@@ -90,6 +90,7 @@ def calibration_initialization() -> dict:
 class CalibrationClient(EvidenceClient):
     def __init__(self) -> None:
         super().__init__()
+        self.latest_hand: dict[str, float] = {}
         self.ik_client = self.create_client(GetPositionIK, "/compute_ik")
         self.last_ik_error: dict | None = None
         self.hand_client = ActionClient(
@@ -98,6 +99,12 @@ class CalibrationClient(EvidenceClient):
         self.contacts: dict[str, list[dict]] = {name: [] for name in CONTACT_TOPICS}
         for name, topic in CONTACT_TOPICS.items():
             self.create_subscription(Contacts, topic, lambda msg, channel=name: self.on_contact(channel, msg), 1000)
+
+    def on_joint_state(self, message: JointState) -> None:
+        super().on_joint_state(message)
+        positions = dict(zip(message.name, message.position))
+        if all(name in positions for name in HAND_JOINTS):
+            self.latest_hand = {name: float(positions[name]) for name in HAND_JOINTS}
 
     def on_contact(self, channel: str, message: Contacts) -> None:
         stamp = message.header.stamp.sec + message.header.stamp.nanosec * 1e-9
@@ -168,7 +175,17 @@ class CalibrationClient(EvidenceClient):
         rclpy.spin_until_future_complete(self, result_future, timeout_sec=5.0)
         wrapped = result_future.result()
         succeeded = bool(wrapped and wrapped.result.error_code == FollowJointTrajectory.Result.SUCCESSFUL)
-        return {"accepted": True, "succeeded": succeeded, "goal_uuid": bytes(handle.goal_id.uuid).hex()}
+        actual = [self.latest_hand.get(name, math.nan) for name in HAND_JOINTS]
+        return {
+            "accepted": True,
+            "succeeded": succeeded,
+            "goal_uuid": bytes(handle.goal_id.uuid).hex(),
+            "observed_positions_m": actual,
+            "max_position_error_m": max(
+                (abs(expected - observed) for expected, observed in zip(positions, actual)),
+                default=math.inf,
+            ),
+        }
 
     def update_cube_scene(self, cube_xyz: list[float]) -> bool:
         scene = PlanningScene(is_diff=True)
@@ -383,9 +400,9 @@ def main() -> int:
         trials.append({"label": "idle", "expected": "none", "contacts": classify_contacts(idle_events)})
 
         specifications = (
-            [(f"left_{index}", "left", -0.003, [0.0365, 0.04]) for index in range(1, 4)]
-            + [(f"right_{index}", "right", 0.003, [0.04, 0.0365]) for index in range(1, 4)]
-            + [(f"bilateral_{index}", "bilateral", 0.0, [0.033, 0.033]) for index in range(1, 4)]
+            [(f"left_{index}", "left", 0.0, [0.030, 0.04]) for index in range(1, 4)]
+            + [(f"right_{index}", "right", 0.0, [0.04, 0.030]) for index in range(1, 4)]
+            + [(f"bilateral_{index}", "bilateral", 0.0, [0.030, 0.030]) for index in range(1, 4)]
         )
         for label, expected, y_offset, finger_target in specifications:
             initialization = calibration_initialization()
@@ -401,17 +418,19 @@ def main() -> int:
                 continue
             client.update_cube_scene(cube["xyz"])
             client.command_hand([0.04, 0.04])
-            motion = client.move_hand_pose(hand_pose(cube["xyz"], y_offset=y_offset))
             start = {name: len(events) for name, events in client.contacts.items()}
+            motion = client.move_hand_pose(hand_pose(cube["xyz"], y_offset=y_offset))
             hand_result = client.command_hand(finger_target)
             client.contact_window(0.45)
             events = {name: client.contacts[name][start[name]:] for name in client.contacts}
+            cube_after = runtime_cube_pose()
             trials.append(
                 {
                     "label": label,
                     "expected": expected,
                     "initialization": initialization,
                     "cube_pose": cube,
+                    "cube_pose_after_action": cube_after,
                     "target_hand_pose": [
                         cube["xyz"][0] - 0.120, cube["xyz"][1] + y_offset,
                         cube["xyz"][2] - 0.055, 0.0, 0.0, 0.0, 1.0,
@@ -429,12 +448,14 @@ def main() -> int:
             initialization = calibration_initialization()
             cube = runtime_cube_pose()
             events = client.contact_window(0.45)
+            cube_after = runtime_cube_pose()
             trials.append(
                 {
                     "label": f"object_environment_{index}",
                     "expected": "cube_table_without_finger",
                     "initialization": initialization,
                     "cube_pose": cube,
+                    "cube_pose_after_action": cube_after,
                     "pad_evidence": client.pad_evidence(cube["xyz"]) if cube else None,
                     "contacts": classify_contacts(events),
                 }
@@ -446,10 +467,12 @@ def main() -> int:
                 trials.append({"label": f"table_{index}", "expected": "finger_table", "reason": "RUNTIME_CUBE_POSE_UNAVAILABLE"})
                 continue
             exception_set = client.set_table_touch_exception(True)
+            start = {name: len(events) for name, events in client.contacts.items()}
             motion = client.move_hand_pose(table_touch_pose(cube["xyz"])) if exception_set else {
                 "ik_solved": False, "planned": False, "executed": False
             }
-            events = client.contact_window(0.45)
+            client.contact_window(0.45)
+            events = {name: client.contacts[name][start[name]:] for name in client.contacts}
             trials.append(
                 {
                     "label": f"table_{index}", "expected": "finger_table",
