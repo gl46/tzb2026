@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import math
+import os
 import re
 import subprocess
 import time
@@ -513,6 +514,14 @@ def main() -> int:
             + [(f"right_{index}", "right", 0.0, [0.04, 0.010]) for index in range(1, 4)]
             + [(f"bilateral_{index}", "bilateral", -0.030, [0.010, 0.010]) for index in range(1, 4)]
         )
+        scope = os.environ.get("M1A_CALIBRATION_SCOPE", "full")
+        if scope == "nonbilateral":
+            specifications = [item for item in specifications if item[1] != "bilateral"]
+        elif scope == "bilateral":
+            repetition = int(os.environ.get("M1A_CALIBRATION_REPETITION", "1"))
+            specifications = [item for item in specifications if item[0] == f"bilateral_{repetition}"]
+        elif scope != "full":
+            raise ValueError(f"unsupported M1A_CALIBRATION_SCOPE: {scope}")
         for label, expected, y_offset, finger_target in specifications:
             initialization = calibration_initialization()
             cube = runtime_cube_pose()
@@ -578,7 +587,7 @@ def main() -> int:
             )
 
         client.command_hand([0.04, 0.04])
-        for index in range(1, 3):
+        for index in range(1, 3) if scope != "bilateral" else ():
             initialization = calibration_initialization()
             cube = runtime_cube_pose()
             events = client.contact_window(0.45)
@@ -595,7 +604,7 @@ def main() -> int:
                 }
             )
 
-        for index in range(1, 3):
+        for index in range(1, 3) if scope != "bilateral" else ():
             cube = runtime_cube_pose()
             if cube is None:
                 trials.append({"label": f"table_{index}", "expected": "finger_table", "reason": "RUNTIME_CUBE_POSE_UNAVAILABLE"})

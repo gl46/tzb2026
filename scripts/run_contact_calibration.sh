@@ -8,12 +8,16 @@ RUN_ID="${M1A_RUN_ID:-m1a-$(date +%Y%m%d-%H%M%S)}"
 SIM_HOST="${SIM_HOST:-node2}"
 SIM_USER="${SIM_USER:-gl}"
 PROJECT_REMOTE_ROOT="${PROJECT_REMOTE_ROOT:-xh-202607-world-agent}"
+CALIBRATION_SCOPE="${M1A_CALIBRATION_SCOPE:-full}"
+CALIBRATION_REPETITION="${M1A_CALIBRATION_REPETITION:-1}"
 mkdir -p logs reports
 raw_log="logs/${RUN_ID}-s0-contact-calibration.log"
 
-ssh -o BatchMode=yes -o ConnectTimeout=10 "$SIM_USER@$SIM_HOST" "bash -s -- '$PROJECT_REMOTE_ROOT'" >"$raw_log" 2>&1 <<'REMOTE' || true
+ssh -o BatchMode=yes -o ConnectTimeout=10 "$SIM_USER@$SIM_HOST" "bash -s -- '$PROJECT_REMOTE_ROOT' '$CALIBRATION_SCOPE' '$CALIBRATION_REPETITION'" >"$raw_log" 2>&1 <<'REMOTE' || true
 set -eo pipefail
 root="$1"
+scope="$2"
+repetition="$3"
 source /opt/ros/jazzy/setup.bash
 source "/home/$USER/$root/robot_ws/install/setup.bash"
 set -u
@@ -43,7 +47,8 @@ fi
 echo M1A_S0_LAUNCH_STARTED
 gz topic -l 2>/dev/null | grep -E 'left_finger_contact|right_finger_contact|red_cube_contact' | sed 's/^/CONTACT_GZ_TOPIC:/' || true
 ros2 topic list | grep -E '/xh/supervision/(panda_(left|right)finger_contacts|red_cube_contacts)' | sed 's/^/CONTACT_ROS_TOPIC:/' || true
-python3 "/home/$USER/$root/scripts/m1a_contact_calibration_client.py"
+M1A_CALIBRATION_SCOPE="$scope" M1A_CALIBRATION_REPETITION="$repetition" \
+  python3 "/home/$USER/$root/scripts/m1a_contact_calibration_client.py"
 echo M1A_S0_LAUNCH_TAIL
 tail -n 220 "$launch_log"
 REMOTE
