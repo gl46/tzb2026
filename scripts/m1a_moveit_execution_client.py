@@ -16,9 +16,10 @@ from moveit_msgs.msg import (
     Constraints,
     JointConstraint,
     PlanningScene,
+    PlanningSceneComponents,
     RobotState,
 )
-from moveit_msgs.srv import ApplyPlanningScene, GetMotionPlan, GetPositionFK
+from moveit_msgs.srv import ApplyPlanningScene, GetMotionPlan, GetPlanningScene, GetPositionFK
 from rclpy.action import ActionClient
 from rclpy.node import Node
 from sensor_msgs.msg import JointState
@@ -32,6 +33,59 @@ TARGETS = [
     ("lift_or_transport", [0.20, -0.60, 0.15, -1.40, 0.10, 1.10, -0.10]),
     ("preplace_or_home", [0.00, -0.50, 0.00, -1.50, 0.00, 1.00, 0.00]),
 ]
+ADJACENT_SELF_PAIRS = [
+    ("panda_link0", "panda_link1"),
+    ("panda_link1", "panda_link2"),
+    ("panda_link2", "panda_link3"),
+    ("panda_link3", "panda_link4"),
+    ("panda_link4", "panda_link5"),
+    ("panda_link5", "panda_link6"),
+    ("panda_link6", "panda_link7"),
+    ("panda_link7", "panda_hand"),
+    ("panda_hand", "panda_leftfinger"),
+    ("panda_hand", "panda_rightfinger"),
+]
+REQUIRED_CHECKED_PAIRS = [
+    ("panda_leftfinger", "object_red_cube"),
+    ("panda_rightfinger", "object_red_cube"),
+    ("panda_link1", "work_table"),
+    ("panda_link7", "work_table"),
+    ("panda_hand", "work_table"),
+]
+
+
+def set_allowed_pair(matrix: AllowedCollisionMatrix, first: str, second: str, allowed: bool) -> None:
+    """Set one symmetric ACM pair without discarding the SRDF-derived matrix."""
+    names = list(matrix.entry_names)
+    rows = [list(entry.enabled) for entry in matrix.entry_values]
+    while len(rows) < len(names):
+        rows.append([])
+    for row in rows:
+        row.extend([False] * (len(names) - len(row)))
+    for name in (first, second):
+        if name not in names:
+            names.append(name)
+            for row in rows:
+                row.append(False)
+            rows.append([False] * len(names))
+    first_index, second_index = names.index(first), names.index(second)
+    rows[first_index][second_index] = allowed
+    rows[second_index][first_index] = allowed
+    matrix.entry_names = names
+    matrix.entry_values = [AllowedCollisionEntry(enabled=row) for row in rows]
+
+
+def pair_is_allowed(matrix: AllowedCollisionMatrix, first: str, second: str) -> bool:
+    if first in matrix.entry_names and second in matrix.entry_names:
+        row = matrix.entry_names.index(first)
+        column = matrix.entry_names.index(second)
+        if row < len(matrix.entry_values) and column < len(matrix.entry_values[row].enabled):
+            return bool(matrix.entry_values[row].enabled[column])
+    if first in matrix.default_entry_names:
+        return bool(matrix.default_entry_values[matrix.default_entry_names.index(first)])
+    if second in matrix.default_entry_names:
+        return bool(matrix.default_entry_values[matrix.default_entry_names.index(second)])
+    return False
 
 
 class EvidenceClient(Node):
@@ -42,6 +96,7 @@ class EvidenceClient(Node):
         self.create_subscription(JointState, "/joint_states", self.on_joint_state, 1000)
         self.plan_client = self.create_client(GetMotionPlan, "/plan_kinematic_path")
         self.scene_client = self.create_client(ApplyPlanningScene, "/apply_planning_scene")
+        self.scene_get_client = self.create_client(GetPlanningScene, "/get_planning_scene")
         self.fk_client = self.create_client(GetPositionFK, "/compute_fk")
         self.execute_client = ActionClient(self, ExecuteTrajectory, "/execute_trajectory")
 
@@ -55,10 +110,30 @@ class EvidenceClient(Node):
         self.samples.append({"timestamp_s": stamp, "positions": values})
 
     def wait_ready(self) -> bool:
-        services = [self.plan_client, self.scene_client, self.fk_client]
+        services = [self.plan_client, self.scene_client, self.scene_get_client, self.fk_client]
         return all(client.wait_for_service(timeout_sec=20.0) for client in services) and self.execute_client.wait_for_server(timeout_sec=20.0)
 
+    def current_acm(self) -> AllowedCollisionMatrix | None:
+        request = GetPlanningScene.Request()
+        request.components = PlanningSceneComponents(
+            components=PlanningSceneComponents.ALLOWED_COLLISION_MATRIX
+        )
+        future = self.scene_get_client.call_async(request)
+        rclpy.spin_until_future_complete(self, future, timeout_sec=10.0)
+        result = future.result()
+        return result.scene.allowed_collision_matrix if result is not None else None
+
     def apply_scene(self) -> bool:
+        matrix = self.current_acm()
+        if matrix is None:
+            return False
+        if not all(pair_is_allowed(matrix, *pair) for pair in ADJACENT_SELF_PAIRS):
+            self.get_logger().error("SRDF adjacent self-collision exceptions are absent from the current ACM")
+            return False
+        set_allowed_pair(matrix, "panda_link0", "work_table", True)
+        if any(pair_is_allowed(matrix, *pair) for pair in REQUIRED_CHECKED_PAIRS):
+            self.get_logger().error("A required robot/world collision pair is disabled in the current ACM")
+            return False
         scene = PlanningScene()
         scene.is_diff = True
         for object_id, size, xyz in (
@@ -77,12 +152,6 @@ class EvidenceClient(Node):
             item.primitive_poses = [pose]
             item.operation = CollisionObject.ADD
             scene.world.collision_objects.append(item)
-        matrix = AllowedCollisionMatrix()
-        matrix.entry_names = ["panda_link0", "work_table"]
-        matrix.entry_values = [
-            AllowedCollisionEntry(enabled=[False, True]),
-            AllowedCollisionEntry(enabled=[True, False]),
-        ]
         scene.allowed_collision_matrix = matrix
         request = ApplyPlanningScene.Request(scene=scene)
         future = self.scene_client.call_async(request)
@@ -138,7 +207,7 @@ class EvidenceClient(Node):
         rclpy.spin_until_future_complete(self, result_future, timeout_sec=30.0)
         wrapped = result_future.result()
         result = wrapped.result if wrapped else None
-        return bool(result and result.error_code.val == 1), str(handle.goal_id.uuid.hex()), self.samples[start_index:]
+        return bool(result and result.error_code.val == 1), bytes(handle.goal_id.uuid).hex(), self.samples[start_index:]
 
 
 def segment_evidence(client: EvidenceClient, trial: int, name: str, target: list[float]) -> dict:

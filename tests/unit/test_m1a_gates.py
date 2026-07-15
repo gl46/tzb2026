@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import ast
 import hashlib
 import json
 from pathlib import Path
@@ -230,5 +231,33 @@ def test_m1a_execution_client_uses_moveit_plan_execute_fk_and_no_pose_write() ->
     assert '"/plan_kinematic_path"' in source
     assert '"/execute_trajectory"' in source
     assert '"/compute_fk"' in source
+    assert '"/get_planning_scene"' in source
     assert '"/joint_states"' in source
+    assert "current_acm()" in source
+    assert 'set_allowed_pair(matrix, "panda_link0", "work_table", True)' in source
     assert "set_pose" not in source and "set_joint" not in source
+
+
+def test_m1a_runtime_acm_preserves_only_documented_exceptions() -> None:
+    root = Path(__file__).parents[2]
+    srdf_root = ET.parse(root / "robot_ws/src/xh_sim/config/m1a_panda.srdf").getroot()
+    srdf_pairs = {
+        (item.attrib["link1"], item.attrib["link2"])
+        for item in srdf_root.findall("disable_collisions")
+    }
+    source = (root / "scripts/m1a_moveit_execution_client.py").read_text()
+    tree = ast.parse(source)
+    assignments = {
+        node.targets[0].id: ast.literal_eval(node.value)
+        for node in tree.body
+        if isinstance(node, ast.Assign)
+        and len(node.targets) == 1
+        and isinstance(node.targets[0], ast.Name)
+        and node.targets[0].id in {"ADJACENT_SELF_PAIRS", "REQUIRED_CHECKED_PAIRS"}
+    }
+    assert set(assignments["ADJACENT_SELF_PAIRS"]) == srdf_pairs
+    checked = set(assignments["REQUIRED_CHECKED_PAIRS"])
+    assert ("panda_leftfinger", "object_red_cube") in checked
+    assert ("panda_rightfinger", "object_red_cube") in checked
+    assert ("panda_link1", "work_table") in checked
+    assert not checked & srdf_pairs
