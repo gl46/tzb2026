@@ -1,15 +1,3111 @@
 {
-  "run_id": "m1a-20260716-174200",
-  "status": "CONTACT_TELEMETRY_UNRELIABLE",
-  "reason": "All 13 required contact-condition commands plus the 2 s idle baseline ran, but no parsed per-trial bilateral contact calibration result is yet available.",
-  "left_finger_topic_present": true,
-  "right_finger_topic_present": true,
-  "object_contact_topic_present": true,
-  "minimum_contact_rate_hz": 20.0,
-  "required_overlap_s": 0.1,
-  "required_consecutive_samples": 3,
-  "raw_log": "logs/m1a-20260716-174200-s0-contact-calibration.log",
-  "calibration_trials_completed": 13,
-  "calibration_initialization": "NOT_USED",
-  "use_sim_time": true
+  "run_id": "m1a-20260716-s0-isolated-23-seeded",
+  "status": "CONTACT_TELEMETRY_CALIBRATED",
+  "reason": "14/14 independent calibration windows passed; 9/9 finger-target positive windows passed.",
+  "oracle_pose_source": "gz model runtime query before every motion trial",
+  "listener_scope": "PER_TRIAL_FULL_ACTION_WINDOW",
+  "session_isolation": "FRESH_GAZEBO_MOVEIT_SESSION_PER_CONDITION",
+  "source_logs": [
+    "logs/m1a-20260716-s0-isolated-23-left_1-s0-contact-calibration.log",
+    "logs/m1a-20260716-s0-isolated-23-left_2-s0-contact-calibration.log",
+    "logs/m1a-20260716-s0-isolated-23-left_3-s0-contact-calibration.log",
+    "logs/m1a-20260716-s0-isolated-23-right_1-s0-contact-calibration.log",
+    "logs/m1a-20260716-s0-isolated-23-right_2-s0-contact-calibration.log",
+    "logs/m1a-20260716-s0-isolated-23-right_3-s0-contact-calibration.log",
+    "logs/m1a-20260716-s0-bilateral1-seeded-s0-contact-calibration.log",
+    "logs/m1a-20260716-s0-isolated-23-bilateral_2-s0-contact-calibration.log",
+    "logs/m1a-20260716-s0-bilateral3-seeded-s0-contact-calibration.log",
+    "logs/m1a-20260716-s0-isolated-23-object_environment_1-s0-contact-calibration.log",
+    "logs/m1a-20260716-s0-isolated-23-object_environment_2-s0-contact-calibration.log",
+    "logs/m1a-20260716-s0-isolated-23-table_1-s0-contact-calibration.log",
+    "logs/m1a-20260716-s0-isolated-23-table_2-s0-contact-calibration.log"
+  ],
+  "trials": [
+    {
+      "label": "idle",
+      "expected": "none",
+      "contacts": {
+        "left_target": false,
+        "right_target": false,
+        "left_table": false,
+        "right_table": false,
+        "cube_table": false,
+        "cube_environment_table": true,
+        "raw_pairs": {
+          "left": [],
+          "right": [],
+          "cube": [],
+          "cube_environment": [
+            [
+              "object_red_cube_environment::link::collision",
+              "work_table::table_link::collision"
+            ]
+          ]
+        },
+        "event_counts": {
+          "left": 0,
+          "right": 0,
+          "cube": 0,
+          "cube_environment": 2345
+        },
+        "topic_rate_evidence": {
+          "left": {
+            "unique_timestamp_samples": 0,
+            "duration_s": 0.0,
+            "observed_rate_hz": 0.0
+          },
+          "right": {
+            "unique_timestamp_samples": 0,
+            "duration_s": 0.0,
+            "observed_rate_hz": 0.0
+          },
+          "cube": {
+            "unique_timestamp_samples": 0,
+            "duration_s": 0.0,
+            "observed_rate_hz": 0.0
+          },
+          "cube_environment": {
+            "unique_timestamp_samples": 2345,
+            "duration_s": 2.344000000000001,
+            "observed_rate_hz": 999.9999999999995
+          }
+        },
+        "left_target_unique_samples": 0,
+        "right_target_unique_samples": 0,
+        "bilateral_overlap_s": 0.0
+      },
+      "passed": true
+    },
+    {
+      "label": "left_1",
+      "expected": "left",
+      "initialization": {
+        "status": "CALIBRATION_ONLY_INITIALIZATION",
+        "source": "m1a_contact_calibration.sdf",
+        "declared_cube_xyz": [
+          0.17,
+          0.12,
+          0.755
+        ],
+        "runtime_pose_write": false
+      },
+      "cube_pose": {
+        "xyz": [
+          0.17,
+          0.12,
+          0.755
+        ],
+        "rpy": [
+          0.0,
+          -0.0,
+          0.0
+        ],
+        "source": "gz model runtime oracle (object_red_cube)"
+      },
+      "cube_pose_after_action": {
+        "xyz": [
+          0.17,
+          0.12,
+          0.755
+        ],
+        "rpy": [
+          0.0,
+          -0.0,
+          0.0
+        ],
+        "source": "gz model runtime oracle (object_red_cube)"
+      },
+      "target_hand_pose": [
+        0.05000000000000002,
+        0.07999999999999999,
+        0.7,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "motion": {
+        "ik_solved": true,
+        "ik_solution": [
+          -1.0368523441990323,
+          1.7628,
+          0.8456484527569768,
+          -1.1701590849304546,
+          1.676838421809847,
+          0.831284851917716,
+          -0.16520319951609697
+        ],
+        "plan_attempts": 1,
+        "planned": true,
+        "executed": true,
+        "converged": false,
+        "goal_uuid": "888a12580016473da09dc357dd2698ea",
+        "joint_state_samples": 803,
+        "controller_state_samples": 803,
+        "post_controller_settle_s": 3.000276803970337
+      },
+      "retreat": {
+        "ik_solved": true,
+        "ik_solution": [
+          0.72481273326205,
+          1.6897267934721263,
+          -0.00216274088160805,
+          -1.4344978301967206,
+          0.12302848246471654,
+          -0.0175,
+          2.539533143701616
+        ],
+        "plan_attempts": 1,
+        "planned": true,
+        "executed": true,
+        "converged": true,
+        "goal_uuid": "c959cfb6bcb940da9ab2cf36189a787c",
+        "joint_state_samples": 701,
+        "controller_state_samples": 701,
+        "post_controller_settle_s": 0.0015575885772705078
+      },
+      "retreat_hand_pose": [
+        -0.04999999999999999,
+        0.07999999999999999,
+        0.835,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "hand_command": {
+        "positions_m": [
+          0.01,
+          0.04
+        ],
+        "accepted": true,
+        "succeeded": true,
+        "goal_uuid": "542d193640d1489f965f9fcc8551e3bd",
+        "observed_positions_m": [
+          0.04000000000004474,
+          0.039996310644428254
+        ],
+        "max_position_error_m": 0.03000000000004474
+      },
+      "calibration_only_allowed_collision_pairs": [
+        [
+          "panda_leftfinger",
+          "object_red_cube"
+        ],
+        [
+          "panda_rightfinger",
+          "object_red_cube"
+        ]
+      ],
+      "target_touch_exception_restored": true,
+      "pad_evidence": {
+        "left": {
+          "link_pose": [
+            0.024257075857107853,
+            0.13220392598006922,
+            0.7367396789935848,
+            -0.03393576633137682,
+            -0.020536111144875666,
+            0.0346192976772117,
+            0.9986131063284139
+          ],
+          "pad_center_world": [
+            0.08406264854119368,
+            0.13643610914745116,
+            0.739059614675076
+          ],
+          "aabb_separation_m": 0.0009373514588063431
+        },
+        "right": {
+          "link_pose": [
+            0.029676729127937063,
+            0.05258357350980852,
+            0.7422753703478725,
+            -0.03393576633137682,
+            -0.020536111144875666,
+            0.0346192976772117,
+            0.9986131063284139
+          ],
+          "pad_center_world": [
+            0.08948230181202288,
+            0.05681575667719045,
+            0.7445953060293636
+          ],
+          "aabb_separation_m": 0.02918424332280954
+        },
+        "minimum_pad_cube_aabb_separation_m": 0.0009373514588063431,
+        "gazebo_link_pose_evidence": {
+          "left": {
+            "link_pose_world_xyz_rpy": [
+              0.024257,
+              0.132204,
+              0.73674,
+              -0.069306,
+              -0.038676,
+              0.070648
+            ],
+            "pad_center_world": [
+              0.08406257060359534,
+              0.13643618744254876,
+              0.7390599815149057
+            ],
+            "aabb_separation_m": 0.0009374293964046765
+          },
+          "right": {
+            "link_pose_world_xyz_rpy": [
+              0.029677,
+              0.052583,
+              0.742275,
+              -0.069306,
+              -0.038676,
+              0.070648
+            ],
+            "pad_center_world": [
+              0.08948257060359534,
+              0.05681518744254878,
+              0.7445949815149058
+            ],
+            "aabb_separation_m": 0.029184812557451215
+          }
+        },
+        "gazebo_minimum_pad_cube_aabb_separation_m": 0.0009374293964046765
+      },
+      "contacts": {
+        "left_target": true,
+        "right_target": false,
+        "left_table": false,
+        "right_table": false,
+        "cube_table": false,
+        "cube_environment_table": true,
+        "raw_pairs": {
+          "left": [
+            [
+              "panda_controller::panda_leftfinger::panda_leftfinger_fixed_joint_lump__collision_collision",
+              "object_red_cube::link::collision"
+            ]
+          ],
+          "right": [],
+          "cube": [
+            [
+              "object_red_cube::link::collision",
+              "panda_controller::panda_leftfinger::panda_leftfinger_fixed_joint_lump__collision_collision"
+            ]
+          ],
+          "cube_environment": [
+            [
+              "object_red_cube_environment::link::collision",
+              "work_table::table_link::collision"
+            ]
+          ]
+        },
+        "event_counts": {
+          "left": 1262,
+          "right": 0,
+          "cube": 1262,
+          "cube_environment": 1263
+        },
+        "topic_rate_evidence": {
+          "left": {
+            "unique_timestamp_samples": 1262,
+            "duration_s": 1.2610000000000028,
+            "observed_rate_hz": 999.9999999999978
+          },
+          "right": {
+            "unique_timestamp_samples": 0,
+            "duration_s": 0.0,
+            "observed_rate_hz": 0.0
+          },
+          "cube": {
+            "unique_timestamp_samples": 1262,
+            "duration_s": 1.2610000000000028,
+            "observed_rate_hz": 999.9999999999978
+          },
+          "cube_environment": {
+            "unique_timestamp_samples": 1263,
+            "duration_s": 1.2620000000000005,
+            "observed_rate_hz": 999.9999999999997
+          }
+        },
+        "left_target_unique_samples": 1262,
+        "right_target_unique_samples": 0,
+        "bilateral_overlap_s": 0.0
+      },
+      "passed": true
+    },
+    {
+      "label": "left_2",
+      "expected": "left",
+      "initialization": {
+        "status": "CALIBRATION_ONLY_INITIALIZATION",
+        "source": "m1a_contact_calibration.sdf",
+        "declared_cube_xyz": [
+          0.17,
+          0.12,
+          0.755
+        ],
+        "runtime_pose_write": false
+      },
+      "cube_pose": {
+        "xyz": [
+          0.17,
+          0.12,
+          0.755
+        ],
+        "rpy": [
+          0.0,
+          -0.0,
+          0.0
+        ],
+        "source": "gz model runtime oracle (object_red_cube)"
+      },
+      "cube_pose_after_action": {
+        "xyz": [
+          0.17,
+          0.12,
+          0.755
+        ],
+        "rpy": [
+          0.0,
+          -0.0,
+          0.0
+        ],
+        "source": "gz model runtime oracle (object_red_cube)"
+      },
+      "target_hand_pose": [
+        0.05000000000000002,
+        0.07999999999999999,
+        0.7,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "motion": {
+        "ik_solved": true,
+        "ik_solution": [
+          -1.0368772657592873,
+          1.7628,
+          0.8456760271512599,
+          -1.1701910774103317,
+          1.6767994252055611,
+          0.8313077725654817,
+          -0.1652228029091084
+        ],
+        "plan_attempts": 1,
+        "planned": true,
+        "executed": true,
+        "converged": false,
+        "goal_uuid": "af03c9ae07544589a680350a4a50be4f",
+        "joint_state_samples": 802,
+        "controller_state_samples": 802,
+        "post_controller_settle_s": 3.0005240440368652
+      },
+      "retreat": {
+        "ik_solved": true,
+        "ik_solution": [
+          0.7248129770484942,
+          1.6897269811346523,
+          -0.0021627933702466416,
+          -1.4344973886190993,
+          0.12302889523577674,
+          -0.0175,
+          2.539533306515003
+        ],
+        "plan_attempts": 1,
+        "planned": true,
+        "executed": true,
+        "converged": true,
+        "goal_uuid": "689b0e8cc19046db92647004d5be8e2c",
+        "joint_state_samples": 917,
+        "controller_state_samples": 917,
+        "post_controller_settle_s": 0.001477956771850586
+      },
+      "retreat_hand_pose": [
+        -0.04999999999999999,
+        0.07999999999999999,
+        0.835,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "hand_command": {
+        "positions_m": [
+          0.01,
+          0.04
+        ],
+        "accepted": true,
+        "succeeded": true,
+        "goal_uuid": "79ccd16d055144e6a48ba0ab13610995",
+        "observed_positions_m": [
+          0.040000000000045166,
+          0.0399963837021444
+        ],
+        "max_position_error_m": 0.030000000000045164
+      },
+      "calibration_only_allowed_collision_pairs": [
+        [
+          "panda_leftfinger",
+          "object_red_cube"
+        ],
+        [
+          "panda_rightfinger",
+          "object_red_cube"
+        ]
+      ],
+      "target_touch_exception_restored": true,
+      "pad_evidence": {
+        "left": {
+          "link_pose": [
+            0.02425233105896753,
+            0.13210286018584316,
+            0.7372634677433724,
+            -0.03322119577656111,
+            -0.019815502754937177,
+            0.03495646587884649,
+            0.9986399468752517
+          ],
+          "pad_center_world": [
+            0.08405857802022715,
+            0.13637092633679884,
+            0.7394987385859979
+          ],
+          "aabb_separation_m": 0.0009414219797728718
+        },
+        "right": {
+          "link_pose": [
+            0.02973218697975625,
+            0.05247851133549864,
+            0.7426822167281726,
+            -0.03322119577656111,
+            -0.019815502754937177,
+            0.03495646587884649,
+            0.9986399468752517
+          ],
+          "pad_center_world": [
+            0.08953843394101586,
+            0.05674657748645431,
+            0.7449174875707981
+          ],
+          "aabb_separation_m": 0.02925342251354568
+        },
+        "minimum_pad_cube_aabb_separation_m": 0.0009414219797728718,
+        "gazebo_link_pose_evidence": {
+          "left": {
+            "link_pose_world_xyz_rpy": [
+              0.024252,
+              0.132103,
+              0.737264,
+              -0.067836,
+              -0.037264,
+              0.071244
+            ],
+            "pad_center_world": [
+              0.08405824548491013,
+              0.1363710597389958,
+              0.739499322585899
+            ],
+            "aabb_separation_m": 0.0009417545150898904
+          },
+          "right": {
+            "link_pose_world_xyz_rpy": [
+              0.029732,
+              0.052478,
+              0.742682,
+              -0.067836,
+              -0.037264,
+              0.071244
+            ],
+            "pad_center_world": [
+              0.08953824548491013,
+              0.05674605973899581,
+              0.7449173225858989
+            ],
+            "aabb_separation_m": 0.029253940261004183
+          }
+        },
+        "gazebo_minimum_pad_cube_aabb_separation_m": 0.0009417545150898904
+      },
+      "contacts": {
+        "left_target": true,
+        "right_target": false,
+        "left_table": false,
+        "right_table": false,
+        "cube_table": false,
+        "cube_environment_table": true,
+        "raw_pairs": {
+          "left": [
+            [
+              "panda_controller::panda_leftfinger::panda_leftfinger_fixed_joint_lump__collision_collision",
+              "object_red_cube::link::collision"
+            ]
+          ],
+          "right": [],
+          "cube": [
+            [
+              "object_red_cube::link::collision",
+              "panda_controller::panda_leftfinger::panda_leftfinger_fixed_joint_lump__collision_collision"
+            ]
+          ],
+          "cube_environment": [
+            [
+              "object_red_cube_environment::link::collision",
+              "work_table::table_link::collision"
+            ]
+          ]
+        },
+        "event_counts": {
+          "left": 1252,
+          "right": 0,
+          "cube": 1253,
+          "cube_environment": 1253
+        },
+        "topic_rate_evidence": {
+          "left": {
+            "unique_timestamp_samples": 1252,
+            "duration_s": 1.2509999999999977,
+            "observed_rate_hz": 1000.0000000000018
+          },
+          "right": {
+            "unique_timestamp_samples": 0,
+            "duration_s": 0.0,
+            "observed_rate_hz": 0.0
+          },
+          "cube": {
+            "unique_timestamp_samples": 1253,
+            "duration_s": 1.251999999999999,
+            "observed_rate_hz": 1000.0000000000009
+          },
+          "cube_environment": {
+            "unique_timestamp_samples": 1253,
+            "duration_s": 1.251999999999999,
+            "observed_rate_hz": 1000.0000000000009
+          }
+        },
+        "left_target_unique_samples": 1252,
+        "right_target_unique_samples": 0,
+        "bilateral_overlap_s": 0.0
+      },
+      "passed": true
+    },
+    {
+      "label": "left_3",
+      "expected": "left",
+      "initialization": {
+        "status": "CALIBRATION_ONLY_INITIALIZATION",
+        "source": "m1a_contact_calibration.sdf",
+        "declared_cube_xyz": [
+          0.17,
+          0.12,
+          0.755
+        ],
+        "runtime_pose_write": false
+      },
+      "cube_pose": {
+        "xyz": [
+          0.17,
+          0.12,
+          0.755
+        ],
+        "rpy": [
+          0.0,
+          -0.0,
+          0.0
+        ],
+        "source": "gz model runtime oracle (object_red_cube)"
+      },
+      "cube_pose_after_action": {
+        "xyz": [
+          0.17,
+          0.12,
+          0.755
+        ],
+        "rpy": [
+          0.0,
+          -0.0,
+          0.0
+        ],
+        "source": "gz model runtime oracle (object_red_cube)"
+      },
+      "target_hand_pose": [
+        0.05000000000000002,
+        0.07999999999999999,
+        0.7,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "motion": {
+        "ik_solved": true,
+        "ik_solution": [
+          -1.036865910580706,
+          1.7628,
+          0.8456634491480313,
+          -1.1701764898383125,
+          1.6768172194463544,
+          0.8312973324889151,
+          -0.1652138487142173
+        ],
+        "plan_attempts": 1,
+        "planned": true,
+        "executed": true,
+        "converged": false,
+        "goal_uuid": "8c6bd7513d25406db1b6fa44d0475e2f",
+        "joint_state_samples": 803,
+        "controller_state_samples": 803,
+        "post_controller_settle_s": 3.0007450580596924
+      },
+      "retreat": {
+        "ik_solved": true,
+        "ik_solution": [
+          0.7588719170102547,
+          1.7628,
+          -0.052548360944378106,
+          -1.6460175986969985,
+          -0.19290422691121664,
+          0.27229494468788445,
+          2.1867216027144822
+        ],
+        "plan_attempts": 1,
+        "planned": true,
+        "executed": true,
+        "converged": true,
+        "goal_uuid": "55a7ee80dccd4e269846409a4e85ac2d",
+        "joint_state_samples": 721,
+        "controller_state_samples": 721,
+        "post_controller_settle_s": 0.0010075569152832031
+      },
+      "retreat_hand_pose": [
+        -0.04999999999999999,
+        0.07999999999999999,
+        0.835,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "hand_command": {
+        "positions_m": [
+          0.01,
+          0.04
+        ],
+        "accepted": true,
+        "succeeded": true,
+        "goal_uuid": "d825daced8064b10aeb2ec4c3c125e7b",
+        "observed_positions_m": [
+          0.0400000000000446,
+          0.03999634300826743
+        ],
+        "max_position_error_m": 0.030000000000044595
+      },
+      "calibration_only_allowed_collision_pairs": [
+        [
+          "panda_leftfinger",
+          "object_red_cube"
+        ],
+        [
+          "panda_rightfinger",
+          "object_red_cube"
+        ]
+      ],
+      "target_touch_exception_restored": true,
+      "pad_evidence": {
+        "left": {
+          "link_pose": [
+            0.024256351914504967,
+            0.1319089832997506,
+            0.7369380755836165,
+            -0.033623436357665966,
+            -0.020232832096586252,
+            0.03449414103923685,
+            0.9986341929189179
+          ],
+          "pad_center_world": [
+            0.08406444632322296,
+            0.13612426242448875,
+            0.7392235219510517
+          ],
+          "aabb_separation_m": 0.0009355536767770567
+        },
+        "right": {
+          "link_pose": [
+            0.029658785029236658,
+            0.05228383911058345,
+            0.7424218963902577,
+            -0.033623436357665966,
+            -0.020232832096586252,
+            0.03449414103923685,
+            0.9986341929189179
+          ],
+          "pad_center_world": [
+            0.08946687943795464,
+            0.056499118235321596,
+            0.7447073427576929
+          ],
+          "aabb_separation_m": 0.029500881764678397
+        },
+        "minimum_pad_cube_aabb_separation_m": 0.0009355536767770567,
+        "gazebo_link_pose_evidence": {
+          "left": {
+            "link_pose_world_xyz_rpy": [
+              0.024256,
+              0.131909,
+              0.736938,
+              -0.068654,
+              -0.0381,
+              0.070363
+            ],
+            "pad_center_world": [
+              0.08406409742956239,
+              0.13612423593319822,
+              0.7392234469767303
+            ],
+            "aabb_separation_m": 0.00093590257043763
+          },
+          "right": {
+            "link_pose_world_xyz_rpy": [
+              0.029659,
+              0.052284,
+              0.742422,
+              -0.068654,
+              -0.0381,
+              0.070363
+            ],
+            "pad_center_world": [
+              0.0894670974295624,
+              0.05649923593319823,
+              0.7447074469767303
+            ],
+            "aabb_separation_m": 0.02950076406680177
+          }
+        },
+        "gazebo_minimum_pad_cube_aabb_separation_m": 0.00093590257043763
+      },
+      "contacts": {
+        "left_target": true,
+        "right_target": false,
+        "left_table": false,
+        "right_table": false,
+        "cube_table": false,
+        "cube_environment_table": true,
+        "raw_pairs": {
+          "left": [
+            [
+              "panda_controller::panda_leftfinger::panda_leftfinger_fixed_joint_lump__collision_collision",
+              "object_red_cube::link::collision"
+            ]
+          ],
+          "right": [],
+          "cube": [
+            [
+              "object_red_cube::link::collision",
+              "panda_controller::panda_leftfinger::panda_leftfinger_fixed_joint_lump__collision_collision"
+            ]
+          ],
+          "cube_environment": [
+            [
+              "object_red_cube_environment::link::collision",
+              "work_table::table_link::collision"
+            ]
+          ]
+        },
+        "event_counts": {
+          "left": 1249,
+          "right": 0,
+          "cube": 1250,
+          "cube_environment": 1250
+        },
+        "topic_rate_evidence": {
+          "left": {
+            "unique_timestamp_samples": 1249,
+            "duration_s": 1.248000000000001,
+            "observed_rate_hz": 999.9999999999991
+          },
+          "right": {
+            "unique_timestamp_samples": 0,
+            "duration_s": 0.0,
+            "observed_rate_hz": 0.0
+          },
+          "cube": {
+            "unique_timestamp_samples": 1250,
+            "duration_s": 1.2489999999999988,
+            "observed_rate_hz": 1000.000000000001
+          },
+          "cube_environment": {
+            "unique_timestamp_samples": 1250,
+            "duration_s": 1.2489999999999988,
+            "observed_rate_hz": 1000.000000000001
+          }
+        },
+        "left_target_unique_samples": 1249,
+        "right_target_unique_samples": 0,
+        "bilateral_overlap_s": 0.0
+      },
+      "passed": true
+    },
+    {
+      "label": "right_1",
+      "expected": "right",
+      "initialization": {
+        "status": "CALIBRATION_ONLY_INITIALIZATION",
+        "source": "m1a_contact_calibration.sdf",
+        "declared_cube_xyz": [
+          0.17,
+          0.12,
+          0.755
+        ],
+        "runtime_pose_write": false
+      },
+      "cube_pose": {
+        "xyz": [
+          0.17,
+          0.12,
+          0.755
+        ],
+        "rpy": [
+          0.0,
+          -0.0,
+          0.0
+        ],
+        "source": "gz model runtime oracle (object_red_cube)"
+      },
+      "cube_pose_after_action": {
+        "xyz": [
+          0.17,
+          0.12,
+          0.755
+        ],
+        "rpy": [
+          0.0,
+          -0.0,
+          0.0
+        ],
+        "source": "gz model runtime oracle (object_red_cube)"
+      },
+      "target_hand_pose": [
+        0.05000000000000002,
+        0.12,
+        0.7,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "motion": {
+        "ik_solved": true,
+        "ik_solution": [
+          -0.9487356893204629,
+          1.7628,
+          0.8750286284157923,
+          -1.1666790823964739,
+          1.665993642590827,
+          0.8585308722747248,
+          -0.2523224726564249
+        ],
+        "plan_attempts": 1,
+        "planned": true,
+        "executed": true,
+        "converged": false,
+        "goal_uuid": "46d1ed04190f4bc9a0a3c5818cfb8e67",
+        "joint_state_samples": 801,
+        "controller_state_samples": 801,
+        "post_controller_settle_s": 3.000490188598633
+      },
+      "retreat": {
+        "ik_solved": true,
+        "ik_solution": [
+          0.8557844933722226,
+          1.7628,
+          -0.05829383990854933,
+          -1.6205369017230844,
+          -0.23457669042130264,
+          0.24860534844334445,
+          2.0470568085222696
+        ],
+        "plan_attempts": 1,
+        "planned": true,
+        "executed": true,
+        "converged": true,
+        "goal_uuid": "db33e1021342431a98fa39d6250dc750",
+        "joint_state_samples": 732,
+        "controller_state_samples": 732,
+        "post_controller_settle_s": 0.0009081363677978516
+      },
+      "retreat_hand_pose": [
+        -0.04999999999999999,
+        0.12,
+        0.835,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "hand_command": {
+        "positions_m": [
+          0.04,
+          0.01
+        ],
+        "accepted": true,
+        "succeeded": true,
+        "goal_uuid": "6dea7738095948dea7712799d6cd8983",
+        "observed_positions_m": [
+          0.039999999999998315,
+          0.009405032515009942
+        ],
+        "max_position_error_m": 0.0005949674849900586
+      },
+      "calibration_only_allowed_collision_pairs": [
+        [
+          "panda_leftfinger",
+          "object_red_cube"
+        ],
+        [
+          "panda_rightfinger",
+          "object_red_cube"
+        ]
+      ],
+      "target_touch_exception_restored": true,
+      "pad_evidence": {
+        "left": {
+          "link_pose": [
+            0.023315670396825347,
+            0.15463746336315543,
+            0.753358236843691,
+            0.01078588912022076,
+            -0.05351035733388435,
+            0.0037633872147829783,
+            0.9985019495076402
+          ],
+          "pad_center_world": [
+            0.08297036782578593,
+            0.15501913448592258,
+            0.7597747313549649
+          ],
+          "aabb_separation_m": 0.002271132286548212
+        },
+        "right": {
+          "link_pose": [
+            0.0237440276139905,
+            0.1052424600618265,
+            0.7523139168024878,
+            0.01078588912022076,
+            -0.05351035733388435,
+            0.0037633872147829783,
+            0.9985019495076402
+          ],
+          "pad_center_world": [
+            0.0833987250429511,
+            0.10562413118459366,
+            0.7587304113137617
+          ],
+          "aabb_separation_m": 0.001601274957048926
+        },
+        "minimum_pad_cube_aabb_separation_m": 0.001601274957048926,
+        "gazebo_link_pose_evidence": {
+          "left": {
+            "link_pose_world_xyz_rpy": [
+              0.023316,
+              0.154637,
+              0.753358,
+              0.021261,
+              -0.107147,
+              0.006397
+            ],
+            "pad_center_world": [
+              0.08297069438533926,
+              0.15501861628544802,
+              0.7597745260696465
+            ],
+            "aabb_separation_m": 0.0022706079394456515
+          },
+          "right": {
+            "link_pose_world_xyz_rpy": [
+              0.023744,
+              0.105241,
+              0.752314,
+              0.02126,
+              -0.107146,
+              0.006398
+            ],
+            "pad_center_world": [
+              0.08339870042005806,
+              0.10562267598119468,
+              0.7587304664137283
+            ],
+            "aabb_separation_m": 0.001601299579941956
+          }
+        },
+        "gazebo_minimum_pad_cube_aabb_separation_m": 0.001601299579941956
+      },
+      "contacts": {
+        "left_target": false,
+        "right_target": true,
+        "left_table": false,
+        "right_table": false,
+        "cube_table": false,
+        "cube_environment_table": true,
+        "raw_pairs": {
+          "left": [],
+          "right": [
+            [
+              "panda_controller::panda_rightfinger::panda_rightfinger_fixed_joint_lump__collision_collision",
+              "object_red_cube::link::collision"
+            ]
+          ],
+          "cube": [
+            [
+              "object_red_cube::link::collision",
+              "panda_controller::panda_rightfinger::panda_rightfinger_fixed_joint_lump__collision_collision"
+            ]
+          ],
+          "cube_environment": [
+            [
+              "object_red_cube_environment::link::collision",
+              "work_table::table_link::collision"
+            ]
+          ]
+        },
+        "event_counts": {
+          "left": 0,
+          "right": 1291,
+          "cube": 1291,
+          "cube_environment": 1290
+        },
+        "topic_rate_evidence": {
+          "left": {
+            "unique_timestamp_samples": 0,
+            "duration_s": 0.0,
+            "observed_rate_hz": 0.0
+          },
+          "right": {
+            "unique_timestamp_samples": 1291,
+            "duration_s": 1.2899999999999991,
+            "observed_rate_hz": 1000.0000000000007
+          },
+          "cube": {
+            "unique_timestamp_samples": 1291,
+            "duration_s": 1.2899999999999991,
+            "observed_rate_hz": 1000.0000000000007
+          },
+          "cube_environment": {
+            "unique_timestamp_samples": 1290,
+            "duration_s": 1.2890000000000015,
+            "observed_rate_hz": 999.9999999999989
+          }
+        },
+        "left_target_unique_samples": 0,
+        "right_target_unique_samples": 1291,
+        "bilateral_overlap_s": 0.0
+      },
+      "passed": true
+    },
+    {
+      "label": "right_2",
+      "expected": "right",
+      "initialization": {
+        "status": "CALIBRATION_ONLY_INITIALIZATION",
+        "source": "m1a_contact_calibration.sdf",
+        "declared_cube_xyz": [
+          0.17,
+          0.12,
+          0.755
+        ],
+        "runtime_pose_write": false
+      },
+      "cube_pose": {
+        "xyz": [
+          0.17,
+          0.12,
+          0.755
+        ],
+        "rpy": [
+          0.0,
+          -0.0,
+          0.0
+        ],
+        "source": "gz model runtime oracle (object_red_cube)"
+      },
+      "cube_pose_after_action": {
+        "xyz": [
+          0.17,
+          0.12,
+          0.755
+        ],
+        "rpy": [
+          0.0,
+          -0.0,
+          0.0
+        ],
+        "source": "gz model runtime oracle (object_red_cube)"
+      },
+      "target_hand_pose": [
+        0.05000000000000002,
+        0.12,
+        0.7,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "motion": {
+        "ik_solved": true,
+        "ik_solution": [
+          -0.9956155871164425,
+          1.7628,
+          0.9247848999295266,
+          -1.2258642455233018,
+          1.5965983901545726,
+          0.9012102436894809,
+          -0.2857178846592139
+        ],
+        "plan_attempts": 1,
+        "planned": true,
+        "executed": true,
+        "converged": false,
+        "goal_uuid": "ffe1be2a857f448ca296832a3a49d757",
+        "joint_state_samples": 801,
+        "controller_state_samples": 801,
+        "post_controller_settle_s": 3.00008225440979
+      },
+      "retreat": {
+        "ik_solved": true,
+        "ik_solution": [
+          -2.8972995155112327,
+          -1.6902172656289864,
+          -1.3530252761431758,
+          -0.7259338592112777,
+          1.32857385845099,
+          1.624123387194619,
+          -0.9506659205127781
+        ],
+        "plan_attempts": 1,
+        "planned": true,
+        "executed": true,
+        "converged": true,
+        "goal_uuid": "fe1db62454ba462db0dd7335a51fc0b8",
+        "joint_state_samples": 1082,
+        "controller_state_samples": 1082,
+        "post_controller_settle_s": 0.0012409687042236328
+      },
+      "retreat_hand_pose": [
+        -0.04999999999999999,
+        0.12,
+        0.835,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "hand_command": {
+        "positions_m": [
+          0.04,
+          0.01
+        ],
+        "accepted": true,
+        "succeeded": true,
+        "goal_uuid": "e22304e7cacb44f09334ca86de59eb6c",
+        "observed_positions_m": [
+          0.039999999999999876,
+          0.015155371286156079
+        ],
+        "max_position_error_m": 0.005155371286156079
+      },
+      "calibration_only_allowed_collision_pairs": [
+        [
+          "panda_leftfinger",
+          "object_red_cube"
+        ],
+        [
+          "panda_rightfinger",
+          "object_red_cube"
+        ]
+      ],
+      "target_touch_exception_restored": true,
+      "pad_evidence": {
+        "left": {
+          "link_pose": [
+            0.022755282549243108,
+            0.15642900189024767,
+            0.7497826390431516,
+            0.0034047833134262222,
+            -0.04972100890092339,
+            0.008638868302793796,
+            0.9987199801140008
+          ],
+          "pad_center_world": [
+            0.08244966549664166,
+            0.1574440244244246,
+            0.7557450524626023
+          ],
+          "aabb_separation_m": 0.00428550000758993
+        },
+        "right": {
+          "link_pose": [
+            0.023725641936255513,
+            0.10128627912959971,
+            0.7494549363983436,
+            0.0034047833134262222,
+            -0.04972100890092339,
+            0.008638868302793796,
+            0.9987199801140008
+          ],
+          "pad_center_world": [
+            0.08342002488365406,
+            0.10230130166377664,
+            0.7554173498177943
+          ],
+          "aabb_separation_m": 0.001579975116345958
+        },
+        "minimum_pad_cube_aabb_separation_m": 0.001579975116345958,
+        "gazebo_link_pose_evidence": {
+          "left": {
+            "link_pose_world_xyz_rpy": [
+              0.022755,
+              0.156429,
+              0.749783,
+              0.005971,
+              -0.099538,
+              0.017002
+            ],
+            "pad_center_world": [
+              0.08244938202032653,
+              0.1574440216884256,
+              0.7557454228450641
+            ],
+            "aabb_separation_m": 0.004285666513925188
+          },
+          "right": {
+            "link_pose_world_xyz_rpy": [
+              0.023726,
+              0.101288,
+              0.749455,
+              0.005973,
+              -0.099538,
+              0.017001
+            ],
+            "pad_center_world": [
+              0.08342038303531837,
+              0.10230296199404307,
+              0.7554174228450641
+            ],
+            "aabb_separation_m": 0.001579616964681646
+          }
+        },
+        "gazebo_minimum_pad_cube_aabb_separation_m": 0.001579616964681646
+      },
+      "contacts": {
+        "left_target": false,
+        "right_target": true,
+        "left_table": false,
+        "right_table": false,
+        "cube_table": false,
+        "cube_environment_table": true,
+        "raw_pairs": {
+          "left": [],
+          "right": [
+            [
+              "panda_controller::panda_rightfinger::panda_rightfinger_fixed_joint_lump__collision_collision",
+              "object_red_cube::link::collision"
+            ]
+          ],
+          "cube": [
+            [
+              "object_red_cube::link::collision",
+              "panda_controller::panda_rightfinger::panda_rightfinger_fixed_joint_lump__collision_collision"
+            ]
+          ],
+          "cube_environment": [
+            [
+              "object_red_cube_environment::link::collision",
+              "work_table::table_link::collision"
+            ]
+          ]
+        },
+        "event_counts": {
+          "left": 0,
+          "right": 1251,
+          "cube": 1251,
+          "cube_environment": 1251
+        },
+        "topic_rate_evidence": {
+          "left": {
+            "unique_timestamp_samples": 0,
+            "duration_s": 0.0,
+            "observed_rate_hz": 0.0
+          },
+          "right": {
+            "unique_timestamp_samples": 1251,
+            "duration_s": 1.25,
+            "observed_rate_hz": 1000.0
+          },
+          "cube": {
+            "unique_timestamp_samples": 1251,
+            "duration_s": 1.25,
+            "observed_rate_hz": 1000.0
+          },
+          "cube_environment": {
+            "unique_timestamp_samples": 1251,
+            "duration_s": 1.25,
+            "observed_rate_hz": 1000.0
+          }
+        },
+        "left_target_unique_samples": 0,
+        "right_target_unique_samples": 1251,
+        "bilateral_overlap_s": 0.0
+      },
+      "passed": true
+    },
+    {
+      "label": "right_3",
+      "expected": "right",
+      "initialization": {
+        "status": "CALIBRATION_ONLY_INITIALIZATION",
+        "source": "m1a_contact_calibration.sdf",
+        "declared_cube_xyz": [
+          0.17,
+          0.12,
+          0.755
+        ],
+        "runtime_pose_write": false
+      },
+      "cube_pose": {
+        "xyz": [
+          0.17,
+          0.12,
+          0.755
+        ],
+        "rpy": [
+          0.0,
+          -0.0,
+          0.0
+        ],
+        "source": "gz model runtime oracle (object_red_cube)"
+      },
+      "cube_pose_after_action": {
+        "xyz": [
+          0.17,
+          0.12,
+          0.755
+        ],
+        "rpy": [
+          0.0,
+          -0.0,
+          0.0
+        ],
+        "source": "gz model runtime oracle (object_red_cube)"
+      },
+      "target_hand_pose": [
+        0.05000000000000002,
+        0.12,
+        0.7,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "motion": {
+        "ik_solved": true,
+        "ik_solution": [
+          -0.9487854846226519,
+          1.7628,
+          0.8750828105466725,
+          -1.166742861301634,
+          1.6659171608994914,
+          0.8585755873546073,
+          -0.252360371783044
+        ],
+        "plan_attempts": 1,
+        "planned": true,
+        "executed": true,
+        "converged": false,
+        "goal_uuid": "6e793e219fa84d559fb7580578338ec3",
+        "joint_state_samples": 801,
+        "controller_state_samples": 801,
+        "post_controller_settle_s": 3.00062894821167
+      },
+      "retreat": {
+        "ik_solved": true,
+        "ik_solution": [
+          -2.7738680597434797,
+          -1.622585956537326,
+          -1.51727159193147,
+          -0.7589417738813491,
+          1.4963390759045239,
+          1.5700026803962652,
+          -1.125309367349651
+        ],
+        "plan_attempts": 2,
+        "planned": false,
+        "executed": false
+      },
+      "retreat_hand_pose": [
+        -0.04999999999999999,
+        0.12,
+        0.835,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "hand_command": {
+        "positions_m": [
+          0.04,
+          0.01
+        ],
+        "accepted": true,
+        "succeeded": true,
+        "goal_uuid": "f0c741eb15de4dcdbd48b4efc2b3e0cf",
+        "observed_positions_m": [
+          0.03999999999999843,
+          0.00953290288964505
+        ],
+        "max_position_error_m": 0.0004670971103549505
+      },
+      "calibration_only_allowed_collision_pairs": [
+        [
+          "panda_leftfinger",
+          "object_red_cube"
+        ],
+        [
+          "panda_rightfinger",
+          "object_red_cube"
+        ]
+      ],
+      "target_touch_exception_restored": true,
+      "pad_evidence": {
+        "left": {
+          "link_pose": [
+            0.023382403946202314,
+            0.15470579563788345,
+            0.7530867950556801,
+            0.01030263084647596,
+            -0.05311606409745619,
+            0.003234222285425651,
+            0.9985299591592857
+          ],
+          "pad_center_world": [
+            0.08304259077112272,
+            0.15502766355542316,
+            0.7594553513331461
+          ],
+          "aabb_separation_m": 0.0022107788836604626
+        },
+        "right": {
+          "link_pose": [
+            0.023756568682896363,
+            0.10518145211216966,
+            0.7520846148914089,
+            0.01030263084647596,
+            -0.05311606409745619,
+            0.003234222285425651,
+            0.9985299591592857
+          ],
+          "pad_center_world": [
+            0.08341675550781677,
+            0.10550332002970937,
+            0.7584531711688749
+          ],
+          "aabb_separation_m": 0.00158324449218325
+        },
+        "minimum_pad_cube_aabb_separation_m": 0.00158324449218325,
+        "gazebo_link_pose_evidence": {
+          "left": {
+            "link_pose_world_xyz_rpy": [
+              0.023383,
+              0.154706,
+              0.753087,
+              0.020349,
+              -0.106343,
+              0.005394
+            ],
+            "pad_center_world": [
+              0.08304318667019961,
+              0.15502781016795272,
+              0.7594555606452901
+            ],
+            "aabb_separation_m": 0.0022103194676407257
+          },
+          "right": {
+            "link_pose_world_xyz_rpy": [
+              0.023757,
+              0.105179,
+              0.752085,
+              0.020347,
+              -0.106343,
+              0.005395
+            ],
+            "pad_center_world": [
+              0.08341718634835962,
+              0.10550086982813921,
+              0.7584535606452901
+            ],
+            "aabb_separation_m": 0.0015828136516403968
+          }
+        },
+        "gazebo_minimum_pad_cube_aabb_separation_m": 0.0015828136516403968
+      },
+      "contacts": {
+        "left_target": false,
+        "right_target": true,
+        "left_table": false,
+        "right_table": false,
+        "cube_table": false,
+        "cube_environment_table": true,
+        "raw_pairs": {
+          "left": [],
+          "right": [
+            [
+              "panda_controller::panda_rightfinger::panda_rightfinger_fixed_joint_lump__collision_collision",
+              "object_red_cube::link::collision"
+            ]
+          ],
+          "cube": [
+            [
+              "object_red_cube::link::collision",
+              "panda_controller::panda_rightfinger::panda_rightfinger_fixed_joint_lump__collision_collision"
+            ]
+          ],
+          "cube_environment": [
+            [
+              "object_red_cube_environment::link::collision",
+              "work_table::table_link::collision"
+            ]
+          ]
+        },
+        "event_counts": {
+          "left": 0,
+          "right": 1262,
+          "cube": 1261,
+          "cube_environment": 1261
+        },
+        "topic_rate_evidence": {
+          "left": {
+            "unique_timestamp_samples": 0,
+            "duration_s": 0.0,
+            "observed_rate_hz": 0.0
+          },
+          "right": {
+            "unique_timestamp_samples": 1262,
+            "duration_s": 1.2609999999999992,
+            "observed_rate_hz": 1000.0000000000006
+          },
+          "cube": {
+            "unique_timestamp_samples": 1261,
+            "duration_s": 1.259999999999998,
+            "observed_rate_hz": 1000.0000000000016
+          },
+          "cube_environment": {
+            "unique_timestamp_samples": 1261,
+            "duration_s": 1.259999999999998,
+            "observed_rate_hz": 1000.0000000000016
+          }
+        },
+        "left_target_unique_samples": 0,
+        "right_target_unique_samples": 1262,
+        "bilateral_overlap_s": 0.0
+      },
+      "passed": true
+    },
+    {
+      "label": "bilateral_1",
+      "expected": "bilateral",
+      "initialization": {
+        "status": "CALIBRATION_ONLY_INITIALIZATION",
+        "source": "m1a_contact_calibration.sdf",
+        "declared_cube_xyz": [
+          0.17,
+          0.12,
+          0.755
+        ],
+        "runtime_pose_write": false
+      },
+      "cube_pose": {
+        "xyz": [
+          0.17,
+          0.12,
+          0.755
+        ],
+        "rpy": [
+          0.0,
+          -0.0,
+          0.0
+        ],
+        "source": "gz model runtime oracle (object_red_cube)"
+      },
+      "cube_pose_after_action": {
+        "xyz": [
+          0.17,
+          0.12,
+          0.755
+        ],
+        "rpy": [
+          0.0,
+          -0.0,
+          0.0
+        ],
+        "source": "gz model runtime oracle (object_red_cube)"
+      },
+      "target_hand_pose": [
+        0.05000000000000002,
+        0.09,
+        0.7,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "motion": {
+        "ik_solved": true,
+        "ik_solution": [
+          -1.0134159315,
+          1.7628,
+          0.8510767928,
+          -1.1684521475,
+          1.6757839956,
+          0.8364348383,
+          -0.187055316
+        ],
+        "ik_seed_source": "bilateral_validated_seed",
+        "plan_attempts": 1,
+        "planned": true,
+        "executed": true,
+        "converged": false,
+        "goal_uuid": "e13c3f3acdf046b185b034695fdd692c",
+        "joint_state_samples": 802,
+        "controller_state_samples": 802,
+        "post_controller_settle_s": 3.0004944801330566
+      },
+      "retreat": {
+        "ik_solved": true,
+        "ik_solution": [
+          0.7816574998481639,
+          1.754436792231412,
+          -0.04760928605736737,
+          -1.6352879131601799,
+          -0.18831979510633565,
+          0.2526190761698245,
+          2.1687582489190804
+        ],
+        "ik_seed_source": "current_joint_state",
+        "plan_attempts": 1,
+        "planned": true,
+        "executed": true,
+        "converged": true,
+        "goal_uuid": "cf6c5fee521543138b684f4e1498b5d4",
+        "joint_state_samples": 752,
+        "controller_state_samples": 752,
+        "post_controller_settle_s": 0.0011718273162841797
+      },
+      "retreat_hand_pose": [
+        -0.04999999999999999,
+        0.09,
+        0.835,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "hand_command": {
+        "positions_m": [
+          0.01,
+          0.01
+        ],
+        "accepted": true,
+        "succeeded": true,
+        "goal_uuid": "9c6ad00b8c044b9aa520d7fc573c9ae8",
+        "observed_positions_m": [
+          0.04000000000004895,
+          0.02448568955311858
+        ],
+        "max_position_error_m": 0.030000000000048946
+      },
+      "calibration_only_allowed_collision_pairs": [
+        [
+          "panda_leftfinger",
+          "object_red_cube"
+        ],
+        [
+          "panda_rightfinger",
+          "object_red_cube"
+        ]
+      ],
+      "target_touch_exception_restored": true,
+      "pad_evidence": {
+        "left": {
+          "link_pose": [
+            0.024233352580552647,
+            0.14093420476255783,
+            0.7370163279554591,
+            -0.03330234143816085,
+            -0.021139168711535324,
+            0.033366014199512135,
+            0.9986645075786759
+          ],
+          "pad_center_world": [
+            0.08404613393766744,
+            0.14501725731710616,
+            0.7394163004892141
+          ],
+          "aabb_separation_m": 0.0009538660623325812
+        },
+        "right": {
+          "link_pose": [
+            0.028440087886969775,
+            0.07673490146350834,
+            0.7413966240120042,
+            -0.03330234143816085,
+            -0.021139168711535324,
+            0.033366014199512135,
+            0.9986645075786759
+          ],
+          "pad_center_world": [
+            0.08825286924408456,
+            0.08081795401805665,
+            0.7437965965457592
+          ],
+          "aabb_separation_m": 0.005182045981943342
+        },
+        "minimum_pad_cube_aabb_separation_m": 0.0009538660623325812,
+        "gazebo_link_pose_evidence": {
+          "left": {
+            "link_pose_world_xyz_rpy": [
+              0.024233,
+              0.140934,
+              0.737016,
+              -0.068033,
+              -0.04001,
+              0.068158
+            ],
+            "pad_center_world": [
+              0.08404578244777733,
+              0.14501704419664332,
+              0.739415959571142
+            ],
+            "aabb_separation_m": 0.0009542175522226914
+          },
+          "right": {
+            "link_pose_world_xyz_rpy": [
+              0.02844,
+              0.076735,
+              0.741397,
+              -0.068033,
+              -0.04001,
+              0.068158
+            ],
+            "pad_center_world": [
+              0.08825278244777733,
+              0.0808180441966433,
+              0.743796959571142
+            ],
+            "aabb_separation_m": 0.005181955803356689
+          }
+        },
+        "gazebo_minimum_pad_cube_aabb_separation_m": 0.0009542175522226914
+      },
+      "contacts": {
+        "left_target": true,
+        "right_target": true,
+        "left_table": false,
+        "right_table": false,
+        "cube_table": false,
+        "cube_environment_table": true,
+        "raw_pairs": {
+          "left": [
+            [
+              "panda_controller::panda_leftfinger::panda_leftfinger_fixed_joint_lump__collision_collision",
+              "object_red_cube::link::collision"
+            ]
+          ],
+          "right": [
+            [
+              "panda_controller::panda_rightfinger::panda_rightfinger_fixed_joint_lump__collision_collision",
+              "object_red_cube::link::collision"
+            ]
+          ],
+          "cube": [
+            [
+              "object_red_cube::link::collision",
+              "panda_controller::panda_leftfinger::panda_leftfinger_fixed_joint_lump__collision_collision"
+            ],
+            [
+              "object_red_cube::link::collision",
+              "panda_controller::panda_rightfinger::panda_rightfinger_fixed_joint_lump__collision_collision"
+            ]
+          ],
+          "cube_environment": [
+            [
+              "object_red_cube_environment::link::collision",
+              "work_table::table_link::collision"
+            ]
+          ]
+        },
+        "event_counts": {
+          "left": 1130,
+          "right": 708,
+          "cube": 1839,
+          "cube_environment": 1130
+        },
+        "topic_rate_evidence": {
+          "left": {
+            "unique_timestamp_samples": 1130,
+            "duration_s": 1.1289999999999978,
+            "observed_rate_hz": 1000.0000000000019
+          },
+          "right": {
+            "unique_timestamp_samples": 708,
+            "duration_s": 0.7070000000000007,
+            "observed_rate_hz": 999.999999999999
+          },
+          "cube": {
+            "unique_timestamp_samples": 1131,
+            "duration_s": 1.129999999999999,
+            "observed_rate_hz": 1000.0000000000009
+          },
+          "cube_environment": {
+            "unique_timestamp_samples": 1130,
+            "duration_s": 1.1290000000000013,
+            "observed_rate_hz": 999.9999999999989
+          }
+        },
+        "left_target_unique_samples": 1130,
+        "right_target_unique_samples": 708,
+        "bilateral_overlap_s": 0.7070000000000007
+      },
+      "passed": true
+    },
+    {
+      "label": "bilateral_2",
+      "expected": "bilateral",
+      "initialization": {
+        "status": "CALIBRATION_ONLY_INITIALIZATION",
+        "source": "m1a_contact_calibration.sdf",
+        "declared_cube_xyz": [
+          0.17,
+          0.12,
+          0.755
+        ],
+        "runtime_pose_write": false
+      },
+      "cube_pose": {
+        "xyz": [
+          0.17,
+          0.12,
+          0.755
+        ],
+        "rpy": [
+          0.0,
+          -0.0,
+          0.0
+        ],
+        "source": "gz model runtime oracle (object_red_cube)"
+      },
+      "cube_pose_after_action": {
+        "xyz": [
+          0.17,
+          0.12,
+          0.755
+        ],
+        "rpy": [
+          0.0,
+          -0.0,
+          0.0
+        ],
+        "source": "gz model runtime oracle (object_red_cube)"
+      },
+      "target_hand_pose": [
+        0.05000000000000002,
+        0.09,
+        0.7,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "motion": {
+        "ik_solved": true,
+        "ik_solution": [
+          -1.0134062473019156,
+          1.7628,
+          0.8510660825828505,
+          -1.168439698208142,
+          1.6757991530460137,
+          0.8364259882067847,
+          -0.1870476971388012
+        ],
+        "plan_attempts": 1,
+        "planned": true,
+        "executed": true,
+        "converged": false,
+        "goal_uuid": "54e37e8349bf4a9d924345a56279dcbe",
+        "joint_state_samples": 802,
+        "controller_state_samples": 802,
+        "post_controller_settle_s": 3.000244140625
+      },
+      "retreat": {
+        "ik_solved": true,
+        "ik_solution": [
+          -2.676484604628255,
+          -1.5418705387949962,
+          -1.7458747867065194,
+          -0.8791878046711663,
+          1.7054245080812542,
+          1.4548774092714851,
+          -1.33393356269645
+        ],
+        "plan_attempts": 1,
+        "planned": true,
+        "executed": true,
+        "converged": true,
+        "goal_uuid": "b93f0146d3b44051b56a6c75f43640f0",
+        "joint_state_samples": 1176,
+        "controller_state_samples": 1176,
+        "post_controller_settle_s": 0.001997709274291992
+      },
+      "retreat_hand_pose": [
+        -0.04999999999999999,
+        0.09,
+        0.835,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "hand_command": {
+        "positions_m": [
+          0.01,
+          0.01
+        ],
+        "accepted": true,
+        "succeeded": true,
+        "goal_uuid": "e4118b25f81b4cee8643677ac3e04c54",
+        "observed_positions_m": [
+          0.04000000000004538,
+          0.025026070011064945
+        ],
+        "max_position_error_m": 0.03000000000004538
+      },
+      "calibration_only_allowed_collision_pairs": [
+        [
+          "panda_leftfinger",
+          "object_red_cube"
+        ],
+        [
+          "panda_rightfinger",
+          "object_red_cube"
+        ]
+      ],
+      "target_touch_exception_restored": true,
+      "pad_evidence": {
+        "left": {
+          "link_pose": [
+            0.024219721828642272,
+            0.14142660229960122,
+            0.7371364945960182,
+            -0.032860555796337926,
+            -0.021459427309314653,
+            0.033628447803177475,
+            0.9986635090713293
+          ],
+          "pad_center_world": [
+            0.0840287562859909,
+            0.14554124298714502,
+            0.7395755782952983
+          ],
+          "aabb_separation_m": 0.0009712437140091262
+        },
+        "right": {
+          "link_pose": [
+            0.02849565314193923,
+            0.07668753004253265,
+            0.7414982545190908,
+            -0.032860555796337926,
+            -0.021459427309314653,
+            0.033628447803177475,
+            0.9986635090713293
+          ],
+          "pad_center_world": [
+            0.08830468759928785,
+            0.08080217073007646,
+            0.7439373382183709
+          ],
+          "aabb_separation_m": 0.005197829269923529
+        },
+        "minimum_pad_cube_aabb_separation_m": 0.0009712437140091262,
+        "gazebo_link_pose_evidence": {
+          "left": {
+            "link_pose_world_xyz_rpy": [
+              0.02422,
+              0.141427,
+              0.737137,
+              -0.067182,
+              -0.040663,
+              0.068688
+            ],
+            "pad_center_world": [
+              0.08402903380391133,
+              0.14554163595772482,
+              0.739576107701187
+            ],
+            "aabb_separation_m": 0.0009709661960886906
+          },
+          "right": {
+            "link_pose_world_xyz_rpy": [
+              0.028496,
+              0.076688,
+              0.741498,
+              -0.067183,
+              -0.040663,
+              0.068688
+            ],
+            "pad_center_world": [
+              0.08830503380391133,
+              0.08080263595772481,
+              0.7439371077011869
+            ],
+            "aabb_separation_m": 0.005197364042275179
+          }
+        },
+        "gazebo_minimum_pad_cube_aabb_separation_m": 0.0009709661960886906
+      },
+      "contacts": {
+        "left_target": true,
+        "right_target": true,
+        "left_table": false,
+        "right_table": false,
+        "cube_table": false,
+        "cube_environment_table": true,
+        "raw_pairs": {
+          "left": [
+            [
+              "panda_controller::panda_leftfinger::panda_leftfinger_fixed_joint_lump__collision_collision",
+              "object_red_cube::link::collision"
+            ]
+          ],
+          "right": [
+            [
+              "panda_controller::panda_rightfinger::panda_rightfinger_fixed_joint_lump__collision_collision",
+              "object_red_cube::link::collision"
+            ]
+          ],
+          "cube": [
+            [
+              "object_red_cube::link::collision",
+              "panda_controller::panda_leftfinger::panda_leftfinger_fixed_joint_lump__collision_collision"
+            ],
+            [
+              "object_red_cube::link::collision",
+              "panda_controller::panda_rightfinger::panda_rightfinger_fixed_joint_lump__collision_collision"
+            ]
+          ],
+          "cube_environment": [
+            [
+              "object_red_cube_environment::link::collision",
+              "work_table::table_link::collision"
+            ]
+          ]
+        },
+        "event_counts": {
+          "left": 1125,
+          "right": 716,
+          "cube": 1839,
+          "cube_environment": 1124
+        },
+        "topic_rate_evidence": {
+          "left": {
+            "unique_timestamp_samples": 1125,
+            "duration_s": 1.1239999999999988,
+            "observed_rate_hz": 1000.0000000000011
+          },
+          "right": {
+            "unique_timestamp_samples": 716,
+            "duration_s": 0.7149999999999999,
+            "observed_rate_hz": 1000.0000000000002
+          },
+          "cube": {
+            "unique_timestamp_samples": 1124,
+            "duration_s": 1.1229999999999976,
+            "observed_rate_hz": 1000.0000000000022
+          },
+          "cube_environment": {
+            "unique_timestamp_samples": 1124,
+            "duration_s": 1.1229999999999976,
+            "observed_rate_hz": 1000.0000000000022
+          }
+        },
+        "left_target_unique_samples": 1125,
+        "right_target_unique_samples": 716,
+        "bilateral_overlap_s": 0.7149999999999999
+      },
+      "passed": true
+    },
+    {
+      "label": "bilateral_3",
+      "expected": "bilateral",
+      "initialization": {
+        "status": "CALIBRATION_ONLY_INITIALIZATION",
+        "source": "m1a_contact_calibration.sdf",
+        "declared_cube_xyz": [
+          0.17,
+          0.12,
+          0.755
+        ],
+        "runtime_pose_write": false
+      },
+      "cube_pose": {
+        "xyz": [
+          0.17,
+          0.12,
+          0.755
+        ],
+        "rpy": [
+          0.0,
+          -0.0,
+          0.0
+        ],
+        "source": "gz model runtime oracle (object_red_cube)"
+      },
+      "cube_pose_after_action": {
+        "xyz": [
+          0.17,
+          0.12,
+          0.755
+        ],
+        "rpy": [
+          0.0,
+          -0.0,
+          0.0
+        ],
+        "source": "gz model runtime oracle (object_red_cube)"
+      },
+      "target_hand_pose": [
+        0.05000000000000002,
+        0.09,
+        0.7,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "motion": {
+        "ik_solved": true,
+        "ik_solution": [
+          -1.0134159315,
+          1.7628,
+          0.8510767928,
+          -1.1684521475,
+          1.6757839956,
+          0.8364348383,
+          -0.187055316
+        ],
+        "ik_seed_source": "bilateral_validated_seed",
+        "plan_attempts": 1,
+        "planned": true,
+        "executed": true,
+        "converged": false,
+        "goal_uuid": "d6092982424c41e0a53f4bf76998f06e",
+        "joint_state_samples": 801,
+        "controller_state_samples": 802,
+        "post_controller_settle_s": 3.0005431175231934
+      },
+      "retreat": {
+        "ik_solved": true,
+        "ik_solution": [
+          0.7522984631703991,
+          1.6895068850214443,
+          -0.0019064530930570894,
+          -1.43468745522945,
+          0.10839263661917777,
+          -0.0175,
+          2.4974448588522224
+        ],
+        "ik_seed_source": "current_joint_state",
+        "plan_attempts": 2,
+        "planned": true,
+        "executed": true,
+        "converged": true,
+        "goal_uuid": "022ee51eb1ce4b1faf3a94d0ed5a82b7",
+        "joint_state_samples": 762,
+        "controller_state_samples": 762,
+        "post_controller_settle_s": 0.0017833709716796875
+      },
+      "retreat_hand_pose": [
+        -0.04999999999999999,
+        0.09,
+        0.835,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "hand_command": {
+        "positions_m": [
+          0.01,
+          0.01
+        ],
+        "accepted": true,
+        "succeeded": true,
+        "goal_uuid": "8a7b36b8827d46e3907fc57006b631f9",
+        "observed_positions_m": [
+          0.04000000000005081,
+          0.02474481091230556
+        ],
+        "max_position_error_m": 0.030000000000050805
+      },
+      "calibration_only_allowed_collision_pairs": [
+        [
+          "panda_leftfinger",
+          "object_red_cube"
+        ],
+        [
+          "panda_rightfinger",
+          "object_red_cube"
+        ]
+      ],
+      "target_touch_exception_restored": true,
+      "pad_evidence": {
+        "left": {
+          "link_pose": [
+            0.024233706428546907,
+            0.1411147845897032,
+            0.7368613522447058,
+            -0.03355704976032767,
+            -0.021371322227411903,
+            0.033624971733213306,
+            0.9986423545361851
+          ],
+          "pad_center_world": [
+            0.08404322177201004,
+            0.14523036212565896,
+            0.739287026568597
+          ],
+          "aabb_separation_m": 0.0009567782279899795
+        },
+        "right": {
+          "link_pose": [
+            0.028489024388242398,
+            0.07666205881137225,
+            0.7412938044650217,
+            -0.03355704976032767,
+            -0.021371322227411903,
+            0.033624971733213306,
+            0.9986423545361851
+          ],
+          "pad_center_world": [
+            0.08829853973170552,
+            0.08077763634732801,
+            0.7437194787889129
+          ],
+          "aabb_separation_m": 0.00522236365267198
+        },
+        "minimum_pad_cube_aabb_separation_m": 0.0009567782279899795,
+        "gazebo_link_pose_evidence": {
+          "left": {
+            "link_pose_world_xyz_rpy": [
+              0.024234,
+              0.141115,
+              0.736861,
+              -0.06857,
+              -0.040439,
+              0.068703
+            ],
+            "pad_center_world": [
+              0.08404351564834578,
+              0.14523057049657534,
+              0.7392866787499586
+            ],
+            "aabb_separation_m": 0.000956484351654241
+          },
+          "right": {
+            "link_pose_world_xyz_rpy": [
+              0.028489,
+              0.076662,
+              0.741294,
+              -0.06857,
+              -0.040439,
+              0.068703
+            ],
+            "pad_center_world": [
+              0.08829851564834577,
+              0.08077757049657536,
+              0.7437196787499586
+            ],
+            "aabb_separation_m": 0.005222429503424636
+          }
+        },
+        "gazebo_minimum_pad_cube_aabb_separation_m": 0.000956484351654241
+      },
+      "contacts": {
+        "left_target": true,
+        "right_target": true,
+        "left_table": false,
+        "right_table": false,
+        "cube_table": false,
+        "cube_environment_table": true,
+        "raw_pairs": {
+          "left": [
+            [
+              "panda_controller::panda_leftfinger::panda_leftfinger_fixed_joint_lump__collision_collision",
+              "object_red_cube::link::collision"
+            ]
+          ],
+          "right": [
+            [
+              "panda_controller::panda_rightfinger::panda_rightfinger_fixed_joint_lump__collision_collision",
+              "object_red_cube::link::collision"
+            ]
+          ],
+          "cube": [
+            [
+              "object_red_cube::link::collision",
+              "panda_controller::panda_leftfinger::panda_leftfinger_fixed_joint_lump__collision_collision"
+            ],
+            [
+              "object_red_cube::link::collision",
+              "panda_controller::panda_rightfinger::panda_rightfinger_fixed_joint_lump__collision_collision"
+            ]
+          ],
+          "cube_environment": [
+            [
+              "object_red_cube_environment::link::collision",
+              "work_table::table_link::collision"
+            ]
+          ]
+        },
+        "event_counts": {
+          "left": 1088,
+          "right": 683,
+          "cube": 1757,
+          "cube_environment": 1088
+        },
+        "topic_rate_evidence": {
+          "left": {
+            "unique_timestamp_samples": 1088,
+            "duration_s": 1.0870000000000033,
+            "observed_rate_hz": 999.9999999999969
+          },
+          "right": {
+            "unique_timestamp_samples": 683,
+            "duration_s": 0.6819999999999986,
+            "observed_rate_hz": 1000.000000000002
+          },
+          "cube": {
+            "unique_timestamp_samples": 1088,
+            "duration_s": 1.0869999999999997,
+            "observed_rate_hz": 1000.0000000000002
+          },
+          "cube_environment": {
+            "unique_timestamp_samples": 1088,
+            "duration_s": 1.0869999999999997,
+            "observed_rate_hz": 1000.0000000000002
+          }
+        },
+        "left_target_unique_samples": 1088,
+        "right_target_unique_samples": 683,
+        "bilateral_overlap_s": 0.6690000000000005
+      },
+      "passed": true
+    },
+    {
+      "label": "object_environment_1",
+      "expected": "target_equivalent_table_without_finger",
+      "initialization": {
+        "status": "CALIBRATION_ONLY_INITIALIZATION",
+        "source": "m1a_contact_calibration.sdf",
+        "declared_cube_xyz": [
+          0.17,
+          0.12,
+          0.755
+        ],
+        "runtime_pose_write": false
+      },
+      "cube_pose": {
+        "xyz": [
+          0.17,
+          0.12,
+          0.755
+        ],
+        "rpy": [
+          0.0,
+          -0.0,
+          0.0
+        ],
+        "source": "gz model runtime oracle (object_red_cube)"
+      },
+      "cube_pose_after_action": {
+        "xyz": [
+          0.17,
+          0.12,
+          0.755
+        ],
+        "rpy": [
+          0.0,
+          -0.0,
+          0.0
+        ],
+        "source": "gz model runtime oracle (object_red_cube)"
+      },
+      "pad_evidence": {
+        "left": {
+          "link_pose": [
+            -0.35,
+            -0.18000000000230143,
+            1.2350000000042112,
+            1.0,
+            0.0,
+            0.0,
+            4.896638650109253e-12
+          ],
+          "pad_center_world": [
+            -0.29,
+            -0.18000000000230143,
+            1.2350000000042112
+          ],
+          "aabb_separation_m": 0.6346552213642531
+        },
+        "right": {
+          "link_pose": [
+            -0.35,
+            -0.10000000000230141,
+            1.2350000000034278,
+            1.0,
+            0.0,
+            0.0,
+            4.896638650109253e-12
+          ],
+          "pad_center_world": [
+            -0.29,
+            -0.10000000000230141,
+            1.2350000000034278
+          ],
+          "aabb_separation_m": 0.6054975227066214
+        },
+        "minimum_pad_cube_aabb_separation_m": 0.6054975227066214,
+        "gazebo_link_pose_evidence": {
+          "left": {
+            "link_pose_world_xyz_rpy": [
+              -0.35,
+              -0.18,
+              1.235,
+              3.14159,
+              -0.0,
+              0.0
+            ],
+            "pad_center_world": [
+              -0.29,
+              -0.18,
+              1.235
+            ],
+            "aabb_separation_m": 0.6346552213603857
+          },
+          "right": {
+            "link_pose_world_xyz_rpy": [
+              -0.35,
+              -0.1,
+              1.235,
+              3.14159,
+              -0.0,
+              0.0
+            ],
+            "pad_center_world": [
+              -0.29,
+              -0.1,
+              1.235
+            ],
+            "aabb_separation_m": 0.6054975227034377
+          }
+        },
+        "gazebo_minimum_pad_cube_aabb_separation_m": 0.6054975227034377
+      },
+      "contacts": {
+        "left_target": false,
+        "right_target": false,
+        "left_table": false,
+        "right_table": false,
+        "cube_table": false,
+        "cube_environment_table": true,
+        "raw_pairs": {
+          "left": [],
+          "right": [],
+          "cube": [],
+          "cube_environment": [
+            [
+              "object_red_cube_environment::link::collision",
+              "work_table::table_link::collision"
+            ]
+          ]
+        },
+        "event_counts": {
+          "left": 0,
+          "right": 0,
+          "cube": 0,
+          "cube_environment": 689
+        },
+        "topic_rate_evidence": {
+          "left": {
+            "unique_timestamp_samples": 0,
+            "duration_s": 0.0,
+            "observed_rate_hz": 0.0
+          },
+          "right": {
+            "unique_timestamp_samples": 0,
+            "duration_s": 0.0,
+            "observed_rate_hz": 0.0
+          },
+          "cube": {
+            "unique_timestamp_samples": 0,
+            "duration_s": 0.0,
+            "observed_rate_hz": 0.0
+          },
+          "cube_environment": {
+            "unique_timestamp_samples": 689,
+            "duration_s": 0.6880000000000024,
+            "observed_rate_hz": 999.9999999999965
+          }
+        },
+        "left_target_unique_samples": 0,
+        "right_target_unique_samples": 0,
+        "bilateral_overlap_s": 0.0
+      },
+      "passed": true
+    },
+    {
+      "label": "object_environment_2",
+      "expected": "target_equivalent_table_without_finger",
+      "initialization": {
+        "status": "CALIBRATION_ONLY_INITIALIZATION",
+        "source": "m1a_contact_calibration.sdf",
+        "declared_cube_xyz": [
+          0.17,
+          0.12,
+          0.755
+        ],
+        "runtime_pose_write": false
+      },
+      "cube_pose": {
+        "xyz": [
+          0.17,
+          0.12,
+          0.755
+        ],
+        "rpy": [
+          0.0,
+          -0.0,
+          0.0
+        ],
+        "source": "gz model runtime oracle (object_red_cube)"
+      },
+      "cube_pose_after_action": {
+        "xyz": [
+          0.17,
+          0.12,
+          0.755
+        ],
+        "rpy": [
+          0.0,
+          -0.0,
+          0.0
+        ],
+        "source": "gz model runtime oracle (object_red_cube)"
+      },
+      "pad_evidence": {
+        "left": {
+          "link_pose": [
+            -0.35,
+            -0.18000000000230143,
+            1.2350000000042112,
+            1.0,
+            0.0,
+            0.0,
+            4.896638650109253e-12
+          ],
+          "pad_center_world": [
+            -0.29,
+            -0.18000000000230143,
+            1.2350000000042112
+          ],
+          "aabb_separation_m": 0.6346552213642531
+        },
+        "right": {
+          "link_pose": [
+            -0.35,
+            -0.10000000000230141,
+            1.2350000000034278,
+            1.0,
+            0.0,
+            0.0,
+            4.896638650109253e-12
+          ],
+          "pad_center_world": [
+            -0.29,
+            -0.10000000000230141,
+            1.2350000000034278
+          ],
+          "aabb_separation_m": 0.6054975227066214
+        },
+        "minimum_pad_cube_aabb_separation_m": 0.6054975227066214,
+        "gazebo_link_pose_evidence": {
+          "left": {
+            "link_pose_world_xyz_rpy": [
+              -0.35,
+              -0.18,
+              1.235,
+              3.14159,
+              -0.0,
+              0.0
+            ],
+            "pad_center_world": [
+              -0.29,
+              -0.18,
+              1.235
+            ],
+            "aabb_separation_m": 0.6346552213603857
+          },
+          "right": {
+            "link_pose_world_xyz_rpy": [
+              -0.35,
+              -0.1,
+              1.235,
+              3.14159,
+              -0.0,
+              0.0
+            ],
+            "pad_center_world": [
+              -0.29,
+              -0.1,
+              1.235
+            ],
+            "aabb_separation_m": 0.6054975227034377
+          }
+        },
+        "gazebo_minimum_pad_cube_aabb_separation_m": 0.6054975227034377
+      },
+      "contacts": {
+        "left_target": false,
+        "right_target": false,
+        "left_table": false,
+        "right_table": false,
+        "cube_table": false,
+        "cube_environment_table": true,
+        "raw_pairs": {
+          "left": [],
+          "right": [],
+          "cube": [],
+          "cube_environment": [
+            [
+              "object_red_cube_environment::link::collision",
+              "work_table::table_link::collision"
+            ]
+          ]
+        },
+        "event_counts": {
+          "left": 0,
+          "right": 0,
+          "cube": 0,
+          "cube_environment": 669
+        },
+        "topic_rate_evidence": {
+          "left": {
+            "unique_timestamp_samples": 0,
+            "duration_s": 0.0,
+            "observed_rate_hz": 0.0
+          },
+          "right": {
+            "unique_timestamp_samples": 0,
+            "duration_s": 0.0,
+            "observed_rate_hz": 0.0
+          },
+          "cube": {
+            "unique_timestamp_samples": 0,
+            "duration_s": 0.0,
+            "observed_rate_hz": 0.0
+          },
+          "cube_environment": {
+            "unique_timestamp_samples": 669,
+            "duration_s": 0.6679999999999993,
+            "observed_rate_hz": 1000.0000000000011
+          }
+        },
+        "left_target_unique_samples": 0,
+        "right_target_unique_samples": 0,
+        "bilateral_overlap_s": 0.0
+      },
+      "passed": true
+    },
+    {
+      "label": "table_1",
+      "expected": "finger_table",
+      "cube_pose": {
+        "xyz": [
+          0.17,
+          0.12,
+          0.755
+        ],
+        "rpy": [
+          0.0,
+          -0.0,
+          0.0
+        ],
+        "source": "gz model runtime oracle (object_red_cube)"
+      },
+      "motion": {
+        "ik_solved": true,
+        "ik_solution": [
+          2.150811842858482,
+          -1.7628,
+          -2.2418518440649957,
+          -1.136360037334159,
+          1.9496285668282358,
+          2.4366845204149232,
+          -0.20794685988435943
+        ],
+        "plan_attempts": 1,
+        "planned": true,
+        "executed": true,
+        "converged": false,
+        "goal_uuid": "3cf000a5b8cb45d18137c06b2f32d563",
+        "joint_state_samples": 896,
+        "controller_state_samples": 896,
+        "post_controller_settle_s": 3.000640392303467
+      },
+      "retreat": {
+        "planned": true,
+        "plan_attempts": 1,
+        "executed": true,
+        "converged": true,
+        "goal_uuid": "7fd7cf863b7f4a55abead65a78cddcb9",
+        "joint_state_samples": 593,
+        "controller_state_samples": 593,
+        "post_controller_settle_s": 0.0015337467193603516
+      },
+      "calibration_only_allowed_collision_pairs": [
+        [
+          "panda_leftfinger",
+          "work_table"
+        ],
+        [
+          "panda_rightfinger",
+          "work_table"
+        ]
+      ],
+      "pad_evidence": {
+        "left": {
+          "link_pose": [
+            -0.22173297003644601,
+            -0.1375611737196043,
+            1.162470031132631,
+            0.9841823150979655,
+            0.14724557809462688,
+            0.09849296373569581,
+            -0.0017454152935426708
+          ],
+          "pad_center_world": [
+            -0.16549882493730944,
+            -0.1201918237821766,
+            1.1741330756631314
+          ],
+          "aabb_separation_m": 0.49710884439231523
+        },
+        "right": {
+          "link_pose": [
+            -0.2449467234716331,
+            -0.06103195305114285,
+            1.1604244901765923,
+            0.9841823150979655,
+            0.14724557809462688,
+            0.09849296373569581,
+            -0.0017454152935426708
+          ],
+          "pad_center_world": [
+            -0.18871257837249653,
+            -0.04366260311371514,
+            1.1720875347070927
+          ],
+          "aabb_separation_m": 0.4817123491913844
+        },
+        "minimum_pad_cube_aabb_separation_m": 0.4817123491913844,
+        "gazebo_link_pose_evidence": {
+          "left": {
+            "link_pose_world_xyz_rpy": [
+              -0.221733,
+              -0.137561,
+              1.16247,
+              3.11552,
+              -0.19563,
+              0.299579
+            ],
+            "pad_center_world": [
+              -0.16549885275579532,
+              -0.1201916763857645,
+              1.174133073390023
+            ],
+            "aabb_separation_m": 0.4971087955507888
+          },
+          "right": {
+            "link_pose_world_xyz_rpy": [
+              -0.244947,
+              -0.061032,
+              1.16042,
+              3.11552,
+              -0.19563,
+              0.299579
+            ],
+            "pad_center_world": [
+              -0.1887128527557953,
+              -0.04366267638576451,
+              1.1720830733900232
+            ],
+            "aabb_separation_m": 0.48170905563581706
+          }
+        },
+        "gazebo_minimum_pad_cube_aabb_separation_m": 0.48170905563581706
+      },
+      "contacts": {
+        "left_target": false,
+        "right_target": false,
+        "left_table": true,
+        "right_table": false,
+        "cube_table": false,
+        "cube_environment_table": true,
+        "raw_pairs": {
+          "left": [
+            [
+              "panda_controller::panda_leftfinger::panda_leftfinger_fixed_joint_lump__collision_collision",
+              "work_table::table_link::collision"
+            ]
+          ],
+          "right": [],
+          "cube": [],
+          "cube_environment": [
+            [
+              "object_red_cube_environment::link::collision",
+              "work_table::table_link::collision"
+            ]
+          ]
+        },
+        "event_counts": {
+          "left": 451,
+          "right": 0,
+          "cube": 0,
+          "cube_environment": 451
+        },
+        "topic_rate_evidence": {
+          "left": {
+            "unique_timestamp_samples": 451,
+            "duration_s": 0.4499999999999993,
+            "observed_rate_hz": 1000.0000000000016
+          },
+          "right": {
+            "unique_timestamp_samples": 0,
+            "duration_s": 0.0,
+            "observed_rate_hz": 0.0
+          },
+          "cube": {
+            "unique_timestamp_samples": 0,
+            "duration_s": 0.0,
+            "observed_rate_hz": 0.0
+          },
+          "cube_environment": {
+            "unique_timestamp_samples": 451,
+            "duration_s": 0.4499999999999993,
+            "observed_rate_hz": 1000.0000000000016
+          }
+        },
+        "left_target_unique_samples": 0,
+        "right_target_unique_samples": 0,
+        "bilateral_overlap_s": 0.0
+      },
+      "passed": true
+    },
+    {
+      "label": "table_2",
+      "expected": "finger_table",
+      "cube_pose": {
+        "xyz": [
+          0.17,
+          0.12,
+          0.755
+        ],
+        "rpy": [
+          0.0,
+          -0.0,
+          0.0
+        ],
+        "source": "gz model runtime oracle (object_red_cube)"
+      },
+      "motion": {
+        "ik_solved": true,
+        "ik_solution": [
+          1.6667561464463976,
+          -1.4060453535113775,
+          -1.6942044735164803,
+          -1.4020033782779713,
+          0.9711420515355462,
+          3.011696859331498,
+          0.7793069541963211
+        ],
+        "plan_attempts": 1,
+        "planned": true,
+        "executed": true,
+        "converged": false,
+        "goal_uuid": "9251890751864d60ac6cec055bdcc13d",
+        "joint_state_samples": 903,
+        "controller_state_samples": 903,
+        "post_controller_settle_s": 3.0003864765167236
+      },
+      "retreat": {
+        "planned": true,
+        "plan_attempts": 1,
+        "executed": true,
+        "converged": true,
+        "goal_uuid": "46995c8837924234a32204a15b280668",
+        "joint_state_samples": 477,
+        "controller_state_samples": 477,
+        "post_controller_settle_s": 0.0015196800231933594
+      },
+      "calibration_only_allowed_collision_pairs": [
+        [
+          "panda_leftfinger",
+          "work_table"
+        ],
+        [
+          "panda_rightfinger",
+          "work_table"
+        ]
+      ],
+      "pad_evidence": {
+        "left": {
+          "link_pose": [
+            -0.2218267171379422,
+            -0.13744018460015722,
+            1.1628359171146845,
+            0.984074379874663,
+            0.14732015904479803,
+            0.0994528003659271,
+            -0.0018777946341440848
+          ],
+          "pad_center_world": [
+            -0.16561800778933533,
+            -0.12006571553373699,
+            1.174613387896811
+          ],
+          "aabb_separation_m": 0.4974806250274849
+        },
+        "right": {
+          "link_pose": [
+            -0.24505204436661182,
+            -0.06091455754925262,
+            1.1607873896584846,
+            0.984074379874663,
+            0.14732015904479803,
+            0.0994528003659271,
+            -0.0018777946341440848
+          ],
+          "pad_center_world": [
+            -0.18884333501800496,
+            -0.04354008848283239,
+            1.1725648604406111
+          ],
+          "aabb_separation_m": 0.48212493836687026
+        },
+        "minimum_pad_cube_aabb_separation_m": 0.48212493836687026,
+        "gazebo_link_pose_evidence": {
+          "left": {
+            "link_pose_world_xyz_rpy": [
+              -0.221827,
+              -0.13744,
+              1.16284,
+              3.11547,
+              -0.197574,
+              0.29979
+            ],
+            "pad_center_world": [
+              -0.16561828693731678,
+              -0.12006553999130201,
+              1.1746174664186786
+            ],
+            "aabb_separation_m": 0.4974837846576965
+          },
+          "right": {
+            "link_pose_world_xyz_rpy": [
+              -0.245052,
+              -0.060915,
+              1.16079,
+              3.11547,
+              -0.197574,
+              0.29979
+            ],
+            "pad_center_world": [
+              -0.18884328693731678,
+              -0.043540539991301995,
+              1.1725674664186785
+            ],
+            "aabb_separation_m": 0.48212705967161634
+          }
+        },
+        "gazebo_minimum_pad_cube_aabb_separation_m": 0.48212705967161634
+      },
+      "contacts": {
+        "left_target": false,
+        "right_target": false,
+        "left_table": true,
+        "right_table": true,
+        "cube_table": false,
+        "cube_environment_table": true,
+        "raw_pairs": {
+          "left": [
+            [
+              "panda_controller::panda_leftfinger::panda_leftfinger_fixed_joint_lump__collision_collision",
+              "work_table::table_link::collision"
+            ]
+          ],
+          "right": [
+            [
+              "panda_controller::panda_rightfinger::panda_rightfinger_fixed_joint_lump__collision_collision",
+              "work_table::table_link::collision"
+            ]
+          ],
+          "cube": [],
+          "cube_environment": [
+            [
+              "object_red_cube_environment::link::collision",
+              "work_table::table_link::collision"
+            ]
+          ]
+        },
+        "event_counts": {
+          "left": 429,
+          "right": 430,
+          "cube": 0,
+          "cube_environment": 429
+        },
+        "topic_rate_evidence": {
+          "left": {
+            "unique_timestamp_samples": 429,
+            "duration_s": 0.4280000000000008,
+            "observed_rate_hz": 999.9999999999981
+          },
+          "right": {
+            "unique_timestamp_samples": 430,
+            "duration_s": 0.4289999999999985,
+            "observed_rate_hz": 1000.0000000000035
+          },
+          "cube": {
+            "unique_timestamp_samples": 0,
+            "duration_s": 0.0,
+            "observed_rate_hz": 0.0
+          },
+          "cube_environment": {
+            "unique_timestamp_samples": 429,
+            "duration_s": 0.42799999999999727,
+            "observed_rate_hz": 1000.0000000000064
+          }
+        },
+        "left_target_unique_samples": 0,
+        "right_target_unique_samples": 0,
+        "bilateral_overlap_s": 0.0
+      },
+      "passed": true
+    }
+  ]
 }

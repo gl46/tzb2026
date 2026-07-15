@@ -14,8 +14,8 @@
   "file_hashes": {
     "reports/m1a-preflight.json": "89da2eb6199b577ac41e8b4e3fbe6dcc676e98d71d75f3511b8bcbc2bff28326",
     "reports/m1a-m0-smoke.json": "99e80754e53cdc7920f2a3c3a50d16725f7676427ecc5b17ac2de244e1e7e988",
-    "reports/m1a-contact-calibration.json": "a4518e7c2d82373d2c01f8a3316282e4f66fb9fba1f75f9043532e2abae9c3df",
-    "reports/m1a-motion-execution.json": "f357f825816e7fe11ae5ad1a83e9bd6b709f90c92b47a128f0c9167f945fb94f",
+    "reports/m1a-contact-calibration.json": "6cf1c58001f64c75baa5ae13eec6fe94de25c345917998342cf951c0181816f5",
+    "reports/m1a-motion-execution.json": "0f0441a18924f7fc9bd83a579acd0819934331bc9badbd7c72f985e7ff7adc4a",
     "reports/m1a-friction-trials.json": "a0dd4b9be925baaa9d9609145b48cc77735bb66edaf431b4afc1dede06d8150b",
     "reports/m1a-contact-gate.json": "8a0fc2e51a71127d2755f8edebd7af9a09ab8ecd84944c784696baa334aa80c6",
     "reports/m1a-b1-oracle.json": "d36638fbdcd91d404a025fded63d5f33f83d1e6adfda37bc3846b5dddbc9a240"
