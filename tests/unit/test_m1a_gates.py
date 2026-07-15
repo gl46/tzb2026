@@ -313,6 +313,15 @@ def test_m1a_contact_calibration_uses_oracle_geometry_hand_control_and_per_trial
     assert "move_joint_target" in client and 'TARGETS[0][1]' in client
 
 
+def test_m1a_rgbd_recorder_uses_real_bridged_camera_frames() -> None:
+    root = Path(__file__).parents[2]
+    recorder = (root / "scripts/record_m1a_rgbd_video.py").read_text()
+    assert '"/xh/camera/rgbd/image"' in recorder
+    assert "sensor_msgs.msg import Image" in recorder
+    assert 'frame_{self.frames:05d}.ppm' in recorder
+    assert "ffmpeg" in recorder
+
+
 def test_m1a_runtime_acm_preserves_only_documented_exceptions() -> None:
     root = Path(__file__).parents[2]
     srdf_root = ET.parse(root / "robot_ws/src/xh_sim/config/m1a_panda.srdf").getroot()
