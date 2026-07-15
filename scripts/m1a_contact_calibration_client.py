@@ -496,7 +496,7 @@ def main() -> int:
         specifications = (
             [(f"left_{index}", "left", -0.040, [0.010, 0.04]) for index in range(1, 4)]
             + [(f"right_{index}", "right", 0.0, [0.04, 0.010]) for index in range(1, 4)]
-            + [(f"bilateral_{index}", "bilateral", -0.020, [0.010, 0.010]) for index in range(1, 4)]
+            + [(f"bilateral_{index}", "bilateral", -0.030, [0.010, 0.010]) for index in range(1, 4)]
         )
         for label, expected, y_offset, finger_target in specifications:
             initialization = calibration_initialization()
@@ -523,6 +523,7 @@ def main() -> int:
             client.contact_window(0.45)
             events = {name: client.contacts[name][start[name]:] for name in client.contacts}
             cube_after = runtime_cube_pose()
+            pad_at_close = client.pad_evidence(cube["xyz"])
             # Leave the target before restoring its normal collision policy.
             # Without this retreat the next independent condition starts from
             # physical penetration, making a failed plan look like a sensor fault.
@@ -550,7 +551,7 @@ def main() -> int:
                         ["panda_rightfinger", "object_red_cube"],
                     ],
                     "target_touch_exception_restored": exception_restored,
-                    "pad_evidence": client.pad_evidence(cube["xyz"]),
+                    "pad_evidence": pad_at_close,
                     "contacts": classify_contacts(events),
                 }
             )
