@@ -336,6 +336,17 @@ def test_m1a_rgbd_recorder_uses_real_bridged_camera_frames() -> None:
     assert "ffmpeg" in recorder
 
 
+def test_m1a_s2_runs_real_unconstrained_trials_with_early_stop() -> None:
+    root = Path(__file__).parents[2]
+    runner = (root / "scripts/run_friction_grasp_trials.sh").read_text()
+    client = (root / "scripts/m1a_friction_trial_client.py").read_text()
+    assert "calibration_mode:=true" in runner
+    assert "APPROACH_ALIGNMENT_FAILURE" in runner
+    assert "m1a_friction_trial_client.py" in runner
+    assert "detachable_joint_absent" in client
+    assert "set_pose" not in client
+
+
 def test_m1a_runtime_acm_preserves_only_documented_exceptions() -> None:
     root = Path(__file__).parents[2]
     srdf_root = ET.parse(root / "robot_ws/src/xh_sim/config/m1a_panda.srdf").getroot()
