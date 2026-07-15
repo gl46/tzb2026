@@ -41,7 +41,9 @@
       </link>
     </model>
     <model name="object_red_cube">
-      <pose>0.22 0.12 0.50 0 0 0</pose>
+      <!-- Center is one half-side above the 0.45 m table top. This matches
+           the MoveIt planning-scene object used by S0/S1. -->
+      <pose>0.22 0.12 0.475 0 0 0</pose>
       <link name="link"><inertial><mass>0.08</mass></inertial><collision name="collision"><geometry><box><size>0.05 0.05 0.05</size></box></geometry></collision><visual name="visual"><geometry><box><size>0.05 0.05 0.05</size></box></geometry><material><diffuse>1 0 0 1</diffuse></material></visual><sensor name="red_cube_contact" type="contact"><always_on>1</always_on><update_rate>30</update_rate><topic>/xh/supervision/red_cube_contacts</topic><contact><collision>collision</collision></contact></sensor></link>
     </model>
     <model name="object_blue_cylinder">

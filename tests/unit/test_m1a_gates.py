@@ -273,6 +273,8 @@ def test_m1a_contact_calibration_uses_oracle_geometry_hand_control_and_per_trial
     assert "pad_center_world" in client and "minimum_pad_cube_aabb_separation_m" in client
     assert "CALIBRATION_ONLY_INITIALIZATION" in client
     assert "set_pose" not in runner and "set_pose" not in client
+    world = (root / "robot_ws/src/xh_sim/worlds/p0_pick_place.sdf").read_text()
+    assert '<pose>0.22 0.12 0.475 0 0 0</pose>' in world
 
 
 def test_m1a_runtime_acm_preserves_only_documented_exceptions() -> None:

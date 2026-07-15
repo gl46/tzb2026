@@ -64,8 +64,8 @@ def runtime_cube_pose() -> dict | None:
         timeout=5,
     )
     match = re.search(
-        r"XYZ\s*\(\s*([-+0-9.eE]+)\s+([-+0-9.eE]+)\s+([-+0-9.eE]+)\s*\)"
-        r".*?RPY\s*\(\s*([-+0-9.eE]+)\s+([-+0-9.eE]+)\s+([-+0-9.eE]+)\s*\)",
+        r"Pose.*?:\s*\[\s*([-+0-9.eE]+)\s+([-+0-9.eE]+)\s+([-+0-9.eE]+)\s*\]"
+        r"\s*\[\s*([-+0-9.eE]+)\s+([-+0-9.eE]+)\s+([-+0-9.eE]+)\s*\]",
         result.stdout,
         re.DOTALL,
     )
