@@ -295,6 +295,7 @@ def test_m1a_contact_calibration_uses_oracle_geometry_hand_control_and_per_trial
     assert 'model name="work_table_calibration_fixture"' in calibration_world
     assert 'model name="object_red_cube_environment"' in calibration_world
     assert 'model name="calibration_camera_fixture"' in calibration_world
+    assert 'gz::sim::systems::Sensors' in calibration_world
     assert "<static>true</static>" in calibration_world
     assert "calibration_cube_anchor" not in calibration_world
     assert "cube_pose_after_action" in client

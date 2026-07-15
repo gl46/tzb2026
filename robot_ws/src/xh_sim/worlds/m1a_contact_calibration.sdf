@@ -9,7 +9,17 @@
     <plugin name="gz::sim::systems::UserCommands" filename="gz-sim-user-commands-system"/>
     <plugin name="gz::sim::systems::SceneBroadcaster" filename="gz-sim-scene-broadcaster-system"/>
     <plugin name="gz::sim::systems::Contact" filename="gz-sim-contact-system"/>
+    <!-- Required for the calibration RGB-D camera to publish real frames in
+         the server-only Harmonic process. -->
+    <plugin name="gz::sim::systems::Sensors" filename="gz-sim-sensors-system">
+      <render_engine>ogre2</render_engine>
+    </plugin>
     <gravity>0 0 -9.81</gravity>
+    <light type="directional" name="sun">
+      <pose>0 0 10 0 0 0</pose><cast_shadows>true</cast_shadows>
+      <diffuse>0.8 0.8 0.8 1</diffuse><specular>0.2 0.2 0.2 1</specular>
+      <direction>-0.5 0.1 -0.9</direction>
+    </light>
 
     <!-- This world exists only to prove the S0 contact telemetry chain.  The
          production P0 task world and its cube pose are intentionally unchanged. -->
@@ -51,7 +61,7 @@
 
     <!-- Dynamic target-equivalent control: it is the same red 5 cm cube as
          the static finger target, but rests on the real work table so S0 can
-         prove object--environment reporting without moving the grasp target. -->
+         prove object-to-environment reporting without moving the grasp target. -->
     <model name="object_red_cube_environment">
       <pose>0.42 0.12 0.475 0 0 0</pose>
       <link name="link">
