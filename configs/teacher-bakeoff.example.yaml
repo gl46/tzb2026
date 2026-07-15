@@ -1,0 +1,4 @@
+schema_version: BakeoffSampleV0
+phase: placeholder_20
+models: [nvidia/Cosmos3-Nano, BLM-Lab/Boundless-World-Model]
+metrics: [time_to_first_successful_output_ms, latency_ms, peak_vram_mb, crash_rate, action_response_consistency, object_identity, gripper_object_causality, direction_error, multi_seed_disagreement, gazebo_future_feature_error, adapter_effort, license_status, projected_label_time]

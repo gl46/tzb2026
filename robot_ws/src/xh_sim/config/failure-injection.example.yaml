@@ -1,0 +1,9 @@
+seed: 202607
+failures:
+  - {mode: grasp_pose_offset, enabled: true, magnitude: 0.015, applies_at_step: 1}
+  - {mode: gripper_width_mismatch, enabled: false, magnitude: 0.01, applies_at_step: 2}
+  - {mode: low_friction_slip, enabled: true, magnitude: 0.5, applies_at_step: 3}
+  - {mode: obstacle_insertion, enabled: false, magnitude: 0.1, applies_at_step: 3}
+  - {mode: object_occlusion, enabled: false, magnitude: 1.0, applies_at_step: 0}
+  - {mode: release_delay, enabled: false, magnitude: 0.5, applies_at_step: 5}
+  - {mode: target_moved_during_execution, enabled: false, magnitude: 0.05, applies_at_step: 4}

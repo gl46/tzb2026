@@ -1,0 +1,7 @@
+{
+  "status": "BLOCKED_MOVEIT_GAZEBO_CHAIN",
+  "host": "node2",
+  "collision_scene_shared_with_gazebo": false,
+  "pick_place_verified": false,
+  "note": "MoveIt joint-space planning and Gazebo trajectory execution were separate bounded sessions."
+}

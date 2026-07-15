@@ -1,0 +1,82 @@
+{
+  "status": "VERIFIED_CONSTRAINED_PICK_PLACE",
+  "host": "node2",
+  "grasp_mode": "GAZEBO_DETACHABLE_JOINT_CONSTRAINT",
+  "finger_contact_grasp_verified": false,
+  "robot_collision_model": "VISUAL_INERTIAL_ONLY_OBJECT_AND_BIN_COLLISIONS_RETAINED",
+  "initial_cube_pose_xyz": [
+    0.22,
+    0.12,
+    0.49999
+  ],
+  "carried_cube_pose_xyz": [
+    0.527276,
+    -0.041895,
+    0.507916
+  ],
+  "final_cube_pose_xyz": [
+    0.541972,
+    -0.064194,
+    0.506301
+  ],
+  "initial_joint_positions": [
+    0.019999999999999907,
+    0.020000000000000094,
+    1.024233298611085e-19,
+    4.908041858730666e-12,
+    -3.403861699067493e-17,
+    -1.7009415551688645e-11,
+    -1.2512884879720738e-15,
+    -1.1487766130393682e-11,
+    -5.933872913433737e-16
+  ],
+  "final_joint_positions": [
+    -6.180617840626366e-15,
+    0.030000000000617904,
+    -1.9261999999999913,
+    -1.6941000000051794,
+    2.8863000000052685,
+    -1.911499999999221,
+    -0.9962000000031906,
+    3.040900000003033,
+    2.2137999999999716
+  ],
+  "initial_end_effector_pose": [
+    0.0,
+    -0.14,
+    1.02,
+    1.0,
+    -0.0,
+    -0.0,
+    0.0
+  ],
+  "final_end_effector_pose": [
+    0.824,
+    0.071,
+    0.255,
+    0.952,
+    -0.009,
+    0.068,
+    0.297
+  ],
+  "bin_center_xyz": [
+    0.51,
+    -0.06,
+    0.45
+  ],
+  "checks": {
+    "approach": true,
+    "lift": true,
+    "place": true,
+    "hand_close": true,
+    "hand_open": true,
+    "attached": true,
+    "detached": true
+  },
+  "object_contact_supervision_observed": true,
+  "object_inside_bin_after_settle": true,
+  "pick_place_completed": true,
+  "episode_recorded": true,
+  "raw_output": "INITIAL_CUBE:0.220000,0.120000,0.499990\nINITIAL_JOINTS:0.019999999999999907,0.020000000000000094,1.024233298611085e-19,4.908041858730666e-12,-3.403861699067493e-17,-1.7009415551688645e-11,-1.2512884879720738e-15,-1.1487766130393682e-11,-5.933872913433737e-16\nINITIAL_EE:0.000,-0.140,1.020,1.000,-0.000,-0.000,0.000\nARM_APPROACH_SUCCEEDED\nHAND_CLOSE_SUCCEEDED\nCONSTRAINT_ATTACHED\nARM_LIFT_SUCCEEDED\nARM_PLACE_SUCCEEDED\nCARRIED_CUBE:0.527276,-0.041895,0.507916\nCONSTRAINT_DETACHED\nHAND_OPEN_SUCCEEDED\nOBJECT_CONTACT_SUPERVISION_RECEIVED\nFINAL_CUBE:0.541972,-0.064194,0.506301\nFINAL_JOINTS:-6.180617840626366e-15,0.030000000000617904,-1.9261999999999913,-1.6941000000051794,2.8863000000052685,-1.911499999999221,-0.9962000000031906,3.040900000003033,2.2137999999999716\nFINAL_EE:0.824,0.071,0.255,0.952,-0.009,0.068,0.297",
+  "episode_path": "data/episodes/p0-constrained-transfer.json"
+}

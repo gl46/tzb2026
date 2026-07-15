@@ -1,0 +1,79 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "action_mapping_revision": {
+      "title": "Action Mapping Revision",
+      "type": "string"
+    },
+    "action_trajectory_uri": {
+      "title": "Action Trajectory Uri",
+      "type": "string"
+    },
+    "depth_uri": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Depth Uri"
+    },
+    "failure_type": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Failure Type"
+    },
+    "gazebo_future_uri": {
+      "title": "Gazebo Future Uri",
+      "type": "string"
+    },
+    "initial_rgb_uri": {
+      "title": "Initial Rgb Uri",
+      "type": "string"
+    },
+    "language_task": {
+      "title": "Language Task",
+      "type": "string"
+    },
+    "sample_id": {
+      "title": "Sample Id",
+      "type": "string"
+    },
+    "scene_id": {
+      "title": "Scene Id",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "BakeoffSampleV0",
+      "default": "BakeoffSampleV0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "simulator_hard_label_uri": {
+      "title": "Simulator Hard Label Uri",
+      "type": "string"
+    }
+  },
+  "required": [
+    "sample_id",
+    "initial_rgb_uri",
+    "language_task",
+    "action_trajectory_uri",
+    "action_mapping_revision",
+    "gazebo_future_uri",
+    "simulator_hard_label_uri",
+    "scene_id"
+  ],
+  "title": "BakeoffSampleV0",
+  "type": "object"
+}

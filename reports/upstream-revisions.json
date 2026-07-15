@@ -1,0 +1,50 @@
+{
+  "checked_at": "2026-07-15",
+  "sources": {
+    "bwm_checkpoint": {
+      "conclusion": "checkpoint_license_not_explicitly_confirmed",
+      "revision": "738a8d3c008e637b8b1b18d5e98a82f6de9c04aa",
+      "url": "https://huggingface.co/BLM-Lab/Boundless-World-Model"
+    },
+    "bwm_code": {
+      "conclusion": "action_conditioned_robot_video_model",
+      "revision": "44acfd1b06f35f365f02f7bb2fc5da6beafcd6bc",
+      "url": "https://github.com/boundless-large-model/boundless-world-model"
+    },
+    "cosmos3_nano": {
+      "conclusion": "16B_openmdw1_1_A100_not_verified",
+      "revision": "411f42a8fdfb8c5b2583cb8786e0938f49796eaa",
+      "url": "https://huggingface.co/nvidia/Cosmos3-Nano"
+    },
+    "cosmos3_super": {
+      "conclusion": "metadata_audited_but_parked",
+      "revision": "e0262be9d8f7586bc24c069a2aed2b665bdff266",
+      "url": "https://huggingface.co/nvidia/Cosmos3-Super"
+    },
+    "cosmos_nim": {
+      "conclusion": "Super_BF16_Hopper_TP2; current_A100_two_host_plan_not_verified",
+      "revision": "documentation-current",
+      "url": "https://docs.nvidia.com/nim/cosmos/3.0.0/support-matrix.html"
+    },
+    "gazebo_harmonic": {
+      "conclusion": "ros_gz_with_ROS_2_Jazzy_binary",
+      "revision": "documentation-current",
+      "url": "https://gazebosim.org/docs/harmonic/comparison/"
+    },
+    "gz_ros2_control_jazzy": {
+      "conclusion": "GazeboSimSystem_plugin_and_joint_trajectory_controller_pattern",
+      "revision": "documentation-current",
+      "url": "https://control.ros.org/jazzy/doc/gz_ros2_control/doc/index.html"
+    },
+    "nvidia_cosmos": {
+      "conclusion": "Cosmos3_Nano_and_Super_official_code",
+      "revision": "aefdf852c16237039785d84ab3327167cb0ec07f",
+      "url": "https://github.com/NVIDIA/cosmos"
+    },
+    "ros2_jazzy": {
+      "conclusion": "Ubuntu_24_04_supported",
+      "revision": "documentation-current",
+      "url": "https://docs.ros.org/en/jazzy/Installation/Alternatives/Ubuntu-Install-Binary.html"
+    }
+  }
+}

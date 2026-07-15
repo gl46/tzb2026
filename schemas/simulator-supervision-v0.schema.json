@@ -1,0 +1,90 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "collisions": {
+      "items": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "title": "Collisions",
+      "type": "array"
+    },
+    "contacts": {
+      "items": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "title": "Contacts",
+      "type": "array"
+    },
+    "failure_injection": {
+      "additionalProperties": true,
+      "title": "Failure Injection",
+      "type": "object"
+    },
+    "grasp_states": {
+      "additionalProperties": {
+        "type": "boolean"
+      },
+      "title": "Grasp States",
+      "type": "object"
+    },
+    "perfect_object_poses": {
+      "additionalProperties": {
+        "items": {
+          "type": "number"
+        },
+        "type": "array"
+      },
+      "title": "Perfect Object Poses",
+      "type": "object"
+    },
+    "physical_parameters": {
+      "additionalProperties": {
+        "type": "number"
+      },
+      "title": "Physical Parameters",
+      "type": "object"
+    },
+    "schema_version": {
+      "const": "SimulatorSupervisionV0",
+      "default": "SimulatorSupervisionV0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "simulator": {
+      "title": "Simulator",
+      "type": "string"
+    },
+    "simulator_version": {
+      "title": "Simulator Version",
+      "type": "string"
+    },
+    "slip_events": {
+      "items": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "title": "Slip Events",
+      "type": "array"
+    },
+    "task_success": {
+      "title": "Task Success",
+      "type": "boolean"
+    },
+    "training_and_evaluation_only": {
+      "const": true,
+      "default": true,
+      "title": "Training And Evaluation Only",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "perfect_object_poses",
+    "task_success",
+    "simulator",
+    "simulator_version"
+  ],
+  "title": "SimulatorSupervisionV0",
+  "type": "object"
+}

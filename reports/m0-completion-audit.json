@@ -1,0 +1,26 @@
+{
+  "status": "PASS",
+  "checks": {
+    "rebaseline_adr": true,
+    "agents_p0_policy": true,
+    "super_parked": true,
+    "student_sim_only_boundary": true,
+    "schemas_and_tests": true,
+    "both_remote_doctors": true,
+    "robot_workspace": true,
+    "p0_control_perception": true,
+    "p0_constrained_pick_place": true,
+    "episode_recorded": true,
+    "contact_supervision": true,
+    "twenty_actual_failures": true,
+    "second_actual_failure": true,
+    "b1_entry": true,
+    "teacher_audit": true,
+    "no_teacher_p0_block": true,
+    "full_test_validation": true
+  },
+  "limitations": [
+    "P0 grasp is a labelled Gazebo DetachableJoint constraint, not verified frictional finger contact.",
+    "The controller robot is a primitive-inertia, collision-simplified Panda-compatible model."
+  ]
+}

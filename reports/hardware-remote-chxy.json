@@ -1,0 +1,118 @@
+{
+  "generated_at": "2026-07-15T13:58:40.043272+00:00",
+  "host_alias": "chxy",
+  "items": {
+    "colcon": {
+      "status": "FOUND",
+      "value": "/usr/bin/colcon"
+    },
+    "compute_mode": {
+      "status": "FOUND",
+      "value": "Default"
+    },
+    "cuda_runtime": {
+      "status": "FOUND",
+      "value": "/usr/bin/nvcc"
+    },
+    "docker": {
+      "status": "FOUND",
+      "value": "/usr/bin/docker"
+    },
+    "egl_ogre_headless": {
+      "status": "FOUND",
+      "value": "/opt/ros/jazzy/opt/gz_tools_vendor/bin/gz"
+    },
+    "ffmpeg": {
+      "status": "FOUND",
+      "value": "/usr/bin/ffmpeg"
+    },
+    "filesystem": {
+      "status": "FOUND",
+      "value": "415G total, 24G available"
+    },
+    "franka_panda_resources": {
+      "status": "FOUND",
+      "value": "/opt/ros/jazzy"
+    },
+    "gazebo_gz": {
+      "status": "FOUND",
+      "value": "8.11.0"
+    },
+    "git": {
+      "status": "FOUND",
+      "value": "/usr/bin/git"
+    },
+    "git_lfs": {
+      "status": "FOUND",
+      "value": "/usr/bin/git-lfs"
+    },
+    "gpu_processes": {
+      "status": "FOUND",
+      "value": "3905108, .venv/bin/python"
+    },
+    "gz_ros2_control": {
+      "status": "FOUND",
+      "value": "/opt/ros/jazzy"
+    },
+    "mig": {
+      "status": "UNKNOWN"
+    },
+    "moveit2": {
+      "status": "FOUND",
+      "value": "/opt/ros/jazzy"
+    },
+    "network_interfaces": {
+      "status": "FOUND",
+      "value": "lo,enp61s0f0np0,enp61s0f1np1,enp61s0f2np2,enp61s0f3np3,ens5np0,tailscale0,docker0,br-2d0a7b15e7de,br-b56a91b25108,br-caa3d59fabdd,veth5256dc2@if2,veth18955f2@if2,vethbece55a@if2,veth947723a@if2,vethe77cbf5@if2,vethd8a6ba9@if2"
+    },
+    "nvidia_gpu": {
+      "status": "FOUND",
+      "value": "NVIDIA A100-SXM4-80GB, 81920 MiB, 595.71.05"
+    },
+    "os": {
+      "status": "FOUND",
+      "value": "Linux 6.17.0-35-generic x86_64 | Ubuntu 24.04.4 LTS"
+    },
+    "python": {
+      "status": "FOUND",
+      "value": "/usr/bin/python3"
+    },
+    "ram": {
+      "status": "FOUND",
+      "value": "251Gi total, 224Gi available"
+    },
+    "relevant_environment": {
+      "status": "FOUND",
+      "value": "ROS_DISTRO=jazzy; RMW_IMPLEMENTATION=default"
+    },
+    "ros2": {
+      "status": "FOUND",
+      "value": "/opt/ros/jazzy/bin/ros2"
+    },
+    "ros2_control": {
+      "status": "FOUND",
+      "value": "/opt/ros/jazzy"
+    },
+    "ros_gz": {
+      "status": "FOUND",
+      "value": "/opt/ros/jazzy"
+    },
+    "rviz": {
+      "status": "FOUND",
+      "value": "/opt/ros/jazzy/bin/rviz2"
+    },
+    "ssh": {
+      "status": "FOUND",
+      "value": "BatchMode read-only probe"
+    },
+    "swap": {
+      "status": "FOUND",
+      "value": "8.0Gi total, 56Ki used"
+    },
+    "time_sync_offset": {
+      "status": "UNKNOWN",
+      "value": "UNKNOWN"
+    }
+  },
+  "scope": "remote"
+}

@@ -1,0 +1,29 @@
+{
+  "status": "PARTIAL_CONTROL_AND_PERCEPTION_VERIFIED",
+  "reason": "node2 project world, spawned controller-backed arm, ROS control, bounded arm/gripper actions, joint state, TF and RGB-D probes were observed; grasp/release, object transfer, supervision and episode recording remain unverified",
+  "platform_smoke_host": "node2",
+  "gazebo_started": true,
+  "scene_world_verified": true,
+  "robot_spawned": true,
+  "panda_visual_stub_spawned": true,
+  "rgbd_sensor_spawned": true,
+  "objects_spawned": 3,
+  "rgbd_image_verified": true,
+  "rgbd_depth_verified": true,
+  "rgbd_camera_info_verified": true,
+  "joint_state_verified": true,
+  "tf_verified": true,
+  "arm_controller_active": true,
+  "hand_controller_active": true,
+  "action_executed": true,
+  "hand_action_executed": true,
+  "pick_place_completed": false,
+  "episode_recorded": false,
+  "topics_verified": [
+    "/joint_states",
+    "/tf",
+    "/xh/camera/rgbd/image",
+    "/xh/camera/rgbd/depth_image",
+    "/xh/camera/rgbd/camera_info"
+  ]
+}

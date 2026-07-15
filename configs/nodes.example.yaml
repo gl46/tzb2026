@@ -1,0 +1,4 @@
+node_a: {host: node2, user: gl, expected_gpu: NVIDIA_A100_80GB}
+node_b: {host: chxy, user: fx, expected_gpu: NVIDIA_A100_80GB}
+remote_write_allowed: false
+network_validation: not_run

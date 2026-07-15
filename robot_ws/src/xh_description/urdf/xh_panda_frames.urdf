@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<robot name="xh_panda_frame_skeleton">
+  <!-- Kinematic chains are supplied by an approved Franka/Panda resource at host setup time. -->
+  <link name="world"/><link name="panda_link0"/><link name="panda_hand"/><link name="parallel_gripper"/><link name="camera_rgbd"/>
+  <joint name="world_to_panda" type="fixed"><parent link="world"/><child link="panda_link0"/><origin xyz="0 0 0" rpy="0 0 0"/></joint>
+  <joint name="panda_to_hand" type="fixed"><parent link="panda_link0"/><child link="panda_hand"/><origin xyz="0 0 0.5" rpy="0 0 0"/></joint>
+  <joint name="hand_to_gripper" type="fixed"><parent link="panda_hand"/><child link="parallel_gripper"/><origin xyz="0 0 0.1" rpy="0 0 0"/></joint>
+  <joint name="world_to_camera" type="fixed"><parent link="world"/><child link="camera_rgbd"/><origin xyz="1 0 1" rpy="0 0 3.14"/></joint>
+</robot>

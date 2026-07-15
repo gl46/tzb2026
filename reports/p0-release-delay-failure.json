@@ -1,0 +1,16 @@
+{
+  "status": "VERIFIED_RELEASE_DELAY_FAILURE",
+  "host": "node2",
+  "failure_type": "release_delay",
+  "task_success": false,
+  "constraint_still_attached_before_cleanup": true,
+  "observed_markers": [
+    "APPROACH_OK",
+    "CLOSE_OK",
+    "ATTACHED",
+    "LIFT_OK",
+    "PLACE_OK",
+    "OPEN_OK",
+    "WAS_ATTACHED_BEFORE_CLEANUP"
+  ]
+}

@@ -1,0 +1,110 @@
+{
+  "generated_at": "2026-07-15T13:58:34.746864+00:00",
+  "items": {
+    "colcon": {
+      "status": "MISSING"
+    },
+    "compute_mode": {
+      "status": "UNKNOWN"
+    },
+    "cpu": {
+      "status": "FOUND",
+      "value": "logical_cores=10"
+    },
+    "cuda_runtime": {
+      "status": "MISSING"
+    },
+    "docker": {
+      "status": "FOUND",
+      "value": "Docker version 29.3.1, build c2be9cc"
+    },
+    "egl_ogre_headless": {
+      "status": "UNKNOWN"
+    },
+    "ffmpeg": {
+      "status": "FOUND",
+      "value": "ffmpeg version 8.1 Copyright (c) 2000-2026 the FFmpeg developers\nbuilt with Apple clang version 17.0.0 (clang-1700.6.4.2)\nconfiguration: --prefix=/opt/homebrew/Cellar/ffmpeg/8.1 --enable-shared --enable-pthreads --enable-version3 --cc=clang --host-cflags= --host-ldflags= --enable-ffplay --enable-gpl --enable-libsvtav1 --enable-libopus --enable-libx264 --enable-libmp3lame --enable-libdav1d --enable-libvpx --enable-libx265 --enable-openssl --enable-videotoolbox --enable-audiotoolbox --enable-neon\n"
+    },
+    "filesystem": {
+      "status": "FOUND",
+      "value": "usage(total=994610155520, used=943802347520, free=50807808000)"
+    },
+    "franka_panda_resources": {
+      "status": "UNKNOWN"
+    },
+    "gazebo_gz": {
+      "status": "MISSING"
+    },
+    "git": {
+      "status": "FOUND",
+      "value": "git version 2.50.1 (Apple Git-155)"
+    },
+    "git_lfs": {
+      "status": "FOUND",
+      "value": "git-lfs/3.7.1 (GitHub; darwin arm64; go 1.25.3)"
+    },
+    "gpu_processes": {
+      "status": "UNKNOWN"
+    },
+    "gz_ros2_control": {
+      "status": "UNKNOWN"
+    },
+    "kernel": {
+      "status": "FOUND",
+      "value": "25.4.0"
+    },
+    "mig": {
+      "status": "UNKNOWN"
+    },
+    "moveit2": {
+      "status": "UNKNOWN"
+    },
+    "network_interfaces": {
+      "status": "UNKNOWN"
+    },
+    "nvidia_container_toolkit": {
+      "status": "MISSING"
+    },
+    "nvidia_gpu": {
+      "status": "MISSING"
+    },
+    "os": {
+      "status": "FOUND",
+      "value": "macOS-26.4.1-arm64-arm-64bit arm64"
+    },
+    "python": {
+      "status": "FOUND",
+      "value": "Python 3.9.6"
+    },
+    "ram": {
+      "status": "UNKNOWN"
+    },
+    "relevant_environment": {
+      "status": "FOUND",
+      "value": "only allow-gate names recorded"
+    },
+    "ros2": {
+      "status": "MISSING"
+    },
+    "ros2_control": {
+      "status": "UNKNOWN"
+    },
+    "ros_gz": {
+      "status": "UNKNOWN"
+    },
+    "rviz": {
+      "status": "MISSING"
+    },
+    "swap": {
+      "status": "UNKNOWN"
+    },
+    "time_sync_offset": {
+      "status": "UNKNOWN"
+    },
+    "uv": {
+      "status": "FOUND",
+      "value": "uv 0.11.3 (Homebrew 2026-04-01 aarch64-apple-darwin)"
+    }
+  },
+  "scope": "local"
+}

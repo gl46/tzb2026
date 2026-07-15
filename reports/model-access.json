@@ -1,0 +1,31 @@
+{
+  "allow_large_download": false,
+  "checked_at": "2026-07-15T13:58:40.152403+00:00",
+  "metadata_only": true,
+  "models": {
+    "BLM-Lab/Boundless-World-Model": {
+      "gated": false,
+      "id": "BLM-Lab/Boundless-World-Model",
+      "license": null,
+      "private": false,
+      "revision": "738a8d3c008e637b8b1b18d5e98a82f6de9c04aa",
+      "status": "FOUND"
+    },
+    "nvidia/Cosmos3-Nano": {
+      "gated": false,
+      "id": "nvidia/Cosmos3-Nano",
+      "license": "other",
+      "private": false,
+      "revision": "411f42a8fdfb8c5b2583cb8786e0938f49796eaa",
+      "status": "FOUND"
+    },
+    "nvidia/Cosmos3-Super": {
+      "gated": false,
+      "id": "nvidia/Cosmos3-Super",
+      "license": "other",
+      "private": false,
+      "revision": "e0262be9d8f7586bc24c069a2aed2b665bdff266",
+      "status": "FOUND"
+    }
+  }
+}

@@ -1,0 +1,580 @@
+{
+  "baseline_b1": {
+    "backend": "DeterministicPlanningBackend",
+    "execution_verified": false,
+    "moveit_planning_smoke": {
+      "gazebo_execution_verified": false,
+      "host": "node2",
+      "note": "Official Panda MoveIt planning service only; dispatch to the Gazebo controller is not claimed.",
+      "status": "VERIFIED_MOTION_PLAN_ONLY"
+    },
+    "reason": "planned",
+    "skill_count": 6,
+    "status": "READY",
+    "teacher_used": false
+  },
+  "blockers": [
+    "The node2 constrained transfer and EpisodeTransition are verified, but the Panda-compatible primitive-inertia robot has no high-fidelity link collision model and its grasp is a Gazebo DetachableJoint constraint rather than verified finger contact; the temporary finger-contact experiment failed and is documented as such.",
+    "A cube contact/collision sensor and 20 actual empty-grasp failure trajectories are now recorded, but failure diversity and recovery-policy evaluation remain future work; the earlier failed constrained-transfer experiment remains preserved as additional failure evidence.",
+    "Teacher action-space mapping and BWM checkpoint license clearance remain required before activation; neither blocks P0 baseline."
+  ],
+  "constrained_pick_place": {
+    "bin_center_xyz": [
+      0.51,
+      -0.06,
+      0.45
+    ],
+    "carried_cube_pose_xyz": [
+      0.527276,
+      -0.041895,
+      0.507916
+    ],
+    "checks": {
+      "approach": true,
+      "attached": true,
+      "detached": true,
+      "hand_close": true,
+      "hand_open": true,
+      "lift": true,
+      "place": true
+    },
+    "episode_path": "data/episodes/p0-constrained-transfer.json",
+    "episode_recorded": true,
+    "final_cube_pose_xyz": [
+      0.541972,
+      -0.064194,
+      0.506301
+    ],
+    "final_end_effector_pose": [
+      0.824,
+      0.071,
+      0.255,
+      0.952,
+      -0.009,
+      0.068,
+      0.297
+    ],
+    "final_joint_positions": [
+      -6.180617840626366e-15,
+      0.030000000000617904,
+      -1.9261999999999913,
+      -1.6941000000051794,
+      2.8863000000052685,
+      -1.911499999999221,
+      -0.9962000000031906,
+      3.040900000003033,
+      2.2137999999999716
+    ],
+    "finger_contact_grasp_verified": false,
+    "grasp_mode": "GAZEBO_DETACHABLE_JOINT_CONSTRAINT",
+    "host": "node2",
+    "initial_cube_pose_xyz": [
+      0.22,
+      0.12,
+      0.49999
+    ],
+    "initial_end_effector_pose": [
+      0.0,
+      -0.14,
+      1.02,
+      1.0,
+      -0.0,
+      -0.0,
+      0.0
+    ],
+    "initial_joint_positions": [
+      0.019999999999999907,
+      0.020000000000000094,
+      1.024233298611085e-19,
+      4.908041858730666e-12,
+      -3.403861699067493e-17,
+      -1.7009415551688645e-11,
+      -1.2512884879720738e-15,
+      -1.1487766130393682e-11,
+      -5.933872913433737e-16
+    ],
+    "object_contact_supervision_observed": true,
+    "object_inside_bin_after_settle": true,
+    "pick_place_completed": true,
+    "raw_output": "INITIAL_CUBE:0.220000,0.120000,0.499990\nINITIAL_JOINTS:0.019999999999999907,0.020000000000000094,1.024233298611085e-19,4.908041858730666e-12,-3.403861699067493e-17,-1.7009415551688645e-11,-1.2512884879720738e-15,-1.1487766130393682e-11,-5.933872913433737e-16\nINITIAL_EE:0.000,-0.140,1.020,1.000,-0.000,-0.000,0.000\nARM_APPROACH_SUCCEEDED\nHAND_CLOSE_SUCCEEDED\nCONSTRAINT_ATTACHED\nARM_LIFT_SUCCEEDED\nARM_PLACE_SUCCEEDED\nCARRIED_CUBE:0.527276,-0.041895,0.507916\nCONSTRAINT_DETACHED\nHAND_OPEN_SUCCEEDED\nOBJECT_CONTACT_SUPERVISION_RECEIVED\nFINAL_CUBE:0.541972,-0.064194,0.506301\nFINAL_JOINTS:-6.180617840626366e-15,0.030000000000617904,-1.9261999999999913,-1.6941000000051794,2.8863000000052685,-1.911499999999221,-0.9962000000031906,3.040900000003033,2.2137999999999716\nFINAL_EE:0.824,0.071,0.255,0.952,-0.009,0.068,0.297",
+    "robot_collision_model": "VISUAL_INERTIAL_ONLY_OBJECT_AND_BIN_COLLISIONS_RETAINED",
+    "status": "VERIFIED_CONSTRAINED_PICK_PLACE"
+  },
+  "deadline": "2026-07-16T23:59:00+08:00",
+  "generated_at": "2026-07-15T23:58:09.681015+08:00",
+  "git_worktree": "clean",
+  "goal": "M0-R P0-first rebaseline",
+  "next_unique_command": "SIM_HOST=node2 SIM_USER=gl PROJECT_REMOTE_ROOT=xh-202607-world-agent bash scripts/run_sim_smoke_test.sh",
+  "overall_status": "PASS",
+  "p0_actual_failure_modes": [
+    "empty_grasp",
+    "release_delay"
+  ],
+  "p0_failure_trajectory_batch": {
+    "count": 20,
+    "entries": [
+      {
+        "arm_action_succeeded": true,
+        "episode_id": "p0-empty-grasp-01",
+        "failure_type": "empty_grasp",
+        "final_cube_pose_xyz": [
+          0.22,
+          0.12,
+          0.475
+        ],
+        "injection": {
+          "approach_seed": 1,
+          "mode": "empty_grasp"
+        },
+        "object_inside_bin": false,
+        "task_success": false
+      },
+      {
+        "arm_action_succeeded": true,
+        "episode_id": "p0-empty-grasp-02",
+        "failure_type": "empty_grasp",
+        "final_cube_pose_xyz": [
+          0.22,
+          0.12,
+          0.475
+        ],
+        "injection": {
+          "approach_seed": 2,
+          "mode": "empty_grasp"
+        },
+        "object_inside_bin": false,
+        "task_success": false
+      },
+      {
+        "arm_action_succeeded": true,
+        "episode_id": "p0-empty-grasp-03",
+        "failure_type": "empty_grasp",
+        "final_cube_pose_xyz": [
+          0.22,
+          0.12,
+          0.475
+        ],
+        "injection": {
+          "approach_seed": 3,
+          "mode": "empty_grasp"
+        },
+        "object_inside_bin": false,
+        "task_success": false
+      },
+      {
+        "arm_action_succeeded": true,
+        "episode_id": "p0-empty-grasp-04",
+        "failure_type": "empty_grasp",
+        "final_cube_pose_xyz": [
+          0.22,
+          0.12,
+          0.475
+        ],
+        "injection": {
+          "approach_seed": 4,
+          "mode": "empty_grasp"
+        },
+        "object_inside_bin": false,
+        "task_success": false
+      },
+      {
+        "arm_action_succeeded": true,
+        "episode_id": "p0-empty-grasp-05",
+        "failure_type": "empty_grasp",
+        "final_cube_pose_xyz": [
+          0.22,
+          0.12,
+          0.475
+        ],
+        "injection": {
+          "approach_seed": 5,
+          "mode": "empty_grasp"
+        },
+        "object_inside_bin": false,
+        "task_success": false
+      },
+      {
+        "arm_action_succeeded": true,
+        "episode_id": "p0-empty-grasp-06",
+        "failure_type": "empty_grasp",
+        "final_cube_pose_xyz": [
+          0.22,
+          0.12,
+          0.475
+        ],
+        "injection": {
+          "approach_seed": 6,
+          "mode": "empty_grasp"
+        },
+        "object_inside_bin": false,
+        "task_success": false
+      },
+      {
+        "arm_action_succeeded": true,
+        "episode_id": "p0-empty-grasp-07",
+        "failure_type": "empty_grasp",
+        "final_cube_pose_xyz": [
+          0.22,
+          0.12,
+          0.475
+        ],
+        "injection": {
+          "approach_seed": 7,
+          "mode": "empty_grasp"
+        },
+        "object_inside_bin": false,
+        "task_success": false
+      },
+      {
+        "arm_action_succeeded": true,
+        "episode_id": "p0-empty-grasp-08",
+        "failure_type": "empty_grasp",
+        "final_cube_pose_xyz": [
+          0.22,
+          0.12,
+          0.475
+        ],
+        "injection": {
+          "approach_seed": 8,
+          "mode": "empty_grasp"
+        },
+        "object_inside_bin": false,
+        "task_success": false
+      },
+      {
+        "arm_action_succeeded": true,
+        "episode_id": "p0-empty-grasp-09",
+        "failure_type": "empty_grasp",
+        "final_cube_pose_xyz": [
+          0.22,
+          0.12,
+          0.475
+        ],
+        "injection": {
+          "approach_seed": 9,
+          "mode": "empty_grasp"
+        },
+        "object_inside_bin": false,
+        "task_success": false
+      },
+      {
+        "arm_action_succeeded": true,
+        "episode_id": "p0-empty-grasp-10",
+        "failure_type": "empty_grasp",
+        "final_cube_pose_xyz": [
+          0.22,
+          0.12,
+          0.475
+        ],
+        "injection": {
+          "approach_seed": 10,
+          "mode": "empty_grasp"
+        },
+        "object_inside_bin": false,
+        "task_success": false
+      },
+      {
+        "arm_action_succeeded": true,
+        "episode_id": "p0-empty-grasp-11",
+        "failure_type": "empty_grasp",
+        "final_cube_pose_xyz": [
+          0.22,
+          0.12,
+          0.475
+        ],
+        "injection": {
+          "approach_seed": 11,
+          "mode": "empty_grasp"
+        },
+        "object_inside_bin": false,
+        "task_success": false
+      },
+      {
+        "arm_action_succeeded": true,
+        "episode_id": "p0-empty-grasp-12",
+        "failure_type": "empty_grasp",
+        "final_cube_pose_xyz": [
+          0.22,
+          0.12,
+          0.475
+        ],
+        "injection": {
+          "approach_seed": 12,
+          "mode": "empty_grasp"
+        },
+        "object_inside_bin": false,
+        "task_success": false
+      },
+      {
+        "arm_action_succeeded": true,
+        "episode_id": "p0-empty-grasp-13",
+        "failure_type": "empty_grasp",
+        "final_cube_pose_xyz": [
+          0.22,
+          0.12,
+          0.475
+        ],
+        "injection": {
+          "approach_seed": 13,
+          "mode": "empty_grasp"
+        },
+        "object_inside_bin": false,
+        "task_success": false
+      },
+      {
+        "arm_action_succeeded": true,
+        "episode_id": "p0-empty-grasp-14",
+        "failure_type": "empty_grasp",
+        "final_cube_pose_xyz": [
+          0.22,
+          0.12,
+          0.475
+        ],
+        "injection": {
+          "approach_seed": 14,
+          "mode": "empty_grasp"
+        },
+        "object_inside_bin": false,
+        "task_success": false
+      },
+      {
+        "arm_action_succeeded": true,
+        "episode_id": "p0-empty-grasp-15",
+        "failure_type": "empty_grasp",
+        "final_cube_pose_xyz": [
+          0.22,
+          0.12,
+          0.475
+        ],
+        "injection": {
+          "approach_seed": 15,
+          "mode": "empty_grasp"
+        },
+        "object_inside_bin": false,
+        "task_success": false
+      },
+      {
+        "arm_action_succeeded": true,
+        "episode_id": "p0-empty-grasp-16",
+        "failure_type": "empty_grasp",
+        "final_cube_pose_xyz": [
+          0.22,
+          0.12,
+          0.475
+        ],
+        "injection": {
+          "approach_seed": 16,
+          "mode": "empty_grasp"
+        },
+        "object_inside_bin": false,
+        "task_success": false
+      },
+      {
+        "arm_action_succeeded": true,
+        "episode_id": "p0-empty-grasp-17",
+        "failure_type": "empty_grasp",
+        "final_cube_pose_xyz": [
+          0.22,
+          0.12,
+          0.475
+        ],
+        "injection": {
+          "approach_seed": 17,
+          "mode": "empty_grasp"
+        },
+        "object_inside_bin": false,
+        "task_success": false
+      },
+      {
+        "arm_action_succeeded": true,
+        "episode_id": "p0-empty-grasp-18",
+        "failure_type": "empty_grasp",
+        "final_cube_pose_xyz": [
+          0.22,
+          0.12,
+          0.475
+        ],
+        "injection": {
+          "approach_seed": 18,
+          "mode": "empty_grasp"
+        },
+        "object_inside_bin": false,
+        "task_success": false
+      },
+      {
+        "arm_action_succeeded": true,
+        "episode_id": "p0-empty-grasp-19",
+        "failure_type": "empty_grasp",
+        "final_cube_pose_xyz": [
+          0.22,
+          0.12,
+          0.475
+        ],
+        "injection": {
+          "approach_seed": 19,
+          "mode": "empty_grasp"
+        },
+        "object_inside_bin": false,
+        "task_success": false
+      },
+      {
+        "arm_action_succeeded": true,
+        "episode_id": "p0-empty-grasp-20",
+        "failure_type": "empty_grasp",
+        "final_cube_pose_xyz": [
+          0.22,
+          0.12,
+          0.475
+        ],
+        "injection": {
+          "approach_seed": 20,
+          "mode": "empty_grasp"
+        },
+        "object_inside_bin": false,
+        "task_success": false
+      }
+    ],
+    "host": "node2",
+    "raw_output": "EMPTY_GRASP:1:true:0.220000,0.120000,0.475000\nEMPTY_GRASP:2:true:0.220000,0.120000,0.475000\nEMPTY_GRASP:3:true:0.220000,0.120000,0.475000\nEMPTY_GRASP:4:true:0.220000,0.120000,0.475000\nEMPTY_GRASP:5:true:0.220000,0.120000,0.475000\nEMPTY_GRASP:6:true:0.220000,0.120000,0.475000\nEMPTY_GRASP:7:true:0.220000,0.120000,0.475000\nEMPTY_GRASP:8:true:0.220000,0.120000,0.475000\nEMPTY_GRASP:9:true:0.220000,0.120000,0.475000\nEMPTY_GRASP:10:true:0.220000,0.120000,0.475000\nEMPTY_GRASP:11:true:0.220000,0.120000,0.475000\nEMPTY_GRASP:12:true:0.220000,0.120000,0.475000\nEMPTY_GRASP:13:true:0.220000,0.120000,0.475000\nEMPTY_GRASP:14:true:0.220000,0.120000,0.475000\nEMPTY_GRASP:15:true:0.220000,0.120000,0.475000\nEMPTY_GRASP:16:true:0.220000,0.120000,0.475000\nEMPTY_GRASP:17:true:0.220000,0.120000,0.475000\nEMPTY_GRASP:18:true:0.220000,0.120000,0.475000\nEMPTY_GRASP:19:true:0.220000,0.120000,0.475000\nEMPTY_GRASP:20:true:0.220000,0.120000,0.475000",
+    "status": "VERIFIED_20_EMPTY_GRASP_FAILURE_TRAJECTORIES"
+  },
+  "p0_release_delay_failure": {
+    "constraint_still_attached_before_cleanup": true,
+    "failure_type": "release_delay",
+    "host": "node2",
+    "observed_markers": [
+      "APPROACH_OK",
+      "CLOSE_OK",
+      "ATTACHED",
+      "LIFT_OK",
+      "PLACE_OK",
+      "OPEN_OK",
+      "WAS_ATTACHED_BEFORE_CLEANUP"
+    ],
+    "status": "VERIFIED_RELEASE_DELAY_FAILURE",
+    "task_success": false
+  },
+  "p0_runtime_evidence": {
+    "action_executed": true,
+    "arm_controller_active": true,
+    "gazebo_started": true,
+    "hand_action_executed": true,
+    "hand_controller_active": true,
+    "joint_state_verified": true,
+    "rgbd_camera_info_verified": true,
+    "rgbd_depth_verified": true,
+    "rgbd_image_verified": true,
+    "robot_spawned": true,
+    "scene_world_verified": true,
+    "tf_verified": true
+  },
+  "p0_status": "VERIFIED_CONSTRAINED_P0_GATE",
+  "p1_status": "READY_FOR_HUMAN_DECISION",
+  "p2_status": "PARKED",
+  "phase": "M0-R",
+  "platform": {
+    "gazebo_actual_runtime": true,
+    "local": {
+      "compatibility": "BLOCKED_SYSTEM_DEPENDENCY",
+      "gazebo_gz": "MISSING",
+      "os": "FOUND",
+      "ros2": "MISSING"
+    },
+    "node2_project_workspace": "BUILD_PASS (xh_description, xh_sim, xh_bringup, xh_baseline, xh_data_recorder)",
+    "project_control_smoke": "PARTIAL_CONTROL_AND_PERCEPTION_VERIFIED",
+    "project_pick_place_actual": true,
+    "remote_doctor": {
+      "chxy": {
+        "franka_panda_resources": "FOUND",
+        "gazebo_gz": "FOUND",
+        "gz_ros2_control": "FOUND",
+        "moveit2": "FOUND",
+        "ros2": "FOUND",
+        "ros2_control": "FOUND",
+        "ros_gz": "FOUND"
+      },
+      "node2": {
+        "franka_panda_resources": "FOUND",
+        "gazebo_gz": "FOUND",
+        "gz_ros2_control": "FOUND",
+        "moveit2": "FOUND",
+        "ros2": "FOUND",
+        "ros2_control": "FOUND",
+        "ros_gz": "FOUND"
+      }
+    }
+  },
+  "simulation_smoke_test": {
+    "action_executed": true,
+    "arm_controller_active": true,
+    "episode_recorded": false,
+    "gazebo_started": true,
+    "hand_action_executed": true,
+    "hand_controller_active": true,
+    "joint_state_verified": true,
+    "objects_spawned": 3,
+    "panda_visual_stub_spawned": true,
+    "pick_place_completed": false,
+    "platform_smoke_host": "node2",
+    "reason": "node2 project world, spawned controller-backed arm, ROS control, bounded arm/gripper actions, joint state, TF and RGB-D probes were observed; grasp/release, object transfer, supervision and episode recording remain unverified",
+    "rgbd_camera_info_verified": true,
+    "rgbd_depth_verified": true,
+    "rgbd_image_verified": true,
+    "rgbd_sensor_spawned": true,
+    "robot_spawned": true,
+    "scene_world_verified": true,
+    "status": "PARTIAL_CONTROL_AND_PERCEPTION_VERIFIED",
+    "tf_verified": true,
+    "topics_verified": [
+      "/joint_states",
+      "/tf",
+      "/xh/camera/rgbd/image",
+      "/xh/camera/rgbd/depth_image",
+      "/xh/camera/rgbd/camera_info"
+    ]
+  },
+  "status": "PASS",
+  "teacher": {
+    "blocks_p0": false,
+    "boundless_world_model": "CANDIDATE_LICENSE_PENDING",
+    "cosmos3_nano": "CANDIDATE_MAPPING_UNVERIFIED",
+    "cosmos3_super": "PARKED",
+    "metadata_audit": {
+      "allow_large_download": false,
+      "checked_at": "2026-07-15T13:58:40.152403+00:00",
+      "metadata_only": true,
+      "models": {
+        "BLM-Lab/Boundless-World-Model": {
+          "gated": false,
+          "id": "BLM-Lab/Boundless-World-Model",
+          "license": null,
+          "private": false,
+          "revision": "738a8d3c008e637b8b1b18d5e98a82f6de9c04aa",
+          "status": "FOUND"
+        },
+        "nvidia/Cosmos3-Nano": {
+          "gated": false,
+          "id": "nvidia/Cosmos3-Nano",
+          "license": "other",
+          "private": false,
+          "revision": "411f42a8fdfb8c5b2583cb8786e0938f49796eaa",
+          "status": "FOUND"
+        },
+        "nvidia/Cosmos3-Super": {
+          "gated": false,
+          "id": "nvidia/Cosmos3-Super",
+          "license": "other",
+          "private": false,
+          "revision": "e0262be9d8f7586bc24c069a2aed2b665bdff266",
+          "status": "FOUND"
+        }
+      }
+    }
+  },
+  "validation": {
+    "git_diff_check": "PASS",
+    "pytest": "PASS (24 passed)",
+    "ruff": "PASS",
+    "schema_validation": "PASS"
+  }
+}

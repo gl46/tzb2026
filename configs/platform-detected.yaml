@@ -1,0 +1,11 @@
+checked_at: "2026-07-15"
+local:
+  os: macOS-26.4.1-arm64
+  ros_distribution: MISSING
+  gazebo_distribution: MISSING
+  compatibility: BLOCKED
+remote:
+  node2: {os: Ubuntu-24.04.2, gpu: NVIDIA_A100-SXM4-80GB, ros_distribution: Jazzy, gazebo_distribution: Harmonic-gz-sim8, compatibility: VERIFIED_HEADLESS}
+  chxy: {os: Ubuntu-24.04.4, gpu: NVIDIA_A100-SXM4-80GB, ros_distribution: Jazzy, gazebo_distribution: Harmonic-gz-sim8, compatibility: VERIFIED_HEADLESS}
+target: {os: Ubuntu-24.04, ros: Jazzy, gazebo: Harmonic, bridge: ros_gz, control: gz_ros2_control, motion: MoveIt2}
+decision: USE_UBUNTU_24_04_JAZZY_HARMONIC_ON_NODE2_OR_CHXY;_PROJECT_LEVEL_PICK_PLACE_REMAINS_UNVERIFIED

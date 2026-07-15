@@ -1,0 +1,139 @@
+{
+  "$defs": {
+    "TargetConstraintsV0": {
+      "additionalProperties": false,
+      "properties": {
+        "category": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Category"
+        },
+        "color": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Color"
+        },
+        "shape": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Shape"
+        }
+      },
+      "title": "TargetConstraintsV0",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "ambiguity_score": {
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Ambiguity Score",
+      "type": "number"
+    },
+    "constraints": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Constraints",
+      "type": "array"
+    },
+    "destination": {
+      "title": "Destination",
+      "type": "string"
+    },
+    "goal_predicates": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Goal Predicates",
+      "type": "array"
+    },
+    "need_clarification": {
+      "title": "Need Clarification",
+      "type": "boolean"
+    },
+    "operation": {
+      "title": "Operation",
+      "type": "string"
+    },
+    "reference_frame": {
+      "title": "Reference Frame",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "TaskSpecV0",
+      "default": "TaskSpecV0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "source_instruction": {
+      "title": "Source Instruction",
+      "type": "string"
+    },
+    "spatial_selector": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Spatial Selector"
+    },
+    "target_constraints": {
+      "$ref": "#/$defs/TargetConstraintsV0"
+    },
+    "target_object_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Target Object Id"
+    },
+    "task_id": {
+      "title": "Task Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "task_id",
+    "operation",
+    "reference_frame",
+    "destination",
+    "goal_predicates",
+    "ambiguity_score",
+    "need_clarification",
+    "source_instruction"
+  ],
+  "title": "TaskSpecV0",
+  "type": "object"
+}

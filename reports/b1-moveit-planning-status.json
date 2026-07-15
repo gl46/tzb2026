@@ -1,0 +1,6 @@
+{
+  "status": "VERIFIED_MOTION_PLAN_ONLY",
+  "host": "node2",
+  "gazebo_execution_verified": false,
+  "note": "Official Panda MoveIt planning service only; dispatch to the Gazebo controller is not claimed."
+}

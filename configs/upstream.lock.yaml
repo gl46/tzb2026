@@ -1,0 +1,11 @@
+checked_at: "2026-07-15"
+sources:
+  ros2_jazzy: {url: https://docs.ros.org/en/jazzy/Installation/Alternatives/Ubuntu-Install-Binary.html, revision: documentation-current, conclusion: Ubuntu_24_04_supported}
+  gazebo_harmonic: {url: https://gazebosim.org/docs/harmonic/comparison/, revision: documentation-current, conclusion: ros_gz_with_ROS_2_Jazzy_binary}
+  gz_ros2_control_jazzy: {url: https://control.ros.org/jazzy/doc/gz_ros2_control/doc/index.html, revision: documentation-current, conclusion: GazeboSimSystem_plugin_and_joint_trajectory_controller_pattern}
+  nvidia_cosmos: {url: https://github.com/NVIDIA/cosmos, revision: aefdf852c16237039785d84ab3327167cb0ec07f, conclusion: Cosmos3_Nano_and_Super_official_code}
+  cosmos3_nano: {url: https://huggingface.co/nvidia/Cosmos3-Nano, revision: 411f42a8fdfb8c5b2583cb8786e0938f49796eaa, conclusion: 16B_openmdw1_1_A100_not_verified}
+  bwm_code: {url: https://github.com/boundless-large-model/boundless-world-model, revision: 44acfd1b06f35f365f02f7bb2fc5da6beafcd6bc, conclusion: action_conditioned_robot_video_model}
+  bwm_checkpoint: {url: https://huggingface.co/BLM-Lab/Boundless-World-Model, revision: 738a8d3c008e637b8b1b18d5e98a82f6de9c04aa, conclusion: checkpoint_license_not_explicitly_confirmed}
+  cosmos3_super: {url: https://huggingface.co/nvidia/Cosmos3-Super, revision: e0262be9d8f7586bc24c069a2aed2b665bdff266, conclusion: metadata_audited_but_parked}
+  cosmos_nim: {url: https://docs.nvidia.com/nim/cosmos/3.0.0/support-matrix.html, revision: documentation-current, conclusion: Super_BF16_Hopper_TP2; current_A100_two_host_plan_not_verified}

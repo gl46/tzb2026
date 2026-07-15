@@ -1,0 +1,36 @@
+cosmos3_nano:
+  model_id: nvidia/Cosmos3-Nano
+  status: CANDIDATE
+  priority: P1
+  license_status: OFFICIAL_MODEL_CARD_OPENMDW1_1
+  access_status: METADATA_READ_ONLY
+  action_domains: [multimodal_action_trajectory]
+  action_mapping_status: NOT_VERIFIED_FOR_FRANKA
+  recommended_hardware: "Official model card test hardware: GB200 and H100; A100 80GB not directly verified"
+  revision: 411f42a8fdfb8c5b2583cb8786e0938f49796eaa
+  last_checked_at: "2026-07-15"
+  blockers: [A100_80GB_SINGLE_GPU_NOT_OFFICIALLY_VERIFIED, ACTION_MAPPING_NOT_CONFIRMED]
+bwm:
+  model_id: BLM-Lab/Boundless-World-Model
+  status: CANDIDATE_LICENSE_PENDING
+  priority: P1
+  license_status: CHECKPOINT_LICENSE_NOT_CONFIRMED
+  access_status: METADATA_READ_ONLY
+  action_domains: [normalized_14d_end_effector_trajectory]
+  action_mapping_status: REQUIRES_OFFICIAL_CONFIG_CONFIRMATION
+  recommended_hardware: "No first-party single-A100 validation located"
+  revision: 738a8d3c008e637b8b1b18d5e98a82f6de9c04aa
+  last_checked_at: "2026-07-15"
+  blockers: [CHECKPOINT_LICENSE_UNCLEAR, A100_80GB_NOT_VERIFIED]
+cosmos3_super:
+  model_id: nvidia/Cosmos3-Super
+  status: PARKED
+  priority: P2
+  license_status: NOT_EVALUATED_FOR_DEPLOYMENT
+  access_status: NO_DOWNLOAD_NO_RUN
+  action_domains: [multimodal_action_trajectory]
+  action_mapping_status: NOT_APPLICABLE_WHILE_PARKED
+  recommended_hardware: "Official NVIDIA material indicates Super BF16 requires Hopper TP=2; current separate A100 hosts are not verified"
+  revision: e0262be9d8f7586bc24c069a2aed2b665bdff266
+  last_checked_at: "2026-07-15"
+  blockers: [PARKED_REQUIRES_EXPLICIT_HUMAN_REACTIVATION, SEPARATE_NODE_A100_TOPOLOGY_NOT_VERIFIED]

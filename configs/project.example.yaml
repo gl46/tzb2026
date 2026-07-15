@@ -1,0 +1,12 @@
+project_id: XH-202607
+schema_revision: v0
+priority: P0_GAZEBO_CLOSED_LOOP
+student_training_modes: [SIM_ONLY, SIM_PLUS_SEMANTIC, SIM_PLUS_TEACHER]
+embodiment: franka_panda_parallel_gripper
+scene:
+  random_seed: 202607
+  objects:
+    - {id: object_red_cube, category: cube, color: red, frame: world}
+    - {id: object_blue_cylinder, category: cylinder, color: blue, frame: world}
+    - {id: object_green_sphere, category: sphere, color: green, frame: world}
+  destination: bin_a
