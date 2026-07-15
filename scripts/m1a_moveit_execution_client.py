@@ -7,6 +7,7 @@ import math
 import time
 
 import rclpy
+from control_msgs.msg import JointTrajectoryControllerState
 from geometry_msgs.msg import Pose
 from moveit_msgs.action import ExecuteTrajectory
 from moveit_msgs.msg import (
@@ -31,7 +32,7 @@ VELOCITY_LIMITS = [2.3925, 2.3925, 2.3925, 2.3925, 2.8710, 2.8710, 2.8973]
 TARGETS = [
     ("pregrasp", [0.12, -0.50, 0.10, -1.20, 0.05, 0.90, -0.05]),
     ("lift_or_transport", [0.20, -0.60, 0.15, -1.40, 0.10, 1.10, -0.10]),
-    ("preplace_or_home", [0.00, -0.50, 0.00, -1.50, 0.00, 1.00, 0.00]),
+    ("preplace", [0.16, -0.55, 0.12, -1.30, 0.075, 1.00, -0.075]),
 ]
 ADJACENT_SELF_PAIRS = [
     ("panda_link0", "panda_link1"),
@@ -92,8 +93,15 @@ class EvidenceClient(Node):
     def __init__(self) -> None:
         super().__init__("m1a_moveit_execution_client")
         self.samples: list[dict] = []
+        self.controller_samples: list[dict] = []
         self.latest: dict[str, float] = {}
         self.create_subscription(JointState, "/joint_states", self.on_joint_state, 1000)
+        self.create_subscription(
+            JointTrajectoryControllerState,
+            "/panda_arm_controller/controller_state",
+            self.on_controller_state,
+            1000,
+        )
         self.plan_client = self.create_client(GetMotionPlan, "/plan_kinematic_path")
         self.scene_client = self.create_client(ApplyPlanningScene, "/apply_planning_scene")
         self.scene_get_client = self.create_client(GetPlanningScene, "/get_planning_scene")
@@ -108,6 +116,23 @@ class EvidenceClient(Node):
         values = [float(positions[name]) for name in JOINTS]
         self.latest = dict(zip(JOINTS, values))
         self.samples.append({"timestamp_s": stamp, "positions": values})
+
+    def on_controller_state(self, message: JointTrajectoryControllerState) -> None:
+        reference = dict(zip(message.joint_names, message.reference.positions))
+        feedback = dict(zip(message.joint_names, message.feedback.positions))
+        if not all(name in reference and name in feedback for name in JOINTS):
+            return
+        stamp = message.header.stamp.sec + message.header.stamp.nanosec * 1e-9
+        desired = [float(reference[name]) for name in JOINTS]
+        actual = [float(feedback[name]) for name in JOINTS]
+        self.controller_samples.append(
+            {
+                "timestamp_s": stamp,
+                "q_des": desired,
+                "q_act": actual,
+                "absolute_error": [abs(d - a) for d, a in zip(desired, actual)],
+            }
+        )
 
     def wait_ready(self) -> bool:
         services = [self.plan_client, self.scene_client, self.scene_get_client, self.fk_client]
@@ -197,12 +222,13 @@ class EvidenceClient(Node):
 
     def execute(self, trajectory, expected: list[float]):
         start_index = len(self.samples)
+        controller_start_index = len(self.controller_samples)
         goal = ExecuteTrajectory.Goal(trajectory=trajectory)
         sent = self.execute_client.send_goal_async(goal)
         rclpy.spin_until_future_complete(self, sent, timeout_sec=10.0)
         handle = sent.result()
         if handle is None or not handle.accepted:
-            return False, None, []
+            return False, None, [], [], 0.0, False
         result_future = handle.get_result_async()
         rclpy.spin_until_future_complete(self, result_future, timeout_sec=30.0)
         wrapped = result_future.result()
@@ -225,6 +251,7 @@ class EvidenceClient(Node):
             controller_succeeded,
             bytes(handle.goal_id.uuid).hex(),
             self.samples[start_index:],
+            self.controller_samples[controller_start_index:],
             time.time() - controller_completed_at,
             consecutive_converged >= 5,
         )
@@ -250,7 +277,9 @@ def segment_evidence(client: EvidenceClient, trial: int, name: str, target: list
     expected = [planned_by_name[joint] for joint in JOINTS]
     expected_fk = client.fk(expected)
     started = time.time()
-    executed, goal_uuid, samples, settle_duration, settled = client.execute(trajectory, expected)
+    executed, goal_uuid, samples, controller_samples, settle_duration, settled = client.execute(
+        trajectory, expected
+    )
     completed = time.time()
     actual = [client.latest.get(joint, math.nan) for joint in JOINTS]
     actual_fk = client.fk(actual) if all(math.isfinite(value) for value in actual) else None
@@ -263,6 +292,10 @@ def segment_evidence(client: EvidenceClient, trial: int, name: str, target: list
                               (b["timestamp_s"] - a["timestamp_s"]) / VELOCITY_LIMITS[j]
                               for a, b in zip(samples, samples[1:]) for j in range(7)
                               if b["timestamp_s"] > a["timestamp_s"]), default=0.0)
+    max_tracking_error = max(
+        (max(sample["absolute_error"]) for sample in controller_samples),
+        default=math.inf,
+    )
     ee_error = math.dist(expected_fk[:3], actual_fk[:3]) if expected_fk and actual_fk else None
     return {
         "trial": trial, "segment": name, "planned": True, "planning_started_wall": planned_at,
@@ -274,8 +307,12 @@ def segment_evidence(client: EvidenceClient, trial: int, name: str, target: list
         "per_joint_final_error": errors, "max_final_joint_error_rad": max(errors),
         "expected_ee_pose": expected_fk, "observed_ee_pose": actual_fk, "ee_position_error_m": ee_error,
         "joint_state_sample_count": len(samples), "timestamps_monotonic": monotonic,
+        "controller_state_sample_count": len(controller_samples),
+        "max_tracking_error_rad": max_tracking_error,
         "max_adjacent_joint_jump_rad": max_jump, "max_velocity_limit_ratio": max_velocity_ratio,
-        "samples": samples, "success": bool(executed and settled and len(samples) >= 20 and monotonic and max(errors) <= 0.05
+        "samples": samples, "controller_samples": controller_samples,
+        "success": bool(executed and settled and len(samples) >= 20 and monotonic
+                                     and max_tracking_error <= 0.05 and max(errors) <= 0.05
                                      and ee_error is not None and ee_error <= 0.02 and max_jump <= 0.08
                                      and max_velocity_ratio <= 1.5 and completed - started >= 0.25),
     }
