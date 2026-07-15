@@ -484,7 +484,7 @@ def main() -> int:
 
         specifications = (
             [(f"left_{index}", "left", -0.040, [0.010, 0.04]) for index in range(1, 4)]
-            + [(f"right_{index}", "right", 0.040, [0.04, 0.010]) for index in range(1, 4)]
+            + [(f"right_{index}", "right", 0.0, [0.04, 0.010]) for index in range(1, 4)]
             + [(f"bilateral_{index}", "bilateral", 0.0, [0.010, 0.010]) for index in range(1, 4)]
         )
         for label, expected, y_offset, finger_target in specifications:
@@ -501,11 +501,13 @@ def main() -> int:
                 continue
             client.update_cube_scene(cube["xyz"])
             client.command_hand([0.04, 0.04])
-            start = {name: len(events) for name, events in client.contacts.items()}
             exception_set = client.set_target_touch_exception(True)
             motion = client.move_hand_pose(hand_pose(cube["xyz"], y_offset=y_offset)) if exception_set else {
                 "ik_solved": False, "planned": False, "executed": False
             }
+            # The semantic test is the commanded finger close, not incidental
+            # contact observed while the open hand approaches the target.
+            start = {name: len(events) for name, events in client.contacts.items()}
             hand_result = client.command_hand(finger_target)
             client.contact_window(0.45)
             events = {name: client.contacts[name][start[name]:] for name in client.contacts}
@@ -566,10 +568,10 @@ def main() -> int:
                 trials.append({"label": f"table_{index}", "expected": "finger_table", "reason": "RUNTIME_CUBE_POSE_UNAVAILABLE"})
                 continue
             exception_set = client.set_table_touch_exception(True)
-            start = {name: len(events) for name, events in client.contacts.items()}
             motion = client.move_hand_pose(table_touch_pose(cube["xyz"])) if exception_set else {
                 "ik_solved": False, "planned": False, "executed": False
             }
+            start = {name: len(events) for name, events in client.contacts.items()}
             client.contact_window(0.45)
             events = {name: client.contacts[name][start[name]:] for name in client.contacts}
             client.command_hand([0.04, 0.04])
