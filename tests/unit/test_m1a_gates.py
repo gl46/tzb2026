@@ -432,6 +432,13 @@ def test_adr_0006_is_evidence_bound_and_not_a_model_change_authorization() -> No
     assert "CONTACT_TELEMETRY_PARTIAL" in adr
     assert report["status"] == "EVIDENCE_ONLY_ADR_0006_PENDING_HUMAN_APPROVAL"
     assert report["sampling"]["arm_joint_samples"] == 100_000
+    official = report["candidate_official_panda_origins"]
+    assert official["source"]["sha256"] == (
+        "c8ee3bad4d89ad9bf4af717037418a3e6b046d47df6375a92a912a901d256a34"
+    )
+    assert official["metrics"]["position_only_refinement"]["final_target_distance_m"] < 1e-5
+    assert report["candidate_uniform_085_m_kinematics"]["position_only_refinement"]["final_target_distance_m"] > 0.1
+    assert report["blocker"] == "HUMAN_ADR_0006_APPROVAL_REQUIRED_BEFORE_URDF_OR_SCENE_CHANGE"
     assert report["urdf_sha256"] == hashlib.sha256(
         (root / "robot_ws/src/xh_sim/urdf/panda_controlled.urdf").read_bytes()
     ).hexdigest()

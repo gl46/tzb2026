@@ -15,7 +15,10 @@ valuable M1A asset and are out of scope for this proposal.
 The initial requested remedy was to retain the base and scene, scale the arm
 links to a nominal 0.85 m total fingertip reach, and preserve all joint
 protocols and the end effector. Before any simulator change, an offline
-URDF-origin FK sample was required.
+URDF-origin FK sample was required. That uniform-scale remedy is not the
+approved candidate: it preserves the current, non-Panda joint-origin directions
+and does not establish target reach under the existing base placement in the
+required sampling/refinement evidence.
 
 ## Evidence before decision
 
@@ -27,42 +30,58 @@ finger joints at 0.02 m, and runs no ROS, Gazebo, collision, contact or grasp
 operation. The report is bound to source-URDF SHA-256
 `e017d82f218578603078fd5da73cdba88ed47fef2f5ed57cf9f01f5c666fb096`.
 
-The hypothetical candidate scales only `panda_joint1`…`panda_joint7` and
+The original uniform candidate scales only `panda_joint1`…`panda_joint7` and
 `panda_hand_joint` origins by 0.371212121. It leaves `world_to_panda`, the two
 finger joints, hand/finger geometry and finger collision-centre offsets
 unchanged. That gives 0.85 m nominal total reach: 0.735 m scaled arm/wrist
 serial translation plus 0.115 m unchanged end-effector extension.
 
-| FK model | Closest sampled pad centre | 3 cm density | 5 cm density |
-| --- | ---: | ---: | ---: |
-| Current controlled URDF | 1.67 cm | 3/200,000 (0.0015%) | 10/200,000 (0.0050%) |
-| 0.85 m candidate, base/scene unchanged | 14.23 cm | 0/200,000 | 0/200,000 |
+An additional candidate uses the joint origins and fixed wrist transforms from
+the installed node2 `moveit_resources_panda_description` file
+`/opt/ros/jazzy/share/moveit_resources_panda_description/urdf/panda.urdf.xacro`
+(SHA-256 `c8ee3bad4d89ad9bf4af717037418a3e6b046d47df6375a92a912a901d256a34`).
+It retains the current project's *soft* limits rather than importing the
+resource's hard limits, retains the world/base transform and all finger
+geometry/sensors, and adds only Panda's fixed `panda_link8` / `panda_joint8`.
+The candidate arm origins are:
 
-The result is evidence against approving the exact initial candidate. It does
-not prove a mathematical workspace bound, but it does show that this candidate
-does not provide sampled access to the required target neighbourhood. Moving
-the cube farther in +x would not repair that measured shortfall with the
-current fixed base. No URDF, scene, controller or end-effector change has been
-made by this ADR or the sampling run.
+```text
+j1 [0, 0, .333]             j2 [0, 0, 0]
+j3 [0, -.316, 0]            j4 [.0825, 0, 0]
+j5 [-.0825, .384, 0]        j6 [0, 0, 0]
+j7 [.088, 0, 0]             fixed j8 [0, 0, .107]
+hand fixed transform: xyz [0, 0, 0], yaw -pi/4
+```
+
+| FK model | Random closest pad centre | 3 cm density | 5 cm density | Position-only refined distance |
+| --- | ---: | ---: | ---: | ---: |
+| Current controlled URDF | 2.66 cm | 1/200,000 (0.0005%) | 6/200,000 (0.0030%) | 0.000000053 m |
+| Uniform 0.85 m candidate | 14.23 cm | 0/200,000 | 0/200,000 | 0.126863353 m |
+| Official Panda-origin candidate | 1.96 cm | 7/200,000 (0.0035%) | 25/200,000 (0.0125%) | 0.000000017 m |
+
+The position refinement starts from each nearest random sample, obeys the
+current seven-arm-joint limits, and solves only pad-centre position. It does
+not solve orientation, check collisions, establish a collision-free approach,
+or establish a grasp. It is nevertheless sufficient to distinguish the
+official-origin candidate from the uniformly shrunk candidate in the required
+target neighbourhood. No URDF, scene, controller or end-effector change has
+been made by this ADR or the sampling run.
 
 ## Decision requested
 
-Do **not** approve an implementation of the exact “0.85 m total reach, fixed
-base and unchanged scene” candidate from this evidence. A human must instead
-approve one of the following explicitly scoped next decisions before any model
-edit:
+Approve or reject **the official Panda-origin candidate described above**. It
+is the proposed implementation for this ADR. The uniform 0.85 m scale candidate
+is explicitly rejected by its 12.7 cm position-only residual in the deterministic
+bounded refinement and must not be implemented.
 
-1. a revised Panda-scale kinematic candidate with an offline target-density
-   result that reaches the task target; or
-2. a base-placement change, accompanied by the same FK evidence and a revised
-   task-scene rationale; or
-3. rejection of the link-proportion remedy in favour of another human-approved
-   geometry decision.
-
-The human approval must name the exact candidate (joint-origin scale, base
-transform and cube pose if any change), its source report and its URDF revision.
-This ADR title describes the requested direction; its current status is not an
-authorization to alter the model.
+Human approval must cover the exact origin table, retained base transform
+`[-.35, 0, .45]`, unchanged dynamic cube pose `[.22, .12, .475]`, the cited
+source report and its URDF revision. The implementation must make the arm
+visual/collision primitives consistent with these transforms; merely changing
+joint origins while leaving the old oversized colliders would not meet this
+decision. The existing hand/finger collision geometry and sensors must not be
+altered. This ADR title describes the requested direction; its current status
+is not authorization to alter the model.
 
 ## Invariants for any approved implementation
 
@@ -74,6 +93,11 @@ An approved implementation must preserve all of the following:
    topic names; and
 3. the controller/MoveIt same-URDF requirement, explicit collision policy and
    SRDF collision-pair reporting.
+
+`panda_link8` / `panda_joint8` may be added only as the fixed, unactuated
+Panda wrist transform stated above. It must not appear in an arm controller,
+trajectory goal, the seven-actuated-joint contract or the test-time policy
+action vector.
 
 The existing unit test for joint names, limits and units must continue to pass;
 the implementation must also add or update a model-hash record that identifies
