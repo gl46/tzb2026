@@ -90,14 +90,14 @@
     <sensor name="left_finger_contact" type="contact">
       <always_on>1</always_on><update_rate>30</update_rate>
       <topic>/xh/supervision/panda_leftfinger_contacts</topic>
-      <contact><collision>collision</collision></contact>
+      <contact><collision>panda_leftfinger_fixed_joint_lump__collision_collision</collision></contact>
     </sensor>
   </gazebo>
   <gazebo reference="panda_rightfinger">
     <sensor name="right_finger_contact" type="contact">
       <always_on>1</always_on><update_rate>30</update_rate>
       <topic>/xh/supervision/panda_rightfinger_contacts</topic>
-      <contact><collision>collision</collision></contact>
+      <contact><collision>panda_rightfinger_fixed_joint_lump__collision_collision</collision></contact>
     </sensor>
   </gazebo>
 </robot>

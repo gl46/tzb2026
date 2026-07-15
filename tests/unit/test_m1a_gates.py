@@ -183,7 +183,8 @@ def test_m1a_protocol_files_define_fail_closed_sensor_and_execution_gates() -> N
     assert execution["required_motion_trials"] == 10
     urdf = (root / "robot_ws/src/xh_sim/urdf/panda_controlled.urdf").read_text()
     assert "left_finger_contact" in urdf and "right_finger_contact" in urdf
-    assert '<contact><collision>collision</collision></contact>' in urdf
+    assert "panda_leftfinger_fixed_joint_lump__collision_collision" in urdf
+    assert "panda_rightfinger_fixed_joint_lump__collision_collision" in urdf
     assert "panda_leftfinger_collision" not in urdf
     assert "panda_rightfinger_collision" not in urdf
     runner = (root / "scripts/run_m1a_validation.sh").read_text()
