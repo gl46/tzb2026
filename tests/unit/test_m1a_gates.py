@@ -272,11 +272,21 @@ def test_m1a_contact_calibration_uses_oracle_geometry_hand_control_and_per_trial
     assert '"/panda_hand_controller/follow_joint_trajectory"' in client
     assert "pad_center_world" in client and "minimum_pad_cube_aabb_separation_m" in client
     assert "CALIBRATION_ONLY_INITIALIZATION" in client
-    assert "/world/xh_p0_pick_place/set_pose" in client
+    assert "set_pose" not in client
     assert "bilateral_overlap_s" in client and "observed_rate_hz" in client
     assert "set_pose" not in runner
     world = (root / "robot_ws/src/xh_sim/worlds/p0_pick_place.sdf").read_text()
     assert '<pose>0.22 0.12 0.475 0 0 0</pose>' in world
+    calibration_world = (
+        root / "robot_ws/src/xh_sim/worlds/m1a_contact_calibration.sdf"
+    ).read_text()
+    assert '<pose>0.17 0.12 0.755 0 0 0</pose>' in calibration_world
+    assert 'model name="work_table_calibration_fixture"' in calibration_world
+    assert "m1a_contact_calibration.sdf" in runner
+    simulation_launch = (root / "robot_ws/src/xh_sim/launch/simulation.launch.py").read_text()
+    moveit_launch = (root / "robot_ws/src/xh_sim/launch/moveit_execution.launch.py").read_text()
+    assert 'LaunchConfiguration("world_file")' in simulation_launch
+    assert 'LaunchConfiguration("world_file")' in moveit_launch
 
 
 def test_m1a_runtime_acm_preserves_only_documented_exceptions() -> None:

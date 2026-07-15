@@ -32,7 +32,8 @@ CONTACT_TOPICS = {
 CUBE_SIZE_M = 0.05
 PAD_SIZE_M = (0.12, 0.018, 0.035)
 CALIBRATION_CUBE_XYZ = [0.17, 0.12, 0.755]
-TABLE_CUBE_XYZ = [0.22, 0.12, 0.475]
+CALIBRATION_FIXTURE_XYZ = [0.17, 0.12, 0.59]
+CALIBRATION_FIXTURE_SIZE_M = [0.03, 0.03, 0.28]
 
 
 def quaternion_rotate(quaternion: list[float], point: tuple[float, float, float]) -> list[float]:
@@ -77,28 +78,12 @@ def runtime_cube_pose() -> dict | None:
     return {"xyz": values[:3], "rpy": values[3:], "source": "gz model runtime oracle"}
 
 
-def calibration_set_cube_pose(xyz: list[float]) -> dict:
-    request = (
-        f'name: "object_red_cube" position {{x: {xyz[0]} y: {xyz[1]} z: {xyz[2]}}} '
-        "orientation {w: 1.0}"
-    )
-    result = subprocess.run(
-        [
-            "gz", "service", "-s", "/world/xh_p0_pick_place/set_pose",
-            "--reqtype", "gz.msgs.Pose", "--reptype", "gz.msgs.Boolean",
-            "--timeout", "2000", "--req", request,
-        ],
-        check=False,
-        capture_output=True,
-        text=True,
-        timeout=5,
-    )
-    succeeded = result.returncode == 0 and "true" in result.stdout.lower()
+def calibration_initialization() -> dict:
     return {
         "status": "CALIBRATION_ONLY_INITIALIZATION",
-        "requested_xyz": xyz,
-        "succeeded": succeeded,
-        "response": result.stdout.strip(),
+        "source": "m1a_contact_calibration.sdf",
+        "declared_cube_xyz": CALIBRATION_CUBE_XYZ,
+        "runtime_pose_write": False,
     }
 
 
@@ -195,6 +180,22 @@ class CalibrationClient(EvidenceClient):
         ]
         pose = Pose()
         pose.position.x, pose.position.y, pose.position.z = cube_xyz
+        pose.orientation.w = 1.0
+        item.primitive_poses = [pose]
+        item.operation = CollisionObject.ADD
+        scene.world.collision_objects = [item]
+        return self.apply_scene_diff(scene)
+
+    def apply_calibration_fixture(self) -> bool:
+        scene = PlanningScene(is_diff=True)
+        item = CollisionObject()
+        item.id = "work_table_calibration_fixture"
+        item.header.frame_id = "world"
+        item.primitives = [
+            SolidPrimitive(type=SolidPrimitive.BOX, dimensions=CALIBRATION_FIXTURE_SIZE_M)
+        ]
+        pose = Pose()
+        pose.position.x, pose.position.y, pose.position.z = CALIBRATION_FIXTURE_XYZ
         pose.orientation.w = 1.0
         item.primitive_poses = [pose]
         item.operation = CollisionObject.ADD
@@ -302,7 +303,7 @@ def table_touch_pose(cube_xyz: list[float]) -> Pose:
     pose = Pose()
     pose.position.x = -0.25
     pose.position.y = -0.25
-    pose.position.z = 0.568
+    pose.position.z = 0.562
     pose.orientation.y = math.sqrt(0.5)
     pose.orientation.w = math.sqrt(0.5)
     return pose
@@ -374,7 +375,7 @@ def main() -> int:
         deadline = time.time() + 10.0
         while not client.latest and time.time() < deadline:
             rclpy.spin_once(client, timeout_sec=0.1)
-        if not client.latest or not client.apply_scene():
+        if not client.latest or not client.apply_scene() or not client.apply_calibration_fixture():
             print(json.dumps({"status": "CONTACT_TELEMETRY_BLOCKED", "reason": "SCENE_OR_JOINT_STATE_UNAVAILABLE"}))
             return 2
         client.command_hand([0.04, 0.04])
@@ -387,10 +388,9 @@ def main() -> int:
             + [(f"bilateral_{index}", "bilateral", 0.0, [0.033, 0.033]) for index in range(1, 4)]
         )
         for label, expected, y_offset, finger_target in specifications:
-            initialization = calibration_set_cube_pose(CALIBRATION_CUBE_XYZ)
-            time.sleep(0.1)
+            initialization = calibration_initialization()
             cube = runtime_cube_pose()
-            if cube is None or not initialization["succeeded"]:
+            if cube is None:
                 trials.append(
                     {
                         "label": label, "expected": expected,
@@ -426,8 +426,7 @@ def main() -> int:
 
         client.command_hand([0.04, 0.04])
         for index in range(1, 3):
-            initialization = calibration_set_cube_pose(TABLE_CUBE_XYZ)
-            time.sleep(0.1)
+            initialization = calibration_initialization()
             cube = runtime_cube_pose()
             events = client.contact_window(0.45)
             trials.append(

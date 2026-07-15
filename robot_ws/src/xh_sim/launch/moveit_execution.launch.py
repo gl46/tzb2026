@@ -9,14 +9,17 @@ from pathlib import Path
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 from moveit_configs_utils import MoveItConfigsBuilder
 
 
 def generate_launch_description():
     share = Path(get_package_share_directory("xh_sim"))
+    default_world = share / "worlds" / "p0_pick_place.sdf"
+    world_file = LaunchConfiguration("world_file")
     moveit_config = (
         MoveItConfigsBuilder("xh_panda_controlled", package_name="xh_sim")
         .robot_description(file_path="urdf/panda_controlled.urdf")
@@ -28,9 +31,14 @@ def generate_launch_description():
         .to_moveit_configs()
     )
     return LaunchDescription([
+        DeclareLaunchArgument(
+            "world_file",
+            default_value=str(default_world),
+            description="Absolute SDF world path forwarded to the Gazebo launch.",
+        ),
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(str(share / "launch" / "simulation.launch.py")),
-            launch_arguments={"headless": "true"}.items(),
+            launch_arguments={"headless": "true", "world_file": world_file}.items(),
         ),
         Node(
             package="moveit_ros_move_group",

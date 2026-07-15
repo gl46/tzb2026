@@ -23,7 +23,8 @@ if gz service -l 2>/dev/null | grep -qx '/world/xh_p0_pick_place/scene/info'; th
 fi
 tmp=$(mktemp -d)
 launch_log="$tmp/launch.log"
-setsid ros2 launch xh_sim moveit_execution.launch.py >"$launch_log" 2>&1 & pid=$!
+calibration_world="/home/$USER/$root/robot_ws/install/xh_sim/share/xh_sim/worlds/m1a_contact_calibration.sdf"
+setsid ros2 launch xh_sim moveit_execution.launch.py world_file:="$calibration_world" >"$launch_log" 2>&1 & pid=$!
 cleanup() {
   kill -TERM -- "-$pid" 2>/dev/null || true
   sleep 1

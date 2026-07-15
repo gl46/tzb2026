@@ -7,13 +7,15 @@ from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, RegisterEventHandler
 from launch.event_handlers import OnProcessExit
 from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 
 
 def generate_launch_description():
     share = Path(get_package_share_directory("xh_sim"))
     ros_gz_share = Path(get_package_share_directory("ros_gz_sim"))
-    world = share / "worlds" / "p0_pick_place.sdf"
+    default_world = share / "worlds" / "p0_pick_place.sdf"
+    world_file = LaunchConfiguration("world_file")
     urdf = share / "urdf" / "panda_controlled.urdf"
 
     # The same description is intentionally sent to robot_state_publisher and
@@ -94,9 +96,14 @@ def generate_launch_description():
 
     return LaunchDescription([
         DeclareLaunchArgument("headless", default_value="true", description="Server-only P0 launch."),
+        DeclareLaunchArgument(
+            "world_file",
+            default_value=str(default_world),
+            description="Absolute SDF world path; S0 may select its isolated calibration world.",
+        ),
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(str(ros_gz_share / "launch" / "gz_sim.launch.py")),
-            launch_arguments={"gz_args": f"-r -s --headless-rendering {world}"}.items(),
+            launch_arguments={"gz_args": ["-r -s --headless-rendering ", world_file]}.items(),
         ),
         bridge,
         robot_state_publisher,

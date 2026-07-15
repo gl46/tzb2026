@@ -1,0 +1,50 @@
+<?xml version="1.0" ?>
+<sdf version="1.9">
+  <world name="xh_p0_pick_place">
+    <physics name="default_physics" type="dart">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+    </physics>
+    <plugin name="gz::sim::systems::Physics" filename="gz-sim-physics-system"/>
+    <plugin name="gz::sim::systems::UserCommands" filename="gz-sim-user-commands-system"/>
+    <plugin name="gz::sim::systems::SceneBroadcaster" filename="gz-sim-scene-broadcaster-system"/>
+    <plugin name="gz::sim::systems::Contact" filename="gz-sim-contact-system"/>
+    <gravity>0 0 -9.81</gravity>
+
+    <!-- This world exists only to prove the S0 contact telemetry chain.  The
+         production P0 task world and its cube pose are intentionally unchanged. -->
+    <model name="work_table">
+      <static>true</static>
+      <link name="table_link">
+        <pose>0 0 0.4 0 0 0</pose>
+        <collision name="collision"><geometry><box><size>1.2 0.8 0.1</size></box></geometry></collision>
+        <visual name="visual"><geometry><box><size>1.2 0.8 0.1</size></box></geometry></visual>
+      </link>
+    </model>
+
+    <!-- A narrow, explicitly modeled support keeps the calibration cube at a
+         collision-free, IK-reachable height without any runtime pose write. -->
+    <model name="work_table_calibration_fixture">
+      <static>true</static>
+      <link name="fixture_link">
+        <pose>0.17 0.12 0.59 0 0 0</pose>
+        <collision name="collision"><geometry><box><size>0.03 0.03 0.28</size></box></geometry></collision>
+        <visual name="visual"><geometry><box><size>0.03 0.03 0.28</size></box></geometry><material><diffuse>0.45 0.45 0.45 1</diffuse></material></visual>
+      </link>
+    </model>
+
+    <model name="object_red_cube">
+      <pose>0.17 0.12 0.755 0 0 0</pose>
+      <link name="link">
+        <inertial><mass>0.08</mass></inertial>
+        <collision name="collision"><geometry><box><size>0.05 0.05 0.05</size></box></geometry></collision>
+        <visual name="visual"><geometry><box><size>0.05 0.05 0.05</size></box></geometry><material><diffuse>1 0 0 1</diffuse></material></visual>
+        <sensor name="red_cube_contact" type="contact">
+          <always_on>1</always_on><update_rate>30</update_rate>
+          <topic>/xh/supervision/red_cube_contacts</topic>
+          <contact><collision>collision</collision></contact>
+        </sensor>
+      </link>
+    </model>
+  </world>
+</sdf>
