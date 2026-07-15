@@ -344,6 +344,7 @@ def test_m1a_s2_runs_real_unconstrained_trials_with_early_stop() -> None:
     assert "APPROACH_ALIGNMENT_FAILURE" in runner
     assert "m1a_friction_trial_client.py" in runner
     assert "detachable_joint_absent" in client
+    assert "M0_MEASURED_APPROACH" in client
     assert "set_pose" not in client
 
 

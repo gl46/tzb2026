@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import time
 
 import rclpy
@@ -14,6 +15,9 @@ from m1a_contact_calibration_client import (
     hand_pose,
     runtime_cube_pose,
 )
+
+
+M0_MEASURED_APPROACH = [-0.307, 1.06, 0.76, -2.148, -1.435, 2.274, 1.422]
 
 
 def main() -> int:
@@ -33,9 +37,15 @@ def main() -> int:
         client.update_cube_scene(cube["xyz"])
         client.command_hand([0.04, 0.04])
         exception_set = client.set_target_touch_exception(True)
-        approach = client.move_hand_pose(
-            hand_pose(cube["xyz"], y_offset=-0.030), ik_seed=BILATERAL_IK_SEED
-        ) if exception_set else {"executed": False}
+        approach_mode = os.environ.get("M1A_S2_APPROACH_MODE", "runtime_ik")
+        if not exception_set:
+            approach = {"executed": False}
+        elif approach_mode == "m0_measured_correction":
+            approach = client.move_joint_target(M0_MEASURED_APPROACH)
+        else:
+            approach = client.move_hand_pose(
+                hand_pose(cube["xyz"], y_offset=-0.030), ik_seed=BILATERAL_IK_SEED
+            )
         start = {name: len(events) for name, events in client.contacts.items()}
         close = client.command_hand([0.01, 0.01])
         client.contact_window(0.5)
@@ -65,9 +75,10 @@ def main() -> int:
         print(json.dumps({
             "status": "FRICTION_TRIAL_FAILED", "primary_failure_class": failure,
             "detachable_joint_absent": True, "configuration": {
-                "id": "baseline", "finger_friction": "world_default", "object_friction": "world_default",
+                "id": "approach_corrected" if approach_mode == "m0_measured_correction" else "baseline",
+                "finger_friction": "world_default", "object_friction": "world_default",
                 "object_mass_kg": 0.08, "solver_step_s": 0.001, "gripper_profile_m": [0.04, 0.01],
-                "approach_pose_source": "runtime_oracle_geometry_plus_collision_checked_ik",
+                "approach_pose_source": "M0_MEASURED_APPROACH_CORRECTION" if approach_mode == "m0_measured_correction" else "runtime_oracle_geometry_plus_collision_checked_ik",
             }, "cube_pose": cube, "approach": approach, "close": close,
             "contacts": contacts, "pad_evidence_at_close": at_close,
             "cube_pose_after_close": cube_after_close, "lift": lift,
