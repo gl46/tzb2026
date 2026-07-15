@@ -414,6 +414,16 @@ def hand_pose(cube_xyz: list[float], *, y_offset: float = 0.0) -> Pose:
     return pose
 
 
+def calibration_retreat_pose(cube_xyz: list[float], *, y_offset: float) -> Pose:
+    """Back away from the cube and lift before restoring normal ACM checks."""
+    pose = Pose()
+    pose.position.x = cube_xyz[0] - 0.220
+    pose.position.y = cube_xyz[1] + y_offset
+    pose.position.z = cube_xyz[2] + 0.080
+    pose.orientation.w = 1.0
+    return pose
+
+
 def table_touch_pose(cube_xyz: list[float]) -> Pose:
     pose = Pose()
     pose.position.x = -0.25
@@ -533,7 +543,9 @@ def main() -> int:
             # Without this retreat the next independent condition starts from
             # physical penetration, making a failed plan look like a sensor fault.
             client.command_hand([0.04, 0.04])
-            retreat = client.move_joint_target(TARGETS[0][1]) if exception_set else {
+            retreat = client.move_hand_pose(calibration_retreat_pose(
+                cube["xyz"], y_offset=y_offset
+            )) if exception_set else {
                 "planned": False, "executed": False
             }
             exception_restored = client.set_target_touch_exception(False)
@@ -550,6 +562,10 @@ def main() -> int:
                     ],
                     "motion": motion,
                     "retreat": retreat,
+                    "retreat_hand_pose": [
+                        cube["xyz"][0] - 0.220, cube["xyz"][1] + y_offset,
+                        cube["xyz"][2] + 0.080, 0.0, 0.0, 0.0, 1.0,
+                    ],
                     "hand_command": {"positions_m": finger_target, **hand_result},
                     "calibration_only_allowed_collision_pairs": [
                         ["panda_leftfinger", "object_red_cube"],

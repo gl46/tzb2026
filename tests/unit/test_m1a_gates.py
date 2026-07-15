@@ -305,6 +305,7 @@ def test_m1a_contact_calibration_uses_oracle_geometry_hand_control_and_per_trial
     assert '"left", -0.040, [0.010, 0.04]' in client
     assert '"right", 0.0, [0.04, 0.010]' in client
     assert '"bilateral", -0.030, [0.010, 0.010]' in client
+    assert "calibration_retreat_pose" in client
     assert "semantic test is the commanded finger close" in client
     assert client.count('"plan_attempts": plan_attempts') >= 2
     assert 'trial.get("retreat", {}).get("executed")' in client
