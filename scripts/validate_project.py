@@ -19,6 +19,10 @@ REQUIRED = [
     "docs/legal/bwm-license-inquiry-draft.md", "scripts/doctor_local.sh", "scripts/doctor_remote.sh",
     "scripts/run_sim_smoke_test.sh", "scripts/run_pick_place_baseline.sh", "scripts/download_teacher_candidate.sh",
     "scripts/run_moveit_planning_smoke.sh",
+    "configs/m1a_execution_gate.yaml", "configs/m1a_contact_gate.yaml", "configs/m1a_friction_trials.yaml",
+    "scripts/run_m1a_preflight.sh", "scripts/run_contact_calibration.sh", "scripts/run_moveit_execution_gate.sh",
+    "scripts/run_friction_grasp_trials.sh", "scripts/run_contact_gated_grasp.sh", "scripts/run_b1_oracle_gate.sh",
+    "scripts/run_m1a_validation.sh", "scripts/write_m1a_status.py",
 ]
 
 

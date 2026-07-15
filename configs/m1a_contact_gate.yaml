@@ -1,0 +1,17 @@
+# M1A contact-gated constraint protocol.  These values are not policy inputs.
+bilateral_contact_overlap_s: 0.100
+minimum_contact_rate_hz: 20.0
+minimum_consecutive_samples: 3
+require_same_target_id: true
+reject_table_or_bin_substitution: true
+use_sim_time: true
+minimum_gripper_width_m: 0.045
+maximum_gripper_width_m: 0.070
+maximum_relative_linear_speed_mps: 0.020
+maximum_relative_linear_speed_peak_mps: 0.040
+relative_speed_window_s: 0.100
+minimum_recent_close_command_window_s: 1.0
+release_detach_deadline_s: 0.500
+release_follow_check_s: 0.500
+bin_settle_time_s: 1.000
+release_open_width_m: 0.070

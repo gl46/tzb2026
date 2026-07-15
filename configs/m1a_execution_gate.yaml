@@ -1,0 +1,11 @@
+# M1A S1 execution evidence gate.  Units are explicit: radians, metres, seconds.
+max_final_joint_error_rad: 0.05
+max_ee_position_error_m: 0.02
+max_ee_orientation_error_rad: 0.15
+minimum_segment_duration_s: 0.25
+minimum_joint_state_samples_per_segment: 20
+max_adjacent_joint_jump_rad_for_dt_le_0_1s: 0.08
+max_velocity_limit_multiplier: 1.5
+minimum_distinct_motion_samples: 5
+required_motion_trials: 10
+required_successful_motion_trials: 9

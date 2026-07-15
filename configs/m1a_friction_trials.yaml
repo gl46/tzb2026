@@ -1,0 +1,9 @@
+# Bounded experimental protocol; no constraint is allowed in these trials.
+max_physical_configurations: 3
+max_trials_per_configuration: 5
+max_total_trials: 15
+minimum_lift_height_m: 0.05
+minimum_hold_time_s: 1.0
+object_id: red_cube
+object_side_m: 0.05
+object_mass_kg: 0.08
