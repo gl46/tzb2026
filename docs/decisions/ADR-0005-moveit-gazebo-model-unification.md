@@ -1,7 +1,7 @@
 # ADR-0005: MoveIt / Gazebo controlled-model unification for M1A
 
 Date: 2026-07-16 (Asia/Shanghai)
-Status: **PROPOSED — human approval required before implementation**
+Status: **ACCEPTED — 2026-07-16 (Asia/Shanghai)**
 
 ## Context
 
@@ -60,7 +60,8 @@ anti-teleport gates returns M1A to `BLOCKED`/`PARTIAL`, not PASS.
 
 ## Approval record
 
-- Human approver: **pending**
-- Approval timestamp: **pending**
-- Accepted option: **pending**
-- Implementation commit(s): **pending**
+- Human approver: project operator
+- Approval timestamp: 2026-07-16 (Asia/Shanghai)
+- Accepted option: project-local MoveIt configuration sourced from
+  `panda_controlled.urdf`
+- Implementation commit(s): pending

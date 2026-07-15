@@ -15,7 +15,9 @@
     <visual><geometry><cylinder radius="0.12" length="0.16"/></geometry><material name="xh_dark"/></visual>
     <collision><geometry><cylinder radius="0.12" length="0.16"/></geometry></collision>
   </link>
-  <joint name="world_to_panda" type="fixed"><parent link="world"/><child link="panda_link0"/></joint>
+  <!-- The model is spawned at the Gazebo world origin. This fixed transform is
+       the single source for the measured controller/TF/world-frame placement. -->
+  <joint name="world_to_panda" type="fixed"><origin xyz="-0.35 0 0.45" rpy="0 0 0"/><parent link="world"/><child link="panda_link0"/></joint>
 
   <link name="panda_link1"><inertial><mass value="3.0"/><inertia ixx="0.03" ixy="0" ixz="0" iyy="0.03" iyz="0" izz="0.02"/></inertial><visual><origin xyz="0 0 0.16"/><geometry><cylinder radius="0.055" length="0.32"/></geometry><material name="xh_white"/></visual><collision><origin xyz="0 0 0.16"/><geometry><cylinder radius="0.055" length="0.32"/></geometry></collision></link>
   <joint name="panda_joint1" type="revolute"><origin xyz="0 0 0.16" rpy="0 0 0"/><parent link="panda_link0"/><child link="panda_link1"/><axis xyz="0 0 1"/><limit effort="87" lower="-2.8973" upper="2.8973" velocity="2.3925"/><dynamics damping="0.2"/></joint>

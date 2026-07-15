@@ -44,7 +44,7 @@ def generate_launch_description():
         arguments=[
             "-world", "xh_p0_pick_place", "-topic", "robot_description",
             "-name", "panda_controller", "-allow_renaming", "true",
-            "-x", "-0.35", "-y", "0", "-z", "0.45",
+            "-x", "0", "-y", "0", "-z", "0",
         ],
     )
     joint_state_broadcaster = Node(

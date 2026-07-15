@@ -1,0 +1,14 @@
+# Copied from the sole controlled URDF. Arm values are radians/radians per
+# second; finger values are metres/metres per second.
+default_velocity_scaling_factor: 0.2
+default_acceleration_scaling_factor: 0.2
+joint_limits:
+  panda_joint1: {has_velocity_limits: true, max_velocity: 2.3925}
+  panda_joint2: {has_velocity_limits: true, max_velocity: 2.3925}
+  panda_joint3: {has_velocity_limits: true, max_velocity: 2.3925}
+  panda_joint4: {has_velocity_limits: true, max_velocity: 2.3925}
+  panda_joint5: {has_velocity_limits: true, max_velocity: 2.8710}
+  panda_joint6: {has_velocity_limits: true, max_velocity: 2.8710}
+  panda_joint7: {has_velocity_limits: true, max_velocity: 2.8973}
+  panda_finger_joint1: {has_velocity_limits: true, max_velocity: 0.2}
+  panda_finger_joint2: {has_velocity_limits: true, max_velocity: 0.2}

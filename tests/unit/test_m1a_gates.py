@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 from pathlib import Path
+import xml.etree.ElementTree as ET
 
 import yaml
 
@@ -195,3 +196,29 @@ def test_m1a_manifest_report_hashes_are_verifiable() -> None:
     for relative_path, expected_hash in manifest["file_hashes"].items():
         actual_hash = hashlib.sha256((root / relative_path).read_bytes()).hexdigest()
         assert actual_hash == expected_hash
+
+
+def test_m1a_moveit_configuration_preserves_controlled_joint_names_limits_and_units() -> None:
+    root = Path(__file__).parents[2]
+    urdf_root = ET.parse(root / "robot_ws/src/xh_sim/urdf/panda_controlled.urdf").getroot()
+    limits = {
+        joint.attrib["name"]: joint.find("limit").attrib
+        for joint in urdf_root.findall("joint")
+        if joint.attrib["name"].startswith("panda_") and joint.find("limit") is not None
+    }
+    configured = yaml.safe_load((root / "robot_ws/src/xh_sim/config/m1a_joint_limits.yaml").read_text())["joint_limits"]
+    expected_names = {f"panda_joint{index}" for index in range(1, 8)} | {
+        "panda_finger_joint1", "panda_finger_joint2"
+    }
+    assert set(configured) == expected_names == set(limits)
+    for name in expected_names:
+        assert configured[name]["max_velocity"] == float(limits[name]["velocity"])
+    srdf = (root / "robot_ws/src/xh_sim/config/m1a_panda.srdf").read_text()
+    assert "panda_link0\" tip_link=\"panda_hand" in srdf
+    assert "panda_leftfinger\" link2=\"object_red_cube" not in srdf
+    policy = yaml.safe_load((root / "robot_ws/src/xh_sim/config/m1a_collision_policy.yaml").read_text())
+    enabled = {tuple(pair) for pair in policy["enabled_robot_world_collision_pairs"]}
+    assert ("panda_leftfinger", "object_red_cube") in enabled
+    assert ("panda_rightfinger", "object_red_cube") in enabled
+    assert ("panda_link1", "work_table") in enabled
+    assert policy["allowed_collision_exceptions"] == [["panda_link0", "work_table"]]

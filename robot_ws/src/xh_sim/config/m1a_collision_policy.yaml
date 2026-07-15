@@ -1,0 +1,23 @@
+# Explicit positive list recorded in S1 evidence. These pairs must remain
+# collision-checked; SRDF may only disable the documented adjacent self-pairs.
+enabled_robot_world_collision_pairs:
+  - [panda_link1, work_table]
+  - [panda_link2, work_table]
+  - [panda_link3, work_table]
+  - [panda_link4, work_table]
+  - [panda_link5, work_table]
+  - [panda_link6, work_table]
+  - [panda_link7, work_table]
+  - [panda_hand, work_table]
+  - [panda_leftfinger, work_table]
+  - [panda_rightfinger, work_table]
+  - [panda_leftfinger, object_red_cube]
+  - [panda_rightfinger, object_red_cube]
+  - [panda_leftfinger, bin_a]
+  - [panda_rightfinger, bin_a]
+  - [panda_hand, bin_a]
+required_scene_objects: [work_table, bin_a]
+allowed_collision_exceptions:
+  # The fixed pedestal intersects the physical table top by design. It is not
+  # a moving arm/table clearance pair and is the sole allowed world exception.
+  - [panda_link0, work_table]
