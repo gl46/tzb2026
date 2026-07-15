@@ -648,10 +648,14 @@ def main() -> int:
         def passed(trial: dict) -> bool:
             contacts = trial.get("contacts", {})
             expected = trial["expected"]
+            # In a one-condition process the simulator is torn down after the
+            # evidence window, so a failed retreat cannot contaminate another
+            # trial.  It remains recorded, but is not a false negative.
+            cleanup_valid = scope == "one" or bool(trial.get("retreat", {}).get("executed"))
             if expected == "left":
                 return bool(
                     trial.get("motion", {}).get("executed")
-                    and trial.get("retreat", {}).get("executed")
+                    and cleanup_valid
                     and trial.get("target_touch_exception_restored")
                     and contacts.get("left_target")
                     and not contacts.get("right_target")
@@ -659,7 +663,7 @@ def main() -> int:
             if expected == "right":
                 return bool(
                     trial.get("motion", {}).get("executed")
-                    and trial.get("retreat", {}).get("executed")
+                    and cleanup_valid
                     and trial.get("target_touch_exception_restored")
                     and contacts.get("right_target")
                     and not contacts.get("left_target")
@@ -667,7 +671,7 @@ def main() -> int:
             if expected == "bilateral":
                 return bool(
                     trial.get("motion", {}).get("executed")
-                    and trial.get("retreat", {}).get("executed")
+                    and cleanup_valid
                     and trial.get("target_touch_exception_restored")
                     and contacts.get("left_target")
                     and contacts.get("right_target")

@@ -314,6 +314,7 @@ def test_m1a_contact_calibration_uses_oracle_geometry_hand_control_and_per_trial
     assert "semantic test is the commanded finger close" in client
     assert client.count('"plan_attempts": plan_attempts') >= 2
     assert 'trial.get("retreat", {}).get("executed")' in client
+    assert 'scope == "one"' in client
     assert "m1a_contact_calibration.sdf" in runner
     assert "calibration_mode:=true" in runner
     assert "M1A_CALIBRATION_SCOPE" in runner
