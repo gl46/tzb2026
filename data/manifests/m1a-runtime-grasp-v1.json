@@ -1,8 +1,8 @@
 {
   "schema_version": "m1a-runtime-grasp-v1",
-  "run_id": "m1a-20260716-171000",
+  "run_id": "m1a-20260716-174200",
   "baseline_commit": "22ce578",
-  "working_revision_or_diff_hash": "1fc834570c66021b03260d50194e869a159a578e",
+  "working_revision_or_diff_hash": "9551a0d9be4a55beaccf02b34a4575842a79174f",
   "episode_ids": [],
   "seeds": [],
   "mode": null,
@@ -14,7 +14,7 @@
   "file_hashes": {
     "reports/m1a-preflight.json": "89da2eb6199b577ac41e8b4e3fbe6dcc676e98d71d75f3511b8bcbc2bff28326",
     "reports/m1a-m0-smoke.json": "99e80754e53cdc7920f2a3c3a50d16725f7676427ecc5b17ac2de244e1e7e988",
-    "reports/m1a-contact-calibration.json": "09531c15a3a4444557273378103de600060188cabebc70e8f4e314d925e98485",
+    "reports/m1a-contact-calibration.json": "a4518e7c2d82373d2c01f8a3316282e4f66fb9fba1f75f9043532e2abae9c3df",
     "reports/m1a-motion-execution.json": "f357f825816e7fe11ae5ad1a83e9bd6b709f90c92b47a128f0c9167f945fb94f",
     "reports/m1a-friction-trials.json": "a0dd4b9be925baaa9d9609145b48cc77735bb66edaf431b4afc1dede06d8150b",
     "reports/m1a-contact-gate.json": "8a0fc2e51a71127d2755f8edebd7af9a09ab8ecd84944c784696baa334aa80c6",

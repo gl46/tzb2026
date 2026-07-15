@@ -1,21 +1,21 @@
 {
   "phase": "M1A",
-  "run_id": "m1a-20260716-171000",
+  "run_id": "m1a-20260716-174200",
   "baseline_commit": "22ce578",
   "execution_baseline_commit": "1fc834570c66021b03260d50194e869a159a578e",
   "baseline_branch": "codex/m1a-runtime-grasp",
   "baseline_origin_match": false,
   "m0_tag_status": "M0_TAG_MISSING_NONBLOCKING",
   "started_at": "2026-07-15T17:06:02Z",
-  "completed_at": "2026-07-15T17:08:01.131428+00:00",
+  "completed_at": "2026-07-15T17:32:21.335002+00:00",
   "deadline": "2026-07-18T23:59:00+08:00",
   "status": "BLOCKED",
   "m0_reproducible": false,
   "m0_baseline_pytest_passed": 24,
-  "m1a_current_pytest_passed": 35,
+  "m1a_current_pytest_passed": 36,
   "m1a_current_pytest_failed": 0,
   "approach_pose_source": "HARD_CODED_JOINT_TARGET",
-  "contact_telemetry_status": "CONTACT_TELEMETRY_PARTIAL",
+  "contact_telemetry_status": "CONTACT_TELEMETRY_UNRELIABLE",
   "motion_status": "BLOCKED",
   "motion_trials": 0,
   "motion_successes": 0,
@@ -39,12 +39,12 @@
   "video_status": "VIDEO_NOT_AVAILABLE_NONBLOCKING",
   "teacher_blocked_m1a": false,
   "limitations": [
-    "Finger-specific topics exist, but this bounded sensor audit has no calibrated left-only/right-only/bilateral target-contact trials.",
+    "All 13 required contact-condition commands plus the 2 s idle baseline ran, but no parsed per-trial bilateral contact calibration result is yet available.",
     "MoveIt is configured with the official Panda resource rather than the Gazebo-controlled panda_controlled.urdf; no unsafe S1 trajectory was dispatched."
   ],
   "blockers": [
     "BLOCKED"
   ],
   "next_command": "bash scripts/run_moveit_execution_gate.sh",
-  "code_revision": "1fc834570c66021b03260d50194e869a159a578e"
+  "code_revision": "9551a0d9be4a55beaccf02b34a4575842a79174f"
 }
