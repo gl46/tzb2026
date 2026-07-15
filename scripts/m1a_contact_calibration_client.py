@@ -31,6 +31,8 @@ CONTACT_TOPICS = {
 }
 CUBE_SIZE_M = 0.05
 PAD_SIZE_M = (0.12, 0.018, 0.035)
+CALIBRATION_CUBE_XYZ = [0.17, 0.12, 0.755]
+TABLE_CUBE_XYZ = [0.22, 0.12, 0.475]
 
 
 def quaternion_rotate(quaternion: list[float], point: tuple[float, float, float]) -> list[float]:
@@ -73,6 +75,31 @@ def runtime_cube_pose() -> dict | None:
         return None
     values = [float(value) for value in match.groups()]
     return {"xyz": values[:3], "rpy": values[3:], "source": "gz model runtime oracle"}
+
+
+def calibration_set_cube_pose(xyz: list[float]) -> dict:
+    request = (
+        f'name: "object_red_cube" position {{x: {xyz[0]} y: {xyz[1]} z: {xyz[2]}}} '
+        "orientation {w: 1.0}"
+    )
+    result = subprocess.run(
+        [
+            "gz", "service", "-s", "/world/xh_p0_pick_place/set_pose",
+            "--reqtype", "gz.msgs.Pose", "--reptype", "gz.msgs.Boolean",
+            "--timeout", "2000", "--req", request,
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+        timeout=5,
+    )
+    succeeded = result.returncode == 0 and "true" in result.stdout.lower()
+    return {
+        "status": "CALIBRATION_ONLY_INITIALIZATION",
+        "requested_xyz": xyz,
+        "succeeded": succeeded,
+        "response": result.stdout.strip(),
+    }
 
 
 class CalibrationClient(EvidenceClient):
@@ -264,9 +291,9 @@ class CalibrationClient(EvidenceClient):
 
 def hand_pose(cube_xyz: list[float], *, y_offset: float = 0.0) -> Pose:
     pose = Pose()
-    pose.position.x = cube_xyz[0] - 0.060
+    pose.position.x = cube_xyz[0] - 0.120
     pose.position.y = cube_xyz[1] + y_offset
-    pose.position.z = cube_xyz[2] - 0.020
+    pose.position.z = cube_xyz[2] - 0.055
     pose.orientation.w = 1.0
     return pose
 
@@ -293,6 +320,34 @@ def classify_contacts(events: dict[str, list[dict]]) -> dict:
             for event in events[channel]
         )
 
+    def channel_timestamps(channel: str, token: str | None = None) -> list[float]:
+        return sorted(
+            {
+                event["timestamp_s"]
+                for event in events[channel]
+                if token is None or token in event["collision1"] or token in event["collision2"]
+            }
+        )
+
+    rates = {}
+    for channel in events:
+        timestamps = channel_timestamps(channel)
+        duration = timestamps[-1] - timestamps[0] if len(timestamps) >= 2 else 0.0
+        rates[channel] = {
+            "unique_timestamp_samples": len(timestamps),
+            "duration_s": duration,
+            "observed_rate_hz": (len(timestamps) - 1) / duration if duration > 0 else 0.0,
+        }
+    left_target_times = channel_timestamps("left", "object_red_cube")
+    right_target_times = channel_timestamps("right", "object_red_cube")
+    overlap = 0.0
+    if left_target_times and right_target_times:
+        overlap = max(
+            0.0,
+            min(left_target_times[-1], right_target_times[-1])
+            - max(left_target_times[0], right_target_times[0]),
+        )
+
     return {
         "left_target": channel_has("left", "object_red_cube"),
         "right_target": channel_has("right", "object_red_cube"),
@@ -301,6 +356,10 @@ def classify_contacts(events: dict[str, list[dict]]) -> dict:
         "cube_table": channel_has("cube", "work_table"),
         "raw_pairs": pairs,
         "event_counts": {channel: len(channel_events) for channel, channel_events in events.items()},
+        "topic_rate_evidence": rates,
+        "left_target_unique_samples": len(left_target_times),
+        "right_target_unique_samples": len(right_target_times),
+        "bilateral_overlap_s": overlap,
     }
 
 
@@ -328,9 +387,17 @@ def main() -> int:
             + [(f"bilateral_{index}", "bilateral", 0.0, [0.033, 0.033]) for index in range(1, 4)]
         )
         for label, expected, y_offset, finger_target in specifications:
+            initialization = calibration_set_cube_pose(CALIBRATION_CUBE_XYZ)
+            time.sleep(0.1)
             cube = runtime_cube_pose()
-            if cube is None:
-                trials.append({"label": label, "expected": expected, "reason": "RUNTIME_CUBE_POSE_UNAVAILABLE"})
+            if cube is None or not initialization["succeeded"]:
+                trials.append(
+                    {
+                        "label": label, "expected": expected,
+                        "reason": "CALIBRATION_INITIALIZATION_OR_ORACLE_UNAVAILABLE",
+                        "initialization": initialization,
+                    }
+                )
                 continue
             client.update_cube_scene(cube["xyz"])
             client.command_hand([0.04, 0.04])
@@ -343,10 +410,11 @@ def main() -> int:
                 {
                     "label": label,
                     "expected": expected,
+                    "initialization": initialization,
                     "cube_pose": cube,
                     "target_hand_pose": [
-                        cube["xyz"][0] - 0.060, cube["xyz"][1] + y_offset,
-                        cube["xyz"][2] - 0.020, 0.0, 0.0, 0.0, 1.0,
+                        cube["xyz"][0] - 0.120, cube["xyz"][1] + y_offset,
+                        cube["xyz"][2] - 0.055, 0.0, 0.0, 0.0, 1.0,
                     ],
                     "motion": motion,
                     "hand_command": {"positions_m": finger_target, **hand_result},
@@ -358,12 +426,15 @@ def main() -> int:
 
         client.command_hand([0.04, 0.04])
         for index in range(1, 3):
+            initialization = calibration_set_cube_pose(TABLE_CUBE_XYZ)
+            time.sleep(0.1)
             cube = runtime_cube_pose()
             events = client.contact_window(0.45)
             trials.append(
                 {
                     "label": f"object_environment_{index}",
                     "expected": "cube_table_without_finger",
+                    "initialization": initialization,
                     "cube_pose": cube,
                     "pad_evidence": client.pad_evidence(cube["xyz"]) if cube else None,
                     "contacts": classify_contacts(events),
@@ -402,7 +473,13 @@ def main() -> int:
             if expected == "right":
                 return contacts.get("right_target") and not contacts.get("left_target")
             if expected == "bilateral":
-                return contacts.get("left_target") and contacts.get("right_target")
+                return bool(
+                    contacts.get("left_target")
+                    and contacts.get("right_target")
+                    and contacts.get("bilateral_overlap_s", 0.0) >= 0.1
+                    and contacts.get("left_target_unique_samples", 0) >= 3
+                    and contacts.get("right_target_unique_samples", 0) >= 3
+                )
             if expected == "finger_table":
                 return contacts.get("left_table") or contacts.get("right_table")
             if expected == "cube_table_without_finger":
