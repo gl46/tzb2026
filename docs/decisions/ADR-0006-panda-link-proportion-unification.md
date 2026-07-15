@@ -1,7 +1,7 @@
 # ADR-0006: 机器人连杆比例统一到 Panda 运动学量级，场景与限位不变
 
 Date: 2026-07-16 (Asia/Shanghai)
-Status: **PROPOSED — NOT APPROVED**
+Status: **ACCEPTED — 2026-07-16 (Asia/Shanghai)**
 
 ## Context
 
@@ -67,16 +67,19 @@ official-origin candidate from the uniformly shrunk candidate in the required
 target neighbourhood. No URDF, scene, controller or end-effector change has
 been made by this ADR or the sampling run.
 
-## Decision requested
+## Decision
 
-Approve or reject **the official Panda-origin candidate described above**. It
-is the proposed implementation for this ADR. The uniform 0.85 m scale candidate
-is explicitly rejected by its 12.7 cm position-only residual in the deterministic
-bounded refinement and must not be implemented.
+The human approver accepted **the official Panda-origin candidate described
+above**, subject to the bin-reachability, home-state collision and S1 collision
+audit conditions below. The uniform 0.85 m scale candidate is explicitly
+rejected by its 12.7 cm position-only residual in the deterministic bounded
+refinement and must not be implemented.
 
-Human approval must cover the exact origin table, retained base transform
-`[-.35, 0, .45]`, unchanged dynamic cube pose `[.22, .12, .475]`, the cited
-source report and its URDF revision. The implementation must make the arm
+Approval covers the exact origin table, retained base transform `[-.35, 0,
+.45]`, unchanged dynamic cube pose `[.22, .12, .475]`, the revised bin centre
+`[.217366447885, -.249990627453, .45]`, its pre-place target
+`[.217366447885, -.249990627453, .60]`, the cited source report and both URDF
+revisions. The implementation must make the arm
 visual/collision primitives consistent with these transforms; merely changing
 joint origins while leaving the old oversized colliders would not meet this
 decision. The existing hand/finger collision geometry and sensors must not be
@@ -140,7 +143,20 @@ historical evidence only and cannot be used as results for the changed model.
 
 ## Approval record
 
-- Human approver: **pending**
-- Approval timestamp: **pending**
-- Exact model/base/scene candidate: **pending**
-- Implementation commit(s): **pending**
+- Human approver: project operator
+- Approval timestamp: 2026-07-16 (Asia/Shanghai)
+- Accepted candidate: official Panda origins plus fixed `panda_link8` /
+  `panda_joint8`; base `[-.35, 0, .45]`; cube `[.22, .12, .475]`; bin centre
+  `[.217366447885, -.249990627453, .45]`; bin pre-place
+  `[.217366447885, -.249990627453, .60]`. The bin footprint is reduced from
+  40 cm to 30 cm so it remains fully supported by the 0.8 m-wide table; the
+  non-task green sphere moves to `[.40, .28, .49]` so the relocated bin has no
+  t=0 overlap.
+- Source URDF SHA-256 before approval:
+  `e017d82f218578603078fd5da73cdba88ed47fef2f5ed57cf9f01f5c666fb096`
+- Approved implementation URDF SHA-256:
+  `8c68b8dbfbc878d6af7924e2eab0d288c56d5ae126a6f93e4922d5b1638533cd`
+- Required before S0: pass the MoveIt home-state self-collision gate.
+- Required in S1: SRDF/`ADJACENT_SELF_PAIRS` agreement and enabled-pair report
+  containing `panda_link8`–`work_table`.
+- Implementation commit(s): pending

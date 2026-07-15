@@ -11,6 +11,46 @@ PROJECT_REMOTE_ROOT="${PROJECT_REMOTE_ROOT:-xh-202607-world-agent}"
 mkdir -p logs reports
 raw_log="logs/${RUN_ID}-s1-moveit-execution.log"
 local_sha="$(sha256sum robot_ws/src/xh_sim/urdf/panda_controlled.urdf | awk '{print $1}')"
+if ! python3 - "$RUN_ID" "$local_sha" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+run_id, local_sha = sys.argv[1:]
+path = Path("reports/m1a-contact-calibration.json")
+s0 = json.loads(path.read_text()) if path.exists() else {}
+ready = (
+    s0.get("status") == "CONTACT_TELEMETRY_CALIBRATED"
+    and s0.get("model_match") is True
+    and s0.get("local_gazebo_urdf_sha256") == local_sha
+)
+if not ready:
+    data = {
+        "run_id": run_id,
+        "motion_status": "BLOCKED_S0_REVALIDATION_REQUIRED",
+        "reason": "S1 requires current-model CONTACT_TELEMETRY_CALIBRATED evidence from S0.",
+        "local_gazebo_urdf_sha256": local_sha,
+        "remote_gazebo_urdf_sha256": None,
+        "model_match": False,
+        "motion_trials": 0,
+        "motion_successes": 0,
+        "anti_teleport_verified_trials": 0,
+        "controller_trajectory_dispatched": False,
+        "planning_scene_objects": ["work_table", "bin_a", "object_red_cube"],
+        "enabled_collision_pairs": [],
+        "segments": [],
+    }
+    Path("reports/m1a-motion-execution.json").write_text(json.dumps(data, indent=2) + "\n")
+    Path("reports/m1a-motion-execution.md").write_text(
+        "# M1A S1 MoveIt execution gate\n\n"
+        "- Status: `BLOCKED_S0_REVALIDATION_REQUIRED`\n"
+        "- Run S0 on the current approved URDF first.\n"
+    )
+raise SystemExit(0 if ready else 1)
+PY
+then
+  exit 2
+fi
 collision_pairs="$(python3 - <<'PY'
 import json, yaml
 from pathlib import Path

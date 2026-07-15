@@ -51,27 +51,30 @@
       <link name="link"><inertial><mass>0.06</mass></inertial><collision name="collision"><geometry><cylinder><radius>0.03</radius><length>0.08</length></cylinder></geometry></collision><visual name="visual"><geometry><cylinder><radius>0.03</radius><length>0.08</length></cylinder></geometry><material><diffuse>0 0 1 1</diffuse></material></visual></link>
     </model>
     <model name="object_green_sphere">
-      <pose>0.16 -0.12 0.49 0 0 0</pose>
+      <!-- The approved bin relocation would otherwise start with this
+           non-task prop inside bin_a; keep it as a separate tabletop prop. -->
+      <pose>0.40 0.28 0.49 0 0 0</pose>
       <link name="link"><inertial><mass>0.04</mass></inertial><collision name="collision"><geometry><sphere><radius>0.035</radius></sphere></geometry></collision><visual name="visual"><geometry><sphere><radius>0.035</radius></sphere></geometry><material><diffuse>0 1 0 1</diffuse></material></visual></link>
     </model>
     <model name="bin_a">
-      <!-- An open 40 cm placement container: 2 cm floor plus four 8 cm walls.
+      <!-- An open 30 cm placement container: 2 cm floor plus four 8 cm walls.
            The interior is deliberately larger than the 5 cm task prop so the
            bounded controller demonstration has a meaningful placement margin. -->
-      <!-- This center is the measured, collision-free release point of the
-           bounded P0 transfer trajectory, not an inferred IK target. -->
-      <static>true</static><pose>0.51 -0.06 0.45 0 0 0</pose>
+      <!-- M1A ADR-0006 placement center: exactly 0.62 m from the Panda base
+           [-.35, 0] and 0.37 m from the red cube. This replaces the M0
+           visual-stub release point, which was outside Panda place reach. -->
+      <static>true</static><pose>0.217366447885 -0.249990627453 0.45 0 0 0</pose>
       <link name="link">
-        <collision name="floor_collision"><pose>0 0 0.01 0 0 0</pose><geometry><box><size>0.40 0.40 0.02</size></box></geometry></collision>
-        <visual name="floor_visual"><pose>0 0 0.01 0 0 0</pose><geometry><box><size>0.40 0.40 0.02</size></box></geometry><material><diffuse>0.7 0.7 0.7 1</diffuse></material></visual>
-        <collision name="left_wall_collision"><pose>0 0.19 0.05 0 0 0</pose><geometry><box><size>0.40 0.02 0.08</size></box></geometry></collision>
-        <collision name="right_wall_collision"><pose>0 -0.19 0.05 0 0 0</pose><geometry><box><size>0.40 0.02 0.08</size></box></geometry></collision>
-        <collision name="front_wall_collision"><pose>0.19 0 0.05 0 0 0</pose><geometry><box><size>0.02 0.40 0.08</size></box></geometry></collision>
-        <collision name="back_wall_collision"><pose>-0.19 0 0.05 0 0 0</pose><geometry><box><size>0.02 0.40 0.08</size></box></geometry></collision>
-        <visual name="left_wall_visual"><pose>0 0.19 0.05 0 0 0</pose><geometry><box><size>0.40 0.02 0.08</size></box></geometry><material><diffuse>0.7 0.7 0.7 1</diffuse></material></visual>
-        <visual name="right_wall_visual"><pose>0 -0.19 0.05 0 0 0</pose><geometry><box><size>0.40 0.02 0.08</size></box></geometry><material><diffuse>0.7 0.7 0.7 1</diffuse></material></visual>
-        <visual name="front_wall_visual"><pose>0.19 0 0.05 0 0 0</pose><geometry><box><size>0.02 0.40 0.08</size></box></geometry><material><diffuse>0.7 0.7 0.7 1</diffuse></material></visual>
-        <visual name="back_wall_visual"><pose>-0.19 0 0.05 0 0 0</pose><geometry><box><size>0.02 0.40 0.08</size></box></geometry><material><diffuse>0.7 0.7 0.7 1</diffuse></material></visual>
+        <collision name="floor_collision"><pose>0 0 0.01 0 0 0</pose><geometry><box><size>0.30 0.30 0.02</size></box></geometry></collision>
+        <visual name="floor_visual"><pose>0 0 0.01 0 0 0</pose><geometry><box><size>0.30 0.30 0.02</size></box></geometry><material><diffuse>0.7 0.7 0.7 1</diffuse></material></visual>
+        <collision name="left_wall_collision"><pose>0 0.14 0.05 0 0 0</pose><geometry><box><size>0.30 0.02 0.08</size></box></geometry></collision>
+        <collision name="right_wall_collision"><pose>0 -0.14 0.05 0 0 0</pose><geometry><box><size>0.30 0.02 0.08</size></box></geometry></collision>
+        <collision name="front_wall_collision"><pose>0.14 0 0.05 0 0 0</pose><geometry><box><size>0.02 0.30 0.08</size></box></geometry></collision>
+        <collision name="back_wall_collision"><pose>-0.14 0 0.05 0 0 0</pose><geometry><box><size>0.02 0.30 0.08</size></box></geometry></collision>
+        <visual name="left_wall_visual"><pose>0 0.14 0.05 0 0 0</pose><geometry><box><size>0.30 0.02 0.08</size></box></geometry><material><diffuse>0.7 0.7 0.7 1</diffuse></material></visual>
+        <visual name="right_wall_visual"><pose>0 -0.14 0.05 0 0 0</pose><geometry><box><size>0.30 0.02 0.08</size></box></geometry><material><diffuse>0.7 0.7 0.7 1</diffuse></material></visual>
+        <visual name="front_wall_visual"><pose>0.14 0 0.05 0 0 0</pose><geometry><box><size>0.02 0.30 0.08</size></box></geometry><material><diffuse>0.7 0.7 0.7 1</diffuse></material></visual>
+        <visual name="back_wall_visual"><pose>-0.14 0 0.05 0 0 0</pose><geometry><box><size>0.02 0.30 0.08</size></box></geometry><material><diffuse>0.7 0.7 0.7 1</diffuse></material></visual>
       </link>
     </model>
   </world>

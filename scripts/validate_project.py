@@ -25,6 +25,7 @@ REQUIRED = [
     "scripts/run_m1a_validation.sh", "scripts/write_m1a_status.py",
     "scripts/run_m1a_m0_smoke.sh",
     "scripts/sample_panda_fk_workspace.py",
+    "scripts/m1a_home_self_collision_client.py", "scripts/run_m1a_home_self_collision_check.sh",
 ]
 
 

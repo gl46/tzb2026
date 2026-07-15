@@ -16,6 +16,7 @@ for label in "${labels[@]}"; do
 done
 
 python3 - "$RUN_ID" "${logs[@]}" <<'PY'
+import hashlib
 import json
 import sys
 from pathlib import Path
@@ -23,8 +24,11 @@ from pathlib import Path
 run_id, *logs = sys.argv[1:]
 trials = []
 idle = None
+remote_hashes = []
 for log in logs:
     raw = Path(log).read_text(errors="replace")
+    remote_hashes.extend(line.split(":", 1)[1] for line in raw.splitlines()
+                         if line.startswith("REMOTE_GAZEBO_URDF_SHA256:"))
     payload = next((json.loads(line) for line in raw.splitlines()
                     if line.startswith("{") and '"trials"' in line), None)
     if payload is None:
@@ -47,6 +51,14 @@ data = {
     "listener_scope": "PER_TRIAL_FULL_ACTION_WINDOW",
     "session_isolation": "FRESH_GAZEBO_MOVEIT_SESSION_PER_CONDITION",
     "source_logs": logs,
+    "local_gazebo_urdf_sha256": hashlib.sha256(
+        Path("robot_ws/src/xh_sim/urdf/panda_controlled.urdf").read_bytes()
+    ).hexdigest(),
+    "remote_gazebo_urdf_sha256": remote_hashes,
+    "model_match": bool(remote_hashes) and len(set(remote_hashes)) == 1
+        and remote_hashes[0] == hashlib.sha256(
+            Path("robot_ws/src/xh_sim/urdf/panda_controlled.urdf").read_bytes()
+        ).hexdigest(),
     "trials": combined,
 }
 Path("reports/m1a-contact-calibration.json").write_text(json.dumps(data, indent=2) + "\n")

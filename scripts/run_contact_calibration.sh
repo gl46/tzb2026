@@ -13,6 +13,44 @@ CALIBRATION_REPETITION="${M1A_CALIBRATION_REPETITION:-1}"
 CALIBRATION_LABEL="${M1A_CALIBRATION_LABEL:-}"
 mkdir -p logs reports
 raw_log="logs/${RUN_ID}-s0-contact-calibration.log"
+local_sha="$(shasum -a 256 robot_ws/src/xh_sim/urdf/panda_controlled.urdf | awk '{print $1}')"
+
+# ADR-0006 requires a same-URDF, MoveIt-checked home state before any new S0
+# session can consume simulation time. A historical S0 cannot satisfy this.
+if ! python3 - "$RUN_ID" <<'PY'
+import hashlib
+import json
+import sys
+from pathlib import Path
+
+run_id = sys.argv[1]
+report_path = Path("reports/m1a-home-self-collision.json")
+urdf_path = Path("robot_ws/src/xh_sim/urdf/panda_controlled.urdf")
+data = json.loads(report_path.read_text()) if report_path.exists() else {}
+valid = (
+    data.get("status") == "HOME_SELF_COLLISION_VERIFIED"
+    and data.get("model_match") is True
+    and data.get("local_gazebo_urdf_sha256") == hashlib.sha256(urdf_path.read_bytes()).hexdigest()
+)
+if not valid:
+    payload = {
+        "run_id": run_id,
+        "status": "CONTACT_TELEMETRY_BLOCKED_HOME_SELF_COLLISION_GATE",
+        "reason": "ADR-0006 requires a current same-URDF HOME_SELF_COLLISION_VERIFIED report before S0.",
+        "home_gate": data,
+        "trials": [],
+    }
+    Path("reports/m1a-contact-calibration.json").write_text(json.dumps(payload, indent=2) + "\n")
+    Path("reports/m1a-contact-calibration.md").write_text(
+        "# M1A S0 contact telemetry calibration\n\n"
+        "- Status: `CONTACT_TELEMETRY_BLOCKED_HOME_SELF_COLLISION_GATE`\n"
+        "- Run `scripts/run_m1a_home_self_collision_check.sh` against the current URDF first.\n"
+    )
+raise SystemExit(0 if valid else 1)
+PY
+then
+  exit 2
+fi
 
 ssh -o BatchMode=yes -o ConnectTimeout=10 "$SIM_USER@$SIM_HOST" "bash -s -- '$PROJECT_REMOTE_ROOT' '$CALIBRATION_SCOPE' '$CALIBRATION_REPETITION' '$CALIBRATION_LABEL'" >"$raw_log" 2>&1 <<'REMOTE' || true
 set -eo pipefail
@@ -41,6 +79,8 @@ cleanup() {
 }
 trap cleanup EXIT INT TERM
 sleep 15
+printf 'REMOTE_GAZEBO_URDF_SHA256:'
+sha256sum "/home/$USER/$root/robot_ws/src/xh_sim/urdf/panda_controlled.urdf" | awk '{print $1}'
 if ! kill -0 "$pid" 2>/dev/null; then
   echo M1A_S0_LAUNCH_FAILED
   sed -n '1,220p' "$launch_log"
@@ -55,13 +95,15 @@ echo M1A_S0_LAUNCH_TAIL
 tail -n 220 "$launch_log"
 REMOTE
 
-python3 - "$RUN_ID" "$raw_log" <<'PY'
+python3 - "$RUN_ID" "$raw_log" "$local_sha" <<'PY'
 import json
 import sys
 from pathlib import Path
 
-run_id, log = sys.argv[1:]
+run_id, log, local_sha = sys.argv[1:]
 raw = Path(log).read_text(errors="replace")
+remote_sha = next((line.split(":", 1)[1] for line in raw.splitlines()
+                   if line.startswith("REMOTE_GAZEBO_URDF_SHA256:")), None)
 runtime = next(
     (json.loads(line) for line in raw.splitlines() if line.startswith("{") and '"trials"' in line),
     None,
@@ -86,6 +128,9 @@ data.update(
         "calibration_trials_completed": max(0, len(data.get("trials", [])) - 1),
         "use_sim_time": True,
         "listener_scope": "PER_TRIAL_FULL_ACTION_WINDOW",
+        "local_gazebo_urdf_sha256": local_sha,
+        "remote_gazebo_urdf_sha256": remote_sha,
+        "model_match": remote_sha == local_sha,
     }
 )
 Path("reports/m1a-contact-calibration.json").write_text(json.dumps(data, indent=2) + "\n")

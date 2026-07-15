@@ -414,31 +414,64 @@ def test_adr_0006_fk_sampling_keeps_end_effector_and_protocol_invariants() -> No
     scale = module.candidate_scale(model, 0.85)
     assert module.ARM_JOINTS == tuple(f"panda_joint{index}" for index in range(1, 8))
     assert 0 < scale < 1
-    assert module.serial_translation_m(model) == pytest.approx(1.98)
+    assert module.serial_translation_m(model) == pytest.approx(1.3192623327153459)
     assert module.fixed_end_effector_extension_m(model) == pytest.approx(0.115)
     report = module.sample_workspace(model, samples=100, seed=7, target_total_reach_m=0.85)
     candidate = report["candidate_definition"]
-    assert candidate["scaled_transforms"] == [*module.ARM_JOINTS, module.HAND_JOINT]
+    assert candidate["scaled_transforms"] == [*module.ARM_JOINTS, "panda_joint8", module.HAND_JOINT]
     assert candidate["unchanged_transforms"] == ["world_to_panda", *module.FINGER_JOINTS, *module.FINGER_LINKS]
     assert report["sampling"]["fingertip_points_per_model"] == 200
 
 
-def test_adr_0006_is_evidence_bound_and_not_a_model_change_authorization() -> None:
+def test_adr_0006_approved_model_is_bound_to_fk_evidence_and_home_gate() -> None:
     root = Path(__file__).parents[2]
     adr = (root / "docs/decisions/ADR-0006-panda-link-proportion-unification.md").read_text()
     report = json.loads((root / "reports/m1a-fk-workspace-sampling.json").read_text())
-    assert "PROPOSED — NOT APPROVED" in adr
+    assert "ACCEPTED" in adr
     assert "100,000" in adr
     assert "CONTACT_TELEMETRY_PARTIAL" in adr
-    assert report["status"] == "EVIDENCE_ONLY_ADR_0006_PENDING_HUMAN_APPROVAL"
+    assert report["status"] == "APPROVED_MODEL_OFFLINE_FK_EVIDENCE_PENDING_HOME_SELF_COLLISION_GATE"
     assert report["sampling"]["arm_joint_samples"] == 100_000
     official = report["candidate_official_panda_origins"]
     assert official["source"]["sha256"] == (
         "c8ee3bad4d89ad9bf4af717037418a3e6b046d47df6375a92a912a901d256a34"
     )
     assert official["metrics"]["position_only_refinement"]["final_target_distance_m"] < 1e-5
-    assert report["candidate_uniform_085_m_kinematics"]["position_only_refinement"]["final_target_distance_m"] > 0.1
-    assert report["blocker"] == "HUMAN_ADR_0006_APPROVAL_REQUIRED_BEFORE_URDF_OR_SCENE_CHANGE"
+    assert report["bin_place_target_evidence"]["current_controlled_urdf"]["position_only_refinement"]["final_target_distance_m"] < 1e-5
+    assert report["blocker"] == "HOME_SELF_COLLISION_GATE_REQUIRED_BEFORE_S0"
+    assert report["approval_record"]["bin_a_xyz_m"] == pytest.approx([0.217366447885, -0.249990627453, 0.45])
     assert report["urdf_sha256"] == hashlib.sha256(
         (root / "robot_ws/src/xh_sim/urdf/panda_controlled.urdf").read_bytes()
     ).hexdigest()
+
+
+def test_approved_model_keeps_actuation_protocol_and_gates_s0_on_home_collision_check() -> None:
+    root = Path(__file__).parents[2]
+    urdf = (root / "robot_ws/src/xh_sim/urdf/panda_controlled.urdf").read_text()
+    srdf = (root / "robot_ws/src/xh_sim/config/m1a_panda.srdf").read_text()
+    policy = yaml.safe_load((root / "robot_ws/src/xh_sim/config/m1a_collision_policy.yaml").read_text())
+    home_client = (root / "scripts/m1a_home_self_collision_client.py").read_text()
+    s0_runner = (root / "scripts/run_contact_calibration.sh").read_text()
+    assert 'joint name="panda_joint8" type="fixed"' in urdf
+    assert '<parent link="panda_link7"/><child link="panda_link8"/>' in urdf
+    assert '<parent link="panda_link8"/><child link="panda_hand"/>' in urdf
+    assert '<origin xyz="0 0 0.333" rpy="0 0 0"/>' in urdf
+    assert '<origin xyz="0 -0.316 0" rpy="1.57079632679 0 0"/>' in urdf
+    assert '<disable_collisions link1="panda_link7" link2="panda_link8"' in srdf
+    assert '<disable_collisions link1="panda_link8" link2="panda_hand"' in srdf
+    assert ("panda_link8", "work_table") in {
+        tuple(pair) for pair in policy["enabled_robot_world_collision_pairs"]
+    }
+    assert '"/check_state_validity"' in home_client
+    assert "MOVEIT_CHECK_STATE_VALIDITY_NO_MOTION_COMMAND" in home_client
+    assert "HOME_SELF_COLLISION_VERIFIED" in s0_runner
+    assert "CONTACT_TELEMETRY_BLOCKED_HOME_SELF_COLLISION_GATE" in s0_runner
+    controller_config = (root / "robot_ws/src/xh_sim/config/panda_controllers.yaml").read_text()
+    moveit_config = (root / "robot_ws/src/xh_sim/config/m1a_moveit_controllers.yaml").read_text()
+    world = (root / "robot_ws/src/xh_sim/worlds/p0_pick_place.sdf").read_text()
+    execution_client = (root / "scripts/m1a_moveit_execution_client.py").read_text()
+    assert "panda_joint8" not in controller_config and "panda_joint8" not in moveit_config
+    assert '<pose>0.217366447885 -0.249990627453 0.45 0 0 0</pose>' in world
+    assert '<pose>0.40 0.28 0.49 0 0 0</pose>' in world
+    assert '<size>0.30 0.30 0.02</size>' in world
+    assert '[0.30, 0.30, 0.10], [0.217366447885, -0.249990627453, 0.50]' in execution_client

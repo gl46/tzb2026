@@ -42,7 +42,8 @@ ADJACENT_SELF_PAIRS = [
     ("panda_link4", "panda_link5"),
     ("panda_link5", "panda_link6"),
     ("panda_link6", "panda_link7"),
-    ("panda_link7", "panda_hand"),
+    ("panda_link7", "panda_link8"),
+    ("panda_link8", "panda_hand"),
     ("panda_hand", "panda_leftfinger"),
     ("panda_hand", "panda_rightfinger"),
 ]
@@ -51,6 +52,7 @@ REQUIRED_CHECKED_PAIRS = [
     ("panda_rightfinger", "object_red_cube"),
     ("panda_link1", "work_table"),
     ("panda_link7", "work_table"),
+    ("panda_link8", "work_table"),
     ("panda_hand", "work_table"),
 ]
 
@@ -163,7 +165,7 @@ class EvidenceClient(Node):
         scene.is_diff = True
         for object_id, size, xyz in (
             ("work_table", [1.2, 0.8, 0.10], [0.0, 0.0, 0.40]),
-            ("bin_a", [0.40, 0.40, 0.10], [0.51, -0.06, 0.50]),
+            ("bin_a", [0.30, 0.30, 0.10], [0.217366447885, -0.249990627453, 0.50]),
             ("object_red_cube", [0.05, 0.05, 0.05], [0.22, 0.12, 0.475]),
         ):
             item = CollisionObject()

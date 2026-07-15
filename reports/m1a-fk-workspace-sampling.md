@@ -1,24 +1,37 @@
 # M1A offline FK workspace sampling
 
-- Status: `EVIDENCE_ONLY — ADR-0006 NOT APPROVED`; no URDF, scene, controller, or end-effector change was made.
-- Samples: `100000` uniform seven-arm-joint configurations, seed `20260716`; each yields two collision-centre fingertip points.
-- Target: `[0.22, 0.12, 0.475]` m; finger joints held at `0.02` m.
-- Current arm-and-wrist serial translation: `1.980000` m. The candidate scales only arm/wrist origins by `0.371212121`, retains the `0.115000` m hand/finger extension, and gives a `0.850` m nominal total reach.
+- Status: `APPROVED_MODEL_OFFLINE_FK_EVIDENCE`; model/scene files are changed but the MoveIt home-state, S0, S1 and S2 runtime gates have not yet run.
+- Source URDF SHA-256 before approval: `e017d82f218578603078fd5da73cdba88ed47fef2f5ed57cf9f01f5c666fb096`; approved current URDF SHA-256: `8c68b8dbfbc878d6af7924e2eab0d288c56d5ae126a6f93e4922d5b1638533cd`.
+- Approved cube pose: `[0.22, 0.12, 0.475]` m. Approved bin centre: `[0.217366447885, -0.249990627453, 0.45]` m, 0.62 m from base and 0.37 m from cube; bin pre-place target: `[0.217366447885, -0.249990627453, 0.6]` m.
+
+## Cube contact target
+
+- Target: `[0.22, 0.12, 0.475]` m; `100000` uniform seven-arm-joint samples, seed `20260716`, finger joints `0.02` m.
 
 | Model | Random minimum (m) | 3 cm pad-point density | 5 cm pad-point density | Refined position-only distance (m) |
 | --- | ---: | ---: | ---: | ---: |
-| Current controlled URDF | 0.026638 | 1/200000 (0.000500%) | 6/200000 (0.003000%) | 0.000000 |
-| Uniform 0.85 m candidate | 0.142255 | 0/200000 (0.000000%) | 0/200000 (0.000000%) | 0.126863 |
+| Current controlled URDF | 0.019599 | 7/200000 (0.003500%) | 25/200000 (0.012500%) | 0.000000 |
+| Uniform 0.85 m candidate | 0.061803 | 0/200000 (0.000000%) | 0/200000 (0.000000%) | 0.042994 |
 | Official Panda-origin candidate | 0.019599 | 7/200000 (0.003500%) | 25/200000 (0.012500%) | 0.000000 |
 
-The densities count collision-centre fingertip points; the adjacent JSON also records the number of source arm samples with either pad in each sphere and both point-cloud bounds. The raw 200,000-point clouds are deterministically regenerable from this script and are deliberately not committed as experiment artifacts.
+## Bin pre-place target
 
-The final column is a bounded damped-least-squares position-only refinement seeded by the nearest random point. It does not solve orientation, check collision or establish a collision-free approach, simulator contact, or grasp success; it cannot authorize the proposed model change.
+- Target: `[0.217366447885, -0.249990627453, 0.6]` m; `100000` uniform seven-arm-joint samples, seed `20260716`, finger joints `0.02` m.
+
+| Model | Random minimum (m) | 3 cm pad-point density | 5 cm pad-point density | Refined position-only distance (m) |
+| --- | ---: | ---: | ---: | ---: |
+| Current controlled URDF | 0.010181 | 5/200000 (0.002500%) | 19/200000 (0.009500%) | 0.000000 |
+| Uniform 0.85 m candidate | 0.067485 | 0/200000 (0.000000%) | 0/200000 (0.000000%) | 0.059802 |
+| Official Panda-origin candidate | 0.010181 | 5/200000 (0.002500%) | 19/200000 (0.009500%) | 0.000000 |
+
+The densities count collision-centre fingertip points; the adjacent JSON records source-arm samples, bounds and both target profiles. Raw point clouds are deterministically regenerable and are not committed as experiment artifacts.
+
+The final column is a bounded damped-least-squares position-only refinement. It does not solve orientation, check collision or establish a collision-free approach, simulator contact, or grasp success.
 
 ## Audit handoff
 
-- Changed files: `pyproject.toml`, `scripts/sample_panda_fk_workspace.py`, this JSON/Markdown report, ADR-0006, and `tests/unit/test_m1a_gates.py`.
+- Changed files: approved URDF/SRDF/collision policy/world, this sampling script and report, ADR-0006, home-state gate scripts, and their unit tests.
 - Verification commands: run this script with `--samples 100000 --seed 20260716 --workers 4`, then `.venv/bin/python -m pytest -q` and `.venv/bin/python scripts/validate_project.py`.
-- Failure/rejection: the uniform 0.85 m candidate retains a 0.126863353 m position-only residual and is rejected.
-- Blocker: `HUMAN_ADR_0006_APPROVAL_REQUIRED_BEFORE_URDF_OR_SCENE_CHANGE`.
-- Next command after approval: implement the exact approved model candidate, then rerun S0 before S1 and S2.
+- Failure/rejection: the historic uniform 0.85 m candidate remains rejected; no runtime success is claimed here.
+- Blocker: `HOME_SELF_COLLISION_GATE_REQUIRED_BEFORE_S0`.
+- Next command: run the MoveIt home-state self-collision gate, then S0 before S1 and S2.

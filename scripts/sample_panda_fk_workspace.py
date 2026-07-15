@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
-"""Sample the controlled Panda URDF's fingertip workspace without ROS or Gazebo.
+"""Sample approved controlled-URDF fingertip targets without ROS or Gazebo.
 
-The candidate model in this report is intentionally a *kinematic proposal*, not
-an edited URDF.  It scales only the seven arm-joint origins and the wrist
-fixed-joint origin.  The base placement, joint axes/limits, and complete hand
-and finger geometry are held fixed so that the comparison can inform ADR-0006
-without silently changing the calibrated end effector.
+The report preserves the rejected uniform-scale comparison but samples both the
+approved cube-contact target and the approved bin pre-place target from the
+same controlled URDF. It remains offline kinematic evidence, not a contact or
+grasp result.
 """
 from __future__ import annotations
 
@@ -32,9 +31,14 @@ ARM_JOINTS = tuple(f"panda_joint{index}" for index in range(1, 8))
 HAND_JOINT = "panda_hand_joint"
 FINGER_JOINTS = ("panda_finger_joint1", "panda_finger_joint2")
 FINGER_LINKS = ("panda_leftfinger", "panda_rightfinger")
-TARGET_XYZ = (0.22, 0.12, 0.475)
+CUBE_TARGET_XYZ = (0.22, 0.12, 0.475)
+# Approved bin centre is 0.62 m from world_to_panda's xy origin and 0.37 m
+# from the cube. The place target clears the 8 cm bin wall by 7 cm.
+BIN_A_XYZ = (0.217366447885, -0.249990627453, 0.45)
+BIN_PLACE_TARGET_XYZ = (BIN_A_XYZ[0], BIN_A_XYZ[1], 0.60)
 TARGET_RADII_M = (0.03, 0.05)
 FINGER_POSITION_M = 0.02
+PRE_APPROVAL_URDF_SHA256 = "e017d82f218578603078fd5da73cdba88ed47fef2f5ed57cf9f01f5c666fb096"
 OFFICIAL_PANDA_SOURCE = {
     "path": "/opt/ros/jazzy/share/moveit_resources_panda_description/urdf/panda.urdf.xacro",
     "sha256": "c8ee3bad4d89ad9bf4af717037418a3e6b046d47df6375a92a912a901d256a34",
@@ -78,6 +82,7 @@ class Model:
     base: Joint
     arm: tuple[Joint, ...]
     hand: Joint
+    post_arm: tuple[Joint, ...]
     fingers: tuple[Joint, ...]
     pad_centers: tuple[Vector, ...]
 
@@ -178,12 +183,19 @@ def load_model(path: Path = URDF_PATH) -> Model:
     for name in FINGER_LINKS:
         collision_origin = links[name].find("collision/origin")
         pads.append(vector(collision_origin.attrib.get("xyz") if collision_origin is not None else None))
-    return Model(base=base, arm=arm, hand=hand, fingers=fingers, pad_centers=tuple(pads))
+    post_arm = tuple(
+        joints[name] for name in ("panda_joint8", HAND_JOINT) if name in joints
+    )
+    if not post_arm or post_arm[-1].name != HAND_JOINT:
+        raise ValueError("controlled URDF lacks the fixed hand transform")
+    return Model(
+        base=base, arm=arm, hand=hand, post_arm=post_arm, fingers=fingers, pad_centers=tuple(pads)
+    )
 
 
 def serial_translation_m(model: Model) -> float:
     """Scalar kinematic-chain length excluding the unchanged finger end effector."""
-    return sum(math.dist((0.0, 0.0, 0.0), joint.origin_xyz) for joint in (*model.arm, model.hand))
+    return sum(math.dist((0.0, 0.0, 0.0), joint.origin_xyz) for joint in (*model.arm, *model.post_arm))
 
 
 def chain_translation_m(arm: Iterable[Joint], post_arm: Iterable[Joint]) -> float:
@@ -215,7 +227,7 @@ def fingertip_positions(
     post_arm: Iterable[Joint] | None = None,
 ) -> tuple[Vector, Vector]:
     arm = tuple(model.arm if arm is None else arm)
-    post_arm = tuple((model.hand,) if post_arm is None else post_arm)
+    post_arm = tuple(model.post_arm if post_arm is None else post_arm)
     frame = transform(model.base.origin_xyz, model.base.origin_rpy)
     for joint, position in zip(arm, arm_positions):
         frame = multiply(frame, transform(joint.origin_xyz, joint.origin_rpy))
@@ -233,8 +245,11 @@ def fingertip_positions(
 
 def uniform_scale_candidate(model: Model, scale: float) -> tuple[tuple[Joint, ...], tuple[Joint, ...]]:
     arm = tuple(replace(joint, origin_xyz=tuple(value * scale for value in joint.origin_xyz)) for joint in model.arm)
-    hand = replace(model.hand, origin_xyz=tuple(value * scale for value in model.hand.origin_xyz))
-    return arm, (hand,)
+    post_arm = tuple(
+        replace(joint, origin_xyz=tuple(value * scale for value in joint.origin_xyz))
+        for joint in model.post_arm
+    )
+    return arm, post_arm
 
 
 def official_panda_origin_candidate(model: Model) -> tuple[tuple[Joint, ...], tuple[Joint, ...]]:
@@ -262,7 +277,7 @@ def empty_metrics() -> dict[str, object]:
 
 
 def update_metrics(
-    metrics: dict[str, object], pads: tuple[Vector, Vector], arm_positions: tuple[float, ...]
+    metrics: dict[str, object], pads: tuple[Vector, Vector], arm_positions: tuple[float, ...], target_xyz: Vector
 ) -> None:
     bounds = metrics["bounds_m"]  # type: ignore[assignment]
     minimum = metrics["minimum_target_distance_m"]  # type: ignore[assignment]
@@ -273,7 +288,7 @@ def update_metrics(
         for index, value in enumerate(pad):
             bounds["min_xyz"][index] = min(bounds["min_xyz"][index], value)
             bounds["max_xyz"][index] = max(bounds["max_xyz"][index], value)
-        distance = math.dist(pad, TARGET_XYZ)
+        distance = math.dist(pad, target_xyz)
         if distance < minimum:
             metrics["minimum_target_distance_m"] = distance
             metrics["closest_pad_side"] = FINGER_LINKS[side]
@@ -325,16 +340,16 @@ def merge_metrics(destination: dict[str, object], source: dict[str, object]) -> 
 
 
 def closest_pad(
-    model: Model, arm_positions: tuple[float, ...], arm: Iterable[Joint], post_arm: Iterable[Joint]
+    model: Model, arm_positions: tuple[float, ...], arm: Iterable[Joint], post_arm: Iterable[Joint], target_xyz: Vector
 ) -> tuple[float, int, Vector]:
     pads = fingertip_positions(model, arm_positions, arm=arm, post_arm=post_arm)
-    distances = tuple(math.dist(pad, TARGET_XYZ) for pad in pads)
+    distances = tuple(math.dist(pad, target_xyz) for pad in pads)
     side = min(range(len(pads)), key=distances.__getitem__)
     return distances[side], side, pads[side]
 
 
 def refine_position_only(
-    model: Model, metrics: dict[str, object], arm: tuple[Joint, ...], post_arm: tuple[Joint, ...]
+    model: Model, metrics: dict[str, object], arm: tuple[Joint, ...], post_arm: tuple[Joint, ...], target_xyz: Vector
 ) -> dict[str, object]:
     """Bounded DLS refinement of a sampled seed for position only, not full pose IK."""
     seed = metrics["closest_arm_positions_rad"]
@@ -343,11 +358,11 @@ def refine_position_only(
     positions = np.asarray(seed, dtype=float)
     lower = np.asarray([joint.lower for joint in model.arm], dtype=float)
     upper = np.asarray([joint.upper for joint in model.arm], dtype=float)
-    target = np.asarray(TARGET_XYZ, dtype=float)
+    target = np.asarray(target_xyz, dtype=float)
     damping = 1e-3
     iterations = 0
     for iterations in range(1, 161):
-        distance, side, pad = closest_pad(model, tuple(positions), arm, post_arm)
+        distance, side, pad = closest_pad(model, tuple(positions), arm, post_arm, target_xyz)
         if distance <= 1e-6:
             break
         jacobian = np.empty((3, len(positions)), dtype=float)
@@ -357,7 +372,7 @@ def refine_position_only(
             perturbed[index] = min(upper[index], perturbed[index] + epsilon)
             if perturbed[index] == positions[index]:
                 perturbed[index] = max(lower[index], perturbed[index] - epsilon)
-            _, _, perturbed_pad = closest_pad(model, tuple(perturbed), arm, post_arm)
+            _, _, perturbed_pad = closest_pad(model, tuple(perturbed), arm, post_arm, target_xyz)
             jacobian[:, index] = (np.asarray(perturbed_pad) - np.asarray(pad)) / (perturbed[index] - positions[index])
         error = target - np.asarray(pad)
         try:
@@ -369,7 +384,7 @@ def refine_position_only(
         accepted = False
         for multiplier in (1.0, 0.5, 0.25, 0.1, 0.05):
             candidate = np.clip(positions + multiplier * delta, lower, upper)
-            candidate_distance, _, _ = closest_pad(model, tuple(candidate), arm, post_arm)
+            candidate_distance, _, _ = closest_pad(model, tuple(candidate), arm, post_arm, target_xyz)
             if candidate_distance < distance:
                 positions = candidate
                 damping = max(damping / 2, 1e-8)
@@ -377,7 +392,7 @@ def refine_position_only(
                 break
         if not accepted:
             damping *= 10
-    distance, side, pad = closest_pad(model, tuple(positions), arm, post_arm)
+    distance, side, pad = closest_pad(model, tuple(positions), arm, post_arm, target_xyz)
     return {
         "method": "bounded_damped_least_squares_position_only_from_nearest_uniform_sample",
         "iterations": iterations,
@@ -390,7 +405,9 @@ def refine_position_only(
     }
 
 
-def sample_chunk(model: Model, samples: int, seed: int, target_total_reach_m: float) -> tuple[dict[str, object], ...]:
+def sample_chunk(
+    model: Model, samples: int, seed: int, target_total_reach_m: float, target_xyz: Vector
+) -> tuple[dict[str, object], ...]:
     """Independent deterministic stream used by one worker; no simulator state."""
     scale = candidate_scale(model, target_total_reach_m)
     uniform_arm, uniform_post_arm = uniform_scale_candidate(model, scale)
@@ -399,22 +416,22 @@ def sample_chunk(model: Model, samples: int, seed: int, target_total_reach_m: fl
     current, uniform, official = empty_metrics(), empty_metrics(), empty_metrics()
     for _ in range(samples):
         positions = tuple(random_source.uniform(joint.lower, joint.upper) for joint in model.arm)  # type: ignore[arg-type]
-        update_metrics(current, fingertip_positions(model, positions), positions)
+        update_metrics(current, fingertip_positions(model, positions), positions, target_xyz)
         update_metrics(
-            uniform, fingertip_positions(model, positions, arm=uniform_arm, post_arm=uniform_post_arm), positions
+            uniform, fingertip_positions(model, positions, arm=uniform_arm, post_arm=uniform_post_arm), positions, target_xyz
         )
         update_metrics(
-            official, fingertip_positions(model, positions, arm=official_arm, post_arm=official_post_arm), positions
+            official, fingertip_positions(model, positions, arm=official_arm, post_arm=official_post_arm), positions, target_xyz
         )
     return current, uniform, official
 
 
-def sample_chunk_from_values(values: tuple[Model, int, int, float]) -> tuple[dict[str, object], ...]:
+def sample_chunk_from_values(values: tuple[Model, int, int, float, Vector]) -> tuple[dict[str, object], ...]:
     return sample_chunk(*values)
 
 
 def sample_workspace(
-    model: Model, *, samples: int, seed: int, target_total_reach_m: float, workers: int = 1
+    model: Model, *, samples: int, seed: int, target_total_reach_m: float, target_xyz: Vector = CUBE_TARGET_XYZ, workers: int = 1
 ) -> dict[str, object]:
     if samples <= 0:
         raise ValueError("samples must be positive")
@@ -426,7 +443,7 @@ def sample_workspace(
     current, uniform, official = empty_metrics(), empty_metrics(), empty_metrics()
     chunk_count = min(workers, samples)
     chunk_sizes = [samples // chunk_count + (1 if index < samples % chunk_count else 0) for index in range(chunk_count)]
-    inputs = [(model, size, seed + index, target_total_reach_m) for index, size in enumerate(chunk_sizes)]
+    inputs = [(model, size, seed + index, target_total_reach_m, target_xyz) for index, size in enumerate(chunk_sizes)]
     if chunk_count == 1:
         chunks = [sample_chunk(*inputs[0])]
     else:
@@ -436,9 +453,9 @@ def sample_workspace(
         merge_metrics(current, chunk_current)
         merge_metrics(uniform, chunk_uniform)
         merge_metrics(official, chunk_official)
-    current_refinement = refine_position_only(model, current, tuple(model.arm), (model.hand,))
-    uniform_refinement = refine_position_only(model, uniform, uniform_arm, uniform_post_arm)
-    official_refinement = refine_position_only(model, official, official_arm, official_post_arm)
+    current_refinement = refine_position_only(model, current, tuple(model.arm), model.post_arm, target_xyz)
+    uniform_refinement = refine_position_only(model, uniform, uniform_arm, uniform_post_arm, target_xyz)
+    official_refinement = refine_position_only(model, official, official_arm, official_post_arm, target_xyz)
     current_metrics = finalise_metrics(current, samples)
     uniform_metrics = finalise_metrics(uniform, samples)
     official_metrics = finalise_metrics(official, samples)
@@ -454,7 +471,7 @@ def sample_workspace(
             "worker_seed_derivation": "base_seed + worker_index",
             "distribution": "independent_uniform_within_URDF_arm_joint_limits",
             "finger_joint_positions_m": {name: FINGER_POSITION_M for name in FINGER_JOINTS},
-            "target_xyz_m": list(TARGET_XYZ),
+            "target_xyz_m": list(target_xyz),
             "target_sphere_radii_m": list(TARGET_RADII_M),
         },
         "candidate_definition": {
@@ -462,7 +479,7 @@ def sample_workspace(
             "current_arm_serial_translation_m": serial_translation_m(model),
             "unchanged_end_effector_extension_m": fixed_end_effector_extension_m(model),
             "candidate_arm_and_wrist_origin_scale": scale,
-            "scaled_transforms": [*ARM_JOINTS, HAND_JOINT],
+            "scaled_transforms": [*ARM_JOINTS, *(joint.name for joint in model.post_arm)],
             "unchanged_transforms": ["world_to_panda", *FINGER_JOINTS, *FINGER_LINKS],
         },
         "current_controlled_urdf": current_metrics,
@@ -479,19 +496,15 @@ def sample_workspace(
     }
 
 
-def markdown(report: dict[str, object]) -> str:
-    sampling = report["sampling"]  # type: ignore[assignment]
-    proposal = report["candidate_definition"]  # type: ignore[assignment]
-    current = report["current_controlled_urdf"]  # type: ignore[assignment]
-    uniform = report["candidate_uniform_085_m_kinematics"]  # type: ignore[assignment]
-    official = report["candidate_official_panda_origins"]  # type: ignore[assignment]
+def target_table(title: str, evidence: dict[str, object]) -> list[str]:
+    sampling = evidence["sampling"]  # type: ignore[assignment]
+    current = evidence["current_controlled_urdf"]  # type: ignore[assignment]
+    uniform = evidence["candidate_uniform_085_m_kinematics"]  # type: ignore[assignment]
+    official = evidence["candidate_official_panda_origins"]  # type: ignore[assignment]
     lines = [
-        "# M1A offline FK workspace sampling",
+        f"## {title}",
         "",
-        "- Status: `EVIDENCE_ONLY — ADR-0006 NOT APPROVED`; no URDF, scene, controller, or end-effector change was made.",
-        f"- Samples: `{sampling['arm_joint_samples']}` uniform seven-arm-joint configurations, seed `{sampling['random_seed']}`; each yields two collision-centre fingertip points.",
-        f"- Target: `{sampling['target_xyz_m']}` m; finger joints held at `{FINGER_POSITION_M}` m.",
-        f"- Current arm-and-wrist serial translation: `{proposal['current_arm_serial_translation_m']:.6f}` m. The candidate scales only arm/wrist origins by `{proposal['candidate_arm_and_wrist_origin_scale']:.9f}`, retains the `{proposal['unchanged_end_effector_extension_m']:.6f}` m hand/finger extension, and gives a `{proposal['target_total_nominal_reach_m']:.3f}` m nominal total reach.",
+        f"- Target: `{sampling['target_xyz_m']}` m; `{sampling['arm_joint_samples']}` uniform seven-arm-joint samples, seed `{sampling['random_seed']}`, finger joints `{FINGER_POSITION_M}` m.",
         "",
         "| Model | Random minimum (m) | 3 cm pad-point density | 5 cm pad-point density | Refined position-only distance (m) |",
         "| --- | ---: | ---: | ---: | ---: |",
@@ -508,19 +521,35 @@ def markdown(report: dict[str, object]) -> str:
             f"{sphere['0.05']['pad_points']}/{values['point_count']} ({sphere['0.05']['pad_point_density']:.6%}) | "
             f"{values['position_only_refinement']['final_target_distance_m']:.6f} |"
         )
+    return lines
+
+
+def markdown(report: dict[str, object]) -> str:
+    bin_place = report["bin_place_target_evidence"]  # type: ignore[assignment]
+    lines = [
+        "# M1A offline FK workspace sampling",
+        "",
+        "- Status: `APPROVED_MODEL_OFFLINE_FK_EVIDENCE`; model/scene files are changed but the MoveIt home-state, S0, S1 and S2 runtime gates have not yet run.",
+        f"- Source URDF SHA-256 before approval: `{report['pre_approval_urdf_sha256']}`; approved current URDF SHA-256: `{report['urdf_sha256']}`.",
+        f"- Approved cube pose: `{list(CUBE_TARGET_XYZ)}` m. Approved bin centre: `{list(BIN_A_XYZ)}` m, 0.62 m from base and 0.37 m from cube; bin pre-place target: `{list(BIN_PLACE_TARGET_XYZ)}` m.",
+        "",
+    ]
+    lines.extend(target_table("Cube contact target", report))
+    lines.extend([""])
+    lines.extend(target_table("Bin pre-place target", bin_place))
     lines.extend([
         "",
-        "The densities count collision-centre fingertip points; the adjacent JSON also records the number of source arm samples with either pad in each sphere and both point-cloud bounds. The raw 200,000-point clouds are deterministically regenerable from this script and are deliberately not committed as experiment artifacts.",
+        "The densities count collision-centre fingertip points; the adjacent JSON records source-arm samples, bounds and both target profiles. Raw point clouds are deterministically regenerable and are not committed as experiment artifacts.",
         "",
-        "The final column is a bounded damped-least-squares position-only refinement seeded by the nearest random point. It does not solve orientation, check collision or establish a collision-free approach, simulator contact, or grasp success; it cannot authorize the proposed model change.",
+        "The final column is a bounded damped-least-squares position-only refinement. It does not solve orientation, check collision or establish a collision-free approach, simulator contact, or grasp success.",
         "",
         "## Audit handoff",
         "",
-        "- Changed files: `pyproject.toml`, `scripts/sample_panda_fk_workspace.py`, this JSON/Markdown report, ADR-0006, and `tests/unit/test_m1a_gates.py`.",
+        "- Changed files: approved URDF/SRDF/collision policy/world, this sampling script and report, ADR-0006, home-state gate scripts, and their unit tests.",
         "- Verification commands: run this script with `--samples 100000 --seed 20260716 --workers 4`, then `.venv/bin/python -m pytest -q` and `.venv/bin/python scripts/validate_project.py`.",
-        "- Failure/rejection: the uniform 0.85 m candidate retains a 0.126863353 m position-only residual and is rejected.",
-        "- Blocker: `HUMAN_ADR_0006_APPROVAL_REQUIRED_BEFORE_URDF_OR_SCENE_CHANGE`.",
-        "- Next command after approval: implement the exact approved model candidate, then rerun S0 before S1 and S2.",
+        "- Failure/rejection: the historic uniform 0.85 m candidate remains rejected; no runtime success is claimed here.",
+        "- Blocker: `HOME_SELF_COLLISION_GATE_REQUIRED_BEFORE_S0`.",
+        "- Next command: run the MoveIt home-state self-collision gate, then S0 before S1 and S2.",
         "",
     ])
     return "\n".join(lines)
@@ -537,16 +566,34 @@ def main() -> int:
     parser.add_argument("--report-md", type=Path, default=REPORT_MD)
     args = parser.parse_args()
 
+    model = load_model(args.urdf)
     report = sample_workspace(
-        load_model(args.urdf), samples=args.samples, seed=args.seed,
+        model, samples=args.samples, seed=args.seed,
         target_total_reach_m=args.target_total_reach_m, workers=args.workers,
+    )
+    report["bin_place_target_evidence"] = sample_workspace(
+        model, samples=args.samples, seed=args.seed, target_total_reach_m=args.target_total_reach_m,
+        target_xyz=BIN_PLACE_TARGET_XYZ, workers=args.workers,
     )
     urdf_bytes = args.urdf.read_bytes()
     report.update({
         "schema_version": "m1a-fk-workspace-sampling-v1",
-        "status": "EVIDENCE_ONLY_ADR_0006_PENDING_HUMAN_APPROVAL",
+        "status": "APPROVED_MODEL_OFFLINE_FK_EVIDENCE_PENDING_HOME_SELF_COLLISION_GATE",
         "urdf": str(args.urdf.relative_to(ROOT)) if args.urdf.is_relative_to(ROOT) else str(args.urdf),
         "urdf_sha256": hashlib.sha256(urdf_bytes).hexdigest(),
+        "pre_approval_urdf_sha256": PRE_APPROVAL_URDF_SHA256,
+        "approval_record": {
+            "approved_candidate": "OFFICIAL_PANDA_ORIGINS_WITH_FIXED_LINK8",
+            "base_xyz_m": [-0.35, 0.0, 0.45],
+            "cube_xyz_m": list(CUBE_TARGET_XYZ),
+            "bin_a_xyz_m": list(BIN_A_XYZ),
+            "bin_pre_place_xyz_m": list(BIN_PLACE_TARGET_XYZ),
+            "conditions": [
+                "HOME_SELF_COLLISION_GATE_BEFORE_S0",
+                "S1_ENABLED_COLLISION_PAIR_LIST_INCLUDES_LINK8",
+                "S0_TO_S1_TO_S2_REVALIDATION_ORDER",
+            ],
+        },
         "method": "URDF_origin_chain_FK_no_ROS_no_Gazebo_no_collision_check",
         "changed_files": [
             "pyproject.toml",
@@ -561,9 +608,9 @@ def main() -> int:
             ".venv/bin/python -m pytest -q",
             ".venv/bin/python scripts/validate_project.py",
         ],
-        "failure_or_rejection": "UNIFORM_085_M_CANDIDATE_POSITION_ONLY_RESIDUAL_0.126863353_M",
-        "blocker": "HUMAN_ADR_0006_APPROVAL_REQUIRED_BEFORE_URDF_OR_SCENE_CHANGE",
-        "next_command_after_human_approval": "Implement the approved model candidate, then rerun S0 before S1 and S2.",
+        "failure_or_rejection": "HISTORIC_UNIFORM_085_M_CANDIDATE_REJECTED",
+        "blocker": "HOME_SELF_COLLISION_GATE_REQUIRED_BEFORE_S0",
+        "next_command": "Run scripts/run_m1a_home_self_collision_check.sh before S0.",
     })
     args.report_json.write_text(json.dumps(report, indent=2) + "\n")
     args.report_md.write_text(markdown(report))

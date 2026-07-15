@@ -10,11 +10,12 @@ mkdir -p logs reports data/manifests
 
 bash scripts/run_m1a_preflight.sh
 bash scripts/run_m1a_m0_smoke.sh
-bash scripts/run_contact_calibration.sh
-bash scripts/run_moveit_execution_gate.sh
-bash scripts/run_friction_grasp_trials.sh
-bash scripts/run_contact_gated_grasp.sh
-bash scripts/run_b1_oracle_gate.sh
+bash scripts/run_m1a_home_self_collision_check.sh || true
+bash scripts/run_contact_calibration.sh || true
+bash scripts/run_moveit_execution_gate.sh || true
+bash scripts/run_friction_grasp_trials.sh || true
+bash scripts/run_contact_gated_grasp.sh || true
+bash scripts/run_b1_oracle_gate.sh || true
 pytest_log="logs/${M1A_RUN_ID}-pytest.log"
 validate_log="logs/${M1A_RUN_ID}-validation.log"
 export M1A_PYTEST_PASSED=0

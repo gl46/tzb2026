@@ -8,6 +8,7 @@ enabled_robot_world_collision_pairs:
   - [panda_link5, work_table]
   - [panda_link6, work_table]
   - [panda_link7, work_table]
+  - [panda_link8, work_table]
   - [panda_hand, work_table]
   - [panda_leftfinger, work_table]
   - [panda_rightfinger, work_table]

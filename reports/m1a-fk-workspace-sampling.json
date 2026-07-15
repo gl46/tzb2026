@@ -22,9 +22,9 @@
   },
   "candidate_definition": {
     "target_total_nominal_reach_m": 0.85,
-    "current_arm_serial_translation_m": 1.98,
+    "current_arm_serial_translation_m": 1.3192623327153459,
     "unchanged_end_effector_extension_m": 0.11499999999999999,
-    "candidate_arm_and_wrist_origin_scale": 0.3712121212121212,
+    "candidate_arm_and_wrist_origin_scale": 0.5571295274437197,
     "scaled_transforms": [
       "panda_joint1",
       "panda_joint2",
@@ -33,6 +33,7 @@
       "panda_joint5",
       "panda_joint6",
       "panda_joint7",
+      "panda_joint8",
       "panda_hand_joint"
     ],
     "unchanged_transforms": [
@@ -47,44 +48,44 @@
     "point_count": 200000,
     "bounds_m": {
       "min_xyz": [
-        -1.467941475,
-        -1.110530105,
-        0.190990306
+        -1.287283814,
+        -0.932996033,
+        0.064980281
       ],
       "max_xyz": [
-        0.758420997,
-        1.115107511,
-        1.857637136
+        0.585846264,
+        0.932891914,
+        1.719834049
       ]
     },
-    "minimum_target_distance_m": 0.026637602,
+    "minimum_target_distance_m": 0.019599465,
     "closest_pad_side": "panda_leftfinger",
     "closest_pad_xyz_m": [
-      0.239736759,
-      0.11318371,
-      0.458460339
+      0.213722317,
+      0.137879895,
+      0.480003907
     ],
     "closest_arm_positions_rad": [
-      -2.001354765,
-      -1.525679856,
-      -2.364378156,
-      -2.380946597,
-      -1.664816798,
-      0.912718494,
-      -0.911591353
+      2.21956949,
+      -1.562222824,
+      -1.934716509,
+      -2.170198448,
+      0.21567706,
+      3.647136353,
+      1.996312161
     ],
     "sphere": {
       "0.03": {
-        "pad_points": 1,
-        "source_arm_samples_with_any_pad": 1,
-        "pad_point_density": 5e-06,
-        "source_arm_sample_density": 1e-05
+        "pad_points": 7,
+        "source_arm_samples_with_any_pad": 6,
+        "pad_point_density": 3.5e-05,
+        "source_arm_sample_density": 6e-05
       },
       "0.05": {
-        "pad_points": 6,
-        "source_arm_samples_with_any_pad": 4,
-        "pad_point_density": 3e-05,
-        "source_arm_sample_density": 4e-05
+        "pad_points": 25,
+        "source_arm_samples_with_any_pad": 19,
+        "pad_point_density": 0.000125,
+        "source_arm_sample_density": 0.00019
       }
     },
     "position_only_refinement": {
@@ -92,19 +93,19 @@
       "iterations": 4,
       "final_pad_side": "panda_leftfinger",
       "final_pad_xyz_m": [
-        0.219999972,
-        0.119999984,
-        0.475000043
+        0.219999986,
+        0.119999994,
+        0.475000009
       ],
-      "final_target_distance_m": 5.3e-08,
+      "final_target_distance_m": 1.7e-08,
       "arm_positions_rad": [
-        -2.044638141,
-        -1.48442327,
-        -2.309063308,
-        -2.440338614,
-        -1.710122491,
-        0.866971395,
-        -0.936568087
+        2.205210429,
+        -1.558521491,
+        -1.945130177,
+        -2.154178261,
+        0.215456914,
+        3.651432138,
+        1.994285992
       ],
       "orientation_not_solved": true,
       "collision_not_checked": true
@@ -114,31 +115,31 @@
     "point_count": 200000,
     "bounds_m": {
       "min_xyz": [
-        -0.814373826,
-        -0.463245415,
-        0.301345369
+        -0.908769756,
+        -0.556165653,
+        0.200941208
       ],
       "max_xyz": [
-        0.113231324,
-        0.463424853,
-        1.023688706
+        0.207732912,
+        0.556272385,
+        1.194196339
       ]
     },
-    "minimum_target_distance_m": 0.142255082,
+    "minimum_target_distance_m": 0.061803069,
     "closest_pad_side": "panda_rightfinger",
     "closest_pad_xyz_m": [
-      0.078981544,
-      0.120094137,
-      0.493716152
+      0.172255292,
+      0.081446364,
+      0.467673386
     ],
     "closest_arm_positions_rad": [
-      -0.614045667,
-      1.72510085,
-      2.361234964,
-      -0.150623583,
-      0.892143158,
-      3.409721796,
-      1.465567763
+      0.121781942,
+      1.423995318,
+      0.01702381,
+      -0.808192218,
+      -0.492657833,
+      2.694451108,
+      1.300124313
     ],
     "sphere": {
       "0.03": {
@@ -159,19 +160,19 @@
       "iterations": 160,
       "final_pad_side": "panda_rightfinger",
       "final_pad_xyz_m": [
-        0.101832129,
-        0.09470366,
-        0.51361036
+        0.179440217,
+        0.111460911,
+        0.486422721
       ],
-      "final_target_distance_m": 0.126863353,
+      "final_target_distance_m": 0.042994076,
       "arm_positions_rad": [
-        -0.675312138,
-        1.7628,
-        2.747211525,
-        -0.167087867,
-        0.354910471,
-        3.533502877,
-        1.918972663
+        0.195996794,
+        1.584560023,
+        0.04388783,
+        -0.46703137,
+        -1.2014e-05,
+        2.578137827,
+        1.107138083
       ],
       "orientation_not_solved": true,
       "collision_not_checked": true
@@ -266,10 +267,309 @@
       }
     }
   },
+  "bin_place_target_evidence": {
+    "sampling": {
+      "arm_joint_samples": 100000,
+      "fingertip_points_per_model": 200000,
+      "random_seed": 20260716,
+      "worker_count": 4,
+      "worker_seed_derivation": "base_seed + worker_index",
+      "distribution": "independent_uniform_within_URDF_arm_joint_limits",
+      "finger_joint_positions_m": {
+        "panda_finger_joint1": 0.02,
+        "panda_finger_joint2": 0.02
+      },
+      "target_xyz_m": [
+        0.217366447885,
+        -0.249990627453,
+        0.6
+      ],
+      "target_sphere_radii_m": [
+        0.03,
+        0.05
+      ]
+    },
+    "candidate_definition": {
+      "target_total_nominal_reach_m": 0.85,
+      "current_arm_serial_translation_m": 1.3192623327153459,
+      "unchanged_end_effector_extension_m": 0.11499999999999999,
+      "candidate_arm_and_wrist_origin_scale": 0.5571295274437197,
+      "scaled_transforms": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7",
+        "panda_joint8",
+        "panda_hand_joint"
+      ],
+      "unchanged_transforms": [
+        "world_to_panda",
+        "panda_finger_joint1",
+        "panda_finger_joint2",
+        "panda_leftfinger",
+        "panda_rightfinger"
+      ]
+    },
+    "current_controlled_urdf": {
+      "point_count": 200000,
+      "bounds_m": {
+        "min_xyz": [
+          -1.287283814,
+          -0.932996033,
+          0.064980281
+        ],
+        "max_xyz": [
+          0.585846264,
+          0.932891914,
+          1.719834049
+        ]
+      },
+      "minimum_target_distance_m": 0.010180788,
+      "closest_pad_side": "panda_leftfinger",
+      "closest_pad_xyz_m": [
+        0.209912071,
+        -0.248140434,
+        0.606682626
+      ],
+      "closest_arm_positions_rad": [
+        -0.242787276,
+        0.425166052,
+        -0.287545817,
+        -2.132026307,
+        -2.086748781,
+        2.757915777,
+        1.355175922
+      ],
+      "sphere": {
+        "0.03": {
+          "pad_points": 5,
+          "source_arm_samples_with_any_pad": 5,
+          "pad_point_density": 2.5e-05,
+          "source_arm_sample_density": 5e-05
+        },
+        "0.05": {
+          "pad_points": 19,
+          "source_arm_samples_with_any_pad": 17,
+          "pad_point_density": 9.5e-05,
+          "source_arm_sample_density": 0.00017
+        }
+      },
+      "position_only_refinement": {
+        "method": "bounded_damped_least_squares_position_only_from_nearest_uniform_sample",
+        "iterations": 4,
+        "final_pad_side": "panda_leftfinger",
+        "final_pad_xyz_m": [
+          0.217366442,
+          -0.249990625,
+          0.600000004
+        ],
+        "final_target_distance_m": 8e-09,
+        "arm_positions_rad": [
+          -0.240674233,
+          0.454570638,
+          -0.283227374,
+          -2.105448035,
+          -2.081787601,
+          2.746513112,
+          1.355828773
+        ],
+        "orientation_not_solved": true,
+        "collision_not_checked": true
+      }
+    },
+    "candidate_uniform_085_m_kinematics": {
+      "point_count": 200000,
+      "bounds_m": {
+        "min_xyz": [
+          -0.908769756,
+          -0.556165653,
+          0.200941208
+        ],
+        "max_xyz": [
+          0.207732912,
+          0.556272385,
+          1.194196339
+        ]
+      },
+      "minimum_target_distance_m": 0.067484682,
+      "closest_pad_side": "panda_leftfinger",
+      "closest_pad_xyz_m": [
+        0.165489645,
+        -0.213094108,
+        0.622397018
+      ],
+      "closest_arm_positions_rad": [
+        -0.085842564,
+        1.417763657,
+        -1.06307069,
+        -0.523200249,
+        0.074994106,
+        2.37044039,
+        0.455769991
+      ],
+      "sphere": {
+        "0.03": {
+          "pad_points": 0,
+          "source_arm_samples_with_any_pad": 0,
+          "pad_point_density": 0.0,
+          "source_arm_sample_density": 0.0
+        },
+        "0.05": {
+          "pad_points": 0,
+          "source_arm_samples_with_any_pad": 0,
+          "pad_point_density": 0.0,
+          "source_arm_sample_density": 0.0
+        }
+      },
+      "position_only_refinement": {
+        "method": "bounded_damped_least_squares_position_only_from_nearest_uniform_sample",
+        "iterations": 160,
+        "final_pad_side": "panda_leftfinger",
+        "final_pad_xyz_m": [
+          0.162730371,
+          -0.225917402,
+          0.60342113
+        ],
+        "final_target_distance_m": 0.059802384,
+        "arm_positions_rad": [
+          -0.192471898,
+          1.502504902,
+          -1.059900242,
+          -0.467010403,
+          0.000135715,
+          2.578136792,
+          0.463593005
+        ],
+        "orientation_not_solved": true,
+        "collision_not_checked": true
+      }
+    },
+    "candidate_official_panda_origins": {
+      "source": {
+        "path": "/opt/ros/jazzy/share/moveit_resources_panda_description/urdf/panda.urdf.xacro",
+        "sha256": "c8ee3bad4d89ad9bf4af717037418a3e6b046d47df6375a92a912a901d256a34",
+        "evidence_host": "node2"
+      },
+      "arm_and_fixed_chain_origin_translation_m": 1.3192623327153459,
+      "added_fixed_link": "panda_link8",
+      "added_fixed_joint": "panda_joint8",
+      "preserved_actuated_joint_protocol": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7",
+        "panda_finger_joint1",
+        "panda_finger_joint2"
+      ],
+      "preserved_hand_and_finger_collision_geometry": true,
+      "metrics": {
+        "point_count": 200000,
+        "bounds_m": {
+          "min_xyz": [
+            -1.287283814,
+            -0.932996033,
+            0.064980281
+          ],
+          "max_xyz": [
+            0.585846264,
+            0.932891914,
+            1.719834049
+          ]
+        },
+        "minimum_target_distance_m": 0.010180788,
+        "closest_pad_side": "panda_leftfinger",
+        "closest_pad_xyz_m": [
+          0.209912071,
+          -0.248140434,
+          0.606682626
+        ],
+        "closest_arm_positions_rad": [
+          -0.242787276,
+          0.425166052,
+          -0.287545817,
+          -2.132026307,
+          -2.086748781,
+          2.757915777,
+          1.355175922
+        ],
+        "sphere": {
+          "0.03": {
+            "pad_points": 5,
+            "source_arm_samples_with_any_pad": 5,
+            "pad_point_density": 2.5e-05,
+            "source_arm_sample_density": 5e-05
+          },
+          "0.05": {
+            "pad_points": 19,
+            "source_arm_samples_with_any_pad": 17,
+            "pad_point_density": 9.5e-05,
+            "source_arm_sample_density": 0.00017
+          }
+        },
+        "position_only_refinement": {
+          "method": "bounded_damped_least_squares_position_only_from_nearest_uniform_sample",
+          "iterations": 4,
+          "final_pad_side": "panda_leftfinger",
+          "final_pad_xyz_m": [
+            0.217366442,
+            -0.249990625,
+            0.600000004
+          ],
+          "final_target_distance_m": 8e-09,
+          "arm_positions_rad": [
+            -0.240674233,
+            0.454570638,
+            -0.283227374,
+            -2.105448035,
+            -2.081787601,
+            2.746513112,
+            1.355828773
+          ],
+          "orientation_not_solved": true,
+          "collision_not_checked": true
+        }
+      }
+    }
+  },
   "schema_version": "m1a-fk-workspace-sampling-v1",
-  "status": "EVIDENCE_ONLY_ADR_0006_PENDING_HUMAN_APPROVAL",
+  "status": "APPROVED_MODEL_OFFLINE_FK_EVIDENCE_PENDING_HOME_SELF_COLLISION_GATE",
   "urdf": "robot_ws/src/xh_sim/urdf/panda_controlled.urdf",
-  "urdf_sha256": "e017d82f218578603078fd5da73cdba88ed47fef2f5ed57cf9f01f5c666fb096",
+  "urdf_sha256": "8c68b8dbfbc878d6af7924e2eab0d288c56d5ae126a6f93e4922d5b1638533cd",
+  "pre_approval_urdf_sha256": "e017d82f218578603078fd5da73cdba88ed47fef2f5ed57cf9f01f5c666fb096",
+  "approval_record": {
+    "approved_candidate": "OFFICIAL_PANDA_ORIGINS_WITH_FIXED_LINK8",
+    "base_xyz_m": [
+      -0.35,
+      0.0,
+      0.45
+    ],
+    "cube_xyz_m": [
+      0.22,
+      0.12,
+      0.475
+    ],
+    "bin_a_xyz_m": [
+      0.217366447885,
+      -0.249990627453,
+      0.45
+    ],
+    "bin_pre_place_xyz_m": [
+      0.217366447885,
+      -0.249990627453,
+      0.6
+    ],
+    "conditions": [
+      "HOME_SELF_COLLISION_GATE_BEFORE_S0",
+      "S1_ENABLED_COLLISION_PAIR_LIST_INCLUDES_LINK8",
+      "S0_TO_S1_TO_S2_REVALIDATION_ORDER"
+    ]
+  },
   "method": "URDF_origin_chain_FK_no_ROS_no_Gazebo_no_collision_check",
   "changed_files": [
     "pyproject.toml",
@@ -284,7 +584,7 @@
     ".venv/bin/python -m pytest -q",
     ".venv/bin/python scripts/validate_project.py"
   ],
-  "failure_or_rejection": "UNIFORM_085_M_CANDIDATE_POSITION_ONLY_RESIDUAL_0.126863353_M",
-  "blocker": "HUMAN_ADR_0006_APPROVAL_REQUIRED_BEFORE_URDF_OR_SCENE_CHANGE",
-  "next_command_after_human_approval": "Implement the approved model candidate, then rerun S0 before S1 and S2."
+  "failure_or_rejection": "HISTORIC_UNIFORM_085_M_CANDIDATE_REJECTED",
+  "blocker": "HOME_SELF_COLLISION_GATE_REQUIRED_BEFORE_S0",
+  "next_command": "Run scripts/run_m1a_home_self_collision_check.sh before S0."
 }
