@@ -223,6 +223,10 @@ def test_m1a_moveit_configuration_preserves_controlled_joint_names_limits_and_un
     launch = (root / "robot_ws/src/xh_sim/launch/moveit_execution.launch.py").read_text()
     assert '.robot_description(file_path="urdf/panda_controlled.urdf")' in launch
     assert source_urdf.exists()
+    simulation_launch = (root / "robot_ws/src/xh_sim/launch/simulation.launch.py").read_text()
+    assert "re.sub" not in simulation_launch
+    assert "<collision>.*?</collision>" not in simulation_launch
+    assert "<position_proportional_gain>1.0</position_proportional_gain>" in source_urdf.read_text()
     srdf = (root / "robot_ws/src/xh_sim/config/m1a_panda.srdf").read_text()
     assert "panda_link0\" tip_link=\"panda_hand" in srdf
     assert "panda_leftfinger\" link2=\"object_red_cube" not in srdf

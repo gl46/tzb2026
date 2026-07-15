@@ -67,7 +67,10 @@
     <plugin filename="gz_ros2_control-system" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
       <parameters>$(find xh_sim)/config/panda_controllers.yaml</parameters>
       <hold_joints>true</hold_joints>
-      <position_proportional_gain>0.1</position_proportional_gain>
+      <!-- Jazzy gz_ros2_control documents 1.0 as the largest non-oscillatory
+           position-interface gain. The previous default 0.1 left joints 5/6
+           more than 0.16 rad short after trajectory completion. -->
+      <position_proportional_gain>1.0</position_proportional_gain>
     </plugin>
     <!-- A deliberately explicit minimum-viable grasp constraint.  It starts
          detached and can only be joined by the bounded P0 transfer runner.

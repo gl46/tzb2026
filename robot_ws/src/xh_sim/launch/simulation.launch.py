@@ -1,7 +1,6 @@
 """Launch the bounded P0 Harmonic scene and its controller-backed arm."""
 
 from pathlib import Path
-import re
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
@@ -24,12 +23,6 @@ def generate_launch_description():
     # Resolve the controller YAML package substitution before publication so the
     # Gazebo plugin receives an actual readable path rather than ``$(find ...)``.
     robot_xml = urdf.read_text(encoding="utf-8").replace("$(find xh_sim)", str(share))
-    # This controller-validation approximation has no reliable link geometry
-    # clearance model.  Keep its visual/inertial chain but exclude robot
-    # collisions, so Gazebo does not silently truncate a requested joint goal
-    # while the action server reports success. Object and bin collisions remain
-    # enabled in the world and are collected as simulator supervision.
-    robot_xml = re.sub(r"<collision>.*?</collision>", "", robot_xml)
     robot_description = {"robot_description": robot_xml, "use_sim_time": True}
     robot_state_publisher = Node(
         package="robot_state_publisher",
