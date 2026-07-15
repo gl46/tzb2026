@@ -279,12 +279,12 @@ class CalibrationClient(EvidenceClient):
                 "planned": False,
                 "executed": False,
             }
-        trajectory = self.plan(solution)
-        plan_attempts = 1
+        trajectory = None
+        plan_attempts = 0
         # OMPL has occasional nondeterministic plan rejection despite a stable
-        # IK target.  Retry the same collision-checked request once and record
-        # it, rather than silently reusing an old trajectory.
-        if trajectory is None:
+        # IK target. Retry the same collision-checked request up to five times
+        # and record the actual count rather than reusing an old trajectory.
+        while trajectory is None and plan_attempts < 5:
             trajectory = self.plan(solution)
             plan_attempts += 1
         if trajectory is None:
