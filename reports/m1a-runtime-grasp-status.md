@@ -1,7 +1,7 @@
 # M1A runtime grasp status
 
-- Overall: `BLOCKED`
-- S0: `CONTACT_TELEMETRY_UNRELIABLE`
-- S1: `BLOCKED`
-- S2/S3/S4 were not started: S1 lacks verified MoveIt execution.
+- Overall: `PARTIAL`
+- S0: `CONTACT_TELEMETRY_CALIBRATED`
+- S1: `VERIFIED_MOVEIT_EXECUTION`
+- S2: `FRICTIONAL_GRASP_NOT_VERIFIED`; S3: `CONTACT_GATED_CONSTRAINT_NOT_VERIFIED`; S4: `B1_ORACLE_BLOCKED_FINAL_GRASP_MODE`.
 - Teacher did not block M1A. `READY_FOR_M1B=false`.

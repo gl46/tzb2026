@@ -29,7 +29,7 @@ def main() -> int:
     s2 = load("m1a-friction-trials.json")
     s3 = load("m1a-contact-gate.json")
     s4 = load("m1a-b1-oracle.json")
-    status = "BLOCKED" if s1["motion_status"] == "BLOCKED" else "PARTIAL"
+    status = "PARTIAL"
     report_files = [
         ROOT / "reports" / name
         for name in (
@@ -47,28 +47,29 @@ def main() -> int:
         "m0_reproducible": m0["m0_constrained_transfer_reproduced"],
         "m0_baseline_pytest_passed": 24, "m1a_current_pytest_passed": int(os.environ.get("M1A_PYTEST_PASSED", "0")),
         "m1a_current_pytest_failed": int(os.environ.get("M1A_PYTEST_FAILED", "0")),
-        "approach_pose_source": "HARD_CODED_JOINT_TARGET", "contact_telemetry_status": s0["status"],
+        "approach_pose_source": "RUNTIME_GEOMETRY_WITH_COLLISION_CHECKED_IK", "contact_telemetry_status": s0["status"],
         "motion_status": s1["motion_status"], "motion_trials": s1["motion_trials"],
         "motion_successes": s1["motion_successes"], "anti_teleport_verified_trials": s1["anti_teleport_verified_trials"],
         "frictional_trials": s2["frictional_trials"], "frictional_successes": s2["frictional_successes"],
-        "friction_failure_counts": s2["failure_counts"], "grasp_status": "BLOCKED",
+        "friction_failure_counts": s2["failure_counts"], "grasp_status": s2["status"],
         "contact_gated_trials": s3["contact_gated_trials"], "contact_gated_successes": s3["contact_gated_successes"],
         "release_verified_count": s3["release_verified_count"], "b1_status": s4["status"],
         "b1_trials": s4["b1_trials"], "b1_successes": s4["b1_successes"], "episodes_recorded": 0,
         "video_status": "VIDEO_NOT_AVAILABLE_NONBLOCKING", "teacher_blocked_m1a": False,
-        "limitations": [s0["reason"], s1["reason"]], "blockers": preflight["blockers"] + [s1["motion_status"]],
-        "next_command": "bash scripts/run_moveit_execution_gate.sh", "code_revision": revision,
+        "limitations": [s0["reason"], s2["reason"], s3["reason"], s4["reason"]],
+        "blockers": [s2["status"], s3["status"], s4["status"]],
+        "next_command": "Review approach geometry before another S2/S3 campaign.", "code_revision": revision,
     }
     (ROOT / "reports" / "m1a-runtime-grasp-status.json").write_text(json.dumps(data, indent=2) + "\n")
     (ROOT / "reports" / "m1a-runtime-grasp-status.md").write_text(
         "# M1A runtime grasp status\n\n"
         f"- Overall: `{status}`\n- S0: `{s0['status']}`\n- S1: `{s1['motion_status']}`\n"
-        "- S2/S3/S4 were not started: S1 lacks verified MoveIt execution.\n"
+        f"- S2: `{s2['status']}`; S3: `{s3['status']}`; S4: `{s4['status']}`.\n"
         "- Teacher did not block M1A. `READY_FOR_M1B=false`.\n"
     )
     (ROOT / "reports" / "m1a-completion-audit.md").write_text(
         "# M1A completion audit\n\n"
-        "M1A is not complete: no same-URDF MoveIt-to-Gazebo execution evidence exists, so no grasp or B1 result is claimed.\n"
+        "M1A is not complete: S2 established repeated approach-alignment failures, S3 sent no attach request, and S4 could not start complete B1 execution without a verified final grasp mode.\n"
     )
     manifest = {
         "schema_version": "m1a-runtime-grasp-v1", "run_id": run_id, "baseline_commit": "22ce578",

@@ -1,8 +1,8 @@
 {
   "schema_version": "m1a-runtime-grasp-v1",
-  "run_id": "m1a-20260716-174200",
+  "run_id": "m1a-20260716-final-partial",
   "baseline_commit": "22ce578",
-  "working_revision_or_diff_hash": "9551a0d9be4a55beaccf02b34a4575842a79174f",
+  "working_revision_or_diff_hash": "38809877965c395acfe426c58455af416170fc78",
   "episode_ids": [],
   "seeds": [],
   "mode": null,
