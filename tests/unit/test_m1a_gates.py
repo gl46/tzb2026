@@ -308,6 +308,9 @@ def test_m1a_contact_calibration_uses_oracle_geometry_hand_control_and_per_trial
     assert "calibration_retreat_pose" in client
     assert "M1A_CALIBRATION_SCOPE" in client
     assert "M1A_CALIBRATION_LABEL" in client and "M1A_CALIBRATION_LABEL" in runner
+    isolated_runner = (root / "scripts/run_isolated_contact_calibration.sh").read_text()
+    assert "FRESH_GAZEBO_MOVEIT_SESSION_PER_CONDITION" in isolated_runner
+    assert "object_environment_2 table_1 table_2" in isolated_runner
     assert "semantic test is the commanded finger close" in client
     assert client.count('"plan_attempts": plan_attempts') >= 2
     assert 'trial.get("retreat", {}).get("executed")' in client
