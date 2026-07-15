@@ -36,7 +36,9 @@
     <model name="object_red_cube">
       <pose>0.17 0.12 0.755 0 0 0</pose>
       <link name="link">
-        <inertial><mass>0.08</mass><inertia><ixx>0.0000333</ixx><iyy>0.0000333</iyy><izz>0.0000333</izz></inertia></inertial>
+        <!-- High calibration-only inertia retains real dynamic contacts while
+             preventing one contact impulse from invalidating later windows. -->
+        <inertial><mass>1000</mass><inertia><ixx>0.416667</ixx><iyy>0.416667</iyy><izz>0.416667</izz></inertia></inertial>
         <collision name="collision"><geometry><box><size>0.05 0.05 0.05</size></box></geometry></collision>
         <visual name="visual"><geometry><box><size>0.05 0.05 0.05</size></box></geometry><material><diffuse>1 0 0 1</diffuse></material></visual>
         <sensor name="red_cube_contact" type="contact">
@@ -45,12 +47,6 @@
           <contact><collision>collision</collision></contact>
         </sensor>
       </link>
-      <!-- S0 proves contact-message semantics, not free-body grasp dynamics.
-           Anchoring prevents an approach transient from invalidating later
-           calibration windows while preserving real collision contacts. -->
-      <joint name="calibration_cube_anchor" type="fixed">
-        <parent>world</parent><child>link</child>
-      </joint>
     </model>
   </world>
 </sdf>

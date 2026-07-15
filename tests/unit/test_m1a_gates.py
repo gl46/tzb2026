@@ -282,7 +282,8 @@ def test_m1a_contact_calibration_uses_oracle_geometry_hand_control_and_per_trial
     ).read_text()
     assert '<pose>0.17 0.12 0.755 0 0 0</pose>' in calibration_world
     assert 'model name="work_table_calibration_fixture"' in calibration_world
-    assert 'joint name="calibration_cube_anchor" type="fixed"' in calibration_world
+    assert "<mass>1000</mass>" in calibration_world
+    assert "calibration_cube_anchor" not in calibration_world
     assert "cube_pose_after_action" in client
     assert "observed_positions_m" in client and "max_position_error_m" in client
     assert "m1a_contact_calibration.sdf" in runner
