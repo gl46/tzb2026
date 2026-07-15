@@ -222,3 +222,13 @@ def test_m1a_moveit_configuration_preserves_controlled_joint_names_limits_and_un
     assert ("panda_rightfinger", "object_red_cube") in enabled
     assert ("panda_link1", "work_table") in enabled
     assert policy["allowed_collision_exceptions"] == [["panda_link0", "work_table"]]
+
+
+def test_m1a_execution_client_uses_moveit_plan_execute_fk_and_no_pose_write() -> None:
+    root = Path(__file__).parents[2]
+    source = (root / "scripts/m1a_moveit_execution_client.py").read_text()
+    assert '"/plan_kinematic_path"' in source
+    assert '"/execute_trajectory"' in source
+    assert '"/compute_fk"' in source
+    assert '"/joint_states"' in source
+    assert "set_pose" not in source and "set_joint" not in source

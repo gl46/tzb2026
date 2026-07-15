@@ -25,7 +25,8 @@ def test_p0_scene_contract_has_props_bin_and_rgbd_sensor() -> None:
     world = ROOT / "robot_ws/src/xh_sim/worlds/p0_pick_place.sdf"
     root = ET.parse(world).getroot()
     names = {element.attrib["name"] for element in root.findall(".//model")}
-    assert {"work_table", "panda_p0_stub", "object_red_cube", "object_blue_cylinder", "object_green_sphere", "bin_a"} <= names
+    assert {"work_table", "camera_fixture", "object_red_cube", "object_blue_cylinder", "object_green_sphere", "bin_a"} <= names
+    assert "panda_p0_stub" not in names
     bin_model = root.find(".//model[@name='bin_a']")
     assert bin_model is not None and len(bin_model.findall(".//collision")) >= 5
     sensor = root.find(".//sensor[@name='front_rgbd']")

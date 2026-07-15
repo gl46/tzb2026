@@ -28,27 +28,10 @@
         <visual name="visual"><geometry><box><size>1.2 0.8 0.1</size></box></geometry></visual>
       </link>
     </model>
-    <!-- Camera fixture remains world-owned. The controller-backed Panda approximation is
-         spawned by xh_sim's launch file, so its lifecycle can be checked independently. -->
-    <model name="panda_p0_stub">
+    <!-- The M0 visual-only Panda stub was removed for M1A. The only robot
+         rendered in this world is the controller-backed model spawned by launch. -->
+    <model name="camera_fixture">
       <static>true</static>
-      <pose>-0.35 0 0.45 0 0 0</pose>
-      <link name="panda_link0">
-        <visual name="base_visual"><geometry><cylinder><radius>0.12</radius><length>0.18</length></cylinder></geometry></visual>
-      </link>
-      <link name="panda_arm">
-        <pose>0.18 0 0.32 0 1.57 0</pose>
-        <visual name="arm_visual"><geometry><cylinder><radius>0.045</radius><length>0.68</length></cylinder></geometry></visual>
-      </link>
-      <link name="panda_hand">
-        <pose>0.52 0 0.32 0 0 0</pose>
-        <visual name="hand_visual"><geometry><box><size>0.12 0.08 0.08</size></box></geometry></visual>
-      </link>
-      <link name="parallel_gripper">
-        <pose>0.62 0 0.32 0 0 0</pose>
-        <visual name="left_finger"><pose>0 0.045 0 0 0 0</pose><geometry><box><size>0.10 0.012 0.035</size></box></geometry></visual>
-        <visual name="right_finger"><pose>0 -0.045 0 0 0 0</pose><geometry><box><size>0.10 0.012 0.035</size></box></geometry></visual>
-      </link>
       <link name="camera_rgbd">
         <pose>0.7 0 0.62 0 0.55 3.14</pose>
         <sensor name="front_rgbd" type="rgbd_camera">
