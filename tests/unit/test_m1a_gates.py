@@ -347,6 +347,14 @@ def test_m1a_s2_runs_real_unconstrained_trials_with_early_stop() -> None:
     assert "set_pose" not in client
 
 
+def test_m1a_s3_never_attaches_when_s2_has_no_bilateral_contact() -> None:
+    root = Path(__file__).parents[2]
+    source = (root / "scripts/run_contact_gated_grasp.sh").read_text()
+    assert "CONTACT_GATE_REJECTED" in source
+    assert "attach_sent\": False" in source
+    assert "gz topic" not in source
+
+
 def test_m1a_runtime_acm_preserves_only_documented_exceptions() -> None:
     root = Path(__file__).parents[2]
     srdf_root = ET.parse(root / "robot_ws/src/xh_sim/config/m1a_panda.srdf").getroot()

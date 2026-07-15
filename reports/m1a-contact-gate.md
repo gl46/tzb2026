@@ -1,4 +1,5 @@
 # M1A S3 contact-gated constraint
 
-- Status: `NOT_RUN_PREREQUISITES_NOT_MET`
-- S0=CONTACT_TELEMETRY_PARTIAL; S1=BLOCKED. No DetachableJoint attach request was sent.
+- Status: `CONTACT_GATED_CONSTRAINT_NOT_VERIFIED`
+- Gate rejections: `3`; attach requests: `0`.
+- S2 produced three actual APPROACH_ALIGNMENT_FAILURE trials; S3 gate rejected every available attempt before attach because bilateral target contact was absent.

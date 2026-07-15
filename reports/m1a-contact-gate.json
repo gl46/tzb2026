@@ -1,8 +1,44 @@
 {
-  "status": "NOT_RUN_PREREQUISITES_NOT_MET",
-  "contact_gated_trials": 0,
+  "status": "CONTACT_GATED_CONSTRAINT_NOT_VERIFIED",
+  "contact_gated_trials": 3,
   "contact_gated_successes": 0,
   "release_verified_count": 0,
   "attach_events": [],
-  "reason": "S0=CONTACT_TELEMETRY_PARTIAL; S1=BLOCKED. No DetachableJoint attach request was sent."
+  "gate_rejections": [
+    {
+      "trial_id": "m1a-20260716-s2-baseline-01-baseline-1",
+      "event": "CONTACT_GATE_REJECTED",
+      "reasons": [
+        "LEFT_TARGET_CONTACT_FALSE",
+        "RIGHT_TARGET_CONTACT_FALSE",
+        "BILATERAL_OVERLAP_BELOW_100MS",
+        "APPROACH_CONTROLLER_NOT_EXECUTED"
+      ],
+      "attach_sent": false
+    },
+    {
+      "trial_id": "m1a-20260716-s2-baseline-01-baseline-2",
+      "event": "CONTACT_GATE_REJECTED",
+      "reasons": [
+        "LEFT_TARGET_CONTACT_FALSE",
+        "RIGHT_TARGET_CONTACT_FALSE",
+        "BILATERAL_OVERLAP_BELOW_100MS",
+        "APPROACH_CONTROLLER_NOT_EXECUTED"
+      ],
+      "attach_sent": false
+    },
+    {
+      "trial_id": "m1a-20260716-s2-baseline-01-baseline-3",
+      "event": "CONTACT_GATE_REJECTED",
+      "reasons": [
+        "LEFT_TARGET_CONTACT_FALSE",
+        "RIGHT_TARGET_CONTACT_FALSE",
+        "BILATERAL_OVERLAP_BELOW_100MS",
+        "APPROACH_CONTROLLER_NOT_EXECUTED"
+      ],
+      "attach_sent": false
+    }
+  ],
+  "detachable_attach_sent": false,
+  "reason": "S2 produced three actual APPROACH_ALIGNMENT_FAILURE trials; S3 gate rejected every available attempt before attach because bilateral target contact was absent."
 }
