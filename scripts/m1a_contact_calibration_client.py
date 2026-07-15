@@ -457,9 +457,9 @@ def main() -> int:
         trials.append({"label": "idle", "expected": "none", "contacts": classify_contacts(idle_events)})
 
         specifications = (
-            [(f"left_{index}", "left", 0.0, [0.030, 0.04]) for index in range(1, 4)]
-            + [(f"right_{index}", "right", 0.0, [0.04, 0.030]) for index in range(1, 4)]
-            + [(f"bilateral_{index}", "bilateral", 0.0, [0.030, 0.030]) for index in range(1, 4)]
+            [(f"left_{index}", "left", -0.040, [0.010, 0.04]) for index in range(1, 4)]
+            + [(f"right_{index}", "right", 0.040, [0.04, 0.010]) for index in range(1, 4)]
+            + [(f"bilateral_{index}", "bilateral", 0.0, [0.010, 0.010]) for index in range(1, 4)]
         )
         for label, expected, y_offset, finger_target in specifications:
             initialization = calibration_initialization()

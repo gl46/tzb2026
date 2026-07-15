@@ -297,6 +297,8 @@ def test_m1a_contact_calibration_uses_oracle_geometry_hand_control_and_per_trial
     assert "observed_positions_m" in client and "max_position_error_m" in client
     assert "set_target_touch_exception" in client
     assert "target_touch_exception_restored" in client
+    assert '"left", -0.040, [0.010, 0.04]' in client
+    assert '"right", 0.040, [0.04, 0.010]' in client
     assert "m1a_contact_calibration.sdf" in runner
     assert "calibration_mode:=true" in runner
     simulation_launch = (root / "robot_ws/src/xh_sim/launch/simulation.launch.py").read_text()
