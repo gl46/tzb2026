@@ -27,7 +27,13 @@ def main() -> int:
         "schemas_and_tests": report["validation"]["schema_validation"] == "PASS",
         "both_remote_doctors": set(report["platform"]["remote_doctor"]) == {"node2", "chxy"},
         "robot_workspace": (ROOT / "robot_ws/src/xh_sim/worlds/p0_pick_place.sdf").is_file(),
-        "p0_control_perception": report["simulation_smoke_test"]["status"] == "PARTIAL_CONTROL_AND_PERCEPTION_VERIFIED",
+        "p0_control_perception": (
+            report["simulation_smoke_test"]["status"] == "VERIFIED_CONSTRAINED_P0_GATE"
+            and report["simulation_smoke_test"]["initial_control_perception_smoke_status"]
+            == "PARTIAL_CONTROL_AND_PERCEPTION_VERIFIED"
+            and report["simulation_smoke_test"]["pick_place_completed"] is True
+            and report["simulation_smoke_test"]["episode_recorded"] is True
+        ),
         "p0_constrained_pick_place": constrained["status"] == "VERIFIED_CONSTRAINED_PICK_PLACE",
         "episode_recorded": constrained["episode_recorded"] is True,
         "contact_supervision": constrained["object_contact_supervision_observed"] is True,

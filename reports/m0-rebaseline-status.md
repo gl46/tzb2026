@@ -1,9 +1,11 @@
 # M0-R rebaseline status
 
-- Executed: 2026-07-15T23:58:09.681015+08:00
-- Git worktree at report-generation time: `clean`
+- Executed: 2026-07-16T00:41:13.523955+08:00
+- Git worktree at report-generation time: `M reports/p0-simulation-status.json
+ M reports/p0-simulation-status.md
+ M scripts/audit_m0_completion.py`
 - Prior M0 migration: no prior worktree was present; ADR-0000 records the rebaseline decision.
-- P0: **VERIFIED_CONSTRAINED_P0_GATE** — controller/perception `PARTIAL_CONTROL_AND_PERCEPTION_VERIFIED`; constrained transfer `VERIFIED_CONSTRAINED_PICK_PLACE`.
+- P0: **VERIFIED_CONSTRAINED_P0_GATE** — controller/perception `VERIFIED_CONSTRAINED_P0_GATE`; constrained transfer `VERIFIED_CONSTRAINED_PICK_PLACE`.
 - P1: **READY_FOR_HUMAN_DECISION** — metadata/adapter/bake-off scaffolding only; no model download or GPU inference.
 - P2: **PARKED** — Cosmos3-Super remains research reference only.
 
