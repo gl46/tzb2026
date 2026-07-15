@@ -515,11 +515,14 @@ def main() -> int:
             + [(f"bilateral_{index}", "bilateral", -0.030, [0.010, 0.010]) for index in range(1, 4)]
         )
         scope = os.environ.get("M1A_CALIBRATION_SCOPE", "full")
+        selected_label = os.environ.get("M1A_CALIBRATION_LABEL", "")
         if scope == "nonbilateral":
             specifications = [item for item in specifications if item[1] != "bilateral"]
         elif scope == "bilateral":
             repetition = int(os.environ.get("M1A_CALIBRATION_REPETITION", "1"))
             specifications = [item for item in specifications if item[0] == f"bilateral_{repetition}"]
+        elif scope == "one":
+            specifications = [item for item in specifications if item[0] == selected_label]
         elif scope != "full":
             raise ValueError(f"unsupported M1A_CALIBRATION_SCOPE: {scope}")
         for label, expected, y_offset, finger_target in specifications:
@@ -587,7 +590,11 @@ def main() -> int:
             )
 
         client.command_hand([0.04, 0.04])
-        for index in range(1, 3) if scope != "bilateral" else ():
+        environment_indices = (
+            range(1, 3) if scope not in {"bilateral", "one"}
+            else ([int(selected_label.rsplit("_", 1)[1])] if selected_label.startswith("object_environment_") else [])
+        )
+        for index in environment_indices:
             initialization = calibration_initialization()
             cube = runtime_cube_pose()
             events = client.contact_window(0.45)
@@ -604,7 +611,11 @@ def main() -> int:
                 }
             )
 
-        for index in range(1, 3) if scope != "bilateral" else ():
+        table_indices = (
+            range(1, 3) if scope not in {"bilateral", "one"}
+            else ([int(selected_label.rsplit("_", 1)[1])] if selected_label.startswith("table_") else [])
+        )
+        for index in table_indices:
             cube = runtime_cube_pose()
             if cube is None:
                 trials.append({"label": f"table_{index}", "expected": "finger_table", "reason": "RUNTIME_CUBE_POSE_UNAVAILABLE"})
