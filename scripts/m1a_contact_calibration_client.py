@@ -79,6 +79,7 @@ class CalibrationClient(EvidenceClient):
     def __init__(self) -> None:
         super().__init__()
         self.ik_client = self.create_client(GetPositionIK, "/compute_ik")
+        self.last_ik_error: dict | None = None
         self.hand_client = ActionClient(
             self, FollowJointTrajectory, "/panda_hand_controller/follow_joint_trajectory"
         )
@@ -105,7 +106,9 @@ class CalibrationClient(EvidenceClient):
             and self.hand_client.wait_for_server(timeout_sec=20.0)
         )
 
-    def ik(self, pose: Pose) -> list[float] | None:
+    def ik(
+        self, pose: Pose, *, avoid_collisions: bool = True, timeout_s: float = 3.0
+    ) -> list[float] | None:
         positions = [self.latest.get(name, math.nan) for name in JOINTS]
         if not all(math.isfinite(value) for value in positions):
             return None
@@ -114,16 +117,22 @@ class CalibrationClient(EvidenceClient):
         ik.group_name = "panda_arm"
         ik.ik_link_name = "panda_hand"
         ik.robot_state = RobotState(joint_state=JointState(name=JOINTS, position=positions))
-        ik.avoid_collisions = True
+        ik.avoid_collisions = avoid_collisions
         ik.pose_stamped = PoseStamped()
         ik.pose_stamped.header.frame_id = "world"
         ik.pose_stamped.pose = pose
-        ik.timeout = Duration(sec=3)
+        seconds = int(timeout_s)
+        ik.timeout = Duration(sec=seconds, nanosec=int((timeout_s - seconds) * 1e9))
         future = self.ik_client.call_async(request)
-        rclpy.spin_until_future_complete(self, future, timeout_sec=5.0)
+        rclpy.spin_until_future_complete(self, future, timeout_sec=timeout_s + 2.0)
         result = future.result()
         if result is None or result.error_code.val != 1:
+            self.last_ik_error = {
+                "code": result.error_code.val if result is not None else None,
+                "message": result.error_code.message if result is not None else "NO_RESPONSE",
+            }
             return None
+        self.last_ik_error = None
         solution = dict(zip(result.solution.joint_state.name, result.solution.joint_state.position))
         return [float(solution[name]) for name in JOINTS] if all(name in solution for name in JOINTS) else None
 
@@ -183,7 +192,12 @@ class CalibrationClient(EvidenceClient):
     def move_hand_pose(self, pose: Pose) -> dict:
         solution = self.ik(pose)
         if solution is None:
-            return {"ik_solved": False, "planned": False, "executed": False}
+            return {
+                "ik_solved": False,
+                "ik_error": self.last_ik_error,
+                "planned": False,
+                "executed": False,
+            }
         trajectory = self.plan(solution)
         if trajectory is None:
             return {"ik_solved": True, "ik_solution": solution, "planned": False, "executed": False}
@@ -259,10 +273,10 @@ def hand_pose(cube_xyz: list[float], *, y_offset: float = 0.0) -> Pose:
 
 def table_touch_pose(cube_xyz: list[float]) -> Pose:
     pose = Pose()
-    pose.position.x = cube_xyz[0] - 0.20
-    pose.position.y = cube_xyz[1] + 0.22
+    pose.position.x = -0.25
+    pose.position.y = -0.25
     pose.position.z = 0.568
-    pose.orientation.y = -math.sqrt(0.5)
+    pose.orientation.y = math.sqrt(0.5)
     pose.orientation.w = math.sqrt(0.5)
     return pose
 
@@ -342,6 +356,20 @@ def main() -> int:
             )
             client.command_hand([0.04, 0.04])
 
+        client.command_hand([0.04, 0.04])
+        for index in range(1, 3):
+            cube = runtime_cube_pose()
+            events = client.contact_window(0.45)
+            trials.append(
+                {
+                    "label": f"object_environment_{index}",
+                    "expected": "cube_table_without_finger",
+                    "cube_pose": cube,
+                    "pad_evidence": client.pad_evidence(cube["xyz"]) if cube else None,
+                    "contacts": classify_contacts(events),
+                }
+            )
+
         for index in range(1, 3):
             cube = runtime_cube_pose()
             if cube is None:
@@ -365,20 +393,6 @@ def main() -> int:
                 }
             )
             client.set_table_touch_exception(False)
-
-        client.command_hand([0.04, 0.04])
-        for index in range(1, 3):
-            cube = runtime_cube_pose()
-            events = client.contact_window(0.45)
-            trials.append(
-                {
-                    "label": f"object_environment_{index}",
-                    "expected": "cube_table_without_finger",
-                    "cube_pose": cube,
-                    "pad_evidence": client.pad_evidence(cube["xyz"]) if cube else None,
-                    "contacts": classify_contacts(events),
-                }
-            )
 
         def passed(trial: dict) -> bool:
             contacts = trial.get("contacts", {})
