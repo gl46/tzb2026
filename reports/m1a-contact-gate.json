@@ -1,0 +1,8 @@
+{
+  "status": "NOT_RUN_PREREQUISITES_NOT_MET",
+  "contact_gated_trials": 0,
+  "contact_gated_successes": 0,
+  "release_verified_count": 0,
+  "attach_events": [],
+  "reason": "S0=CONTACT_TELEMETRY_PARTIAL; S1=BLOCKED. No DetachableJoint attach request was sent."
+}

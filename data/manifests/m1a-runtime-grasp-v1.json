@@ -1,0 +1,22 @@
+{
+  "schema_version": "m1a-runtime-grasp-v1",
+  "run_id": "m1a-20260716-170500",
+  "baseline_commit": "22ce578",
+  "working_revision_or_diff_hash": "07dc4b68d5baf8ee65b89c38c384b3bb3dd1060d",
+  "episode_ids": [],
+  "seeds": [],
+  "mode": null,
+  "motion_trials": 0,
+  "motion_successes": 0,
+  "frictional_trials": 0,
+  "contact_gated_trials": 0,
+  "b1_oracle_trials": 0,
+  "file_hashes": {
+    "reports/m1a-preflight.json": "c7d7699c2f7f357d8d203ab47f45b89bb119f397c8a1e8b30807e5b9603aa3f7",
+    "reports/m1a-contact-calibration.json": "ba7313cca04ec06aefcb0b1d3e2622c24602d58421bab26faf57f469b85b8348",
+    "reports/m1a-motion-execution.json": "a8796a572018f05b0f54ba266a5c3f239311e30d9ccbb6781b57621c5154b0d8",
+    "reports/m1a-friction-trials.json": "a0dd4b9be925baaa9d9609145b48cc77735bb66edaf431b4afc1dede06d8150b",
+    "reports/m1a-contact-gate.json": "8a0fc2e51a71127d2755f8edebd7af9a09ab8ecd84944c784696baa334aa80c6",
+    "reports/m1a-b1-oracle.json": "d36638fbdcd91d404a025fded63d5f33f83d1e6adfda37bc3846b5dddbc9a240"
+  }
+}

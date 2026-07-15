@@ -1,0 +1,12 @@
+{
+  "status": "NOT_RUN_S1_NOT_VERIFIED",
+  "frictional_trials": 0,
+  "frictional_successes": 0,
+  "failure_counts": {
+    "APPROACH_ALIGNMENT_FAILURE": 0,
+    "CONTACT_CLOSURE_FAILURE": 0,
+    "HOLD_TRANSPORT_FAILURE": 0,
+    "RELEASE_PLACEMENT_FAILURE": 0
+  },
+  "reason": "S2 did not run because S1 has not established a verified MoveIt execution chain."
+}

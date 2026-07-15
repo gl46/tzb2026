@@ -1,0 +1,16 @@
+{
+  "run_id": "m1a-20260716-170500",
+  "started_at": "2026-07-15T17:02:52Z",
+  "head": "07dc4b68d5baf8ee65b89c38c384b3bb3dd1060d",
+  "origin_main": "22ce5788e45e4b98e36f666078d5421d69c64096",
+  "branch": "codex/m1a-runtime-grasp",
+  "document_baseline": "22ce578",
+  "execution_baseline": "07dc4b68d5baf8ee65b89c38c384b3bb3dd1060d",
+  "m0_tag_status": "M0_TAG_MISSING_NONBLOCKING",
+  "local_urdf_sha256": "efc3abf467ccc79484a8ed0907e61a6df417420395f1327005bed40386ca343c",
+  "remote_probe": "efc3abf467ccc79484a8ed0907e61a6df417420395f1327005bed40386ca343c  /home/gl/xh-202607-world-agent/robot_ws/src/xh_sim/urdf/panda_controlled.urdf",
+  "can_start": true,
+  "blockers": [],
+  "baseline_origin_match": false,
+  "execution_baseline_matches_head": true
+}

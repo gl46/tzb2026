@@ -1,0 +1,8 @@
+{
+  "status": "B1_ORACLE_BLOCKED",
+  "b1_trials": 0,
+  "b1_successes": 0,
+  "mode": "B1_ORACLE_GEOMETRIC_BASELINE",
+  "reason": "S1=BLOCKED; B1 execution was not started.",
+  "oracle_pose_in_observation": false
+}
