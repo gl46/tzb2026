@@ -214,6 +214,15 @@ def test_m1a_moveit_configuration_preserves_controlled_joint_names_limits_and_un
     assert set(configured) == expected_names == set(limits)
     for name in expected_names:
         assert configured[name]["max_velocity"] == float(limits[name]["velocity"])
+        assert configured[name]["has_velocity_limits"] is True
+        assert configured[name]["has_acceleration_limits"] is True
+        assert configured[name]["max_acceleration"] > 0
+        assert "min_position" not in configured[name]
+        assert "max_position" not in configured[name]
+    source_urdf = root / "robot_ws/src/xh_sim/urdf/panda_controlled.urdf"
+    launch = (root / "robot_ws/src/xh_sim/launch/moveit_execution.launch.py").read_text()
+    assert '.robot_description(file_path="urdf/panda_controlled.urdf")' in launch
+    assert source_urdf.exists()
     srdf = (root / "robot_ws/src/xh_sim/config/m1a_panda.srdf").read_text()
     assert "panda_link0\" tip_link=\"panda_hand" in srdf
     assert "panda_leftfinger\" link2=\"object_red_cube" not in srdf
