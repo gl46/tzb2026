@@ -158,7 +158,7 @@ class CalibrationClient(EvidenceClient):
 
     def ik(
         self, pose: Pose, *, avoid_collisions: bool = True, timeout_s: float = 3.0,
-        seed: list[float] | None = None,
+        seed: list[float] | None = None, ik_link: str = "panda_hand",
     ) -> list[float] | None:
         positions = seed or [self.latest.get(name, math.nan) for name in JOINTS]
         if not all(math.isfinite(value) for value in positions):
@@ -166,7 +166,7 @@ class CalibrationClient(EvidenceClient):
         request = GetPositionIK.Request()
         ik = request.ik_request
         ik.group_name = "panda_arm"
-        ik.ik_link_name = "panda_hand"
+        ik.ik_link_name = ik_link
         ik.robot_state = RobotState(joint_state=JointState(name=JOINTS, position=positions))
         ik.avoid_collisions = avoid_collisions
         ik.pose_stamped = PoseStamped()
@@ -276,8 +276,10 @@ class CalibrationClient(EvidenceClient):
         rclpy.spin_until_future_complete(self, future, timeout_sec=10.0)
         return bool(future.result() and future.result().success)
 
-    def move_hand_pose(self, pose: Pose, *, ik_seed: list[float] | None = None) -> dict:
-        solution = self.ik(pose, seed=ik_seed)
+    def move_hand_pose(
+        self, pose: Pose, *, ik_seed: list[float] | None = None, ik_link: str = "panda_hand"
+    ) -> dict:
+        solution = self.ik(pose, seed=ik_seed, ik_link=ik_link)
         if solution is None:
             return {
                 "ik_solved": False,
@@ -308,6 +310,7 @@ class CalibrationClient(EvidenceClient):
             "ik_solved": True,
             "ik_solution": solution,
             "ik_seed_source": "bilateral_validated_seed" if ik_seed else "current_joint_state",
+            "ik_link": ik_link,
             "plan_attempts": plan_attempts,
             "planned": True,
             "executed": executed,

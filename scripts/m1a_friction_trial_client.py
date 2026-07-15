@@ -7,6 +7,7 @@ import os
 import time
 
 import rclpy
+from geometry_msgs.msg import Pose
 
 from m1a_contact_calibration_client import (
     BILATERAL_IK_SEED,
@@ -18,6 +19,17 @@ from m1a_contact_calibration_client import (
 
 
 M0_MEASURED_APPROACH = [-0.307, 1.06, 0.76, -2.148, -1.435, 2.274, 1.422]
+
+
+def left_pad_target_pose(cube_xyz: list[float]) -> Pose:
+    """M0-measured finger orientation, translated so its pad center meets cube."""
+    pose = Pose()
+    # Quaternion from the measured M0 left-finger RPY [2.4076, .054805, .163582].
+    pose.orientation.x, pose.orientation.y = 0.9289, 0.0860
+    pose.orientation.z, pose.orientation.w = 0.0038, 0.3600
+    # Subtract the measured pad-center offset R*[.06, 0, 0] from runtime cube.
+    pose.position.x, pose.position.y, pose.position.z = cube_xyz[0] - .0591, cube_xyz[1] - .0100, cube_xyz[2] + .0033
+    return pose
 
 
 def main() -> int:
@@ -42,6 +54,8 @@ def main() -> int:
             approach = {"executed": False}
         elif approach_mode == "m0_measured_correction":
             approach = client.move_joint_target(M0_MEASURED_APPROACH)
+        elif approach_mode == "left_finger_geometry":
+            approach = client.move_hand_pose(left_pad_target_pose(cube["xyz"]), ik_link="panda_leftfinger")
         else:
             approach = client.move_hand_pose(
                 hand_pose(cube["xyz"], y_offset=-0.030), ik_seed=BILATERAL_IK_SEED
@@ -75,10 +89,10 @@ def main() -> int:
         print(json.dumps({
             "status": "FRICTION_TRIAL_FAILED", "primary_failure_class": failure,
             "detachable_joint_absent": True, "configuration": {
-                "id": "approach_corrected" if approach_mode == "m0_measured_correction" else "baseline",
+                "id": "finger_geometry_corrected" if approach_mode == "left_finger_geometry" else ("approach_corrected" if approach_mode == "m0_measured_correction" else "baseline"),
                 "finger_friction": "world_default", "object_friction": "world_default",
                 "object_mass_kg": 0.08, "solver_step_s": 0.001, "gripper_profile_m": [0.04, 0.01],
-                "approach_pose_source": "M0_MEASURED_APPROACH_CORRECTION" if approach_mode == "m0_measured_correction" else "runtime_oracle_geometry_plus_collision_checked_ik",
+                "approach_pose_source": "RUNTIME_CUBE_TO_LEFT_PAD_GEOMETRY" if approach_mode == "left_finger_geometry" else ("M0_MEASURED_APPROACH_CORRECTION" if approach_mode == "m0_measured_correction" else "runtime_oracle_geometry_plus_collision_checked_ik"),
             }, "cube_pose": cube, "approach": approach, "close": close,
             "contacts": contacts, "pad_evidence_at_close": at_close,
             "cube_pose_after_close": cube_after_close, "lift": lift,
