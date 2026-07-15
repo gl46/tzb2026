@@ -2,11 +2,14 @@ from __future__ import annotations
 
 import ast
 import hashlib
+import importlib.util
 import json
 from pathlib import Path
+import sys
 import xml.etree.ElementTree as ET
 
 import yaml
+import pytest
 
 from xh_agent.grasp.contact_gate import ContactGateInput, evaluate_contact_gate
 from xh_agent.grasp.contact_telemetry import ContactEvent, bilateral_contact_window
@@ -14,6 +17,19 @@ from xh_agent.grasp.failure_attribution import FailureClass, attribute_failure
 from xh_agent.grasp.release_gate import ReleaseEvidence, evaluate_release
 from xh_agent.runtime.continuity import JointSample, check_joint_continuity
 from xh_agent.runtime.motion_execution import MotionSegmentEvidence, evaluate_motion_segment
+
+
+PANDA_JOINT_PROTOCOL_V1 = {
+    "panda_joint1": (-2.8973, 2.8973, 2.3925, "revolute", "rad"),
+    "panda_joint2": (-1.7628, 1.7628, 2.3925, "revolute", "rad"),
+    "panda_joint3": (-2.8973, 2.8973, 2.3925, "revolute", "rad"),
+    "panda_joint4": (-3.0718, 0.0175, 2.3925, "revolute", "rad"),
+    "panda_joint5": (-2.8973, 2.8973, 2.8710, "revolute", "rad"),
+    "panda_joint6": (-0.0175, 3.7525, 2.8710, "revolute", "rad"),
+    "panda_joint7": (-2.8973, 2.8973, 2.8973, "revolute", "rad"),
+    "panda_finger_joint1": (0.0, 0.04, 0.2, "prismatic", "m"),
+    "panda_finger_joint2": (0.0, 0.04, 0.2, "prismatic", "m"),
+}
 
 
 def contact_events(*, target: str = "red_cube", duration_s: float = 0.1) -> list[ContactEvent]:
@@ -212,12 +228,17 @@ def test_m1a_moveit_configuration_preserves_controlled_joint_names_limits_and_un
         if joint.attrib["name"].startswith("panda_") and joint.find("limit") is not None
     }
     configured = yaml.safe_load((root / "robot_ws/src/xh_sim/config/m1a_joint_limits.yaml").read_text())["joint_limits"]
-    expected_names = {f"panda_joint{index}" for index in range(1, 8)} | {
-        "panda_finger_joint1", "panda_finger_joint2"
-    }
+    expected_names = set(PANDA_JOINT_PROTOCOL_V1)
     assert set(configured) == expected_names == set(limits)
     for name in expected_names:
-        assert configured[name]["max_velocity"] == float(limits[name]["velocity"])
+        lower, upper, velocity, kind, unit = PANDA_JOINT_PROTOCOL_V1[name]
+        joint = next(item for item in urdf_root.findall("joint") if item.attrib["name"] == name)
+        assert joint.attrib["type"] == kind
+        assert unit == ("rad" if kind == "revolute" else "m")
+        assert float(limits[name]["lower"]) == lower
+        assert float(limits[name]["upper"]) == upper
+        assert float(limits[name]["velocity"]) == velocity
+        assert configured[name]["max_velocity"] == velocity
         assert configured[name]["has_velocity_limits"] is True
         assert configured[name]["has_acceleration_limits"] is True
         assert configured[name]["max_acceleration"] > 0
@@ -379,3 +400,38 @@ def test_m1a_runtime_acm_preserves_only_documented_exceptions() -> None:
     assert ("panda_rightfinger", "object_red_cube") in checked
     assert ("panda_link1", "work_table") in checked
     assert not checked & srdf_pairs
+
+
+def test_adr_0006_fk_sampling_keeps_end_effector_and_protocol_invariants() -> None:
+    root = Path(__file__).parents[2]
+    script_path = root / "scripts/sample_panda_fk_workspace.py"
+    specification = importlib.util.spec_from_file_location("sample_panda_fk_workspace", script_path)
+    assert specification is not None and specification.loader is not None
+    module = importlib.util.module_from_spec(specification)
+    sys.modules[specification.name] = module
+    specification.loader.exec_module(module)
+    model = module.load_model(root / "robot_ws/src/xh_sim/urdf/panda_controlled.urdf")
+    scale = module.candidate_scale(model, 0.85)
+    assert module.ARM_JOINTS == tuple(f"panda_joint{index}" for index in range(1, 8))
+    assert 0 < scale < 1
+    assert module.serial_translation_m(model) == pytest.approx(1.98)
+    assert module.fixed_end_effector_extension_m(model) == pytest.approx(0.115)
+    report = module.sample_workspace(model, samples=100, seed=7, target_total_reach_m=0.85)
+    candidate = report["candidate_definition"]
+    assert candidate["scaled_transforms"] == [*module.ARM_JOINTS, module.HAND_JOINT]
+    assert candidate["unchanged_transforms"] == ["world_to_panda", *module.FINGER_JOINTS, *module.FINGER_LINKS]
+    assert report["sampling"]["fingertip_points_per_model"] == 200
+
+
+def test_adr_0006_is_evidence_bound_and_not_a_model_change_authorization() -> None:
+    root = Path(__file__).parents[2]
+    adr = (root / "docs/decisions/ADR-0006-panda-link-proportion-unification.md").read_text()
+    report = json.loads((root / "reports/m1a-fk-workspace-sampling.json").read_text())
+    assert "PROPOSED — NOT APPROVED" in adr
+    assert "100,000" in adr
+    assert "CONTACT_TELEMETRY_PARTIAL" in adr
+    assert report["status"] == "EVIDENCE_ONLY_ADR_0006_PENDING_HUMAN_APPROVAL"
+    assert report["sampling"]["arm_joint_samples"] == 100_000
+    assert report["urdf_sha256"] == hashlib.sha256(
+        (root / "robot_ws/src/xh_sim/urdf/panda_controlled.urdf").read_bytes()
+    ).hexdigest()
