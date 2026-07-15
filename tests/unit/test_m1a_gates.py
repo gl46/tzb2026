@@ -233,7 +233,9 @@ def test_m1a_moveit_configuration_preserves_controlled_joint_names_limits_and_un
     assert "calibration_mode" in simulation_launch
     assert "gz-sim-detachable-joint-system" in simulation_launch
     assert "<position_proportional_gain>1.0</position_proportional_gain>" in source_urdf.read_text()
-    assert simulation_launch.count("ros_gz_interfaces/msg/Contacts[gz.msgs.Contacts") == 3
+    # Finger pair, static grasp target and dynamic target-equivalent/table
+    # control each have their own explicit Gazebo contact bridge.
+    assert simulation_launch.count("ros_gz_interfaces/msg/Contacts[gz.msgs.Contacts") == 4
     assert '"/xh/supervision/panda_leftfinger_contacts"' in simulation_launch
     assert '"/xh/supervision/panda_rightfinger_contacts"' in simulation_launch
     srdf = (root / "robot_ws/src/xh_sim/config/m1a_panda.srdf").read_text()
@@ -291,6 +293,8 @@ def test_m1a_contact_calibration_uses_oracle_geometry_hand_control_and_per_trial
     ).read_text()
     assert '<pose>0.17 0.12 0.755 0 0 0</pose>' in calibration_world
     assert 'model name="work_table_calibration_fixture"' in calibration_world
+    assert 'model name="object_red_cube_environment"' in calibration_world
+    assert 'model name="calibration_camera_fixture"' in calibration_world
     assert "<static>true</static>" in calibration_world
     assert "calibration_cube_anchor" not in calibration_world
     assert "cube_pose_after_action" in client
@@ -305,6 +309,8 @@ def test_m1a_contact_calibration_uses_oracle_geometry_hand_control_and_per_trial
     moveit_launch = (root / "robot_ws/src/xh_sim/launch/moveit_execution.launch.py").read_text()
     assert 'LaunchConfiguration("world_file")' in simulation_launch
     assert 'LaunchConfiguration("world_file")' in moveit_launch
+    assert "red_cube_environment_contacts" in simulation_launch
+    assert "move_joint_target" in client and 'TARGETS[0][1]' in client
 
 
 def test_m1a_runtime_acm_preserves_only_documented_exceptions() -> None:

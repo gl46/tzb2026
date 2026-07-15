@@ -20,7 +20,7 @@ from sensor_msgs.msg import JointState
 from shape_msgs.msg import SolidPrimitive
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 
-from m1a_moveit_execution_client import EvidenceClient, JOINTS, set_allowed_pair
+from m1a_moveit_execution_client import EvidenceClient, JOINTS, TARGETS, set_allowed_pair
 
 
 HAND_JOINTS = ["panda_finger_joint1", "panda_finger_joint2"]
@@ -28,6 +28,10 @@ CONTACT_TOPICS = {
     "left": "/xh/supervision/panda_leftfinger_contacts",
     "right": "/xh/supervision/panda_rightfinger_contacts",
     "cube": "/xh/supervision/red_cube_contacts",
+    # A dynamic, geometry-identical red cube resting on the production table.
+    # The grasp target remains static so independent finger windows cannot
+    # disturb one another; this companion proves target-type/table contacts.
+    "cube_environment": "/xh/supervision/red_cube_environment_contacts",
 }
 CUBE_SIZE_M = 0.05
 PAD_SIZE_M = (0.12, 0.018, 0.035)
@@ -295,6 +299,27 @@ class CalibrationClient(EvidenceClient):
             "post_controller_settle_s": settle_s,
         }
 
+    def move_joint_target(self, target: list[float]) -> dict:
+        """Plan and execute a collision-checked retreat through MoveIt."""
+        trajectory = self.plan(target)
+        if trajectory is None:
+            return {"planned": False, "executed": False}
+        names = list(trajectory.joint_trajectory.joint_names)
+        final = dict(zip(names, trajectory.joint_trajectory.points[-1].positions))
+        expected = [float(final[name]) for name in JOINTS]
+        executed, goal_uuid, samples, controller_samples, settle_s, converged = self.execute(
+            trajectory, expected
+        )
+        return {
+            "planned": True,
+            "executed": executed,
+            "converged": converged,
+            "goal_uuid": goal_uuid,
+            "joint_state_samples": len(samples),
+            "controller_state_samples": len(controller_samples),
+            "post_controller_settle_s": settle_s,
+        }
+
     def pad_evidence(self, cube_xyz: list[float]) -> dict:
         positions = [self.latest.get(name, math.nan) for name in JOINTS]
         output: dict[str, dict | float | None] = {}
@@ -429,6 +454,7 @@ def classify_contacts(events: dict[str, list[dict]]) -> dict:
         "left_table": channel_has("left", "work_table"),
         "right_table": channel_has("right", "work_table"),
         "cube_table": channel_has("cube", "work_table"),
+        "cube_environment_table": channel_has("cube_environment", "work_table"),
         "raw_pairs": pairs,
         "event_counts": {channel: len(channel_events) for channel, channel_events in events.items()},
         "topic_rate_evidence": rates,
@@ -484,6 +510,13 @@ def main() -> int:
             client.contact_window(0.45)
             events = {name: client.contacts[name][start[name]:] for name in client.contacts}
             cube_after = runtime_cube_pose()
+            # Leave the target before restoring its normal collision policy.
+            # Without this retreat the next independent condition starts from
+            # physical penetration, making a failed plan look like a sensor fault.
+            client.command_hand([0.04, 0.04])
+            retreat = client.move_joint_target(TARGETS[0][1]) if exception_set else {
+                "planned": False, "executed": False
+            }
             exception_restored = client.set_target_touch_exception(False)
             trials.append(
                 {
@@ -497,6 +530,7 @@ def main() -> int:
                         cube["xyz"][2] - 0.055, 0.0, 0.0, 0.0, 1.0,
                     ],
                     "motion": motion,
+                    "retreat": retreat,
                     "hand_command": {"positions_m": finger_target, **hand_result},
                     "calibration_only_allowed_collision_pairs": [
                         ["panda_leftfinger", "object_red_cube"],
@@ -507,7 +541,6 @@ def main() -> int:
                     "contacts": classify_contacts(events),
                 }
             )
-            client.command_hand([0.04, 0.04])
 
         client.command_hand([0.04, 0.04])
         for index in range(1, 3):
@@ -518,7 +551,7 @@ def main() -> int:
             trials.append(
                 {
                     "label": f"object_environment_{index}",
-                    "expected": "cube_table_without_finger",
+                    "expected": "target_equivalent_table_without_finger",
                     "initialization": initialization,
                     "cube_pose": cube,
                     "cube_pose_after_action": cube_after,
@@ -539,10 +572,14 @@ def main() -> int:
             }
             client.contact_window(0.45)
             events = {name: client.contacts[name][start[name]:] for name in client.contacts}
+            client.command_hand([0.04, 0.04])
+            retreat = client.move_joint_target(TARGETS[0][1]) if exception_set else {
+                "planned": False, "executed": False
+            }
             trials.append(
                 {
                     "label": f"table_{index}", "expected": "finger_table",
-                    "cube_pose": cube, "motion": motion,
+                    "cube_pose": cube, "motion": motion, "retreat": retreat,
                     "calibration_only_allowed_collision_pairs": [
                         ["panda_leftfinger", "work_table"],
                         ["panda_rightfinger", "work_table"],
@@ -582,8 +619,12 @@ def main() -> int:
                 )
             if expected == "finger_table":
                 return contacts.get("left_table") or contacts.get("right_table")
-            if expected == "cube_table_without_finger":
-                return contacts.get("cube_table") and not contacts.get("left_target") and not contacts.get("right_target")
+            if expected == "target_equivalent_table_without_finger":
+                return (
+                    contacts.get("cube_environment_table")
+                    and not contacts.get("left_target")
+                    and not contacts.get("right_target")
+                )
             return not contacts.get("left_target") and not contacts.get("right_target")
 
         for trial in trials:

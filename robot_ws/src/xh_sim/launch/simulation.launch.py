@@ -93,6 +93,10 @@ def generate_launch_description():
         "/world/xh_p0_pick_place/model/object_red_cube/link/link/"
         "sensor/red_cube_contact/contact"
     )
+    cube_environment_contact_gz = (
+        "/world/xh_p0_pick_place/model/object_red_cube_environment/link/link/"
+        "sensor/red_cube_environment_contact/contact"
+    )
     # Camera bridges are intentionally explicit.  A missing transport topic is
     # reported by the smoke test rather than treated as a substitute for RGB-D.
     bridge = Node(
@@ -107,11 +111,13 @@ def generate_launch_description():
             f"{left_contact_gz}@ros_gz_interfaces/msg/Contacts[gz.msgs.Contacts",
             f"{right_contact_gz}@ros_gz_interfaces/msg/Contacts[gz.msgs.Contacts",
             f"{cube_contact_gz}@ros_gz_interfaces/msg/Contacts[gz.msgs.Contacts",
+            f"{cube_environment_contact_gz}@ros_gz_interfaces/msg/Contacts[gz.msgs.Contacts",
         ],
         remappings=[
             (left_contact_gz, "/xh/supervision/panda_leftfinger_contacts"),
             (right_contact_gz, "/xh/supervision/panda_rightfinger_contacts"),
             (cube_contact_gz, "/xh/supervision/red_cube_contacts"),
+            (cube_environment_contact_gz, "/xh/supervision/red_cube_environment_contacts"),
         ],
     )
 
