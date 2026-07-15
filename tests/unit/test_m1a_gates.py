@@ -306,6 +306,7 @@ def test_m1a_contact_calibration_uses_oracle_geometry_hand_control_and_per_trial
     assert '"right", 0.0, [0.04, 0.010]' in client
     assert '"bilateral", -0.030, [0.010, 0.010]' in client
     assert "calibration_retreat_pose" in client
+    assert "BILATERAL_IK_SEED" in client and "bilateral_validated_seed" in client
     assert "M1A_CALIBRATION_SCOPE" in client
     assert "M1A_CALIBRATION_LABEL" in client and "M1A_CALIBRATION_LABEL" in runner
     isolated_runner = (root / "scripts/run_isolated_contact_calibration.sh").read_text()

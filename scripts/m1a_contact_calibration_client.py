@@ -39,6 +39,11 @@ PAD_SIZE_M = (0.12, 0.018, 0.035)
 CALIBRATION_CUBE_XYZ = [0.17, 0.12, 0.755]
 CALIBRATION_FIXTURE_XYZ = [0.17, 0.12, 0.59]
 CALIBRATION_FIXTURE_SIZE_M = [0.03, 0.03, 0.28]
+# A seed from a previously collision-checked bilateral solution.  It is not an
+# arm command: every trial still solves IK against its runtime oracle pose and
+# plans the returned solution through MoveIt.
+BILATERAL_IK_SEED = [-1.0134159315, 1.7628, 0.8510767928, -1.1684521475,
+                     1.6757839956, 0.8364348383, -0.1870553160]
 
 
 def quaternion_rotate(quaternion: list[float], point: tuple[float, float, float]) -> list[float]:
@@ -152,9 +157,10 @@ class CalibrationClient(EvidenceClient):
         )
 
     def ik(
-        self, pose: Pose, *, avoid_collisions: bool = True, timeout_s: float = 3.0
+        self, pose: Pose, *, avoid_collisions: bool = True, timeout_s: float = 3.0,
+        seed: list[float] | None = None,
     ) -> list[float] | None:
-        positions = [self.latest.get(name, math.nan) for name in JOINTS]
+        positions = seed or [self.latest.get(name, math.nan) for name in JOINTS]
         if not all(math.isfinite(value) for value in positions):
             return None
         request = GetPositionIK.Request()
@@ -270,8 +276,8 @@ class CalibrationClient(EvidenceClient):
         rclpy.spin_until_future_complete(self, future, timeout_sec=10.0)
         return bool(future.result() and future.result().success)
 
-    def move_hand_pose(self, pose: Pose) -> dict:
-        solution = self.ik(pose)
+    def move_hand_pose(self, pose: Pose, *, ik_seed: list[float] | None = None) -> dict:
+        solution = self.ik(pose, seed=ik_seed)
         if solution is None:
             return {
                 "ik_solved": False,
@@ -301,6 +307,7 @@ class CalibrationClient(EvidenceClient):
         return {
             "ik_solved": True,
             "ik_solution": solution,
+            "ik_seed_source": "bilateral_validated_seed" if ik_seed else "current_joint_state",
             "plan_attempts": plan_attempts,
             "planned": True,
             "executed": executed,
@@ -540,7 +547,10 @@ def main() -> int:
             client.update_cube_scene(cube["xyz"])
             client.command_hand([0.04, 0.04])
             exception_set = client.set_target_touch_exception(True)
-            motion = client.move_hand_pose(hand_pose(cube["xyz"], y_offset=y_offset)) if exception_set else {
+            motion = client.move_hand_pose(
+                hand_pose(cube["xyz"], y_offset=y_offset),
+                ik_seed=BILATERAL_IK_SEED if expected == "bilateral" else None,
+            ) if exception_set else {
                 "ik_solved": False, "planned": False, "executed": False
             }
             # The semantic test is the commanded finger close, not incidental
