@@ -229,6 +229,16 @@ class CalibrationClient(EvidenceClient):
         scene.allowed_collision_matrix = matrix
         return self.apply_scene_diff(scene)
 
+    def set_target_touch_exception(self, allowed: bool) -> bool:
+        matrix = self.current_acm()
+        if matrix is None:
+            return False
+        for finger in ("panda_leftfinger", "panda_rightfinger"):
+            set_allowed_pair(matrix, finger, "object_red_cube", allowed)
+        scene = PlanningScene(is_diff=True)
+        scene.allowed_collision_matrix = matrix
+        return self.apply_scene_diff(scene)
+
     def apply_scene_diff(self, scene: PlanningScene) -> bool:
         future = self.scene_client.call_async(ApplyPlanningScene.Request(scene=scene))
         rclpy.spin_until_future_complete(self, future, timeout_sec=10.0)
@@ -419,11 +429,15 @@ def main() -> int:
             client.update_cube_scene(cube["xyz"])
             client.command_hand([0.04, 0.04])
             start = {name: len(events) for name, events in client.contacts.items()}
-            motion = client.move_hand_pose(hand_pose(cube["xyz"], y_offset=y_offset))
+            exception_set = client.set_target_touch_exception(True)
+            motion = client.move_hand_pose(hand_pose(cube["xyz"], y_offset=y_offset)) if exception_set else {
+                "ik_solved": False, "planned": False, "executed": False
+            }
             hand_result = client.command_hand(finger_target)
             client.contact_window(0.45)
             events = {name: client.contacts[name][start[name]:] for name in client.contacts}
             cube_after = runtime_cube_pose()
+            exception_restored = client.set_target_touch_exception(False)
             trials.append(
                 {
                     "label": label,
@@ -437,6 +451,11 @@ def main() -> int:
                     ],
                     "motion": motion,
                     "hand_command": {"positions_m": finger_target, **hand_result},
+                    "calibration_only_allowed_collision_pairs": [
+                        ["panda_leftfinger", "object_red_cube"],
+                        ["panda_rightfinger", "object_red_cube"],
+                    ],
+                    "target_touch_exception_restored": exception_restored,
                     "pad_evidence": client.pad_evidence(cube["xyz"]),
                     "contacts": classify_contacts(events),
                 }
@@ -491,12 +510,24 @@ def main() -> int:
             contacts = trial.get("contacts", {})
             expected = trial["expected"]
             if expected == "left":
-                return contacts.get("left_target") and not contacts.get("right_target")
+                return bool(
+                    trial.get("motion", {}).get("executed")
+                    and trial.get("target_touch_exception_restored")
+                    and contacts.get("left_target")
+                    and not contacts.get("right_target")
+                )
             if expected == "right":
-                return contacts.get("right_target") and not contacts.get("left_target")
+                return bool(
+                    trial.get("motion", {}).get("executed")
+                    and trial.get("target_touch_exception_restored")
+                    and contacts.get("right_target")
+                    and not contacts.get("left_target")
+                )
             if expected == "bilateral":
                 return bool(
-                    contacts.get("left_target")
+                    trial.get("motion", {}).get("executed")
+                    and trial.get("target_touch_exception_restored")
+                    and contacts.get("left_target")
                     and contacts.get("right_target")
                     and contacts.get("bilateral_overlap_s", 0.0) >= 0.1
                     and contacts.get("left_target_unique_samples", 0) >= 3

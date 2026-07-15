@@ -34,11 +34,11 @@
     </model>
 
     <model name="object_red_cube">
+      <static>true</static>
       <pose>0.17 0.12 0.755 0 0 0</pose>
       <link name="link">
-        <!-- High calibration-only inertia retains real dynamic contacts while
-             preventing one contact impulse from invalidating later windows. -->
-        <inertial><mass>1000</mass><inertia><ixx>0.416667</ixx><iyy>0.416667</iyy><izz>0.416667</izz></inertia></inertial>
+        <!-- S0 validates contact-message semantics, not grasp dynamics.  A
+             static calibration target preserves all 13 independent windows. -->
         <collision name="collision"><geometry><box><size>0.05 0.05 0.05</size></box></geometry></collision>
         <visual name="visual"><geometry><box><size>0.05 0.05 0.05</size></box></geometry><material><diffuse>1 0 0 1</diffuse></material></visual>
         <sensor name="red_cube_contact" type="contact">
