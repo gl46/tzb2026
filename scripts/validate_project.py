@@ -23,6 +23,7 @@ REQUIRED = [
     "scripts/run_m1a_preflight.sh", "scripts/run_contact_calibration.sh", "scripts/run_moveit_execution_gate.sh",
     "scripts/run_friction_grasp_trials.sh", "scripts/run_contact_gated_grasp.sh", "scripts/run_b1_oracle_gate.sh",
     "scripts/run_m1a_validation.sh", "scripts/write_m1a_status.py",
+    "scripts/run_m1a_m0_smoke.sh",
 ]
 
 

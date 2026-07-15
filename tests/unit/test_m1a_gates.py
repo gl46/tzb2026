@@ -180,6 +180,7 @@ def test_m1a_protocol_files_define_fail_closed_sensor_and_execution_gates() -> N
     urdf = (root / "robot_ws/src/xh_sim/urdf/panda_controlled.urdf").read_text()
     assert "left_finger_contact" in urdf and "right_finger_contact" in urdf
     runner = (root / "scripts/run_m1a_validation.sh").read_text()
+    assert "run_m1a_m0_smoke.sh" in runner
     assert "run_contact_calibration.sh" in runner and "run_moveit_execution_gate.sh" in runner
     assert "run_friction_grasp_trials.sh" in runner
     assert "set_pose" not in runner and "set_model" not in runner

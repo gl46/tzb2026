@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import subprocess
 import sys
 from datetime import datetime, timezone
@@ -22,6 +23,7 @@ def digest(path: Path) -> str:
 def main() -> int:
     run_id = sys.argv[1]
     preflight = load("m1a-preflight.json")
+    m0 = load("m1a-m0-smoke.json")
     s0 = load("m1a-contact-calibration.json")
     s1 = load("m1a-motion-execution.json")
     s2 = load("m1a-friction-trials.json")
@@ -31,7 +33,7 @@ def main() -> int:
     report_files = [
         ROOT / "reports" / name
         for name in (
-            "m1a-preflight.json", "m1a-contact-calibration.json", "m1a-motion-execution.json",
+            "m1a-preflight.json", "m1a-m0-smoke.json", "m1a-contact-calibration.json", "m1a-motion-execution.json",
             "m1a-friction-trials.json", "m1a-contact-gate.json", "m1a-b1-oracle.json",
         )
     ]
@@ -41,8 +43,10 @@ def main() -> int:
         "execution_baseline_commit": preflight["execution_baseline"], "baseline_branch": preflight["branch"],
         "baseline_origin_match": preflight["baseline_origin_match"], "m0_tag_status": preflight["m0_tag_status"],
         "started_at": preflight["started_at"], "completed_at": datetime.now(timezone.utc).isoformat(),
-        "deadline": "2026-07-18T23:59:00+08:00", "status": status, "m0_reproducible": False,
-        "m0_baseline_pytest_passed": 24, "m1a_current_pytest_passed": 0, "m1a_current_pytest_failed": 0,
+        "deadline": "2026-07-18T23:59:00+08:00", "status": status,
+        "m0_reproducible": m0["m0_constrained_transfer_reproduced"],
+        "m0_baseline_pytest_passed": 24, "m1a_current_pytest_passed": int(os.environ.get("M1A_PYTEST_PASSED", "0")),
+        "m1a_current_pytest_failed": int(os.environ.get("M1A_PYTEST_FAILED", "0")),
         "approach_pose_source": "HARD_CODED_JOINT_TARGET", "contact_telemetry_status": s0["status"],
         "motion_status": s1["motion_status"], "motion_trials": s1["motion_trials"],
         "motion_successes": s1["motion_successes"], "anti_teleport_verified_trials": s1["anti_teleport_verified_trials"],
