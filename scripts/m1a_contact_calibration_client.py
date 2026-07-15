@@ -279,8 +279,18 @@ class CalibrationClient(EvidenceClient):
                 "executed": False,
             }
         trajectory = self.plan(solution)
+        plan_attempts = 1
+        # OMPL has occasional nondeterministic plan rejection despite a stable
+        # IK target.  Retry the same collision-checked request once and record
+        # it, rather than silently reusing an old trajectory.
         if trajectory is None:
-            return {"ik_solved": True, "ik_solution": solution, "planned": False, "executed": False}
+            trajectory = self.plan(solution)
+            plan_attempts += 1
+        if trajectory is None:
+            return {
+                "ik_solved": True, "ik_solution": solution, "plan_attempts": plan_attempts,
+                "planned": False, "executed": False,
+            }
         names = list(trajectory.joint_trajectory.joint_names)
         final = dict(zip(names, trajectory.joint_trajectory.points[-1].positions))
         expected = [float(final[name]) for name in JOINTS]
@@ -290,6 +300,7 @@ class CalibrationClient(EvidenceClient):
         return {
             "ik_solved": True,
             "ik_solution": solution,
+            "plan_attempts": plan_attempts,
             "planned": True,
             "executed": executed,
             "converged": converged,
@@ -485,7 +496,7 @@ def main() -> int:
         specifications = (
             [(f"left_{index}", "left", -0.040, [0.010, 0.04]) for index in range(1, 4)]
             + [(f"right_{index}", "right", 0.0, [0.04, 0.010]) for index in range(1, 4)]
-            + [(f"bilateral_{index}", "bilateral", 0.0, [0.010, 0.010]) for index in range(1, 4)]
+            + [(f"bilateral_{index}", "bilateral", -0.020, [0.010, 0.010]) for index in range(1, 4)]
         )
         for label, expected, y_offset, finger_target in specifications:
             initialization = calibration_initialization()
