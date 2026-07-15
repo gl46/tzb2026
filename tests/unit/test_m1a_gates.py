@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import hashlib
+import json
 from pathlib import Path
 
 import yaml
@@ -184,3 +186,12 @@ def test_m1a_protocol_files_define_fail_closed_sensor_and_execution_gates() -> N
     assert "run_contact_calibration.sh" in runner and "run_moveit_execution_gate.sh" in runner
     assert "run_friction_grasp_trials.sh" in runner
     assert "set_pose" not in runner and "set_model" not in runner
+
+
+def test_m1a_manifest_report_hashes_are_verifiable() -> None:
+    root = Path(__file__).parents[2]
+    manifest = json.loads((root / "data/manifests/m1a-runtime-grasp-v1.json").read_text())
+    assert manifest["schema_version"] == "m1a-runtime-grasp-v1"
+    for relative_path, expected_hash in manifest["file_hashes"].items():
+        actual_hash = hashlib.sha256((root / relative_path).read_bytes()).hexdigest()
+        assert actual_hash == expected_hash

@@ -1,5 +1,5 @@
 {
-  "run_id": "m1a-20260716-170500",
+  "run_id": "m1a-20260716-171000",
   "status": "CONTACT_TELEMETRY_PARTIAL",
   "reason": "Finger-specific topics exist, but this bounded sensor audit has no calibrated left-only/right-only/bilateral target-contact trials.",
   "left_finger_topic_present": true,
@@ -8,7 +8,7 @@
   "minimum_contact_rate_hz": 20.0,
   "required_overlap_s": 0.1,
   "required_consecutive_samples": 3,
-  "raw_log": "logs/m1a-20260716-170500-s0-contact-calibration.log",
+  "raw_log": "logs/m1a-20260716-171000-s0-contact-calibration.log",
   "calibration_trials_completed": 0,
   "calibration_initialization": "NOT_USED",
   "use_sim_time": true

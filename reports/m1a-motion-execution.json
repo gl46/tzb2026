@@ -1,5 +1,5 @@
 {
-  "run_id": "m1a-20260716-170500",
+  "run_id": "m1a-20260716-171000",
   "motion_status": "BLOCKED",
   "reason": "MoveIt is configured with the official Panda resource rather than the Gazebo-controlled panda_controlled.urdf; no unsafe S1 trajectory was dispatched.",
   "local_gazebo_urdf_sha256": "efc3abf467ccc79484a8ed0907e61a6df417420395f1327005bed40386ca343c",
@@ -11,5 +11,5 @@
   "motion_successes": 0,
   "anti_teleport_verified_trials": 0,
   "controller_trajectory_dispatched": false,
-  "raw_log": "logs/m1a-20260716-170500-s1-moveit-execution.log"
+  "raw_log": "logs/m1a-20260716-171000-s1-moveit-execution.log"
 }

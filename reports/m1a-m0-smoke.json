@@ -1,0 +1,12 @@
+{
+  "run_id": "m1a-20260716-171000",
+  "status": "PARTIAL_CONTROL_AND_PERCEPTION_VERIFIED",
+  "world_service": true,
+  "controllers_active": true,
+  "arm_action_succeeded": true,
+  "joint_states_received": true,
+  "m0_constrained_transfer_reproduced": false,
+  "episode_recorded": false,
+  "raw_log": "logs/m1a-20260716-171000-m0-smoke.log",
+  "reason": "This M1A preflight rechecked controller-backed M0 smoke only; it did not rerun or overwrite the protected constrained-transfer episode."
+}
