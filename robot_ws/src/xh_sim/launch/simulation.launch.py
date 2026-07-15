@@ -58,6 +58,18 @@ def generate_launch_description():
         output="screen",
         arguments=["panda_hand_controller", "--controller-manager-timeout", "20"],
     )
+    left_contact_gz = (
+        "/world/xh_p0_pick_place/model/panda_controller/link/panda_leftfinger/"
+        "sensor/left_finger_contact/contact"
+    )
+    right_contact_gz = (
+        "/world/xh_p0_pick_place/model/panda_controller/link/panda_rightfinger/"
+        "sensor/right_finger_contact/contact"
+    )
+    cube_contact_gz = (
+        "/world/xh_p0_pick_place/model/object_red_cube/link/link/"
+        "sensor/red_cube_contact/contact"
+    )
     # Camera bridges are intentionally explicit.  A missing transport topic is
     # reported by the smoke test rather than treated as a substitute for RGB-D.
     bridge = Node(
@@ -69,6 +81,14 @@ def generate_launch_description():
             "/xh/camera/rgbd/image@sensor_msgs/msg/Image[gz.msgs.Image",
             "/xh/camera/rgbd/depth_image@sensor_msgs/msg/Image[gz.msgs.Image",
             "/xh/camera/rgbd/camera_info@sensor_msgs/msg/CameraInfo[gz.msgs.CameraInfo",
+            f"{left_contact_gz}@ros_gz_interfaces/msg/Contacts[gz.msgs.Contacts",
+            f"{right_contact_gz}@ros_gz_interfaces/msg/Contacts[gz.msgs.Contacts",
+            f"{cube_contact_gz}@ros_gz_interfaces/msg/Contacts[gz.msgs.Contacts",
+        ],
+        remappings=[
+            (left_contact_gz, "/xh/supervision/panda_leftfinger_contacts"),
+            (right_contact_gz, "/xh/supervision/panda_rightfinger_contacts"),
+            (cube_contact_gz, "/xh/supervision/red_cube_contacts"),
         ],
     )
 

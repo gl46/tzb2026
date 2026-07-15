@@ -49,7 +49,19 @@ if runtime is None:
 else:
     status = runtime["status"]
     reason = f"{runtime['successful_trials']}/10 three-segment MoveIt trials passed all recorded gates."
-    trials, successes, segments = 10, runtime["successful_trials"], runtime["segments"]
+    trials, successes = 10, runtime["successful_trials"]
+    segments = []
+    for segment in runtime["segments"]:
+        summary = {key: value for key, value in segment.items() if key not in {"samples", "controller_samples"}}
+        summary["joint_state_sample_excerpt"] = [
+            segment["samples"][index] for index in (0, -1) if segment.get("samples")
+        ]
+        summary["controller_state_sample_excerpt"] = [
+            segment["controller_samples"][index]
+            for index in (0, -1)
+            if segment.get("controller_samples")
+        ]
+        segments.append(summary)
 data = {
     "run_id": run_id, "motion_status": status, "reason": reason,
     "local_gazebo_urdf_sha256": local_sha, "remote_gazebo_urdf_sha256": remote_sha,

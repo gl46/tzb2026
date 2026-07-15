@@ -227,6 +227,9 @@ def test_m1a_moveit_configuration_preserves_controlled_joint_names_limits_and_un
     assert "re.sub" not in simulation_launch
     assert "<collision>.*?</collision>" not in simulation_launch
     assert "<position_proportional_gain>1.0</position_proportional_gain>" in source_urdf.read_text()
+    assert simulation_launch.count("ros_gz_interfaces/msg/Contacts[gz.msgs.Contacts") == 3
+    assert '"/xh/supervision/panda_leftfinger_contacts"' in simulation_launch
+    assert '"/xh/supervision/panda_rightfinger_contacts"' in simulation_launch
     srdf = (root / "robot_ws/src/xh_sim/config/m1a_panda.srdf").read_text()
     assert "panda_link0\" tip_link=\"panda_hand" in srdf
     assert "panda_leftfinger\" link2=\"object_red_cube" not in srdf
@@ -256,6 +259,20 @@ def test_m1a_execution_client_uses_moveit_plan_execute_fk_and_no_pose_write() ->
     assert "planned_by_name" in source
     assert "PLANNED_JOINT_SET_MISMATCH" in source
     assert "set_pose" not in source and "set_joint" not in source
+
+
+def test_m1a_contact_calibration_uses_oracle_geometry_hand_control_and_per_trial_windows() -> None:
+    root = Path(__file__).parents[2]
+    runner = (root / "scripts/run_contact_calibration.sh").read_text()
+    client = (root / "scripts/m1a_contact_calibration_client.py").read_text()
+    assert "timeout 42" not in runner
+    assert "PER_TRIAL_FULL_ACTION_WINDOW" in runner
+    assert "gz model" in client and "runtime_cube_pose" in client
+    assert '"/compute_ik"' in client
+    assert '"/panda_hand_controller/follow_joint_trajectory"' in client
+    assert "pad_center_world" in client and "minimum_pad_cube_aabb_separation_m" in client
+    assert "CALIBRATION_ONLY_INITIALIZATION" in client
+    assert "set_pose" not in runner and "set_pose" not in client
 
 
 def test_m1a_runtime_acm_preserves_only_documented_exceptions() -> None:
