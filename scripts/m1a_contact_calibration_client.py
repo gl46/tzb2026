@@ -59,8 +59,24 @@ def aabb_separation(
 
 
 def runtime_cube_pose() -> dict | None:
+    return runtime_model_pose("object_red_cube")
+
+
+def runtime_link_pose(link: str) -> list[float] | None:
+    pose = runtime_model_pose("panda_controller", link=link)
+    if pose is None:
+        return None
+    return [*pose["xyz"], *pose["rpy"]]
+
+
+def runtime_model_pose(model: str, *, link: str | None = None) -> dict | None:
+    command = ["gz", "model", "-m", model]
+    if link is None:
+        command.append("-p")
+    else:
+        command.extend(["-l", link])
     result = subprocess.run(
-        ["gz", "model", "-m", "object_red_cube", "-p"],
+        command,
         check=False,
         capture_output=True,
         text=True,
@@ -75,7 +91,11 @@ def runtime_cube_pose() -> dict | None:
     if result.returncode != 0 or match is None:
         return None
     values = [float(value) for value in match.groups()]
-    return {"xyz": values[:3], "rpy": values[3:], "source": "gz model runtime oracle"}
+    return {
+        "xyz": values[:3],
+        "rpy": values[3:],
+        "source": f"gz model runtime oracle ({model}{'/' + link if link else ''})",
+    }
 
 
 def calibration_initialization() -> dict:
@@ -289,6 +309,32 @@ class CalibrationClient(EvidenceClient):
             output[side] = {"link_pose": pose, "pad_center_world": center, "aabb_separation_m": separation}
             separations.append(separation)
         output["minimum_pad_cube_aabb_separation_m"] = min(separations) if separations else None
+        simulator: dict[str, dict | float | None] = {}
+        simulator_separations = []
+        for side, link in (("left", "panda_leftfinger"), ("right", "panda_rightfinger")):
+            pose = runtime_link_pose(link)
+            if pose is None:
+                simulator[side] = None
+                continue
+            roll, pitch, yaw = pose[3:]
+            cy, sy = math.cos(yaw / 2.0), math.sin(yaw / 2.0)
+            cp, sp = math.cos(pitch / 2.0), math.sin(pitch / 2.0)
+            cr, sr = math.cos(roll / 2.0), math.sin(roll / 2.0)
+            quaternion = [sr * cp * cy - cr * sp * sy, cr * sp * cy + sr * cp * sy,
+                          cr * cp * sy - sr * sp * cy, cr * cp * cy + sr * sp * sy]
+            translation = quaternion_rotate(quaternion, (0.06, 0.0, 0.0))
+            center = [pose[index] + translation[index] for index in range(3)]
+            separation = aabb_separation(center, PAD_SIZE_M, cube_xyz, (CUBE_SIZE_M,) * 3)
+            simulator[side] = {
+                "link_pose_world_xyz_rpy": pose,
+                "pad_center_world": center,
+                "aabb_separation_m": separation,
+            }
+            simulator_separations.append(separation)
+        output["gazebo_link_pose_evidence"] = simulator
+        output["gazebo_minimum_pad_cube_aabb_separation_m"] = (
+            min(simulator_separations) if simulator_separations else None
+        )
         return output
 
     def fk_link(self, link: str, positions: list[float]) -> list[float] | None:
