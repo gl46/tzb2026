@@ -99,6 +99,25 @@ Panda wrist transform stated above. It must not appear in an arm controller,
 trajectory goal, the seven-actuated-joint contract or the test-time policy
 action vector.
 
+## Implementation-readiness audit
+
+This is a read-only audit of the current M1A configuration, not an
+implementation authorization. Once approved, the expected impact is narrowly
+bounded:
+
+| Surface | Required change after approval | Must remain unchanged |
+| --- | --- | --- |
+| `panda_controlled.urdf` | Replace the arm/wrist transforms with the approved table; add fixed `panda_link8` / `panda_joint8`; resize arm visual/collision primitives consistently. | The base transform, nine actuated joint names/limits/interfaces, hand/finger links, finger collision geometry and contact sensor topics. |
+| `m1a_panda.srdf` | Replace adjacent pair `panda_link7`–`panda_hand` with `panda_link7`–`panda_link8` and `panda_link8`–`panda_hand`. | The arm chain remains `panda_link0` to `panda_hand`; no robot/world collision is disabled. |
+| `m1a_collision_policy.yaml` and S1 evidence | Add `panda_link8`–`work_table` to the explicit enabled list and report it in the final enabled-pair list. | Finger/object and arm/table checks, plus the sole `panda_link0`–`work_table` exception. |
+| Controller and MoveIt controller YAML | None. | Exactly seven arm trajectory joints and two finger trajectory joints. |
+| Launch chain | None. | Both Gazebo and MoveIt continue to consume the same controlled URDF. |
+
+The existing `ADJACENT_SELF_PAIRS` audit and unit test must be updated together
+with the SRDF so no collision exception is introduced silently. These changes
+are followed by the mandatory S0 → S1 → S2 sequence; they are not a shortcut
+to S2.
+
 The existing unit test for joint names, limits and units must continue to pass;
 the implementation must also add or update a model-hash record that identifies
 the new source URDF. No Teacher or privileged simulator truth may enter the
