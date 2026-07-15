@@ -83,7 +83,7 @@ for index in "${!labels[@]}"; do
   echo "CALIBRATION_TRIAL:$((index + 1)):${labels[$index]}:${targets[$index]}"
   IFS=, read -r q1 q2 q3 q4 q5 q6 q7 <<<"${targets[$index]}"
   timeout -k 2 8 ros2 action send_goal /panda_arm_controller/follow_joint_trajectory control_msgs/action/FollowJointTrajectory \
-    "{trajectory: {joint_names: [panda_joint1, panda_joint2, panda_joint3, panda_joint4, panda_joint5, panda_joint6, panda_joint7], points: [{positions: [$q1, $q2, $q3, $q4, $q5, $q6, $q7], time_from_start: {sec: 2}}]}}" 2>&1 | sed "s/^/CALIBRATION_ACTION:$((index + 1)):"
+    "{trajectory: {joint_names: [panda_joint1, panda_joint2, panda_joint3, panda_joint4, panda_joint5, panda_joint6, panda_joint7], points: [{positions: [$q1, $q2, $q3, $q4, $q5, $q6, $q7], time_from_start: {sec: 2}}]}}" 2>&1 | sed "s/^/CALIBRATION_ACTION:$((index + 1)):/"
 done
 wait "$left_monitor" || true
 wait "$right_monitor" || true
