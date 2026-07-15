@@ -1,12 +1,626 @@
 {
-  "status": "NOT_RUN_S1_NOT_VERIFIED",
-  "frictional_trials": 0,
+  "status": "FRICTIONAL_GRASP_NOT_VERIFIED",
+  "run_id": "m1a-20260716-s2-baseline-01",
+  "frictional_trials": 3,
   "frictional_successes": 0,
   "failure_counts": {
-    "APPROACH_ALIGNMENT_FAILURE": 0,
+    "APPROACH_ALIGNMENT_FAILURE": 3,
     "CONTACT_CLOSURE_FAILURE": 0,
     "HOLD_TRANSPORT_FAILURE": 0,
     "RELEASE_PLACEMENT_FAILURE": 0
   },
-  "reason": "S2 did not run because S1 has not established a verified MoveIt execution chain."
+  "trials": [
+    {
+      "trial_id": "m1a-20260716-s2-baseline-01-baseline-1",
+      "status": "FRICTION_TRIAL_FAILED",
+      "primary_failure_class": "APPROACH_ALIGNMENT_FAILURE",
+      "detachable_joint_absent": true,
+      "configuration": {
+        "id": "baseline",
+        "finger_friction": "world_default",
+        "object_friction": "world_default",
+        "object_mass_kg": 0.08,
+        "solver_step_s": 0.001,
+        "gripper_profile_m": [
+          0.04,
+          0.01
+        ],
+        "approach_pose_source": "runtime_oracle_geometry_plus_collision_checked_ik"
+      },
+      "cube_pose": {
+        "xyz": [
+          0.22,
+          0.12,
+          0.475
+        ],
+        "rpy": [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        "source": "gz model runtime oracle (object_red_cube)"
+      },
+      "approach": {
+        "ik_solved": false,
+        "ik_error": {
+          "code": -31,
+          "message": ""
+        },
+        "planned": false,
+        "executed": false
+      },
+      "close": {
+        "accepted": true,
+        "succeeded": true,
+        "goal_uuid": "5aa64a467584457c805d11fe2a6ba90b",
+        "observed_positions_m": [
+          0.01037500000000463,
+          0.04
+        ],
+        "max_position_error_m": 0.03
+      },
+      "contacts": {
+        "left_target": false,
+        "right_target": false,
+        "left_table": false,
+        "right_table": false,
+        "cube_table": true,
+        "cube_environment_table": false,
+        "raw_pairs": {
+          "left": [],
+          "right": [],
+          "cube": [
+            [
+              "object_red_cube::link::collision",
+              "work_table::table_link::collision"
+            ]
+          ],
+          "cube_environment": []
+        },
+        "event_counts": {
+          "left": 0,
+          "right": 0,
+          "cube": 1303,
+          "cube_environment": 0
+        },
+        "topic_rate_evidence": {
+          "left": {
+            "unique_timestamp_samples": 0,
+            "duration_s": 0.0,
+            "observed_rate_hz": 0.0
+          },
+          "right": {
+            "unique_timestamp_samples": 0,
+            "duration_s": 0.0,
+            "observed_rate_hz": 0.0
+          },
+          "cube": {
+            "unique_timestamp_samples": 1303,
+            "duration_s": 1.3019999999999996,
+            "observed_rate_hz": 1000.0000000000003
+          },
+          "cube_environment": {
+            "unique_timestamp_samples": 0,
+            "duration_s": 0.0,
+            "observed_rate_hz": 0.0
+          }
+        },
+        "left_target_unique_samples": 0,
+        "right_target_unique_samples": 0,
+        "bilateral_overlap_s": 0.0
+      },
+      "pad_evidence_at_close": {
+        "left": {
+          "link_pose": [
+            -0.35,
+            -0.15000000000230143,
+            1.2350000000039174,
+            1.0,
+            0.0,
+            0.0,
+            4.896638650109253e-12
+          ],
+          "pad_center_world": [
+            -0.29,
+            -0.15000000000230143,
+            1.2350000000039174
+          ],
+          "aabb_separation_m": 0.8666759775179579
+        },
+        "right": {
+          "link_pose": [
+            -0.35,
+            -0.10000000000230141,
+            1.2350000000034278,
+            1.0,
+            0.0,
+            0.0,
+            4.896638650109253e-12
+          ],
+          "pad_center_world": [
+            -0.29,
+            -0.10000000000230141,
+            1.2350000000034278
+          ],
+          "aabb_separation_m": 0.8544163212426219
+        },
+        "minimum_pad_cube_aabb_separation_m": 0.8544163212426219,
+        "gazebo_link_pose_evidence": {
+          "left": {
+            "link_pose_world_xyz_rpy": [
+              -0.35,
+              -0.15,
+              1.235,
+              3.14159,
+              -0.0,
+              0.0
+            ],
+            "pad_center_world": [
+              -0.29,
+              -0.15,
+              1.235
+            ],
+            "aabb_separation_m": 0.8666759775140882
+          },
+          "right": {
+            "link_pose_world_xyz_rpy": [
+              -0.35,
+              -0.1,
+              1.235,
+              3.14159,
+              -0.0,
+              0.0
+            ],
+            "pad_center_world": [
+              -0.29,
+              -0.1,
+              1.235
+            ],
+            "aabb_separation_m": 0.8544163212392424
+          }
+        },
+        "gazebo_minimum_pad_cube_aabb_separation_m": 0.8544163212392424
+      },
+      "cube_pose_after_close": {
+        "xyz": [
+          0.22,
+          0.12,
+          0.475
+        ],
+        "rpy": [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        "source": "gz model runtime oracle (object_red_cube)"
+      },
+      "lift": {
+        "executed": false
+      },
+      "cube_pose_after_lift": {
+        "xyz": [
+          0.22,
+          0.12,
+          0.475
+        ],
+        "rpy": [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        "source": "gz model runtime oracle (object_red_cube)"
+      },
+      "lift_height_m": 0.0,
+      "raw_log": "logs/m1a-20260716-s2-baseline-01-s2-baseline-1.log"
+    },
+    {
+      "trial_id": "m1a-20260716-s2-baseline-01-baseline-2",
+      "status": "FRICTION_TRIAL_FAILED",
+      "primary_failure_class": "APPROACH_ALIGNMENT_FAILURE",
+      "detachable_joint_absent": true,
+      "configuration": {
+        "id": "baseline",
+        "finger_friction": "world_default",
+        "object_friction": "world_default",
+        "object_mass_kg": 0.08,
+        "solver_step_s": 0.001,
+        "gripper_profile_m": [
+          0.04,
+          0.01
+        ],
+        "approach_pose_source": "runtime_oracle_geometry_plus_collision_checked_ik"
+      },
+      "cube_pose": {
+        "xyz": [
+          0.22,
+          0.12,
+          0.475
+        ],
+        "rpy": [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        "source": "gz model runtime oracle (object_red_cube)"
+      },
+      "approach": {
+        "ik_solved": false,
+        "ik_error": {
+          "code": -31,
+          "message": ""
+        },
+        "planned": false,
+        "executed": false
+      },
+      "close": {
+        "accepted": true,
+        "succeeded": true,
+        "goal_uuid": "511063ab17044ee8b068e66441aa3a1c",
+        "observed_positions_m": [
+          0.010000000000000005,
+          0.04
+        ],
+        "max_position_error_m": 0.03
+      },
+      "contacts": {
+        "left_target": false,
+        "right_target": false,
+        "left_table": false,
+        "right_table": false,
+        "cube_table": true,
+        "cube_environment_table": false,
+        "raw_pairs": {
+          "left": [],
+          "right": [],
+          "cube": [
+            [
+              "object_red_cube::link::collision",
+              "work_table::table_link::collision"
+            ]
+          ],
+          "cube_environment": []
+        },
+        "event_counts": {
+          "left": 0,
+          "right": 0,
+          "cube": 1344,
+          "cube_environment": 0
+        },
+        "topic_rate_evidence": {
+          "left": {
+            "unique_timestamp_samples": 0,
+            "duration_s": 0.0,
+            "observed_rate_hz": 0.0
+          },
+          "right": {
+            "unique_timestamp_samples": 0,
+            "duration_s": 0.0,
+            "observed_rate_hz": 0.0
+          },
+          "cube": {
+            "unique_timestamp_samples": 1344,
+            "duration_s": 1.3430000000000017,
+            "observed_rate_hz": 999.9999999999987
+          },
+          "cube_environment": {
+            "unique_timestamp_samples": 0,
+            "duration_s": 0.0,
+            "observed_rate_hz": 0.0
+          }
+        },
+        "left_target_unique_samples": 0,
+        "right_target_unique_samples": 0,
+        "bilateral_overlap_s": 0.0
+      },
+      "pad_evidence_at_close": {
+        "left": {
+          "link_pose": [
+            -0.35,
+            -0.15000000000230143,
+            1.2350000000039174,
+            1.0,
+            0.0,
+            0.0,
+            4.896638650109253e-12
+          ],
+          "pad_center_world": [
+            -0.29,
+            -0.15000000000230143,
+            1.2350000000039174
+          ],
+          "aabb_separation_m": 0.8666759775179579
+        },
+        "right": {
+          "link_pose": [
+            -0.35,
+            -0.10000000000230141,
+            1.2350000000034278,
+            1.0,
+            0.0,
+            0.0,
+            4.896638650109253e-12
+          ],
+          "pad_center_world": [
+            -0.29,
+            -0.10000000000230141,
+            1.2350000000034278
+          ],
+          "aabb_separation_m": 0.8544163212426219
+        },
+        "minimum_pad_cube_aabb_separation_m": 0.8544163212426219,
+        "gazebo_link_pose_evidence": {
+          "left": {
+            "link_pose_world_xyz_rpy": [
+              -0.35,
+              -0.15,
+              1.235,
+              3.14159,
+              -0.0,
+              0.0
+            ],
+            "pad_center_world": [
+              -0.29,
+              -0.15,
+              1.235
+            ],
+            "aabb_separation_m": 0.8666759775140882
+          },
+          "right": {
+            "link_pose_world_xyz_rpy": [
+              -0.35,
+              -0.1,
+              1.235,
+              3.14159,
+              -0.0,
+              0.0
+            ],
+            "pad_center_world": [
+              -0.29,
+              -0.1,
+              1.235
+            ],
+            "aabb_separation_m": 0.8544163212392424
+          }
+        },
+        "gazebo_minimum_pad_cube_aabb_separation_m": 0.8544163212392424
+      },
+      "cube_pose_after_close": {
+        "xyz": [
+          0.22,
+          0.12,
+          0.475
+        ],
+        "rpy": [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        "source": "gz model runtime oracle (object_red_cube)"
+      },
+      "lift": {
+        "executed": false
+      },
+      "cube_pose_after_lift": {
+        "xyz": [
+          0.22,
+          0.12,
+          0.475
+        ],
+        "rpy": [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        "source": "gz model runtime oracle (object_red_cube)"
+      },
+      "lift_height_m": 0.0,
+      "raw_log": "logs/m1a-20260716-s2-baseline-01-s2-baseline-2.log"
+    },
+    {
+      "trial_id": "m1a-20260716-s2-baseline-01-baseline-3",
+      "status": "FRICTION_TRIAL_FAILED",
+      "primary_failure_class": "APPROACH_ALIGNMENT_FAILURE",
+      "detachable_joint_absent": true,
+      "configuration": {
+        "id": "baseline",
+        "finger_friction": "world_default",
+        "object_friction": "world_default",
+        "object_mass_kg": 0.08,
+        "solver_step_s": 0.001,
+        "gripper_profile_m": [
+          0.04,
+          0.01
+        ],
+        "approach_pose_source": "runtime_oracle_geometry_plus_collision_checked_ik"
+      },
+      "cube_pose": {
+        "xyz": [
+          0.22,
+          0.12,
+          0.475
+        ],
+        "rpy": [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        "source": "gz model runtime oracle (object_red_cube)"
+      },
+      "approach": {
+        "ik_solved": false,
+        "ik_error": {
+          "code": -31,
+          "message": ""
+        },
+        "planned": false,
+        "executed": false
+      },
+      "close": {
+        "accepted": true,
+        "succeeded": true,
+        "goal_uuid": "d569b707501948d28e9321512e501bb1",
+        "observed_positions_m": [
+          0.010412500000000468,
+          0.04
+        ],
+        "max_position_error_m": 0.03
+      },
+      "contacts": {
+        "left_target": false,
+        "right_target": false,
+        "left_table": false,
+        "right_table": false,
+        "cube_table": true,
+        "cube_environment_table": false,
+        "raw_pairs": {
+          "left": [],
+          "right": [],
+          "cube": [
+            [
+              "object_red_cube::link::collision",
+              "work_table::table_link::collision"
+            ]
+          ],
+          "cube_environment": []
+        },
+        "event_counts": {
+          "left": 0,
+          "right": 0,
+          "cube": 1303,
+          "cube_environment": 0
+        },
+        "topic_rate_evidence": {
+          "left": {
+            "unique_timestamp_samples": 0,
+            "duration_s": 0.0,
+            "observed_rate_hz": 0.0
+          },
+          "right": {
+            "unique_timestamp_samples": 0,
+            "duration_s": 0.0,
+            "observed_rate_hz": 0.0
+          },
+          "cube": {
+            "unique_timestamp_samples": 1303,
+            "duration_s": 1.3019999999999996,
+            "observed_rate_hz": 1000.0000000000003
+          },
+          "cube_environment": {
+            "unique_timestamp_samples": 0,
+            "duration_s": 0.0,
+            "observed_rate_hz": 0.0
+          }
+        },
+        "left_target_unique_samples": 0,
+        "right_target_unique_samples": 0,
+        "bilateral_overlap_s": 0.0
+      },
+      "pad_evidence_at_close": {
+        "left": {
+          "link_pose": [
+            -0.35,
+            -0.1500000000023014,
+            1.2350000000039174,
+            1.0,
+            0.0,
+            0.0,
+            4.896638650109253e-12
+          ],
+          "pad_center_world": [
+            -0.29,
+            -0.1500000000023014,
+            1.2350000000039174
+          ],
+          "aabb_separation_m": 0.8666759775179579
+        },
+        "right": {
+          "link_pose": [
+            -0.35,
+            -0.10000000000230141,
+            1.2350000000034278,
+            1.0,
+            0.0,
+            0.0,
+            4.896638650109253e-12
+          ],
+          "pad_center_world": [
+            -0.29,
+            -0.10000000000230141,
+            1.2350000000034278
+          ],
+          "aabb_separation_m": 0.8544163212426219
+        },
+        "minimum_pad_cube_aabb_separation_m": 0.8544163212426219,
+        "gazebo_link_pose_evidence": {
+          "left": {
+            "link_pose_world_xyz_rpy": [
+              -0.35,
+              -0.15,
+              1.235,
+              3.14159,
+              -0.0,
+              0.0
+            ],
+            "pad_center_world": [
+              -0.29,
+              -0.15,
+              1.235
+            ],
+            "aabb_separation_m": 0.8666759775140882
+          },
+          "right": {
+            "link_pose_world_xyz_rpy": [
+              -0.35,
+              -0.1,
+              1.235,
+              3.14159,
+              -0.0,
+              0.0
+            ],
+            "pad_center_world": [
+              -0.29,
+              -0.1,
+              1.235
+            ],
+            "aabb_separation_m": 0.8544163212392424
+          }
+        },
+        "gazebo_minimum_pad_cube_aabb_separation_m": 0.8544163212392424
+      },
+      "cube_pose_after_close": {
+        "xyz": [
+          0.22,
+          0.12,
+          0.475
+        ],
+        "rpy": [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        "source": "gz model runtime oracle (object_red_cube)"
+      },
+      "lift": {
+        "executed": false
+      },
+      "cube_pose_after_lift": {
+        "xyz": [
+          0.22,
+          0.12,
+          0.475
+        ],
+        "rpy": [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        "source": "gz model runtime oracle (object_red_cube)"
+      },
+      "lift_height_m": 0.0,
+      "raw_log": "logs/m1a-20260716-s2-baseline-01-s2-baseline-3.log"
+    }
+  ],
+  "detachable_joint_absent": true,
+  "early_stop": true,
+  "reason": "Stopped after three approach-alignment failures; friction parameters were not changed because contact was not established."
 }

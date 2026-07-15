@@ -1,4 +1,6 @@
 # M1A S2 friction trials
 
-- Status: `NOT_RUN_S1_NOT_VERIFIED`
-- Trials: `0`
+- Status: `FRICTIONAL_GRASP_NOT_VERIFIED`
+- Trials: `3`
+- Failure counts: `{'APPROACH_ALIGNMENT_FAILURE': 3, 'CONTACT_CLOSURE_FAILURE': 0, 'HOLD_TRANSPORT_FAILURE': 0, 'RELEASE_PLACEMENT_FAILURE': 0}`
+- Early stop: `True`
