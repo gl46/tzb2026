@@ -244,6 +244,8 @@ def test_m1a_execution_client_uses_moveit_plan_execute_fk_and_no_pose_write() ->
     assert '"/joint_states"' in source
     assert "current_acm()" in source
     assert 'set_allowed_pair(matrix, "panda_link0", "work_table", True)' in source
+    assert "post_controller_converged" in source
+    assert "consecutive_converged >= 5" in source
     assert "set_pose" not in source and "set_joint" not in source
 
 

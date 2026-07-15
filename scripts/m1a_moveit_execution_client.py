@@ -195,7 +195,7 @@ class EvidenceClient(Node):
             return None
         return result.motion_plan_response.trajectory
 
-    def execute(self, trajectory):
+    def execute(self, trajectory, expected: list[float]):
         start_index = len(self.samples)
         goal = ExecuteTrajectory.Goal(trajectory=trajectory)
         sent = self.execute_client.send_goal_async(goal)
@@ -207,7 +207,27 @@ class EvidenceClient(Node):
         rclpy.spin_until_future_complete(self, result_future, timeout_sec=30.0)
         wrapped = result_future.result()
         result = wrapped.result if wrapped else None
-        return bool(result and result.error_code.val == 1), bytes(handle.goal_id.uuid).hex(), self.samples[start_index:]
+        controller_succeeded = bool(result and result.error_code.val == 1)
+        controller_completed_at = time.time()
+        consecutive_converged = 0
+        settle_deadline = controller_completed_at + 3.0
+        while controller_succeeded and time.time() < settle_deadline:
+            rclpy.spin_once(self, timeout_sec=0.02)
+            actual = [self.latest.get(joint, math.nan) for joint in JOINTS]
+            converged = all(math.isfinite(value) for value in actual) and max(
+                abs(actual_value - expected_value)
+                for actual_value, expected_value in zip(actual, expected)
+            ) <= 0.01
+            consecutive_converged = consecutive_converged + 1 if converged else 0
+            if consecutive_converged >= 5:
+                break
+        return (
+            controller_succeeded,
+            bytes(handle.goal_id.uuid).hex(),
+            self.samples[start_index:],
+            time.time() - controller_completed_at,
+            consecutive_converged >= 5,
+        )
 
 
 def segment_evidence(client: EvidenceClient, trial: int, name: str, target: list[float]) -> dict:
@@ -218,7 +238,7 @@ def segment_evidence(client: EvidenceClient, trial: int, name: str, target: list
     expected = list(trajectory.joint_trajectory.points[-1].positions)
     expected_fk = client.fk(expected)
     started = time.time()
-    executed, goal_uuid, samples = client.execute(trajectory)
+    executed, goal_uuid, samples, settle_duration, settled = client.execute(trajectory, expected)
     completed = time.time()
     actual = [client.latest.get(joint, math.nan) for joint in JOINTS]
     actual_fk = client.fk(actual) if all(math.isfinite(value) for value in actual) else None
@@ -236,11 +256,12 @@ def segment_evidence(client: EvidenceClient, trial: int, name: str, target: list
         "trial": trial, "segment": name, "planned": True, "planning_started_wall": planned_at,
         "dispatched": goal_uuid is not None, "goal_uuid": goal_uuid, "controller_result": "SUCCEEDED" if executed else "FAILED",
         "duration_s": completed - started, "expected_final_joints": expected, "observed_final_joints": actual,
+        "post_controller_settle_s": settle_duration, "post_controller_converged": settled,
         "per_joint_final_error": errors, "max_final_joint_error_rad": max(errors),
         "expected_ee_pose": expected_fk, "observed_ee_pose": actual_fk, "ee_position_error_m": ee_error,
         "joint_state_sample_count": len(samples), "timestamps_monotonic": monotonic,
         "max_adjacent_joint_jump_rad": max_jump, "max_velocity_limit_ratio": max_velocity_ratio,
-        "samples": samples, "success": bool(executed and len(samples) >= 20 and monotonic and max(errors) <= 0.05
+        "samples": samples, "success": bool(executed and settled and len(samples) >= 20 and monotonic and max(errors) <= 0.05
                                      and ee_error is not None and ee_error <= 0.02 and max_jump <= 0.08
                                      and max_velocity_ratio <= 1.5 and completed - started >= 0.25),
     }
