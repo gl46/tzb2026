@@ -4,27 +4,29 @@ from pathlib import Path
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, RegisterEventHandler
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, OpaqueFunction, RegisterEventHandler
 from launch.event_handlers import OnProcessExit
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 
 
-def generate_launch_description():
-    share = Path(get_package_share_directory("xh_sim"))
-    ros_gz_share = Path(get_package_share_directory("ros_gz_sim"))
-    default_world = share / "worlds" / "p0_pick_place.sdf"
-    world_file = LaunchConfiguration("world_file")
+def _robot_actions(context, share: Path):
+    """Build the controller-backed robot after resolving calibration mode."""
     urdf = share / "urdf" / "panda_controlled.urdf"
-
-    # The same description is intentionally sent to robot_state_publisher and
-    # Gazebo's create node.  This keeps TF and the gz_ros2_control model bound
-    # to one concrete, auditable robot description.
-    # ``ros_gz_sim create`` receives XML directly, not an xacro expansion pass.
-    # Resolve the controller YAML package substitution before publication so the
-    # Gazebo plugin receives an actual readable path rather than ``$(find ...)``.
     robot_xml = urdf.read_text(encoding="utf-8").replace("$(find xh_sim)", str(share))
+    calibration_mode = LaunchConfiguration("calibration_mode").perform(context).lower() == "true"
+    if calibration_mode:
+        # The M0 detachable joint moves the red cube with the arm even before a
+        # physical finger grasp is established.  S0 validates raw contact
+        # telemetry, so its isolated world excludes only this simulator-only
+        # constraint; every link, joint, limit, collision and controller is
+        # otherwise byte-for-byte from panda_controlled.urdf.
+        start = robot_xml.find('<plugin filename="gz-sim-detachable-joint-system"')
+        end = robot_xml.find("</plugin>", start)
+        if start < 0 or end < 0:
+            raise RuntimeError("S0 calibration requested but detachable-joint plugin was not found")
+        robot_xml = robot_xml[:start] + robot_xml[end + len("</plugin>"):]
     robot_description = {"robot_description": robot_xml, "use_sim_time": True}
     robot_state_publisher = Node(
         package="robot_state_publisher",
@@ -60,6 +62,25 @@ def generate_launch_description():
         output="screen",
         arguments=["panda_hand_controller", "--controller-manager-timeout", "20"],
     )
+    return [
+        robot_state_publisher,
+        spawn_robot,
+        RegisterEventHandler(OnProcessExit(
+            target_action=spawn_robot,
+            on_exit=[joint_state_broadcaster],
+        )),
+        RegisterEventHandler(OnProcessExit(
+            target_action=joint_state_broadcaster,
+            on_exit=[arm_controller, hand_controller],
+        )),
+    ]
+
+
+def generate_launch_description():
+    share = Path(get_package_share_directory("xh_sim"))
+    ros_gz_share = Path(get_package_share_directory("ros_gz_sim"))
+    default_world = share / "worlds" / "p0_pick_place.sdf"
+    world_file = LaunchConfiguration("world_file")
     left_contact_gz = (
         "/world/xh_p0_pick_place/model/panda_controller/link/panda_leftfinger/"
         "sensor/left_finger_contact/contact"
@@ -97,6 +118,11 @@ def generate_launch_description():
     return LaunchDescription([
         DeclareLaunchArgument("headless", default_value="true", description="Server-only P0 launch."),
         DeclareLaunchArgument(
+            "calibration_mode",
+            default_value="false",
+            description="S0-only: omit the M0 detachable joint, retaining all robot mechanics.",
+        ),
+        DeclareLaunchArgument(
             "world_file",
             default_value=str(default_world),
             description="Absolute SDF world path; S0 may select its isolated calibration world.",
@@ -106,14 +132,5 @@ def generate_launch_description():
             launch_arguments={"gz_args": ["-r -s --headless-rendering ", world_file]}.items(),
         ),
         bridge,
-        robot_state_publisher,
-        spawn_robot,
-        RegisterEventHandler(OnProcessExit(
-            target_action=spawn_robot,
-            on_exit=[joint_state_broadcaster],
-        )),
-        RegisterEventHandler(OnProcessExit(
-            target_action=joint_state_broadcaster,
-            on_exit=[arm_controller, hand_controller],
-        )),
+        OpaqueFunction(function=lambda context: _robot_actions(context, share)),
     ])

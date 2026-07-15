@@ -24,7 +24,7 @@ fi
 tmp=$(mktemp -d)
 launch_log="$tmp/launch.log"
 calibration_world="/home/$USER/$root/robot_ws/install/xh_sim/share/xh_sim/worlds/m1a_contact_calibration.sdf"
-setsid ros2 launch xh_sim moveit_execution.launch.py world_file:="$calibration_world" >"$launch_log" 2>&1 & pid=$!
+setsid ros2 launch xh_sim moveit_execution.launch.py world_file:="$calibration_world" calibration_mode:=true >"$launch_log" 2>&1 & pid=$!
 cleanup() {
   kill -TERM -- "-$pid" 2>/dev/null || true
   sleep 1

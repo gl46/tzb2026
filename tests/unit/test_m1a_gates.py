@@ -226,6 +226,8 @@ def test_m1a_moveit_configuration_preserves_controlled_joint_names_limits_and_un
     simulation_launch = (root / "robot_ws/src/xh_sim/launch/simulation.launch.py").read_text()
     assert "re.sub" not in simulation_launch
     assert "<collision>.*?</collision>" not in simulation_launch
+    assert "calibration_mode" in simulation_launch
+    assert "gz-sim-detachable-joint-system" in simulation_launch
     assert "<position_proportional_gain>1.0</position_proportional_gain>" in source_urdf.read_text()
     assert simulation_launch.count("ros_gz_interfaces/msg/Contacts[gz.msgs.Contacts") == 3
     assert '"/xh/supervision/panda_leftfinger_contacts"' in simulation_launch
@@ -292,6 +294,7 @@ def test_m1a_contact_calibration_uses_oracle_geometry_hand_control_and_per_trial
     assert "set_target_touch_exception" in client
     assert "target_touch_exception_restored" in client
     assert "m1a_contact_calibration.sdf" in runner
+    assert "calibration_mode:=true" in runner
     simulation_launch = (root / "robot_ws/src/xh_sim/launch/simulation.launch.py").read_text()
     moveit_launch = (root / "robot_ws/src/xh_sim/launch/moveit_execution.launch.py").read_text()
     assert 'LaunchConfiguration("world_file")' in simulation_launch
