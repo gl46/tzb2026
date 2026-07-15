@@ -83,10 +83,11 @@ def runtime_model_pose(model: str, *, link: str | None = None) -> dict | None:
         timeout=5,
     )
     match = re.search(
-        r"Pose.*?:\s*\[\s*([-+0-9.eE]+)\s+([-+0-9.eE]+)\s+([-+0-9.eE]+)\s*\]"
+        r"^\s*- Pose \[ XYZ \(m\) \] \[ RPY \(rad\) \]:\s*"
+        r"\[\s*([-+0-9.eE]+)\s+([-+0-9.eE]+)\s+([-+0-9.eE]+)\s*\]"
         r"\s*\[\s*([-+0-9.eE]+)\s+([-+0-9.eE]+)\s+([-+0-9.eE]+)\s*\]",
         result.stdout,
-        re.DOTALL,
+        re.MULTILINE,
     )
     if result.returncode != 0 or match is None:
         return None
