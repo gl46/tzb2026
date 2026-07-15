@@ -313,8 +313,12 @@ class CalibrationClient(EvidenceClient):
     def move_joint_target(self, target: list[float]) -> dict:
         """Plan and execute a collision-checked retreat through MoveIt."""
         trajectory = self.plan(target)
+        plan_attempts = 1
         if trajectory is None:
-            return {"planned": False, "executed": False}
+            trajectory = self.plan(target)
+            plan_attempts += 1
+        if trajectory is None:
+            return {"planned": False, "executed": False, "plan_attempts": plan_attempts}
         names = list(trajectory.joint_trajectory.joint_names)
         final = dict(zip(names, trajectory.joint_trajectory.points[-1].positions))
         expected = [float(final[name]) for name in JOINTS]
@@ -323,6 +327,7 @@ class CalibrationClient(EvidenceClient):
         )
         return {
             "planned": True,
+            "plan_attempts": plan_attempts,
             "executed": executed,
             "converged": converged,
             "goal_uuid": goal_uuid,
@@ -610,6 +615,7 @@ def main() -> int:
             if expected == "left":
                 return bool(
                     trial.get("motion", {}).get("executed")
+                    and trial.get("retreat", {}).get("executed")
                     and trial.get("target_touch_exception_restored")
                     and contacts.get("left_target")
                     and not contacts.get("right_target")
@@ -617,6 +623,7 @@ def main() -> int:
             if expected == "right":
                 return bool(
                     trial.get("motion", {}).get("executed")
+                    and trial.get("retreat", {}).get("executed")
                     and trial.get("target_touch_exception_restored")
                     and contacts.get("right_target")
                     and not contacts.get("left_target")
@@ -624,6 +631,7 @@ def main() -> int:
             if expected == "bilateral":
                 return bool(
                     trial.get("motion", {}).get("executed")
+                    and trial.get("retreat", {}).get("executed")
                     and trial.get("target_touch_exception_restored")
                     and contacts.get("left_target")
                     and contacts.get("right_target")

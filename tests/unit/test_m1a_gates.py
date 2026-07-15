@@ -306,7 +306,8 @@ def test_m1a_contact_calibration_uses_oracle_geometry_hand_control_and_per_trial
     assert '"right", 0.0, [0.04, 0.010]' in client
     assert '"bilateral", -0.030, [0.010, 0.010]' in client
     assert "semantic test is the commanded finger close" in client
-    assert '"plan_attempts": plan_attempts' in client
+    assert client.count('"plan_attempts": plan_attempts') >= 2
+    assert 'trial.get("retreat", {}).get("executed")' in client
     assert "m1a_contact_calibration.sdf" in runner
     assert "calibration_mode:=true" in runner
     simulation_launch = (root / "robot_ws/src/xh_sim/launch/simulation.launch.py").read_text()
