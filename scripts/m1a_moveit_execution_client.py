@@ -235,7 +235,19 @@ def segment_evidence(client: EvidenceClient, trial: int, name: str, target: list
     trajectory = client.plan(target)
     if trajectory is None:
         return {"trial": trial, "segment": name, "planned": False, "success": False, "reason": "PLAN_FAILED"}
-    expected = list(trajectory.joint_trajectory.points[-1].positions)
+    planned_joint_names = list(trajectory.joint_trajectory.joint_names)
+    planned_final_positions = list(trajectory.joint_trajectory.points[-1].positions)
+    planned_by_name = dict(zip(planned_joint_names, planned_final_positions))
+    if not all(joint in planned_by_name for joint in JOINTS):
+        return {
+            "trial": trial,
+            "segment": name,
+            "planned": True,
+            "success": False,
+            "reason": "PLANNED_JOINT_SET_MISMATCH",
+            "planned_joint_names": planned_joint_names,
+        }
+    expected = [planned_by_name[joint] for joint in JOINTS]
     expected_fk = client.fk(expected)
     started = time.time()
     executed, goal_uuid, samples, settle_duration, settled = client.execute(trajectory, expected)
@@ -254,6 +266,8 @@ def segment_evidence(client: EvidenceClient, trial: int, name: str, target: list
     ee_error = math.dist(expected_fk[:3], actual_fk[:3]) if expected_fk and actual_fk else None
     return {
         "trial": trial, "segment": name, "planned": True, "planning_started_wall": planned_at,
+        "planned_joint_names": planned_joint_names,
+        "planned_final_positions_in_trajectory_order": planned_final_positions,
         "dispatched": goal_uuid is not None, "goal_uuid": goal_uuid, "controller_result": "SUCCEEDED" if executed else "FAILED",
         "duration_s": completed - started, "expected_final_joints": expected, "observed_final_joints": actual,
         "post_controller_settle_s": settle_duration, "post_controller_converged": settled,
