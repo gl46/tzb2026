@@ -13,10 +13,11 @@ mkdir -p logs reports
 raw_log="logs/${RUN_ID}-s0-contact-calibration.log"
 
 ssh -o BatchMode=yes -o ConnectTimeout=10 "$SIM_USER@$SIM_HOST" "bash -s -- '$PROJECT_REMOTE_ROOT'" >"$raw_log" 2>&1 <<'REMOTE' || true
-set -u
+set -eo pipefail
 root="$1"
 source /opt/ros/jazzy/setup.bash
 source "$HOME/$root/robot_ws/install/setup.bash"
+set -u
 if gz service -l 2>/dev/null | grep -qx '/world/xh_p0_pick_place/scene/info'; then
   echo M1A_REMOTE_SIM_ALREADY_RUNNING
   exit 0
