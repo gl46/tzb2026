@@ -1,8 +1,8 @@
 {
-  "status": "B1_ORACLE_BLOCKED",
+  "status": "B1_ORACLE_BLOCKED_FINAL_GRASP_MODE",
   "b1_trials": 0,
   "b1_successes": 0,
   "mode": "B1_ORACLE_GEOMETRIC_BASELINE",
-  "reason": "S1=BLOCKED; B1 execution was not started.",
+  "reason": "S1=VERIFIED_MOVEIT_EXECUTION; S3=CONTACT_GATED_CONSTRAINT_NOT_VERIFIED; no verified final grasp mode exists, so complete B1 execution was not started.",
   "oracle_pose_in_observation": false
 }
