@@ -20,7 +20,7 @@ def part_sdf(index: int, state: str, x: float, y: float, color: tuple[float, flo
     roll, pitch = (0.0, 0.0) if state == "normal" else (3.14159, 0.0) if state == "inverted" else (0.45, -0.30)
     z = 0.50 if state != "tilted" else 0.48
     red, green, blue = color
-    return f'''    <model name="cylinder_{index:02d}"><pose>{x:.4f} {y:.4f} {z:.4f} {roll:.4f} {pitch:.4f} {yaw:.4f}</pose><link name="link"><inertial><mass>0.06</mass></inertial><collision name="collision"><geometry><cylinder><radius>0.025</radius><length>0.09</length></cylinder></geometry></collision><visual name="visual"><geometry><cylinder><radius>0.025</radius><length>0.09</length></cylinder></geometry><material><diffuse>{red:.3f} {green:.3f} {blue:.3f} 1</diffuse><specular>0.15 0.15 0.15 1</specular></material></visual></link></model>'''
+    return f'''    <model name="cylinder_{index:02d}"><pose>{x:.4f} {y:.4f} {z:.4f} {roll:.4f} {pitch:.4f} {yaw:.4f}</pose><link name="link"><inertial><mass>0.06</mass></inertial><collision name="collision"><geometry><cylinder><radius>0.025</radius><length>0.09</length></cylinder></geometry></collision><visual name="visual"><geometry><cylinder><radius>0.025</radius><length>0.09</length></cylinder></geometry><material><diffuse>{red:.3f} {green:.3f} {blue:.3f} 1</diffuse><specular>0.15 0.15 0.15 1</specular></material></visual><sensor name="contact" type="contact"><always_on>1</always_on><update_rate>30</update_rate><topic>/xh/actuation_internal/cylinders/cylinder_{index:02d}/contacts</topic><contact><collision>collision</collision></contact></sensor></link></model>'''
 
 
 def render(template: str, seed: int) -> tuple[str, dict[str, object]]:

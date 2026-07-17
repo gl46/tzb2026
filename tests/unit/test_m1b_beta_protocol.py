@@ -5,6 +5,7 @@ from pydantic import ValidationError
 
 from xh_agent.agent.closed_loop import record_step
 from xh_agent.agent.skill_planner import plan
+from xh_agent.grasp.m1b_broker import M1BContactBroker, width_window_from_perceived_diameter
 from xh_agent.recovery.manager import recovery_for
 from xh_agent.task_compiler.deterministic import DeterministicTaskCompiler
 
@@ -41,3 +42,21 @@ def test_recovery_changes_parameters_and_has_bounded_retry(failure_type: str) ->
     assert recovery.changed_parameters
     assert recovery.retry_budget == 2
     assert "cleanup" not in " ".join(recovery.recovery_subgoals).lower()
+
+
+def test_m1b_broker_selects_only_same_entity_and_hides_it_from_public_feedback() -> None:
+    feedback, internal = M1BContactBroker().select(left_entities={"cylinder_02"}, right_entities={"cylinder_02", "cylinder_03"})
+    assert feedback.grasp_success is True
+    assert feedback.reobservation_required is True
+    assert not hasattr(feedback, "actual_sim_entity_id")
+    assert internal["attach_topic"] == "/xh/m1b/cylinder_02/attach"
+    rejected, internal_rejected = M1BContactBroker().select(left_entities={"cylinder_01"}, right_entities={"cylinder_02"})
+    assert rejected.grasp_success is False
+    assert internal_rejected["actual_sim_entity_id"] is None
+
+
+def test_m1b_width_window_is_perception_derived_and_clamped() -> None:
+    lower, upper = width_window_from_perceived_diameter(0.05)
+    assert 0 <= lower < upper <= 0.08
+    with pytest.raises(ValueError):
+        width_window_from_perceived_diameter(0.2)

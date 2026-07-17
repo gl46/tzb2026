@@ -16,11 +16,11 @@ from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 
 
-def _generate_spawn_representation(share: Path, calibration_mode: bool) -> tuple[Path, Path, Path]:
+def _generate_spawn_representation(share: Path, calibration_mode: bool, scene_supervision: str) -> tuple[Path, Path, Path]:
     """Create ADR-0009's verified SDF before Gazebo can spawn the robot."""
 
     urdf = share / "urdf" / "panda_controlled.urdf"
-    mode = "calibration" if calibration_mode else "production"
+    mode = "beta" if scene_supervision else "calibration" if calibration_mode else "production"
     artifact_root = os.environ.get("XH_SIM_GENERATED_SDF_DIR")
     artifact_dir = (
         Path(artifact_root).resolve()
@@ -39,6 +39,7 @@ def _generate_spawn_representation(share: Path, calibration_mode: bool) -> tuple
             "--package-share", str(share), "--mode", mode,
             "--output-sdf", str(output_sdf), "--output-urdf", str(output_urdf),
             "--manifest", str(manifest),
+            *(["--scene-supervision", scene_supervision] if scene_supervision else []),
         ],
         check=False,
         capture_output=True,
@@ -63,8 +64,9 @@ def _robot_actions(context, share: Path):
     """Build the controller-backed robot after resolving calibration mode."""
 
     calibration_mode = LaunchConfiguration("calibration_mode").perform(context).lower() == "true"
+    scene_supervision = LaunchConfiguration("m1b_scene_supervision").perform(context)
     world_name = LaunchConfiguration("world_name")
-    generated_urdf, generated_sdf, _manifest = _generate_spawn_representation(share, calibration_mode)
+    generated_urdf, generated_sdf, _manifest = _generate_spawn_representation(share, calibration_mode, scene_supervision)
     robot_xml = generated_urdf.read_text(encoding="utf-8")
     robot_description = {"robot_description": robot_xml, "use_sim_time": True}
     robot_state_publisher = Node(
@@ -194,6 +196,11 @@ def generate_launch_description():
             "world_name",
             default_value="xh_p0_pick_place",
             description="Gazebo world name used by the controller-backed Panda spawn.",
+        ),
+        DeclareLaunchArgument(
+            "m1b_scene_supervision",
+            default_value="",
+            description="ADR-0013 beta only: supervision manifest used at spawn to create per-object internal grasp joints.",
         ),
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(str(ros_gz_share / "launch" / "gz_sim.launch.py")),

@@ -125,6 +125,9 @@ def test_random_scene_generator_makes_seed_specific_six_to_twelve_part_scenes(tm
     assert not (output / "scene-1000.sdf").read_text().count("M1B_RANDOM_PARTS_BEGIN") > 1
     positions = [item["position_3d_world"][:2] for item in labels["simulator_supervision"]["objects"]]
     assert all((first[0] - second[0]) ** 2 + (first[1] - second[1]) ** 2 >= 0.09 ** 2 for index, first in enumerate(positions) for second in positions[index + 1:])
+    scene = (output / "scene-1000.sdf").read_text()
+    assert "/xh/actuation_internal/cylinders/cylinder_01/contacts" in scene
+    assert 'type="contact"' in scene
 
 
 def test_captured_manifest_excludes_incomplete_frames(tmp_path: Path) -> None:
