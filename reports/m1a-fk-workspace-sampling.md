@@ -1,7 +1,7 @@
 # M1A offline FK workspace sampling
 
 - Status: `APPROVED_MODEL_OFFLINE_FK_EVIDENCE`; model/scene files are changed but the MoveIt home-state, S0, S1 and S2 runtime gates have not yet run.
-- Source URDF SHA-256 before approval: `e017d82f218578603078fd5da73cdba88ed47fef2f5ed57cf9f01f5c666fb096`; approved current URDF SHA-256: `8c68b8dbfbc878d6af7924e2eab0d288c56d5ae126a6f93e4922d5b1638533cd`.
+- Source URDF SHA-256 before approval: `e017d82f218578603078fd5da73cdba88ed47fef2f5ed57cf9f01f5c666fb096`; approved current URDF SHA-256: `2f77f5150f4e4a5a098ab59a56f98216622cfdfd54a0c79dedbe44e19352eff1`.
 - Approved cube pose: `[0.22, 0.12, 0.475]` m. Approved bin centre: `[0.217366447885, -0.249990627453, 0.45]` m, 0.62 m from base and 0.37 m from cube; bin pre-place target: `[0.217366447885, -0.249990627453, 0.6]` m.
 
 ## Cube contact target

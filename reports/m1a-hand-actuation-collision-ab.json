@@ -1,0 +1,474 @@
+{
+  "status": "HAND_ACTUATION_CHANNELS_NOT_VERIFIED",
+  "scope": "HOME_POSE_NO_ARM_MOTION_NO_OBJECT_CONTACT",
+  "joint_names": [
+    "panda_finger_joint1",
+    "panda_finger_joint2"
+  ],
+  "probes": [
+    {
+      "label": "open",
+      "before_positions_m": [
+        0.02000021108159671,
+        0.019999788918403292
+      ],
+      "command_positions_m": [
+        0.04,
+        0.04
+      ],
+      "after_positions_m": [
+        0.040000000000000015,
+        0.03999937017412019
+      ],
+      "before_link_poses_world_xyz_rpy": {
+        "left": [
+          -0.048406,
+          -0.014142,
+          1.21476,
+          -3.14158,
+          8e-06,
+          0.785398
+        ],
+        "right": [
+          -0.07669,
+          0.014142,
+          1.21476,
+          -3.14158,
+          8e-06,
+          0.785398
+        ]
+      },
+      "after_link_poses_world_xyz_rpy": {
+        "left": [
+          -0.034264,
+          -0.028284,
+          1.21476,
+          -3.14158,
+          8e-06,
+          0.785398
+        ],
+        "right": [
+          -0.090832,
+          0.028284,
+          1.21476,
+          -3.14158,
+          8e-06,
+          0.785398
+        ]
+      },
+      "action": {
+        "accepted": true,
+        "succeeded": true,
+        "controller_result_succeeded": true,
+        "goal_uuid": "232ff9affbe6437aae713dcae9abb127",
+        "observed_positions_m": [
+          0.03975000263851693,
+          0.03974999736147675
+        ],
+        "goal_tolerance_m": 0.001,
+        "post_goal_observation_slack_m": 0.0001,
+        "max_position_error_m": 0.00025000263852325427
+      },
+      "contact_observation": {
+        "left_target": false,
+        "right_target": false,
+        "left_table": false,
+        "right_table": false,
+        "cube_table": true,
+        "cube_environment_table": false,
+        "raw_pairs": {
+          "left": [],
+          "right": [],
+          "cube": [
+            [
+              "object_red_cube::link::collision",
+              "work_table::table_link::collision"
+            ]
+          ],
+          "cube_environment": []
+        },
+        "event_counts": {
+          "left": 0,
+          "right": 0,
+          "cube": 267,
+          "cube_environment": 0
+        },
+        "topic_rate_evidence": {
+          "left": {
+            "unique_timestamp_samples": 0,
+            "duration_s": 0.0,
+            "observed_rate_hz": 0.0
+          },
+          "right": {
+            "unique_timestamp_samples": 0,
+            "duration_s": 0.0,
+            "observed_rate_hz": 0.0
+          },
+          "cube": {
+            "unique_timestamp_samples": 267,
+            "duration_s": 0.266,
+            "observed_rate_hz": 1000.0
+          },
+          "cube_environment": {
+            "unique_timestamp_samples": 0,
+            "duration_s": 0.0,
+            "observed_rate_hz": 0.0
+          }
+        },
+        "left_target_unique_samples": 0,
+        "right_target_unique_samples": 0,
+        "bilateral_overlap_s": 0.0
+      },
+      "all_channels_reached_command": true
+    },
+    {
+      "label": "left_only",
+      "before_positions_m": [
+        0.040000000000000015,
+        0.03999937017412019
+      ],
+      "command_positions_m": [
+        0.01,
+        0.04
+      ],
+      "after_positions_m": [
+        0.040000000000000015,
+        0.03999926091352109
+      ],
+      "before_link_poses_world_xyz_rpy": {
+        "left": [
+          -0.034264,
+          -0.028284,
+          1.21476,
+          -3.14158,
+          8e-06,
+          0.785398
+        ],
+        "right": [
+          -0.090832,
+          0.028284,
+          1.21476,
+          -3.14158,
+          8e-06,
+          0.785398
+        ]
+      },
+      "after_link_poses_world_xyz_rpy": {
+        "left": [
+          -0.034264,
+          -0.028284,
+          1.21476,
+          -3.14158,
+          8e-06,
+          0.785398
+        ],
+        "right": [
+          -0.090832,
+          0.028284,
+          1.21476,
+          -3.14158,
+          8e-06,
+          0.785398
+        ]
+      },
+      "action": {
+        "accepted": true,
+        "succeeded": false,
+        "controller_result_succeeded": false,
+        "goal_uuid": "0e95b3a22a7a4f2180356a265af88a9b",
+        "observed_positions_m": [
+          0.040000000000000015,
+          0.039999260913521094
+        ],
+        "goal_tolerance_m": 0.001,
+        "post_goal_observation_slack_m": 0.0001,
+        "max_position_error_m": 0.030000000000000013
+      },
+      "contact_observation": {
+        "left_target": false,
+        "right_target": false,
+        "left_table": false,
+        "right_table": false,
+        "cube_table": true,
+        "cube_environment_table": false,
+        "raw_pairs": {
+          "left": [],
+          "right": [],
+          "cube": [
+            [
+              "object_red_cube::link::collision",
+              "work_table::table_link::collision"
+            ]
+          ],
+          "cube_environment": []
+        },
+        "event_counts": {
+          "left": 0,
+          "right": 0,
+          "cube": 201,
+          "cube_environment": 0
+        },
+        "topic_rate_evidence": {
+          "left": {
+            "unique_timestamp_samples": 0,
+            "duration_s": 0.0,
+            "observed_rate_hz": 0.0
+          },
+          "right": {
+            "unique_timestamp_samples": 0,
+            "duration_s": 0.0,
+            "observed_rate_hz": 0.0
+          },
+          "cube": {
+            "unique_timestamp_samples": 201,
+            "duration_s": 0.1999999999999993,
+            "observed_rate_hz": 1000.0000000000035
+          },
+          "cube_environment": {
+            "unique_timestamp_samples": 0,
+            "duration_s": 0.0,
+            "observed_rate_hz": 0.0
+          }
+        },
+        "left_target_unique_samples": 0,
+        "right_target_unique_samples": 0,
+        "bilateral_overlap_s": 0.0
+      },
+      "all_channels_reached_command": false
+    },
+    {
+      "label": "right_only",
+      "before_positions_m": [
+        0.040000000000000015,
+        0.03999926091352109
+      ],
+      "command_positions_m": [
+        0.04,
+        0.01
+      ],
+      "after_positions_m": [
+        0.040000000000000015,
+        0.00999999999999987
+      ],
+      "before_link_poses_world_xyz_rpy": {
+        "left": [
+          -0.034264,
+          -0.028284,
+          1.21476,
+          -3.14158,
+          8e-06,
+          0.785398
+        ],
+        "right": [
+          -0.090832,
+          0.028284,
+          1.21476,
+          -3.14158,
+          8e-06,
+          0.785398
+        ]
+      },
+      "after_link_poses_world_xyz_rpy": {
+        "left": [
+          -0.034264,
+          -0.028284,
+          1.21476,
+          -3.14158,
+          8e-06,
+          0.785398
+        ],
+        "right": [
+          -0.069619,
+          0.007071,
+          1.21476,
+          -3.14158,
+          8e-06,
+          0.785398
+        ]
+      },
+      "action": {
+        "accepted": true,
+        "succeeded": true,
+        "controller_result_succeeded": true,
+        "goal_uuid": "ba6c990b7bd2457c88f7fd0dd10b4057",
+        "observed_positions_m": [
+          0.040000000000000015,
+          0.010374990761423609
+        ],
+        "goal_tolerance_m": 0.001,
+        "post_goal_observation_slack_m": 0.0001,
+        "max_position_error_m": 0.0003749907614236086
+      },
+      "contact_observation": {
+        "left_target": false,
+        "right_target": false,
+        "left_table": false,
+        "right_table": false,
+        "cube_table": true,
+        "cube_environment_table": false,
+        "raw_pairs": {
+          "left": [],
+          "right": [],
+          "cube": [
+            [
+              "object_red_cube::link::collision",
+              "work_table::table_link::collision"
+            ]
+          ],
+          "cube_environment": []
+        },
+        "event_counts": {
+          "left": 0,
+          "right": 0,
+          "cube": 276,
+          "cube_environment": 0
+        },
+        "topic_rate_evidence": {
+          "left": {
+            "unique_timestamp_samples": 0,
+            "duration_s": 0.0,
+            "observed_rate_hz": 0.0
+          },
+          "right": {
+            "unique_timestamp_samples": 0,
+            "duration_s": 0.0,
+            "observed_rate_hz": 0.0
+          },
+          "cube": {
+            "unique_timestamp_samples": 276,
+            "duration_s": 0.27500000000000213,
+            "observed_rate_hz": 999.9999999999923
+          },
+          "cube_environment": {
+            "unique_timestamp_samples": 0,
+            "duration_s": 0.0,
+            "observed_rate_hz": 0.0
+          }
+        },
+        "left_target_unique_samples": 0,
+        "right_target_unique_samples": 0,
+        "bilateral_overlap_s": 0.0
+      },
+      "all_channels_reached_command": true
+    },
+    {
+      "label": "bilateral",
+      "before_positions_m": [
+        0.040000000000000015,
+        0.00999999999999987
+      ],
+      "command_positions_m": [
+        0.01,
+        0.01
+      ],
+      "after_positions_m": [
+        0.040000000000000015,
+        0.00999999999999987
+      ],
+      "before_link_poses_world_xyz_rpy": {
+        "left": [
+          -0.034264,
+          -0.028284,
+          1.21476,
+          -3.14158,
+          8e-06,
+          0.785398
+        ],
+        "right": [
+          -0.069619,
+          0.007071,
+          1.21476,
+          -3.14158,
+          8e-06,
+          0.785398
+        ]
+      },
+      "after_link_poses_world_xyz_rpy": {
+        "left": [
+          -0.034264,
+          -0.028284,
+          1.21476,
+          -3.14158,
+          8e-06,
+          0.785398
+        ],
+        "right": [
+          -0.069619,
+          0.007071,
+          1.21476,
+          -3.14158,
+          8e-06,
+          0.785398
+        ]
+      },
+      "action": {
+        "accepted": true,
+        "succeeded": false,
+        "controller_result_succeeded": false,
+        "goal_uuid": "25d5d7748fe9435dbc684c541ed2a825",
+        "observed_positions_m": [
+          0.040000000000000015,
+          0.00999999999999987
+        ],
+        "goal_tolerance_m": 0.001,
+        "post_goal_observation_slack_m": 0.0001,
+        "max_position_error_m": 0.030000000000000013
+      },
+      "contact_observation": {
+        "left_target": false,
+        "right_target": false,
+        "left_table": false,
+        "right_table": false,
+        "cube_table": true,
+        "cube_environment_table": false,
+        "raw_pairs": {
+          "left": [],
+          "right": [],
+          "cube": [
+            [
+              "object_red_cube::link::collision",
+              "work_table::table_link::collision"
+            ]
+          ],
+          "cube_environment": []
+        },
+        "event_counts": {
+          "left": 0,
+          "right": 0,
+          "cube": 201,
+          "cube_environment": 0
+        },
+        "topic_rate_evidence": {
+          "left": {
+            "unique_timestamp_samples": 0,
+            "duration_s": 0.0,
+            "observed_rate_hz": 0.0
+          },
+          "right": {
+            "unique_timestamp_samples": 0,
+            "duration_s": 0.0,
+            "observed_rate_hz": 0.0
+          },
+          "cube": {
+            "unique_timestamp_samples": 201,
+            "duration_s": 0.20000000000000284,
+            "observed_rate_hz": 999.9999999999858
+          },
+          "cube_environment": {
+            "unique_timestamp_samples": 0,
+            "duration_s": 0.0,
+            "observed_rate_hz": 0.0
+          }
+        },
+        "left_target_unique_samples": 0,
+        "right_target_unique_samples": 0,
+        "bilateral_overlap_s": 0.0
+      },
+      "all_channels_reached_command": false
+    }
+  ],
+  "controls_verified": false,
+  "run_id": "m1a-20260716-hand-collision-ab-04",
+  "raw_log": "logs/m1a-20260716-hand-collision-ab-04.log",
+  "experiment_label": "TEMPORARY_PALM_COLLISION_OFFSET_AB"
+}

@@ -155,8 +155,37 @@ historical evidence only and cannot be used as results for the changed model.
 - Source URDF SHA-256 before approval:
   `e017d82f218578603078fd5da73cdba88ed47fef2f5ed57cf9f01f5c666fb096`
 - Approved implementation URDF SHA-256:
-  `8c68b8dbfbc878d6af7924e2eab0d288c56d5ae126a6f93e4922d5b1638533cd`
+  `2f77f5150f4e4a5a098ab59a56f98216622cfdfd54a0c79dedbe44e19352eff1`
 - Required before S0: pass the MoveIt home-state self-collision gate.
+  The tested `home` is the collision-checked neutral tucked state
+  `[0, -.5, 0, -1.5, 0, 1, 0]`; non-adjacent collisions remain enabled rather
+  than being added as SRDF exceptions.  The no-motion candidate probe also
+  checked official `ready`, `transport`, and `extended`; those were rejected
+  by the conservative primitives, not silently exempted.
+- Collider correction during implementation: `panda_link4` now uses the
+  conservative axis-aligned bounds of the cited official collision mesh
+  (origin `[-.041234, .034430, .027923]` m; size
+  `[.192746, .179159, .166259]` m).  This replaces an unrelated 39.3 cm,
+  rotated legacy box that collided with link6 in every no-motion probe.
+- The legacy `panda_link1` cylinder also reached the tabletop at the retained
+  base height.  It is replaced by conservative official-mesh bounds (origin
+  `[.000087, -.037090, -.068515]` m; size `[.110148, .184565, .246977]` m).
+  Gazebo's seven arm state interfaces explicitly initialize to the verified
+  SRDF home; names, limits, units, controllers, and action vectors are
+  unchanged.
+- The single primitive bounds for `panda_link2` and `panda_link4` created an
+  impossible non-adjacent `link2`–`link4` collision at valid targets.  Their
+  collision geometry therefore uses the installed, SHA-recorded official Panda
+  collision meshes.  This is deliberately *not* an SRDF/ACM exception; the
+  pair remains checked, and `xh_sim` declares the resource dependency.
 - Required in S1: SRDF/`ADJACENT_SELF_PAIRS` agreement and enabled-pair report
   containing `panda_link8`–`work_table`.
-- Implementation commit(s): pending
+- Revalidation on this exact hash: no-motion home collision gate passed; all
+  13 independent S0 conditions calibrated; S1 passed 10/10 MoveIt
+  plan→execute→FK trials with the enabled-pair list and exact adjacent-pair
+  audit. S2 then stopped after eight real production-table
+  `APPROACH_ALIGNMENT_FAILURE/NO_REACH` trials; S3 sent no attach request and
+  S4 is blocked for lack of a verified final grasp mode. These are partial
+  execution results, not a grasp success claim.
+- Implementation commit(s): intentionally uncommitted (`ALLOW_GIT_COMMIT=0`);
+  the current worktree and report hashes are the review record.

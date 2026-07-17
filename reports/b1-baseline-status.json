@@ -1,7 +1,9 @@
 {
-  "execution_verified": false,
-  "reason": "planned",
-  "skill_count": 6,
-  "status": "READY",
-  "teacher_used": false
+  "status": "B1_ORACLE_EXECUTION_VERIFIED",
+  "baseline": "B1_GROUND_TRUTH_POSE_BASELINE",
+  "run_id": "m1a-20260717-s4-b1-final-r1",
+  "trials": 10,
+  "successes": 10,
+  "oracle_pose_in_observation": false,
+  "reason": "A fresh 10-reset B1 batch used the runtime Gazebo pose only as oracle task geometry, then collision-checked IK and controller execution; at least 8 episodes completed contact-gated pick/place and positive release."
 }

@@ -1,0 +1,649 @@
+{
+  "status": "HAND_MIMIC_Q2_MASTER_NOT_VERIFIED",
+  "scope": "HOME_POSE_NO_ARM_MOTION_NO_OBJECT_CONTACT",
+  "joint_names": [
+    "panda_finger_joint1",
+    "panda_finger_joint2"
+  ],
+  "physical_master_joint": "panda_finger_joint2",
+  "follower_joint": "panda_finger_joint1",
+  "tracking_tolerance_m": 0.001,
+  "passive_initial_state": {
+    "expected_position_m": 0.02,
+    "tolerance_m": 0.001,
+    "before_positions_m": [
+      -2.145501387228882e-13,
+      4.813039709006262e-07
+    ],
+    "after_positions_m": [
+      -6.136302403703109e-14,
+      4.859590490013943e-07
+    ],
+    "before_link_poses_world_xyz_rpy": {
+      "left": [
+        -0.062575,
+        -2.7e-05,
+        1.21477,
+        -3.14113,
+        0.000104,
+        0.785441
+      ],
+      "right": [
+        -0.062576,
+        -2.6e-05,
+        1.21477,
+        -3.14113,
+        0.000105,
+        0.785442
+      ]
+    },
+    "after_link_poses_world_xyz_rpy": {
+      "left": [
+        -0.062575,
+        -2.7e-05,
+        1.21477,
+        -3.14113,
+        0.000104,
+        0.785441
+      ],
+      "right": [
+        -0.062576,
+        -2.6e-05,
+        1.21477,
+        -3.14113,
+        0.000105,
+        0.785442
+      ]
+    },
+    "max_error_m": 0.020000000000061365,
+    "no_sag_verified": false
+  },
+  "asymmetric_adapter_contract": "INVALID_GOAL:ASYMMETRIC_MIMIC_COMMAND_REJECTED",
+  "probes": [
+    {
+      "label": "symmetric_open",
+      "before_positions_m": [
+        -6.136302403703109e-14,
+        4.859590490013943e-07
+      ],
+      "command_positions_m": [
+        0.04,
+        0.04
+      ],
+      "after_positions_m": [
+        -5.331222659513135e-14,
+        -2.7341116037860047e-07
+      ],
+      "before_link_poses_world_xyz_rpy": {
+        "left": [
+          -0.062575,
+          -2.7e-05,
+          1.21477,
+          -3.14113,
+          0.000104,
+          0.785441
+        ],
+        "right": [
+          -0.062576,
+          -2.6e-05,
+          1.21477,
+          -3.14113,
+          0.000105,
+          0.785442
+        ]
+      },
+      "after_link_poses_world_xyz_rpy": {
+        "left": [
+          -0.062575,
+          -2.7e-05,
+          1.21477,
+          -3.14113,
+          0.000104,
+          0.785441
+        ],
+        "right": [
+          -0.062575,
+          -2.7e-05,
+          1.21477,
+          -3.14113,
+          0.000104,
+          0.78544
+        ]
+      },
+      "finger_link_displacement_m": {
+        "left": 0.0,
+        "right": 1.4142135623738026e-06
+      },
+      "action": {
+        "accepted": true,
+        "succeeded": false,
+        "controller_result_succeeded": false,
+        "controller_result_error_code": null,
+        "controller_result_error_string": "NO_ACTION_RESULT",
+        "goal_uuid": "848519d3864c418583ee6b7b173422bb",
+        "observed_positions_m": [
+          -5.331222659513135e-14,
+          -2.7380610845284536e-07
+        ],
+        "goal_tolerance_m": 0.001,
+        "post_goal_observation_slack_m": 0.0001,
+        "max_position_error_m": 0.040000273806108454,
+        "mimic_tracking_error_m": 2.7380605514061877e-07,
+        "physical_controller_state_topic": "/panda_hand_physical_controller/controller_state",
+        "controller_state_sample_count": 737,
+        "controller_target_reference_seen": true,
+        "controller_terminal_state": {
+          "timestamp_s": 23.51,
+          "physical_joint": "panda_finger_joint2",
+          "physical_reference_m": 0.04,
+          "physical_feedback_m": -2.7380610845284536e-07,
+          "physical_error_m": 0.040000273806108454,
+          "physical_output_m": 0.04
+        },
+        "adapter_decisions": [
+          {
+            "outcome": "FORWARDED",
+            "physical_action": "/panda_hand_physical_controller/follow_joint_trajectory",
+            "physical_command_emitted": true,
+            "physical_master_joint": "panda_finger_joint2",
+            "physical_target_m": 0.04,
+            "reason": "SYMMETRIC_MIMIC_COMMAND",
+            "timestamp_monotonic_s": 1839616.050706659
+          }
+        ]
+      },
+      "contact_observation": {
+        "left_target": false,
+        "right_target": false,
+        "left_table": false,
+        "right_table": false,
+        "cube_table": true,
+        "cube_environment_table": false,
+        "raw_pairs": {
+          "left": [],
+          "right": [],
+          "cube": [
+            [
+              "object_red_cube::link::collision",
+              "work_table::table_link::collision"
+            ]
+          ],
+          "cube_environment": []
+        },
+        "event_counts": {
+          "left": 0,
+          "right": 0,
+          "cube": 236,
+          "cube_environment": 0
+        },
+        "topic_rate_evidence": {
+          "left": {
+            "unique_timestamp_samples": 0,
+            "duration_s": 0.0,
+            "observed_rate_hz": 0.0
+          },
+          "right": {
+            "unique_timestamp_samples": 0,
+            "duration_s": 0.0,
+            "observed_rate_hz": 0.0
+          },
+          "cube": {
+            "unique_timestamp_samples": 192,
+            "duration_s": 0.19899999999999807,
+            "observed_rate_hz": 959.7989949748837
+          },
+          "cube_environment": {
+            "unique_timestamp_samples": 0,
+            "duration_s": 0.0,
+            "observed_rate_hz": 0.0
+          }
+        },
+        "left_target_unique_samples": 0,
+        "right_target_unique_samples": 0,
+        "bilateral_overlap_s": 0.0
+      },
+      "should_forward": true,
+      "physical_command_emitted": true,
+      "all_channels_reached_command": false
+    },
+    {
+      "label": "symmetric_q2_master_close",
+      "before_positions_m": [
+        -5.331222659513135e-14,
+        -2.7341116037860047e-07
+      ],
+      "command_positions_m": [
+        0.01,
+        0.01
+      ],
+      "after_positions_m": [
+        -6.628330696811791e-13,
+        -2.7515017109180917e-07
+      ],
+      "before_link_poses_world_xyz_rpy": {
+        "left": [
+          -0.062575,
+          -2.7e-05,
+          1.21477,
+          -3.14113,
+          0.000104,
+          0.785441
+        ],
+        "right": [
+          -0.062575,
+          -2.7e-05,
+          1.21477,
+          -3.14113,
+          0.000104,
+          0.78544
+        ]
+      },
+      "after_link_poses_world_xyz_rpy": {
+        "left": [
+          -0.062575,
+          -2.7e-05,
+          1.21477,
+          -3.14113,
+          0.000103,
+          0.785439
+        ],
+        "right": [
+          -0.062576,
+          -2.7e-05,
+          1.21477,
+          -3.14113,
+          0.000104,
+          0.785439
+        ]
+      },
+      "finger_link_displacement_m": {
+        "left": 0.0,
+        "right": 1.000000000001e-06
+      },
+      "action": {
+        "accepted": true,
+        "succeeded": false,
+        "controller_result_succeeded": false,
+        "controller_result_error_code": null,
+        "controller_result_error_string": "NO_ACTION_RESULT",
+        "goal_uuid": "71662c4d433444db8306a6447af36dc4",
+        "observed_positions_m": [
+          -3.5242831873325e-14,
+          -2.7430294835539826e-07
+        ],
+        "goal_tolerance_m": 0.001,
+        "post_goal_observation_slack_m": 0.0001,
+        "max_position_error_m": 0.010000274302948356,
+        "mimic_tracking_error_m": 2.743029131125664e-07,
+        "physical_controller_state_topic": "/panda_hand_physical_controller/controller_state",
+        "controller_state_sample_count": 741,
+        "controller_target_reference_seen": true,
+        "controller_terminal_state": {
+          "timestamp_s": 31.12,
+          "physical_joint": "panda_finger_joint2",
+          "physical_reference_m": 0.01,
+          "physical_feedback_m": -2.7430294835539826e-07,
+          "physical_error_m": 0.010000274302948356,
+          "physical_output_m": 0.01
+        },
+        "adapter_decisions": [
+          {
+            "outcome": "FORWARDED",
+            "physical_action": "/panda_hand_physical_controller/follow_joint_trajectory",
+            "physical_command_emitted": true,
+            "physical_master_joint": "panda_finger_joint2",
+            "physical_target_m": 0.01,
+            "reason": "SYMMETRIC_MIMIC_COMMAND",
+            "timestamp_monotonic_s": 1839624.069581396
+          },
+          {
+            "outcome": "REJECTED",
+            "physical_action": "/panda_hand_physical_controller/follow_joint_trajectory",
+            "physical_command_emitted": false,
+            "reason": "PHYSICAL_HAND_GOAL_TIMEOUT",
+            "timestamp_monotonic_s": 1839626.064365598
+          }
+        ]
+      },
+      "contact_observation": {
+        "left_target": false,
+        "right_target": false,
+        "left_table": false,
+        "right_table": false,
+        "cube_table": true,
+        "cube_environment_table": false,
+        "raw_pairs": {
+          "left": [],
+          "right": [],
+          "cube": [
+            [
+              "object_red_cube::link::collision",
+              "work_table::table_link::collision"
+            ]
+          ],
+          "cube_environment": []
+        },
+        "event_counts": {
+          "left": 0,
+          "right": 0,
+          "cube": 243,
+          "cube_environment": 0
+        },
+        "topic_rate_evidence": {
+          "left": {
+            "unique_timestamp_samples": 0,
+            "duration_s": 0.0,
+            "observed_rate_hz": 0.0
+          },
+          "right": {
+            "unique_timestamp_samples": 0,
+            "duration_s": 0.0,
+            "observed_rate_hz": 0.0
+          },
+          "cube": {
+            "unique_timestamp_samples": 195,
+            "duration_s": 0.19900000000000162,
+            "observed_rate_hz": 974.8743718592885
+          },
+          "cube_environment": {
+            "unique_timestamp_samples": 0,
+            "duration_s": 0.0,
+            "observed_rate_hz": 0.0
+          }
+        },
+        "left_target_unique_samples": 0,
+        "right_target_unique_samples": 0,
+        "bilateral_overlap_s": 0.0
+      },
+      "should_forward": true,
+      "physical_command_emitted": true,
+      "all_channels_reached_command": false
+    },
+    {
+      "label": "asymmetric_rejected",
+      "before_positions_m": [
+        -6.628330696811791e-13,
+        -2.7515017109180917e-07
+      ],
+      "command_positions_m": [
+        0.01,
+        0.04
+      ],
+      "after_positions_m": [
+        -3.675012022670045e-14,
+        -2.7646663625091605e-07
+      ],
+      "before_link_poses_world_xyz_rpy": {
+        "left": [
+          -0.062575,
+          -2.7e-05,
+          1.21477,
+          -3.14113,
+          0.000103,
+          0.785439
+        ],
+        "right": [
+          -0.062576,
+          -2.7e-05,
+          1.21477,
+          -3.14113,
+          0.000104,
+          0.785439
+        ]
+      },
+      "after_link_poses_world_xyz_rpy": {
+        "left": [
+          -0.062575,
+          -2.7e-05,
+          1.21477,
+          -3.14113,
+          0.000103,
+          0.785439
+        ],
+        "right": [
+          -0.062576,
+          -2.7e-05,
+          1.21477,
+          -3.14113,
+          0.000104,
+          0.785439
+        ]
+      },
+      "finger_link_displacement_m": {
+        "left": 0.0,
+        "right": 0.0
+      },
+      "action": {
+        "accepted": true,
+        "succeeded": false,
+        "controller_result_succeeded": false,
+        "controller_result_error_code": -1,
+        "controller_result_error_string": "ASYMMETRIC_MIMIC_COMMAND_REJECTED",
+        "goal_uuid": "c2f7d107a97d4b0a919e982c2f7d46e1",
+        "observed_positions_m": [
+          -9.530830985537975e-14,
+          -2.7513434019965644e-07
+        ],
+        "goal_tolerance_m": 0.001,
+        "post_goal_observation_slack_m": 0.0001,
+        "max_position_error_m": 0.0400002751343402,
+        "mimic_tracking_error_m": 2.751342448913466e-07,
+        "physical_controller_state_topic": "/panda_hand_physical_controller/controller_state",
+        "controller_state_sample_count": 0,
+        "controller_target_reference_seen": false,
+        "controller_terminal_state": null,
+        "adapter_decisions": []
+      },
+      "contact_observation": {
+        "left_target": false,
+        "right_target": false,
+        "left_table": false,
+        "right_table": false,
+        "cube_table": true,
+        "cube_environment_table": false,
+        "raw_pairs": {
+          "left": [],
+          "right": [],
+          "cube": [
+            [
+              "object_red_cube::link::collision",
+              "work_table::table_link::collision"
+            ]
+          ],
+          "cube_environment": []
+        },
+        "event_counts": {
+          "left": 0,
+          "right": 0,
+          "cube": 100,
+          "cube_environment": 0
+        },
+        "topic_rate_evidence": {
+          "left": {
+            "unique_timestamp_samples": 0,
+            "duration_s": 0.0,
+            "observed_rate_hz": 0.0
+          },
+          "right": {
+            "unique_timestamp_samples": 0,
+            "duration_s": 0.0,
+            "observed_rate_hz": 0.0
+          },
+          "cube": {
+            "unique_timestamp_samples": 100,
+            "duration_s": 0.1980000000000004,
+            "observed_rate_hz": 499.999999999999
+          },
+          "cube_environment": {
+            "unique_timestamp_samples": 0,
+            "duration_s": 0.0,
+            "observed_rate_hz": 0.0
+          }
+        },
+        "left_target_unique_samples": 0,
+        "right_target_unique_samples": 0,
+        "bilateral_overlap_s": 0.0
+      },
+      "should_forward": false,
+      "physical_command_emitted": false,
+      "all_channels_reached_command": false
+    },
+    {
+      "label": "symmetric_reopen",
+      "before_positions_m": [
+        -3.675012022670045e-14,
+        -2.7646663625091605e-07
+      ],
+      "command_positions_m": [
+        0.04,
+        0.04
+      ],
+      "after_positions_m": [
+        4.810925702258828e-08,
+        -3.198401898885095e-08
+      ],
+      "before_link_poses_world_xyz_rpy": {
+        "left": [
+          -0.062575,
+          -2.7e-05,
+          1.21477,
+          -3.14113,
+          0.000103,
+          0.785439
+        ],
+        "right": [
+          -0.062576,
+          -2.7e-05,
+          1.21477,
+          -3.14113,
+          0.000104,
+          0.785439
+        ]
+      },
+      "after_link_poses_world_xyz_rpy": {
+        "left": [
+          -0.062575,
+          -2.7e-05,
+          1.21477,
+          -3.14113,
+          0.000103,
+          0.785439
+        ],
+        "right": [
+          -0.062576,
+          -2.7e-05,
+          1.21477,
+          -3.14113,
+          0.000104,
+          0.785439
+        ]
+      },
+      "finger_link_displacement_m": {
+        "left": 0.0,
+        "right": 0.0
+      },
+      "action": {
+        "accepted": true,
+        "succeeded": false,
+        "controller_result_succeeded": false,
+        "controller_result_error_code": null,
+        "controller_result_error_string": "NO_ACTION_RESULT",
+        "goal_uuid": "7ebed7b231b047c680019285ee8da062",
+        "observed_positions_m": [
+          4.808341103057501e-08,
+          -3.1944402678618644e-08
+        ],
+        "goal_tolerance_m": 0.001,
+        "post_goal_observation_slack_m": 0.0001,
+        "max_position_error_m": 0.04000003194440268,
+        "mimic_tracking_error_m": 8.002781370919365e-08,
+        "physical_controller_state_topic": "/panda_hand_physical_controller/controller_state",
+        "controller_state_sample_count": 888,
+        "controller_target_reference_seen": true,
+        "controller_terminal_state": {
+          "timestamp_s": 41.2,
+          "physical_joint": "panda_finger_joint2",
+          "physical_reference_m": 0.04,
+          "physical_feedback_m": -3.1944402678618644e-08,
+          "physical_error_m": 0.04000003194440268,
+          "physical_output_m": 0.04
+        },
+        "adapter_decisions": [
+          {
+            "outcome": "REJECTED",
+            "physical_action": "/panda_hand_physical_controller/follow_joint_trajectory",
+            "physical_command_emitted": false,
+            "reason": "PHYSICAL_HAND_GOAL_TIMEOUT",
+            "timestamp_monotonic_s": 1839634.082165184
+          },
+          {
+            "outcome": "FORWARDED",
+            "physical_action": "/panda_hand_physical_controller/follow_joint_trajectory",
+            "physical_command_emitted": true,
+            "physical_master_joint": "panda_finger_joint2",
+            "physical_target_m": 0.04,
+            "reason": "SYMMETRIC_MIMIC_COMMAND",
+            "timestamp_monotonic_s": 1839634.96107128
+          }
+        ]
+      },
+      "contact_observation": {
+        "left_target": false,
+        "right_target": false,
+        "left_table": false,
+        "right_table": false,
+        "cube_table": true,
+        "cube_environment_table": false,
+        "raw_pairs": {
+          "left": [],
+          "right": [],
+          "cube": [
+            [
+              "object_red_cube::link::collision",
+              "work_table::table_link::collision"
+            ]
+          ],
+          "cube_environment": []
+        },
+        "event_counts": {
+          "left": 0,
+          "right": 0,
+          "cube": 268,
+          "cube_environment": 0
+        },
+        "topic_rate_evidence": {
+          "left": {
+            "unique_timestamp_samples": 0,
+            "duration_s": 0.0,
+            "observed_rate_hz": 0.0
+          },
+          "right": {
+            "unique_timestamp_samples": 0,
+            "duration_s": 0.0,
+            "observed_rate_hz": 0.0
+          },
+          "cube": {
+            "unique_timestamp_samples": 193,
+            "duration_s": 0.19899999999999807,
+            "observed_rate_hz": 964.8241206030244
+          },
+          "cube_environment": {
+            "unique_timestamp_samples": 0,
+            "duration_s": 0.0,
+            "observed_rate_hz": 0.0
+          }
+        },
+        "left_target_unique_samples": 0,
+        "right_target_unique_samples": 0,
+        "bilateral_overlap_s": 0.0
+      },
+      "should_forward": true,
+      "physical_command_emitted": true,
+      "all_channels_reached_command": false
+    }
+  ],
+  "controls_verified": false,
+  "run_id": "m1a-20260717-bullet-opposed-axis-compensation-gate2",
+  "raw_log": "logs/m1a-20260717-bullet-opposed-axis-compensation-gate2.log",
+  "experiment_label": "BULLET_OPPOSED_AXIS_COMPENSATION"
+}

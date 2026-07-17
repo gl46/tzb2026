@@ -47,7 +47,11 @@ def test_controller_backed_panda_contract_has_all_controlled_joints() -> None:
     config = yaml.safe_load((ROOT / "robot_ws/src/xh_sim/config/panda_controllers.yaml").read_text())
     manager = config["controller_manager"]["ros__parameters"]
     assert manager["panda_arm_controller"]["type"] == "joint_trajectory_controller/JointTrajectoryController"
-    assert manager["panda_hand_controller"]["type"] == "joint_trajectory_controller/JointTrajectoryController"
+    # The public two-finger action is provided by the fail-closed mimic
+    # adapter; only q2 is exported to gz_ros2_control as a physical command.
+    assert manager["panda_hand_physical_controller"]["type"] == "joint_trajectory_controller/JointTrajectoryController"
+    adapter = (ROOT / "robot_ws/src/xh_sim/scripts/panda_hand_mimic_adapter.py").read_text()
+    assert 'PUBLIC_ACTION = "/panda_hand_controller/follow_joint_trajectory"' in adapter
 
 
 def test_constrained_pick_place_runner_labels_its_grasp_mode() -> None:

@@ -12,6 +12,10 @@ from sensor_msgs.msg import JointState
 
 
 ARM_JOINTS = [f"panda_joint{index}" for index in range(1, 8)]
+# Must exactly match the ``home`` group state in m1a_panda.srdf.  This neutral
+# tucked posture was selected by a no-motion ``check_state_validity`` probe
+# after the official-origin primitive correction; it is not a collision
+# exception or a commanded move.
 HOME_ARM_POSITIONS = [0.0, -0.5, 0.0, -1.5, 0.0, 1.0, 0.0]
 FINGER_JOINTS = ["panda_finger_joint1", "panda_finger_joint2"]
 

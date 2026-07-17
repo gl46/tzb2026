@@ -1,13 +1,18 @@
 <?xml version="1.0" ?>
 <sdf version="1.9">
   <world name="xh_p0_pick_place">
-    <physics name="default_physics" type="dart">
+    <physics name="default_physics" type="bullet">
       <max_step_size>0.001</max_step_size>
       <real_time_factor>1.0</real_time_factor>
     </physics>
     <!-- Explicit systems are required for a server-only Harmonic run to expose
          physics, spawn services, contacts, the scene graph, and RGB-D output. -->
-    <plugin name="gz::sim::systems::Physics" filename="gz-sim-physics-system"/>
+    <!-- ADR-0009: the explicit generated SDF carries the q1<-q2 physical
+         mimic constraint. The installed Bullet-Featherstone plugin is the
+         required backend; the five-part capability audit must pass before S0. -->
+    <plugin name="gz::sim::systems::Physics" filename="gz-sim-physics-system">
+      <engine><filename>gz-physics-bullet-featherstone-plugin</filename></engine>
+    </plugin>
     <plugin name="gz::sim::systems::UserCommands" filename="gz-sim-user-commands-system"/>
     <plugin name="gz::sim::systems::SceneBroadcaster" filename="gz-sim-scene-broadcaster-system"/>
     <plugin name="gz::sim::systems::Contact" filename="gz-sim-contact-system"/>

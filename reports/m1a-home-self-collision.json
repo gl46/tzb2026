@@ -1,0 +1,32 @@
+{
+  "run_id": "m1a-20260717-detachable-reset-home-r1",
+  "status": "HOME_SELF_COLLISION_VERIFIED",
+  "reason": "MoveIt reports the approved home state as collision-free.",
+  "started_at_unix_s": 1784232354.895086,
+  "local_gazebo_urdf_sha256": "84b0d2dc67dea0071a696e4e09211d0ff44d9694e57d7b2a3aa8978f37e5081c",
+  "remote_gazebo_urdf_sha256": "84b0d2dc67dea0071a696e4e09211d0ff44d9694e57d7b2a3aa8978f37e5081c",
+  "model_match": true,
+  "runtime": {
+    "status": "HOME_SELF_COLLISION_VERIFIED",
+    "valid": true,
+    "group": "panda_arm",
+    "arm_joint_positions_rad": [
+      0.0,
+      -0.5,
+      0.0,
+      -1.5,
+      0.0,
+      1.0,
+      0.0
+    ],
+    "finger_joint_positions_m": [
+      0.02,
+      0.02
+    ],
+    "contacts": [],
+    "duration_s": 0.39476680755615234,
+    "method": "MOVEIT_CHECK_STATE_VALIDITY_NO_MOTION_COMMAND"
+  },
+  "raw_log": "logs/m1a-20260717-detachable-reset-home-r1-home-self-collision.log",
+  "next_gate": "S0_ONLY_IF_HOME_SELF_COLLISION_VERIFIED_AND_MODEL_MATCH"
+}

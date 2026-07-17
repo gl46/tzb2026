@@ -81,7 +81,7 @@ if [ "$smoke_kind" = PROJECT_CONTROL ]; then
   done
 
   controllers=$(timeout -k 1 6 ros2 control list_controllers 2>&1 || true)
-  for controller in joint_state_broadcaster panda_arm_controller panda_hand_controller; do
+  for controller in joint_state_broadcaster panda_arm_controller panda_hand_physical_controller; do
     if grep -Eq "^${controller}[[:space:]].*[[:space:]]active$" <<<"$controllers"; then
       echo "CONTROLLER_ACTIVE:$controller"
     fi
@@ -95,7 +95,7 @@ if [ "$smoke_kind" = PROJECT_CONTROL ]; then
       '{trajectory: {joint_names: [panda_joint1, panda_joint2, panda_joint3, panda_joint4, panda_joint5, panda_joint6, panda_joint7], points: [{positions: [0.12, -0.25, 0.15, -0.20, 0.10, 0.15, -0.10], time_from_start: {sec: 3}}]}}' >"$action" 2>&1 || true
     if grep -q 'Goal finished with status: SUCCEEDED' "$action"; then echo ARM_ACTION_SUCCEEDED; fi
   fi
-  if grep -Eq '^panda_hand_controller[[:space:]].*[[:space:]]active$' <<<"$controllers"; then
+  if grep -Eq '^panda_hand_physical_controller[[:space:]].*[[:space:]]active$' <<<"$controllers"; then
     timeout -k 2 15 ros2 action send_goal /panda_hand_controller/follow_joint_trajectory control_msgs/action/FollowJointTrajectory \
       '{trajectory: {joint_names: [panda_finger_joint1, panda_finger_joint2], points: [{positions: [0.03, 0.03], time_from_start: {sec: 2}}]}}' >"$action" 2>&1 || true
     if grep -q 'Goal finished with status: SUCCEEDED' "$action"; then echo HAND_ACTION_SUCCEEDED; fi
@@ -160,7 +160,7 @@ if grep -q 'ROS_MESSAGE_RECEIVED:/xh/camera/rgbd/camera_info' <<<"$remote_output
 if grep -q 'JOINT_STATE_MESSAGE_RECEIVED' <<<"$remote_output"; then joint_state_verified=true; fi
 if grep -q 'TF_MESSAGE_RECEIVED' <<<"$remote_output"; then tf_verified=true; fi
 if grep -q 'CONTROLLER_ACTIVE:panda_arm_controller' <<<"$remote_output"; then arm_controller_active=true; fi
-if grep -q 'CONTROLLER_ACTIVE:panda_hand_controller' <<<"$remote_output"; then hand_controller_active=true; fi
+if grep -q 'CONTROLLER_ACTIVE:panda_hand_physical_controller' <<<"$remote_output"; then hand_controller_active=true; fi
 if grep -q 'ARM_ACTION_SUCCEEDED' <<<"$remote_output"; then arm_action_executed=true; fi
 if grep -q 'HAND_ACTION_SUCCEEDED' <<<"$remote_output"; then hand_action_executed=true; fi
 for object in object_red_cube object_blue_cylinder object_green_sphere; do

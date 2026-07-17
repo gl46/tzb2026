@@ -5,30 +5,46 @@ from __future__ import annotations
 import json
 import math
 import os
+from pathlib import Path
 import re
 import subprocess
+import sys
 import time
 
 import rclpy
 from builtin_interfaces.msg import Duration
 from control_msgs.action import FollowJointTrajectory
-from geometry_msgs.msg import Pose, PoseStamped
-from moveit_msgs.msg import CollisionObject, PlanningScene, RobotState
-from moveit_msgs.srv import ApplyPlanningScene, GetPositionIK
+from control_msgs.msg import JointTolerance, JointTrajectoryControllerState
+from geometry_msgs.msg import Pose, PoseArray, PoseStamped
+from moveit_msgs.msg import AttachedCollisionObject, CollisionObject, PlanningScene, PlanningSceneComponents, RobotState
+from moveit_msgs.srv import ApplyPlanningScene, GetPlanningScene, GetPositionIK
 from rclpy.action import ActionClient
 from ros_gz_interfaces.msg import Contacts
 from sensor_msgs.msg import JointState
 from shape_msgs.msg import SolidPrimitive
+from std_msgs.msg import String
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
+from rosgraph_msgs.msg import Clock
 
-from m1a_moveit_execution_client import EvidenceClient, JOINTS, TARGETS, set_allowed_pair
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT / "src") not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT / "src"))
+
+from xh_agent.grasp.orientation_families import gripper_frame_corridor  # noqa: E402
+
+from m1a_moveit_execution_client import EvidenceClient, JOINTS, TARGETS, set_allowed_pair  # noqa: E402
 
 
 HAND_JOINTS = ["panda_finger_joint1", "panda_finger_joint2"]
+# PANDA_MIMIC_Q2_MASTER is the pre-authorized ADR-0008 fallback selected only
+# after the recorded q1-master close probe held a 30 mm physical error.
+PHYSICAL_HAND_JOINT = "panda_finger_joint2"
+PHYSICAL_HAND_CONTROLLER = "/panda_hand_physical_controller/controller_state"
 CONTACT_TOPICS = {
     "left": "/xh/supervision/panda_leftfinger_contacts",
     "right": "/xh/supervision/panda_rightfinger_contacts",
     "cube": "/xh/supervision/red_cube_contacts",
+    "cube_bilateral": "/xh/supervision/red_cube_bilateral_contacts",
     # A dynamic, geometry-identical red cube resting on the production table.
     # The grasp target remains static so independent finger windows cannot
     # disturb one another; this companion proves target-type/table contacts.
@@ -36,16 +52,42 @@ CONTACT_TOPICS = {
 }
 CUBE_SIZE_M = 0.05
 PAD_SIZE_M = (0.12, 0.018, 0.035)
+FINGER_LENGTH_M = 0.12
+FINGER_ROOT_Z_M = 0.055
+PLANNING_SCENE_WORLD_OBJECT_PADDING_M = 0.0
 CALIBRATION_CUBE_XYZ = [0.17, 0.12, 0.755]
 CALIBRATION_FIXTURE_XYZ = [0.17, 0.12, 0.59]
 CALIBRATION_FIXTURE_SIZE_M = [0.03, 0.03, 0.28]
-# A seed from a previously collision-checked bilateral solution.  It is not an
-# arm command: every trial still solves IK against its runtime oracle pose and
-# plans the returned solution through MoveIt.
-BILATERAL_IK_SEED = [-1.0134159315, 1.7628, 0.8510767928, -1.1684521475,
-                     1.6757839956, 0.8364348383, -0.1870553160]
+CONTACT_RETREAT_HEIGHT_M = 0.220
+HAND_POST_GOAL_OBSERVATION_SLACK_M = 0.0001
+# The nominal side-contact pose placed the 12 cm finger pad exactly tangent to
+# the cube's west face.  The full S0 run recorded 0.30--0.94 mm FK / Gazebo
+# AABB gaps for otherwise executed right and bilateral trials, so the fixture
+# needs a measured 2 mm finger-only overlap margin.  This is calibration-only:
+# the high fixture and the allowed collision pairs remain unchanged.
+CALIBRATION_FINGER_TARGET_INSET_M = 0.002
+# The free target must be centred by symmetric jaw closure, not by a long
+# side-push from the hand.  Keep only a 1 mm final approach from a non-contact
+# pre-close pose; the corresponding before/after poses are recorded below.
+BILATERAL_PRECONTACT_CLEARANCE_M = 0.001
+BILATERAL_FINAL_FINGER_INSET_M = 0.0
+BILATERAL_PRECONTACT_FINGER_M = 0.034
+BILATERAL_STEADY_WIDTH_RANGE_M = (0.045, 0.070)
 
 
+def calibration_bilateral_branch_seed() -> list[float]:
+    """Select the collision-validated elbow-up IK branch for the free cube.
+
+    This is only a numerical IK initial value, not a seven-joint action: the
+    requested end-effector pose remains derived from the runtime oracle cube
+    pose on every label.  Without a branch selector, equivalent Panda hand
+    poses can sweep the physical free cube differently before jaw closure.
+    """
+    return [
+        0.7951233744998444, -0.7951787069080972, -1.0790437437304568,
+        -2.617706356985651, -0.7753497125747142, 2.023731606765663,
+        1.0679453240091286,
+    ]
 def quaternion_rotate(quaternion: list[float], point: tuple[float, float, float]) -> list[float]:
     x, y, z, w = quaternion
     px, py, pz = point
@@ -72,6 +114,10 @@ def runtime_cube_pose() -> dict | None:
     return runtime_model_pose("object_red_cube")
 
 
+def runtime_bilateral_cube_pose() -> dict | None:
+    return runtime_model_pose("object_red_cube_bilateral")
+
+
 def runtime_link_pose(link: str) -> list[float] | None:
     pose = runtime_model_pose("panda_controller", link=link)
     if pose is None:
@@ -80,7 +126,9 @@ def runtime_link_pose(link: str) -> list[float] | None:
 
 
 def runtime_model_pose(model: str, *, link: str | None = None) -> dict | None:
-    command = ["gz", "model", "-m", model]
+    # gz model remains subscribed after printing a state. Bound the query
+    # externally and parse its first response even when timeout returns 124.
+    command = ["timeout", "1.5", "gz", "model", "-m", model]
     if link is None:
         command.append("-p")
     else:
@@ -90,7 +138,7 @@ def runtime_model_pose(model: str, *, link: str | None = None) -> dict | None:
         check=False,
         capture_output=True,
         text=True,
-        timeout=5,
+        timeout=3,
     )
     match = re.search(
         r"^\s*- Pose \[ XYZ \(m\) \] \[ RPY \(rad\) \]:\s*"
@@ -99,7 +147,7 @@ def runtime_model_pose(model: str, *, link: str | None = None) -> dict | None:
         result.stdout,
         re.MULTILINE,
     )
-    if result.returncode != 0 or match is None:
+    if match is None:
         return None
     values = [float(value) for value in match.groups()]
     return {
@@ -128,8 +176,27 @@ class CalibrationClient(EvidenceClient):
             self, FollowJointTrajectory, "/panda_hand_controller/follow_joint_trajectory"
         )
         self.contacts: dict[str, list[dict]] = {name: [] for name in CONTACT_TOPICS}
+        self.hand_controller_samples: list[dict] = []
+        self.adapter_decisions: list[dict] = []
+        self.dynamic_cube_poses: list[dict] = []
+        self.dynamic_target_reference_xyz: list[float] | None = None
+        self.latest_sim_clock_s: float | None = None
         for name, topic in CONTACT_TOPICS.items():
             self.create_subscription(Contacts, topic, lambda msg, channel=name: self.on_contact(channel, msg), 1000)
+        self.create_subscription(Clock, "/clock", self.on_clock, 1000)
+        self.create_subscription(PoseArray, "/xh/supervision/dynamic_pose", self.on_dynamic_pose, 1000)
+        self.create_subscription(
+            JointTrajectoryControllerState,
+            PHYSICAL_HAND_CONTROLLER,
+            self.on_hand_controller_state,
+            1000,
+        )
+        self.create_subscription(
+            String,
+            "/panda_hand_controller/adapter_decision",
+            self.on_hand_adapter_decision,
+            1000,
+        )
 
     def on_joint_state(self, message: JointState) -> None:
         super().on_joint_state(message)
@@ -149,6 +216,69 @@ class CalibrationClient(EvidenceClient):
                 }
             )
 
+    def on_clock(self, message: Clock) -> None:
+        self.latest_sim_clock_s = message.clock.sec + message.clock.nanosec * 1e-9
+
+    def on_hand_controller_state(self, message: JointTrajectoryControllerState) -> None:
+        reference = dict(zip(message.joint_names, message.reference.positions))
+        feedback = dict(zip(message.joint_names, message.feedback.positions))
+        output = dict(zip(message.joint_names, message.output.positions))
+        if PHYSICAL_HAND_JOINT not in reference or PHYSICAL_HAND_JOINT not in feedback:
+            return
+        stamp = message.header.stamp.sec + message.header.stamp.nanosec * 1e-9
+        self.hand_controller_samples.append({
+            "timestamp_s": stamp,
+            "physical_joint": PHYSICAL_HAND_JOINT,
+            "physical_reference_m": float(reference[PHYSICAL_HAND_JOINT]),
+            "physical_feedback_m": float(feedback[PHYSICAL_HAND_JOINT]),
+            "physical_error_m": float(reference[PHYSICAL_HAND_JOINT] - feedback[PHYSICAL_HAND_JOINT]),
+            "physical_output_m": (
+                float(output[PHYSICAL_HAND_JOINT])
+                if PHYSICAL_HAND_JOINT in output else None
+            ),
+        })
+
+    def on_hand_adapter_decision(self, message: String) -> None:
+        try:
+            decision = json.loads(message.data)
+        except json.JSONDecodeError:
+            decision = {"outcome": "UNPARSEABLE", "raw": message.data}
+        self.adapter_decisions.append(decision)
+
+    def set_dynamic_target_reference(self, cube_xyz: list[float]) -> None:
+        """Bind PoseArray target selection to a runtime-oracle S3 target pose."""
+
+        self.dynamic_target_reference_xyz = list(cube_xyz)
+        self.dynamic_cube_poses.clear()
+
+    def on_dynamic_pose(self, message: PoseArray) -> None:
+        """Store the target pose nearest to the runtime-oracle target reference.
+
+        ``Pose_V`` conversion to ``PoseArray`` does not retain Gazebo entity
+        names. S3 therefore binds the target once from allowed simulator
+        supervision at reset, then records the nearest dynamic entry with the
+        bridged simulation clock and explicit provenance.
+        """
+
+        if self.dynamic_target_reference_xyz is None or self.latest_sim_clock_s is None or not message.poses:
+            return
+        candidate = min(
+            message.poses,
+            key=lambda pose: sum(
+                (coordinate - reference) ** 2
+                for coordinate, reference in zip(
+                    (pose.position.x, pose.position.y, pose.position.z),
+                    self.dynamic_target_reference_xyz,
+                )
+            ),
+        )
+        self.dynamic_cube_poses.append({
+            "timestamp_s": self.latest_sim_clock_s,
+            "xyz_m": [candidate.position.x, candidate.position.y, candidate.position.z],
+            "pose_count": len(message.poses),
+            "source": "/xh/supervision/dynamic_pose (Pose_V→PoseArray nearest runtime-oracle target)",
+        })
+
     def wait_calibration_ready(self) -> bool:
         return (
             self.wait_ready()
@@ -163,11 +293,20 @@ class CalibrationClient(EvidenceClient):
         positions = seed or [self.latest.get(name, math.nan) for name in JOINTS]
         if not all(math.isfinite(value) for value in positions):
             return None
+        hand_positions = [self.latest_hand.get(name, math.nan) for name in HAND_JOINTS]
+        if not all(math.isfinite(value) for value in hand_positions):
+            return None
         request = GetPositionIK.Request()
         ik = request.ik_request
         ik.group_name = "panda_arm"
         ik.ik_link_name = ik_link
-        ik.robot_state = RobotState(joint_state=JointState(name=JOINTS, position=positions))
+        # The bilateral fixture is intentionally close to the pads.  Supplying
+        # their measured opening prevents IK from silently evaluating the
+        # default closed-finger state instead of the physical state it will
+        # actually plan from.
+        ik.robot_state = RobotState(
+            joint_state=JointState(name=JOINTS + HAND_JOINTS, position=positions + hand_positions)
+        )
         ik.avoid_collisions = avoid_collisions
         ik.pose_stamped = PoseStamped()
         ik.pose_stamped.header.frame_id = "world"
@@ -187,7 +326,19 @@ class CalibrationClient(EvidenceClient):
         solution = dict(zip(result.solution.joint_state.name, result.solution.joint_state.position))
         return [float(solution[name]) for name in JOINTS] if all(name in solution for name in JOINTS) else None
 
-    def command_hand(self, positions: list[float], duration_s: float = 0.8) -> dict:
+    def command_hand(
+        self, positions: list[float], duration_s: float = 0.8, *, goal_tolerance_m: float = 0.001,
+    ) -> dict:
+        """Command both pads and require millimetre-scale endpoint evidence.
+
+        The controller's default trajectory tolerance is wide enough to call a
+        7 mm finger error successful.  That is incompatible with the S3
+        contact-width gate, so the action goal and the post-action evidence
+        share the same explicit 1 mm tolerance.
+        """
+
+        controller_start = len(self.hand_controller_samples)
+        adapter_start = len(self.adapter_decisions)
         goal = FollowJointTrajectory.Goal()
         goal.trajectory = JointTrajectory(joint_names=HAND_JOINTS)
         seconds = int(duration_s)
@@ -198,6 +349,10 @@ class CalibrationClient(EvidenceClient):
                 time_from_start=Duration(sec=seconds, nanosec=nanoseconds),
             )
         ]
+        goal.goal_tolerance = [
+            JointTolerance(name=name, position=goal_tolerance_m)
+            for name in HAND_JOINTS
+        ]
         sent = self.hand_client.send_goal_async(goal)
         rclpy.spin_until_future_complete(self, sent, timeout_sec=3.0)
         handle = sent.result()
@@ -206,23 +361,57 @@ class CalibrationClient(EvidenceClient):
         result_future = handle.get_result_async()
         rclpy.spin_until_future_complete(self, result_future, timeout_sec=5.0)
         wrapped = result_future.result()
-        succeeded = bool(wrapped and wrapped.result.error_code == FollowJointTrajectory.Result.SUCCESSFUL)
+        controller_succeeded = bool(
+            wrapped and wrapped.result.error_code == FollowJointTrajectory.Result.SUCCESSFUL
+        )
+        for _ in range(3):
+            rclpy.spin_once(self, timeout_sec=0.02)
         actual = [self.latest_hand.get(name, math.nan) for name in HAND_JOINTS]
+        max_position_error_m = max(
+            (abs(expected - observed) for expected, observed in zip(positions, actual)),
+            default=math.inf,
+        )
+        controller_samples = self.hand_controller_samples[controller_start:]
+        target_reference_seen = any(
+            abs(sample["physical_reference_m"] - positions[HAND_JOINTS.index(PHYSICAL_HAND_JOINT)]) <= 1e-9
+            for sample in controller_samples
+        )
+        mimic_tracking_error_m = abs(actual[0] - actual[1])
         return {
             "accepted": True,
-            "succeeded": succeeded,
+            # The controller evaluates its 1 mm goal tolerance at goal
+            # completion; joint-state delivery can lag that instant by one
+            # simulation tick.  Preserve the 1 mm action contract while
+            # allowing a bounded 0.1 mm observation-sampling slack.
+            "succeeded": bool(
+                controller_succeeded
+                and max_position_error_m <= goal_tolerance_m + HAND_POST_GOAL_OBSERVATION_SLACK_M
+                and mimic_tracking_error_m <= goal_tolerance_m + HAND_POST_GOAL_OBSERVATION_SLACK_M
+            ),
+            "controller_result_succeeded": controller_succeeded,
+            "controller_result_error_code": (
+                wrapped.result.error_code if wrapped is not None else None
+            ),
+            "controller_result_error_string": (
+                wrapped.result.error_string if wrapped is not None else "NO_ACTION_RESULT"
+            ),
             "goal_uuid": bytes(handle.goal_id.uuid).hex(),
             "observed_positions_m": actual,
-            "max_position_error_m": max(
-                (abs(expected - observed) for expected, observed in zip(positions, actual)),
-                default=math.inf,
-            ),
+            "goal_tolerance_m": goal_tolerance_m,
+            "post_goal_observation_slack_m": HAND_POST_GOAL_OBSERVATION_SLACK_M,
+            "max_position_error_m": max_position_error_m,
+            "mimic_tracking_error_m": mimic_tracking_error_m,
+            "physical_controller_state_topic": PHYSICAL_HAND_CONTROLLER,
+            "controller_state_sample_count": len(controller_samples),
+            "controller_target_reference_seen": target_reference_seen,
+            "controller_terminal_state": controller_samples[-1] if controller_samples else None,
+            "adapter_decisions": self.adapter_decisions[adapter_start:],
         }
 
-    def update_cube_scene(self, cube_xyz: list[float]) -> bool:
+    def update_cube_scene(self, cube_xyz: list[float], *, target_id: str = "object_red_cube") -> bool:
         scene = PlanningScene(is_diff=True)
         item = CollisionObject()
-        item.id = "object_red_cube"
+        item.id = target_id
         item.header.frame_id = "world"
         item.primitives = [
             SolidPrimitive(type=SolidPrimitive.BOX, dimensions=[CUBE_SIZE_M] * 3)
@@ -235,16 +424,99 @@ class CalibrationClient(EvidenceClient):
         scene.world.collision_objects = [item]
         return self.apply_scene_diff(scene)
 
-    def apply_calibration_fixture(self) -> bool:
+    def attach_cube_scene(self, cube_xyz: list[float]) -> dict:
+        """Represent Gazebo's gated constraint as a MoveIt carried object.
+
+        The runtime constraint attaches to ``panda_link7``.  Keeping the same
+        link and the measured relative transform in MoveIt prevents transport
+        planning from silently discarding the carried cube after attachment.
+        """
+
+        positions = [self.latest.get(name, math.nan) for name in JOINTS]
+        link = self.fk_link("panda_link7", positions)
+        if link is None:
+            return {"applied": False, "reason": "PANDA_LINK7_FK_UNAVAILABLE"}
+        relative_xyz = quaternion_rotate(
+            [-link[3], -link[4], -link[5], link[6]],
+            tuple(cube - origin for cube, origin in zip(cube_xyz, link[:3])),
+        )
+        # MoveIt rejects a single diff that removes a world object and adds an
+        # AttachedCollisionObject carrying the same ID.  Commit the removal
+        # first, then attach in a second transaction; this mirrors the
+        # physical DetachableJoint state transition and leaves evidence for
+        # either failure rather than silently skipping the lift.
+        remove_scene = PlanningScene(is_diff=True)
+        remove = CollisionObject()
+        remove.id = "object_red_cube"
+        remove.header.frame_id = "world"
+        remove.operation = CollisionObject.REMOVE
+        remove_scene.world.collision_objects = [remove]
+        world_removed = self.apply_scene_diff(remove_scene)
+        if not world_removed:
+            return {
+                "applied": False,
+                "reason": "MOVEIT_WORLD_CUBE_REMOVE_REJECTED",
+                "parent_link": "panda_link7",
+                "relative_cube_xyz_m": list(relative_xyz),
+            }
         scene = PlanningScene(is_diff=True)
-        item = CollisionObject()
-        item.id = "work_table_calibration_fixture"
-        item.header.frame_id = "world"
-        item.primitives = [
-            SolidPrimitive(type=SolidPrimitive.BOX, dimensions=CALIBRATION_FIXTURE_SIZE_M)
+        attached = AttachedCollisionObject()
+        attached.link_name = "panda_link7"
+        attached.touch_links = ["panda_link7", "panda_link8", "panda_hand", "panda_leftfinger", "panda_rightfinger"]
+        attached.object.id = "object_red_cube"
+        attached.object.header.frame_id = "panda_link7"
+        attached.object.primitives = [
+            SolidPrimitive(type=SolidPrimitive.BOX, dimensions=[CUBE_SIZE_M] * 3)
         ]
         pose = Pose()
-        pose.position.x, pose.position.y, pose.position.z = CALIBRATION_FIXTURE_XYZ
+        pose.position.x, pose.position.y, pose.position.z = relative_xyz
+        pose.orientation.w = 1.0
+        attached.object.primitive_poses = [pose]
+        attached.object.operation = CollisionObject.ADD
+        scene.robot_state.is_diff = True
+        scene.robot_state.attached_collision_objects = [attached]
+        applied = self.apply_scene_diff(scene)
+        return {
+            "applied": applied,
+            "world_removed": world_removed,
+            "parent_link": "panda_link7",
+            "relative_cube_xyz_m": list(relative_xyz),
+            "representation": "MOVEIT_ATTACHED_COLLISION_OBJECT",
+        }
+
+    def detach_cube_scene(self, cube_xyz: list[float]) -> dict:
+        """Remove the carried-object representation and restore the world cube."""
+
+        scene = PlanningScene(is_diff=True)
+        attached = AttachedCollisionObject()
+        attached.object.id = "object_red_cube"
+        attached.object.operation = CollisionObject.REMOVE
+        scene.robot_state.is_diff = True
+        scene.robot_state.attached_collision_objects = [attached]
+        removed = self.apply_scene_diff(scene)
+        restored = self.update_cube_scene(cube_xyz) if removed else False
+        return {
+            "applied": bool(removed and restored),
+            "removed_attached_object": removed,
+            "restored_world_object": restored,
+            "runtime_cube_xyz_m": cube_xyz,
+        }
+
+    def apply_calibration_fixture(self) -> bool:
+        return self.apply_fixture(
+            "work_table_calibration_fixture", CALIBRATION_FIXTURE_XYZ, CALIBRATION_FIXTURE_SIZE_M
+        )
+
+    def apply_fixture(self, fixture_id: str, xyz: list[float], size: list[float]) -> bool:
+        scene = PlanningScene(is_diff=True)
+        item = CollisionObject()
+        item.id = fixture_id
+        item.header.frame_id = "world"
+        item.primitives = [
+            SolidPrimitive(type=SolidPrimitive.BOX, dimensions=size)
+        ]
+        pose = Pose()
+        pose.position.x, pose.position.y, pose.position.z = xyz
         pose.orientation.w = 1.0
         item.primitive_poses = [pose]
         item.operation = CollisionObject.ADD
@@ -261,12 +533,22 @@ class CalibrationClient(EvidenceClient):
         scene.allowed_collision_matrix = matrix
         return self.apply_scene_diff(scene)
 
-    def set_target_touch_exception(self, allowed: bool) -> bool:
+    def set_attached_cube_table_exception(self, allowed: bool) -> bool:
+        """Permit the physical table-contact state only while lifting attach."""
+        matrix = self.current_acm()
+        if matrix is None:
+            return False
+        set_allowed_pair(matrix, "object_red_cube", "work_table", allowed)
+        scene = PlanningScene(is_diff=True)
+        scene.allowed_collision_matrix = matrix
+        return self.apply_scene_diff(scene)
+
+    def set_target_touch_exception(self, allowed: bool, *, target_id: str = "object_red_cube") -> bool:
         matrix = self.current_acm()
         if matrix is None:
             return False
         for finger in ("panda_leftfinger", "panda_rightfinger"):
-            set_allowed_pair(matrix, finger, "object_red_cube", allowed)
+            set_allowed_pair(matrix, finger, target_id, allowed)
         scene = PlanningScene(is_diff=True)
         scene.allowed_collision_matrix = matrix
         return self.apply_scene_diff(scene)
@@ -275,6 +557,74 @@ class CalibrationClient(EvidenceClient):
         future = self.scene_client.call_async(ApplyPlanningScene.Request(scene=scene))
         rclpy.spin_until_future_complete(self, future, timeout_sec=10.0)
         return bool(future.result() and future.result().success)
+
+    def table_collision_evidence(self, *, maximum_padding_m: float) -> dict:
+        """Read the exact MoveIt table primitive before a table-clearance IK.
+
+        ``CollisionObject`` primitives do not carry a padding field.  The
+        applied world object is therefore exact geometry; any non-zero object
+        padding would have to be introduced outside this planning-scene payload
+        and is not configured by this launch.
+        """
+
+        request = GetPlanningScene.Request()
+        request.components = PlanningSceneComponents(
+            components=PlanningSceneComponents.WORLD_OBJECT_GEOMETRY
+        )
+        future = self.scene_get_client.call_async(request)
+        rclpy.spin_until_future_complete(self, future, timeout_sec=10.0)
+        result = future.result()
+        table = next(
+            (
+                item for item in (result.scene.world.collision_objects if result is not None else [])
+                if item.id == "work_table"
+            ),
+            None,
+        )
+        primitive = table.primitives[0] if table and table.primitives else None
+        # MoveIt stores an object's root pose separately from each primitive's
+        # local pose.  ``apply_scene`` supplies the table centre as the object
+        # root and an identity primitive pose, so both are required here.
+        object_pose = table.pose if table is not None else None
+        primitive_pose = table.primitive_poses[0] if table and table.primitive_poses else None
+        dimensions = list(primitive.dimensions) if primitive is not None else []
+        center = (
+            [
+                object_pose.position.x + primitive_pose.position.x,
+                object_pose.position.y + primitive_pose.position.y,
+                object_pose.position.z + primitive_pose.position.z,
+            ]
+            if object_pose is not None and primitive_pose is not None else None
+        )
+        exact_primitive = bool(
+            primitive is not None
+            and primitive.type == SolidPrimitive.BOX
+            and len(dimensions) == 3
+            and all(abs(value - expected) <= 1e-9 for value, expected in zip(dimensions, (1.2, 0.8, 0.10)))
+            and center is not None
+            and all(abs(value - expected) <= 1e-9 for value, expected in zip(center, (0.0, 0.0, 0.40)))
+        )
+        return {
+            "scene_object_id": "work_table",
+            "scene_primitive_dimensions_m": dimensions,
+            "scene_object_root_xyz_m": (
+                [object_pose.position.x, object_pose.position.y, object_pose.position.z]
+                if object_pose is not None else None
+            ),
+            "scene_primitive_local_xyz_m": (
+                [primitive_pose.position.x, primitive_pose.position.y, primitive_pose.position.z]
+                if primitive_pose is not None else None
+            ),
+            "scene_primitive_center_xyz_m": center,
+            "scene_table_top_z_m": 0.45 if exact_primitive else None,
+            "planning_scene_world_object_padding_m": PLANNING_SCENE_WORLD_OBJECT_PADDING_M,
+            "padding_representation": "MoveIt CollisionObject primitive geometry has no object-padding field",
+            "maximum_permitted_padding_m": maximum_padding_m,
+            "exact_table_primitive_verified": exact_primitive,
+            "padding_within_tip_clearance": (
+                exact_primitive and PLANNING_SCENE_WORLD_OBJECT_PADDING_M <= maximum_padding_m
+            ),
+        }
 
     def move_hand_pose(
         self, pose: Pose, *, ik_seed: list[float] | None = None, ik_link: str = "panda_hand"
@@ -390,6 +740,33 @@ class CalibrationClient(EvidenceClient):
         )
         return output
 
+    def gripper_frame_corridor_evidence(
+        self, cube_xyz: list[float], *, maximum_transverse_error_m: float,
+        finger_center_line_anchor_m: list[float] | None = None,
+    ) -> dict:
+        """Produce S3 corridor evidence in the hand frame, not world axes."""
+
+        positions = [self.latest.get(name, math.nan) for name in JOINTS]
+        if not all(math.isfinite(value) for value in positions):
+            return {
+                "coordinate_frame": "panda_hand",
+                "target_in_grasp_corridor": False,
+                "reason": "JOINT_STATE_UNAVAILABLE",
+            }
+        hand = self.fk_link("panda_hand", positions)
+        if hand is None:
+            return {
+                "coordinate_frame": "panda_hand",
+                "target_in_grasp_corridor": False,
+                "reason": "HAND_FK_UNAVAILABLE",
+            }
+        evidence = gripper_frame_corridor(
+            hand[:3], hand[3:], cube_xyz, threshold_m=maximum_transverse_error_m,
+            finger_center_line_anchor_m=finger_center_line_anchor_m,
+        )
+        evidence["hand_pose_world_xyzw"] = hand
+        return evidence
+
     def fk_link(self, link: str, positions: list[float]) -> list[float] | None:
         from moveit_msgs.srv import GetPositionFK
 
@@ -416,23 +793,43 @@ class CalibrationClient(EvidenceClient):
         return {name: self.contacts[name][starts[name]:] for name in self.contacts}
 
 
-def hand_pose(cube_xyz: list[float], *, y_offset: float = 0.0) -> Pose:
+def hand_pose(
+    cube_xyz: list[float], *, y_offset: float = 0.0,
+    finger_target_inset_m: float = CALIBRATION_FINGER_TARGET_INSET_M,
+) -> Pose:
+    """Runtime-oracle side contact pose, derived from the hand/finger chain."""
     pose = Pose()
-    pose.position.x = cube_xyz[0] - 0.120
+    # With RPY [pi, 0, 0], a finger runs along world +X from its hand frame and
+    # its centreline is 5.5 cm below the hand.  Align its tip with the cube's
+    # west face with a recorded 2 mm finger-only overlap margin.  The palm
+    # remains clear of the high calibration fixture and table.
+    pose.position.x = cube_xyz[0] - (
+        CUBE_SIZE_M / 2.0 + FINGER_LENGTH_M - finger_target_inset_m
+    )
     pose.position.y = cube_xyz[1] + y_offset
-    pose.position.z = cube_xyz[2] - 0.055
-    pose.orientation.w = 1.0
+    pose.position.z = cube_xyz[2] + FINGER_ROOT_Z_M
+    # RPY [pi, 0, 0] puts the finger centreline at the cube's centre height.
+    pose.orientation.x = 1.0
+    pose.orientation.w = 0.0
     return pose
 
 
 def calibration_retreat_pose(cube_xyz: list[float], *, y_offset: float) -> Pose:
-    """Back away from the cube and lift before restoring normal ACM checks."""
+    """Lift from the runtime target before restoring normal ACM checks."""
     pose = Pose()
-    pose.position.x = cube_xyz[0] - 0.220
+    pose.position.x = cube_xyz[0] - (CUBE_SIZE_M / 2.0 + FINGER_LENGTH_M + 0.10)
     pose.position.y = cube_xyz[1] + y_offset
-    pose.position.z = cube_xyz[2] + 0.080
-    pose.orientation.w = 1.0
+    pose.position.z = cube_xyz[2] + CONTACT_RETREAT_HEIGHT_M
+    pose.orientation.x = 1.0
+    pose.orientation.w = 0.0
     return pose
+
+
+def pose_vector(pose: Pose) -> list[float]:
+    return [
+        pose.position.x, pose.position.y, pose.position.z,
+        pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w,
+    ]
 
 
 def table_touch_pose(cube_xyz: list[float]) -> Pose:
@@ -445,7 +842,7 @@ def table_touch_pose(cube_xyz: list[float]) -> Pose:
     return pose
 
 
-def classify_contacts(events: dict[str, list[dict]]) -> dict:
+def classify_contacts(events: dict[str, list[dict]], *, target_model: str = "object_red_cube") -> dict:
     pairs = {
         channel: sorted({(event["collision1"], event["collision2"]) for event in channel_events})
         for channel, channel_events in events.items()
@@ -475,8 +872,10 @@ def classify_contacts(events: dict[str, list[dict]]) -> dict:
             "duration_s": duration,
             "observed_rate_hz": (len(timestamps) - 1) / duration if duration > 0 else 0.0,
         }
-    left_target_times = channel_timestamps("left", "object_red_cube")
-    right_target_times = channel_timestamps("right", "object_red_cube")
+    left_target_times = channel_timestamps("left", target_model)
+    right_target_times = channel_timestamps("right", target_model)
+    cube_channel = "cube_bilateral" if target_model == "object_red_cube_bilateral" else "cube"
+    cube_target_times = channel_timestamps(cube_channel, target_model)
     overlap = 0.0
     if left_target_times and right_target_times:
         overlap = max(
@@ -486,8 +885,10 @@ def classify_contacts(events: dict[str, list[dict]]) -> dict:
         )
 
     return {
-        "left_target": channel_has("left", "object_red_cube"),
-        "right_target": channel_has("right", "object_red_cube"),
+        "target_model": target_model,
+        "left_target": channel_has("left", target_model),
+        "right_target": channel_has("right", target_model),
+        "target_cube_events": len(cube_target_times),
         "left_table": channel_has("left", "work_table"),
         "right_table": channel_has("right", "work_table"),
         "cube_table": channel_has("cube", "work_table"),
@@ -520,9 +921,15 @@ def main() -> int:
         trials.append({"label": "idle", "expected": "none", "contacts": classify_contacts(idle_events)})
 
         specifications = (
-            [(f"left_{index}", "left", -0.040, [0.010, 0.04]) for index in range(1, 4)]
-            + [(f"right_{index}", "right", 0.0, [0.04, 0.010]) for index in range(1, 4)]
-            + [(f"bilateral_{index}", "bilateral", -0.030, [0.010, 0.010]) for index in range(1, 4)]
+            # ADR-0008 redefines left/right as pose-induced, fixed-aperture
+            # labelled contact.  Both fingers stay at the same 4 cm command;
+            # the runtime-oracle lateral approach, not an unavailable
+            # independent channel, selects the named pad.  No joint-angle seed
+            # is carried between conditions: every pose derives from the
+            # runtime cube geometry and starts IK from measured state.
+            [(f"left_{index}", "left", 0.040, [0.040, 0.040]) for index in range(1, 4)]
+            + [(f"right_{index}", "right", -0.040, [0.040, 0.040]) for index in range(1, 4)]
+            + [(f"bilateral_{index}", "bilateral", 0.0, [0.010, 0.010]) for index in range(1, 4)]
         )
         scope = os.environ.get("M1A_CALIBRATION_SCOPE", "full")
         selected_label = os.environ.get("M1A_CALIBRATION_LABEL", "")
@@ -537,7 +944,8 @@ def main() -> int:
             raise ValueError(f"unsupported M1A_CALIBRATION_SCOPE: {scope}")
         for label, expected, y_offset, finger_target in specifications:
             initialization = calibration_initialization()
-            cube = runtime_cube_pose()
+            target_model = "object_red_cube_bilateral" if expected == "bilateral" else "object_red_cube"
+            cube = runtime_bilateral_cube_pose() if expected == "bilateral" else runtime_cube_pose()
             if cube is None:
                 trials.append(
                     {
@@ -547,58 +955,111 @@ def main() -> int:
                     }
                 )
                 continue
-            client.update_cube_scene(cube["xyz"])
-            client.command_hand([0.04, 0.04])
-            exception_set = client.set_target_touch_exception(True)
-            motion = client.move_hand_pose(
-                hand_pose(cube["xyz"], y_offset=y_offset),
-                ik_seed=BILATERAL_IK_SEED if expected == "bilateral" else None,
-            ) if exception_set else {
-                "ik_solved": False, "planned": False, "executed": False
-            }
-            # The semantic test is the commanded finger close, not incidental
-            # contact observed while the open hand approaches the target.
+            client.update_cube_scene(cube["xyz"], target_id=target_model)
+            exception_set = client.set_target_touch_exception(True, target_id=target_model)
+            target_pose = hand_pose(cube["xyz"], y_offset=y_offset)
             start = {name: len(events) for name, events in client.contacts.items()}
-            hand_result = client.command_hand(finger_target)
+            if expected in {"left", "right"}:
+                # Keep the symmetric aperture fixed across the entire named-pad
+                # contact window.  Motion causes the label; the following
+                # action result records the physical command and mimic state.
+                hand_result = client.command_hand(finger_target)
+                motion = client.move_hand_pose(target_pose) if exception_set else {
+                    "ik_solved": False, "planned": False, "executed": False
+                }
+            else:
+                # Do not push the free cube with an open hand.  First stop
+                # 1 mm short, pre-close without contact to the expected
+                # 68 mm total width, then make the short contact approach.
+                # The final 10 mm/side command must settle in the 45--70 mm
+                # total physical width window while both pads remain in touch.
+                precontact_pose = hand_pose(
+                    cube["xyz"], y_offset=y_offset,
+                    finger_target_inset_m=-BILATERAL_PRECONTACT_CLEARANCE_M,
+                )
+                target_pose = hand_pose(
+                    cube["xyz"], y_offset=y_offset,
+                    finger_target_inset_m=BILATERAL_FINAL_FINGER_INSET_M,
+                )
+                precontact_motion = client.move_hand_pose(
+                    precontact_pose, ik_seed=calibration_bilateral_branch_seed()
+                ) if exception_set else {
+                    "ik_solved": False, "planned": False, "executed": False
+                }
+                cube_after_precontact = runtime_bilateral_cube_pose()
+                precontact_ready = (
+                    precontact_motion.get("executed") is True
+                    and precontact_motion.get("converged") is True
+                )
+                precontact_close = client.command_hand([BILATERAL_PRECONTACT_FINGER_M] * 2) if precontact_ready else {
+                    "accepted": False,
+                    "succeeded": False,
+                    "controller_result_succeeded": False,
+                    "controller_result_error_string": "PRECONTACT_NOT_CONVERGED",
+                    "observed_positions_m": [],
+                }
+                motion = client.move_hand_pose(target_pose) if (
+                    precontact_ready and precontact_close.get("succeeded") is True
+                ) else {
+                    "ik_solved": False, "planned": False, "executed": False
+                }
+                cube_before_close = runtime_bilateral_cube_pose()
+                contact_ready = motion.get("executed") is True and motion.get("converged") is True
+                hand_result = client.command_hand(finger_target) if contact_ready else {
+                    "accepted": False,
+                    "succeeded": False,
+                    "controller_result_succeeded": False,
+                    "controller_result_error_string": "BILATERAL_CONTACT_POSE_NOT_CONVERGED",
+                    "observed_positions_m": [],
+                }
             client.contact_window(0.45)
             events = {name: client.contacts[name][start[name]:] for name in client.contacts}
-            cube_after = runtime_cube_pose()
+            cube_after = runtime_bilateral_cube_pose() if expected == "bilateral" else runtime_cube_pose()
             pad_at_close = client.pad_evidence(cube["xyz"])
             # Leave the target before restoring its normal collision policy.
             # Without this retreat the next independent condition starts from
             # physical penetration, making a failed plan look like a sensor fault.
             client.command_hand([0.04, 0.04])
-            retreat = client.move_hand_pose(calibration_retreat_pose(
-                cube["xyz"], y_offset=y_offset
-            )) if exception_set else {
+            retreat_pose = calibration_retreat_pose(cube["xyz"], y_offset=y_offset)
+            retreat = client.move_hand_pose(retreat_pose) if exception_set else {
                 "planned": False, "executed": False
             }
-            exception_restored = client.set_target_touch_exception(False)
+            target_exception_restored = client.set_target_touch_exception(False, target_id=target_model)
+            exception_restored = target_exception_restored
             trials.append(
                 {
                     "label": label,
                     "expected": expected,
+                    "target_model": target_model,
+                    "target_physics": "FREE_DYNAMIC_SELF_CENTERING" if expected == "bilateral" else "STATIC_SINGLE_PAD_CALIBRATION",
                     "initialization": initialization,
+                    "calibration_finger_target_inset_m": CALIBRATION_FINGER_TARGET_INSET_M,
                     "cube_pose": cube,
                     "cube_pose_after_action": cube_after,
-                    "target_hand_pose": [
-                        cube["xyz"][0] - 0.120, cube["xyz"][1] + y_offset,
-                        cube["xyz"][2] - 0.055, 0.0, 0.0, 0.0, 1.0,
-                    ],
+                    "target_hand_pose": pose_vector(target_pose),
+                    "precontact_motion": precontact_motion if expected == "bilateral" else None,
+                    "precontact_hand_command": precontact_close if expected == "bilateral" else None,
+                    "cube_pose_after_precontact": cube_after_precontact if expected == "bilateral" else None,
+                    "cube_pose_before_close": cube_before_close if expected == "bilateral" else None,
                     "motion": motion,
                     "retreat": retreat,
-                    "retreat_hand_pose": [
-                        cube["xyz"][0] - 0.220, cube["xyz"][1] + y_offset,
-                        cube["xyz"][2] + 0.080, 0.0, 0.0, 0.0, 1.0,
-                    ],
+                    "retreat_hand_pose": pose_vector(retreat_pose),
                     "hand_command": {"positions_m": finger_target, **hand_result},
+                    "bilateral_steady_gripper_width_m": (
+                        sum(hand_result.get("observed_positions_m", [])) if expected == "bilateral" else None
+                    ),
+                    "hand_command_semantics": (
+                        "POSE_INDUCED_FIXED_SYMMETRIC_APERTURE"
+                        if expected in {"left", "right"}
+                        else "SYMMETRIC_MIMIC_CLOSE"
+                    ),
                     "calibration_only_allowed_collision_pairs": [
-                        ["panda_leftfinger", "object_red_cube"],
-                        ["panda_rightfinger", "object_red_cube"],
+                        ["panda_leftfinger", target_model],
+                        ["panda_rightfinger", target_model],
                     ],
                     "target_touch_exception_restored": exception_restored,
                     "pad_evidence": pad_at_close,
-                    "contacts": classify_contacts(events),
+                    "contacts": classify_contacts(events, target_model=target_model),
                 }
             )
 
@@ -682,15 +1143,19 @@ def main() -> int:
                     and not contacts.get("left_target")
                 )
             if expected == "bilateral":
+                width = trial.get("bilateral_steady_gripper_width_m")
                 return bool(
                     trial.get("motion", {}).get("executed")
                     and cleanup_valid
                     and trial.get("target_touch_exception_restored")
                     and contacts.get("left_target")
                     and contacts.get("right_target")
+                    and contacts.get("target_cube_events", 0) > 0
                     and contacts.get("bilateral_overlap_s", 0.0) >= 0.1
                     and contacts.get("left_target_unique_samples", 0) >= 3
                     and contacts.get("right_target_unique_samples", 0) >= 3
+                    and width is not None
+                    and BILATERAL_STEADY_WIDTH_RANGE_M[0] <= width <= BILATERAL_STEADY_WIDTH_RANGE_M[1]
                 )
             if expected == "finger_table":
                 return contacts.get("left_table") or contacts.get("right_table")
@@ -705,12 +1170,13 @@ def main() -> int:
         for trial in trials:
             trial["passed"] = bool(passed(trial))
         positives = [trial for trial in trials if trial["expected"] in {"left", "right", "bilateral"}]
-        status = "CONTACT_TELEMETRY_CALIBRATED" if len(trials) == 14 and all(trial["passed"] for trial in trials) else "CONTACT_TELEMETRY_PARTIAL"
+        condition_trials = [trial for trial in trials if trial["label"] != "idle"]
+        status = "CONTACT_TELEMETRY_CALIBRATED" if len(condition_trials) == 13 and all(trial["passed"] for trial in trials) else "CONTACT_TELEMETRY_PARTIAL"
         print(
             json.dumps(
                 {
                     "status": status,
-                    "reason": f"{sum(trial['passed'] for trial in trials)}/14 calibration windows passed; {sum(trial['passed'] for trial in positives)}/9 finger-target positive windows passed.",
+                    "reason": f"{sum(trial['passed'] for trial in condition_trials)}/13 approved conditions passed; {sum(trial['passed'] for trial in positives)}/9 finger-target positive windows passed.",
                     "oracle_pose_source": "gz model runtime query before every motion trial",
                     "calibration_initialization": "CALIBRATION_ONLY_INITIALIZATION",
                     "contact_topics": CONTACT_TOPICS,

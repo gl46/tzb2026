@@ -10,62 +10,14 @@ logs=()
 
 for label in "${labels[@]}"; do
   child_run_id="${RUN_ID}-${label}"
-  M1A_RUN_ID="$child_run_id" M1A_CALIBRATION_SCOPE=one M1A_CALIBRATION_LABEL="$label" \
-    bash "$ROOT/scripts/run_contact_calibration.sh"
+  # Always continue to the next independent condition so a failed endpoint is
+  # represented as missing evidence by the fail-closed aggregator, rather than
+  # silently truncating the 13-condition audit under `set -e`.
+  if ! M1A_RUN_ID="$child_run_id" M1A_CALIBRATION_SCOPE=one M1A_CALIBRATION_LABEL="$label" \
+    bash "$ROOT/scripts/run_contact_calibration.sh"; then
+    printf 'M1A_S0_CHILD_RUN_FAILED:%s\n' "$label" >&2
+  fi
   logs+=("$ROOT/logs/${child_run_id}-s0-contact-calibration.log")
 done
 
-python3 - "$RUN_ID" "${logs[@]}" <<'PY'
-import hashlib
-import json
-import sys
-from pathlib import Path
-
-run_id, *logs = sys.argv[1:]
-trials = []
-idle = None
-remote_hashes = []
-for log in logs:
-    raw = Path(log).read_text(errors="replace")
-    remote_hashes.extend(line.split(":", 1)[1] for line in raw.splitlines()
-                         if line.startswith("REMOTE_GAZEBO_URDF_SHA256:"))
-    payload = next((json.loads(line) for line in raw.splitlines()
-                    if line.startswith("{") and '"trials"' in line), None)
-    if payload is None:
-        raise SystemExit(f"no structured contact evidence in {log}")
-    for trial in payload["trials"]:
-        if trial["label"] == "idle" and idle is None:
-            idle = trial
-        elif trial["label"] != "idle":
-            trials.append(trial)
-if idle is None or len(trials) != 13:
-    raise SystemExit(f"expected one idle and 13 isolated trials, got idle={idle is not None} trials={len(trials)}")
-combined = [idle, *trials]
-positives = [trial for trial in trials if trial["expected"] in {"left", "right", "bilateral"}]
-status = "CONTACT_TELEMETRY_CALIBRATED" if all(trial.get("passed") for trial in combined) else "CONTACT_TELEMETRY_PARTIAL"
-data = {
-    "run_id": run_id,
-    "status": status,
-    "reason": f"{sum(bool(trial.get('passed')) for trial in combined)}/14 independent calibration windows passed; {sum(bool(trial.get('passed')) for trial in positives)}/9 finger-target positive windows passed.",
-    "oracle_pose_source": "gz model runtime query before every motion trial",
-    "listener_scope": "PER_TRIAL_FULL_ACTION_WINDOW",
-    "session_isolation": "FRESH_GAZEBO_MOVEIT_SESSION_PER_CONDITION",
-    "source_logs": logs,
-    "local_gazebo_urdf_sha256": hashlib.sha256(
-        Path("robot_ws/src/xh_sim/urdf/panda_controlled.urdf").read_bytes()
-    ).hexdigest(),
-    "remote_gazebo_urdf_sha256": remote_hashes,
-    "model_match": bool(remote_hashes) and len(set(remote_hashes)) == 1
-        and remote_hashes[0] == hashlib.sha256(
-            Path("robot_ws/src/xh_sim/urdf/panda_controlled.urdf").read_bytes()
-        ).hexdigest(),
-    "trials": combined,
-}
-Path("reports/m1a-contact-calibration.json").write_text(json.dumps(data, indent=2) + "\n")
-Path("reports/m1a-contact-calibration.md").write_text(
-    "# M1A S0 contact telemetry calibration\n\n"
-    f"- Status: `{status}`\n- Reason: {data['reason']}\n"
-    "- Each of the 13 conditions ran in a fresh Gazebo/MoveIt session; no post-contact state is reused.\n"
-    "- No grasp is claimed by this calibration audit.\n"
-)
-PY
+python3 "$ROOT/scripts/aggregate_isolated_contact_calibration.py" "$RUN_ID" "${logs[@]}"

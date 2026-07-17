@@ -14,6 +14,8 @@
   </group>
   <group_state name="home" group="panda_arm">
     <joint name="panda_joint1" value="0.0"/>
+    <!-- Collision-checked neutral tucked posture.  This explicit state is
+         queried without motion by the ADR-0006 pre-S0 gate. -->
     <joint name="panda_joint2" value="-0.5"/>
     <joint name="panda_joint3" value="0.0"/>
     <joint name="panda_joint4" value="-1.5"/>

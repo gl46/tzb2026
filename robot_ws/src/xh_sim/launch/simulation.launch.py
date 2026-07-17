@@ -1,8 +1,13 @@
 """Launch the bounded P0 Harmonic scene and its controller-backed arm."""
 
+import json
+import os
 from pathlib import Path
+import subprocess
+import sys
+import tempfile
 
-from ament_index_python.packages import get_package_share_directory
+from ament_index_python.packages import get_package_prefix, get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, OpaqueFunction, RegisterEventHandler
 from launch.event_handlers import OnProcessExit
@@ -11,22 +16,55 @@ from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 
 
+def _generate_spawn_representation(share: Path, calibration_mode: bool) -> tuple[Path, Path, Path]:
+    """Create ADR-0009's verified SDF before Gazebo can spawn the robot."""
+
+    urdf = share / "urdf" / "panda_controlled.urdf"
+    mode = "calibration" if calibration_mode else "production"
+    artifact_root = os.environ.get("XH_SIM_GENERATED_SDF_DIR")
+    artifact_dir = (
+        Path(artifact_root).resolve()
+        if artifact_root else Path(tempfile.mkdtemp(prefix=f"xh-sim-{mode}-"))
+    )
+    artifact_dir.mkdir(parents=True, exist_ok=True)
+    output_sdf = artifact_dir / "panda_controller.sdf"
+    output_urdf = artifact_dir / "panda_controller.urdf"
+    manifest = artifact_dir / "panda_controller.manifest.json"
+    generator = (
+        Path(get_package_prefix("xh_sim")) / "lib" / "xh_sim" / "generate_panda_spawn_sdf.py"
+    )
+    completed = subprocess.run(
+        [
+            sys.executable, str(generator), "--urdf", str(urdf),
+            "--package-share", str(share), "--mode", mode,
+            "--output-sdf", str(output_sdf), "--output-urdf", str(output_urdf),
+            "--manifest", str(manifest),
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+        timeout=45,
+    )
+    if completed.returncode != 0 or not all(path.is_file() for path in (output_sdf, output_urdf, manifest)):
+        detail = (completed.stderr or completed.stdout).strip()
+        raise RuntimeError(f"ADR-0009 generated SDF is unavailable: {detail}")
+    hashes = json.loads(manifest.read_text(encoding="utf-8"))["hashes"]
+    print(
+        "M1A_SDF_SPAWN_MANIFEST "
+        f"mode={mode} urdf={hashes['source_urdf_sha256']} "
+        f"sdf={hashes['generated_sdf_sha256']} generator={hashes['generator_sha256']} "
+        f"path={manifest}",
+        flush=True,
+    )
+    return output_urdf, output_sdf, manifest
+
+
 def _robot_actions(context, share: Path):
     """Build the controller-backed robot after resolving calibration mode."""
-    urdf = share / "urdf" / "panda_controlled.urdf"
-    robot_xml = urdf.read_text(encoding="utf-8").replace("$(find xh_sim)", str(share))
+
     calibration_mode = LaunchConfiguration("calibration_mode").perform(context).lower() == "true"
-    if calibration_mode:
-        # The M0 detachable joint moves the red cube with the arm even before a
-        # physical finger grasp is established.  S0 validates raw contact
-        # telemetry, so its isolated world excludes only this simulator-only
-        # constraint; every link, joint, limit, collision and controller is
-        # otherwise byte-for-byte from panda_controlled.urdf.
-        start = robot_xml.find('<plugin filename="gz-sim-detachable-joint-system"')
-        end = robot_xml.find("</plugin>", start)
-        if start < 0 or end < 0:
-            raise RuntimeError("S0 calibration requested but detachable-joint plugin was not found")
-        robot_xml = robot_xml[:start] + robot_xml[end + len("</plugin>"):]
+    generated_urdf, generated_sdf, _manifest = _generate_spawn_representation(share, calibration_mode)
+    robot_xml = generated_urdf.read_text(encoding="utf-8")
     robot_description = {"robot_description": robot_xml, "use_sim_time": True}
     robot_state_publisher = Node(
         package="robot_state_publisher",
@@ -39,7 +77,7 @@ def _robot_actions(context, share: Path):
         executable="create",
         output="screen",
         arguments=[
-            "-world", "xh_p0_pick_place", "-topic", "robot_description",
+            "-world", "xh_p0_pick_place", "-file", str(generated_sdf),
             "-name", "panda_controller", "-allow_renaming", "true",
             "-x", "0", "-y", "0", "-z", "0",
         ],
@@ -60,7 +98,12 @@ def _robot_actions(context, share: Path):
         package="controller_manager",
         executable="spawner",
         output="screen",
-        arguments=["panda_hand_controller", "--controller-manager-timeout", "20"],
+        arguments=["panda_hand_physical_controller", "--controller-manager-timeout", "20"],
+    )
+    hand_adapter = Node(
+        package="xh_sim",
+        executable="panda_hand_mimic_adapter.py",
+        output="screen",
     )
     return [
         robot_state_publisher,
@@ -72,6 +115,10 @@ def _robot_actions(context, share: Path):
         RegisterEventHandler(OnProcessExit(
             target_action=joint_state_broadcaster,
             on_exit=[arm_controller, hand_controller],
+        )),
+        RegisterEventHandler(OnProcessExit(
+            target_action=hand_controller,
+            on_exit=[hand_adapter],
         )),
     ]
 
@@ -97,6 +144,11 @@ def generate_launch_description():
         "/world/xh_p0_pick_place/model/object_red_cube_environment/link/link/"
         "sensor/red_cube_environment_contact/contact"
     )
+    cube_bilateral_contact_gz = (
+        "/world/xh_p0_pick_place/model/object_red_cube_bilateral/link/link/"
+        "sensor/red_cube_bilateral_contact/contact"
+    )
+    dynamic_pose_gz = "/world/xh_p0_pick_place/dynamic_pose/info"
     # Camera bridges are intentionally explicit.  A missing transport topic is
     # reported by the smoke test rather than treated as a substitute for RGB-D.
     bridge = Node(
@@ -112,12 +164,16 @@ def generate_launch_description():
             f"{right_contact_gz}@ros_gz_interfaces/msg/Contacts[gz.msgs.Contacts",
             f"{cube_contact_gz}@ros_gz_interfaces/msg/Contacts[gz.msgs.Contacts",
             f"{cube_environment_contact_gz}@ros_gz_interfaces/msg/Contacts[gz.msgs.Contacts",
+            f"{cube_bilateral_contact_gz}@ros_gz_interfaces/msg/Contacts[gz.msgs.Contacts",
+            f"{dynamic_pose_gz}@geometry_msgs/msg/PoseArray[gz.msgs.Pose_V",
         ],
         remappings=[
             (left_contact_gz, "/xh/supervision/panda_leftfinger_contacts"),
             (right_contact_gz, "/xh/supervision/panda_rightfinger_contacts"),
             (cube_contact_gz, "/xh/supervision/red_cube_contacts"),
             (cube_environment_contact_gz, "/xh/supervision/red_cube_environment_contacts"),
+            (cube_bilateral_contact_gz, "/xh/supervision/red_cube_bilateral_contacts"),
+            (dynamic_pose_gz, "/xh/supervision/dynamic_pose"),
         ],
     )
 

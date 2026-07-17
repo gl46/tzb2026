@@ -1,0 +1,7 @@
+{
+  "status": "HAND_ACTUATION_DIAGNOSTIC_BLOCKED",
+  "diagnostic_completed": false,
+  "reason": "NO_STRUCTURED_RUNTIME_EVIDENCE",
+  "run_id": "m1a-20260716-option1-diagnostic-07",
+  "raw_log": "logs/m1a-20260716-option1-diagnostic-07.log"
+}

@@ -31,3 +31,4 @@ models/
 checkpoints/
 hf-cache/
 logs/*.log
+logs/*.json

@@ -1,11 +1,15 @@
 <?xml version="1.0" ?>
 <sdf version="1.9">
   <world name="xh_p0_pick_place">
-    <physics name="default_physics" type="dart">
+    <physics name="default_physics" type="bullet">
       <max_step_size>0.001</max_step_size>
       <real_time_factor>1.0</real_time_factor>
     </physics>
-    <plugin name="gz::sim::systems::Physics" filename="gz-sim-physics-system"/>
+    <!-- ADR-0009 keeps calibration on the same explicit Bullet-Featherstone
+         backend as production, so its follower-joint constraint is identical. -->
+    <plugin name="gz::sim::systems::Physics" filename="gz-sim-physics-system">
+      <engine><filename>gz-physics-bullet-featherstone-plugin</filename></engine>
+    </plugin>
     <plugin name="gz::sim::systems::UserCommands" filename="gz-sim-user-commands-system"/>
     <plugin name="gz::sim::systems::SceneBroadcaster" filename="gz-sim-scene-broadcaster-system"/>
     <plugin name="gz::sim::systems::Contact" filename="gz-sim-contact-system"/>
@@ -54,6 +58,50 @@
         <sensor name="red_cube_contact" type="contact">
           <always_on>1</always_on><update_rate>30</update_rate>
           <topic>/xh/supervision/red_cube_contacts</topic>
+          <contact><collision>collision</collision></contact>
+        </sensor>
+      </link>
+    </model>
+
+    <!-- Bilateral S0 uses a free 5 cm cube.  Unlike the static single-pad
+         target, it can translate under the first pad's push and self-centre
+         between the coupled parallel fingers.  This is calibration-only and
+         has no effect on the production world. -->
+    <!-- Prevent the free bilateral target from being translated out of the
+         grasp corridor by the short +X contact approach.  The backstop leaves
+         the gripper's closing axis (world Y) unconstrained, so the cube still
+         self-centres under unequal finger contact. -->
+    <model name="work_table_bilateral_backstop">
+      <static>true</static>
+      <link name="backstop_link">
+        <pose>0.2025 -0.12 0.755 0 0 0</pose>
+        <collision name="collision"><geometry><box><size>0.01 0.09 0.10</size></box></geometry></collision>
+        <visual name="visual"><geometry><box><size>0.01 0.09 0.10</size></box></geometry><material><diffuse>0.25 0.25 0.25 1</diffuse></material></visual>
+      </link>
+    </model>
+    <!-- This thin physical shelf supplies the normal reaction that
+         Bullet/Harmonic does not provide for link-level gravity=false.  It is
+         deliberately only 5 mm wider than the cube along world Y (the
+         jaw-closing axis).  That avoids a physical finger--shelf collision
+         during the side approach while still allowing the millimetre-scale
+         self-centring displacement this calibration is designed to observe. -->
+    <model name="work_table_bilateral_support">
+      <static>true</static>
+      <link name="support_link">
+        <pose>0.17 -0.12 0.725 0 0 0</pose>
+        <collision name="collision"><geometry><box><size>0.06 0.055 0.01</size></box></geometry></collision>
+        <visual name="visual"><geometry><box><size>0.06 0.055 0.01</size></box></geometry><material><diffuse>0.15 0.15 0.15 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="object_red_cube_bilateral">
+      <pose>0.17 -0.12 0.755 0 0 0</pose>
+      <link name="link">
+        <inertial><mass>0.08</mass></inertial>
+        <collision name="collision"><geometry><box><size>0.05 0.05 0.05</size></box></geometry></collision>
+        <visual name="visual"><geometry><box><size>0.05 0.05 0.05</size></box></geometry><material><diffuse>1 0 0 1</diffuse></material></visual>
+        <sensor name="red_cube_bilateral_contact" type="contact">
+          <always_on>1</always_on><update_rate>30</update_rate>
+          <topic>/xh/supervision/red_cube_bilateral_contacts</topic>
           <contact><collision>collision</collision></contact>
         </sensor>
       </link>

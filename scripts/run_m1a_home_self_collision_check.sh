@@ -82,5 +82,10 @@ Path("reports/m1a-home-self-collision.md").write_text(
     f"- Status: `{status}`\n- {reason}\n"
     f"- Same URDF SHA-256: `{local_sha}` / `{remote_sha}`\n"
     "- Method: MoveIt `check_state_validity`, with no motion command.\n"
+    "- Changed files: no source files; this is runtime evidence for the approved URDF/SRDF.\n"
+    "- Tests: same-URDF hash comparison and `panda_arm` state-validity query at the SRDF home posture.\n"
+    "- Failures: see the immutable run-specific raw log; a non-verified result blocks S0.\n"
+    f"- Blocker: `{'NONE' if status == 'HOME_SELF_COLLISION_VERIFIED' and local_sha == remote_sha else 'HOME_SELF_COLLISION_GATE_NOT_SATISFIED'}`.\n"
+    f"- Next command: `{'scripts/run_isolated_contact_calibration.sh' if status == 'HOME_SELF_COLLISION_VERIFIED' and local_sha == remote_sha else 'fix the reported collision or model mismatch, then rerun this gate'}`.\n"
 )
 PY

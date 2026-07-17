@@ -1,0 +1,8 @@
+{
+  "status": "HAND_ACTUATION_PROBE_BLOCKED",
+  "controls_verified": false,
+  "reason": "NO_STRUCTURED_RUNTIME_EVIDENCE",
+  "run_id": "m1a-20260716-hand-mirror-axis-08",
+  "raw_log": "logs/m1a-20260716-hand-mirror-axis-08.log",
+  "experiment_label": "TEMPORARY_Q1_SIGNED_AXIS_MIRROR_AB"
+}

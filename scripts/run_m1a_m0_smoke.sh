@@ -44,7 +44,7 @@ fi
 echo M1A_M0_LAUNCH_STARTED
 if gz service -l 2>/dev/null | grep -qx '/world/xh_p0_pick_place/scene/info'; then echo M0_WORLD_SERVICE; fi
 controllers="$(timeout -k 1 6 ros2 control list_controllers 2>&1 || true)"
-for controller in joint_state_broadcaster panda_arm_controller panda_hand_controller; do
+for controller in joint_state_broadcaster panda_arm_controller panda_hand_physical_controller; do
   if grep -Eq "^${controller}[[:space:]].*[[:space:]]active$" <<<"$controllers"; then echo "M0_CONTROLLER_ACTIVE:$controller"; fi
 done
 if grep -Eq '^panda_arm_controller[[:space:]].*[[:space:]]active$' <<<"$controllers"; then
@@ -64,7 +64,7 @@ raw = Path(log).read_text(errors="replace")
 world = "M0_WORLD_SERVICE" in raw
 arm = "M0_ARM_ACTION_SUCCEEDED" in raw
 joints = "M0_JOINT_STATES" in raw
-controllers = all(f"M0_CONTROLLER_ACTIVE:{name}" in raw for name in ("joint_state_broadcaster", "panda_arm_controller", "panda_hand_controller"))
+controllers = all(f"M0_CONTROLLER_ACTIVE:{name}" in raw for name in ("joint_state_broadcaster", "panda_arm_controller", "panda_hand_physical_controller"))
 blocked = any(marker in raw for marker in ("M1A_REMOTE_SIM_ALREADY_RUNNING", "M1A_M0_LAUNCH_FAILED"))
 status = "PARTIAL_CONTROL_AND_PERCEPTION_VERIFIED" if world and controllers and arm and joints and not blocked else "BLOCKED_M0_SMOKE"
 data = {"run_id": run_id, "status": status, "world_service": world, "controllers_active": controllers,

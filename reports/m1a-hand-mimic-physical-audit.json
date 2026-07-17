@@ -1,0 +1,20 @@
+{
+  "run_id": "m1a-20260717-bullet-explicit-sdf-master-order",
+  "status": "HAND_MIMIC_PHYSICAL_CONSTRAINT_VERIFIED",
+  "reason": "The full generated-SDF physical-mimic acceptance set was not observed.",
+  "local_gazebo_urdf_sha256": "2a8f3b1edf9cea769a7e5f952f74c29dd4bc18e257bd32d72b43a68b4f864478",
+  "remote_gazebo_urdf_sha256": "2a8f3b1edf9cea769a7e5f952f74c29dd4bc18e257bd32d72b43a68b4f864478",
+  "model_match": true,
+  "master_joint": "panda_finger_joint2",
+  "follower_joint": "panda_finger_joint1",
+  "sdf_mimic_declaration_loaded": true,
+  "sdf_mimic_physical_constraint_declined": false,
+  "hardware_interfaces": {
+    "q1_position_command_exported": false,
+    "q2_position_command_exported": true,
+    "q1_position_state_exported": true,
+    "q2_position_state_exported": true
+  },
+  "joint_states_double_report_verified_by": "m1a-hand-actuation-probe.json q2-master no-contact probe",
+  "raw_log": "logs/m1a-20260717-bullet-explicit-sdf-master-order-hand-mimic-physical-audit.log"
+}

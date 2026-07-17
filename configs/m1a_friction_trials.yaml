@@ -7,3 +7,63 @@ minimum_hold_time_s: 1.0
 object_id: red_cube
 object_side_m: 0.05
 object_mass_kg: 0.08
+
+# Production-table approach recovery.  No URDF, world, mass, friction, solver,
+# controller, sensor, joint protocol, or contact-gate threshold changes here.
+# Historical side-grasp trials remain in the report as prior-SHA evidence.
+# ADR-0007/0008/0009 approve a fresh 3×5 allocation after the repaired
+# actuation SHA passes GATE1–5, S0 and S1.
+orientation_recovery_configuration:
+  id: fingertip_down_orientation_family_after_side_grasp_no_reach
+  object_mass_kg: 0.08
+  changed_parameter_family: grasp_orientation_family_after_approach_alignment_failure
+  finger_friction: world_default
+  object_friction: world_default
+  contact_stiffness_damping: world_default
+  solver_step_s: 0.001
+  gripper_profile_m: [0.04, 0.01]
+  physical_configuration_invariants:
+    urdf_changed: false
+    world_changed: false
+    contact_sensor_changed: false
+    joint_protocol_changed: false
+
+# Every candidate is evaluated through collision-checked MoveIt IK in this
+# order.  Local X is the 12 cm finger-board axis; local Y is the closing axis.
+# The 10 mm tip clearance is above the 0.45 m table top, and MoveIt receives
+# the exact primitive world object with zero object padding (verified at run
+# time before candidate evaluation).
+grasp_orientation_families:
+  frame: panda_hand
+  table_top_z_m: 0.45
+  fingertip_table_clearance_m: 0.010
+  pregrasp_standoff_m: 0.100
+  maximum_planning_scene_table_padding_m: 0.010
+  gripper_frame_corridor_max_transverse_error_m: 0.020
+  candidates:
+    - id: fingertip_down_close_world_y
+      family: fingertip_down
+      finger_horizontal_axis_world: [1.0, 0.0, 0.0]
+      closing_axis_world: [0.0, 1.0, 0.0]
+      finger_down_angle_deg: 90.0
+    - id: fingertip_down_close_world_x
+      family: fingertip_down
+      finger_horizontal_axis_world: [0.0, 1.0, 0.0]
+      closing_axis_world: [1.0, 0.0, 0.0]
+      finger_down_angle_deg: 90.0
+    - id: inclined_60deg_close_world_y
+      family: inclined_side
+      finger_horizontal_axis_world: [1.0, 0.0, 0.0]
+      closing_axis_world: [0.0, 1.0, 0.0]
+      finger_down_angle_deg: 60.0
+    - id: inclined_45deg_close_world_y
+      family: inclined_side
+      finger_horizontal_axis_world: [1.0, 0.0, 0.0]
+      closing_axis_world: [0.0, 1.0, 0.0]
+      finger_down_angle_deg: 45.0
+    - id: pure_side_close_world_y_height_guarded
+      family: pure_side_height_guarded
+      finger_horizontal_axis_world: [1.0, 0.0, 0.0]
+      closing_axis_world: [0.0, 1.0, 0.0]
+      finger_down_angle_deg: 0.0
+      minimum_target_center_above_table_m: 0.065

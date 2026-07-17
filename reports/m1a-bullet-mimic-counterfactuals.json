@@ -1,0 +1,79 @@
+{
+  "status": "M1A_BULLET_SIGN_HYPOTHESIS_RESOLVED_CLEAN",
+  "scope": "ADR-0009 Appendix A historical observations plus the two approved clean GATE2 multiplier probes after the q1 controller-mimic opt-out",
+  "source_urdf_sha256": "2a8f3b1edf9cea769a7e5f952f74c29dd4bc18e257bd32d72b43a68b4f864478",
+  "result": "The historical observations remain invalid for sign inference. The clean +1 GATE2 restored q2-master open/close tracking and link motion; the clean -1 GATE2 locked both fingers at zero. Therefore +1 is the only supported Bullet SDF multiplier, but GATE2 remains blocked by a 1.674 mm no-command hold error.",
+  "counterfactuals": [
+    {
+      "run_id": "m1a-20260717-bullet-opposed-axis-compensation-gate2",
+      "encoding": "q1 SDF mimic multiplier -1; no URDF, controller, geometry, or sensor change",
+      "generator_sha256": "38b7ad7f80b5cd982778cb66f17313ea1fc4356c9a0e9e1e194e9b8b4633da04",
+      "generated_sdf_sha256": "df8c8cd212c5a4723d44ee7edd750992c3ae9a21476ef9c4daa9616cb9f11dd0",
+      "passive_positions_m": [0.0, 4.86e-07],
+      "open_max_position_error_m": 0.040000274,
+      "close_max_position_error_m": 0.010000274,
+      "valid_for_multiplier_sign_inference": false,
+      "result": "CONTAMINATED_OBSERVATION: both directions remained at zero; passive initial-state acceptance missed by 20 mm while the q1 controller-side mimic loop was also active.",
+      "raw_log": "logs/m1a-20260717-bullet-opposed-axis-compensation-gate2.log"
+    },
+    {
+      "run_id": "m1a-20260717-bullet-q2-axis-frame-r1",
+      "encoding": "q2 SDF axis +Y, q2 joint-frame pi roll, inverse q2 child-link roll, q1 SDF mimic multiplier +1",
+      "generator_sha256": "d07e5faba98697231f0bff3019a251249edaea83a85bc68c16e934e42315e16e",
+      "generated_sdf_sha256": "89a438fa4d2f65f9597874a56bf9ac4ff1e8e641c030ad8d51fc8935b3de30c8",
+      "offline_invariants": {
+        "zero_pose_frame_max_error": 0.0,
+        "collision_count": 12,
+        "sensor_count": 2
+      },
+      "passive_positions_m": [0.013295159, 0.013295355],
+      "open_final_positions_m": [0.015891623, 0.015891576],
+      "open_max_position_error_m": 0.024207517,
+      "close_max_position_error_m": 0.000197621,
+      "valid_for_multiplier_sign_inference": false,
+      "result": "CONTAMINATED_OBSERVATION: one-way force-balance signature reproduced while the q1 controller-side mimic loop was also active.",
+      "raw_log": "logs/m1a-20260717-bullet-q2-axis-frame-r1-bullet-capability-audit.log"
+    }
+  ],
+  "production_generator_restored": true,
+  "post_timebox_static_audit": {
+    "status": "M1A_CLEAN_SIGN_CONFIRMED_PASSIVE_HOLD_BLOCKED",
+    "scope": "the q1 ros2_control structural-mimic opt-out is applied; clean multiplier probes preserve geometry, sensors, limits, interfaces, and SDF semantics except for the authorized -1 counterfactual",
+    "installed_gz_ros2_control_package": "1.2.19-1noble.20260615.171757",
+    "upstream_tag": "1.2.19",
+    "upstream_commit": "3632af2998895cd18c03717bd40c7acd547db24d",
+    "audited_gz_system_cpp_sha256": "33cf54384d8893cfcdb523a30d08f4239daffcc06d4884762433fe64e93357ea",
+    "finding": "hardware_interface 4.45.2 derives controller mimic from the structural URDF unless q1 has ros2_control mimic=\"false\". With that opt-out, the clean +1 probe has no q1 controller-mimic log and q2 reaches 0.04 m / 0.01 m with at most 0.272 mm / 0.0011 mm error. The only remaining GATE2 failure is a no-command initial position of 0.0183258 m, 1.6742 mm below the required 0.02 m ±1 mm.",
+    "candidate_repair": "No physical or controller change is selected. Preserve q1 mimic=\"false\" and +1 SDF multiplier; diagnose the independent q2 no-command hold error without relaxing the 1 mm threshold or reintroducing a q1 command path.",
+    "runtime_status": "CLEAN_PLUS_ONE_COMPLETE_GATE2_PASSIVE_HOLD_FAILED",
+    "contaminated_post_removal_run": {
+      "run_id": "m1a-20260717-clean-plus1-r1",
+      "source_urdf_sha256": "2c8eac9e568848b276cf04ac78e0c57c681f379f681736dacb4e1516b5f4a268",
+      "direct_q1_mimic_parameters_present": false,
+      "runtime_log": "The pre-opt-out run still logged q1 as mimicking q2; it is retained only as evidence that direct params alone were insufficient.",
+      "valid_for_multiplier_sign_inference": false,
+      "result": "CONTAMINATED_OBSERVATION: passive state sagged by 6.712 mm; q2 open to 0.04 m stalled at 0.01599 m; close to 0.01 m passed. It is not multiplier-sign evidence."
+    }
+  },
+  "clean_multiplier_probes": {
+    "plus_one": {
+      "run_id": "m1a-20260717-urdf-mimic-optout-plus1-r1",
+      "valid_for_multiplier_sign_inference": true,
+      "q1_controller_mimic_log_present": false,
+      "passive_error_m": 0.0016741552203893666,
+      "open_max_position_error_m": 0.00027199178934097373,
+      "close_max_position_error_m": 0.0000010284036397936042,
+      "result": "SIGN_PLUS_ONE_SUPPORTED_BUT_GATE2_PASSIVE_HOLD_FAILED"
+    },
+    "minus_one": {
+      "run_id": "m1a-20260717-urdf-mimic-optout-minus1-r1-gate2-only",
+      "valid_for_multiplier_sign_inference": true,
+      "q1_controller_mimic_log_present": false,
+      "passive_error_m": 0.020000000000049027,
+      "open_max_position_error_m": 0.040000000000032156,
+      "close_max_position_error_m": 0.010000000002232022,
+      "result": "SIGN_MINUS_ONE_REJECTED_FINGERS_LOCKED_AT_ZERO"
+    }
+  },
+  "next_command": "Diagnose the 1.674 mm no-command q2 hold error without restoring q1 controller mimic or relaxing the 1 mm threshold; then rerun clean +1 GATE2 before GATE3–5."
+}

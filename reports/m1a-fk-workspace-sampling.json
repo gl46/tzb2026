@@ -540,7 +540,7 @@
   "schema_version": "m1a-fk-workspace-sampling-v1",
   "status": "APPROVED_MODEL_OFFLINE_FK_EVIDENCE_PENDING_HOME_SELF_COLLISION_GATE",
   "urdf": "robot_ws/src/xh_sim/urdf/panda_controlled.urdf",
-  "urdf_sha256": "8c68b8dbfbc878d6af7924e2eab0d288c56d5ae126a6f93e4922d5b1638533cd",
+  "urdf_sha256": "2f77f5150f4e4a5a098ab59a56f98216622cfdfd54a0c79dedbe44e19352eff1",
   "pre_approval_urdf_sha256": "e017d82f218578603078fd5da73cdba88ed47fef2f5ed57cf9f01f5c666fb096",
   "approval_record": {
     "approved_candidate": "OFFICIAL_PANDA_ORIGINS_WITH_FIXED_LINK8",

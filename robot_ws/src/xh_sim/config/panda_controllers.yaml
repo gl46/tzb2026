@@ -7,7 +7,7 @@ controller_manager:
       type: joint_state_broadcaster/JointStateBroadcaster
     panda_arm_controller:
       type: joint_trajectory_controller/JointTrajectoryController
-    panda_hand_controller:
+    panda_hand_physical_controller:
       type: joint_trajectory_controller/JointTrajectoryController
 
 panda_arm_controller:
@@ -27,10 +27,13 @@ panda_arm_controller:
       - velocity
     allow_nonzero_velocity_at_trajectory_end: true
 
-panda_hand_controller:
+panda_hand_physical_controller:
   ros__parameters:
+    # Preserve q2's hardware-initialized 0.02 m command when this controller
+    # activates.  Reading the already-settled state instead would silently
+    # redefine the no-command GATE2 reference below the configured open pose.
+    set_last_command_interface_value_as_state_on_activation: true
     joints:
-      - panda_finger_joint1
       - panda_finger_joint2
     command_interfaces:
       - position

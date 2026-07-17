@@ -14,6 +14,48 @@ CALIBRATION_LABEL="${M1A_CALIBRATION_LABEL:-}"
 mkdir -p logs reports
 raw_log="logs/${RUN_ID}-s0-contact-calibration.log"
 local_sha="$(shasum -a 256 robot_ws/src/xh_sim/urdf/panda_controlled.urdf | awk '{print $1}')"
+local_generator_sha="$(shasum -a 256 robot_ws/src/xh_sim/scripts/generate_panda_spawn_sdf.py | awk '{print $1}')"
+
+# ADR-0009's current five-gate audit contains the action-level physical-mimic
+# proof (GATE2).  The former DART-era static log check is historical evidence,
+# not a second authority: it cannot observe the now-required q1
+# ``mimic=\"false\"`` ros2_control opt-out.
+if ! python3 - "$RUN_ID" "$local_sha" "$local_generator_sha" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+run_id, local_sha, local_generator_sha = sys.argv[1:]
+bullet_path = Path("reports/m1a-bullet-capability-audit.json")
+bullet = json.loads(bullet_path.read_text()) if bullet_path.exists() else {}
+valid = (
+    bullet.get("status") == "M1A_BULLET_CAPABILITY_VERIFIED"
+    and bullet.get("local_gazebo_urdf_sha256") == local_sha
+    and bullet.get("generated_manifest", {}).get("hashes", {}).get("generator_sha256") == local_generator_sha
+    and bullet.get("gates", {}).get("physical_mimic") is True
+    and bullet.get("hand_probe", {}).get("controls_verified") is True
+)
+if not valid:
+    payload = {
+        "run_id": run_id,
+        "status": "CONTACT_TELEMETRY_BLOCKED_BULLET_CAPABILITY_AUDIT",
+        "reason": "ADR-0009 requires the current five-gate Bullet capability audit before S0.",
+        "physical_mimic_gate": bullet.get("hand_probe", {}),
+        "bullet_capability_audit": bullet,
+        "local_generator_sha256": local_generator_sha,
+        "trials": [],
+    }
+    Path("reports/m1a-contact-calibration.json").write_text(json.dumps(payload, indent=2) + "\n")
+    Path("reports/m1a-contact-calibration.md").write_text(
+        "# M1A S0 contact telemetry calibration\n\n"
+        "- Status: `CONTACT_TELEMETRY_BLOCKED_BULLET_CAPABILITY_AUDIT`\n"
+        "- Run the current five-gate Bullet capability audit and resolve its result before S0.\n"
+    )
+raise SystemExit(0 if valid else 1)
+PY
+then
+  exit 2
+fi
 
 # ADR-0006 requires a same-URDF, MoveIt-checked home state before any new S0
 # session can consume simulation time. A historical S0 cannot satisfy this.
@@ -66,33 +108,59 @@ if gz service -l 2>/dev/null | grep -qx '/world/xh_p0_pick_place/scene/info'; th
   exit 0
 fi
 tmp=$(mktemp -d)
-launch_log="$tmp/launch.log"
 calibration_world="/home/$USER/$root/robot_ws/install/xh_sim/share/xh_sim/worlds/m1a_contact_calibration.sdf"
-setsid ros2 launch xh_sim moveit_execution.launch.py world_file:="$calibration_world" calibration_mode:=true >"$launch_log" 2>&1 & pid=$!
-cleanup() {
-  kill -TERM -- "-$pid" 2>/dev/null || true
-  sleep 1
-  kill -KILL -- "-$pid" 2>/dev/null || true
-  wait "$pid" 2>/dev/null || true
-  rm -f "$launch_log"
-  rmdir "$tmp" 2>/dev/null || true
+pid=""; launch_pgid=""; launch_log=""
+stop_session() {
+  if [ -n "$launch_pgid" ]; then
+    kill -TERM -- "-$launch_pgid" 2>/dev/null || true
+    sleep 1
+    kill -KILL -- "-$launch_pgid" 2>/dev/null || true
+  fi
+  [ -z "$pid" ] || wait "$pid" 2>/dev/null || true
+  pid=""; launch_pgid=""
 }
-trap cleanup EXIT INT TERM
-sleep 15
+cleanup() { stop_session; rm -rf "$tmp"; }
+trap cleanup EXIT HUP INT TERM
+start_session() {
+  local session_label="$1"
+  launch_log="$tmp/${session_label}.launch.log"
+  setsid ros2 launch xh_sim moveit_execution.launch.py world_file:="$calibration_world" calibration_mode:=true >"$launch_log" 2>&1 & pid=$!
+  launch_pgid="$(ps -o pgid= -p "$pid" | tr -d ' ')"
+  sleep 15
+  echo "M1A_S0_LAUNCH_LABEL:$session_label"
+  echo "M1A_S0_LAUNCH_PGID:$launch_pgid"
+  if ! kill -0 "$pid" 2>/dev/null; then
+    echo "M1A_S0_LAUNCH_FAILED:$session_label"
+    sed -n '1,220p' "$launch_log"
+    return 1
+  fi
+  return 0
+}
+run_isolated_label() {
+  local trial_label="$1" output runtime
+  if ! start_session "$trial_label"; then
+    printf 'M1A_S0_TRIAL:%s:{"status":"CONTACT_TELEMETRY_BLOCKED","trials":[]}\n' "$trial_label"
+    stop_session
+    return
+  fi
+  output="$(M1A_CALIBRATION_SCOPE=one M1A_CALIBRATION_LABEL="$trial_label" python3 "/home/$USER/$root/scripts/m1a_contact_calibration_client.py" 2>&1 || true)"
+  runtime="$(printf '%s\n' "$output" | tail -n 1)"
+  printf 'M1A_S0_TRIAL:%s:%s\n' "$trial_label" "$runtime"
+  stop_session
+}
 printf 'REMOTE_GAZEBO_URDF_SHA256:'
 sha256sum "/home/$USER/$root/robot_ws/src/xh_sim/urdf/panda_controlled.urdf" | awk '{print $1}'
-if ! kill -0 "$pid" 2>/dev/null; then
-  echo M1A_S0_LAUNCH_FAILED
-  sed -n '1,220p' "$launch_log"
-  exit 0
+if [ "$scope" = full ]; then
+  # A label is a calibration experiment.  It must not inherit the preceding
+  # label's arm pose, contact force, cube state, or topic history.
+  for trial_label in left_1 left_2 left_3 right_1 right_2 right_3 bilateral_1 bilateral_2 bilateral_3 object_environment_1 object_environment_2 table_1 table_2; do
+    run_isolated_label "$trial_label"
+  done
+else
+  start_session "${scope}_${label:-$repetition}" || exit 0
+  M1A_CALIBRATION_SCOPE="$scope" M1A_CALIBRATION_REPETITION="$repetition" M1A_CALIBRATION_LABEL="$label" \
+    python3 "/home/$USER/$root/scripts/m1a_contact_calibration_client.py"
 fi
-echo M1A_S0_LAUNCH_STARTED
-gz topic -l 2>/dev/null | grep -E 'left_finger_contact|right_finger_contact|red_cube_contact' | sed 's/^/CONTACT_GZ_TOPIC:/' || true
-ros2 topic list | grep -E '/xh/supervision/(panda_(left|right)finger_contacts|red_cube_contacts)' | sed 's/^/CONTACT_ROS_TOPIC:/' || true
-M1A_CALIBRATION_SCOPE="$scope" M1A_CALIBRATION_REPETITION="$repetition" M1A_CALIBRATION_LABEL="$label" \
-  python3 "/home/$USER/$root/scripts/m1a_contact_calibration_client.py"
-echo M1A_S0_LAUNCH_TAIL
-tail -n 220 "$launch_log"
 REMOTE
 
 python3 - "$RUN_ID" "$raw_log" "$local_sha" <<'PY'
@@ -104,11 +172,35 @@ run_id, log, local_sha = sys.argv[1:]
 raw = Path(log).read_text(errors="replace")
 remote_sha = next((line.split(":", 1)[1] for line in raw.splitlines()
                    if line.startswith("REMOTE_GAZEBO_URDF_SHA256:")), None)
+isolated = []
+for line in raw.splitlines():
+    if not line.startswith("M1A_S0_TRIAL:"):
+        continue
+    _, trial_label, payload = line.split(":", 2)
+    try:
+        evidence = json.loads(payload)
+    except json.JSONDecodeError:
+        continue
+    trial = next((item for item in evidence.get("trials", []) if item.get("label") == trial_label), None)
+    if trial is not None:
+        trial["isolation"] = {"fresh_simulation_session": True, "label": trial_label}
+        isolated.append(trial)
 runtime = next(
     (json.loads(line) for line in raw.splitlines() if line.startswith("{") and '"trials"' in line),
     None,
 )
-if runtime is None:
+if isolated:
+    status = "CONTACT_TELEMETRY_CALIBRATED" if len(isolated) == 13 and all(
+        item.get("passed") is True for item in isolated
+    ) else "CONTACT_TELEMETRY_PARTIAL"
+    reason = f"{sum(item.get('passed') is True for item in isolated)}/13 independently reset approved conditions passed."
+    data = {
+        "run_id": run_id, "status": status, "reason": reason, "trials": isolated,
+        "oracle_pose_source": "gz model runtime query before every isolated label",
+        "calibration_initialization": "CALIBRATION_ONLY_INITIALIZATION_PER_LABEL",
+        "target_policy": "STATIC_SINGLE_PAD_AND_FREE_DYNAMIC_BILATERAL",
+    }
+elif runtime is None:
     status = "CONTACT_TELEMETRY_BLOCKED"
     if "M1A_REMOTE_SIM_ALREADY_RUNNING" in raw:
         reason = "A pre-existing simulation was running; the bounded calibration did not attach to it."
@@ -125,7 +217,9 @@ data.update(
         "minimum_contact_rate_hz": 20.0,
         "required_overlap_s": 0.1,
         "required_consecutive_samples": 3,
-        "calibration_trials_completed": max(0, len(data.get("trials", [])) - 1),
+        "calibration_trials_completed": (
+            len(data.get("trials", [])) if isolated else max(0, len(data.get("trials", [])) - 1)
+        ),
         "use_sim_time": True,
         "listener_scope": "PER_TRIAL_FULL_ACTION_WINDOW",
         "local_gazebo_urdf_sha256": local_sha,
@@ -140,6 +234,7 @@ Path("reports/m1a-contact-calibration.md").write_text(
     f"- Runtime oracle pose source: `{data.get('oracle_pose_source')}`\n"
     f"- Completed condition trials: `{data['calibration_trials_completed']}/13`\n"
     "- Every motion trial records cube pose, MoveIt/IK result, finger action, pad FK, minimum AABB separation, and raw contact pairs.\n"
+    "- Full S0 runs reset Gazebo and the calibration target before every labelled condition.\n"
     "- No grasp is claimed by this calibration audit.\n"
 )
 PY
