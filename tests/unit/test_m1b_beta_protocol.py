@@ -50,14 +50,18 @@ def test_recovery_changes_parameters_and_has_bounded_retry(failure_type: str) ->
 
 
 def test_m1b_broker_selects_only_same_entity_and_hides_it_from_public_feedback() -> None:
-    feedback, internal = M1BContactBroker().select(left_entities={"cylinder_02"}, right_entities={"cylinder_02", "cylinder_03"})
+    broker = M1BContactBroker()
+    feedback, internal = broker.select(left_entities={"cylinder_02"}, right_entities={"cylinder_02", "cylinder_03"}, bilateral_overlap_s=0.100, consecutive_samples=3)
     assert feedback.grasp_success is True
     assert feedback.reobservation_required is True
     assert not hasattr(feedback, "actual_sim_entity_id")
     assert internal["attach_topic"] == "/xh/m1b/cylinder_02/attach"
-    rejected, internal_rejected = M1BContactBroker().select(left_entities={"cylinder_01"}, right_entities={"cylinder_02"})
+    rejected, internal_rejected = broker.select(left_entities={"cylinder_01"}, right_entities={"cylinder_02"}, bilateral_overlap_s=0.100, consecutive_samples=3)
     assert rejected.grasp_success is False
     assert internal_rejected["actual_sim_entity_id"] is None
+    early, _ = broker.select(left_entities={"cylinder_02"}, right_entities={"cylinder_02"}, bilateral_overlap_s=0.099, consecutive_samples=3)
+    assert early.tactile_state == "bilateral_contact_window_incomplete"
+    assert broker.cylinder_entities([("panda_leftfinger::collision", "cylinder_02::link::collision")]) == {"cylinder_02"}
 
 
 def test_m1b_width_window_is_perception_derived_and_clamped() -> None:

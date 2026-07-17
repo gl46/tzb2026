@@ -3,6 +3,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import re
+
+
+_CYLINDER = re.compile(r"(?:^|[^a-z0-9_])(cylinder_[0-9]{2})(?:$|[^a-z0-9_])")
 
 
 @dataclass(frozen=True)
@@ -23,7 +27,31 @@ def width_window_from_perceived_diameter(diameter_m: float) -> tuple[float, floa
 class M1BContactBroker:
     """Entity names are retained only in the returned actuator-internal record."""
 
-    def select(self, *, left_entities: set[str], right_entities: set[str]) -> tuple[M1BGraspFeedbackV1, dict[str, str | bool | None]]:
+    @staticmethod
+    def cylinder_entities(collision_pairs: list[tuple[str, str]]) -> set[str]:
+        """Extract only industrial-cylinder names from raw actuator contacts."""
+        entities: set[str] = set()
+        for first, second in collision_pairs:
+            for text in (first, second):
+                match = _CYLINDER.search(text)
+                if match:
+                    entities.add(match.group(1))
+        return entities
+
+    def select(
+        self,
+        *,
+        left_entities: set[str],
+        right_entities: set[str],
+        bilateral_overlap_s: float,
+        consecutive_samples: int,
+    ) -> tuple[M1BGraspFeedbackV1, dict[str, str | bool | None]]:
+        if bilateral_overlap_s < 0.100 or consecutive_samples < 3:
+            return M1BGraspFeedbackV1(False, "bilateral_contact_window_incomplete", True), {
+                "actual_sim_entity_id": None,
+                "attach_topic": None,
+                "same_entity_contact": False,
+            }
         common = sorted(left_entities & right_entities)
         if len(common) != 1 or not common[0].startswith("cylinder_"):
             return M1BGraspFeedbackV1(False, "no_same_entity_bilateral_contact", True), {

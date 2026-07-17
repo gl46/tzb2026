@@ -66,6 +66,7 @@ def _robot_actions(context, share: Path):
     calibration_mode = LaunchConfiguration("calibration_mode").perform(context).lower() == "true"
     scene_supervision = LaunchConfiguration("m1b_scene_supervision").perform(context)
     world_name = LaunchConfiguration("world_name")
+    world_name_value = world_name.perform(context)
     generated_urdf, generated_sdf, _manifest = _generate_spawn_representation(share, calibration_mode, scene_supervision)
     robot_xml = generated_urdf.read_text(encoding="utf-8")
     robot_description = {"robot_description": robot_xml, "use_sim_time": True}
@@ -152,6 +153,28 @@ def _robot_actions(context, share: Path):
             package="tf2_ros", executable="static_transform_publisher", output="screen",
             arguments=["--roll", str(-1.5707963267948966), "--pitch", "0", "--yaw", str(-1.5707963267948966), "--frame-id", calibration["camera_link_frame"], "--child-frame-id", calibration["camera_optical_frame"]],
         )))
+        # Raw finger contacts remain actuation-internal.  The broker alone
+        # parses their simulator collision names; task/perception interfaces
+        # never subscribe to these topics.
+        left_contact = (
+            f"/world/{world_name_value}/model/panda_controller/link/panda_leftfinger/"
+            "sensor/left_finger_contact/contact"
+        )
+        right_contact = (
+            f"/world/{world_name_value}/model/panda_controller/link/panda_rightfinger/"
+            "sensor/right_finger_contact/contact"
+        )
+        actions.append(Node(
+            package="ros_gz_bridge", executable="parameter_bridge", output="screen",
+            arguments=[
+                f"{left_contact}@ros_gz_interfaces/msg/Contacts[gz.msgs.Contacts",
+                f"{right_contact}@ros_gz_interfaces/msg/Contacts[gz.msgs.Contacts",
+            ],
+            remappings=[
+                (left_contact, "/xh/actuation_internal/m1b/panda_leftfinger_contacts"),
+                (right_contact, "/xh/actuation_internal/m1b/panda_rightfinger_contacts"),
+            ],
+        ))
     return actions
 
 
