@@ -106,3 +106,9 @@ def test_m1b_reset_requires_every_generated_detachable_state() -> None:
     status, reasons = validate_reset_records(missing, ["cylinder_01", "cylinder_02"])
     assert status == "INVALID_RESET"
     assert reasons == ("DETACH_STATE_UNOBSERVED:cylinder_02",)
+
+
+def test_m1b_moveit_server_does_not_start_a_second_simulation() -> None:
+    source = (Path(__file__).parents[2] / "robot_ws/src/xh_sim/launch/m1b_moveit_server.launch.py").read_text()
+    assert "simulation.launch.py" not in source.replace("``simulation.launch.py``", "")
+    assert "moveit_ros_move_group" in source
