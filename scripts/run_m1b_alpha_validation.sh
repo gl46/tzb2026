@@ -7,6 +7,6 @@ python_bin=".venv/bin/python"
 "$python_bin" scripts/generate_perception_dataset.py --count 200
 "$python_bin" scripts/evaluate_perception.py --manifest data/manifests/m1b-alpha-dataset-v1.json
 "$python_bin" -m compileall -q src scripts
-"$python_bin" -m ruff check src tests scripts
+"$python_bin" -m ruff check src tests $(find scripts -type f -name '*.py' -print)
 for file in scripts/run_industrial_scene_v1.sh scripts/record_m1b_alpha_episode.sh scripts/run_m1b_alpha_validation.sh; do bash -n "$file"; done
 git diff --check

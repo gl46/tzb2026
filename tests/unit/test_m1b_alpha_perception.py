@@ -128,3 +128,7 @@ def test_captured_manifest_excludes_incomplete_frames(tmp_path: Path) -> None:
 
 def test_open_vocab_cli_has_a_dependency_free_help_path() -> None:
     subprocess.run([sys.executable, "scripts/run_open_vocab.py", "--help"], check=True, stdout=subprocess.DEVNULL)
+
+
+def test_geometric_evaluator_cli_has_a_help_path() -> None:
+    subprocess.run([sys.executable, "scripts/evaluate_captured_geometric.py", "--help"], check=True, stdout=subprocess.DEVNULL)

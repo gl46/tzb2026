@@ -16,16 +16,19 @@
 - A synchronized RGB/depth/camera-info/TF/joint snapshot and rosbag were
   recorded at `/home/gl/xh-202607-world-agent-codex-m1b/data/episodes/m1b-alpha-sync-tight-20260717/`
   with a maximum stream skew of 53 ms.
-- The live RGB-D geometric baseline produced four public tracks from the v2
-  snapshot. It is not yet an accuracy claim or a held-out result.
-- Local regression: `59 passed`; focused remote Alpha tests: `6 passed`.
+- 200 independent RGB/depth/camera scenes were captured (140/30/30
+  train/val/test); all held-out seeds were actually run in Gazebo.
+- Held-out geometric evaluation returned a nonempty output for 30/30 scenes,
+  but median absolute count error was 6.5. It is not an accuracy pass.
+- Local regression: `66 passed`; focused remote Alpha tests and full remote
+  regression passed after deployment.
 
 ## What is deliberately not claimed
 
-There is no 150+ actual RGB-D dataset, 30-scene held-out evaluation,
-open-vocabulary checkpoint, fine-tune, metrics or fused perception result. The
-manifest's 200 records validate seed splitting only. Therefore the Beta gate is
-closed and no M1B-beta code/execution has started.
+There is no open-vocabulary checkpoint, fine-tune, correspondence-based pose
+metric or fused perception result. The geometric baseline substantially
+under-detects objects, so the Beta gate is closed and no M1B-beta
+code/execution has started.
 
 ## Oracle boundary
 
