@@ -13,17 +13,19 @@
   RGB-D image/depth/camera-info/points topics. A controller-backed Panda was
   successfully created and the joint, arm and hand controllers activated in
   `logs/m1b-alpha-industrial-panda-20260717-192700.log`.
-- A real 26-frame RGB sequence and H.264 MP4 exist at
-  `/home/gl/xh-202607-world-agent-codex-m1b/data/episodes/m1b-alpha-fixed-20260717/`.
+- A synchronized RGB/depth/camera-info/TF/joint snapshot and rosbag were
+  recorded at `/home/gl/xh-202607-world-agent-codex-m1b/data/episodes/m1b-alpha-sync-tight-20260717/`
+  with a maximum stream skew of 53 ms.
+- The live RGB-D geometric baseline produced four public tracks from the v2
+  snapshot. It is not yet an accuracy claim or a held-out result.
 - Local regression: `59 passed`; focused remote Alpha tests: `6 passed`.
 
 ## What is deliberately not claimed
 
-There is no 150+ actual RGB-D dataset, 30-scene held-out evaluation, fully
-synchronized ROS bag, open-vocabulary checkpoint, fine-tune, metrics or fused
-live perception result. The manifest's 200 records validate seed splitting
-only. Therefore the Beta gate is closed and no M1B-beta code/execution has
-started.
+There is no 150+ actual RGB-D dataset, 30-scene held-out evaluation,
+open-vocabulary checkpoint, fine-tune, metrics or fused perception result. The
+manifest's 200 records validate seed splitting only. Therefore the Beta gate is
+closed and no M1B-beta code/execution has started.
 
 ## Oracle boundary
 

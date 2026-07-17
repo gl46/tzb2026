@@ -6,8 +6,10 @@
   "baseline_commit": "0709cc19b66e52e8043eb26babb9a6f3e8ca9a72",
   "actual_head_at_start": "0709cc19b66e52e8043eb26babb9a6f3e8ca9a72",
   "scene_runtime_verified": true,
-  "recording_verified": false,
-  "rgb_recording_evidence": "/home/gl/xh-202607-world-agent-codex-m1b/data/episodes/m1b-alpha-fixed-20260717/industrial_fixed.mp4",
+  "recording_verified": true,
+  "recording_evidence": "/home/gl/xh-202607-world-agent-codex-m1b/data/episodes/m1b-alpha-sync-tight-20260717/ (rosbag + 53 ms RGB/depth/camera/TF/joint snapshot)",
+  "live_geometric_perception_verified": true,
+  "live_geometric_track_count": 4,
   "dataset_samples": 0,
   "dataset_manifest_fixture_samples": 200,
   "heldout_scenes": 0,
@@ -23,9 +25,9 @@
     "repository-wide ruff currently reports three pre-existing violations in M1A scripts outside this Goal"
   ],
   "limitations": [
-    "Industrial scene currently contains three seed-fixed parts; full 6-12 part randomized generator is not implemented.",
-    "RGB image sequence and MP4 were captured from live Gazebo, but synchronized depth/camera-info/TF/joint rosbag is not yet captured.",
-    "No actual Gazebo dataset, held-out metric evaluation, open-vocabulary weight download, or fine-tune was run.",
+    "Industrial scene currently contains six seed-fixed parts; full 6-12 part randomized generator is not implemented.",
+    "A synchronized RGB/depth/camera-info/TF/joint rosbag and snapshot were captured, but not across a dataset batch.",
+    "No actual Gazebo dataset batch, held-out metric evaluation, open-vocabulary weight download, or fine-tune was run.",
     "M1B-beta is prohibited until the Alpha minimum gate is met."
   ],
   "teacher_state": "Nano CANDIDATE; BWM CANDIDATE_LICENSE_PENDING; Super PARKED",
