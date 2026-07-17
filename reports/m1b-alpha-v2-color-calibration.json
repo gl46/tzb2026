@@ -1,0 +1,35 @@
+{
+  "backend": "color_prototype_adapter_v1",
+  "mode": "train_split_threshold_calibration",
+  "dataset": "data/manifests/m1b-alpha-captured-v2.json",
+  "executed": true,
+  "selected_color_similarity": 0.95,
+  "train_metrics_by_candidate": {
+    "0.93": {
+      "scenes": 114,
+      "median_absolute_track_count_error": 1.0,
+      "mean_absolute_track_count_error": 1.4649122807017543,
+      "valid_output_rate": 1.0
+    },
+    "0.95": {
+      "scenes": 114,
+      "median_absolute_track_count_error": 0.0,
+      "mean_absolute_track_count_error": 0.22807017543859648,
+      "valid_output_rate": 1.0
+    },
+    "0.97": {
+      "scenes": 114,
+      "median_absolute_track_count_error": 6.0,
+      "mean_absolute_track_count_error": 5.140350877192983,
+      "valid_output_rate": 1.0
+    }
+  },
+  "validation_metrics": {
+    "scenes": 21,
+    "median_absolute_track_count_error": 0.0,
+    "mean_absolute_track_count_error": 0.09523809523809523,
+    "valid_output_rate": 1.0
+  },
+  "online_contract": "RGB-D observation only; supervision used only during calibration",
+  "status": "CALIBRATED"
+}

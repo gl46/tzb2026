@@ -15,11 +15,32 @@ from .pose_state import orientation_state
 from .tracker import track_id_from_geometry
 
 
+COLOR_PROTOTYPES = np.asarray([
+    (0.8, 0.1, 0.1),  # red
+    (0.1, 0.7, 0.2),  # green
+    (0.1, 0.2, 0.8),  # blue
+    (0.8, 0.6, 0.1),  # yellow
+    (0.7, 0.1, 0.7),  # magenta
+    (0.1, 0.7, 0.7),  # cyan
+], dtype=float)
+COLOR_NAMES = ("red", "green", "blue", "yellow", "magenta", "cyan")
+
+
 class GeometricRGBDBaseline:
-    def __init__(self, *, table_depth_m: float = 1.0, min_component_pixels: int = 12, max_component_pixels: int = 2000) -> None:
+    def __init__(
+        self,
+        *,
+        table_depth_m: float = 1.0,
+        min_component_pixels: int = 12,
+        max_component_pixels: int = 2500,
+        color_similarity: float = 0.95,
+    ) -> None:
         self.table_depth_m = table_depth_m
         self.min_component_pixels = min_component_pixels
         self.max_component_pixels = max_component_pixels
+        if not 0 < color_similarity <= 1:
+            raise ValueError("color_similarity must be in (0, 1]")
+        self.color_similarity = color_similarity
 
     def infer(self, observation: PerceptionInputV1, depth_m: np.ndarray, rgb: np.ndarray | None = None) -> list[PerceptionResultV1]:
         if depth_m.ndim != 2 or not np.isfinite(depth_m).any():
@@ -31,19 +52,18 @@ class GeometricRGBDBaseline:
         table = self._table_plane(depth_m, valid)
         depth_m = np.where(valid, depth_m, table)
         foreground = valid & (depth_m < table - 0.012)
+        components: list[tuple[list[tuple[int, int]], str | None]]
         if rgb is not None:
             if rgb.shape != (*depth_m.shape, 3):
                 raise ValueError("RGB must align with the depth image as HxWx3")
-            rgb_int = rgb.astype(np.int16)
-            maximum, minimum = rgb_int.max(axis=2), rgb_int.min(axis=2)
-            blue_dominant = (rgb_int[:, :, 2] > rgb_int[:, :, 0] + 25) & (rgb_int[:, :, 2] > rgb_int[:, :, 1] + 25)
-            foreground = valid & (maximum - minimum >= 70) & (maximum >= 90) & ~blue_dominant
-        components = self._components(foreground)
+            components = self._color_components(foreground, rgb)
+        else:
+            components = [(pixels, None) for pixels in self._components(foreground)]
         fx, fy, cx, cy = observation.camera_intrinsics[0], observation.camera_intrinsics[4], observation.camera_intrinsics[2], observation.camera_intrinsics[5]
         if fx <= 0 or fy <= 0:
             raise ValueError("camera focal lengths must be positive")
         results: list[PerceptionResultV1] = []
-        for pixels in components:
+        for pixels, color_name in components:
             if not self.min_component_pixels <= len(pixels) <= self.max_component_pixels:
                 continue
             rows = np.fromiter((pixel[0] for pixel in pixels), dtype=int)
@@ -53,19 +73,42 @@ class GeometricRGBDBaseline:
             position = [(u - cx) * z / fx, (v - cy) * z / fy, z]
             bbox = BBoxV1(x=int(cols.min()), y=int(rows.min()), width=int(cols.max() - cols.min() + 1), height=int(rows.max() - rows.min() + 1))
             lateral = max(bbox.width / fx * z, bbox.height / fy * z)
-            height = max(0.005, self.table_depth_m - z)
+            # The table is sloped in image coordinates.  The fitted local table
+            # depth is an observation-derived height reference, unlike the
+            # previous fixed-depth proxy.
+            height = max(0.005, float(np.median(table[rows, cols] - depth_m[rows, cols])))
             state = orientation_state(height, lateral)
             confidence = min(0.99, len(pixels) / float(self.min_component_pixels * 4))
             results.append(PerceptionResultV1(
                 frame_id=observation.frame_id, timestamp_ns=observation.timestamp_ns,
                 track_id=track_id_from_geometry(position, "industrial_cylinder"), category="industrial_cylinder",
-                attributes={"orientation": state}, bbox_or_mask=bbox, position_3d=position,
+                attributes={"orientation": state, **({"visual_color": color_name} if color_name else {})}, bbox_or_mask=bbox, position_3d=position,
                 orientation_state=state, confidence=confidence,
                 covariance_or_quality={"component_pixels": float(len(pixels)), "depth_median_m": z},
                 visibility=min(1.0, len(pixels) / 100.0), relations=[],
-                source_components=["geometric_rgbd_v1"],
+                source_components=["geometric_rgbd_v1", *( ["color_prototype_v1"] if color_name else [])],
             ))
         return sorted(results, key=lambda item: item.position_3d[0])
+
+    def _color_components(self, foreground: np.ndarray, rgb: np.ndarray) -> list[tuple[list[tuple[int, int]], str]]:
+        """Segment each configured visual prototype independently.
+
+        This is a compact, train-calibratable semantic head.  Separating color
+        hypotheses before connected-components prevents adjacent differently
+        coloured cylinders from becoming one detection.  It consumes RGB-D only;
+        simulator labels never enter this method.
+        """
+        rgb_float = rgb.astype(float)
+        norm = np.linalg.norm(rgb_float, axis=2)
+        unit = np.divide(rgb_float, norm[:, :, None], out=np.zeros_like(rgb_float), where=norm[:, :, None] > 1e-9)
+        prototypes = COLOR_PROTOTYPES / np.linalg.norm(COLOR_PROTOTYPES, axis=1)[:, None]
+        similarity = unit @ prototypes.T
+        assigned = similarity.argmax(axis=2)
+        components: list[tuple[list[tuple[int, int]], str]] = []
+        for index, name in enumerate(COLOR_NAMES):
+            mask = foreground & (assigned == index) & (similarity[:, :, index] >= self.color_similarity)
+            components.extend((pixels, name) for pixels in self._components(mask))
+        return components
 
     @staticmethod
     def _table_plane(depth_m: np.ndarray, valid: np.ndarray) -> np.ndarray:

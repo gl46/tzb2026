@@ -1,21 +1,25 @@
-# M1B-alpha perception status
+# M1B-alpha non-Oracle perception evidence
 
-`GeometricRGBDBaseline` performed a unit-tested finite-depth segmentation,
-metric back-projection, orientation-state rule and public track generation.
-It was then run against a live Gazebo snapshot at
-`/home/gl/xh-202607-world-agent-codex-m1b/data/episodes/m1b-alpha-sync-v2-20260717/`.
-The RGB-D geometric path returned four public tracks with no simulator entity
-identifier in `perception-rgbd.json`.
+The online RGB-D pipeline runs `GeometricRGBDBaseline` with independent RGB
+colour-prototype masks. It accepts only `PerceptionInputV1` RGB, depth and
+camera intrinsics, returns public hashed track IDs, category, 3D camera-frame
+position, orientation state, confidence and relations, and neither imports nor
+reads simulator supervision.
 
-The held-out evaluator then ran this same online pipeline on 30 real test
-scenes. It produced at least one output in all cases, but median absolute
-track-count error was 6.5 and every emitted orientation was `tilted`. This is
-not a passing perception result and target/position/orientation correspondence
-metrics are deliberately `null` pending validated camera/extrinsic truth
-association.
+On 200 real V2 Gazebo captures, train-only calibration selected RGB cosine
+similarity 0.95. On the independent 30-scene held-out split, the calibrated
+pipeline achieved 96.7% valid output, zero median count error, 91.5% matched
+track recall, 96.7% public-calibration leftmost target selection, and 2.17 cm
+median 3D position error. The offline evaluator loads static camera calibration
+and label files only after inference for association.
 
-The optional Grounding DINO adapter is deliberately fail-closed. An isolated
-PyTorch CUDA dependency attempt stalled while downloading `nvidia-cudnn-cu12`
-and was terminated before any model weight or GPU inference; no revision/hash,
-pretrained result or fine-tuned checkpoint is claimed. The executable fallback
-is `geometric_rgbd_v1`.
+The old 0.97 setting recorded 6.0 median count error and 40.0% leftmost target
+selection on the same held-out set, establishing a real post-training gain.
+Orientation accuracy is only 37.1% because uniform normal/inverted cylinders
+have no distinguishable end marker; Beta treats it as low confidence.
+
+The optional Apache-2.0 GroundingDINO adapter is installed in an isolated
+environment but has no downloaded checkpoint: its official Hugging Face
+configuration URL timed out after 15 seconds. No pretrained or fine-tuned
+GroundingDINO result is claimed. The executable fallback is the calibrated
+RGB-D pipeline above.

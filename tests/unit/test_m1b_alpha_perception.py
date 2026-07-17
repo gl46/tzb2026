@@ -59,12 +59,26 @@ def test_geometric_baseline_removes_a_sloped_table_plane() -> None:
 
 def test_geometric_baseline_uses_aligned_rgb_to_reject_blue_fixture_regions() -> None:
     depth = np.ones((30, 30), dtype=float)
+    depth[4:14, 3:13] = 0.8
     rgb = np.full((30, 30, 3), 120, dtype=np.uint8)
     rgb[4:14, 3:13] = [255, 0, 0]
     rgb[4:20, 16:29] = [0, 0, 255]
     results = GeometricRGBDBaseline(min_component_pixels=12).infer(observation(), depth, rgb)
     assert len(results) == 1
     assert results[0].bbox_or_mask.width == 10
+
+
+def test_color_prototypes_keep_adjacent_differently_colored_objects_separate() -> None:
+    depth = np.ones((30, 30), dtype=float)
+    depth[5:15, 4:14] = 0.8
+    depth[5:15, 14:24] = 0.8
+    rgb = np.full((30, 30, 3), 120, dtype=np.uint8)
+    rgb[5:15, 4:14] = [220, 30, 30]
+    rgb[5:15, 14:24] = [30, 190, 60]
+    results = GeometricRGBDBaseline(min_component_pixels=12).infer(observation(), depth, rgb)
+    assert len(results) == 2
+    assert {result.attributes["visual_color"] for result in results} == {"red", "green"}
+    assert all("color_prototype_v1" in result.source_components for result in results)
 
 
 def test_pose_state_and_offline_evaluator() -> None:
@@ -134,3 +148,7 @@ def test_open_vocab_cli_has_a_dependency_free_help_path() -> None:
 
 def test_geometric_evaluator_cli_has_a_help_path() -> None:
     subprocess.run([sys.executable, "scripts/evaluate_captured_geometric.py", "--help"], check=True, stdout=subprocess.DEVNULL)
+
+
+def test_color_prototype_calibration_cli_has_a_help_path() -> None:
+    subprocess.run([sys.executable, "scripts/train_perception.py", "--help"], check=True, stdout=subprocess.DEVNULL)

@@ -1,0 +1,879 @@
+{
+  "backend": "geometric_rgbd_v1",
+  "split": "test",
+  "metrics": {
+    "valid_output_rate": 0.9666666666666667,
+    "median_absolute_track_count_error": 0.0,
+    "matched_track_recall": 0.915057915057915,
+    "leftmost_target_selection_accuracy": 0.9666666666666667,
+    "position_median_error_m": 0.021729317421256583,
+    "orientation_accuracy": 0.37130801687763715,
+    "evaluated_scenes": 30,
+    "note": "Online inference receives RGB-D only. Static camera calibration and simulator labels are loaded only after prediction by this offline evaluator."
+  },
+  "records": [
+    {
+      "seed": 1017,
+      "track_count": 9,
+      "expected_object_count": 9,
+      "valid_output": true,
+      "matched_tracks": 9,
+      "position_errors_m": [
+        0.020868950786767253,
+        0.021744171615368728,
+        0.02042140352001061,
+        0.02186926208028055,
+        0.019518345412208628,
+        0.01944194867005444,
+        0.04322625943486166,
+        0.057063009510279546,
+        0.03966329678015551
+      ],
+      "orientation_accuracy": 0.3333333333333333,
+      "leftmost_target_selected": true,
+      "orientation_states": [
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal"
+      ]
+    },
+    {
+      "seed": 1018,
+      "track_count": 9,
+      "expected_object_count": 9,
+      "valid_output": true,
+      "matched_tracks": 9,
+      "position_errors_m": [
+        0.02074052767986101,
+        0.02239390428128933,
+        0.020075733335466344,
+        0.020639217718031674,
+        0.0195867157938209,
+        0.019197433166784315,
+        0.03590402668197453,
+        0.0385900768915825,
+        0.05120998099223524
+      ],
+      "orientation_accuracy": 0.3333333333333333,
+      "leftmost_target_selected": true,
+      "orientation_states": [
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal"
+      ]
+    },
+    {
+      "seed": 1019,
+      "track_count": 6,
+      "expected_object_count": 6,
+      "valid_output": true,
+      "matched_tracks": 6,
+      "position_errors_m": [
+        0.022344726596261737,
+        0.021726847521540478,
+        0.02028894042283505,
+        0.019430818094935548,
+        0.0367094388184055,
+        0.05682656541538348
+      ],
+      "orientation_accuracy": 0.3333333333333333,
+      "leftmost_target_selected": true,
+      "orientation_states": [
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal"
+      ]
+    },
+    {
+      "seed": 1037,
+      "track_count": 6,
+      "expected_object_count": 6,
+      "valid_output": true,
+      "matched_tracks": 6,
+      "position_errors_m": [
+        0.020401462204169742,
+        0.021729317421256583,
+        0.021349746574591627,
+        0.019461358379489178,
+        0.036551724978414475,
+        0.03789520057635821
+      ],
+      "orientation_accuracy": 0.3333333333333333,
+      "leftmost_target_selected": true,
+      "orientation_states": [
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal"
+      ]
+    },
+    {
+      "seed": 1038,
+      "track_count": 6,
+      "expected_object_count": 6,
+      "valid_output": true,
+      "matched_tracks": 6,
+      "position_errors_m": [
+        0.020539850378686265,
+        0.021780971552757718,
+        0.02036300558466327,
+        0.019317551761533505,
+        0.043366895581515845,
+        0.045759149015766554
+      ],
+      "orientation_accuracy": 0.3333333333333333,
+      "leftmost_target_selected": true,
+      "orientation_states": [
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal"
+      ]
+    },
+    {
+      "seed": 1039,
+      "track_count": 10,
+      "expected_object_count": 11,
+      "valid_output": true,
+      "matched_tracks": 10,
+      "position_errors_m": [
+        0.020131715270652807,
+        0.022601359378015922,
+        0.02295289002829989,
+        0.026451801461770397,
+        0.019547666004978148,
+        0.03759462282329305,
+        0.0195775846576402,
+        0.036071436164167615,
+        0.050001849438735556,
+        0.03475978659169104
+      ],
+      "orientation_accuracy": 0.2,
+      "leftmost_target_selected": true,
+      "orientation_states": [
+        "normal",
+        "normal",
+        "tilted",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal"
+      ]
+    },
+    {
+      "seed": 1057,
+      "track_count": 12,
+      "expected_object_count": 12,
+      "valid_output": true,
+      "matched_tracks": 12,
+      "position_errors_m": [
+        0.020526211197813747,
+        0.02132965673821113,
+        0.021137005842744114,
+        0.020185137477314763,
+        0.02328350504573042,
+        0.02781767577417372,
+        0.019186496840921025,
+        0.01884282227411381,
+        0.03649116995605923,
+        0.03754418790551876,
+        0.039041460680170996,
+        0.039871631389127145
+      ],
+      "orientation_accuracy": 0.3333333333333333,
+      "leftmost_target_selected": true,
+      "orientation_states": [
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal"
+      ]
+    },
+    {
+      "seed": 1058,
+      "track_count": 7,
+      "expected_object_count": 8,
+      "valid_output": true,
+      "matched_tracks": 7,
+      "position_errors_m": [
+        0.022579529858105383,
+        0.019950937650049086,
+        0.01948074180953038,
+        0.019447477565733683,
+        0.03607531686213473,
+        0.059977110138681546,
+        0.04378065591552245
+      ],
+      "orientation_accuracy": 0.42857142857142855,
+      "leftmost_target_selected": true,
+      "orientation_states": [
+        "normal",
+        "normal",
+        "normal",
+        "tilted",
+        "normal",
+        "normal",
+        "normal"
+      ]
+    },
+    {
+      "seed": 1059,
+      "track_count": 6,
+      "expected_object_count": 6,
+      "valid_output": true,
+      "matched_tracks": 6,
+      "position_errors_m": [
+        0.022000387438629615,
+        0.020318092808427266,
+        0.02095201260063331,
+        0.019080095636425962,
+        0.03872372208261945,
+        0.03778385349845771
+      ],
+      "orientation_accuracy": 0.3333333333333333,
+      "leftmost_target_selected": true,
+      "orientation_states": [
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal"
+      ]
+    },
+    {
+      "seed": 1077,
+      "track_count": 10,
+      "expected_object_count": 11,
+      "valid_output": true,
+      "matched_tracks": 10,
+      "position_errors_m": [
+        0.022643066079342297,
+        0.02060163752962684,
+        0.022289761430333514,
+        0.019747414598206618,
+        0.019155648948918226,
+        0.019047817930050462,
+        0.03946398813078168,
+        0.03622801801867029,
+        0.04054685414767174,
+        0.03502928845421491
+      ],
+      "orientation_accuracy": 0.4,
+      "leftmost_target_selected": true,
+      "orientation_states": [
+        "normal",
+        "tilted",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal"
+      ]
+    },
+    {
+      "seed": 1078,
+      "track_count": 6,
+      "expected_object_count": 6,
+      "valid_output": true,
+      "matched_tracks": 6,
+      "position_errors_m": [
+        0.022208730797140322,
+        0.023058364905728903,
+        0.020813929996790555,
+        0.019415511868651727,
+        0.036092963426875777,
+        0.044573075983346616
+      ],
+      "orientation_accuracy": 0.3333333333333333,
+      "leftmost_target_selected": true,
+      "orientation_states": [
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal"
+      ]
+    },
+    {
+      "seed": 1079,
+      "track_count": 10,
+      "expected_object_count": 10,
+      "valid_output": true,
+      "matched_tracks": 10,
+      "position_errors_m": [
+        0.020182189711255457,
+        0.022993305439423437,
+        0.025909704232481425,
+        0.0203329564036681,
+        0.02418104441979196,
+        0.02156991271569867,
+        0.019686713171092003,
+        0.03626748136654843,
+        0.049146754433278005,
+        0.04498681960044933
+      ],
+      "orientation_accuracy": 0.4,
+      "leftmost_target_selected": true,
+      "orientation_states": [
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal"
+      ]
+    },
+    {
+      "seed": 1097,
+      "track_count": 10,
+      "expected_object_count": 10,
+      "valid_output": true,
+      "matched_tracks": 10,
+      "position_errors_m": [
+        0.020718117642921228,
+        0.022060463248496802,
+        0.021595237977407127,
+        0.019870313596374437,
+        0.0233022793055044,
+        0.019216634360746623,
+        0.01926333322775696,
+        0.036653779808283604,
+        0.03650243184398751,
+        0.03852891579892194
+      ],
+      "orientation_accuracy": 0.4,
+      "leftmost_target_selected": true,
+      "orientation_states": [
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal"
+      ]
+    },
+    {
+      "seed": 1098,
+      "track_count": 7,
+      "expected_object_count": 7,
+      "valid_output": true,
+      "matched_tracks": 7,
+      "position_errors_m": [
+        0.020467455221378977,
+        0.020792225101791687,
+        0.021995767996399723,
+        0.019542069568795582,
+        0.0195526143452497,
+        0.03869999549880662,
+        0.05582526468320107
+      ],
+      "orientation_accuracy": 0.42857142857142855,
+      "leftmost_target_selected": true,
+      "orientation_states": [
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal"
+      ]
+    },
+    {
+      "seed": 1099,
+      "track_count": 9,
+      "expected_object_count": 9,
+      "valid_output": true,
+      "matched_tracks": 9,
+      "position_errors_m": [
+        0.02030776245824898,
+        0.021090378185625053,
+        0.020732069989483376,
+        0.022397955627494106,
+        0.019860850100834136,
+        0.019492574604994543,
+        0.0377127325922029,
+        0.037672188736589354,
+        0.048013636504303764
+      ],
+      "orientation_accuracy": 0.3333333333333333,
+      "leftmost_target_selected": true,
+      "orientation_states": [
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal"
+      ]
+    },
+    {
+      "seed": 1117,
+      "track_count": 9,
+      "expected_object_count": 9,
+      "valid_output": true,
+      "matched_tracks": 9,
+      "position_errors_m": [
+        0.022793644407646745,
+        0.02039804763335,
+        0.02057027062059296,
+        0.020398254229591913,
+        0.019365157144611,
+        0.019429065886429217,
+        0.038867184435980306,
+        0.039668463570570016,
+        0.04135366073320241
+      ],
+      "orientation_accuracy": 0.3333333333333333,
+      "leftmost_target_selected": true,
+      "orientation_states": [
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal"
+      ]
+    },
+    {
+      "seed": 1118,
+      "track_count": 7,
+      "expected_object_count": 7,
+      "valid_output": true,
+      "matched_tracks": 7,
+      "position_errors_m": [
+        0.019814140333925156,
+        0.022352278009225637,
+        0.02052539429310463,
+        0.01899604839200759,
+        0.018873010881264488,
+        0.05904341650161009,
+        0.05343631556881087
+      ],
+      "orientation_accuracy": 0.42857142857142855,
+      "leftmost_target_selected": true,
+      "orientation_states": [
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal"
+      ]
+    },
+    {
+      "seed": 1119,
+      "track_count": 6,
+      "expected_object_count": 6,
+      "valid_output": true,
+      "matched_tracks": 6,
+      "position_errors_m": [
+        0.021802300143102988,
+        0.02119618721307268,
+        0.02087473068195622,
+        0.019204266022405738,
+        0.03611704226825553,
+        0.03752752820772462
+      ],
+      "orientation_accuracy": 0.3333333333333333,
+      "leftmost_target_selected": true,
+      "orientation_states": [
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal"
+      ]
+    },
+    {
+      "seed": 1137,
+      "track_count": 8,
+      "expected_object_count": 9,
+      "valid_output": true,
+      "matched_tracks": 8,
+      "position_errors_m": [
+        0.020145724891918154,
+        0.02029939654309869,
+        0.020546082830180695,
+        0.021315358010951985,
+        0.019213564616608635,
+        0.019255675017005817,
+        0.03616918655888587,
+        0.05236815257547793
+      ],
+      "orientation_accuracy": 0.5,
+      "leftmost_target_selected": true,
+      "orientation_states": [
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "tilted",
+        "normal",
+        "normal"
+      ]
+    },
+    {
+      "seed": 1138,
+      "track_count": 7,
+      "expected_object_count": 8,
+      "valid_output": true,
+      "matched_tracks": 7,
+      "position_errors_m": [
+        0.022092447130114122,
+        0.020228488715253092,
+        0.01919643117255509,
+        0.019214148898024613,
+        0.03615120099189912,
+        0.037953443005509194,
+        0.03456638943145775
+      ],
+      "orientation_accuracy": 0.42857142857142855,
+      "leftmost_target_selected": true,
+      "orientation_states": [
+        "normal",
+        "tilted",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal"
+      ]
+    },
+    {
+      "seed": 1139,
+      "track_count": 6,
+      "expected_object_count": 6,
+      "valid_output": true,
+      "matched_tracks": 6,
+      "position_errors_m": [
+        0.01956866077528868,
+        0.02135792629678074,
+        0.023820030126379683,
+        0.019580193413313393,
+        0.03694034585014598,
+        0.03677860475581289
+      ],
+      "orientation_accuracy": 0.3333333333333333,
+      "leftmost_target_selected": true,
+      "orientation_states": [
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal"
+      ]
+    },
+    {
+      "seed": 1157,
+      "track_count": 10,
+      "expected_object_count": 10,
+      "valid_output": true,
+      "matched_tracks": 10,
+      "position_errors_m": [
+        0.020640435750387806,
+        0.021166595772630855,
+        0.021349519340907328,
+        0.019907819631938148,
+        0.022873703430260912,
+        0.019326399107812066,
+        0.036153803728199874,
+        0.03667775538384096,
+        0.0391040844043493,
+        0.01953894357807452
+      ],
+      "orientation_accuracy": 0.4,
+      "leftmost_target_selected": true,
+      "orientation_states": [
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal"
+      ]
+    },
+    {
+      "seed": 1158,
+      "track_count": 10,
+      "expected_object_count": 12,
+      "valid_output": true,
+      "matched_tracks": 10,
+      "position_errors_m": [
+        0.0206292367196267,
+        0.022122756065318487,
+        0.022932706106425314,
+        0.020970933401233665,
+        0.019643520291707267,
+        0.01941516372856538,
+        0.037631060201460516,
+        0.037321609586570235,
+        0.07061501640212542,
+        0.03785226740637877
+      ],
+      "orientation_accuracy": 0.4,
+      "leftmost_target_selected": true,
+      "orientation_states": [
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "tilted",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal"
+      ]
+    },
+    {
+      "seed": 1159,
+      "track_count": 7,
+      "expected_object_count": 7,
+      "valid_output": true,
+      "matched_tracks": 7,
+      "position_errors_m": [
+        0.02062451930548647,
+        0.022232628021553513,
+        0.020160930831121755,
+        0.019491417976124033,
+        0.03690625819619536,
+        0.03584702584609899,
+        0.019577815014666506
+      ],
+      "orientation_accuracy": 0.42857142857142855,
+      "leftmost_target_selected": true,
+      "orientation_states": [
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal"
+      ]
+    },
+    {
+      "seed": 1177,
+      "track_count": 9,
+      "expected_object_count": 9,
+      "valid_output": true,
+      "matched_tracks": 9,
+      "position_errors_m": [
+        0.019862057421302006,
+        0.02269004421772218,
+        0.020216444011227103,
+        0.02300755522349202,
+        0.019582317460627573,
+        0.03695037417060281,
+        0.019354924603275505,
+        0.036612754737575165,
+        0.05866746424329553
+      ],
+      "orientation_accuracy": 0.3333333333333333,
+      "leftmost_target_selected": true,
+      "orientation_states": [
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal"
+      ]
+    },
+    {
+      "seed": 1178,
+      "track_count": 9,
+      "expected_object_count": 10,
+      "valid_output": true,
+      "matched_tracks": 9,
+      "position_errors_m": [
+        0.02151796578377732,
+        0.01987752005156362,
+        0.025296951138025756,
+        0.0193969292137618,
+        0.01971093597161661,
+        0.03774572587909071,
+        0.037640399110302404,
+        0.047898776646089054,
+        0.03616545988016663
+      ],
+      "orientation_accuracy": 0.4444444444444444,
+      "leftmost_target_selected": true,
+      "orientation_states": [
+        "normal",
+        "normal",
+        "normal",
+        "tilted",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal"
+      ]
+    },
+    {
+      "seed": 1179,
+      "track_count": 8,
+      "expected_object_count": 10,
+      "valid_output": true,
+      "matched_tracks": 8,
+      "position_errors_m": [
+        0.020565997748417244,
+        0.01975739003564844,
+        0.02114622575510237,
+        0.01915024025873275,
+        0.02059486292845969,
+        0.035982750452122805,
+        0.03125935136049392,
+        0.0537907714875823
+      ],
+      "orientation_accuracy": 0.375,
+      "leftmost_target_selected": true,
+      "orientation_states": [
+        "tilted",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "tilted",
+        "normal",
+        "normal"
+      ]
+    },
+    {
+      "seed": 1197,
+      "track_count": 11,
+      "expected_object_count": 11,
+      "valid_output": true,
+      "matched_tracks": 11,
+      "position_errors_m": [
+        0.021479836167052933,
+        0.02124429692202974,
+        0.020326216927096293,
+        0.02115230241298421,
+        0.019972388759609896,
+        0.02407048865488157,
+        0.02057859293049873,
+        0.019591577974237162,
+        0.034699908509439305,
+        0.03557258661149174,
+        0.05865029996073893
+      ],
+      "orientation_accuracy": 0.36363636363636365,
+      "leftmost_target_selected": true,
+      "orientation_states": [
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal",
+        "normal"
+      ]
+    },
+    {
+      "seed": 1198,
+      "track_count": 7,
+      "expected_object_count": 8,
+      "valid_output": true,
+      "matched_tracks": 7,
+      "position_errors_m": [
+        0.02120689017154122,
+        0.02260732499834231,
+        0.019219937066044114,
+        0.01943400652915738,
+        0.036027133625628406,
+        0.05859097937081893,
+        0.03587368153398441
+      ],
+      "orientation_accuracy": 0.42857142857142855,
+      "leftmost_target_selected": true,
+      "orientation_states": [
+        "normal",
+        "normal",
+        "tilted",
+        "normal",
+        "normal",
+        "normal",
+        "normal"
+      ]
+    },
+    {
+      "seed": 1199,
+      "track_count": 0,
+      "expected_object_count": 11,
+      "valid_output": false,
+      "matched_tracks": 0,
+      "position_errors_m": [],
+      "orientation_accuracy": 0.0,
+      "leftmost_target_selected": false,
+      "orientation_states": []
+    }
+  ],
+  "truth_boundary": "offline evaluator only"
+}
