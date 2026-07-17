@@ -1,0 +1,33 @@
+{
+  "phase": "M1B_ALPHA",
+  "status": "PARTIAL",
+  "ready_for_m1b_beta": false,
+  "baseline_tag": "m1a-contact-gated-grasp",
+  "baseline_commit": "0709cc19b66e52e8043eb26babb9a6f3e8ca9a72",
+  "actual_head_at_start": "0709cc19b66e52e8043eb26babb9a6f3e8ca9a72",
+  "scene_runtime_verified": true,
+  "recording_verified": false,
+  "rgb_recording_evidence": "/home/gl/xh-202607-world-agent-codex-m1b/data/episodes/m1b-alpha-fixed-20260717/industrial_fixed.mp4",
+  "dataset_samples": 0,
+  "dataset_manifest_fixture_samples": 200,
+  "heldout_scenes": 0,
+  "perception_model": "geometric_rgbd_v1 (open-vocabulary GroundingDINO adapter not installed)",
+  "model_license": "GroundingDINO code: Apache-2.0; no weight accepted or downloaded",
+  "pretrained_metrics": {},
+  "finetuned_metrics": {},
+  "fused_metrics": {},
+  "oracle_leakage_detected": false,
+  "tests_passed": 59,
+  "tests_failed": 0,
+  "known_validation_failures": [
+    "repository-wide ruff currently reports three pre-existing violations in M1A scripts outside this Goal"
+  ],
+  "limitations": [
+    "Industrial scene currently contains three seed-fixed parts; full 6-12 part randomized generator is not implemented.",
+    "RGB image sequence and MP4 were captured from live Gazebo, but synchronized depth/camera-info/TF/joint rosbag is not yet captured.",
+    "No actual Gazebo dataset, held-out metric evaluation, open-vocabulary weight download, or fine-tune was run.",
+    "M1B-beta is prohibited until the Alpha minimum gate is met."
+  ],
+  "teacher_state": "Nano CANDIDATE; BWM CANDIDATE_LICENSE_PENDING; Super PARKED",
+  "next_command": "ssh gl@node2 'source /opt/ros/jazzy/setup.bash; cd /home/gl/xh-202607-world-agent-codex-m1b; source robot_ws/install/setup.bash; ros2 launch xh_sim simulation.launch.py world_name:=industrial_cylinder_v1 world_file:=$PWD/robot_ws/install/xh_sim/share/xh_sim/worlds/industrial_cylinder_v1.sdf'"
+}

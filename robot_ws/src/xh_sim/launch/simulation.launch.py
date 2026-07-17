@@ -63,6 +63,7 @@ def _robot_actions(context, share: Path):
     """Build the controller-backed robot after resolving calibration mode."""
 
     calibration_mode = LaunchConfiguration("calibration_mode").perform(context).lower() == "true"
+    world_name = LaunchConfiguration("world_name")
     generated_urdf, generated_sdf, _manifest = _generate_spawn_representation(share, calibration_mode)
     robot_xml = generated_urdf.read_text(encoding="utf-8")
     robot_description = {"robot_description": robot_xml, "use_sim_time": True}
@@ -77,7 +78,7 @@ def _robot_actions(context, share: Path):
         executable="create",
         output="screen",
         arguments=[
-            "-world", "xh_p0_pick_place", "-file", str(generated_sdf),
+            "-world", world_name, "-file", str(generated_sdf),
             "-name", "panda_controller", "-allow_renaming", "true",
             "-x", "0", "-y", "0", "-z", "0",
         ],
@@ -188,6 +189,11 @@ def generate_launch_description():
             "world_file",
             default_value=str(default_world),
             description="Absolute SDF world path; S0 may select its isolated calibration world.",
+        ),
+        DeclareLaunchArgument(
+            "world_name",
+            default_value="xh_p0_pick_place",
+            description="Gazebo world name used by the controller-backed Panda spawn.",
         ),
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(str(ros_gz_share / "launch" / "gz_sim.launch.py")),

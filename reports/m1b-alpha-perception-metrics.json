@@ -1,0 +1,6 @@
+{
+  "model": "geometric_rgbd_v1",
+  "heldout_scenes": 30,
+  "metrics": {},
+  "status": "MANIFEST_ONLY_NO_GAZEBO_FRAMES"
+}

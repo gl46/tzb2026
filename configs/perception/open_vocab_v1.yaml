@@ -1,0 +1,7 @@
+backend: GroundingDINO
+license: Apache-2.0
+weights: NOT_DOWNLOADED
+revision: NOT_INSTALLED
+max_download_gib: 20
+fallback: geometric_rgbd_v1
+finetune: frozen_backbone_detector_head

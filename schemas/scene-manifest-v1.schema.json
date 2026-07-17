@@ -1,0 +1,7 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SceneManifestV1",
+  "type": "object",
+  "required": ["scene_id", "seed", "split", "randomization"],
+  "properties": {"scene_id": {"const": "IndustrialCylinderBenchmarkV1"}, "seed": {"type": "integer"}, "split": {"enum": ["train", "val", "test"]}, "randomization": {"type": "object"}}
+}

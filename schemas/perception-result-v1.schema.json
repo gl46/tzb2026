@@ -1,0 +1,7 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PerceptionResultV1",
+  "type": "object",
+  "required": ["frame_id", "timestamp_ns", "track_id", "category", "bbox_or_mask", "position_3d", "orientation_state", "confidence", "visibility", "source_components"],
+  "properties": {"track_id": {"type": "string", "pattern": "^track-[0-9a-f]{8}$"}, "position_3d": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "number"}, "x-oracle-forbidden": true}, "orientation_state": {"enum": ["normal", "inverted", "tilted", "unknown"]}}
+}
