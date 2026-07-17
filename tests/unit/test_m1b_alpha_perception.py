@@ -124,3 +124,7 @@ def test_captured_manifest_excludes_incomplete_frames(tmp_path: Path) -> None:
     output = tmp_path / "manifest.json"
     subprocess.run([sys.executable, "scripts/build_captured_dataset_manifest.py", "--root", str(root), "--output", str(output)], check=True)
     assert json.loads(output.read_text())["counts"]["train"] == 1
+
+
+def test_open_vocab_cli_has_a_dependency_free_help_path() -> None:
+    subprocess.run([sys.executable, "scripts/run_open_vocab.py", "--help"], check=True, stdout=subprocess.DEVNULL)
