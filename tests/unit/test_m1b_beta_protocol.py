@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 from pydantic import ValidationError
 
@@ -7,6 +9,7 @@ from xh_agent.agent.closed_loop import record_step
 from xh_agent.agent.skill_planner import plan
 from xh_agent.grasp.m1b_broker import M1BContactBroker, width_window_from_perceived_diameter
 from xh_agent.recovery.manager import recovery_for
+from xh_agent.runtime.m1b_camera_calibration import M1BStaticCameraCalibrationV1
 from xh_agent.task_compiler.deterministic import DeterministicTaskCompiler
 
 
@@ -60,3 +63,16 @@ def test_m1b_width_window_is_perception_derived_and_clamped() -> None:
     assert 0 <= lower < upper <= 0.08
     with pytest.raises(ValueError):
         width_window_from_perceived_diameter(0.2)
+
+
+def test_m1b_static_camera_calibration_is_versioned_and_invertible() -> None:
+    root = Path(__file__).parents[2]
+    calibration = M1BStaticCameraCalibrationV1.from_file(root / "configs/m1b_camera_calibration.json")
+    optical = (0.12, -0.08, 1.35)
+    world = calibration.optical_to_world(optical)
+    assert calibration.world_to_optical(world) == pytest.approx(optical)
+    assert calibration.camera_optical_frame == "camera_fixture/camera_rgbd/front_rgbd"
+    assert len(calibration.fingerprint) == 64
+    tf_args = calibration.static_tf_arguments()
+    assert "--frame-id" in tf_args and "world" in tf_args
+    assert "--child-frame-id" in tf_args and calibration.camera_optical_frame in tf_args

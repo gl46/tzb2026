@@ -1,0 +1,15 @@
+{
+  "schema_version": "M1BStaticCameraCalibrationV1",
+  "parent_frame": "world",
+  "camera_link_frame": "camera_fixture/camera_rgbd",
+  "camera_optical_frame": "camera_fixture/camera_rgbd/front_rgbd",
+  "translation_m": [-0.8, -0.8, 1.4],
+  "rpy_rad": [0.0, 0.77, 0.93],
+  "link_to_optical_axes": "gazebo_camera_link_to_ros_optical_v1",
+  "source": {
+    "kind": "versioned_scene_sdf",
+    "path": "robot_ws/src/xh_sim/worlds/industrial_cylinder_v1.sdf",
+    "evidence": "camera_fixture/camera_rgbd pose and front_rgbd topic"
+  },
+  "truth_boundary": "Static scene calibration is published as TF. Gazebo pose services and simulator entity state are prohibited at runtime."
+}

@@ -108,7 +108,7 @@ def _robot_actions(context, share: Path):
         executable="panda_hand_mimic_adapter.py",
         output="screen",
     )
-    return [
+    actions = [
         robot_state_publisher,
         spawn_robot,
         RegisterEventHandler(OnProcessExit(
@@ -124,6 +124,35 @@ def _robot_actions(context, share: Path):
             on_exit=[hand_adapter],
         )),
     ]
+    if scene_supervision:
+        configured_calibration = os.environ.get("XH_M1B_CAMERA_CALIBRATION")
+        calibration_path = Path(configured_calibration) if configured_calibration else next(
+            (
+                parent / "configs" / "m1b_camera_calibration.json"
+                for parent in Path(__file__).resolve().parents
+                if (parent / "configs" / "m1b_camera_calibration.json").is_file()
+            ),
+            None,
+        )
+        if calibration_path is None:
+            raise RuntimeError("M1B camera calibration file is unavailable")
+        calibration = json.loads(calibration_path.read_text(encoding="utf-8"))
+        if calibration.get("schema_version") != "M1BStaticCameraCalibrationV1":
+            raise RuntimeError("M1B camera calibration schema is unavailable")
+        if calibration.get("link_to_optical_axes") != "gazebo_camera_link_to_ros_optical_v1":
+            raise RuntimeError("M1B camera calibration axis convention is unavailable")
+        # The launch process owns the static TF publication.  It never queries
+        # Gazebo for a pose, so privileged simulator state cannot enter policy.
+        x, y, z = calibration["translation_m"]
+        roll, pitch, yaw = calibration["rpy_rad"]
+        actions.extend((Node(
+            package="tf2_ros", executable="static_transform_publisher", output="screen",
+            arguments=["--x", str(x), "--y", str(y), "--z", str(z), "--roll", str(roll), "--pitch", str(pitch), "--yaw", str(yaw), "--frame-id", calibration["parent_frame"], "--child-frame-id", calibration["camera_link_frame"]],
+        ), Node(
+            package="tf2_ros", executable="static_transform_publisher", output="screen",
+            arguments=["--roll", str(-1.5707963267948966), "--pitch", "0", "--yaw", str(-1.5707963267948966), "--frame-id", calibration["camera_link_frame"], "--child-frame-id", calibration["camera_optical_frame"]],
+        )))
+    return actions
 
 
 def generate_launch_description():
