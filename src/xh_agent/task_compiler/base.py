@@ -86,7 +86,7 @@ class StepRecordV1(StrictModel):
 
 class RecoveryPlanV1(StrictModel):
     schema_version: Literal["RecoveryPlanV1"] = "RecoveryPlanV1"
-    failure_type: Literal["EMPTY_GRASP", "UNSTABLE_OR_WRONG_PLACEMENT", "RELEASE_FAILURE"]
+    failure_type: Literal["EMPTY_GRASP", "WRONG_OBJECT", "UNSTABLE_OR_WRONG_PLACEMENT", "RELEASE_FAILURE"]
     evidence: list[str] = Field(min_length=1)
     recovery_subgoals: list[str] = Field(min_length=1)
     retry_budget: int = Field(gt=0)

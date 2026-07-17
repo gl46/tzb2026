@@ -8,6 +8,8 @@ from pydantic import ValidationError
 from xh_agent.agent.closed_loop import record_step
 from xh_agent.agent.skill_planner import plan
 from xh_agent.grasp.m1b_broker import M1BContactBroker, width_window_from_perceived_diameter
+from xh_agent.grasp.post_grasp import evaluate_post_grasp_identity, evaluator_supervision_record
+from xh_agent.grasp.reset import M1BResetVerificationV1, validate_reset_records
 from xh_agent.recovery.manager import recovery_for
 from xh_agent.runtime.m1b_camera_calibration import M1BStaticCameraCalibrationV1
 from xh_agent.task_compiler.deterministic import DeterministicTaskCompiler
@@ -39,7 +41,7 @@ def test_step_requires_a_fresh_observation_and_compares_expected_actual() -> Non
         step.model_copy(update={"observation_after_id": "obs-1"}).model_validate(step.model_copy(update={"observation_after_id": "obs-1"}).model_dump())
 
 
-@pytest.mark.parametrize("failure_type", ["EMPTY_GRASP", "UNSTABLE_OR_WRONG_PLACEMENT", "RELEASE_FAILURE"])
+@pytest.mark.parametrize("failure_type", ["EMPTY_GRASP", "WRONG_OBJECT", "UNSTABLE_OR_WRONG_PLACEMENT", "RELEASE_FAILURE"])
 def test_recovery_changes_parameters_and_has_bounded_retry(failure_type: str) -> None:
     recovery = recovery_for(failure_type)
     assert recovery.changed_parameters
@@ -76,3 +78,27 @@ def test_m1b_static_camera_calibration_is_versioned_and_invertible() -> None:
     tf_args = calibration.static_tf_arguments()
     assert "--frame-id" in tf_args and "world" in tf_args
     assert "--child-frame-id" in tf_args and calibration.camera_optical_frame in tf_args
+
+
+def test_post_grasp_identity_routes_wrong_object_without_entity_leak() -> None:
+    wrong = evaluate_post_grasp_identity(target_track_id="track-11111111", carried_track_id="track-22222222")
+    assert wrong.identity_status == "WRONG_OBJECT"
+    assert wrong.wrong_object_detected is True
+    assert "actual_sim_entity_id" not in wrong.__dict__
+    assert recovery_for("WRONG_OBJECT").recovery_subgoals[1] == "SafePlaceNonTarget"
+    unobserved = evaluate_post_grasp_identity(target_track_id="track-11111111", carried_track_id=None)
+    assert unobserved.reobservation_required is True
+    supervision = evaluator_supervision_record(actual_sim_entity_id="cylinder_02", wrong_object=True)
+    assert supervision["wrong_object"] is True
+
+
+def test_m1b_reset_requires_every_generated_detachable_state() -> None:
+    good = [
+        M1BResetVerificationV1("cylinder_01", "/xh/m1b/cylinder_01/detach", "/xh/m1b/cylinder_01/grasp_state", True, ('data: "detached"',)),
+        M1BResetVerificationV1("cylinder_02", "/xh/m1b/cylinder_02/detach", "/xh/m1b/cylinder_02/grasp_state", True, ('data: "detached"',)),
+    ]
+    assert validate_reset_records(good, ["cylinder_01", "cylinder_02"])[0] == "RESET_VERIFIED"
+    missing = [*good[:-1], M1BResetVerificationV1("cylinder_02", "/xh/m1b/cylinder_02/detach", "/xh/m1b/cylinder_02/grasp_state", False, ())]
+    status, reasons = validate_reset_records(missing, ["cylinder_01", "cylinder_02"])
+    assert status == "INVALID_RESET"
+    assert reasons == ("DETACH_STATE_UNOBSERVED:cylinder_02",)
