@@ -8,6 +8,7 @@ source /opt/ros/jazzy/setup.bash
 set -u
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$root"
+dataset_root="${DATASET_ROOT:-data/generated/m1b_alpha_v1}"
 gz_pid=""
 bridge_pid=""
 cleanup() {
@@ -25,10 +26,10 @@ cleanup() {
 trap cleanup EXIT
 for ((offset=0; offset<count; offset++)); do
   seed=$((seed_start + offset))
-  output="data/generated/m1b_alpha_v1/frames/$seed"
+  output="$dataset_root/frames/$seed"
   [[ -f "$output/recording.json" ]] && continue
   mkdir -p "$output" logs
-  gz sim -s -r "data/generated/m1b_alpha_v1/scenes/scene-$seed.sdf" >"logs/m1b-alpha-dataset-$seed.log" 2>&1 &
+  gz sim -s -r "$dataset_root/scenes/scene-$seed.sdf" >"logs/m1b-alpha-dataset-$seed.log" 2>&1 &
   gz_pid=$!
   bridge_pid=""
   sleep 4

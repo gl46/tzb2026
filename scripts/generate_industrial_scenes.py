@@ -28,14 +28,23 @@ def render(template: str, seed: int) -> tuple[str, dict[str, object]]:
     count = rng.randint(6, 12)
     parts = []
     labels = []
+    positions: list[tuple[float, float]] = []
     for index in range(count):
         state = ORIENTATIONS[index % len(ORIENTATIONS)]
-        x = rng.uniform(-0.43, -0.08)
-        y = rng.uniform(-0.28, 0.28)
+        # Split two incoming zones and enforce a 9 cm centre separation. This
+        # prevents the simulator generator from creating unobservable stacks.
+        for _ in range(500):
+            x = rng.uniform(-0.43, -0.10)
+            y = rng.uniform(-0.31, -0.08) if index % 2 == 0 else rng.uniform(0.08, 0.31)
+            if all((x - other_x) ** 2 + (y - other_y) ** 2 >= 0.09 ** 2 for other_x, other_y in positions):
+                positions.append((x, y))
+                break
+        else:
+            raise RuntimeError(f"could not place non-overlapping cylinder for seed {seed}")
         yaw = rng.uniform(-3.14159, 3.14159)
         color = COLORS[index % len(COLORS)]
         parts.append(part_sdf(index + 1, state, x, y, color, yaw))
-        labels.append({"actual_sim_entity_id": f"cylinder_{index + 1:02d}", "category": "industrial_cylinder", "orientation_state": state, "position_3d_world": [x, y, 0.50 if state != "tilted" else 0.48], "yaw": yaw})
+        labels.append({"actual_sim_entity_id": f"cylinder_{index + 1:02d}", "category": "industrial_cylinder", "orientation_state": state, "position_3d_world": [x, y, 0.50 if state != "tilted" else 0.48], "incoming_region": "incoming_a" if index % 2 == 0 else "incoming_b", "yaw": yaw})
     begin, end = "<!-- M1B_RANDOM_PARTS_BEGIN -->", "<!-- M1B_RANDOM_PARTS_END -->"
     start, finish = template.index(begin) + len(begin), template.index(end)
     scene = template[:start] + "\n" + "\n".join(parts) + "\n    " + template[finish:]
