@@ -233,11 +233,13 @@ def test_m1b_tolerance_attach_uses_detachablejoint_empty_payload() -> None:
     assert '--calibration-hand-y-bias-m' in source
     assert '--calibration-keep-target-collision-through-descend' in source
     assert '--calibration-lateral-insertion' in source
-    assert 'M1B_CALIBRATION_LATERAL_INSERTION_HAND_X_OFFSET_M = -0.200' in source
+    assert 'M1B_CALIBRATION_LATERAL_INSERTION_CLEAR_HAND_X_OFFSETS_M = (-0.200, -0.160, -0.140, -0.120)' in source
     assert 'def m1b_calibration_lateral_insertion(' in source
-    assert '("high_clear", M1B_NORMAL_PRECONTACT_HAND_Z_OFFSET_M, M1B_CALIBRATION_LATERAL_INSERTION_HAND_X_OFFSET_M)' in source
-    assert '("low_clear", M1B_NORMAL_CONTACT_HAND_Z_OFFSET_M, M1B_CALIBRATION_LATERAL_INSERTION_HAND_X_OFFSET_M)' in source
+    assert 'for clear_x_offset_m in M1B_CALIBRATION_LATERAL_INSERTION_CLEAR_HAND_X_OFFSETS_M:' in source
+    assert '("high_clear", M1B_NORMAL_PRECONTACT_HAND_Z_OFFSET_M, clear_x_offset_m)' in source
+    assert '("low_clear", M1B_NORMAL_CONTACT_HAND_Z_OFFSET_M, clear_x_offset_m)' in source
     assert '("lateral_insert", M1B_NORMAL_CONTACT_HAND_Z_OFFSET_M, M1B_NORMAL_SIDE_HAND_X_OFFSET_M)' in source
+    assert '"candidate_attempts": candidate_attempts' in source
     assert '--calibration-lateral-insertion requires --calibration-keep-target-collision-through-descend' in source
     assert '"calibration_lateral_insertion": args.calibration_lateral_insertion' in source
     assert '"calibration_motion_diagnostic": calibration_motion' in source

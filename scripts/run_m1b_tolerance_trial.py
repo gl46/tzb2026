@@ -67,7 +67,11 @@ M1B_NORMAL_SIDE_HAND_X_OFFSET_M = -0.080
 # leaves 115 mm between the nearest leading edge and the 25 mm-radius target.
 # This avoids the old vertical path, which entered through the cylinder top
 # and physically displaced it before the close command.
-M1B_CALIBRATION_LATERAL_INSERTION_HAND_X_OFFSET_M = -0.200
+# All four placements keep the nearest board edge at least 35 mm outside a
+# 25 mm-radius cylinder (the board reaches +60 mm from the hand origin).
+# The widest point is first, but a nearer one is required when an individual
+# arm-workspace branch cannot solve the wide low-clear pose.
+M1B_CALIBRATION_LATERAL_INSERTION_CLEAR_HAND_X_OFFSETS_M = (-0.200, -0.160, -0.140, -0.120)
 # Live calibration link-pose evidence at the settled target shows the physical
 # board midpoint is 0.8 mm left of the commanded hand Y.  +1 mm is the
 # approved fixed hand-chain correction; calibration-only sweeps may override
@@ -318,39 +322,46 @@ def m1b_calibration_lateral_insertion(
     the causal hypothesis (vertical entry pushes the free cylinder) without
     granting an ACM exception or becoming an online truth-dependent policy.
     """
-    stages: dict[str, dict[str, object]] = {}
-    seed: list[float] | None = M1B_NORMAL_SIDE_IK_SEED
-    for name, z_offset_m, x_offset_m in (
-        ("high_clear", M1B_NORMAL_PRECONTACT_HAND_Z_OFFSET_M, M1B_CALIBRATION_LATERAL_INSERTION_HAND_X_OFFSET_M),
-        ("low_clear", M1B_NORMAL_CONTACT_HAND_Z_OFFSET_M, M1B_CALIBRATION_LATERAL_INSERTION_HAND_X_OFFSET_M),
-        ("lateral_insert", M1B_NORMAL_CONTACT_HAND_Z_OFFSET_M, M1B_NORMAL_SIDE_HAND_X_OFFSET_M),
-    ):
-        stage = client.move_hand_pose(
-            _m1b_normal_side_pose(
-                centre_world_m, hand_z_offset_m=z_offset_m,
-                hand_y_centerline_bias_m=hand_y_centerline_bias_m,
-                hand_x_offset_m=x_offset_m,
-            ),
-            ik_seed=seed,
-        )
-        stages[name] = stage
-        if not (stage.get("executed") and stage.get("converged")):
+    candidate_attempts: list[dict[str, object]] = []
+    for clear_x_offset_m in M1B_CALIBRATION_LATERAL_INSERTION_CLEAR_HAND_X_OFFSETS_M:
+        stages: dict[str, dict[str, object]] = {}
+        seed: list[float] | None = M1B_NORMAL_SIDE_IK_SEED
+        for name, z_offset_m, x_offset_m in (
+            ("high_clear", M1B_NORMAL_PRECONTACT_HAND_Z_OFFSET_M, clear_x_offset_m),
+            ("low_clear", M1B_NORMAL_CONTACT_HAND_Z_OFFSET_M, clear_x_offset_m),
+            ("lateral_insert", M1B_NORMAL_CONTACT_HAND_Z_OFFSET_M, M1B_NORMAL_SIDE_HAND_X_OFFSET_M),
+        ):
+            stage = client.move_hand_pose(
+                _m1b_normal_side_pose(
+                    centre_world_m, hand_z_offset_m=z_offset_m,
+                    hand_y_centerline_bias_m=hand_y_centerline_bias_m,
+                    hand_x_offset_m=x_offset_m,
+                ),
+                ik_seed=seed,
+            )
+            stages[name] = stage
+            if not (stage.get("executed") and stage.get("converged")):
+                candidate_attempts.append({"clear_hand_x_offset_m": clear_x_offset_m, "failed_stage": name, "stages": stages})
+                break
+            seed = stage.get("ik_solution")
+        else:
             return {
-                "executed": False, "converged": False, "failed_stage": name,
-                "stages": stages,
+                "executed": True, "converged": True, "stages": stages,
+                "candidate_attempts": candidate_attempts,
                 "geometry": {
                     "insertion_axis_world": [1.0, 0.0, 0.0],
-                    "clear_hand_x_offset_m": M1B_CALIBRATION_LATERAL_INSERTION_HAND_X_OFFSET_M,
+                    "clear_hand_x_offset_m": clear_x_offset_m,
+                    "candidate_clear_hand_x_offsets_m": list(M1B_CALIBRATION_LATERAL_INSERTION_CLEAR_HAND_X_OFFSETS_M),
                     "final_hand_x_offset_m": M1B_NORMAL_SIDE_HAND_X_OFFSET_M,
                     "hand_z_offset_m": M1B_NORMAL_CONTACT_HAND_Z_OFFSET_M,
                 },
             }
-        seed = stage.get("ik_solution")
     return {
-        "executed": True, "converged": True, "stages": stages,
+        "executed": False, "converged": False,
+        "candidate_attempts": candidate_attempts,
         "geometry": {
             "insertion_axis_world": [1.0, 0.0, 0.0],
-            "clear_hand_x_offset_m": M1B_CALIBRATION_LATERAL_INSERTION_HAND_X_OFFSET_M,
+            "candidate_clear_hand_x_offsets_m": list(M1B_CALIBRATION_LATERAL_INSERTION_CLEAR_HAND_X_OFFSETS_M),
             "final_hand_x_offset_m": M1B_NORMAL_SIDE_HAND_X_OFFSET_M,
             "hand_z_offset_m": M1B_NORMAL_CONTACT_HAND_Z_OFFSET_M,
         },
