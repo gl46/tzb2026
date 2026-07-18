@@ -34,7 +34,11 @@ POSE_RE = re.compile(
 SETTLE_S = 2.0
 MAX_OBJECT_DISPLACEMENT_M = 0.001
 MIN_EE_DISPLACEMENT_M = 0.02
-HOME_JOG_DELTA_RAD = 0.05
+# The 50 mrad probe moved the calibrated Panda hand only 11.4 mm on the
+# actual S1 chain.  This 100 mrad home-neighbourhood jog was measured to
+# exceed the Amendment-1 20 mm minimum while staying collision-checked by
+# MoveIt.
+HOME_JOG_DELTA_RAD = 0.10
 
 
 def supervision_model_position(name: str) -> list[float] | None:
