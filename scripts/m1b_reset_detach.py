@@ -88,20 +88,43 @@ def detach_all_and_observe(object_names: list[str], timeout_s: float) -> list[M1
                 ["gz", "topic", "-t", f"/xh/m1b/{name}/detach", "-m", "gz.msgs.Empty", "-p", "unused: true"],
                 check=False, capture_output=True, text=True, timeout=timeout_s,
             )
-        deadline = time.monotonic() + timeout_s
         observed = {name: False for name in object_names}
-        while time.monotonic() < deadline and not all(observed.values()):
-            for name, monitor in monitors.items():
-                if observed[name] or monitor.stdout is None:
-                    continue
-                ready, _, _ = select.select([monitor.stdout], [], [], 0.01)
-                if not ready:
-                    continue
-                line = monitor.stdout.readline()
-                if not line:
-                    continue
-                lines[name].append(line.rstrip())
-                observed[name] = "detached" in line
+        def collect(deadline: float) -> None:
+            while time.monotonic() < deadline and not all(observed.values()):
+                for name, monitor in monitors.items():
+                    if observed[name] or monitor.stdout is None:
+                        continue
+                    ready, _, _ = select.select([monitor.stdout], [], [], 0.01)
+                    if not ready:
+                        continue
+                    line = monitor.stdout.readline()
+                    if not line:
+                        continue
+                    lines[name].append(line.rstrip())
+                    observed[name] = "detached" in line
+
+        collect(time.monotonic() + timeout_s)
+        missing = [name for name in object_names if not observed[name]]
+        if missing:
+            # A DetachableJoint emits its state on transition.  If the initial
+            # transition was lost despite all monitors being armed, force one
+            # explicit attach→detach transition while those same monitors stay
+            # live, then require the new final `detached` evidence.  This is a
+            # repair of transport observability, never a bypass of the final
+            # all-N detached requirement.
+            for name in missing:
+                lines[name].append("repair_cycle: attach_then_detach")
+                subprocess.run(
+                    ["gz", "topic", "-t", f"/xh/m1b/{name}/attach", "-m", "gz.msgs.Empty", "-p", "unused: true"],
+                    check=False, capture_output=True, text=True, timeout=timeout_s,
+                )
+            time.sleep(0.10)
+            for name in missing:
+                subprocess.run(
+                    ["gz", "topic", "-t", f"/xh/m1b/{name}/detach", "-m", "gz.msgs.Empty", "-p", "unused: true"],
+                    check=False, capture_output=True, text=True, timeout=timeout_s,
+                )
+            collect(time.monotonic() + timeout_s)
         records = []
         for name in object_names:
             command = commands[name]
