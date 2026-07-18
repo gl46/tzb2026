@@ -120,7 +120,10 @@ def attach_and_observe(topic: str, state_topic: str) -> dict[str, object]:
     monitor = subprocess.Popen(["gz", "topic", "-e", "-t", state_topic], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
     lines: list[str] = []
     try:
-        time.sleep(0.10)
+        # DetachableJoint state is a one-shot Gazebo transport publication;
+        # establish the monitor subscription before issuing attach so success
+        # requires an observed state transition rather than a blind publish.
+        time.sleep(0.40)
         command = subprocess.run(
             ["gz", "topic", "-t", topic, "-m", "gz.msgs.Empty", "-p", "unused: true"],
             check=False, capture_output=True, text=True, timeout=3.0,
