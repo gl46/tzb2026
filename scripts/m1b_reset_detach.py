@@ -69,6 +69,60 @@ def detach_and_observe(object_name: str, timeout_s: float) -> M1BResetVerificati
     return M1BResetVerificationV1(object_name, detach_topic, state_topic, any("detached" in line for line in lines), tuple(lines))
 
 
+def detach_all_and_observe(object_names: list[str], timeout_s: float) -> list[M1BResetVerificationV1]:
+    """Arm every one-shot state monitor before broadcasting the N detaches."""
+    monitors: dict[str, subprocess.Popen[str]] = {}
+    lines: dict[str, list[str]] = {name: [] for name in object_names}
+    try:
+        for name in object_names:
+            monitors[name] = subprocess.Popen(
+                ["gz", "topic", "-e", "-t", f"/xh/m1b/{name}/grasp_state"],
+                stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True,
+            )
+        # The N observers must all exist before the first detach is published.
+        # This protects the whole reset transaction from one-shot state loss.
+        time.sleep(1.0)
+        commands = {}
+        for name in object_names:
+            commands[name] = subprocess.run(
+                ["gz", "topic", "-t", f"/xh/m1b/{name}/detach", "-m", "gz.msgs.Empty", "-p", "unused: true"],
+                check=False, capture_output=True, text=True, timeout=timeout_s,
+            )
+        deadline = time.monotonic() + timeout_s
+        observed = {name: False for name in object_names}
+        while time.monotonic() < deadline and not all(observed.values()):
+            for name, monitor in monitors.items():
+                if observed[name] or monitor.stdout is None:
+                    continue
+                ready, _, _ = select.select([monitor.stdout], [], [], 0.01)
+                if not ready:
+                    continue
+                line = monitor.stdout.readline()
+                if not line:
+                    continue
+                lines[name].append(line.rstrip())
+                observed[name] = "detached" in line
+        records = []
+        for name in object_names:
+            command = commands[name]
+            if command.returncode != 0:
+                lines[name].extend(value for value in (command.stdout, command.stderr) if value)
+            records.append(M1BResetVerificationV1(
+                name, f"/xh/m1b/{name}/detach", f"/xh/m1b/{name}/grasp_state",
+                observed[name], tuple(lines[name]),
+            ))
+        return records
+    finally:
+        for monitor in monitors.values():
+            monitor.terminate()
+        for monitor in monitors.values():
+            try:
+                monitor.wait(timeout=1.0)
+            except subprocess.TimeoutExpired:
+                monitor.kill()
+                monitor.wait(timeout=1.0)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--spawn-manifest", type=Path, required=True)
@@ -93,7 +147,7 @@ def main() -> int:
     objects = per_object["objects"]
     if not objects or any(not isinstance(name, str) or not name.startswith("cylinder_") for name in objects):
         raise SystemExit("spawn manifest has invalid detachable object list")
-    records = [detach_and_observe(name, args.timeout_s) for name in objects]
+    records = detach_all_and_observe(objects, args.timeout_s)
     status, reasons = validate_reset_records(records, objects)
     payload = {
         "schema_version": "M1BResetDetachEvidenceV1",
