@@ -22,9 +22,15 @@ ADR-0013's later axis-wise audit was run against those actual captured frames,
 not the manifest: all 30 held-out scenes yielded 235 matched public tracks.
 Its absolute-error p90 is 9.88 mm / 15.13 mm / 17.30 mm on world X / Y / Z;
 normal cylinders alone have a 17.35 mm Z p90. The complete per-track evidence
-is in `m1b-alpha-perception-metrics.json`. These are measurement results, not
-an M1B-beta reachability pass: the tolerance envelope has not yet been
-measured, so the required 0.6× comparison remains intentionally pending.
+is in `m1b-alpha-perception-metrics.json`. The complete 81-trial,
+perception-free calibration campaign is recorded in
+`m1b-tolerance-envelope.json`: no axis passed the signed 2/3 monotonic
+closure, so the empirical tolerance envelope is unmeasured on X, Y, and Z.
+The actual p90-versus-0.6× comparison consequently records **NO_GO** in
+`m1b-perception-reachability-gate.json` with
+`TOLERANCE_UNMEASURED:x|y|z`. This is a grasp-primitive/hand-execution
+finding, not a relaxation of the perception gate; round-trip and
+WRONG_OBJECT acceptance remain unrun.
 
 The optional Apache-2.0 GroundingDINO adapter is installed in an isolated
 environment but has no downloaded checkpoint: its official Hugging Face

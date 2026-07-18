@@ -1,0 +1,1099 @@
+{
+  "schema_version": "M1BToleranceEnvelopeV1",
+  "status": "COMPLETE_CALIBRATION_ONLY",
+  "trial_count": 81,
+  "success_predicate": "bilateral_same_entity_contact_and_observed_attach",
+  "point_pass_rule": "at_least_2_of_3",
+  "monotonic_closure": "both_signed_offsets_and_all_smaller_magnitudes_pass",
+  "tolerance_envelope_m": {
+    "x": null,
+    "y": null,
+    "z": null
+  },
+  "point_results": {
+    "x:-0.020": {
+      "axis": "x",
+      "offset_m": -0.02,
+      "successes": 0,
+      "attempts": 3,
+      "pass": false
+    },
+    "x:-0.015": {
+      "axis": "x",
+      "offset_m": -0.015,
+      "successes": 0,
+      "attempts": 3,
+      "pass": false
+    },
+    "x:-0.010": {
+      "axis": "x",
+      "offset_m": -0.01,
+      "successes": 1,
+      "attempts": 3,
+      "pass": false
+    },
+    "x:-0.005": {
+      "axis": "x",
+      "offset_m": -0.005,
+      "successes": 0,
+      "attempts": 3,
+      "pass": false
+    },
+    "x:+0.000": {
+      "axis": "x",
+      "offset_m": 0.0,
+      "successes": 0,
+      "attempts": 3,
+      "pass": false
+    },
+    "x:+0.005": {
+      "axis": "x",
+      "offset_m": 0.005,
+      "successes": 0,
+      "attempts": 3,
+      "pass": false
+    },
+    "x:+0.010": {
+      "axis": "x",
+      "offset_m": 0.01,
+      "successes": 0,
+      "attempts": 3,
+      "pass": false
+    },
+    "x:+0.015": {
+      "axis": "x",
+      "offset_m": 0.015,
+      "successes": 0,
+      "attempts": 3,
+      "pass": false
+    },
+    "x:+0.020": {
+      "axis": "x",
+      "offset_m": 0.02,
+      "successes": 0,
+      "attempts": 3,
+      "pass": false
+    },
+    "y:-0.020": {
+      "axis": "y",
+      "offset_m": -0.02,
+      "successes": 0,
+      "attempts": 3,
+      "pass": false
+    },
+    "y:-0.015": {
+      "axis": "y",
+      "offset_m": -0.015,
+      "successes": 0,
+      "attempts": 3,
+      "pass": false
+    },
+    "y:-0.010": {
+      "axis": "y",
+      "offset_m": -0.01,
+      "successes": 1,
+      "attempts": 3,
+      "pass": false
+    },
+    "y:-0.005": {
+      "axis": "y",
+      "offset_m": -0.005,
+      "successes": 1,
+      "attempts": 3,
+      "pass": false
+    },
+    "y:+0.000": {
+      "axis": "y",
+      "offset_m": 0.0,
+      "successes": 0,
+      "attempts": 3,
+      "pass": false
+    },
+    "y:+0.005": {
+      "axis": "y",
+      "offset_m": 0.005,
+      "successes": 1,
+      "attempts": 3,
+      "pass": false
+    },
+    "y:+0.010": {
+      "axis": "y",
+      "offset_m": 0.01,
+      "successes": 0,
+      "attempts": 3,
+      "pass": false
+    },
+    "y:+0.015": {
+      "axis": "y",
+      "offset_m": 0.015,
+      "successes": 0,
+      "attempts": 3,
+      "pass": false
+    },
+    "y:+0.020": {
+      "axis": "y",
+      "offset_m": 0.02,
+      "successes": 2,
+      "attempts": 3,
+      "pass": true
+    },
+    "z:-0.020": {
+      "axis": "z",
+      "offset_m": -0.02,
+      "successes": 0,
+      "attempts": 3,
+      "pass": false
+    },
+    "z:-0.015": {
+      "axis": "z",
+      "offset_m": -0.015,
+      "successes": 0,
+      "attempts": 3,
+      "pass": false
+    },
+    "z:-0.010": {
+      "axis": "z",
+      "offset_m": -0.01,
+      "successes": 0,
+      "attempts": 3,
+      "pass": false
+    },
+    "z:-0.005": {
+      "axis": "z",
+      "offset_m": -0.005,
+      "successes": 0,
+      "attempts": 3,
+      "pass": false
+    },
+    "z:+0.000": {
+      "axis": "z",
+      "offset_m": 0.0,
+      "successes": 1,
+      "attempts": 3,
+      "pass": false
+    },
+    "z:+0.005": {
+      "axis": "z",
+      "offset_m": 0.005,
+      "successes": 1,
+      "attempts": 3,
+      "pass": false
+    },
+    "z:+0.010": {
+      "axis": "z",
+      "offset_m": 0.01,
+      "successes": 0,
+      "attempts": 3,
+      "pass": false
+    },
+    "z:+0.015": {
+      "axis": "z",
+      "offset_m": 0.015,
+      "successes": 1,
+      "attempts": 3,
+      "pass": false
+    },
+    "z:+0.020": {
+      "axis": "z",
+      "offset_m": 0.02,
+      "successes": 1,
+      "attempts": 3,
+      "pass": false
+    }
+  },
+  "trials": [
+    {
+      "trial_index": 0,
+      "axis": "x",
+      "offset_m": 0.0,
+      "repetition": 1,
+      "scene_seed": 1017,
+      "object_slot": 7,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-000.json",
+      "raw_evidence_sha256": "461884bf199b98dcb646a13dff58752a8f535ec51516d16c565681d1e5b872a5"
+    },
+    {
+      "trial_index": 1,
+      "axis": "x",
+      "offset_m": 0.0,
+      "repetition": 2,
+      "scene_seed": 1018,
+      "object_slot": 4,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-001.json",
+      "raw_evidence_sha256": "8708a110d8662794cc628d7d0d47113f418ca4966bb7a712074056e1890a71a9"
+    },
+    {
+      "trial_index": 2,
+      "axis": "x",
+      "offset_m": 0.0,
+      "repetition": 3,
+      "scene_seed": 1019,
+      "object_slot": 2,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-002.json",
+      "raw_evidence_sha256": "dc3c0abb032c0335a8c946309df10c9bd039be8154da2e3a12222c097b59a244"
+    },
+    {
+      "trial_index": 3,
+      "axis": "x",
+      "offset_m": -0.005,
+      "repetition": 1,
+      "scene_seed": 1017,
+      "object_slot": 7,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-003.json",
+      "raw_evidence_sha256": "5f0965d3b02603980be65eb0890115bc0156e6307053d1bf1d3272cbc9e3ccd9"
+    },
+    {
+      "trial_index": 4,
+      "axis": "x",
+      "offset_m": -0.005,
+      "repetition": 2,
+      "scene_seed": 1018,
+      "object_slot": 4,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-004.json",
+      "raw_evidence_sha256": "0ff5feb3b8bc467f0bd4da8a33a7fc9539b41f30f7400aed89e6e437df708217"
+    },
+    {
+      "trial_index": 5,
+      "axis": "x",
+      "offset_m": -0.005,
+      "repetition": 3,
+      "scene_seed": 1019,
+      "object_slot": 2,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-005.json",
+      "raw_evidence_sha256": "cf26b6b44ca59e4cb86bd67ebfa6c4204a0a0092fbb1d47bcc48e052ab68f0ca"
+    },
+    {
+      "trial_index": 6,
+      "axis": "x",
+      "offset_m": 0.005,
+      "repetition": 1,
+      "scene_seed": 1017,
+      "object_slot": 7,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-006.json",
+      "raw_evidence_sha256": "bbb5d56b9b27795353ca3bb62804512bc85b6a933d0a1c2004c08a853c109624"
+    },
+    {
+      "trial_index": 7,
+      "axis": "x",
+      "offset_m": 0.005,
+      "repetition": 2,
+      "scene_seed": 1018,
+      "object_slot": 4,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-007.json",
+      "raw_evidence_sha256": "3ad2939880ea2f2032262cb1bb521f41e310716deddb9c704580059e1644cccd"
+    },
+    {
+      "trial_index": 8,
+      "axis": "x",
+      "offset_m": 0.005,
+      "repetition": 3,
+      "scene_seed": 1019,
+      "object_slot": 2,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-008.json",
+      "raw_evidence_sha256": "f07456b1b51ac6e9c6b47494e7e06c0aa64c0d7a2c0962f9e7394828578a4b67"
+    },
+    {
+      "trial_index": 9,
+      "axis": "x",
+      "offset_m": -0.01,
+      "repetition": 1,
+      "scene_seed": 1017,
+      "object_slot": 7,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-009.json",
+      "raw_evidence_sha256": "adbeac5f82dda0fb43e1175ecbe5d6fbf5e9d14a51686b34b4d2ba39efe299db"
+    },
+    {
+      "trial_index": 10,
+      "axis": "x",
+      "offset_m": -0.01,
+      "repetition": 2,
+      "scene_seed": 1018,
+      "object_slot": 4,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-010.json",
+      "raw_evidence_sha256": "a80ecbc92c56ef3d03f0bf894b0b8b1d5749927e0e084a4edb5914e746eb94a1"
+    },
+    {
+      "trial_index": 11,
+      "axis": "x",
+      "offset_m": -0.01,
+      "repetition": 3,
+      "scene_seed": 1019,
+      "object_slot": 2,
+      "success": true,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-011.json",
+      "raw_evidence_sha256": "ff38b0c2264af4d05917bc577dc6985e34bb3aad851f2ecbc3954d37c40ebfe7"
+    },
+    {
+      "trial_index": 12,
+      "axis": "x",
+      "offset_m": 0.01,
+      "repetition": 1,
+      "scene_seed": 1017,
+      "object_slot": 7,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-012.json",
+      "raw_evidence_sha256": "70c04cb2b9c7cf5eede8adbe7ca3e93ad5389aaf19bc02430ab167d3a7a50b46"
+    },
+    {
+      "trial_index": 13,
+      "axis": "x",
+      "offset_m": 0.01,
+      "repetition": 2,
+      "scene_seed": 1018,
+      "object_slot": 4,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-013.json",
+      "raw_evidence_sha256": "edeee96a3ccfb4d65daa65e6d28a5a7c6e88b85ea404df0dc64b57a3d06c997a"
+    },
+    {
+      "trial_index": 14,
+      "axis": "x",
+      "offset_m": 0.01,
+      "repetition": 3,
+      "scene_seed": 1019,
+      "object_slot": 2,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-014.json",
+      "raw_evidence_sha256": "e7940bff982f82481c2cce9133df392144b42528d04e9fba9295290b20b95493"
+    },
+    {
+      "trial_index": 15,
+      "axis": "x",
+      "offset_m": -0.015,
+      "repetition": 1,
+      "scene_seed": 1017,
+      "object_slot": 7,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-015.json",
+      "raw_evidence_sha256": "0278e7187db3132df9d4ed058b50ede76fbb311cdc9838d27408518d47b07fc9"
+    },
+    {
+      "trial_index": 16,
+      "axis": "x",
+      "offset_m": -0.015,
+      "repetition": 2,
+      "scene_seed": 1018,
+      "object_slot": 4,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-016.json",
+      "raw_evidence_sha256": "638efaf9079570f3b0d0317eea6394cdaf7b57095d11d1ce155f03dd3d34a147"
+    },
+    {
+      "trial_index": 17,
+      "axis": "x",
+      "offset_m": -0.015,
+      "repetition": 3,
+      "scene_seed": 1019,
+      "object_slot": 2,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-017.json",
+      "raw_evidence_sha256": "2764ea9fd39221ae7bf97988fb9eb7fae21e050b20d88080429d90a7d982e532"
+    },
+    {
+      "trial_index": 18,
+      "axis": "x",
+      "offset_m": 0.015,
+      "repetition": 1,
+      "scene_seed": 1017,
+      "object_slot": 7,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-018.json",
+      "raw_evidence_sha256": "0eb6b3846c8b938c9dc4612b9d276ee9c4fb029e277640c616b5e2bec3f6ce38"
+    },
+    {
+      "trial_index": 19,
+      "axis": "x",
+      "offset_m": 0.015,
+      "repetition": 2,
+      "scene_seed": 1018,
+      "object_slot": 4,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-019.json",
+      "raw_evidence_sha256": "4bf82953056c2dd9a5bae75f185b914fefcc6912c19893975b67cd8a0b0a631f"
+    },
+    {
+      "trial_index": 20,
+      "axis": "x",
+      "offset_m": 0.015,
+      "repetition": 3,
+      "scene_seed": 1019,
+      "object_slot": 2,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-020.json",
+      "raw_evidence_sha256": "ff7ef7e2e6a553a6f37f9dde87e9bb3ddb56fcbf1817411b7998d55de05feb77"
+    },
+    {
+      "trial_index": 21,
+      "axis": "x",
+      "offset_m": -0.02,
+      "repetition": 1,
+      "scene_seed": 1017,
+      "object_slot": 7,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-021.json",
+      "raw_evidence_sha256": "331d72b6e2b3cff71e2ad6f698945646a7032b3bc7c1b67c5bbc2df07fbf89e4"
+    },
+    {
+      "trial_index": 22,
+      "axis": "x",
+      "offset_m": -0.02,
+      "repetition": 2,
+      "scene_seed": 1018,
+      "object_slot": 4,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-022.json",
+      "raw_evidence_sha256": "ed2de79cf4b522a7c1c95d3f4711cca32fb93b176e6544b4894d761546e89946"
+    },
+    {
+      "trial_index": 23,
+      "axis": "x",
+      "offset_m": -0.02,
+      "repetition": 3,
+      "scene_seed": 1019,
+      "object_slot": 2,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-023.json",
+      "raw_evidence_sha256": "ad1d42730ae513564346c524ef4e16fc267b3d75456ca93edd14fe5dae774468"
+    },
+    {
+      "trial_index": 24,
+      "axis": "x",
+      "offset_m": 0.02,
+      "repetition": 1,
+      "scene_seed": 1017,
+      "object_slot": 7,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-024.json",
+      "raw_evidence_sha256": "a5f454753242d9f551cc73b704b5d0d9499bb2cffe89542af2af603b626b7ceb"
+    },
+    {
+      "trial_index": 25,
+      "axis": "x",
+      "offset_m": 0.02,
+      "repetition": 2,
+      "scene_seed": 1018,
+      "object_slot": 4,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-025.json",
+      "raw_evidence_sha256": "63b817a3a7117909221a02af205e79d5f8c013008ae063fffb41199ed7e108a2"
+    },
+    {
+      "trial_index": 26,
+      "axis": "x",
+      "offset_m": 0.02,
+      "repetition": 3,
+      "scene_seed": 1019,
+      "object_slot": 2,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-026.json",
+      "raw_evidence_sha256": "8284e77808fbee29b8883e73349adaec0e1aa60dc08b2dbf43264ee1bcff0614"
+    },
+    {
+      "trial_index": 27,
+      "axis": "y",
+      "offset_m": 0.0,
+      "repetition": 1,
+      "scene_seed": 1017,
+      "object_slot": 7,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-027.json",
+      "raw_evidence_sha256": "058391424a36224f17b47d02a2e54a64d06215ae41f74abe87bece3f4741e27d"
+    },
+    {
+      "trial_index": 28,
+      "axis": "y",
+      "offset_m": 0.0,
+      "repetition": 2,
+      "scene_seed": 1018,
+      "object_slot": 4,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-028.json",
+      "raw_evidence_sha256": "510d22f6eed859c7710931acf6b55ada225aa5474a78a99946ccbff98b31af90"
+    },
+    {
+      "trial_index": 29,
+      "axis": "y",
+      "offset_m": 0.0,
+      "repetition": 3,
+      "scene_seed": 1019,
+      "object_slot": 2,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-029.json",
+      "raw_evidence_sha256": "6bada9cb9c09e00a2164609824e13ab7b29aca05db65d2441a708d9d3318e1de"
+    },
+    {
+      "trial_index": 30,
+      "axis": "y",
+      "offset_m": -0.005,
+      "repetition": 1,
+      "scene_seed": 1017,
+      "object_slot": 7,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-030.json",
+      "raw_evidence_sha256": "6846020c0258759e9741e8fecdd0a5ff711c76a06a95fbad40b8f148583fd03b"
+    },
+    {
+      "trial_index": 31,
+      "axis": "y",
+      "offset_m": -0.005,
+      "repetition": 2,
+      "scene_seed": 1018,
+      "object_slot": 4,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-031.json",
+      "raw_evidence_sha256": "1449e5f13f2554cdcb44db6d81a3ae1be3afa1b8d80857f7b4d27746330d3166"
+    },
+    {
+      "trial_index": 32,
+      "axis": "y",
+      "offset_m": -0.005,
+      "repetition": 3,
+      "scene_seed": 1019,
+      "object_slot": 2,
+      "success": true,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-032.json",
+      "raw_evidence_sha256": "3e2119cc7bf33135d08924f7baa8f223b86b41faab1f3de8495fb374b66d08dc"
+    },
+    {
+      "trial_index": 33,
+      "axis": "y",
+      "offset_m": 0.005,
+      "repetition": 1,
+      "scene_seed": 1017,
+      "object_slot": 7,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-033.json",
+      "raw_evidence_sha256": "fcbede97368990bd93ddd631d4651f64bb5416d277b6b02b509bc38054fea06d"
+    },
+    {
+      "trial_index": 34,
+      "axis": "y",
+      "offset_m": 0.005,
+      "repetition": 2,
+      "scene_seed": 1018,
+      "object_slot": 4,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-034.json",
+      "raw_evidence_sha256": "a115ea9f518ad46b177144125ebfb527ecf024645255cc3ebc86aac659dab6de"
+    },
+    {
+      "trial_index": 35,
+      "axis": "y",
+      "offset_m": 0.005,
+      "repetition": 3,
+      "scene_seed": 1019,
+      "object_slot": 2,
+      "success": true,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-035.json",
+      "raw_evidence_sha256": "f835e9965f935ccf24498de57e9edbad675edfd0196639f2c572de6e49d03d71"
+    },
+    {
+      "trial_index": 36,
+      "axis": "y",
+      "offset_m": -0.01,
+      "repetition": 1,
+      "scene_seed": 1017,
+      "object_slot": 7,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-036.json",
+      "raw_evidence_sha256": "ecc5cd2239baac06d456ead478bcc220465a757668d97c3ff06ccde9cc5ff4c3"
+    },
+    {
+      "trial_index": 37,
+      "axis": "y",
+      "offset_m": -0.01,
+      "repetition": 2,
+      "scene_seed": 1018,
+      "object_slot": 4,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-037.json",
+      "raw_evidence_sha256": "ac4e702563fe82f420277a8f019959ddaeadd272a56c7f4690ddc66971fee0a1"
+    },
+    {
+      "trial_index": 38,
+      "axis": "y",
+      "offset_m": -0.01,
+      "repetition": 3,
+      "scene_seed": 1019,
+      "object_slot": 2,
+      "success": true,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-038.json",
+      "raw_evidence_sha256": "720bc726e655d53ba144325405940d4c56cef10994ba29ff8057c6a1d954b685"
+    },
+    {
+      "trial_index": 39,
+      "axis": "y",
+      "offset_m": 0.01,
+      "repetition": 1,
+      "scene_seed": 1017,
+      "object_slot": 7,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-039.json",
+      "raw_evidence_sha256": "5c90a3f8fda45055862e17e9b179da24612ea45652cb0169006cbb3c0c71902e"
+    },
+    {
+      "trial_index": 40,
+      "axis": "y",
+      "offset_m": 0.01,
+      "repetition": 2,
+      "scene_seed": 1018,
+      "object_slot": 4,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-040.json",
+      "raw_evidence_sha256": "4e85a7c24a5349bc77c60cab4e995929af64238c5818a59acfcbbff665baf2f1"
+    },
+    {
+      "trial_index": 41,
+      "axis": "y",
+      "offset_m": 0.01,
+      "repetition": 3,
+      "scene_seed": 1019,
+      "object_slot": 2,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-041.json",
+      "raw_evidence_sha256": "013caba755278b1026f22b78a249928b2960d25a00e4ac23693b55b32ddf1579"
+    },
+    {
+      "trial_index": 42,
+      "axis": "y",
+      "offset_m": -0.015,
+      "repetition": 1,
+      "scene_seed": 1017,
+      "object_slot": 7,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-042.json",
+      "raw_evidence_sha256": "6cd236f12e2e14ed30207772a1644517e30d3cdab691c248c9172e2085276d9a"
+    },
+    {
+      "trial_index": 43,
+      "axis": "y",
+      "offset_m": -0.015,
+      "repetition": 2,
+      "scene_seed": 1018,
+      "object_slot": 4,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-043.json",
+      "raw_evidence_sha256": "d7b48038eb18a40e07e0f7bd0e0d98350819889cb0945120ee443abc0a2b00c4"
+    },
+    {
+      "trial_index": 44,
+      "axis": "y",
+      "offset_m": -0.015,
+      "repetition": 3,
+      "scene_seed": 1019,
+      "object_slot": 2,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-044.json",
+      "raw_evidence_sha256": "c965a945f8ce6c39d862b765fe12fffa282fa334e4254a2cb0a9d8e5de857f28"
+    },
+    {
+      "trial_index": 45,
+      "axis": "y",
+      "offset_m": 0.015,
+      "repetition": 1,
+      "scene_seed": 1017,
+      "object_slot": 7,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-045.json",
+      "raw_evidence_sha256": "8a7cd1ac64a4af88438b0063bd6a4b03046cf06ff9a579190952be98e08fff25"
+    },
+    {
+      "trial_index": 46,
+      "axis": "y",
+      "offset_m": 0.015,
+      "repetition": 2,
+      "scene_seed": 1018,
+      "object_slot": 4,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-046.json",
+      "raw_evidence_sha256": "60c98323e2f6e49ed958f85c7bda025f1006245e9b96887d00854680449f0dcb"
+    },
+    {
+      "trial_index": 47,
+      "axis": "y",
+      "offset_m": 0.015,
+      "repetition": 3,
+      "scene_seed": 1019,
+      "object_slot": 2,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-047.json",
+      "raw_evidence_sha256": "7f9fec056009e9a54a6d1728c2c24bbb140e95873d592b2e6a9eed88a7305d2d"
+    },
+    {
+      "trial_index": 48,
+      "axis": "y",
+      "offset_m": -0.02,
+      "repetition": 1,
+      "scene_seed": 1017,
+      "object_slot": 7,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-048.json",
+      "raw_evidence_sha256": "3a2f9f29cedb34f1bb6d2466a6d4df1e15f9bfa917cdf8f13186eb4f6ac38da9"
+    },
+    {
+      "trial_index": 49,
+      "axis": "y",
+      "offset_m": -0.02,
+      "repetition": 2,
+      "scene_seed": 1018,
+      "object_slot": 4,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-049.json",
+      "raw_evidence_sha256": "b8dac89db570d86ea49c6e0e0c5e8a5dbdc0ec788e35048171e16420f9b2754d"
+    },
+    {
+      "trial_index": 50,
+      "axis": "y",
+      "offset_m": -0.02,
+      "repetition": 3,
+      "scene_seed": 1019,
+      "object_slot": 2,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-050.json",
+      "raw_evidence_sha256": "69165a387c690038f9cb3c378bb19c695b16f3da9d84b097acfdb2351211f69c"
+    },
+    {
+      "trial_index": 51,
+      "axis": "y",
+      "offset_m": 0.02,
+      "repetition": 1,
+      "scene_seed": 1017,
+      "object_slot": 7,
+      "success": true,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-051.json",
+      "raw_evidence_sha256": "f852ff3446f8ea93ba3ccaf9af71bb6aad5cc9e147ac23124c02535960ba7b6a"
+    },
+    {
+      "trial_index": 52,
+      "axis": "y",
+      "offset_m": 0.02,
+      "repetition": 2,
+      "scene_seed": 1018,
+      "object_slot": 4,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-052.json",
+      "raw_evidence_sha256": "c8e166c297347143c6101d8f8a8ab1bc44594c365c9e578d8fe9054602645bb6"
+    },
+    {
+      "trial_index": 53,
+      "axis": "y",
+      "offset_m": 0.02,
+      "repetition": 3,
+      "scene_seed": 1019,
+      "object_slot": 2,
+      "success": true,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-053.json",
+      "raw_evidence_sha256": "7fd232053e999c2669a9b3ad25a14be9ef385a844ed4fa0dff8aa3e6404fe210"
+    },
+    {
+      "trial_index": 54,
+      "axis": "z",
+      "offset_m": 0.0,
+      "repetition": 1,
+      "scene_seed": 1017,
+      "object_slot": 7,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-054.json",
+      "raw_evidence_sha256": "ae4df864662e38a021d2bff87bf26bbcb7926acd86f49b1c41c22a31760db42c"
+    },
+    {
+      "trial_index": 55,
+      "axis": "z",
+      "offset_m": 0.0,
+      "repetition": 2,
+      "scene_seed": 1018,
+      "object_slot": 4,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-055.json",
+      "raw_evidence_sha256": "c3a716f73a2ea99a0fff7928b78ed4e6153972dbd83a157e8f5f8cb14322610a"
+    },
+    {
+      "trial_index": 56,
+      "axis": "z",
+      "offset_m": 0.0,
+      "repetition": 3,
+      "scene_seed": 1019,
+      "object_slot": 2,
+      "success": true,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-056.json",
+      "raw_evidence_sha256": "071d52a8a5b55c1bf13cb6d44513280ba465f4d07adde8c605a928d5f89678cb"
+    },
+    {
+      "trial_index": 57,
+      "axis": "z",
+      "offset_m": -0.005,
+      "repetition": 1,
+      "scene_seed": 1017,
+      "object_slot": 7,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-057.json",
+      "raw_evidence_sha256": "a5b4794542ccd2bbd73933cc3a5da42563336d288b15ba97d04f5d009d45d162"
+    },
+    {
+      "trial_index": 58,
+      "axis": "z",
+      "offset_m": -0.005,
+      "repetition": 2,
+      "scene_seed": 1018,
+      "object_slot": 4,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-058.json",
+      "raw_evidence_sha256": "2aab1fcc1c4765c8fa572e63b05f1a4d852646e1d7da77aa01f89cce3a104880"
+    },
+    {
+      "trial_index": 59,
+      "axis": "z",
+      "offset_m": -0.005,
+      "repetition": 3,
+      "scene_seed": 1019,
+      "object_slot": 2,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-059.json",
+      "raw_evidence_sha256": "d8c25ec3951fc4fc3730dafff77c8eb8ea52771879bad546ece69032d0b35ff6"
+    },
+    {
+      "trial_index": 60,
+      "axis": "z",
+      "offset_m": 0.005,
+      "repetition": 1,
+      "scene_seed": 1017,
+      "object_slot": 7,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-060.json",
+      "raw_evidence_sha256": "6d149aff80eeb8ab3888408c7481483bd96ec50c2e283f7862b709166eff2238"
+    },
+    {
+      "trial_index": 61,
+      "axis": "z",
+      "offset_m": 0.005,
+      "repetition": 2,
+      "scene_seed": 1018,
+      "object_slot": 4,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-061.json",
+      "raw_evidence_sha256": "36806d3b4129263fa53b6d47e5a33475a7605d4ef3145b34f823fa30e55353ce"
+    },
+    {
+      "trial_index": 62,
+      "axis": "z",
+      "offset_m": 0.005,
+      "repetition": 3,
+      "scene_seed": 1019,
+      "object_slot": 2,
+      "success": true,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-062.json",
+      "raw_evidence_sha256": "662b8b0925710286fa5a135ea901e9bafb3bfba08c460bd9468d214e81e1517a"
+    },
+    {
+      "trial_index": 63,
+      "axis": "z",
+      "offset_m": -0.01,
+      "repetition": 1,
+      "scene_seed": 1017,
+      "object_slot": 7,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-063.json",
+      "raw_evidence_sha256": "be411fed7e884ac48b5fc36342be9a7b582a442b7b65f25930a790d88d18a506"
+    },
+    {
+      "trial_index": 64,
+      "axis": "z",
+      "offset_m": -0.01,
+      "repetition": 2,
+      "scene_seed": 1018,
+      "object_slot": 4,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-064.json",
+      "raw_evidence_sha256": "bccc9c283427c81bab6e0a2b71104cc0ae7ab782df34806becdbe9360d916aa9"
+    },
+    {
+      "trial_index": 65,
+      "axis": "z",
+      "offset_m": -0.01,
+      "repetition": 3,
+      "scene_seed": 1019,
+      "object_slot": 2,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-065.json",
+      "raw_evidence_sha256": "8770d7660434342557dedc6f9a7726a0441c690df093e0c0cede3f927a3f9e2c"
+    },
+    {
+      "trial_index": 66,
+      "axis": "z",
+      "offset_m": 0.01,
+      "repetition": 1,
+      "scene_seed": 1017,
+      "object_slot": 7,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-066.json",
+      "raw_evidence_sha256": "7b8f4abbb4e880c68a1c193ce79ebf714bc6ecc023bc52df51671370bdd713a1"
+    },
+    {
+      "trial_index": 67,
+      "axis": "z",
+      "offset_m": 0.01,
+      "repetition": 2,
+      "scene_seed": 1018,
+      "object_slot": 4,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-067.json",
+      "raw_evidence_sha256": "3e3e779f834bb88587e888f71970b9076155c3c3bdf359a9453e660f6f7dcc92"
+    },
+    {
+      "trial_index": 68,
+      "axis": "z",
+      "offset_m": 0.01,
+      "repetition": 3,
+      "scene_seed": 1019,
+      "object_slot": 2,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-068.json",
+      "raw_evidence_sha256": "06eeb4b251393a8cbf5879a7d886bdbd034e08eceacb480ae2609edf288b0397"
+    },
+    {
+      "trial_index": 69,
+      "axis": "z",
+      "offset_m": -0.015,
+      "repetition": 1,
+      "scene_seed": 1017,
+      "object_slot": 7,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-069.json",
+      "raw_evidence_sha256": "d32d67379bc69e6101eeb33f3b131c92bcc3f1940c83b52c569fce2effc8a443"
+    },
+    {
+      "trial_index": 70,
+      "axis": "z",
+      "offset_m": -0.015,
+      "repetition": 2,
+      "scene_seed": 1018,
+      "object_slot": 4,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-070.json",
+      "raw_evidence_sha256": "d8a590768f3df4b4719c8304fd69bcefc8960a6c4bef8943d957bf1fc017129e"
+    },
+    {
+      "trial_index": 71,
+      "axis": "z",
+      "offset_m": -0.015,
+      "repetition": 3,
+      "scene_seed": 1019,
+      "object_slot": 2,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-071.json",
+      "raw_evidence_sha256": "7191d68b5d11e7a540d4c000a114937facf5742478fad7ea952e4a0356c1a4bb"
+    },
+    {
+      "trial_index": 72,
+      "axis": "z",
+      "offset_m": 0.015,
+      "repetition": 1,
+      "scene_seed": 1017,
+      "object_slot": 7,
+      "success": true,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-072.json",
+      "raw_evidence_sha256": "2e3c2d31368cc916a2f09153eaf94d1b9012922a4c80f05f33b41bd0b12f8c6f"
+    },
+    {
+      "trial_index": 73,
+      "axis": "z",
+      "offset_m": 0.015,
+      "repetition": 2,
+      "scene_seed": 1018,
+      "object_slot": 4,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-073.json",
+      "raw_evidence_sha256": "6afad38ffa56e034f8c5ef4d326cf1247efb47b164bf3ba905b3d97689f7d24a"
+    },
+    {
+      "trial_index": 74,
+      "axis": "z",
+      "offset_m": 0.015,
+      "repetition": 3,
+      "scene_seed": 1019,
+      "object_slot": 2,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-074.json",
+      "raw_evidence_sha256": "e67c352db28944b498a88be93d8c14b927e6ef9c9d28f5a1b8961bf7121d6d66"
+    },
+    {
+      "trial_index": 75,
+      "axis": "z",
+      "offset_m": -0.02,
+      "repetition": 1,
+      "scene_seed": 1017,
+      "object_slot": 7,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-075.json",
+      "raw_evidence_sha256": "c3cf45c1dcdb613f3669765c89a89ab65ab12affb2c83a17f686a7da44c24bf6"
+    },
+    {
+      "trial_index": 76,
+      "axis": "z",
+      "offset_m": -0.02,
+      "repetition": 2,
+      "scene_seed": 1018,
+      "object_slot": 4,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-076.json",
+      "raw_evidence_sha256": "78e0f66abc58435076d224ce821d872f4fca83b2b54a0dfdfe04f01d1cf59ff6"
+    },
+    {
+      "trial_index": 77,
+      "axis": "z",
+      "offset_m": -0.02,
+      "repetition": 3,
+      "scene_seed": 1019,
+      "object_slot": 2,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-077.json",
+      "raw_evidence_sha256": "11bbe3275077df4a28925dbfb5a107cdd5841909a440f5ead1a86ecfaf5cfdb9"
+    },
+    {
+      "trial_index": 78,
+      "axis": "z",
+      "offset_m": 0.02,
+      "repetition": 1,
+      "scene_seed": 1017,
+      "object_slot": 7,
+      "success": true,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-078.json",
+      "raw_evidence_sha256": "fa37a61f241fe83072a7ea7102e4b306a4864bf42a291264c34225206083d161"
+    },
+    {
+      "trial_index": 79,
+      "axis": "z",
+      "offset_m": 0.02,
+      "repetition": 2,
+      "scene_seed": 1018,
+      "object_slot": 4,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-079.json",
+      "raw_evidence_sha256": "50a674592d013b6be993b985fa8fa465b3915f7502583165c7a0059160f347e0"
+    },
+    {
+      "trial_index": 80,
+      "axis": "z",
+      "offset_m": 0.02,
+      "repetition": 3,
+      "scene_seed": 1019,
+      "object_slot": 2,
+      "success": false,
+      "raw_evidence_path": "/tmp/m1b-tolerance-campaign-20260719/run-retry1/raw/trial-080.json",
+      "raw_evidence_sha256": "a31331fbf70297adcda20c206b02ff5257a67032b0f2db7f626aa7cbc3243016"
+    }
+  ],
+  "truth_boundary": "settled simulator truth was calibration-only initialization; raw contact/broker/attach evidence is production-path evidence."
+}
+
