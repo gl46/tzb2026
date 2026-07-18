@@ -52,6 +52,8 @@ M1B_NORMAL_SIDE_IK_SEED = [
 ]
 M1B_NORMAL_PRECONTACT_HAND_Z_OFFSET_M = 0.220
 M1B_NORMAL_CONTACT_HAND_Z_OFFSET_M = 0.065
+M1B_FINGER_BOARD_THICKNESS_M = 0.018
+M1B_MAX_FINGER_POSITION_M = 0.040
 
 
 def m1b_close_finger_targets_from_perceived_diameter(
@@ -59,18 +61,25 @@ def m1b_close_finger_targets_from_perceived_diameter(
 ) -> tuple[list[float], dict[str, float]]:
     """Turn the public perceived diameter into the physical hand command.
 
-    ``width_window_from_perceived_diameter`` is expressed in total jaw width,
-    whereas the Panda hand controller takes one target per symmetric finger.
-    The midpoint is deliberately selected inside the already bounded public
-    window; it is never read from simulator supervision or a fixture label.
+    ``width_window_from_perceived_diameter`` is the desired inner-pad gap.
+    The Panda controller instead takes one positive-open position per finger;
+    for its 18 mm boards, ``inner_gap = 2q - 0.018``.  Select the lower edge
+    of the public window to produce a bounded contact preload rather than
+    stopping open at its midpoint.  This is never read from simulator
+    supervision or a fixture label.
     """
     lower_m, upper_m = width_window_from_perceived_diameter(perceived_diameter_m)
-    total_jaw_width_m = (lower_m + upper_m) / 2.0
-    return [total_jaw_width_m / 2.0, total_jaw_width_m / 2.0], {
+    selected_inner_gap_m = lower_m
+    per_finger_target_m = (selected_inner_gap_m + M1B_FINGER_BOARD_THICKNESS_M) / 2.0
+    if per_finger_target_m > M1B_MAX_FINGER_POSITION_M:
+        raise SystemExit("public aperture is outside the physical Panda-hand capacity")
+    return [per_finger_target_m, per_finger_target_m], {
         "perceived_diameter_m": perceived_diameter_m,
-        "total_jaw_width_window_m": [lower_m, upper_m],
-        "selected_total_jaw_width_m": total_jaw_width_m,
-        "per_finger_target_m": total_jaw_width_m / 2.0,
+        "inner_pad_gap_window_m": [lower_m, upper_m],
+        "selected_inner_pad_gap_m": selected_inner_gap_m,
+        "finger_board_thickness_m": M1B_FINGER_BOARD_THICKNESS_M,
+        "per_finger_target_m": per_finger_target_m,
+        "joint_mapping": "inner_pad_gap_m = 2 * per_finger_target_m - finger_board_thickness_m",
     }
 
 
