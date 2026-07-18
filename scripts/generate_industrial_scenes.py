@@ -41,14 +41,14 @@ def part_sdf(index: int, state: str, x: float, y: float, color: tuple[float, flo
     return f'''    <model name="cylinder_{index:02d}"><pose>{x:.4f} {y:.4f} {z:.4f} {roll:.4f} {pitch:.4f} {yaw:.4f}</pose><link name="link"><inertial><mass>0.06</mass></inertial><collision name="collision"><geometry><cylinder><radius>0.025</radius><length>0.09</length></cylinder></geometry></collision><visual name="visual"><geometry><cylinder><radius>0.025</radius><length>0.09</length></cylinder></geometry><material><diffuse>{red:.3f} {green:.3f} {blue:.3f} 1</diffuse><specular>0.15 0.15 0.15 1</specular></material></visual><sensor name="contact" type="contact"><always_on>1</always_on><update_rate>30</update_rate><topic>/xh/actuation_internal/cylinders/cylinder_{index:02d}/contacts</topic><contact><collision>collision</collision></contact></sensor></link></model>'''
 
 
-def render(template: str, seed: int) -> tuple[str, dict[str, object]]:
+def render(template: str, seed: int, *, orientations: tuple[str, ...] = ORIENTATIONS) -> tuple[str, dict[str, object]]:
     rng = random.Random(seed)
     count = rng.randint(6, 12)
     parts = []
     labels = []
     positions: list[tuple[float, float]] = []
     for index in range(count):
-        state = ORIENTATIONS[index % len(ORIENTATIONS)]
+        state = orientations[index % len(orientations)]
         # Split two incoming zones and enforce a 9 cm centre separation. This
         # prevents the simulator generator from creating unobservable stacks.
         for _ in range(500):
@@ -76,15 +76,17 @@ def main() -> int:
     parser.add_argument("--output-dir", type=Path, default=Path("data/generated/m1b_alpha_v1/scenes"))
     parser.add_argument("--count", type=int, default=150)
     parser.add_argument("--seed-start", type=int, default=1000)
+    parser.add_argument("--orientation-mode", choices=("mixed", "normal"), default="mixed")
     args = parser.parse_args()
     if args.count < 150:
         raise SystemExit("--count must be at least 150")
     template = args.template.read_text(encoding="utf-8")
+    orientations = ORIENTATIONS if args.orientation_mode == "mixed" else ("normal",)
     args.output_dir.mkdir(parents=True, exist_ok=True)
     manifest = []
     for offset in range(args.count):
         seed = args.seed_start + offset
-        scene, supervision = render(template, seed)
+        scene, supervision = render(template, seed, orientations=orientations)
         (args.output_dir / f"scene-{seed}.sdf").write_text(scene, encoding="utf-8")
         (args.output_dir / f"scene-{seed}.supervision.json").write_text(json.dumps(supervision, indent=2) + "\n", encoding="utf-8")
         manifest.append({"seed": seed, "split": supervision["split"], "sdf": str(args.output_dir / f"scene-{seed}.sdf"), "supervision": str(args.output_dir / f"scene-{seed}.supervision.json"), "part_count": supervision["part_count"]})

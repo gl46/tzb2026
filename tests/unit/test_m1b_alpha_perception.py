@@ -131,6 +131,10 @@ def test_random_scene_generator_makes_seed_specific_six_to_twelve_part_scenes(tm
     scene = (output / "scene-1000.sdf").read_text()
     assert "/xh/actuation_internal/cylinders/cylinder_01/contacts" in scene
     assert 'type="contact"' in scene
+    normal_output = tmp_path / "normal-scenes"
+    subprocess.run([sys.executable, "scripts/generate_industrial_scenes.py", "--count", "150", "--orientation-mode", "normal", "--output-dir", str(normal_output)], check=True)
+    normal_labels = json.loads((normal_output / "scene-1000.supervision.json").read_text())
+    assert {item["orientation_state"] for item in normal_labels["simulator_supervision"]["objects"]} == {"normal"}
 
 
 def test_captured_manifest_excludes_incomplete_frames(tmp_path: Path) -> None:
