@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import math
+import json
 from pathlib import Path
+import subprocess
 import sys
 
 import pytest
@@ -314,3 +316,13 @@ def test_m1b_s0_style_tolerance_gate_requires_repeated_trials_and_margin() -> No
     audit = perception_axis_audit([(0.004, -0.003, 0.005)] * 30)
     assert reachability_gate(envelope, audit)[0] == "GO"
     assert reachability_gate(envelope, perception_axis_audit([(0.007, 0.0, 0.0)] * 30))[1] == ("P90_EXCEEDS_60_PERCENT_TOLERANCE:x",)
+
+
+def test_m1b_tolerance_worklist_binds_three_distinct_calibration_instances(tmp_path: Path) -> None:
+    root = Path(__file__).parents[2]
+    output = tmp_path / "worklist.json"
+    subprocess.run([sys.executable, "scripts/plan_m1b_tolerance_calibration.py", "--config", "configs/m1b_normal_tolerance_calibration.json", "--output", str(output)], cwd=root, check=True)
+    worklist = json.loads(output.read_text())
+    assert worklist["trial_count"] == 81
+    first_point = [trial for trial in worklist["trials"] if trial["axis"] == "x" and trial["offset_m"] == 0.0]
+    assert len({(trial["scene_seed"], trial["object_slot"]) for trial in first_point}) == 3
