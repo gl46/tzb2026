@@ -188,7 +188,9 @@ def test_m1b_tolerance_attach_uses_detachablejoint_empty_payload() -> None:
     assert '["gz", "topic", "-t", topic, "-m", "gz.msgs.Empty", "-p", ""]' in source
     assert '"-p", "unused: true"' not in source
     assert 'approach_motion_accepted = bool(approach.get("executed") and approach.get("converged"))' in source
-    assert '"motion_gate_requires_terminal_convergence": True' in source
+    assert '"pregrasp_terminal_convergence_required": True' in source
+    assert '"contact_descend_terminal_convergence_required": False' in source
+    assert '"contact_descend_contact_authorization": "POST_CLOSE_BILATERAL_SAME_ENTITY_WINDOW"' in source
     assert 'M1B_NORMAL_PRECONTACT_HAND_Z_OFFSET_M = 0.220' in source
     assert 'M1B_NORMAL_CONTACT_HAND_Z_OFFSET_M = 0.065' in source
     assert 'M1B_NORMAL_SIDE_HAND_X_OFFSET_M = -0.080' in source

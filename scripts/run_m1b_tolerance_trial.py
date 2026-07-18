@@ -531,7 +531,19 @@ def main() -> int:
             "baseline_perception_free": args.calibration_fixture_diameter_m is not None and not args.enable_near_pregrasp_reobservation,
             "offset_vector_m": [target[index] - truth_center[index] for index in range(3)],
             "production_grasp_primitive": "open_physical_hand + m1b_normal_side_precontact + m1b_normal_side_contact_descend + close_physical_hand + m1b_internal_bilateral_broker",
-            "ready": ready, "calibration_collision_scene_applied": cylinder_scene_applied if ready else False, "target_touch_exception_applied": target_touch_exception_applied if ready else False, "motion_gate_requires_terminal_convergence": True, "open_hand": open_hand, "approach": approach, "close": close, "contact_descend": contact_descend,
+            "ready": ready, "calibration_collision_scene_applied": cylinder_scene_applied if ready else False, "target_touch_exception_applied": target_touch_exception_applied if ready else False,
+            # The non-contact pregrasp must converge to its planned terminal
+            # state.  The final descent deliberately permits contact to
+            # prevent the controller from driving through a free cylinder;
+            # its authorization comes from successful execution plus the
+            # post-close bilateral same-entity window below.
+            "motion_gate_contract": {
+                "pregrasp_terminal_convergence_required": True,
+                "contact_descend_controller_execution_required": True,
+                "contact_descend_terminal_convergence_required": False,
+                "contact_descend_contact_authorization": "POST_CLOSE_BILATERAL_SAME_ENTITY_WINDOW",
+            },
+            "open_hand": open_hand, "approach": approach, "close": close, "contact_descend": contact_descend,
             "hand_feedback_ready": hand_feedback_ready,
             "raw_contact_samples": [{"timestamp_s": item.timestamp_s, "finger": item.finger, "collision_pairs": list(item.collision_pairs)} for item in raw],
             "post_close_contact_samples": [{"timestamp_s": item.timestamp_s, "finger": item.finger, "collision_pairs": list(item.collision_pairs)} for item in post_close_raw],
