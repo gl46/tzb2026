@@ -61,11 +61,11 @@ M1B_NORMAL_PRECONTACT_HAND_Z_OFFSET_M = 0.220
 # Keep the 65 mm plane while retaining the tangent-tip X placement.
 M1B_NORMAL_CONTACT_HAND_Z_OFFSET_M = 0.065
 M1B_NORMAL_SIDE_HAND_X_OFFSET_M = -0.080
-# The hand-frame Y centreline is symmetric in the spawned URDF.  Dynamic
-# cylinder settling is handled by the public near-pregrasp reobservation
-# below; baking a target-specific settling displacement into the hand chain
-# would turn it into an untracked simulator calibration leak.
-M1B_NORMAL_HAND_Y_CENTERLINE_BIAS_M = 0.0
+# Live calibration link-pose evidence at the settled target shows the physical
+# board midpoint is 0.8 mm left of the commanded hand Y.  +1 mm provides a
+# symmetric 1 mm pad preload for the 50 mm calibration cylinder.  This is a
+# fixed hand-chain correction, not target pose input.
+M1B_NORMAL_HAND_Y_CENTERLINE_BIAS_M = 0.001
 M1B_FINGER_BOARD_THICKNESS_M = 0.018
 M1B_MAX_FINGER_POSITION_M = 0.040
 M1B_NEAR_REOBSERVATION_DURATION_S = 8.0

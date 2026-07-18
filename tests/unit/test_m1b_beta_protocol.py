@@ -189,7 +189,7 @@ def test_m1b_tolerance_attach_uses_detachablejoint_empty_payload() -> None:
     assert 'M1B_NORMAL_PRECONTACT_HAND_Z_OFFSET_M = 0.220' in source
     assert 'M1B_NORMAL_CONTACT_HAND_Z_OFFSET_M = 0.065' in source
     assert 'M1B_NORMAL_SIDE_HAND_X_OFFSET_M = -0.080' in source
-    assert 'M1B_NORMAL_HAND_Y_CENTERLINE_BIAS_M = 0.0' in source
+    assert 'M1B_NORMAL_HAND_Y_CENTERLINE_BIAS_M = 0.001' in source
     assert 'value.position.y = centre_world_m[1] + M1B_NORMAL_HAND_Y_CENTERLINE_BIAS_M' in source
     assert 'value.position.x = centre_world_m[0] + M1B_NORMAL_SIDE_HAND_X_OFFSET_M' in source
     assert 'def m1b_close_finger_targets_from_perceived_diameter(' in source
