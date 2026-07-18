@@ -208,9 +208,11 @@ def test_m1b_tolerance_attach_uses_detachablejoint_empty_payload() -> None:
     assert '"track_id": str(initial_public_track["track_id"])' in source
     assert '"near_pregrasp_public_reobservation": near_reobservation' in source
     assert '"PUBLIC_NEAR_REOBSERVATION_GATE_REJECTED"' in source
-    assert '"--public-perception-evidence", required=True, type=Path' in source
-    assert '"--public-camera-info", required=True, type=Path' in source
-    assert '"--public-track-id", required=True' in source
+    assert 'aperture_source.add_argument("--calibration-fixture-diameter-m", type=float' in source
+    assert 'aperture_source.add_argument("--public-perception-evidence", type=Path' in source
+    assert '"--enable-near-pregrasp-reobservation", action="store_true"' in source
+    assert '"source": "CALIBRATION_FIXTURE_DECLARED_GEOMETRY"' in source
+    assert '"baseline_perception_free": args.calibration_fixture_diameter_m is not None' in source
     assert '"evidence_sha256": hashlib.sha256(raw).hexdigest()' in source
     assert 'close = client.command_hand(close_targets)' in source
     assert '"source": "ACTUAL_PUBLIC_RGBD_GEOMETRIC_OUTPUT"' in source

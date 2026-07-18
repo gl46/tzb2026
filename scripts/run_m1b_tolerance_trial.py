@@ -328,10 +328,13 @@ def main() -> int:
     parser.add_argument("--trial", required=True, type=Path, help="One record from the immutable worklist")
     parser.add_argument("--supervision", required=True, type=Path)
     parser.add_argument("--object-slot", required=True, type=int, help="1-based normal-object slot, calibration only")
-    parser.add_argument("--public-perception-evidence", required=True, type=Path, help="Actual public RGB-D geometric output")
-    parser.add_argument("--public-camera-info", required=True, type=Path, help="Camera intrinsics paired with that public frame")
-    parser.add_argument("--public-track-id", required=True, help="Production-side public target track ID")
+    aperture_source = parser.add_mutually_exclusive_group(required=True)
+    aperture_source.add_argument("--calibration-fixture-diameter-m", type=float, help="Declared physical cylinder diameter for the perception-free tolerance experiment")
+    aperture_source.add_argument("--public-perception-evidence", type=Path, help="Actual public RGB-D geometric output for a production-style run")
+    parser.add_argument("--public-camera-info", type=Path, help="Camera intrinsics paired with public perception evidence")
+    parser.add_argument("--public-track-id", help="Production-side public target track ID")
     parser.add_argument("--public-pipeline-python", default=os.environ.get("M1B_PUBLIC_PIPELINE_PYTHON", sys.executable), help="Python with the declared public RGB-D dependencies")
+    parser.add_argument("--enable-near-pregrasp-reobservation", action="store_true", help="Enable the production NO-GO remediation; excluded from the baseline tolerance envelope")
     parser.add_argument("--output", required=True, type=Path)
     args = parser.parse_args()
     trial = json.loads(args.trial.read_text(encoding="utf-8"))
@@ -347,11 +350,22 @@ def main() -> int:
     truth_center = [float(value) for value in normal[args.object_slot - 1]["position_3d_world"]]
     target = list(truth_center)
     target["xyz".index(axis)] += float(trial["offset_m"])
-    calibration = M1BStaticCameraCalibrationV1.from_file(ROOT / "configs" / "m1b_camera_calibration.json")
-    initial_public_track, public_evidence = public_track_from_evidence(
-        args.public_perception_evidence, args.public_camera_info, args.public_track_id, calibration,
-    )
-    close_targets, aperture = m1b_close_finger_targets_from_perceived_diameter(float(initial_public_track["perceived_diameter_m"]))
+    calibration: M1BStaticCameraCalibrationV1 | None = None
+    initial_public_track: dict[str, object] | None = None
+    if args.calibration_fixture_diameter_m is not None:
+        perceived_diameter_m = args.calibration_fixture_diameter_m
+        public_evidence: dict[str, object] = {"source": "CALIBRATION_FIXTURE_DECLARED_GEOMETRY", "perceived_diameter_m": perceived_diameter_m}
+    else:
+        if args.public_perception_evidence is None or args.public_camera_info is None or not args.public_track_id:
+            raise SystemExit("public perception evidence, camera info, and target track are required together")
+        calibration = M1BStaticCameraCalibrationV1.from_file(ROOT / "configs" / "m1b_camera_calibration.json")
+        initial_public_track, public_evidence = public_track_from_evidence(
+            args.public_perception_evidence, args.public_camera_info, args.public_track_id, calibration,
+        )
+        perceived_diameter_m = float(initial_public_track["perceived_diameter_m"])
+    if args.enable_near_pregrasp_reobservation and initial_public_track is None:
+        raise SystemExit("near-pregrasp reobservation requires public perception evidence")
+    close_targets, aperture = m1b_close_finger_targets_from_perceived_diameter(perceived_diameter_m)
     rclpy.init()
     client = CalibrationClient()
     raw: list[M1BContactSampleV1] = []
@@ -408,7 +422,8 @@ def main() -> int:
             if approach_motion_accepted and open_hand.get("succeeded"):
                 target_touch_exception_applied = client.set_target_touch_exception(True, target_id=target_entity)
             final_target = list(target)
-            if target_touch_exception_applied:
+            if target_touch_exception_applied and args.enable_near_pregrasp_reobservation:
+                assert initial_public_track is not None and calibration is not None
                 near_reobservation["attempted"] = True
                 near_directory = args.output.parent / f"{args.output.stem}.near_rgbd"
                 try:
@@ -437,6 +452,8 @@ def main() -> int:
                     near_reobservation = {"attempted": True, "succeeded": True, "aggregation": "PER_AXIS_MEDIAN_OF_PUBLIC_RGBD_FRAMES", "frames": near_frames, "selected_public_track": near_track, "public_center_delta_world_m": public_delta, "final_target_world_m": final_target}
                 except (OSError, RuntimeError, subprocess.TimeoutExpired) as error:
                     near_reobservation = {"attempted": True, "succeeded": False, "reason": str(error)}
+            if target_touch_exception_applied and not args.enable_near_pregrasp_reobservation:
+                near_reobservation = {"attempted": False, "succeeded": True, "mode": "BASELINE_PERCEPTION_FREE_TOLERANCE"}
             contact_descend = (
                 m1b_normal_side_contact_descend(client, final_target, ik_seed=approach.get("final", {}).get("ik_solution"))
                 if near_reobservation.get("succeeded") else {"executed": False, "reason": "PUBLIC_NEAR_REOBSERVATION_GATE_REJECTED"}
@@ -479,6 +496,7 @@ def main() -> int:
             "supervision_initialization": {"orientation_state": "normal", "object_slot": args.object_slot, "truth_center_used_only_for_initial_target_pose": truth_center},
             "public_aperture_input": {**public_evidence, **aperture},
             "near_pregrasp_public_reobservation": near_reobservation,
+            "baseline_perception_free": args.calibration_fixture_diameter_m is not None and not args.enable_near_pregrasp_reobservation,
             "offset_vector_m": [target[index] - truth_center[index] for index in range(3)],
             "production_grasp_primitive": "open_physical_hand + m1b_normal_side_precontact + m1b_normal_side_contact_descend + close_physical_hand + m1b_internal_bilateral_broker",
             "ready": ready, "calibration_collision_scene_applied": cylinder_scene_applied if ready else False, "target_touch_exception_applied": target_touch_exception_applied if ready else False, "motion_gate_requires_terminal_convergence": True, "open_hand": open_hand, "approach": approach, "close": close, "contact_descend": contact_descend,
