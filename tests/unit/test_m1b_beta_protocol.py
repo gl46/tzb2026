@@ -86,6 +86,16 @@ def test_m1b_static_camera_calibration_is_versioned_and_invertible() -> None:
     assert "--child-frame-id" in tf_args and calibration.camera_optical_frame in tf_args
 
 
+def test_m1b_camera_center_correction_uses_only_perceived_diameter() -> None:
+    root = Path(__file__).parents[2]
+    calibration = M1BStaticCameraCalibrationV1.from_file(root / "configs/m1b_camera_calibration.json")
+    surface = (-0.25, 0.10, 1.30)
+    center = calibration.visible_surface_to_center_world(surface, 0.05)
+    assert center == pytest.approx(calibration.optical_to_world((-0.25, 0.10, 1.325)))
+    with pytest.raises(ValueError):
+        calibration.visible_surface_to_center_world(surface, 0.2)
+
+
 def test_post_grasp_identity_routes_wrong_object_without_entity_leak() -> None:
     wrong = evaluate_post_grasp_identity(target_track_id="track-11111111", carried_track_id="track-22222222")
     assert wrong.identity_status == "WRONG_OBJECT"

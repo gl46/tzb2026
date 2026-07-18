@@ -116,6 +116,24 @@ class M1BStaticCameraCalibrationV1:
         delta = tuple(value - origin for value, origin in zip(position_m, self.translation_m))
         return _apply(_transpose(self.world_from_optical_rotation), delta)
 
+    def visible_surface_to_center_world(
+        self, surface_optical_m: tuple[float, float, float], perceived_diameter_m: float,
+    ) -> tuple[float, float, float]:
+        """Estimate a cylinder centre from its visible RGB-D surface point.
+
+        Metric depth reports the camera-facing surface, not the object centre
+        required by the finger geometry.  For the industrial-cylinder class,
+        move one *perceived* radius away from the camera along optical +Z,
+        then use the approved static TF.  This is a public geometric estimate;
+        it accepts neither a simulator pose nor an entity identifier.
+        """
+        if not 0.01 <= perceived_diameter_m <= 0.12:
+            raise ValueError("perceived cylinder diameter must be in [0.01, 0.12] m")
+        x, y, z = surface_optical_m
+        if not all(math.isfinite(value) for value in surface_optical_m):
+            raise ValueError("surface point must be finite")
+        return self.optical_to_world((x, y, z + perceived_diameter_m / 2.0))
+
     def static_tf_arguments(self) -> list[str]:
         """Arguments for tf2_ros/static_transform_publisher, world -> sensor frame."""
         x, y, z, w = _quaternion_from_rotation(self.world_from_optical_rotation)
