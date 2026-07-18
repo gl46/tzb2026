@@ -69,7 +69,7 @@ def detach_and_observe(object_name: str, timeout_s: float) -> M1BResetVerificati
     return M1BResetVerificationV1(object_name, detach_topic, state_topic, any("detached" in line for line in lines), tuple(lines))
 
 
-def detach_all_and_observe(
+def detach_all_and_observe_legacy(
     object_names: list[str], timeout_s: float, *, world_name: str | None = None,
 ) -> tuple[list[M1BResetVerificationV1], dict[str, object] | None]:
     """Arm every one-shot state monitor before broadcasting the N detaches."""
@@ -187,6 +187,55 @@ def detach_all_and_observe(
             except subprocess.TimeoutExpired:
                 monitor.kill()
                 monitor.wait(timeout=1.0)
+
+
+def detach_all_and_observe(
+    object_names: list[str], timeout_s: float, *, world_name: str | None = None,
+) -> tuple[list[M1BResetVerificationV1], dict[str, object] | None]:
+    """Issue the complete detach transaction without blocking on one-shot state.
+
+    Amendment 1 makes ``grasp_state`` diagnostic-only: a lost one-shot must
+    neither trigger a repair attach nor prevent the mandatory physical
+    non-coupling verification.  The detach broadcasts and the simulator
+    processing pulse remain the reset actuation; records retain any publisher
+    errors as auxiliary evidence.
+    """
+    commands: dict[str, subprocess.CompletedProcess[str]] = {}
+    for name in object_names:
+        commands[name] = subprocess.run(
+            ["gz", "topic", "-t", f"/xh/m1b/{name}/detach", "-m", "gz.msgs.Empty", "-p", "unused: true"],
+            check=False, capture_output=True, text=True, timeout=timeout_s,
+        )
+    processing_pulse = None
+    if world_name:
+        unpause = subprocess.run(
+            ["gz", "service", "--service", f"/world/{world_name}/control",
+             "--reqtype", "gz.msgs.WorldControl", "--reptype", "gz.msgs.Boolean",
+             "--timeout", "3000", "--req", "pause: false"],
+            check=False, capture_output=True, text=True,
+        )
+        time.sleep(0.40)
+        pause = subprocess.run(
+            ["gz", "service", "--service", f"/world/{world_name}/control",
+             "--reqtype", "gz.msgs.WorldControl", "--reptype", "gz.msgs.Boolean",
+             "--timeout", "3000", "--req", "pause: true"],
+            check=False, capture_output=True, text=True,
+        )
+        processing_pulse = {
+            "controllers_active": False,
+            "unpause_returncode": unpause.returncode,
+            "pause_returncode": pause.returncode,
+            "duration_s": 0.40,
+        }
+    records = []
+    for name, command in commands.items():
+        lines = ["auxiliary_grasp_state_not_waited_per_amendment_1"]
+        if command.returncode != 0:
+            lines.extend(value for value in (command.stdout, command.stderr) if value)
+        records.append(M1BResetVerificationV1(
+            name, f"/xh/m1b/{name}/detach", f"/xh/m1b/{name}/grasp_state", False, tuple(lines),
+        ))
+    return records, processing_pulse
 
 
 def main() -> int:

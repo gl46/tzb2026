@@ -152,6 +152,12 @@ def test_m1b_amendment_reset_gate_is_physical_and_fails_closed_on_missing_pose()
     assert '"online_truth_access": False' in source
 
 
+def test_m1b_amendment_detach_does_not_wait_on_auxiliary_one_shot_state() -> None:
+    source = (Path(__file__).parents[2] / "scripts/m1b_reset_detach.py").read_text()
+    assert "auxiliary_grasp_state_not_waited_per_amendment_1" in source
+    assert "the companion physical non-coupling verifier is the sole final reset" in source
+
+
 def test_m1b_moveit_server_does_not_start_a_second_simulation() -> None:
     source = (Path(__file__).parents[2] / "robot_ws/src/xh_sim/launch/m1b_moveit_server.launch.py").read_text()
     assert "simulation.launch.py" not in source.replace("``simulation.launch.py``", "")
