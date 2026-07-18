@@ -221,6 +221,8 @@ def main() -> int:
         approach = {"executed": False, "reason": "MOVEIT_UNAVAILABLE"}
         open_hand = {"succeeded": False}
         close = {"succeeded": False}
+        contact_descend = {"executed": False, "reason": "MOVEIT_UNAVAILABLE"}
+        contact_start_index = len(raw)
         if ready:
             cylinder_scene_applied = apply_calibration_cylinder_scene(client, labels)
             target_entity = str(normal[args.object_slot - 1]["actual_sim_entity_id"])
@@ -233,26 +235,25 @@ def main() -> int:
             target_touch_exception_applied = False
             open_hand = client.command_hand([0.04, 0.04])
             approach = m1b_normal_side_precontact(client, target) if cylinder_scene_applied else {"executed": False, "reason": "CALIBRATION_COLLISION_SCENE_UNAVAILABLE"}
-            # ADR-0013 carries over the controller-*aborted* gate, not an
-            # unloaded joint-settle requirement.  A successful trajectory can
-            # legitimately show a load-induced joint offset once the fingers
-            # contact a free object.  The contact window below is scoped to
-            # the close command, so approach grazes can never authorize attach.
-            contact_start_index = len(raw)
             # A controller action can report success while the physical arm
             # was deflected by an unmodelled/free-cylinder contact.  Do not
             # close or enter the contact-bearing descent from that state:
             # production motion acceptance requires both execution and the
             # bounded terminal convergence evidence.
             approach_motion_accepted = bool(approach.get("executed") and approach.get("converged"))
-            if approach_motion_accepted:
+            if approach_motion_accepted and open_hand.get("succeeded"):
                 target_touch_exception_applied = client.set_target_touch_exception(True, target_id=target_entity)
-            if approach_motion_accepted and target_touch_exception_applied:
-                close = client.command_hand([0.01, 0.01])
             contact_descend = (
                 m1b_normal_side_contact_descend(client, target, ik_seed=approach.get("final", {}).get("ik_solution"))
-                if close.get("succeeded") else {"executed": False, "reason": "CLOSE_GATE_REJECTED"}
+                if target_touch_exception_applied else {"executed": False, "reason": "TOUCH_EXCEPTION_GATE_REJECTED"}
             )
+            # Descend while open so the 50 mm cylinder enters between both
+            # pads; only then issue the 20 mm close.  The evidence window
+            # begins immediately before that close, excluding all approach
+            # contact telemetry from attach authorization.
+            contact_start_index = len(raw)
+            if contact_descend.get("executed") and contact_descend.get("converged"):
+                close = client.command_hand([0.01, 0.01])
             if close.get("succeeded"):
                 deadline = time.monotonic() + 0.35
                 while time.monotonic() < deadline:
@@ -263,7 +264,7 @@ def main() -> int:
         post_close_raw = raw[contact_start_index:] if ready and close.get("succeeded") else []
         feedback, internal = broker_from_window(post_close_raw)
         motion_gate_passed = bool(
-            approach.get("executed") and approach.get("converged")
+            open_hand.get("succeeded") and approach.get("executed") and approach.get("converged")
             and close.get("succeeded") and contact_descend.get("executed") and contact_descend.get("converged")
         )
         attach = {"sent": False, "state_confirmed": False, "reason": "BILATERAL_GATE_REJECTED"}
