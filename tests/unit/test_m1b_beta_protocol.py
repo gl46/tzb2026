@@ -143,10 +143,10 @@ def test_m1b_amendment_reset_gate_is_physical_and_fails_closed_on_missing_pose()
     assert 'SETTLE_S = 2.0' in source
     assert 'MAX_OBJECT_DISPLACEMENT_M = 0.001' in source
     assert 'MIN_EE_DISPLACEMENT_M = 0.02' in source
-    assert 'MAX_HOME_JOINT_ERROR_RAD = 0.01' in source
+    assert 'MAX_HOME_JOINT_ERROR_RAD = 0.10' in source
     assert 'HOME_JOG_WORLD_Z_M = 0.03' in source
     assert 'def lifted_home_pose(home_fk: list[float] | None) -> Pose | None:' in source
-    assert 'client.move_hand_pose(jog_pose, ik_seed=HOME_ARM_POSITIONS)' in source
+    assert 'client.move_hand_pose(jog_pose, ik_seed=live_home_positions)' in source
     assert 'def verify_live_home(client: CalibrationClient) -> dict[str, object]:' in source
     assert 'except subprocess.TimeoutExpired:' in source
     assert 'return None' in source

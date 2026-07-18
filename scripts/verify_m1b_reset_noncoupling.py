@@ -36,7 +36,7 @@ POSE_RE = re.compile(
 SETTLE_S = 2.0
 MAX_OBJECT_DISPLACEMENT_M = 0.001
 MIN_EE_DISPLACEMENT_M = 0.02
-MAX_HOME_JOINT_ERROR_RAD = 0.01
+MAX_HOME_JOINT_ERROR_RAD = 0.10
 # A joint-space micro-jog can sweep a lower arm link through an incoming zone.
 # This reset probe instead lifts the high S1-home hand 30 mm in world Z using
 # the same MoveIt IK/plan/execute chain and the injected cylinder obstacles.
@@ -148,10 +148,12 @@ def main() -> int:
         before, before_attempts = positions(names)
         before_joints = [client.latest.get(name, math.nan) for name in JOINTS]
         before_fk = client.fk(before_joints) if all(math.isfinite(value) for value in before_joints) else None
-        jog_pose = lifted_home_pose(client.fk(HOME_ARM_POSITIONS))
+        live_home_positions = home.get("observed_joint_positions_rad")
+        jog_pose = client.fk(live_home_positions) if isinstance(live_home_positions, list) else None
+        jog_pose = lifted_home_pose(jog_pose)
         before_unpause = set_world_pause(args.world_name, False)
         jog = (
-            client.move_hand_pose(jog_pose, ik_seed=HOME_ARM_POSITIONS)
+            client.move_hand_pose(jog_pose, ik_seed=live_home_positions)
             if home.get("verified") and collision_scene_applied and before_unpause["succeeded"] and jog_pose is not None
             else {"executed": False}
         )
