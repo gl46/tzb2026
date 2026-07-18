@@ -38,6 +38,14 @@ CYLINDER_CONTACT_TOPICS = [
     f"/xh/actuation_internal/m1b/cylinder_{index:02d}_contacts"
     for index in range(1, 13)
 ]
+# Measured on the collision-checked scene-1034 normal-cylinder approach.
+# This is an IK numerical initializer only; MoveIt still validates the pose,
+# plans the full trajectory, and controller feedback still decides convergence.
+M1B_NORMAL_SIDE_IK_SEED = [
+    2.8972995179371477, -0.36830496587838346, 2.7341791043013672,
+    -2.7829882206873315, 1.4459771370327215, 2.997318074330887,
+    -1.286336046330572,
+]
 
 
 def m1b_normal_side_approach(client: CalibrationClient, centre_world_m: list[float]) -> dict[str, object]:
@@ -70,11 +78,11 @@ def m1b_normal_side_approach(client: CalibrationClient, centre_world_m: list[flo
         value = pose(-0.080)
         value.position.z = centre_world_m[2] + 0.065
         return value
-    final = client.move_hand_pose(final_pose())
+    final = client.move_hand_pose(final_pose(), ik_seed=M1B_NORMAL_SIDE_IK_SEED)
     return {
         "executed": bool(final.get("executed") and final.get("converged")),
         "converged": bool(final.get("converged")), "final": final,
-        "geometry": {"finger_board_axis_world": [1.0, 0.0, 0.0], "closing_axis_world": [0.0, 1.0, 0.0], "final_x_offset_m": -0.080, "final_hand_z_offset_m": 0.065, "path_source": "MoveIt collision-checked trajectory from reset home"},
+        "geometry": {"finger_board_axis_world": [1.0, 0.0, 0.0], "closing_axis_world": [0.0, 1.0, 0.0], "final_x_offset_m": -0.080, "final_hand_z_offset_m": 0.065, "ik_seed_source": "measured_scene1034_collision_checked_branch", "path_source": "MoveIt collision-checked trajectory from reset home"},
     }
 
 
