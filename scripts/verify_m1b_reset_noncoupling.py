@@ -40,13 +40,14 @@ MIN_EE_DISPLACEMENT_M = 0.02
 HOME_JOG_JOINT_INDEX = 5
 HOME_JOG_DELTA_RAD = 0.18
 POSE_SNAPSHOT_ATTEMPTS = 3
+POSE_QUERY_TIMEOUT_S = 5
 
 
 def supervision_model_position(name: str) -> list[float] | None:
     try:
         result = subprocess.run(
-            ["timeout", "2", "gz", "model", "-m", name, "-p"],
-            check=False, capture_output=True, text=True, timeout=4.0,
+            ["timeout", str(POSE_QUERY_TIMEOUT_S), "gz", "model", "-m", name, "-p"],
+            check=False, capture_output=True, text=True, timeout=POSE_QUERY_TIMEOUT_S + 2.0,
         )
     except subprocess.TimeoutExpired:
         # A supervision-query timeout is not evidence that the object stayed
