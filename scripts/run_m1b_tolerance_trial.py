@@ -250,7 +250,7 @@ def select_near_public_track(
 
 def _m1b_normal_side_pose(
     centre_world_m: list[float], *, hand_z_offset_m: float, hand_y_centerline_bias_m: float,
-    hand_x_offset_m: float = M1B_NORMAL_SIDE_HAND_X_OFFSET_M,
+    hand_x_offset_m: float = M1B_NORMAL_SIDE_HAND_X_OFFSET_M, mirrored_x_entry: bool = False,
 ) -> Pose:
     """Return one side-grasp hand pose; only the vertical phase may vary."""
     value = Pose()
@@ -265,8 +265,15 @@ def _m1b_normal_side_pose(
     # contact and must not be silently treated as self-centring.
     value.position.y = centre_world_m[1] + hand_y_centerline_bias_m
     value.position.z = centre_world_m[2] + hand_z_offset_m
-    value.orientation.x = 1.0
-    value.orientation.w = 0.0
+    # The production branch remains the historical -X entry.  The
+    # calibration-only mirror rotates the same parallel boards by pi about Y:
+    # their X span reverses while the two pads still close symmetrically along
+    # world Y.  It supplies a second arm-workspace branch without changing
+    # the gripper geometry or feeding simulator truth to runtime.
+    if mirrored_x_entry:
+        value.orientation.y = 1.0
+    else:
+        value.orientation.x = 1.0
     return value
 
 
@@ -323,44 +330,55 @@ def m1b_calibration_lateral_insertion(
     granting an ACM exception or becoming an online truth-dependent policy.
     """
     candidate_attempts: list[dict[str, object]] = []
-    for clear_x_offset_m in M1B_CALIBRATION_LATERAL_INSERTION_CLEAR_HAND_X_OFFSETS_M:
-        stages: dict[str, dict[str, object]] = {}
-        seed: list[float] | None = M1B_NORMAL_SIDE_IK_SEED
-        for name, z_offset_m, x_offset_m in (
-            ("high_clear", M1B_NORMAL_PRECONTACT_HAND_Z_OFFSET_M, clear_x_offset_m),
-            ("low_clear", M1B_NORMAL_CONTACT_HAND_Z_OFFSET_M, clear_x_offset_m),
-            ("lateral_insert", M1B_NORMAL_CONTACT_HAND_Z_OFFSET_M, M1B_NORMAL_SIDE_HAND_X_OFFSET_M),
-        ):
-            stage = client.move_hand_pose(
-                _m1b_normal_side_pose(
-                    centre_world_m, hand_z_offset_m=z_offset_m,
-                    hand_y_centerline_bias_m=hand_y_centerline_bias_m,
-                    hand_x_offset_m=x_offset_m,
-                ),
-                ik_seed=seed,
-            )
-            stages[name] = stage
-            if not (stage.get("executed") and stage.get("converged")):
-                candidate_attempts.append({"clear_hand_x_offset_m": clear_x_offset_m, "failed_stage": name, "stages": stages})
-                break
-            seed = stage.get("ik_solution")
-        else:
-            return {
-                "executed": True, "converged": True, "stages": stages,
-                "candidate_attempts": candidate_attempts,
-                "geometry": {
-                    "insertion_axis_world": [1.0, 0.0, 0.0],
-                    "clear_hand_x_offset_m": clear_x_offset_m,
-                    "candidate_clear_hand_x_offsets_m": list(M1B_CALIBRATION_LATERAL_INSERTION_CLEAR_HAND_X_OFFSETS_M),
-                    "final_hand_x_offset_m": M1B_NORMAL_SIDE_HAND_X_OFFSET_M,
-                    "hand_z_offset_m": M1B_NORMAL_CONTACT_HAND_Z_OFFSET_M,
-                },
-            }
+    insertion_families = (
+        ("negative_x", False, -1.0),
+        ("positive_x_mirrored", True, 1.0),
+    )
+    for family_name, mirrored_x_entry, direction in insertion_families:
+        for magnitude_m in (abs(value) for value in M1B_CALIBRATION_LATERAL_INSERTION_CLEAR_HAND_X_OFFSETS_M):
+            clear_x_offset_m = direction * magnitude_m
+            final_x_offset_m = direction * abs(M1B_NORMAL_SIDE_HAND_X_OFFSET_M)
+            stages: dict[str, dict[str, object]] = {}
+            seed: list[float] | None = M1B_NORMAL_SIDE_IK_SEED
+            for name, z_offset_m, x_offset_m in (
+                ("high_clear", M1B_NORMAL_PRECONTACT_HAND_Z_OFFSET_M, clear_x_offset_m),
+                ("low_clear", M1B_NORMAL_CONTACT_HAND_Z_OFFSET_M, clear_x_offset_m),
+                ("lateral_insert", M1B_NORMAL_CONTACT_HAND_Z_OFFSET_M, final_x_offset_m),
+            ):
+                stage = client.move_hand_pose(
+                    _m1b_normal_side_pose(
+                        centre_world_m, hand_z_offset_m=z_offset_m,
+                        hand_y_centerline_bias_m=hand_y_centerline_bias_m,
+                        hand_x_offset_m=x_offset_m,
+                        mirrored_x_entry=mirrored_x_entry,
+                    ),
+                    ik_seed=seed,
+                )
+                stages[name] = stage
+                if not (stage.get("executed") and stage.get("converged")):
+                    candidate_attempts.append({"family": family_name, "mirrored_x_entry": mirrored_x_entry, "clear_hand_x_offset_m": clear_x_offset_m, "failed_stage": name, "stages": stages})
+                    break
+                seed = stage.get("ik_solution")
+            else:
+                return {
+                    "executed": True, "converged": True, "stages": stages,
+                    "candidate_attempts": candidate_attempts,
+                    "geometry": {
+                        "insertion_axis_world": [1.0, 0.0, 0.0],
+                        "family": family_name,
+                        "mirrored_x_entry": mirrored_x_entry,
+                        "clear_hand_x_offset_m": clear_x_offset_m,
+                        "candidate_clear_hand_x_offsets_m": list(M1B_CALIBRATION_LATERAL_INSERTION_CLEAR_HAND_X_OFFSETS_M),
+                        "final_hand_x_offset_m": final_x_offset_m,
+                        "hand_z_offset_m": M1B_NORMAL_CONTACT_HAND_Z_OFFSET_M,
+                    },
+                }
     return {
         "executed": False, "converged": False,
         "candidate_attempts": candidate_attempts,
         "geometry": {
             "insertion_axis_world": [1.0, 0.0, 0.0],
+            "families": [item[0] for item in insertion_families],
             "candidate_clear_hand_x_offsets_m": list(M1B_CALIBRATION_LATERAL_INSERTION_CLEAR_HAND_X_OFFSETS_M),
             "final_hand_x_offset_m": M1B_NORMAL_SIDE_HAND_X_OFFSET_M,
             "hand_z_offset_m": M1B_NORMAL_CONTACT_HAND_Z_OFFSET_M,
