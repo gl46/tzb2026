@@ -178,6 +178,12 @@ def test_m1b_amendment_detach_does_not_wait_on_auxiliary_one_shot_state() -> Non
     assert '"stderr": "timeout", "published": False' in source
 
 
+def test_m1b_tolerance_attach_uses_detachablejoint_empty_payload() -> None:
+    source = (Path(__file__).parents[2] / "scripts/run_m1b_tolerance_trial.py").read_text()
+    assert '["gz", "topic", "-t", topic, "-m", "gz.msgs.Empty", "-p", ""]' in source
+    assert '"-p", "unused: true"' not in source
+
+
 def test_m1b_moveit_server_does_not_start_a_second_simulation() -> None:
     source = (Path(__file__).parents[2] / "robot_ws/src/xh_sim/launch/m1b_moveit_server.launch.py").read_text()
     assert "simulation.launch.py" not in source.replace("``simulation.launch.py``", "")

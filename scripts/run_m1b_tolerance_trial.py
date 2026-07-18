@@ -132,7 +132,11 @@ def attach_and_observe(topic: str, state_topic: str) -> dict[str, object]:
         # requires an observed state transition rather than a blind publish.
         time.sleep(0.40)
         command = subprocess.run(
-            ["gz", "topic", "-t", topic, "-m", "gz.msgs.Empty", "-p", "unused: true"],
+            # DetachableJoint consumes an Empty request.  Supplying an
+            # invented field can make Gazebo accept a publish command without
+            # delivering the state transition, so the calibration path must
+            # use the same wire payload as the production attach primitive.
+            ["gz", "topic", "-t", topic, "-m", "gz.msgs.Empty", "-p", ""],
             check=False, capture_output=True, text=True, timeout=3.0,
         )
         deadline = time.monotonic() + 2.0
