@@ -30,7 +30,7 @@ for directory in (ROOT / "src", ROOT / "scripts"):
 from m1a_contact_calibration_client import CalibrationClient  # noqa: E402
 from m1a_contact_calibration_client import quaternion_rotate  # noqa: E402
 from m1b_reset_detach import detach_and_observe  # noqa: E402
-from m1a_moveit_execution_client import JOINTS  # noqa: E402
+from m1a_moveit_execution_client import JOINTS, set_allowed_pair  # noqa: E402
 
 
 POSE_RE = re.compile(
@@ -101,6 +101,27 @@ def remove_attached_cylinder_from_moveit(client: CalibrationClient, entity: str)
     return client.apply_scene_diff(scene)
 
 
+def configure_transport_collision_exceptions(client: CalibrationClient, entity: str) -> bool:
+    """Permit only the physical grasp/initial-static contacts needed to transport."""
+    matrix = client.current_acm()
+    if matrix is None:
+        return False
+    for link in ("panda_link7", "panda_link8", "panda_hand", "panda_leftfinger", "panda_rightfinger", "work_table"):
+        set_allowed_pair(matrix, entity, link, True)
+    # Closed parallel fingers meet in this simplified Panda model.  It is a
+    # self-contact inherent in the physical grasp state, not a free-space
+    # collision exemption.
+    set_allowed_pair(matrix, "panda_leftfinger", "panda_rightfinger", True)
+    # These generated scene objects overlap the immobile base at reset.  They
+    # cannot be cleared by any arm trajectory, so retain checking against every
+    # moving link but allow the unavoidable base-only initial overlap.
+    for index in range(1, 13):
+        other = f"cylinder_{index:02d}"
+        if other != entity:
+            set_allowed_pair(matrix, other, "panda_link0", True)
+    return client.apply_scene_diff(PlanningScene(is_diff=True, allowed_collision_matrix=matrix))
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--entity", required=True, help="Actuation-internal entity selected by the broker")
@@ -119,11 +140,15 @@ def main() -> int:
         before_link = gazebo_position("panda_controller", link="panda_link7")
         before_cylinder = gazebo_position(args.entity)
         moveit_carried_object_applied = attach_cylinder_to_moveit(client, args.entity, before_cylinder) if ready else False
+        transport_collision_exceptions_applied = (
+            configure_transport_collision_exceptions(client, args.entity)
+            if moveit_carried_object_applied else False
+        )
         move_target = list(current)
         # A small base-axis transport displacement gives the constraint a
         # measurable follow test while remaining far inside Panda limits.
         move_target[0] += 0.10
-        attached_move = client.move_joint_target(move_target) if moveit_carried_object_applied else {"executed": False}
+        attached_move = client.move_joint_target(move_target) if transport_collision_exceptions_applied else {"executed": False}
         after_link = gazebo_position("panda_controller", link="panda_link7")
         after_cylinder = gazebo_position(args.entity)
         link_motion = distance(before_link, after_link)
@@ -162,6 +187,7 @@ def main() -> int:
             "entity_source": "actuation_internal_broker_attach_record",
             "entity": args.entity,
             "moveit_carried_object_applied": moveit_carried_object_applied,
+            "transport_collision_exceptions_applied": transport_collision_exceptions_applied,
             "attached_move": attached_move,
             "attached_follow": attached_follow,
             "attached_follow_metrics": {"link_motion_m": link_motion, "cylinder_motion_m": cylinder_motion, "relative_drift_m": relative_drift},
