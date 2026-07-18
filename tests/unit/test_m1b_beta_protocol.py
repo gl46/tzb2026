@@ -205,6 +205,7 @@ def test_m1b_tolerance_attach_uses_detachablejoint_empty_payload() -> None:
     assert 'M1B_NEAR_REOBSERVATION_MAX_ASSOCIATION_DISTANCE_M = 0.050' in source
     assert 'M1B_NEAR_REOBSERVATION_FRAME_COUNT = 3' in source
     assert '"aggregation": "PER_AXIS_MEDIAN_OF_PUBLIC_RGBD_FRAMES"' in source
+    assert '"track_id": str(initial_public_track["track_id"])' in source
     assert '"near_pregrasp_public_reobservation": near_reobservation' in source
     assert '"PUBLIC_NEAR_REOBSERVATION_GATE_REJECTED"' in source
     assert '"--public-perception-evidence", required=True, type=Path' in source

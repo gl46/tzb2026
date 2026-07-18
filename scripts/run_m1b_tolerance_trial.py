@@ -421,7 +421,12 @@ def main() -> int:
                         )
                         near_frames.append({"evidence_path": str(near_evidence_path), "selected_public_track": near_track, "metadata": near_metadata})
                     near_track = {
-                        "track_id": "MULTIFRAME_PUBLIC_MEDIAN",
+                        # The per-frame geometric helper is stateless in this
+                        # calibration subprocess.  Association above has
+                        # already established that every frame belongs to the
+                        # initial public target, so retain that canonical
+                        # public ID rather than minting a new one.
+                        "track_id": str(initial_public_track["track_id"]),
                         "visual_color": initial_public_track.get("visual_color"),
                         "perceived_diameter_m": median(float(frame["selected_public_track"]["perceived_diameter_m"]) for frame in near_frames),
                         "estimated_center_world_m": [median(float(frame["selected_public_track"]["estimated_center_world_m"][axis]) for frame in near_frames) for axis in range(3)],
