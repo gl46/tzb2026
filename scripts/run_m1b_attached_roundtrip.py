@@ -18,6 +18,9 @@ import sys
 from pathlib import Path
 
 import rclpy
+from geometry_msgs.msg import Pose
+from moveit_msgs.msg import AttachedCollisionObject, CollisionObject, PlanningScene
+from shape_msgs.msg import SolidPrimitive
 
 ROOT = Path(__file__).resolve().parents[1]
 for directory in (ROOT / "src", ROOT / "scripts"):
@@ -25,6 +28,7 @@ for directory in (ROOT / "src", ROOT / "scripts"):
         sys.path.insert(0, str(directory))
 
 from m1a_contact_calibration_client import CalibrationClient  # noqa: E402
+from m1a_contact_calibration_client import quaternion_rotate  # noqa: E402
 from m1b_reset_detach import detach_and_observe  # noqa: E402
 from m1a_moveit_execution_client import JOINTS  # noqa: E402
 
@@ -53,6 +57,50 @@ def relative(cylinder: list[float] | None, link: list[float] | None) -> list[flo
     return [a - b for a, b in zip(cylinder, link)] if cylinder is not None and link is not None else None
 
 
+def attach_cylinder_to_moveit(client: CalibrationClient, entity: str, cylinder_world: list[float] | None) -> bool:
+    """Mirror the already-observed Gazebo attach in MoveIt for transport planning."""
+    positions = [client.latest.get(name, math.nan) for name in JOINTS]
+    link = client.fk_link("panda_link7", positions) if all(math.isfinite(v) for v in positions) else None
+    if link is None or cylinder_world is None:
+        return False
+    remove_scene = PlanningScene(is_diff=True)
+    remove = CollisionObject(id=entity)
+    remove.header.frame_id = "world"
+    remove.operation = CollisionObject.REMOVE
+    remove_scene.world.collision_objects = [remove]
+    if not client.apply_scene_diff(remove_scene):
+        return False
+    relative_xyz = quaternion_rotate(
+        [-link[3], -link[4], -link[5], link[6]],
+        tuple(value - origin for value, origin in zip(cylinder_world, link[:3])),
+    )
+    scene = PlanningScene(is_diff=True)
+    attached = AttachedCollisionObject()
+    attached.link_name = "panda_link7"
+    attached.touch_links = ["panda_link7", "panda_link8", "panda_hand", "panda_leftfinger", "panda_rightfinger"]
+    attached.object.id = entity
+    attached.object.header.frame_id = "panda_link7"
+    attached.object.primitives = [SolidPrimitive(type=SolidPrimitive.CYLINDER, dimensions=[0.09, 0.025])]
+    pose = Pose()
+    pose.position.x, pose.position.y, pose.position.z = relative_xyz
+    pose.orientation.w = 1.0
+    attached.object.primitive_poses = [pose]
+    attached.object.operation = CollisionObject.ADD
+    scene.robot_state.is_diff = True
+    scene.robot_state.attached_collision_objects = [attached]
+    return client.apply_scene_diff(scene)
+
+
+def remove_attached_cylinder_from_moveit(client: CalibrationClient, entity: str) -> bool:
+    scene = PlanningScene(is_diff=True)
+    attached = AttachedCollisionObject()
+    attached.object.id = entity
+    attached.object.operation = CollisionObject.REMOVE
+    scene.robot_state.is_diff = True
+    scene.robot_state.attached_collision_objects = [attached]
+    return client.apply_scene_diff(scene)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--entity", required=True, help="Actuation-internal entity selected by the broker")
@@ -70,11 +118,12 @@ def main() -> int:
         current = [client.latest.get(name, math.nan) for name in JOINTS]
         before_link = gazebo_position("panda_controller", link="panda_link7")
         before_cylinder = gazebo_position(args.entity)
+        moveit_carried_object_applied = attach_cylinder_to_moveit(client, args.entity, before_cylinder) if ready else False
         move_target = list(current)
         # A small base-axis transport displacement gives the constraint a
         # measurable follow test while remaining far inside Panda limits.
         move_target[0] += 0.10
-        attached_move = client.move_joint_target(move_target) if ready and all(math.isfinite(v) for v in current) else {"executed": False}
+        attached_move = client.move_joint_target(move_target) if moveit_carried_object_applied else {"executed": False}
         after_link = gazebo_position("panda_controller", link="panda_link7")
         after_cylinder = gazebo_position(args.entity)
         link_motion = distance(before_link, after_link)
@@ -88,11 +137,12 @@ def main() -> int:
         )
         detach = detach_and_observe(args.entity, 2.0) if attached_follow else None
         detach_verified = bool(detach and detach.detached_observed)
+        moveit_carried_object_removed = remove_attached_cylinder_from_moveit(client, args.entity) if detach_verified else False
         before_decouple_link = gazebo_position("panda_controller", link="panda_link7")
         before_decouple_cylinder = gazebo_position(args.entity)
         decouple_target = list(move_target)
         decouple_target[0] -= 0.12
-        detached_move = client.move_joint_target(decouple_target) if detach_verified else {"executed": False}
+        detached_move = client.move_joint_target(decouple_target) if detach_verified and moveit_carried_object_removed else {"executed": False}
         after_decouple_link = gazebo_position("panda_controller", link="panda_link7")
         after_decouple_cylinder = gazebo_position(args.entity)
         decouple_link_motion = distance(before_decouple_link, after_decouple_link)
@@ -111,10 +161,12 @@ def main() -> int:
             "online_truth_access": False,
             "entity_source": "actuation_internal_broker_attach_record",
             "entity": args.entity,
+            "moveit_carried_object_applied": moveit_carried_object_applied,
             "attached_move": attached_move,
             "attached_follow": attached_follow,
             "attached_follow_metrics": {"link_motion_m": link_motion, "cylinder_motion_m": cylinder_motion, "relative_drift_m": relative_drift},
             "detach": None if detach is None else {"topic": detach.detach_topic, "state_topic": detach.grasp_state_topic, "detached_observed": detach.detached_observed, "state_lines": list(detach.state_lines)},
+            "moveit_carried_object_removed": moveit_carried_object_removed,
             "detached_move": detached_move,
             "detached_decoupled": detached_decoupled,
             "detached_decouple_metrics": {"link_motion_m": decouple_link_motion, "relative_change_m": decouple_relative_change},
