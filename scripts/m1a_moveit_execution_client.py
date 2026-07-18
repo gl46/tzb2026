@@ -207,6 +207,14 @@ class EvidenceClient(Node):
         motion.allowed_planning_time = 5.0
         motion.max_velocity_scaling_factor = 0.2
         motion.max_acceleration_scaling_factor = 0.2
+        # Use the same live robot-state sample for planning that the execution
+        # side will shortly validate.  Leaving this empty delegates to
+        # MoveIt's monitored-state cache, which can lag `/joint_states` across
+        # a paused-world reset and produces a trajectory rejected at execution
+        # start for a state that has already changed in Gazebo.
+        start_positions = [self.latest.get(name, math.nan) for name in JOINTS]
+        if all(math.isfinite(value) for value in start_positions):
+            motion.start_state.joint_state = JointState(name=JOINTS, position=start_positions)
         motion.start_state.is_diff = True
         constraint = Constraints(name="m1a_joint_target")
         constraint.joint_constraints = [
