@@ -110,6 +110,28 @@ def verify_live_home(client: CalibrationClient) -> dict[str, object]:
     }
 
 
+def move_to_home_neighborhood(client: CalibrationClient, initial: dict[str, object]) -> dict[str, object]:
+    """Recover the launch-time arm posture through the S1 MoveIt chain.
+
+    Gazebo can sag before its trajectory controller is active.  This is a
+    planned, collision-checked MoveIt execution to the already approved S1
+    home state, never a direct joint-state write.  The physical reset jog is
+    still performed only after a fresh live-home verification.
+    """
+    if initial.get("verified"):
+        return {"required": False, "executed": False, "home_after": initial}
+    move = client.move_joint_target(HOME_ARM_POSITIONS)
+    time.sleep(SETTLE_S)
+    home_after = verify_live_home(client)
+    return {
+        "required": True,
+        "target_arm_joint_positions_rad": HOME_ARM_POSITIONS,
+        "executed": bool(move.get("executed")),
+        "moveit_execution": move,
+        "home_after": home_after,
+    }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--spawn-manifest", required=True, type=Path)
@@ -132,7 +154,13 @@ def main() -> int:
         for _ in range(20):
             rclpy.spin_once(client, timeout_sec=0.05)
         collision_scene_applied = apply_calibration_cylinder_scene(client, labels) if ready else False
-        home = verify_live_home(client) if ready and collision_scene_applied else {"verified": False}
+        initial_home = verify_live_home(client) if ready and collision_scene_applied else {"verified": False}
+        home_approach = (
+            move_to_home_neighborhood(client, initial_home)
+            if ready and collision_scene_applied
+            else {"required": False, "executed": False, "home_after": {"verified": False}}
+        )
+        home = home_approach["home_after"]
         time.sleep(SETTLE_S)
         before_pause = set_world_pause(args.world_name, True)
         before, before_attempts = positions(names)
@@ -177,6 +205,11 @@ def main() -> int:
                 "after_snapshot": after_pause,
             },
             "home_pose_source": "S1 HOME_ARM_POSITIONS verified against live joint state",
+            "home_approach": {
+                "method": "S1_MOVEIT_PLANNED_EXECUTION",
+                "collision_checked_against_planner_cylinder_scene": collision_scene_applied,
+                **home_approach,
+            },
             "planner_cylinder_scene": {
                 "source": "RESET_INFRASTRUCTURE_SUPERVISION_ONLY",
                 "objects": names,

@@ -147,6 +147,9 @@ def test_m1b_amendment_reset_gate_is_physical_and_fails_closed_on_missing_pose()
     assert 'HOME_JOG_JOINT_INDEX = 2' in source
     assert 'HOME_JOG_DELTA_RAD = -0.05' in source
     assert 'client.move_joint_target(jog_target)' in source
+    assert 'def move_to_home_neighborhood(client: CalibrationClient, initial: dict[str, object])' in source
+    assert 'client.move_joint_target(HOME_ARM_POSITIONS)' in source
+    assert '"method": "S1_MOVEIT_PLANNED_EXECUTION"' in source
     assert 'def verify_live_home(client: CalibrationClient) -> dict[str, object]:' in source
     assert 'except subprocess.TimeoutExpired:' in source
     assert 'return None' in source
