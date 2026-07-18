@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Execute the bounded ADR-0013 calibration campaign on one simulator host.
-set -euo pipefail
+set -eo pipefail
 
 if [[ $# -ne 2 ]]; then
   echo "usage: $0 WORKLIST_JSON RUN_DIRECTORY" >&2
@@ -26,6 +26,7 @@ mkdir -p "$run_dir/raw" "$run_dir/logs" "$run_dir/trials"
 
 source /opt/ros/jazzy/setup.bash
 source "$root/robot_ws/install/setup.bash"
+set -u
 export PYTHONPATH="$root/src:$root/scripts:${PYTHONPATH:-}"
 cd "$root"
 
