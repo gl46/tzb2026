@@ -1,0 +1,15 @@
+dataset: QRM-Real-V1
+sources_dir: data/qrm_lite/sources
+horizon: 4
+action_dim: 10
+splits:
+  val_ratio: 0.15
+  test_ratio: 0.15
+  by: episode_id
+gates:
+  real_episodes_min: 50
+  real_chunks_min: 300
+  failure_or_recovery_min_fraction: 0.30
+  synthetic_train_max_fraction: 0.50
+oracle_policy: labels_and_nominal_only
+m1b_followup_dataset: QRM-Real-V2

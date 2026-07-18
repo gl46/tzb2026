@@ -1,0 +1,61 @@
+{
+  "primary_comparison": "Q1_no_failure_context vs Q2_with_failure_context",
+  "not_compared": "MLP vs Flow (Flow is IMPLEMENTED_NOT_SELECTED)",
+  "q1_offline": {
+    "recovery_top1": 0.3877551020408163,
+    "skill_accuracy": 0.3877551020408163,
+    "macro_f1": 0.18333333333333335,
+    "n_fail_samples": 49
+  },
+  "q2_offline": {
+    "recovery_top1": 0.3877551020408163,
+    "skill_accuracy": 0.3877551020408163,
+    "macro_f1": 0.15384615384615385,
+    "n_fail_samples": 49
+  },
+  "offline_repetition": {
+    "q1_same_failed_action_repetition_rate": 0.10204081632653061,
+    "q2_same_failed_action_repetition_rate": 0.02040816326530612,
+    "relative_reduction": 0.8,
+    "absolute_reduction": 0.0816326530612245,
+    "q1_n": 49,
+    "q2_n": 49,
+    "q1_action_hist": {
+      "REOBSERVE": 21,
+      "GRASP": 8,
+      "OBSERVE": 5,
+      "ALTERNATE_OBLIQUE": 5,
+      "ALTERNATE_SIDE": 10
+    },
+    "q2_action_hist": {
+      "REOBSERVE": 25,
+      "GRASP": 4,
+      "OBSERVE": 9,
+      "MOVE": 1,
+      "ALTERNATE_SIDE": 10
+    }
+  },
+  "dry_recovery_loop": {
+    "q1_vs_q2": {
+      "q1_same_failed_action_repetition_rate": 0.0,
+      "q2_same_failed_action_repetition_rate": 0.0,
+      "relative_reduction": null,
+      "absolute_reduction": 0.0,
+      "q1_n": 10,
+      "q2_n": 10,
+      "q1_action_hist": {
+        "REOBSERVE": 10
+      },
+      "q2_action_hist": {
+        "REOBSERVE": 10
+      }
+    },
+    "moveit_reject_rate": 0.0,
+    "mean_attempts": 2.0
+  },
+  "headline_metric": "same_failed_action_repetition_rate",
+  "interpretation_guide": {
+    "good": "Q2 reduces same-failed-action repetition vs Q1 and improves recovery top-1",
+    "example": "Q1 42% repeat top grasp after empty-grasp \u2192 Q2 18% with more side/oblique/reobserve"
+  }
+}

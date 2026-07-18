@@ -1,0 +1,26 @@
+formal_models:
+  - Q0_COARSE_ONLY
+  - Q1_COARSE_MLP_RESIDUAL
+  - Q2_COARSE_MLP_FAILURE_CONTEXT
+flow_status: IMPLEMENTED_NOT_SELECTED
+primary_ablation: Q1_vs_Q2_failure_context
+residual_safety:
+  max_translation_m: 0.03
+  max_rotation_deg: 15
+  max_gripper_width_delta_m: 0.01
+  speed_bins: [slow, medium, fast]
+recovery_skills:
+  - REOBSERVE
+  - RETRY_TOP
+  - ALTERNATE_OBLIQUE
+  - ALTERNATE_SIDE
+  - ABORT_SAFE
+closed_loop:
+  episodes: 20
+  q1: 10
+  q2: 10
+  inject: EMPTY_GRASP
+latency:
+  warm_p50_target_ms: 5000
+  service: QwenPolicyService
+  call_sites: [task_start, skill_end, failure, replan]

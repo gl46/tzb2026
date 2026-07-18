@@ -1,0 +1,37 @@
+{
+  "dataset": "QRM-Real-V1",
+  "n_samples": 381,
+  "n_episodes": 91,
+  "n_train": 285,
+  "n_val": 50,
+  "n_test": 46,
+  "real_samples": 381,
+  "synthetic_samples": 0,
+  "synthetic_train_fraction": 0.0,
+  "failure_or_recovery_samples": 160,
+  "failure_or_recovery_fraction": 0.4199475065616798,
+  "recovery_transitions": 100,
+  "by_source": {
+    "m1a-contact-gate": 140,
+    "m1a-contact-gate-historical": 18,
+    "m1a-friction-trials": 20,
+    "m1a-friction-trials-historical": 60,
+    "m0-empty-grasp": 100,
+    "m1a-motion-execution": 30,
+    "m1a-contact-calibration": 13
+  },
+  "gates": {
+    "real_episodes_ge_50": true,
+    "real_chunks_ge_300": true,
+    "failure_frac_ge_0_30": true,
+    "synthetic_train_frac_le_0_50": true,
+    "episode_level_split": true,
+    "oracle_not_in_online_obs_contract": true
+  },
+  "jsonl": "data/qrm_lite/manifests/real-v1.jsonl",
+  "m1b_auto_append": {
+    "reserved_dataset": "QRM-Real-V2",
+    "status": "interface_only",
+    "note": "Do not block Beta-1 waiting for M1B; append non-oracle episodes when available"
+  }
+}

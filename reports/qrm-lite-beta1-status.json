@@ -1,0 +1,125 @@
+{
+  "phase": "P1-QRM-beta1",
+  "status": "IN_PROGRESS_BOOTSTRAPPED",
+  "alpha_tag": "qrm-lite-alpha",
+  "alpha_commit": "0287d23e586f5d977c71257aeca4accacecadbe8",
+  "alpha_verdict": "GO_COARSE_AND_MLP_ONLY",
+  "flow_status": "IMPLEMENTED_NOT_SELECTED",
+  "branch": "codex/qrm-lite-beta1",
+  "base_commit": "0287d23e586f5d977c71257aeca4accacecadbe8",
+  "formal_models": [
+    "Q0_COARSE_ONLY",
+    "Q1_COARSE_MLP_RESIDUAL",
+    "Q2_COARSE_MLP_FAILURE_CONTEXT"
+  ],
+  "primary_ablation": "Q1_vs_Q2_failure_context",
+  "real_v1": {
+    "dataset": "QRM-Real-V1",
+    "n_samples": 381,
+    "n_episodes": 91,
+    "n_train": 285,
+    "n_val": 50,
+    "n_test": 46,
+    "real_samples": 381,
+    "synthetic_samples": 0,
+    "synthetic_train_fraction": 0.0,
+    "failure_or_recovery_samples": 160,
+    "failure_or_recovery_fraction": 0.4199475065616798,
+    "recovery_transitions": 100,
+    "by_source": {
+      "m1a-contact-gate": 140,
+      "m1a-contact-gate-historical": 18,
+      "m1a-friction-trials": 20,
+      "m1a-friction-trials-historical": 60,
+      "m0-empty-grasp": 100,
+      "m1a-motion-execution": 30,
+      "m1a-contact-calibration": 13
+    },
+    "gates": {
+      "real_episodes_ge_50": true,
+      "real_chunks_ge_300": true,
+      "failure_frac_ge_0_30": true,
+      "synthetic_train_frac_le_0_50": true,
+      "episode_level_split": true,
+      "oracle_not_in_online_obs_contract": true
+    },
+    "jsonl": "data/qrm_lite/manifests/real-v1.jsonl",
+    "m1b_auto_append": {
+      "reserved_dataset": "QRM-Real-V2",
+      "status": "interface_only",
+      "note": "Do not block Beta-1 waiting for M1B; append non-oracle episodes when available"
+    }
+  },
+  "q012_train_summary": {
+    "n_train": 285,
+    "n_val": 50,
+    "majority_baseline_acc": 0.14,
+    "models": {
+      "Q0_COARSE_ONLY": {
+        "val_skill_acc": 0.7,
+        "beats_zero_residual": null,
+        "uses_fc": false
+      },
+      "Q1_COARSE_MLP_RESIDUAL": {
+        "val_skill_acc": 0.7,
+        "beats_zero_residual": true,
+        "uses_fc": false
+      },
+      "Q2_COARSE_MLP_FAILURE_CONTEXT": {
+        "val_skill_acc": 0.7,
+        "beats_zero_residual": true,
+        "uses_fc": true
+      }
+    }
+  },
+  "failure_context_ablation": {
+    "offline_repetition": {
+      "q1_same_failed_action_repetition_rate": 0.10204081632653061,
+      "q2_same_failed_action_repetition_rate": 0.02040816326530612,
+      "relative_reduction": 0.8,
+      "absolute_reduction": 0.0816326530612245,
+      "q1_n": 49,
+      "q2_n": 49,
+      "q1_action_hist": {
+        "REOBSERVE": 21,
+        "GRASP": 8,
+        "OBSERVE": 5,
+        "ALTERNATE_OBLIQUE": 5,
+        "ALTERNATE_SIDE": 10
+      },
+      "q2_action_hist": {
+        "REOBSERVE": 25,
+        "GRASP": 4,
+        "OBSERVE": 9,
+        "MOVE": 1,
+        "ALTERNATE_SIDE": 10
+      }
+    },
+    "q1_offline": {
+      "recovery_top1": 0.3877551020408163,
+      "skill_accuracy": 0.3877551020408163,
+      "macro_f1": 0.18333333333333335,
+      "n_fail_samples": 49
+    },
+    "q2_offline": {
+      "recovery_top1": 0.3877551020408163,
+      "skill_accuracy": 0.3877551020408163,
+      "macro_f1": 0.15384615384615385,
+      "n_fail_samples": 49
+    },
+    "note": "Current offline repetition metric is not yet discriminative; needs better recovery labels and Gazebo 20-ep loop"
+  },
+  "topology": {
+    "train_host": "fx@chxy",
+    "closed_loop_host": "gl@node2 (M1B idle only)",
+    "local": "/Users/gl/tzb-qrm-lite"
+  },
+  "next_steps": [
+    "rsync/codex branch to fx@chxy and stand up resident QwenPolicyService",
+    "improve recovery supervision labels for Q1 vs Q2 discrimination",
+    "run 20-episode empty-grasp recovery on node2 when M1B idle",
+    "decide GO_QRM_BETA_2 / GO_QRM_COARSE_ONLY / STOP_QRM_ACTION_REFINER"
+  ],
+  "tests_passed": 18,
+  "pushed": false
+}

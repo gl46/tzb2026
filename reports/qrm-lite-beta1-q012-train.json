@@ -1,0 +1,257 @@
+{
+  "dataset": "data/qrm_lite/manifests/real-v1.jsonl",
+  "n_train": 285,
+  "n_val": 50,
+  "models": {
+    "Q0_COARSE_ONLY": {
+      "checkpoint": "artifacts/qrm_lite/beta1/Q0.npz",
+      "uses_failure_context": false,
+      "uses_residual": false,
+      "coarse": {
+        "history_tail": [
+          {
+            "epoch": 195,
+            "loss": 0.02627483750677703,
+            "skill_acc": 0.8245614035087719
+          },
+          {
+            "epoch": 196,
+            "loss": 0.026227014004796274,
+            "skill_acc": 0.8245614035087719
+          },
+          {
+            "epoch": 197,
+            "loss": 0.026179391352354184,
+            "skill_acc": 0.8245614035087719
+          },
+          {
+            "epoch": 198,
+            "loss": 0.026131967961604167,
+            "skill_acc": 0.8245614035087719
+          },
+          {
+            "epoch": 199,
+            "loss": 0.02608474227348615,
+            "skill_acc": 0.8245614035087719
+          }
+        ],
+        "final": {
+          "epoch": 199,
+          "loss": 0.02608474227348615,
+          "skill_acc": 0.8245614035087719
+        },
+        "initial": {
+          "epoch": 0,
+          "loss": 0.21145465247752082,
+          "skill_acc": 0.16140350877192983
+        }
+      },
+      "mlp": null,
+      "val": {
+        "skill_accuracy": 0.7,
+        "macro_f1": 0.5767676767676768,
+        "n": 50
+      }
+    },
+    "Q1_COARSE_MLP_RESIDUAL": {
+      "checkpoint": "artifacts/qrm_lite/beta1/Q1.npz",
+      "uses_failure_context": false,
+      "uses_residual": true,
+      "coarse": {
+        "history_tail": [
+          {
+            "epoch": 195,
+            "loss": 0.02627483750677703,
+            "skill_acc": 0.8245614035087719
+          },
+          {
+            "epoch": 196,
+            "loss": 0.026227014004796274,
+            "skill_acc": 0.8245614035087719
+          },
+          {
+            "epoch": 197,
+            "loss": 0.026179391352354184,
+            "skill_acc": 0.8245614035087719
+          },
+          {
+            "epoch": 198,
+            "loss": 0.026131967961604167,
+            "skill_acc": 0.8245614035087719
+          },
+          {
+            "epoch": 199,
+            "loss": 0.02608474227348615,
+            "skill_acc": 0.8245614035087719
+          }
+        ],
+        "final": {
+          "epoch": 199,
+          "loss": 0.02608474227348615,
+          "skill_acc": 0.8245614035087719
+        },
+        "initial": {
+          "epoch": 0,
+          "loss": 0.21145465247752082,
+          "skill_acc": 0.16140350877192983
+        }
+      },
+      "mlp": {
+        "history_tail": [
+          {
+            "epoch": 245,
+            "loss": 0.0044857111188312876,
+            "trans_mae": 0.023102945542511775
+          },
+          {
+            "epoch": 246,
+            "loss": 0.004469674513918442,
+            "trans_mae": 0.023094583903833975
+          },
+          {
+            "epoch": 247,
+            "loss": 0.004453713608882905,
+            "trans_mae": 0.02308619017682816
+          },
+          {
+            "epoch": 248,
+            "loss": 0.004437827962131383,
+            "trans_mae": 0.023077607706170296
+          },
+          {
+            "epoch": 249,
+            "loss": 0.0044220171357921,
+            "trans_mae": 0.02306804841901553
+          }
+        ],
+        "final": {
+          "epoch": 249,
+          "loss": 0.0044220171357921,
+          "trans_mae": 0.02306804841901553
+        },
+        "initial": {
+          "epoch": 0,
+          "loss": 0.12678477389614062,
+          "trans_mae": 0.026760678225585657
+        },
+        "residual_errors": {
+          "l1": 0.0390814543096541,
+          "l2": 0.06313232311042899,
+          "translation_l1": 0.02306804841901553
+        },
+        "zero_residual_baseline": {
+          "l1": 0.05851624561403509,
+          "l2": 0.20075989947844788,
+          "translation_l1": 0.005989824561403508
+        },
+        "beats_zero_residual": true
+      },
+      "val": {
+        "skill_accuracy": 0.7,
+        "macro_f1": 0.5767676767676768,
+        "n": 50
+      }
+    },
+    "Q2_COARSE_MLP_FAILURE_CONTEXT": {
+      "checkpoint": "artifacts/qrm_lite/beta1/Q2.npz",
+      "uses_failure_context": true,
+      "uses_residual": true,
+      "coarse": {
+        "history_tail": [
+          {
+            "epoch": 195,
+            "loss": 0.024943711270400203,
+            "skill_acc": 0.8491228070175438
+          },
+          {
+            "epoch": 196,
+            "loss": 0.024892349309725597,
+            "skill_acc": 0.8491228070175438
+          },
+          {
+            "epoch": 197,
+            "loss": 0.024841223372466754,
+            "skill_acc": 0.8491228070175438
+          },
+          {
+            "epoch": 198,
+            "loss": 0.024790331551568384,
+            "skill_acc": 0.8491228070175438
+          },
+          {
+            "epoch": 199,
+            "loss": 0.024739671971436488,
+            "skill_acc": 0.8491228070175438
+          }
+        ],
+        "final": {
+          "epoch": 199,
+          "loss": 0.024739671971436488,
+          "skill_acc": 0.8491228070175438
+        },
+        "initial": {
+          "epoch": 0,
+          "loss": 0.20945959747350124,
+          "skill_acc": 0.13333333333333333
+        }
+      },
+      "mlp": {
+        "history_tail": [
+          {
+            "epoch": 245,
+            "loss": 0.0049618324287705184,
+            "trans_mae": 0.02292697364589884
+          },
+          {
+            "epoch": 246,
+            "loss": 0.004944183414832054,
+            "trans_mae": 0.022916481408726326
+          },
+          {
+            "epoch": 247,
+            "loss": 0.00492662041438783,
+            "trans_mae": 0.02290598675110045
+          },
+          {
+            "epoch": 248,
+            "loss": 0.004909142898942521,
+            "trans_mae": 0.022895308087041752
+          },
+          {
+            "epoch": 249,
+            "loss": 0.004891750344239593,
+            "trans_mae": 0.022884641382962034
+          }
+        ],
+        "final": {
+          "epoch": 249,
+          "loss": 0.004891750344239593,
+          "trans_mae": 0.022884641382962034
+        },
+        "initial": {
+          "epoch": 0,
+          "loss": 0.13015177709859474,
+          "trans_mae": 0.02651029055519344
+        },
+        "residual_errors": {
+          "l1": 0.042027605058263744,
+          "l2": 0.06541357139559588,
+          "translation_l1": 0.022884641382962034
+        },
+        "zero_residual_baseline": {
+          "l1": 0.05851624561403509,
+          "l2": 0.20075989947844788,
+          "translation_l1": 0.005989824561403508
+        },
+        "beats_zero_residual": true
+      },
+      "val": {
+        "skill_accuracy": 0.7,
+        "macro_f1": 0.5757575757575758,
+        "n": 50
+      }
+    }
+  },
+  "majority_class_baseline_acc": 0.14,
+  "flow_status": "IMPLEMENTED_NOT_SELECTED"
+}

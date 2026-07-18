@@ -36,3 +36,7 @@ logs/*.json
 .venv-qrm-lite/
 artifacts/qrm_lite/
 data/qrm_lite/manifests/*.jsonl
+
+# QRM beta1 local artifacts
+data/qrm_lite/manifests/real-v*.jsonl
+artifacts/qrm_lite/beta1/

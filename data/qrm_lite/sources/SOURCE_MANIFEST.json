@@ -1,0 +1,56 @@
+[
+  {
+    "path": "reports/m1a-contact-calibration.json",
+    "copied_to": "data/qrm_lite/sources/m1a-contact-calibration.json",
+    "bytes": 116346,
+    "status": "ok"
+  },
+  {
+    "path": "reports/m1a-motion-execution.json",
+    "copied_to": "data/qrm_lite/sources/m1a-motion-execution.json",
+    "bytes": 152416,
+    "status": "ok"
+  },
+  {
+    "path": "reports/m1a-friction-trials.json",
+    "copied_to": "data/qrm_lite/sources/m1a-friction-trials.json",
+    "bytes": 2020675,
+    "status": "ok"
+  },
+  {
+    "path": "reports/m1a-contact-gate.json",
+    "copied_to": "data/qrm_lite/sources/m1a-contact-gate.json",
+    "bytes": 1390768,
+    "status": "ok"
+  },
+  {
+    "path": "reports/m1a-b1-oracle.json",
+    "copied_to": "data/qrm_lite/sources/m1a-b1-oracle.json",
+    "bytes": 2201,
+    "status": "ok"
+  },
+  {
+    "path": "reports/p0-empty-grasp-failures.json",
+    "copied_to": "data/qrm_lite/sources/p0-empty-grasp-failures.json",
+    "bytes": 8276,
+    "status": "ok"
+  },
+  {
+    "path": "reports/m1a-m0-smoke.json",
+    "copied_to": "data/qrm_lite/sources/m1a-m0-smoke.json",
+    "bytes": 494,
+    "status": "ok"
+  },
+  {
+    "path": "data/episodes/p0-empty-grasp-failures.jsonl",
+    "copied_to": "data/qrm_lite/sources/p0-empty-grasp-failures.jsonl",
+    "bytes": 5011,
+    "status": "ok"
+  },
+  {
+    "path": "data/manifests/m1a-runtime-grasp-v1.json",
+    "copied_to": "data/qrm_lite/sources/m1a-runtime-grasp-v1.json",
+    "bytes": 2446,
+    "status": "ok"
+  }
+]

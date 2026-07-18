@@ -1,0 +1,328 @@
+{
+  "status": "VERIFIED_20_EMPTY_GRASP_FAILURE_TRAJECTORIES",
+  "host": "node2",
+  "count": 20,
+  "entries": [
+    {
+      "episode_id": "p0-empty-grasp-01",
+      "failure_type": "empty_grasp",
+      "injection": {
+        "mode": "empty_grasp",
+        "approach_seed": 1
+      },
+      "arm_action_succeeded": true,
+      "final_cube_pose_xyz": [
+        0.22,
+        0.12,
+        0.475
+      ],
+      "task_success": false,
+      "object_inside_bin": false
+    },
+    {
+      "episode_id": "p0-empty-grasp-02",
+      "failure_type": "empty_grasp",
+      "injection": {
+        "mode": "empty_grasp",
+        "approach_seed": 2
+      },
+      "arm_action_succeeded": true,
+      "final_cube_pose_xyz": [
+        0.22,
+        0.12,
+        0.475
+      ],
+      "task_success": false,
+      "object_inside_bin": false
+    },
+    {
+      "episode_id": "p0-empty-grasp-03",
+      "failure_type": "empty_grasp",
+      "injection": {
+        "mode": "empty_grasp",
+        "approach_seed": 3
+      },
+      "arm_action_succeeded": true,
+      "final_cube_pose_xyz": [
+        0.22,
+        0.12,
+        0.475
+      ],
+      "task_success": false,
+      "object_inside_bin": false
+    },
+    {
+      "episode_id": "p0-empty-grasp-04",
+      "failure_type": "empty_grasp",
+      "injection": {
+        "mode": "empty_grasp",
+        "approach_seed": 4
+      },
+      "arm_action_succeeded": true,
+      "final_cube_pose_xyz": [
+        0.22,
+        0.12,
+        0.475
+      ],
+      "task_success": false,
+      "object_inside_bin": false
+    },
+    {
+      "episode_id": "p0-empty-grasp-05",
+      "failure_type": "empty_grasp",
+      "injection": {
+        "mode": "empty_grasp",
+        "approach_seed": 5
+      },
+      "arm_action_succeeded": true,
+      "final_cube_pose_xyz": [
+        0.22,
+        0.12,
+        0.475
+      ],
+      "task_success": false,
+      "object_inside_bin": false
+    },
+    {
+      "episode_id": "p0-empty-grasp-06",
+      "failure_type": "empty_grasp",
+      "injection": {
+        "mode": "empty_grasp",
+        "approach_seed": 6
+      },
+      "arm_action_succeeded": true,
+      "final_cube_pose_xyz": [
+        0.22,
+        0.12,
+        0.475
+      ],
+      "task_success": false,
+      "object_inside_bin": false
+    },
+    {
+      "episode_id": "p0-empty-grasp-07",
+      "failure_type": "empty_grasp",
+      "injection": {
+        "mode": "empty_grasp",
+        "approach_seed": 7
+      },
+      "arm_action_succeeded": true,
+      "final_cube_pose_xyz": [
+        0.22,
+        0.12,
+        0.475
+      ],
+      "task_success": false,
+      "object_inside_bin": false
+    },
+    {
+      "episode_id": "p0-empty-grasp-08",
+      "failure_type": "empty_grasp",
+      "injection": {
+        "mode": "empty_grasp",
+        "approach_seed": 8
+      },
+      "arm_action_succeeded": true,
+      "final_cube_pose_xyz": [
+        0.22,
+        0.12,
+        0.475
+      ],
+      "task_success": false,
+      "object_inside_bin": false
+    },
+    {
+      "episode_id": "p0-empty-grasp-09",
+      "failure_type": "empty_grasp",
+      "injection": {
+        "mode": "empty_grasp",
+        "approach_seed": 9
+      },
+      "arm_action_succeeded": true,
+      "final_cube_pose_xyz": [
+        0.22,
+        0.12,
+        0.475
+      ],
+      "task_success": false,
+      "object_inside_bin": false
+    },
+    {
+      "episode_id": "p0-empty-grasp-10",
+      "failure_type": "empty_grasp",
+      "injection": {
+        "mode": "empty_grasp",
+        "approach_seed": 10
+      },
+      "arm_action_succeeded": true,
+      "final_cube_pose_xyz": [
+        0.22,
+        0.12,
+        0.475
+      ],
+      "task_success": false,
+      "object_inside_bin": false
+    },
+    {
+      "episode_id": "p0-empty-grasp-11",
+      "failure_type": "empty_grasp",
+      "injection": {
+        "mode": "empty_grasp",
+        "approach_seed": 11
+      },
+      "arm_action_succeeded": true,
+      "final_cube_pose_xyz": [
+        0.22,
+        0.12,
+        0.475
+      ],
+      "task_success": false,
+      "object_inside_bin": false
+    },
+    {
+      "episode_id": "p0-empty-grasp-12",
+      "failure_type": "empty_grasp",
+      "injection": {
+        "mode": "empty_grasp",
+        "approach_seed": 12
+      },
+      "arm_action_succeeded": true,
+      "final_cube_pose_xyz": [
+        0.22,
+        0.12,
+        0.475
+      ],
+      "task_success": false,
+      "object_inside_bin": false
+    },
+    {
+      "episode_id": "p0-empty-grasp-13",
+      "failure_type": "empty_grasp",
+      "injection": {
+        "mode": "empty_grasp",
+        "approach_seed": 13
+      },
+      "arm_action_succeeded": true,
+      "final_cube_pose_xyz": [
+        0.22,
+        0.12,
+        0.475
+      ],
+      "task_success": false,
+      "object_inside_bin": false
+    },
+    {
+      "episode_id": "p0-empty-grasp-14",
+      "failure_type": "empty_grasp",
+      "injection": {
+        "mode": "empty_grasp",
+        "approach_seed": 14
+      },
+      "arm_action_succeeded": true,
+      "final_cube_pose_xyz": [
+        0.22,
+        0.12,
+        0.475
+      ],
+      "task_success": false,
+      "object_inside_bin": false
+    },
+    {
+      "episode_id": "p0-empty-grasp-15",
+      "failure_type": "empty_grasp",
+      "injection": {
+        "mode": "empty_grasp",
+        "approach_seed": 15
+      },
+      "arm_action_succeeded": true,
+      "final_cube_pose_xyz": [
+        0.22,
+        0.12,
+        0.475
+      ],
+      "task_success": false,
+      "object_inside_bin": false
+    },
+    {
+      "episode_id": "p0-empty-grasp-16",
+      "failure_type": "empty_grasp",
+      "injection": {
+        "mode": "empty_grasp",
+        "approach_seed": 16
+      },
+      "arm_action_succeeded": true,
+      "final_cube_pose_xyz": [
+        0.22,
+        0.12,
+        0.475
+      ],
+      "task_success": false,
+      "object_inside_bin": false
+    },
+    {
+      "episode_id": "p0-empty-grasp-17",
+      "failure_type": "empty_grasp",
+      "injection": {
+        "mode": "empty_grasp",
+        "approach_seed": 17
+      },
+      "arm_action_succeeded": true,
+      "final_cube_pose_xyz": [
+        0.22,
+        0.12,
+        0.475
+      ],
+      "task_success": false,
+      "object_inside_bin": false
+    },
+    {
+      "episode_id": "p0-empty-grasp-18",
+      "failure_type": "empty_grasp",
+      "injection": {
+        "mode": "empty_grasp",
+        "approach_seed": 18
+      },
+      "arm_action_succeeded": true,
+      "final_cube_pose_xyz": [
+        0.22,
+        0.12,
+        0.475
+      ],
+      "task_success": false,
+      "object_inside_bin": false
+    },
+    {
+      "episode_id": "p0-empty-grasp-19",
+      "failure_type": "empty_grasp",
+      "injection": {
+        "mode": "empty_grasp",
+        "approach_seed": 19
+      },
+      "arm_action_succeeded": true,
+      "final_cube_pose_xyz": [
+        0.22,
+        0.12,
+        0.475
+      ],
+      "task_success": false,
+      "object_inside_bin": false
+    },
+    {
+      "episode_id": "p0-empty-grasp-20",
+      "failure_type": "empty_grasp",
+      "injection": {
+        "mode": "empty_grasp",
+        "approach_seed": 20
+      },
+      "arm_action_succeeded": true,
+      "final_cube_pose_xyz": [
+        0.22,
+        0.12,
+        0.475
+      ],
+      "task_success": false,
+      "object_inside_bin": false
+    }
+  ],
+  "raw_output": "EMPTY_GRASP:1:true:0.220000,0.120000,0.475000\nEMPTY_GRASP:2:true:0.220000,0.120000,0.475000\nEMPTY_GRASP:3:true:0.220000,0.120000,0.475000\nEMPTY_GRASP:4:true:0.220000,0.120000,0.475000\nEMPTY_GRASP:5:true:0.220000,0.120000,0.475000\nEMPTY_GRASP:6:true:0.220000,0.120000,0.475000\nEMPTY_GRASP:7:true:0.220000,0.120000,0.475000\nEMPTY_GRASP:8:true:0.220000,0.120000,0.475000\nEMPTY_GRASP:9:true:0.220000,0.120000,0.475000\nEMPTY_GRASP:10:true:0.220000,0.120000,0.475000\nEMPTY_GRASP:11:true:0.220000,0.120000,0.475000\nEMPTY_GRASP:12:true:0.220000,0.120000,0.475000\nEMPTY_GRASP:13:true:0.220000,0.120000,0.475000\nEMPTY_GRASP:14:true:0.220000,0.120000,0.475000\nEMPTY_GRASP:15:true:0.220000,0.120000,0.475000\nEMPTY_GRASP:16:true:0.220000,0.120000,0.475000\nEMPTY_GRASP:17:true:0.220000,0.120000,0.475000\nEMPTY_GRASP:18:true:0.220000,0.120000,0.475000\nEMPTY_GRASP:19:true:0.220000,0.120000,0.475000\nEMPTY_GRASP:20:true:0.220000,0.120000,0.475000"
+}
