@@ -17,6 +17,7 @@ import time
 from pathlib import Path
 
 import rclpy
+from geometry_msgs.msg import Pose
 
 ROOT = Path(__file__).resolve().parents[1]
 for directory in (ROOT / "src", ROOT / "scripts"):
@@ -35,11 +36,10 @@ POSE_RE = re.compile(
 SETTLE_S = 2.0
 MAX_OBJECT_DISPLACEMENT_M = 0.001
 MIN_EE_DISPLACEMENT_M = 0.02
-# The positive-Y panda_joint4 jog contacted a positive-Y cylinder.  A 50 mrad
-# negative panda_joint3 jog moves the hand about 24 mm toward negative Y from
-# S1 home, away from that incoming zone while retaining a measurable path.
-HOME_JOG_JOINT_INDEX = 2
-HOME_JOG_DELTA_RAD = -0.05
+# A joint-space micro-jog can sweep a lower arm link through an incoming zone.
+# This reset probe instead lifts the high S1-home hand 30 mm in world Z using
+# the same MoveIt IK/plan/execute chain and the injected cylinder obstacles.
+HOME_JOG_WORLD_Z_M = 0.03
 POSE_SNAPSHOT_ATTEMPTS = 3
 POSE_QUERY_TIMEOUT_S = 5
 
@@ -95,6 +95,16 @@ def set_world_pause(world_name: str, paused: bool) -> dict[str, object]:
     }
 
 
+def lifted_home_pose(home_fk: list[float] | None) -> Pose | None:
+    if home_fk is None:
+        return None
+    pose = Pose()
+    pose.position.x, pose.position.y = home_fk[:2]
+    pose.position.z = home_fk[2] + HOME_JOG_WORLD_Z_M
+    pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w = home_fk[3:]
+    return pose
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--spawn-manifest", required=True, type=Path)
@@ -123,10 +133,13 @@ def main() -> int:
         before, before_attempts = positions(names)
         before_joints = [client.latest.get(name, math.nan) for name in JOINTS]
         before_fk = client.fk(before_joints) if all(math.isfinite(value) for value in before_joints) else None
-        jog_target = list(HOME_ARM_POSITIONS)
-        jog_target[HOME_JOG_JOINT_INDEX] += HOME_JOG_DELTA_RAD
+        jog_pose = lifted_home_pose(client.fk(HOME_ARM_POSITIONS))
         before_unpause = set_world_pause(args.world_name, False)
-        jog = client.move_joint_target(jog_target) if home.get("executed") and collision_scene_applied and before_unpause["succeeded"] else {"executed": False}
+        jog = (
+            client.move_hand_pose(jog_pose, ik_seed=HOME_ARM_POSITIONS)
+            if home.get("executed") and collision_scene_applied and before_unpause["succeeded"] and jog_pose is not None
+            else {"executed": False}
+        )
         time.sleep(SETTLE_S)
         after_pause = set_world_pause(args.world_name, True)
         after, after_attempts = positions(names)
@@ -161,7 +174,7 @@ def main() -> int:
                 "objects": names,
                 "applied": collision_scene_applied,
             },
-            "jog_joint_delta_rad": {JOINTS[HOME_JOG_JOINT_INDEX]: HOME_JOG_DELTA_RAD},
+            "jog_hand_delta_m": {"world_z": HOME_JOG_WORLD_Z_M},
             "minimum_ee_displacement_m": MIN_EE_DISPLACEMENT_M,
             "maximum_object_displacement_m": MAX_OBJECT_DISPLACEMENT_M,
             "home": home,

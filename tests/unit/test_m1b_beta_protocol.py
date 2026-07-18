@@ -143,8 +143,9 @@ def test_m1b_amendment_reset_gate_is_physical_and_fails_closed_on_missing_pose()
     assert 'SETTLE_S = 2.0' in source
     assert 'MAX_OBJECT_DISPLACEMENT_M = 0.001' in source
     assert 'MIN_EE_DISPLACEMENT_M = 0.02' in source
-    assert 'HOME_JOG_JOINT_INDEX = 2' in source
-    assert 'HOME_JOG_DELTA_RAD = -0.05' in source
+    assert 'HOME_JOG_WORLD_Z_M = 0.03' in source
+    assert 'def lifted_home_pose(home_fk: list[float] | None) -> Pose | None:' in source
+    assert 'client.move_hand_pose(jog_pose, ik_seed=HOME_ARM_POSITIONS)' in source
     assert 'except subprocess.TimeoutExpired:' in source
     assert 'return None' in source
     assert 'final = {name: supervision_model_position(name) for name in names}' in source
