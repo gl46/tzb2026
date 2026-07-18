@@ -12,6 +12,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import os
 import re
 import select
@@ -71,6 +72,7 @@ M1B_NEAR_REOBSERVATION_DURATION_S = 8.0
 M1B_NEAR_REOBSERVATION_MAX_ASSOCIATION_DISTANCE_M = 0.050
 M1B_NEAR_REOBSERVATION_FRAME_COUNT = 3
 CALIBRATION_SETTLE_S = 2.0
+HAND_FEEDBACK_READY_TIMEOUT_S = 12.0
 
 
 def calibration_live_model_center(entity_name: str) -> list[float]:
@@ -87,6 +89,17 @@ def calibration_live_model_center(entity_name: str) -> list[float]:
     if match is None:
         raise RuntimeError(f"CALIBRATION_SUPERVISION_POSE_UNAVAILABLE:{entity_name}")
     return [float(value) for value in match.groups()]
+
+
+def wait_for_finite_hand_feedback(client: CalibrationClient) -> bool:
+    """Do not send the first physical hand goal before joint feedback exists."""
+    deadline = time.monotonic() + HAND_FEEDBACK_READY_TIMEOUT_S
+    while time.monotonic() < deadline:
+        values = [client.latest_hand.get(name, math.nan) for name in ("panda_finger_joint1", "panda_finger_joint2")]
+        if all(math.isfinite(value) for value in values):
+            return True
+        rclpy.spin_once(client, timeout_sec=0.05)
+    return False
 
 
 def m1b_close_finger_targets_from_perceived_diameter(
@@ -413,7 +426,8 @@ def main() -> int:
     for topic in CYLINDER_CONTACT_TOPICS:
         client.create_subscription(Contacts, topic, on_cylinder_contact, 1000)
     try:
-        ready = client.wait_calibration_ready() and client.apply_scene()
+        hand_feedback_ready = client.wait_calibration_ready() and wait_for_finite_hand_feedback(client)
+        ready = hand_feedback_ready and client.apply_scene()
         approach = {"executed": False, "reason": "MOVEIT_UNAVAILABLE"}
         open_hand = {"succeeded": False}
         close = {"succeeded": False}
@@ -518,6 +532,7 @@ def main() -> int:
             "offset_vector_m": [target[index] - truth_center[index] for index in range(3)],
             "production_grasp_primitive": "open_physical_hand + m1b_normal_side_precontact + m1b_normal_side_contact_descend + close_physical_hand + m1b_internal_bilateral_broker",
             "ready": ready, "calibration_collision_scene_applied": cylinder_scene_applied if ready else False, "target_touch_exception_applied": target_touch_exception_applied if ready else False, "motion_gate_requires_terminal_convergence": True, "open_hand": open_hand, "approach": approach, "close": close, "contact_descend": contact_descend,
+            "hand_feedback_ready": hand_feedback_ready,
             "raw_contact_samples": [{"timestamp_s": item.timestamp_s, "finger": item.finger, "collision_pairs": list(item.collision_pairs)} for item in raw],
             "post_close_contact_samples": [{"timestamp_s": item.timestamp_s, "finger": item.finger, "collision_pairs": list(item.collision_pairs)} for item in post_close_raw],
             "cylinder_side_contact_samples": cylinder_contact_samples,

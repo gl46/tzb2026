@@ -215,6 +215,9 @@ def test_m1b_tolerance_attach_uses_detachablejoint_empty_payload() -> None:
     assert 'def calibration_live_model_center(entity_name: str)' in source
     assert 'time.sleep(CALIBRATION_SETTLE_S)' in source
     assert '"EVALUATOR_ONLY_GAZEBO_MODEL_POSE_AFTER_SETTLE"' in source
+    assert 'HAND_FEEDBACK_READY_TIMEOUT_S = 12.0' in source
+    assert 'def wait_for_finite_hand_feedback(client: CalibrationClient)' in source
+    assert 'hand_feedback_ready = client.wait_calibration_ready() and wait_for_finite_hand_feedback(client)' in source
     assert '"evidence_sha256": hashlib.sha256(raw).hexdigest()' in source
     assert 'close = client.command_hand(close_targets)' in source
     assert '"source": "ACTUAL_PUBLIC_RGBD_GEOMETRIC_OUTPUT"' in source
