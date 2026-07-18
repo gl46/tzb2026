@@ -1,0 +1,11 @@
+{
+  "schema_version": "M1BToleranceCalibrationV1",
+  "scope": "CALIBRATION_ONLY_SUPERVISION_INITIALIZATION",
+  "eligible_orientation_state": "normal",
+  "offset_axes": ["x", "y", "z"],
+  "offsets_m": [0.0, -0.005, 0.005, -0.01, 0.01, -0.015, 0.015, -0.02, 0.02],
+  "repetitions_per_point": 3,
+  "success_predicate": "bilateral_same_entity_contact",
+  "minimum_success_rate": 0.8,
+  "truth_boundary": "calibration_only_never_available_to_online_policy"
+}
