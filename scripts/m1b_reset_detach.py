@@ -202,12 +202,15 @@ def detach_all_and_observe(
     processing pulse remain the reset actuation; records retain any publisher
     errors as auxiliary evidence.
     """
-    commands: dict[str, subprocess.CompletedProcess[str]] = {}
+    commands: dict[str, subprocess.CompletedProcess[str] | None] = {}
     for name in object_names:
-        commands[name] = subprocess.run(
-            ["gz", "topic", "-t", f"/xh/m1b/{name}/detach", "-m", "gz.msgs.Empty", "-p", ""],
-            check=False, capture_output=True, text=True, timeout=timeout_s,
-        )
+        try:
+            commands[name] = subprocess.run(
+                ["gz", "topic", "-t", f"/xh/m1b/{name}/detach", "-m", "gz.msgs.Empty", "-p", ""],
+                check=False, capture_output=True, text=True, timeout=timeout_s,
+            )
+        except subprocess.TimeoutExpired:
+            commands[name] = None
     processing_pulse = None
     if world_name:
         unpause = subprocess.run(
@@ -232,7 +235,9 @@ def detach_all_and_observe(
     records = []
     for name, command in commands.items():
         lines = ["auxiliary_grasp_state_not_waited_per_amendment_1"]
-        if command.returncode != 0:
+        if command is None:
+            lines.append("detach_publish_timeout")
+        elif command.returncode != 0:
             lines.extend(value for value in (command.stdout, command.stderr) if value)
         records.append(M1BResetVerificationV1(
             name, f"/xh/m1b/{name}/detach", f"/xh/m1b/{name}/grasp_state", False, tuple(lines),
@@ -250,10 +255,14 @@ def broadcast_detach_round(object_names: list[str], timeout_s: float) -> dict[st
     """
     results: dict[str, dict[str, object]] = {}
     for name in object_names:
-        command = subprocess.run(
-            ["gz", "topic", "-t", f"/xh/m1b/{name}/detach", "-m", "gz.msgs.Empty", "-p", ""],
-            check=False, capture_output=True, text=True, timeout=timeout_s,
-        )
+        try:
+            command = subprocess.run(
+                ["gz", "topic", "-t", f"/xh/m1b/{name}/detach", "-m", "gz.msgs.Empty", "-p", ""],
+                check=False, capture_output=True, text=True, timeout=timeout_s,
+            )
+        except subprocess.TimeoutExpired:
+            results[name] = {"returncode": None, "stdout": "", "stderr": "timeout", "published": False}
+            continue
         results[name] = {
             "returncode": command.returncode,
             "stdout": command.stdout.strip(),

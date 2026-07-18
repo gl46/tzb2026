@@ -172,6 +172,7 @@ def test_m1b_amendment_detach_does_not_wait_on_auxiliary_one_shot_state() -> Non
     assert "def broadcast_detach_round(object_names: list[str], timeout_s: float)" in source
     assert '"post_resume_detach_round"' in source
     assert '"POST_RESUME_DETACH_PUBLISH_FAILED"' in source
+    assert '"stderr": "timeout", "published": False' in source
 
 
 def test_m1b_moveit_server_does_not_start_a_second_simulation() -> None:
