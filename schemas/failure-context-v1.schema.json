@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "failure-context-v1.schema.json",
+  "title": "FailureContextV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "failure_type", "retry_count"],
+  "properties": {
+    "schema_version": { "const": "FailureContextV1" },
+    "last_skill": { "type": ["string", "null"] },
+    "expected_predicates": { "type": "array", "items": { "type": "string" } },
+    "observed_predicates": { "type": "array", "items": { "type": "string" } },
+    "predicate_residual": { "type": "array", "items": { "type": "string" } },
+    "failure_type": {
+      "type": "string",
+      "enum": [
+        "NONE",
+        "EMPTY_GRASP",
+        "WRONG_OBJECT",
+        "DROP_OR_SLIP",
+        "UNSTABLE_PLACEMENT",
+        "WRONG_CELL",
+        "RELEASE_FAILURE",
+        "PATH_BLOCKED",
+        "TRACKING_LOST",
+        "UNKNOWN"
+      ]
+    },
+    "retry_count": { "type": "integer", "minimum": 0 },
+    "attempted_recoveries": { "type": "array", "items": { "type": "string" } },
+    "last_action_summary": { "type": ["string", "null"] },
+    "last_target_track_id": { "type": ["string", "null"] }
+  }
+}

@@ -1,0 +1,9 @@
+split: val
+metrics:
+  - translation_mae
+  - rotation_r6d_mae
+  - gripper_mae
+  - chunk_endpoint_trans_mae
+  - mse
+mlp_ckpt: artifacts/qrm_lite/mlp_refiner.npz
+flow_ckpt: artifacts/qrm_lite/flow_refiner.npz

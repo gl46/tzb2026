@@ -1,0 +1,10 @@
+backbone_dim: 0
+joint_dim: 8
+history_len: 4
+hidden: 256
+n_trans_bins: 5
+n_rot_bins: 5
+limit: 100
+epochs: 200
+lr: 0.05
+seed: 0

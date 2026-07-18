@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "qrm-training-sample-v1.schema.json",
+  "title": "QRMTrainingSampleV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "sample_id",
+    "episode_id",
+    "observation",
+    "coarse_intent",
+    "nominal_action_chunk",
+    "residual_action_chunk",
+    "target_action_chunk"
+  ],
+  "properties": {
+    "schema_version": { "const": "QRMTrainingSampleV1" },
+    "sample_id": { "type": "string" },
+    "episode_id": { "type": "string" },
+    "seed": { "type": "integer" },
+    "split": { "type": "string", "enum": ["train", "val", "test", "overfit"] },
+    "observation": { "type": "object" },
+    "coarse_intent": { "type": "object" },
+    "nominal_action_chunk": { "type": "object" },
+    "residual_action_chunk": { "type": "object" },
+    "target_action_chunk": { "type": "object" },
+    "simulator_supervision": { "type": ["object", "null"] },
+    "provenance": { "type": "object" },
+    "synthetic": { "type": "boolean" }
+  }
+}

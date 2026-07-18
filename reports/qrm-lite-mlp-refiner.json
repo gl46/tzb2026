@@ -1,0 +1,35 @@
+{
+  "n_samples": 100,
+  "final_loss": 0.0052490913338292255,
+  "final_trans_mae": 0.0339866336660235,
+  "initial_loss": 0.073575253819579,
+  "overfit_verified": true,
+  "checkpoint": "artifacts/qrm_lite/mlp_refiner.npz",
+  "history_tail": [
+    {
+      "epoch": 395,
+      "loss": 0.005303215265120228,
+      "trans_mae": 0.03406587005079103
+    },
+    {
+      "epoch": 396,
+      "loss": 0.005289621933924689,
+      "trans_mae": 0.034046113303770595
+    },
+    {
+      "epoch": 397,
+      "loss": 0.005276070264516768,
+      "trans_mae": 0.03402638290858498
+    },
+    {
+      "epoch": 398,
+      "loss": 0.005262560112444895,
+      "trans_mae": 0.034006537653430265
+    },
+    {
+      "epoch": 399,
+      "loss": 0.0052490913338292255,
+      "trans_mae": 0.0339866336660235
+    }
+  ]
+}

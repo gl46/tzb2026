@@ -1,0 +1,29 @@
+{
+  "phase": "P1-QRM-alpha",
+  "status": "PARTIAL",
+  "base_model": "Qwen/Qwen3.5-4B",
+  "base_revision": "851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a",
+  "branch": "codex/qrm-lite-alpha",
+  "base_commit": "0709cc19b66e52e8043eb26babb9a6f3e8ca9a72",
+  "gpu": "NVIDIA A100-SXM4-80GB @ gl@node2",
+  "qwen_multimodal_forward": false,
+  "hidden_states_verified": false,
+  "lora_train_step_verified": false,
+  "dataset_samples": 120,
+  "camera_action_roundtrip": true,
+  "coarse_overfit_verified": true,
+  "mlp_overfit_verified": true,
+  "flow_forward_backward_verified": true,
+  "flow_loss_decreased": true,
+  "flow_outperforms_mlp_preliminary": false,
+  "gate_verdict": "CONTINUE_WITH_FIXES",
+  "tests_passed": 12,
+  "tests_failed": 0,
+  "commit": "",
+  "pushed": false,
+  "blockers": [
+    "Qwen3.5-4B weight download still running on node2 via hf-mirror (xet path 401; wget resume used)"
+  ],
+  "next_command": "ssh gl@node2 'tail -f ~/xh-202607-qrm-lite/logs/qwen-download.log'",
+  "topology_override": "remote only gl@node2; paper 2606.17846v2 reference; no fx@chxy writes"
+}

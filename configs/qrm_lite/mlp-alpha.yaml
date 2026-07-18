@@ -1,0 +1,9 @@
+horizon: 4
+action_dim: 10
+hidden: 512
+limit: 100
+epochs: 300
+lr: 0.05
+max_translation_m: 0.05
+max_r6d: 0.5
+seed: 0

@@ -1,0 +1,22 @@
+{
+  "n_samples": 120,
+  "n_episodes": 120,
+  "n_train": 108,
+  "n_val": 12,
+  "failure_counts": {
+    "EMPTY_GRASP": 36,
+    "RELEASE_FAILURE": 17,
+    "UNKNOWN": 26,
+    "UNSTABLE_PLACEMENT": 20,
+    "DROP_OR_SLIP": 21
+  },
+  "synthetic_count": 100,
+  "real_log_count": 20,
+  "horizon": 4,
+  "action_dim": 10,
+  "seed_paths": [
+    "data/episodes/p0-empty-grasp-failures.jsonl"
+  ],
+  "jsonl": "data/qrm_lite/manifests/alpha-dataset.jsonl",
+  "manifest_sha": "0dc885e16ec4aca6"
+}

@@ -1,0 +1,35 @@
+{
+  "backend": "numpy",
+  "final_loss": 0.9075600923410225,
+  "initial_loss": 1.1263285926230726,
+  "history_tail": [
+    {
+      "epoch": 95,
+      "loss": 0.9183077528142428
+    },
+    {
+      "epoch": 96,
+      "loss": 0.8973427445609828
+    },
+    {
+      "epoch": 97,
+      "loss": 0.9699670982863483
+    },
+    {
+      "epoch": 98,
+      "loss": 0.9025495181409913
+    },
+    {
+      "epoch": 99,
+      "loss": 0.9268258817711975
+    }
+  ],
+  "checkpoint": "artifacts/qrm_lite/flow_refiner.npz",
+  "sample_shape": [
+    4,
+    10
+  ],
+  "forward_backward_verified": true,
+  "loss_decreased": true,
+  "n_samples": 100
+}

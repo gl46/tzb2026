@@ -1,0 +1,12 @@
+horizon: 4
+action_dim: 10
+fps: 5.0
+representation: delta_ee_cam_r6d_gripper
+coordinate_frame: camera_optical
+n_synthetic: 120
+val_ratio: 0.1
+seed: 0
+manifest: data/qrm_lite/manifests/alpha-dataset.json
+jsonl: data/qrm_lite/manifests/alpha-dataset.jsonl
+seed_sources:
+  - data/episodes/p0-empty-grasp-failures.jsonl

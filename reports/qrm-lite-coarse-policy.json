@@ -1,0 +1,77 @@
+{
+  "n_samples": 100,
+  "epochs": 300,
+  "final_loss": 0.017264837081574457,
+  "final_skill_acc": 1.0,
+  "overfit_verified": true,
+  "checkpoint": "artifacts/qrm_lite/coarse_overfit.npz",
+  "examples": [
+    {
+      "sample_id": "p0-empty-grasp-01-0",
+      "target_skill": "LIFT",
+      "pred_skill": "LIFT",
+      "target_fail": "EMPTY_GRASP",
+      "pred_fail": "EMPTY_GRASP",
+      "failure_context_used": "EMPTY_GRASP"
+    },
+    {
+      "sample_id": "p0-empty-grasp-02-1",
+      "target_skill": "PLACE",
+      "pred_skill": "PLACE",
+      "target_fail": "EMPTY_GRASP",
+      "pred_fail": "EMPTY_GRASP",
+      "failure_context_used": "EMPTY_GRASP"
+    },
+    {
+      "sample_id": "p0-empty-grasp-03-2",
+      "target_skill": "LIFT",
+      "pred_skill": "LIFT",
+      "target_fail": "EMPTY_GRASP",
+      "pred_fail": "EMPTY_GRASP",
+      "failure_context_used": "EMPTY_GRASP"
+    },
+    {
+      "sample_id": "p0-empty-grasp-04-3",
+      "target_skill": "APPROACH",
+      "pred_skill": "APPROACH",
+      "target_fail": "EMPTY_GRASP",
+      "pred_fail": "EMPTY_GRASP",
+      "failure_context_used": "EMPTY_GRASP"
+    },
+    {
+      "sample_id": "p0-empty-grasp-05-4",
+      "target_skill": "REOBSERVE",
+      "pred_skill": "REOBSERVE",
+      "target_fail": "EMPTY_GRASP",
+      "pred_fail": "EMPTY_GRASP",
+      "failure_context_used": "EMPTY_GRASP"
+    }
+  ],
+  "history_tail": [
+    {
+      "epoch": 295,
+      "loss": 0.01741283552601086,
+      "skill_acc": 1.0
+    },
+    {
+      "epoch": 296,
+      "loss": 0.01737552226465412,
+      "skill_acc": 1.0
+    },
+    {
+      "epoch": 297,
+      "loss": 0.017338419005139525,
+      "skill_acc": 1.0
+    },
+    {
+      "epoch": 298,
+      "loss": 0.01730152439245919,
+      "skill_acc": 1.0
+    },
+    {
+      "epoch": 299,
+      "loss": 0.017264837081574457,
+      "skill_acc": 1.0
+    }
+  ]
+}

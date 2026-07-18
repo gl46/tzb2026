@@ -1,0 +1,22 @@
+{
+  "generated_at": "2026-07-18T00:00:58.872433+00:00",
+  "sources": [
+    {
+      "path": "data/episodes/p0-empty-grasp-failures.jsonl",
+      "kind": "failure_log",
+      "n": 20,
+      "note": "empty grasp episodes"
+    },
+    {
+      "path": "data/qrm_lite/manifests/alpha-dataset.jsonl",
+      "kind": "qrm_training",
+      "n": 120,
+      "note": "20 real logs + 100 geometric synthetic"
+    }
+  ],
+  "missing": [
+    "full RGB-D rosbag streams not packaged in this alpha worktree",
+    "MoveIt executed trajectory dumps not yet converted en masse"
+  ],
+  "action_frame": "camera_optical delta EE + r6d residual + gripper"
+}

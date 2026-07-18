@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "qrm-observation-v1.schema.json",
+  "title": "QRMObservationV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "episode_id", "step_id", "instruction"],
+  "properties": {
+    "schema_version": { "const": "QRMObservationV1" },
+    "episode_id": { "type": "string" },
+    "step_id": { "type": "integer", "minimum": 0 },
+    "timestamp_ns": { "type": "integer", "minimum": 0 },
+    "instruction": { "type": "string" },
+    "rgb_uri": { "type": ["string", "null"] },
+    "depth_uri": { "type": ["string", "null"] },
+    "multi_view_rgb_uris": { "type": "array", "items": { "type": "string" } },
+    "camera_frame": { "type": "string" },
+    "camera_intrinsics": { "type": "array", "items": { "type": "number" } },
+    "camera_extrinsics_base_T_cam": { "type": "array", "items": { "type": "number" } },
+    "joint_position": { "type": "array", "items": { "type": "number" } },
+    "joint_velocity": { "type": "array", "items": { "type": "number" } },
+    "end_effector_pose_base": { "type": "array", "items": { "type": "number" } },
+    "gripper_state": { "type": "number" },
+    "current_skill_stage": { "type": ["string", "null"] },
+    "perception_tracks": { "type": "array", "items": { "type": "object" } },
+    "history": { "type": "array", "items": { "type": "object" } },
+    "failure_context": { "type": "object" }
+  }
+}

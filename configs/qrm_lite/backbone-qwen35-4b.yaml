@@ -1,0 +1,14 @@
+model_id: Qwen/Qwen3.5-4B
+revision: 851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a
+dtype: bfloat16
+trust_remote_code: true
+hf_endpoint: https://hf-mirror.com
+cache_env: HF_HOME
+lora:
+  r: 8
+  alpha: 16
+  dropout: 0.05
+  target_modules: [q_proj, k_proj, v_proj, o_proj]
+notes:
+  - Official Qwen-RobotManip weights are not released; this is backbone-only bring-up.
+  - License: Apache-2.0 (model card, audited 2026-07-18).
