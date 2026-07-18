@@ -167,6 +167,9 @@ def test_m1b_amendment_detach_does_not_wait_on_auxiliary_one_shot_state() -> Non
     source = (Path(__file__).parents[2] / "scripts/m1b_reset_detach.py").read_text()
     assert "auxiliary_grasp_state_not_waited_per_amendment_1" in source
     assert "the companion physical non-coupling verifier is the sole final reset" in source
+    assert "def broadcast_detach_round(object_names: list[str], timeout_s: float)" in source
+    assert '"post_resume_detach_round"' in source
+    assert '"POST_RESUME_DETACH_PUBLISH_FAILED"' in source
 
 
 def test_m1b_moveit_server_does_not_start_a_second_simulation() -> None:

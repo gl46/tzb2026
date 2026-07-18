@@ -205,7 +205,7 @@ def detach_all_and_observe(
     commands: dict[str, subprocess.CompletedProcess[str]] = {}
     for name in object_names:
         commands[name] = subprocess.run(
-            ["gz", "topic", "-t", f"/xh/m1b/{name}/detach", "-m", "gz.msgs.Empty", "-p", "unused: true"],
+            ["gz", "topic", "-t", f"/xh/m1b/{name}/detach", "-m", "gz.msgs.Empty", "-p", ""],
             check=False, capture_output=True, text=True, timeout=timeout_s,
         )
     processing_pulse = None
@@ -213,14 +213,14 @@ def detach_all_and_observe(
         unpause = subprocess.run(
             ["gz", "service", "--service", f"/world/{world_name}/control",
              "--reqtype", "gz.msgs.WorldControl", "--reptype", "gz.msgs.Boolean",
-             "--timeout", "3000", "--req", "pause: false"],
+             "--timeout", str(WORLD_CONTROL_TIMEOUT_MS), "--req", "pause: false"],
             check=False, capture_output=True, text=True,
         )
         time.sleep(0.40)
         pause = subprocess.run(
             ["gz", "service", "--service", f"/world/{world_name}/control",
              "--reqtype", "gz.msgs.WorldControl", "--reptype", "gz.msgs.Boolean",
-             "--timeout", "3000", "--req", "pause: true"],
+             "--timeout", str(WORLD_CONTROL_TIMEOUT_MS), "--req", "pause: true"],
             check=False, capture_output=True, text=True,
         )
         processing_pulse = {
@@ -238,6 +238,29 @@ def detach_all_and_observe(
             name, f"/xh/m1b/{name}/detach", f"/xh/m1b/{name}/grasp_state", False, tuple(lines),
         ))
     return records, processing_pulse
+
+
+def broadcast_detach_round(object_names: list[str], timeout_s: float) -> dict[str, dict[str, object]]:
+    """Repeat the complete detach broadcast after the world is running.
+
+    The first broadcast is delivered while a paused simulator is pulsed.  A
+    second, full-N broadcast once the world is live makes delivery to every
+    DetachableJoint independent of that startup scheduling edge; it is
+    idempotent for already-detached objects and never performs attach.
+    """
+    results: dict[str, dict[str, object]] = {}
+    for name in object_names:
+        command = subprocess.run(
+            ["gz", "topic", "-t", f"/xh/m1b/{name}/detach", "-m", "gz.msgs.Empty", "-p", ""],
+            check=False, capture_output=True, text=True, timeout=timeout_s,
+        )
+        results[name] = {
+            "returncode": command.returncode,
+            "stdout": command.stdout.strip(),
+            "stderr": command.stderr.strip(),
+            "published": command.returncode == 0,
+        }
+    return results
 
 
 def main() -> int:
@@ -320,6 +343,17 @@ def main() -> int:
                 status = "INVALID_RESET"
                 payload["status"] = status
                 payload["reasons"].append("WORLD_RESUME_FAILED")
+            else:
+                post_resume = broadcast_detach_round(objects, args.timeout_s)
+                payload["post_resume_detach_round"] = post_resume
+                if not all(result["published"] for result in post_resume.values()):
+                    status = "INVALID_RESET"
+                    payload["status"] = status
+                    payload["reasons"].append("POST_RESUME_DETACH_PUBLISH_FAILED")
+                else:
+                    # Let the active simulator process the full second round
+                    # before MoveIt is permitted to execute the reset jog.
+                    time.sleep(0.40)
     if args.activate_controllers:
         if status != "INVALID_RESET":
             attempts = []
