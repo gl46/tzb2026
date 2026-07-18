@@ -145,9 +145,15 @@ def main() -> int:
                 result = subprocess.run(
                     [
                         "bash", "-lc",
-                        "source /opt/ros/jazzy/setup.bash && ros2 control switch_controllers "
-                        "--activate joint_state_broadcaster panda_arm_controller "
-                        "panda_hand_physical_controller --strict",
+                        "source /opt/ros/jazzy/setup.bash && "
+                        "required=(joint_state_broadcaster panda_arm_controller panda_hand_physical_controller); "
+                        "pending=(); "
+                        "for controller in \"${required[@]}\"; do "
+                        "state=$(ros2 control list_controllers | awk -v name=\"$controller\" '$1 == name {print $NF}'); "
+                        "if [ \"$state\" != active ]; then pending+=(\"$controller\"); fi; "
+                        "done; "
+                        "if [ ${#pending[@]} -eq 0 ]; then echo CONTROLLERS_ALREADY_ACTIVE; "
+                        "else ros2 control switch_controllers --activate \"${pending[@]}\" --strict; fi",
                     ],
                     check=False,
                     capture_output=True,
