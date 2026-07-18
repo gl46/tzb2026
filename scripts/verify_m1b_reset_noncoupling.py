@@ -42,10 +42,16 @@ HOME_JOG_DELTA_RAD = 0.10
 
 
 def supervision_model_position(name: str) -> list[float] | None:
-    result = subprocess.run(
-        ["timeout", "2", "gz", "model", "-m", name, "-p"],
-        check=False, capture_output=True, text=True, timeout=4.0,
-    )
+    try:
+        result = subprocess.run(
+            ["timeout", "2", "gz", "model", "-m", name, "-p"],
+            check=False, capture_output=True, text=True, timeout=4.0,
+        )
+    except subprocess.TimeoutExpired:
+        # A supervision-query timeout is not evidence that the object stayed
+        # still.  Return a missing sample so the final physical-reset gate
+        # fails closed while still emitting a reviewable JSON record.
+        return None
     match = POSE_RE.search(result.stdout)
     return [float(value) for value in match.groups()] if match else None
 

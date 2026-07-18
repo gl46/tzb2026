@@ -138,6 +138,17 @@ def test_m1b_reset_requires_every_generated_detachable_state() -> None:
     assert reasons == ("DETACH_STATE_UNOBSERVED:cylinder_02",)
 
 
+def test_m1b_amendment_reset_gate_is_physical_and_fails_closed_on_missing_pose() -> None:
+    source = (Path(__file__).parents[2] / "scripts/verify_m1b_reset_noncoupling.py").read_text()
+    assert 'SETTLE_S = 2.0' in source
+    assert 'MAX_OBJECT_DISPLACEMENT_M = 0.001' in source
+    assert 'MIN_EE_DISPLACEMENT_M = 0.02' in source
+    assert 'except subprocess.TimeoutExpired:' in source
+    assert 'return None' in source
+    assert '"RESET_PHYSICAL_NONCOUPLING_VERIFIED" if passed else "INVALID_RESET"' in source
+    assert '"online_truth_access": False' in source
+
+
 def test_m1b_moveit_server_does_not_start_a_second_simulation() -> None:
     source = (Path(__file__).parents[2] / "robot_ws/src/xh_sim/launch/m1b_moveit_server.launch.py").read_text()
     assert "simulation.launch.py" not in source.replace("``simulation.launch.py``", "")
