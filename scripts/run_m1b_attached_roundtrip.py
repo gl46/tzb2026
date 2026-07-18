@@ -43,8 +43,11 @@ def gazebo_position(model: str, *, link: str | None = None) -> list[float] | Non
     command = ["timeout", "2", "gz", "model", "-m", model]
     command.extend(["-l", link] if link else ["-p"])
     result = subprocess.run(command, capture_output=True, text=True, check=False, timeout=4.0)
-    match = POSE_RE.search(result.stdout)
-    return [float(value) for value in match.groups()] if match else None
+    matches = POSE_RE.findall(result.stdout)
+    # A link query prints the model-root pose first and the requested link pose
+    # later.  The final pose is therefore the requested link, while a model
+    # query contains only its model pose.
+    return [float(value) for value in matches[-1]] if matches else None
 
 
 def distance(first: list[float] | None, second: list[float] | None) -> float | None:
