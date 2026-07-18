@@ -6,7 +6,7 @@
   "alpha_verdict": "GO_COARSE_AND_MLP_ONLY",
   "flow_status": "IMPLEMENTED_NOT_SELECTED",
   "branch": "codex/qrm-lite-beta1",
-  "base_commit": "0287d23e586f5d977c71257aeca4accacecadbe8",
+  "base_commit": "2595dcd8b161668a458273b20aa109998e274351",
   "formal_models": [
     "Q0_COARSE_ONLY",
     "Q1_COARSE_MLP_RESIDUAL",
@@ -121,5 +121,5 @@
     "decide GO_QRM_BETA_2 / GO_QRM_COARSE_ONLY / STOP_QRM_ACTION_REFINER"
   ],
   "tests_passed": 18,
-  "pushed": false
+  "pushed": true
 }
