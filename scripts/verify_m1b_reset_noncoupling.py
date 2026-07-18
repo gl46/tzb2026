@@ -8,7 +8,6 @@ online grasp policy.
 from __future__ import annotations
 
 import argparse
-from concurrent.futures import ThreadPoolExecutor
 import json
 import math
 import re
@@ -59,15 +58,12 @@ def supervision_model_position(name: str) -> list[float] | None:
 
 
 def positions(names: list[str]) -> tuple[dict[str, list[float] | None], int]:
-    # `gz model` is a CLI transport query.  Serializing twelve calls stretches
-    # one logical snapshot long enough to mistake ordinary settling for motion
-    # caused by the jog.  Issue the independent evaluator-side reads together
-    # so every named object belongs to the same before/after observation.
+    # Each snapshot is taken only while the world is paused.  Sequential CLI
+    # reads are therefore one frozen observation and avoid transport-query
+    # loss observed when twelve independent `gz model` clients start together.
     final: dict[str, list[float] | None] = {name: None for name in names}
     for attempt in range(1, POSE_SNAPSHOT_ATTEMPTS + 1):
-        with ThreadPoolExecutor(max_workers=len(names)) as executor:
-            samples = executor.map(supervision_model_position, names)
-            final = dict(zip(names, samples, strict=True))
+        final = {name: supervision_model_position(name) for name in names}
         # Never combine an object sampled in one CLI snapshot with objects
         # sampled in another.  A complete attempt is one atomic evaluator-side
         # before/after observation; incomplete attempts are discarded.

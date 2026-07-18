@@ -145,7 +145,7 @@ def test_m1b_amendment_reset_gate_is_physical_and_fails_closed_on_missing_pose()
     assert 'MIN_EE_DISPLACEMENT_M = 0.02' in source
     assert 'except subprocess.TimeoutExpired:' in source
     assert 'return None' in source
-    assert 'ThreadPoolExecutor(max_workers=len(names))' in source
+    assert 'final = {name: supervision_model_position(name) for name in names}' in source
     assert 'POSE_SNAPSHOT_ATTEMPTS = 3' in source
     assert 'if all(sample is not None for sample in final.values()):' in source
     assert 'def set_world_pause(world_name: str, paused: bool)' in source

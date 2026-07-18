@@ -18,6 +18,11 @@ CYLINDER_HALF_LENGTH_M = 0.045
 # already intersecting the tabletop.  The physical-reset check remains the
 # authority on whether the object has subsequently settled.
 SPAWN_CLEARANCE_M = 0.002
+# Low residual velocity decay prevents a settled free cylinder from drifting
+# numerically during the reset jog while preserving normal gravity/contact and
+# detachable-joint transport dynamics.
+LINEAR_VELOCITY_DECAY = 0.5
+ANGULAR_VELOCITY_DECAY = 0.5
 
 
 def split(seed: int) -> str:
@@ -38,7 +43,7 @@ def cylinder_pose(state: str) -> tuple[float, float, float]:
 def part_sdf(index: int, state: str, x: float, y: float, color: tuple[float, float, float], yaw: float) -> str:
     roll, pitch, z = cylinder_pose(state)
     red, green, blue = color
-    return f'''    <model name="cylinder_{index:02d}"><pose>{x:.4f} {y:.4f} {z:.4f} {roll:.4f} {pitch:.4f} {yaw:.4f}</pose><link name="link"><inertial><mass>0.06</mass></inertial><collision name="collision"><geometry><cylinder><radius>0.025</radius><length>0.09</length></cylinder></geometry></collision><visual name="visual"><geometry><cylinder><radius>0.025</radius><length>0.09</length></cylinder></geometry><material><diffuse>{red:.3f} {green:.3f} {blue:.3f} 1</diffuse><specular>0.15 0.15 0.15 1</specular></material></visual><sensor name="contact" type="contact"><always_on>1</always_on><update_rate>30</update_rate><topic>/xh/actuation_internal/cylinders/cylinder_{index:02d}/contacts</topic><contact><collision>collision</collision></contact></sensor></link></model>'''
+    return f'''    <model name="cylinder_{index:02d}"><pose>{x:.4f} {y:.4f} {z:.4f} {roll:.4f} {pitch:.4f} {yaw:.4f}</pose><link name="link"><inertial><mass>0.06</mass></inertial><velocity_decay><linear>{LINEAR_VELOCITY_DECAY}</linear><angular>{ANGULAR_VELOCITY_DECAY}</angular></velocity_decay><collision name="collision"><geometry><cylinder><radius>0.025</radius><length>0.09</length></cylinder></geometry></collision><visual name="visual"><geometry><cylinder><radius>0.025</radius><length>0.09</length></cylinder></geometry><material><diffuse>{red:.3f} {green:.3f} {blue:.3f} 1</diffuse><specular>0.15 0.15 0.15 1</specular></material></visual><sensor name="contact" type="contact"><always_on>1</always_on><update_rate>30</update_rate><topic>/xh/actuation_internal/cylinders/cylinder_{index:02d}/contacts</topic><contact><collision>collision</collision></contact></sensor></link></model>'''
 
 
 def render(template: str, seed: int, *, orientations: tuple[str, ...] = ORIENTATIONS) -> tuple[str, dict[str, object]]:
