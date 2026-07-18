@@ -34,12 +34,11 @@ POSE_RE = re.compile(
 SETTLE_S = 2.0
 MAX_OBJECT_DISPLACEMENT_M = 0.001
 MIN_EE_DISPLACEMENT_M = 0.02
-# A base-joint jog swept a lower arm link through the incoming zones, while a
-# wrist-only jog did not reliably converge on this controller.  A 50 mrad
-# panda_joint4 jog predicts about 40 mm hand translation from the S1 home
-# posture without the base or shoulder sweep.
-HOME_JOG_JOINT_INDEX = 3
-HOME_JOG_DELTA_RAD = 0.05
+# The positive-Y panda_joint4 jog contacted a positive-Y cylinder.  A 50 mrad
+# negative panda_joint3 jog moves the hand about 24 mm toward negative Y from
+# S1 home, away from that incoming zone while retaining a measurable path.
+HOME_JOG_JOINT_INDEX = 2
+HOME_JOG_DELTA_RAD = -0.05
 POSE_SNAPSHOT_ATTEMPTS = 3
 POSE_QUERY_TIMEOUT_S = 5
 
