@@ -26,6 +26,7 @@ for directory in (ROOT / "src", ROOT / "scripts"):
 from m1a_contact_calibration_client import CalibrationClient  # noqa: E402
 from m1a_moveit_execution_client import JOINTS  # noqa: E402
 from m1a_home_self_collision_client import HOME_ARM_POSITIONS  # noqa: E402
+from run_m1b_tolerance_trial import apply_calibration_cylinder_scene  # noqa: E402
 
 POSE_RE = re.compile(
     r"Pose \[ XYZ \(m\) \] \[ RPY \(rad\) \]:\s*"
@@ -97,20 +98,26 @@ def set_world_pause(world_name: str, paused: bool) -> dict[str, object]:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--spawn-manifest", required=True, type=Path)
+    parser.add_argument("--scene-supervision", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--world-name", default="industrial_cylinder_v1")
     args = parser.parse_args()
     manifest = json.loads(args.spawn_manifest.read_text(encoding="utf-8"))
+    supervision = json.loads(args.scene_supervision.read_text(encoding="utf-8"))
     names = manifest.get("per_object_detachables", {}).get("objects", [])
     if not names or any(not isinstance(name, str) or not name.startswith("cylinder_") for name in names):
         raise SystemExit("spawn manifest lacks generated cylinder list")
+    labels = supervision.get("simulator_supervision", {}).get("objects", [])
+    if {str(label.get("actual_sim_entity_id")) for label in labels} != set(names):
+        raise SystemExit("scene supervision object set does not match spawn manifest")
     rclpy.init()
     client = CalibrationClient()
     try:
         ready = client.wait_calibration_ready()
         for _ in range(20):
             rclpy.spin_once(client, timeout_sec=0.05)
-        home = client.move_joint_target(HOME_ARM_POSITIONS) if ready else {"executed": False}
+        collision_scene_applied = apply_calibration_cylinder_scene(client, labels) if ready else False
+        home = client.move_joint_target(HOME_ARM_POSITIONS) if ready and collision_scene_applied else {"executed": False}
         time.sleep(SETTLE_S)
         before_pause = set_world_pause(args.world_name, True)
         before, before_attempts = positions(names)
@@ -119,7 +126,7 @@ def main() -> int:
         jog_target = list(HOME_ARM_POSITIONS)
         jog_target[HOME_JOG_JOINT_INDEX] += HOME_JOG_DELTA_RAD
         before_unpause = set_world_pause(args.world_name, False)
-        jog = client.move_joint_target(jog_target) if home.get("executed") and before_unpause["succeeded"] else {"executed": False}
+        jog = client.move_joint_target(jog_target) if home.get("executed") and collision_scene_applied and before_unpause["succeeded"] else {"executed": False}
         time.sleep(SETTLE_S)
         after_pause = set_world_pause(args.world_name, True)
         after, after_attempts = positions(names)
@@ -131,7 +138,7 @@ def main() -> int:
         }
         ee_displacement = math.dist(before_fk[:3], after_fk[:3]) if before_fk and after_fk else None
         passed = bool(
-            home.get("executed") and jog.get("executed")
+            collision_scene_applied and home.get("executed") and jog.get("executed")
             and before_pause["succeeded"] and before_unpause["succeeded"] and after_pause["succeeded"]
             and ee_displacement is not None and ee_displacement >= MIN_EE_DISPLACEMENT_M
             and all(value is not None and value <= MAX_OBJECT_DISPLACEMENT_M for value in displacements.values())
@@ -149,6 +156,11 @@ def main() -> int:
                 "after_snapshot": after_pause,
             },
             "home_pose_source": "S1 HOME_ARM_POSITIONS through MoveIt execution chain",
+            "planner_cylinder_scene": {
+                "source": "RESET_INFRASTRUCTURE_SUPERVISION_ONLY",
+                "objects": names,
+                "applied": collision_scene_applied,
+            },
             "jog_joint_delta_rad": {JOINTS[HOME_JOG_JOINT_INDEX]: HOME_JOG_DELTA_RAD},
             "minimum_ee_displacement_m": MIN_EE_DISPLACEMENT_M,
             "maximum_object_displacement_m": MAX_OBJECT_DISPLACEMENT_M,

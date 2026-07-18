@@ -153,6 +153,9 @@ def test_m1b_amendment_reset_gate_is_physical_and_fails_closed_on_missing_pose()
     assert 'if all(sample is not None for sample in final.values()):' in source
     assert 'def set_world_pause(world_name: str, paused: bool)' in source
     assert '"world_pause_controls"' in source
+    assert 'parser.add_argument("--scene-supervision", required=True, type=Path)' in source
+    assert 'apply_calibration_cylinder_scene(client, labels)' in source
+    assert '"planner_cylinder_scene"' in source
     assert '"object_positions_before_m": before' in source
     assert '"object_positions_after_m": after' in source
     assert '"RESET_PHYSICAL_NONCOUPLING_VERIFIED" if passed else "INVALID_RESET"' in source
