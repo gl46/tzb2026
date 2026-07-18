@@ -23,6 +23,12 @@ SPAWN_CLEARANCE_M = 0.0001
 # detachable-joint transport dynamics.
 LINEAR_VELOCITY_DECAY = 0.5
 ANGULAR_VELOCITY_DECAY = 0.5
+# The controlled Panda is mounted at this fixed world pose.  Free cylinders
+# inside this footprint collide with link0 before any perception/grasp action,
+# which makes a calibration trial measure spawn interference rather than
+# centre-offset tolerance.  Keep the physical cylinder envelope outside it.
+ROBOT_BASE_XY = (-0.35, 0.0)
+ROBOT_BASE_KEEP_OUT_RADIUS_M = 0.19
 
 
 def split(seed: int) -> str:
@@ -57,9 +63,13 @@ def render(template: str, seed: int, *, orientations: tuple[str, ...] = ORIENTAT
         # Split two incoming zones and enforce a 9 cm centre separation. This
         # prevents the simulator generator from creating unobservable stacks.
         for _ in range(500):
-            x = rng.uniform(-0.43, -0.10)
-            y = rng.uniform(-0.31, -0.08) if index % 2 == 0 else rng.uniform(0.08, 0.31)
-            if all((x - other_x) ** 2 + (y - other_y) ** 2 >= 0.09 ** 2 for other_x, other_y in positions):
+            # The calibration envelope retains both incoming lanes while
+            # extending their outer X edge enough to fit twelve objects after
+            # excluding the fixed robot-base footprint.
+            x = rng.uniform(-0.55, -0.08)
+            y = rng.uniform(-0.36, -0.08) if index % 2 == 0 else rng.uniform(0.08, 0.36)
+            clear_of_base = math.dist((x, y), ROBOT_BASE_XY) >= ROBOT_BASE_KEEP_OUT_RADIUS_M
+            if clear_of_base and all((x - other_x) ** 2 + (y - other_y) ** 2 >= 0.09 ** 2 for other_x, other_y in positions):
                 positions.append((x, y))
                 break
         else:

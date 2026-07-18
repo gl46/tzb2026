@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 from pathlib import Path
 import sys
 
@@ -22,6 +23,7 @@ SCRIPTS = Path(__file__).parents[2] / "scripts"
 if str(SCRIPTS) not in sys.path:
     sys.path.insert(0, str(SCRIPTS))
 from audit_m1b_center_reachability import percentile90, perceived_diameter_m  # noqa: E402
+from generate_industrial_scenes import ROBOT_BASE_KEEP_OUT_RADIUS_M, ROBOT_BASE_XY, render  # noqa: E402
 from xh_agent.perception.interfaces import BBoxV1, PerceptionResultV1  # noqa: E402
 
 
@@ -191,6 +193,14 @@ def test_m1b_moveit_execution_waits_for_planned_trajectory() -> None:
     assert 'trajectory_duration_s = final_time.sec + final_time.nanosec * 1e-9' in source
     assert 'result_timeout_s = min(90.0, max(30.0, trajectory_duration_s + 15.0))' in source
     assert 'timeout_sec=result_timeout_s' in source
+
+
+def test_m1b_generated_cylinders_clear_the_fixed_robot_base() -> None:
+    template = (Path(__file__).parents[2] / "robot_ws/src/xh_sim/worlds/industrial_cylinder_v1.sdf").read_text()
+    _, supervision = render(template, 1017, orientations=("normal",))
+    for label in supervision["simulator_supervision"]["objects"]:
+        x, y, _ = label["position_3d_world"]
+        assert math.dist((x, y), ROBOT_BASE_XY) >= ROBOT_BASE_KEEP_OUT_RADIUS_M
 
 
 def test_m1b_moveit_server_does_not_start_a_second_simulation() -> None:
