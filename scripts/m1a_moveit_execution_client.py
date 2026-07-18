@@ -247,7 +247,12 @@ class EvidenceClient(Node):
         # own final time plus a finite transport/controller margin instead.
         final_time = trajectory.joint_trajectory.points[-1].time_from_start
         trajectory_duration_s = final_time.sec + final_time.nanosec * 1e-9
-        result_timeout_s = min(90.0, max(30.0, trajectory_duration_s + 15.0))
+        # Gazebo's controller loop can complete noticeably later than the
+        # time parameterization when it is sharing a physics/render workload.
+        # Keep the action client alive long enough to receive that terminal
+        # result; otherwise a real completed motion is falsely recorded as a
+        # timeout and its next trial starts from an unknown arm state.
+        result_timeout_s = min(120.0, max(60.0, trajectory_duration_s + 30.0))
         rclpy.spin_until_future_complete(self, result_future, timeout_sec=result_timeout_s)
         wrapped = result_future.result()
         result = wrapped.result if wrapped else None

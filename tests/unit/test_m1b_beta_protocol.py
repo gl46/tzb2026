@@ -191,7 +191,7 @@ def test_m1b_tolerance_attach_uses_detachablejoint_empty_payload() -> None:
 def test_m1b_moveit_execution_waits_for_planned_trajectory() -> None:
     source = (Path(__file__).parents[2] / "scripts/m1a_moveit_execution_client.py").read_text()
     assert 'trajectory_duration_s = final_time.sec + final_time.nanosec * 1e-9' in source
-    assert 'result_timeout_s = min(90.0, max(30.0, trajectory_duration_s + 15.0))' in source
+    assert 'result_timeout_s = min(120.0, max(60.0, trajectory_duration_s + 30.0))' in source
     assert 'timeout_sec=result_timeout_s' in source
 
 
