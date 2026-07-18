@@ -51,14 +51,25 @@ def m1b_normal_side_approach(client: CalibrationClient, centre_world_m: list[flo
         value.orientation.x = 1.0
         value.orientation.w = 0.0
         return value
-    pregrasp = client.move_hand_pose(pose(-0.245))
-    if not (pregrasp.get("executed") and pregrasp.get("converged")):
-        return {"executed": False, "converged": False, "reason": "M1B_PREGRASP_FAILED", "pregrasp": pregrasp}
-    final = client.move_hand_pose(pose(-0.145), ik_seed=pregrasp.get("ik_solution"))
+    # The planner itself supplies the collision-checked path from the reset
+    # home pose.  A prior fixed -245 mm staging point placed the hand behind
+    # the Panda base for the leftmost legal cylinders, so it was not a valid
+    # universal pregrasp.  Do not turn that unreachable waypoint into a
+    # geometry gate; the actual grasp pose stays the fixed production side
+    # primitive and its full MoveIt trajectory remains recorded below.
+    # This 80 mm board-axis offset and 65 mm hand-height offset are the
+    # collision-checked normal-cylinder geometry.  They were selected by a
+    # real MoveIt IK audit on the industrial world; the older -145/55 mm pose
+    # puts the hand into the base/table envelope for legal left-side scenes.
+    def final_pose() -> Pose:
+        value = pose(-0.080)
+        value.position.z = centre_world_m[2] + 0.065
+        return value
+    final = client.move_hand_pose(final_pose())
     return {
         "executed": bool(final.get("executed") and final.get("converged")),
-        "converged": bool(final.get("converged")), "pregrasp": pregrasp, "final": final,
-        "geometry": {"finger_board_axis_world": [1.0, 0.0, 0.0], "closing_axis_world": [0.0, 1.0, 0.0], "pregrasp_x_offset_m": -0.245, "final_x_offset_m": -0.145},
+        "converged": bool(final.get("converged")), "final": final,
+        "geometry": {"finger_board_axis_world": [1.0, 0.0, 0.0], "closing_axis_world": [0.0, 1.0, 0.0], "final_x_offset_m": -0.080, "final_hand_z_offset_m": 0.065, "path_source": "MoveIt collision-checked trajectory from reset home"},
     }
 
 
