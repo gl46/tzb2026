@@ -147,3 +147,21 @@ def test_m1b_contact_window_requires_matched_same_entity_samples() -> None:
     assert internal["attach_topic"] == "/xh/m1b/cylinder_02/attach"
     early, _ = broker_from_window(samples[:-2])
     assert early.grasp_success is False
+
+
+def test_m1b_contact_window_accepts_bounded_stamp_jitter_but_not_stale_contacts() -> None:
+    jittered = [
+        M1BContactSampleV1(time, "left", (("panda_leftfinger::collision", "cylinder_02::link::collision"),))
+        for time in (1.000, 1.050, 1.100)
+    ] + [
+        M1BContactSampleV1(time, "right", (("panda_rightfinger::collision", "cylinder_02::link::collision"),))
+        for time in (1.015, 1.065, 1.115)
+    ]
+    assert broker_from_window(jittered)[0].grasp_success is True
+
+    stale = [
+        M1BContactSampleV1(time, finger, ((f"panda_{finger}finger::collision", "cylinder_02::link::collision"),))
+        for time in (1.0, 1.5, 2.0)
+        for finger in ("left", "right")
+    ]
+    assert broker_from_window(stale)[0].grasp_success is False
