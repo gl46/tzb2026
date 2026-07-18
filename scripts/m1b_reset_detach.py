@@ -70,10 +70,17 @@ def main() -> int:
     parser.add_argument("--timeout-s", type=float, default=2.0)
     parser.add_argument("--world-name", help="Required with --resume-world after a paused M1B reset")
     parser.add_argument("--resume-world", action="store_true", help="Resume Gazebo only after RESET_VERIFIED")
+    parser.add_argument(
+        "--activate-controllers",
+        action="store_true",
+        help="Activate the preloaded Panda controllers only after a successful world resume",
+    )
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     if args.timeout_s <= 0:
         raise SystemExit("--timeout-s must be positive")
+    if args.activate_controllers and not args.resume_world:
+        raise SystemExit("--activate-controllers requires --resume-world")
     manifest = json.loads(args.spawn_manifest.read_text(encoding="utf-8"))
     per_object = manifest.get("per_object_detachables")
     if not isinstance(per_object, dict) or not isinstance(per_object.get("objects"), list):
@@ -127,6 +134,31 @@ def main() -> int:
                 status = "INVALID_RESET"
                 payload["status"] = status
                 payload["reasons"].append("WORLD_RESUME_FAILED")
+    if args.activate_controllers:
+        if status != "RESET_VERIFIED":
+            payload["controller_activation"] = {"attempted": False, "reason": "WORLD_NOT_RESUMED"}
+        else:
+            result = subprocess.run(
+                [
+                    "ros2", "control", "switch_controllers", "--activate",
+                    "joint_state_broadcaster", "panda_arm_controller",
+                    "panda_hand_physical_controller", "--strict",
+                ],
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            payload["controller_activation"] = {
+                "attempted": True,
+                "returncode": result.returncode,
+                "stdout": result.stdout.strip(),
+                "stderr": result.stderr.strip(),
+                "activated": result.returncode == 0,
+            }
+            if not payload["controller_activation"]["activated"]:
+                status = "INVALID_RESET"
+                payload["status"] = status
+                payload["reasons"].append("CONTROLLER_ACTIVATION_FAILED")
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({"status": status, "objects": len(objects), "reasons": payload["reasons"]}))

@@ -120,6 +120,9 @@ def test_m1b_launch_has_paused_startup_contract_without_changing_default_m1a_run
     assert 'DeclareLaunchArgument(\n            "start_paused"' in source
     assert "ADR-0014 requires this for M1B detach-first reset" in source
     assert "else '-r -s --headless-rendering '" in source
+    reset = (Path(__file__).parents[2] / "scripts/m1b_reset_detach.py").read_text()
+    assert "--activate-controllers requires --resume-world" in reset
+    assert "CONTROLLER_ACTIVATION_FAILED" in reset
 
 
 def test_m1b_hand_preflight_requires_physical_endpoint_feedback() -> None:
