@@ -9,6 +9,7 @@ from xh_agent.agent.closed_loop import record_step
 from xh_agent.agent.skill_planner import plan
 from xh_agent.grasp.m1b_broker import M1BContactBroker, width_window_from_perceived_diameter
 from xh_agent.grasp.hand_preflight import M1BHandPreflightV1, evaluate_hand_preflight
+from xh_agent.grasp.m1b_contact_window import M1BContactSampleV1, broker_from_window
 from xh_agent.grasp.post_grasp import evaluate_post_grasp_identity, evaluator_supervision_record
 from xh_agent.grasp.reset import M1BResetVerificationV1, validate_reset_records
 from xh_agent.recovery.manager import recovery_for
@@ -132,3 +133,16 @@ def test_m1b_hand_preflight_requires_physical_endpoint_feedback() -> None:
     status, reasons = evaluate_hand_preflight(stalled)
     assert status == "HAND_ACTUATION_UNVERIFIED"
     assert {"HAND_CONTROLLER_NOT_SUCCEEDED", "LEFT_FINGER_ENDPOINT_ERROR", "RIGHT_FINGER_ENDPOINT_ERROR"} <= set(reasons)
+
+
+def test_m1b_contact_window_requires_matched_same_entity_samples() -> None:
+    samples = [
+        M1BContactSampleV1(time, finger, ((f"panda_{finger}finger::collision", "cylinder_02::link::collision"),))
+        for time in (1.0, 1.05, 1.10)
+        for finger in ("left", "right")
+    ]
+    feedback, internal = broker_from_window(samples)
+    assert feedback.grasp_success is True
+    assert internal["attach_topic"] == "/xh/m1b/cylinder_02/attach"
+    early, _ = broker_from_window(samples[:-2])
+    assert early.grasp_success is False
