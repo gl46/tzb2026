@@ -15,6 +15,7 @@ from xh_agent.grasp.m1b_broker import M1BContactBroker, width_window_from_percei
 from xh_agent.grasp.hand_preflight import M1BHandPreflightV1, evaluate_hand_preflight
 from xh_agent.grasp.m1b_contact_window import M1BContactSampleV1, broker_from_window
 from xh_agent.grasp.tolerance_envelope import OffsetTrialV1, perception_axis_audit, reachability_gate, tolerance_envelope
+from evaluate_m1b_reachability_gate import actual_perception_errors, measured_tolerance_envelope
 from xh_agent.grasp.post_grasp import evaluate_post_grasp_identity, evaluator_supervision_record
 from xh_agent.grasp.reset import M1BResetVerificationV1, validate_reset_records
 from xh_agent.recovery.manager import recovery_for
@@ -319,6 +320,22 @@ def test_m1b_s0_style_tolerance_gate_requires_repeated_trials_and_margin() -> No
     audit = perception_axis_audit([(0.004, -0.003, 0.005)] * 30)
     assert reachability_gate(envelope, audit)[0] == "GO"
     assert reachability_gate(envelope, perception_axis_audit([(0.007, 0.0, 0.0)] * 30))[1] == ("P90_EXCEEDS_60_PERCENT_TOLERANCE:x",)
+
+
+def test_m1b_reachability_gate_accepts_only_complete_actual_evidence() -> None:
+    envelope = measured_tolerance_envelope({
+        "schema_version": "M1BToleranceEnvelopeV1",
+        "status": "COMPLETE_CALIBRATION_ONLY",
+        "trial_count": 81,
+        "tolerance_envelope_m": {"x": 0.02, "y": None, "z": 0.01},
+    })
+    assert envelope == {"x": 0.02, "y": None, "z": 0.01}
+    with pytest.raises(ValueError, match="not complete"):
+        measured_tolerance_envelope({"schema_version": "M1BToleranceEnvelopeV1", "status": "RUNNING", "trial_count": 81, "tolerance_envelope_m": {"x": 0.02, "y": 0.01, "z": 0.01}})
+    errors = actual_perception_errors({"status": "ACTUAL_GAZEBO_RGBD_FRAMES_EVALUATED", "matches": [{"error_world_xyz_m": [0.001, -0.002, 0.003]}]})
+    assert errors == [(0.001, -0.002, 0.003)]
+    with pytest.raises(ValueError, match="not an actual"):
+        actual_perception_errors({"status": "MANIFEST_ONLY_NO_GAZEBO_FRAMES", "matches": []})
 
 
 def test_m1b_tolerance_worklist_binds_three_distinct_calibration_instances(tmp_path: Path) -> None:

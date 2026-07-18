@@ -6,7 +6,41 @@ import argparse
 import json
 from pathlib import Path
 
-from xh_agent.grasp.tolerance_envelope import OffsetTrialV1, perception_axis_audit, reachability_gate, tolerance_envelope
+from xh_agent.grasp.tolerance_envelope import perception_axis_audit, reachability_gate
+
+
+def measured_tolerance_envelope(payload: dict[str, object]) -> dict[str, float | None]:
+    """Accept only the complete, immutable 81-trial campaign summary.
+
+    The first version of this tool accepted a legacy list of synthetic
+    ``OffsetTrialV1`` records.  The real campaign instead emits a signed,
+    monotonic summary after validating every raw record against its immutable
+    worklist.  Recomputing from a lossy summary would both fail on its schema
+    and weaken that validation boundary.
+    """
+    if payload.get("schema_version") != "M1BToleranceEnvelopeV1":
+        raise ValueError("tolerance evidence must be M1BToleranceEnvelopeV1")
+    if payload.get("status") != "COMPLETE_CALIBRATION_ONLY":
+        raise ValueError("tolerance campaign is not complete")
+    if payload.get("trial_count") != 81:
+        raise ValueError("tolerance campaign must contain exactly 81 trials")
+    envelope = payload.get("tolerance_envelope_m")
+    if not isinstance(envelope, dict) or set(envelope) != {"x", "y", "z"}:
+        raise ValueError("tolerance campaign has invalid per-axis envelope")
+    return {
+        axis: None if envelope[axis] is None else float(envelope[axis])
+        for axis in ("x", "y", "z")
+    }
+
+
+def actual_perception_errors(payload: dict[str, object]) -> list[tuple[float, float, float]]:
+    """Reject manifest-only perception evidence before calculating p90."""
+    if payload.get("status") != "ACTUAL_GAZEBO_RGBD_FRAMES_EVALUATED":
+        raise ValueError("perception evidence is not an actual Gazebo RGB-D evaluation")
+    matches = payload.get("matches")
+    if not isinstance(matches, list) or not matches:
+        raise ValueError("perception evidence contains no matched RGB-D tracks")
+    return [tuple(float(value) for value in record["error_world_xyz_m"]) for record in matches]
 
 
 def main() -> int:
@@ -16,10 +50,9 @@ def main() -> int:
     parser.add_argument("--output", required=True, type=Path)
     args = parser.parse_args()
     raw_trials = json.loads(args.tolerance_trials.read_text(encoding="utf-8"))
-    trials = [OffsetTrialV1(**record) for record in raw_trials["trials"]]
     raw_errors = json.loads(args.perception_errors.read_text(encoding="utf-8"))
-    errors = [tuple(float(value) for value in record["error_world_xyz_m"]) for record in raw_errors["matches"]]
-    envelope = tolerance_envelope(trials)
+    envelope = measured_tolerance_envelope(raw_trials)
+    errors = actual_perception_errors(raw_errors)
     audit = perception_axis_audit(errors)
     status, reasons = reachability_gate(envelope, audit)
     payload = {
