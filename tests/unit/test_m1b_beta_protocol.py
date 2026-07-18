@@ -10,6 +10,7 @@ from xh_agent.agent.skill_planner import plan
 from xh_agent.grasp.m1b_broker import M1BContactBroker, width_window_from_perceived_diameter
 from xh_agent.grasp.hand_preflight import M1BHandPreflightV1, evaluate_hand_preflight
 from xh_agent.grasp.m1b_contact_window import M1BContactSampleV1, broker_from_window
+from xh_agent.grasp.tolerance_envelope import OffsetTrialV1, perception_axis_audit, reachability_gate, tolerance_envelope
 from xh_agent.grasp.post_grasp import evaluate_post_grasp_identity, evaluator_supervision_record
 from xh_agent.grasp.reset import M1BResetVerificationV1, validate_reset_records
 from xh_agent.recovery.manager import recovery_for
@@ -178,3 +179,17 @@ def test_m1b_contact_window_accepts_bounded_stamp_jitter_but_not_stale_contacts(
         for finger in ("left", "right")
     ]
     assert broker_from_window(stale)[0].grasp_success is False
+
+
+def test_m1b_s0_style_tolerance_gate_requires_repeated_trials_and_margin() -> None:
+    trials = [
+        OffsetTrialV1(axis, offset, success)
+        for axis in ("x", "y", "z")
+        for offset, success in ((0.0, True), (0.005, True), (0.010, True))
+        for _ in range(3)
+    ]
+    envelope = tolerance_envelope(trials)
+    assert envelope == {"x": 0.010, "y": 0.010, "z": 0.010}
+    audit = perception_axis_audit([(0.004, -0.003, 0.005)] * 30)
+    assert reachability_gate(envelope, audit)[0] == "GO"
+    assert reachability_gate(envelope, perception_axis_audit([(0.007, 0.0, 0.0)] * 30))[1] == ("P90_EXCEEDS_60_PERCENT_TOLERANCE:x",)
