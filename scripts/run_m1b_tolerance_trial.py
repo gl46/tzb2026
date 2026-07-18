@@ -377,6 +377,7 @@ def main() -> int:
     parser.add_argument("--public-pipeline-python", default=os.environ.get("M1B_PUBLIC_PIPELINE_PYTHON", sys.executable), help="Python with the declared public RGB-D dependencies")
     parser.add_argument("--enable-near-pregrasp-reobservation", action="store_true", help="Enable the production NO-GO remediation; excluded from the baseline tolerance envelope")
     parser.add_argument("--calibration-hand-y-bias-m", type=float, help="Calibration-only centreline sweep; absent uses the production fixed hand-chain correction")
+    parser.add_argument("--calibration-keep-target-collision-through-descend", action="store_true", help="Calibration-only contact-free final-descent probe")
     parser.add_argument("--output", required=True, type=Path)
     args = parser.parse_args()
     trial = json.loads(args.trial.read_text(encoding="utf-8"))
@@ -384,6 +385,8 @@ def main() -> int:
         raise SystemExit("trial is not calibration-only")
     if args.calibration_hand_y_bias_m is not None and args.calibration_fixture_diameter_m is None:
         raise SystemExit("--calibration-hand-y-bias-m is calibration-only")
+    if args.calibration_keep_target_collision_through_descend and args.calibration_fixture_diameter_m is None:
+        raise SystemExit("--calibration-keep-target-collision-through-descend is calibration-only")
     hand_y_centerline_bias_m = M1B_NORMAL_HAND_Y_CENTERLINE_BIAS_M if args.calibration_hand_y_bias_m is None else args.calibration_hand_y_bias_m
     axis = str(trial["axis"])
     if axis not in {"x", "y", "z"}:
@@ -477,7 +480,7 @@ def main() -> int:
                 after_pregrasp = calibration_live_model_center(target_entity)
                 calibration_motion["after_pregrasp_center_world_m"] = after_pregrasp
                 calibration_motion["pregrasp_displacement_world_xyz_m"] = calibration_displacement_m(truth_center, after_pregrasp)
-            if approach_motion_accepted and open_hand.get("succeeded"):
+            if approach_motion_accepted and open_hand.get("succeeded") and not args.calibration_keep_target_collision_through_descend:
                 target_touch_exception_applied = client.set_target_touch_exception(True, target_id=target_entity)
             final_target = list(target)
             if target_touch_exception_applied and args.enable_near_pregrasp_reobservation:
@@ -510,7 +513,7 @@ def main() -> int:
                     near_reobservation = {"attempted": True, "succeeded": True, "aggregation": "PER_AXIS_MEDIAN_OF_PUBLIC_RGBD_FRAMES", "frames": near_frames, "selected_public_track": near_track, "public_center_delta_world_m": public_delta, "final_target_world_m": final_target}
                 except (OSError, RuntimeError, subprocess.TimeoutExpired) as error:
                     near_reobservation = {"attempted": True, "succeeded": False, "reason": str(error)}
-            if target_touch_exception_applied and not args.enable_near_pregrasp_reobservation:
+            if (target_touch_exception_applied or args.calibration_keep_target_collision_through_descend) and not args.enable_near_pregrasp_reobservation:
                 near_reobservation = {"attempted": False, "succeeded": True, "mode": "BASELINE_PERCEPTION_FREE_TOLERANCE"}
             contact_descend = (
                 m1b_normal_side_contact_descend(client, final_target, ik_seed=approach.get("final", {}).get("ik_solution"), hand_y_centerline_bias_m=hand_y_centerline_bias_m)
@@ -575,6 +578,7 @@ def main() -> int:
             },
             "hand_close_duration_s": M1B_NORMAL_CLOSE_DURATION_S,
             "calibration_hand_y_centerline_bias_m": hand_y_centerline_bias_m,
+            "calibration_keep_target_collision_through_descend": args.calibration_keep_target_collision_through_descend,
             "calibration_motion_diagnostic": calibration_motion,
             "open_hand": open_hand, "approach": approach, "close": close, "contact_descend": contact_descend,
             "hand_feedback_ready": hand_feedback_ready,
