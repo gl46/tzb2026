@@ -62,10 +62,11 @@ M1B_NORMAL_PRECONTACT_HAND_Z_OFFSET_M = 0.220
 M1B_NORMAL_CONTACT_HAND_Z_OFFSET_M = 0.065
 M1B_NORMAL_SIDE_HAND_X_OFFSET_M = -0.080
 # Live calibration link-pose evidence at the settled target shows the physical
-# board midpoint is 0.8 mm left of the commanded hand Y.  +1 mm provides a
-# symmetric 1 mm pad preload for the 50 mm calibration cylinder.  This is a
-# fixed hand-chain correction, not target pose input.
-M1B_NORMAL_HAND_Y_CENTERLINE_BIAS_M = 0.001
+# board midpoint is left of the commanded hand Y.  The calibration-only
+# centreline sweep (-4, -2, 0, +2, +4 mm) produced the only bilateral,
+# observed-attach result at +4 mm; negative values retained right-only
+# contact.  This is a fixed hand-chain correction, not target pose input.
+M1B_NORMAL_HAND_Y_CENTERLINE_BIAS_M = 0.004
 M1B_FINGER_BOARD_THICKNESS_M = 0.018
 M1B_MAX_FINGER_POSITION_M = 0.040
 M1B_NEAR_REOBSERVATION_DURATION_S = 8.0
