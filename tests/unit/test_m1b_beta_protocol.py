@@ -26,6 +26,7 @@ if str(SCRIPTS) not in sys.path:
     sys.path.insert(0, str(SCRIPTS))
 from audit_m1b_center_reachability import percentile90, perceived_diameter_m  # noqa: E402
 from generate_industrial_scenes import ROBOT_BASE_KEEP_OUT_RADIUS_M, ROBOT_BASE_XY, render  # noqa: E402
+from summarize_m1b_tolerance_campaign import summarize  # noqa: E402
 from xh_agent.perception.interfaces import BBoxV1, PerceptionResultV1  # noqa: E402
 
 
@@ -326,3 +327,31 @@ def test_m1b_tolerance_worklist_binds_three_distinct_calibration_instances(tmp_p
     assert worklist["trial_count"] == 81
     first_point = [trial for trial in worklist["trials"] if trial["axis"] == "x" and trial["offset_m"] == 0.0]
     assert len({(trial["scene_seed"], trial["object_slot"]) for trial in first_point}) == 3
+
+
+def test_m1b_tolerance_summary_requires_all_trials_and_applies_signed_monotonic_closure(tmp_path: Path) -> None:
+    root = Path(__file__).parents[2]
+    worklist_path = tmp_path / "worklist.json"
+    subprocess.run([sys.executable, "scripts/plan_m1b_tolerance_calibration.py", "--config", "configs/m1b_normal_tolerance_calibration.json", "--output", str(worklist_path)], cwd=root, check=True)
+    worklist = json.loads(worklist_path.read_text())
+    raw = tmp_path / "raw"; raw.mkdir()
+    for index, trial in enumerate(worklist["trials"]):
+        success = not (trial["axis"] == "y" and trial["offset_m"] == 0.015)
+        record = {"provenance": "CALIBRATION_ONLY_INITIALIZATION", "trial": trial, "baseline_perception_free": True, "bilateral_same_entity_contact": success, "attach": {"state_confirmed": success}}
+        (raw / f"trial-{index:03d}.json").write_text(json.dumps(record))
+    summary = summarize(worklist, raw)
+    assert summary["tolerance_envelope_m"] == {"x": 0.02, "y": 0.01, "z": 0.02}
+    (raw / "trial-080.json").unlink()
+    with pytest.raises(ValueError, match="missing raw trial evidence"):
+        summarize(worklist, raw)
+
+
+def test_m1b_remote_tolerance_campaign_requires_fresh_partitions_and_full_reset() -> None:
+    source = (Path(__file__).parents[2] / "scripts/run_m1b_tolerance_campaign_remote.sh").read_text()
+    assert 'for index in $(seq 0 80)' in source
+    assert 'partition="m1b_tolerance_campaign_$index"' in source
+    assert '--resume-world --activate-controllers' in source
+    assert '--calibration-fixture-diameter-m "$fixture_diameter_m"' in source
+    assert 'cleanup_partition "$partition"' in source
+    assert 'INFRASTRUCTURE_FAILURE:TRIAL:index=$index' in source
+    assert 'summarize_m1b_tolerance_campaign.py' in source
