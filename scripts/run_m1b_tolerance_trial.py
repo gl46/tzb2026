@@ -19,7 +19,9 @@ from pathlib import Path
 
 import rclpy
 from geometry_msgs.msg import Pose
+from moveit_msgs.msg import CollisionObject, PlanningScene
 from ros_gz_interfaces.msg import Contacts
+from shape_msgs.msg import SolidPrimitive
 
 ROOT = Path(__file__).resolve().parents[1]
 for directory in (ROOT / "src", ROOT / "scripts"):
@@ -84,6 +86,29 @@ def m1b_normal_side_approach(client: CalibrationClient, centre_world_m: list[flo
         "converged": bool(final.get("converged")), "final": final,
         "geometry": {"finger_board_axis_world": [1.0, 0.0, 0.0], "closing_axis_world": [0.0, 1.0, 0.0], "final_x_offset_m": -0.080, "final_hand_z_offset_m": 0.065, "ik_seed_source": "measured_scene1034_collision_checked_branch", "path_source": "MoveIt collision-checked trajectory from reset home"},
     }
+
+
+def apply_calibration_cylinder_scene(client: CalibrationClient, labels: list[dict[str, object]]) -> bool:
+    """Add every supervised cylinder as a collision object during calibration.
+
+    This initialization-only scene prevents the planner from taking an arm or
+    finger trajectory through neighbouring physical cylinders.  It is not an
+    online policy input: production creates the equivalent obstacles from
+    public perception tracks before planning.
+    """
+    scene = PlanningScene(is_diff=True)
+    for label in labels:
+        item = CollisionObject()
+        item.id = str(label["actual_sim_entity_id"])
+        item.header.frame_id = "world"
+        item.primitives = [SolidPrimitive(type=SolidPrimitive.CYLINDER, dimensions=[0.09, 0.025])]
+        pose = Pose()
+        pose.position.x, pose.position.y, pose.position.z = (float(value) for value in label["position_3d_world"])
+        pose.orientation.w = 1.0
+        item.primitive_poses = [pose]
+        item.operation = CollisionObject.ADD
+        scene.world.collision_objects.append(item)
+    return client.apply_scene_diff(scene)
 
 
 def attach_and_observe(topic: str, state_topic: str) -> dict[str, object]:
@@ -175,10 +200,11 @@ def main() -> int:
         open_hand = {"succeeded": False}
         close = {"succeeded": False}
         if ready:
-            client.update_cube_scene(target, target_id="m1b_calibration_target")
-            client.set_target_touch_exception(True, target_id="m1b_calibration_target")
+            cylinder_scene_applied = apply_calibration_cylinder_scene(client, labels)
+            target_entity = str(normal[args.object_slot - 1]["actual_sim_entity_id"])
+            target_touch_exception_applied = client.set_target_touch_exception(True, target_id=target_entity) if cylinder_scene_applied else False
             open_hand = client.command_hand([0.04, 0.04])
-            approach = m1b_normal_side_approach(client, target)
+            approach = m1b_normal_side_approach(client, target) if target_touch_exception_applied else {"executed": False, "reason": "CALIBRATION_COLLISION_SCENE_UNAVAILABLE"}
             if approach.get("executed") and approach.get("converged"):
                 close = client.command_hand([0.01, 0.01])
             deadline = time.monotonic() + 0.35
@@ -196,7 +222,7 @@ def main() -> int:
             "supervision_initialization": {"orientation_state": "normal", "object_slot": args.object_slot, "truth_center_used_only_for_initial_target_pose": truth_center},
             "offset_vector_m": [target[index] - truth_center[index] for index in range(3)],
             "production_grasp_primitive": "m1b_normal_side_approach + physical_hand + m1b_internal_bilateral_broker",
-            "ready": ready, "open_hand": open_hand, "approach": approach, "close": close,
+            "ready": ready, "calibration_collision_scene_applied": cylinder_scene_applied if ready else False, "target_touch_exception_applied": target_touch_exception_applied if ready else False, "open_hand": open_hand, "approach": approach, "close": close,
             "raw_contact_samples": [{"timestamp_s": item.timestamp_s, "finger": item.finger, "collision_pairs": list(item.collision_pairs)} for item in raw],
             "cylinder_side_contact_samples": cylinder_contact_samples,
             "gate": {"grasp_success": feedback.grasp_success, "tactile_state": feedback.tactile_state, "reobservation_required": feedback.reobservation_required, "internal_actuation_record": internal},
