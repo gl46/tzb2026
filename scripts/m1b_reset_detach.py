@@ -140,28 +140,45 @@ def main() -> int:
         if status != "RESET_VERIFIED":
             payload["controller_activation"] = {"attempted": False, "reason": "WORLD_NOT_RESUMED"}
         else:
-            result = subprocess.run(
-                [
-                    "bash", "-lc",
-                    "source /opt/ros/jazzy/setup.bash && ros2 control switch_controllers "
-                    "--activate joint_state_broadcaster panda_arm_controller "
-                    "panda_hand_physical_controller --strict",
-                ],
-                check=False,
-                capture_output=True,
-                text=True,
-                env={
-                    key: value
-                    for key, value in os.environ.items()
-                    if key not in {"PYTHONPATH", "VIRTUAL_ENV", "PYTHONHOME"}
-                },
-            )
+            attempts = []
+            for attempt in range(1, 4):
+                result = subprocess.run(
+                    [
+                        "bash", "-lc",
+                        "source /opt/ros/jazzy/setup.bash && ros2 control switch_controllers "
+                        "--activate joint_state_broadcaster panda_arm_controller "
+                        "panda_hand_physical_controller --strict",
+                    ],
+                    check=False,
+                    capture_output=True,
+                    text=True,
+                    env={
+                        key: value
+                        for key, value in os.environ.items()
+                        if key not in {"PYTHONPATH", "VIRTUAL_ENV", "PYTHONHOME"}
+                    },
+                )
+                attempts.append({
+                    "attempt": attempt,
+                    "returncode": result.returncode,
+                    "stdout": result.stdout.strip(),
+                    "stderr": result.stderr.strip(),
+                })
+                if result.returncode == 0:
+                    break
+                # Gazebo resumes asynchronously.  Controller-manager services
+                # may exist before the paused-world spawners have loaded all
+                # controllers, so retry only this post-resume lifecycle step.
+                time.sleep(1.0)
+            assert attempts
+            last = attempts[-1]
             payload["controller_activation"] = {
                 "attempted": True,
-                "returncode": result.returncode,
-                "stdout": result.stdout.strip(),
-                "stderr": result.stderr.strip(),
-                "activated": result.returncode == 0,
+                "attempts": attempts,
+                "returncode": last["returncode"],
+                "stdout": last["stdout"],
+                "stderr": last["stderr"],
+                "activated": last["returncode"] == 0,
             }
             if not payload["controller_activation"]["activated"]:
                 status = "INVALID_RESET"

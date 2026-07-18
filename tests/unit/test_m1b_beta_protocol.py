@@ -125,6 +125,7 @@ def test_m1b_launch_has_paused_startup_contract_without_changing_default_m1a_run
     assert "--activate-controllers requires --resume-world" in reset
     assert "CONTROLLER_ACTIVATION_FAILED" in reset
     assert "source /opt/ros/jazzy/setup.bash && ros2 control switch_controllers" in reset
+    assert "for attempt in range(1, 4)" in reset
 
 
 def test_m1b_hand_preflight_requires_physical_endpoint_feedback() -> None:
