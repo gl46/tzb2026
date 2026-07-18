@@ -187,7 +187,8 @@ def test_m1b_tolerance_attach_uses_detachablejoint_empty_payload() -> None:
     assert 'approach_motion_accepted = bool(approach.get("executed") and approach.get("converged"))' in source
     assert '"motion_gate_requires_terminal_convergence": True' in source
     assert 'M1B_NORMAL_PRECONTACT_HAND_Z_OFFSET_M = 0.220' in source
-    assert 'if contact_descend.get("executed") and contact_descend.get("converged"):' in source
+    assert 'if contact_descend.get("executed"):' in source
+    assert 'only the non-contact\n            # approach requires strict terminal convergence' in source
     assert 'contact_start_index = len(raw)' in source
 
 

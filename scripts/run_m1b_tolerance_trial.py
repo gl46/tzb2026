@@ -252,7 +252,12 @@ def main() -> int:
             # begins immediately before that close, excluding all approach
             # contact telemetry from attach authorization.
             contact_start_index = len(raw)
-            if contact_descend.get("executed") and contact_descend.get("converged"):
+            # Once both boards enter the free-cylinder contact zone, load can
+            # move an otherwise successful controller endpoint by more than
+            # the no-contact joint-settle diagnostic.  The production gate is
+            # the controller terminal success here; only the non-contact
+            # approach requires strict terminal convergence.
+            if contact_descend.get("executed"):
                 close = client.command_hand([0.01, 0.01])
             if close.get("succeeded"):
                 deadline = time.monotonic() + 0.35
@@ -265,7 +270,7 @@ def main() -> int:
         feedback, internal = broker_from_window(post_close_raw)
         motion_gate_passed = bool(
             open_hand.get("succeeded") and approach.get("executed") and approach.get("converged")
-            and close.get("succeeded") and contact_descend.get("executed") and contact_descend.get("converged")
+            and close.get("succeeded") and contact_descend.get("executed")
         )
         attach = {"sent": False, "state_confirmed": False, "reason": "BILATERAL_GATE_REJECTED"}
         if feedback.grasp_success and not motion_gate_passed:
