@@ -142,14 +142,19 @@ def main() -> int:
         else:
             result = subprocess.run(
                 [
-                    "ros2", "control", "switch_controllers", "--activate",
-                    "joint_state_broadcaster", "panda_arm_controller",
-                    "panda_hand_physical_controller", "--strict",
+                    "bash", "-lc",
+                    "source /opt/ros/jazzy/setup.bash && ros2 control switch_controllers "
+                    "--activate joint_state_broadcaster panda_arm_controller "
+                    "panda_hand_physical_controller --strict",
                 ],
                 check=False,
                 capture_output=True,
                 text=True,
-                env={key: value for key, value in os.environ.items() if key != "PYTHONPATH"},
+                env={
+                    key: value
+                    for key, value in os.environ.items()
+                    if key not in {"PYTHONPATH", "VIRTUAL_ENV", "PYTHONHOME"}
+                },
             )
             payload["controller_activation"] = {
                 "attempted": True,
