@@ -115,6 +115,13 @@ def test_m1b_moveit_server_does_not_start_a_second_simulation() -> None:
     assert "moveit_ros_move_group" in source
 
 
+def test_m1b_launch_has_paused_startup_contract_without_changing_default_m1a_run() -> None:
+    source = (Path(__file__).parents[2] / "robot_ws/src/xh_sim/launch/simulation.launch.py").read_text()
+    assert 'DeclareLaunchArgument(\n            "start_paused"' in source
+    assert "ADR-0014 requires this for M1B detach-first reset" in source
+    assert "else '-r -s --headless-rendering '" in source
+
+
 def test_m1b_hand_preflight_requires_physical_endpoint_feedback() -> None:
     good = M1BHandPreflightV1(True, True, 0.04, 0.04, 0.04)
     assert evaluate_hand_preflight(good)[0] == "HAND_PREFLIGHT_VERIFIED"

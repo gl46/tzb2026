@@ -68,6 +68,8 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--spawn-manifest", type=Path, required=True)
     parser.add_argument("--timeout-s", type=float, default=2.0)
+    parser.add_argument("--world-name", help="Required with --resume-world after a paused M1B reset")
+    parser.add_argument("--resume-world", action="store_true", help="Resume Gazebo only after RESET_VERIFIED")
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     if args.timeout_s <= 0:
@@ -98,9 +100,36 @@ def main() -> int:
             for record in records
         ],
     }
+    if args.resume_world:
+        if not args.world_name:
+            raise SystemExit("--resume-world requires --world-name")
+        if status != "RESET_VERIFIED":
+            payload["world_resume"] = {"attempted": False, "reason": "RESET_NOT_VERIFIED"}
+        else:
+            result = subprocess.run(
+                [
+                    "gz", "service", "--service", f"/world/{args.world_name}/control",
+                    "--reqtype", "gz.msgs.WorldControl", "--reptype", "gz.msgs.Boolean",
+                    "--timeout", "3000", "--req", "pause: false",
+                ],
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            payload["world_resume"] = {
+                "attempted": True,
+                "returncode": result.returncode,
+                "stdout": result.stdout.strip(),
+                "stderr": result.stderr.strip(),
+                "resumed": result.returncode == 0 and "data: true" in result.stdout,
+            }
+            if not payload["world_resume"]["resumed"]:
+                status = "INVALID_RESET"
+                payload["status"] = status
+                payload["reasons"].append("WORLD_RESUME_FAILED")
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
-    print(json.dumps({"status": status, "objects": len(objects), "reasons": list(reasons)}))
+    print(json.dumps({"status": status, "objects": len(objects), "reasons": payload["reasons"]}))
     return 0 if status == "RESET_VERIFIED" else 2
 
 

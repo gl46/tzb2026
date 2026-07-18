@@ -12,7 +12,7 @@ from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, OpaqueFunction, RegisterEventHandler
 from launch.event_handlers import OnProcessExit
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import LaunchConfiguration
+from launch.substitutions import LaunchConfiguration, PythonExpression
 from launch_ros.actions import Node
 
 
@@ -183,6 +183,7 @@ def generate_launch_description():
     ros_gz_share = Path(get_package_share_directory("ros_gz_sim"))
     default_world = share / "worlds" / "p0_pick_place.sdf"
     world_file = LaunchConfiguration("world_file")
+    start_paused = LaunchConfiguration("start_paused")
     left_contact_gz = (
         "/world/xh_p0_pick_place/model/panda_controller/link/panda_leftfinger/"
         "sensor/left_finger_contact/contact"
@@ -254,9 +255,22 @@ def generate_launch_description():
             default_value="",
             description="ADR-0013 beta only: supervision manifest used at spawn to create per-object internal grasp joints.",
         ),
+        DeclareLaunchArgument(
+            "start_paused",
+            default_value="false",
+            description="Start Gazebo paused; ADR-0014 requires this for M1B detach-first reset.",
+        ),
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(str(ros_gz_share / "launch" / "gz_sim.launch.py")),
-            launch_arguments={"gz_args": ["-r -s --headless-rendering ", world_file]}.items(),
+            launch_arguments={
+                "gz_args": [
+                    PythonExpression([
+                        "'-s --headless-rendering ' if '", start_paused,
+                        "'.lower() == 'true' else '-r -s --headless-rendering '",
+                    ]),
+                    world_file,
+                ],
+            }.items(),
         ),
         bridge,
         OpaqueFunction(function=lambda context: _robot_actions(context, share)),
