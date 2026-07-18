@@ -38,9 +38,10 @@ MAX_OBJECT_DISPLACEMENT_M = 0.001
 MIN_EE_DISPLACEMENT_M = 0.02
 MAX_HOME_JOINT_ERROR_RAD = 0.10
 # A joint-space micro-jog can sweep a lower arm link through an incoming zone.
-# This reset probe instead lifts the high S1-home hand 30 mm in world Z using
+# This reset probe moves the high S1-home hand 30 mm downward in world Z using
 # the same MoveIt IK/plan/execute chain and the injected cylinder obstacles.
-HOME_JOG_WORLD_Z_M = 0.03
+# The upward branch is at the Panda's local reach boundary in this fixture.
+HOME_JOG_WORLD_Z_M = -0.03
 POSE_SNAPSHOT_ATTEMPTS = 3
 POSE_QUERY_TIMEOUT_S = 5
 
