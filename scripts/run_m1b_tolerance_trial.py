@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import select
 import subprocess
 import sys
 import time
@@ -78,19 +79,38 @@ def m1b_normal_side_approach(client: CalibrationClient, centre_world_m: list[flo
 
 
 def attach_and_observe(topic: str, state_topic: str) -> dict[str, object]:
-    command = subprocess.run(
-        ["gz", "topic", "-t", topic, "-m", "gz.msgs.Empty", "-p", "unused: true"],
-        check=False, capture_output=True, text=True, timeout=3.0,
-    )
-    observed = subprocess.run(
-        ["timeout", "2", "gz", "topic", "-e", "-t", state_topic],
-        check=False, capture_output=True, text=True, timeout=3.0,
-    )
+    """Subscribe before publish so the one-shot DetachableJoint state is evidence."""
+    monitor = subprocess.Popen(["gz", "topic", "-e", "-t", state_topic], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+    lines: list[str] = []
+    try:
+        time.sleep(0.10)
+        command = subprocess.run(
+            ["gz", "topic", "-t", topic, "-m", "gz.msgs.Empty", "-p", "unused: true"],
+            check=False, capture_output=True, text=True, timeout=3.0,
+        )
+        deadline = time.monotonic() + 2.0
+        while time.monotonic() < deadline and monitor.stdout is not None:
+            ready, _, _ = select.select([monitor.stdout], [], [], 0.05)
+            if not ready:
+                continue
+            line = monitor.stdout.readline()
+            if not line:
+                break
+            lines.append(line.rstrip())
+            if "attached" in line:
+                break
+    finally:
+        monitor.terminate()
+        try:
+            monitor.wait(timeout=1.0)
+        except subprocess.TimeoutExpired:
+            monitor.kill()
+            monitor.wait(timeout=1.0)
     return {
         "sent": command.returncode == 0, "topic": topic,
         "command_stdout": command.stdout.strip(), "command_stderr": command.stderr.strip(),
-        "state_topic": state_topic, "state_confirmed": "attached" in observed.stdout,
-        "state_lines": observed.stdout.splitlines(),
+        "state_topic": state_topic, "state_confirmed": any("attached" in line for line in lines),
+        "state_lines": lines,
     }
 
 
