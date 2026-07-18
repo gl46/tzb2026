@@ -656,6 +656,8 @@ class CalibrationClient(EvidenceClient):
         executed, goal_uuid, samples, controller_samples, settle_s, converged = self.execute(
             trajectory, expected
         )
+        observed = [self.latest.get(name, math.nan) for name in JOINTS]
+        final_errors = [abs(actual - target) for actual, target in zip(observed, expected)]
         return {
             "ik_solved": True,
             "ik_solution": solution,
@@ -669,6 +671,10 @@ class CalibrationClient(EvidenceClient):
             "joint_state_samples": len(samples),
             "controller_state_samples": len(controller_samples),
             "post_controller_settle_s": settle_s,
+            "expected_final_joints": expected,
+            "observed_final_joints": observed,
+            "per_joint_final_error_rad": final_errors,
+            "max_final_joint_error_rad": max(final_errors),
         }
 
     def move_joint_target(self, target: list[float]) -> dict:
