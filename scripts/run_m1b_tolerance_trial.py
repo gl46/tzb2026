@@ -18,6 +18,7 @@ import subprocess
 import sys
 import time
 from pathlib import Path
+from statistics import median
 
 import rclpy
 from geometry_msgs.msg import Pose
@@ -69,6 +70,7 @@ M1B_FINGER_BOARD_THICKNESS_M = 0.018
 M1B_MAX_FINGER_POSITION_M = 0.040
 M1B_NEAR_REOBSERVATION_DURATION_S = 8.0
 M1B_NEAR_REOBSERVATION_MAX_ASSOCIATION_DISTANCE_M = 0.050
+M1B_NEAR_REOBSERVATION_FRAME_COUNT = 3
 
 
 def m1b_close_finger_targets_from_perceived_diameter(
@@ -410,13 +412,24 @@ def main() -> int:
                 near_reobservation["attempted"] = True
                 near_directory = args.output.parent / f"{args.output.stem}.near_rgbd"
                 try:
-                    near_evidence_path = capture_near_public_observation(near_directory, public_pipeline_python=args.public_pipeline_python)
-                    near_track, near_metadata = select_near_public_track(
-                        near_evidence_path, near_directory / "camera_info.json", initial=initial_public_track, calibration=calibration,
-                    )
+                    near_frames = []
+                    for index in range(1, M1B_NEAR_REOBSERVATION_FRAME_COUNT + 1):
+                        frame_directory = near_directory / f"frame-{index:02d}"
+                        near_evidence_path = capture_near_public_observation(frame_directory, public_pipeline_python=args.public_pipeline_python)
+                        near_track, near_metadata = select_near_public_track(
+                            near_evidence_path, frame_directory / "camera_info.json", initial=initial_public_track, calibration=calibration,
+                        )
+                        near_frames.append({"evidence_path": str(near_evidence_path), "selected_public_track": near_track, "metadata": near_metadata})
+                    near_track = {
+                        "track_id": "MULTIFRAME_PUBLIC_MEDIAN",
+                        "visual_color": initial_public_track.get("visual_color"),
+                        "perceived_diameter_m": median(float(frame["selected_public_track"]["perceived_diameter_m"]) for frame in near_frames),
+                        "estimated_center_world_m": [median(float(frame["selected_public_track"]["estimated_center_world_m"][axis]) for frame in near_frames) for axis in range(3)],
+                    }
+                    close_targets, aperture = m1b_close_finger_targets_from_perceived_diameter(float(near_track["perceived_diameter_m"]))
                     public_delta = [float(current) - float(previous) for current, previous in zip(near_track["estimated_center_world_m"], initial_public_track["estimated_center_world_m"])]
                     final_target = [coordinate + delta for coordinate, delta in zip(target, public_delta)]
-                    near_reobservation = {"attempted": True, "succeeded": True, "evidence_path": str(near_evidence_path), "selected_public_track": near_track, "metadata": near_metadata, "public_center_delta_world_m": public_delta, "final_target_world_m": final_target}
+                    near_reobservation = {"attempted": True, "succeeded": True, "aggregation": "PER_AXIS_MEDIAN_OF_PUBLIC_RGBD_FRAMES", "frames": near_frames, "selected_public_track": near_track, "public_center_delta_world_m": public_delta, "final_target_world_m": final_target}
                 except (OSError, RuntimeError, subprocess.TimeoutExpired) as error:
                     near_reobservation = {"attempted": True, "succeeded": False, "reason": str(error)}
             contact_descend = (
