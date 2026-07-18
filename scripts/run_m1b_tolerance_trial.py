@@ -78,13 +78,18 @@ def m1b_normal_side_approach(client: CalibrationClient, centre_world_m: list[flo
     # puts the hand into the base/table envelope for legal left-side scenes.
     def final_pose() -> Pose:
         value = pose(-0.080)
+        # The physical pad board has a 6 mm open-jaw clearance at nominal
+        # centre.  A measured +5 mm closing-axis bias prevents the right pad
+        # from grazing a free cylinder during arm settling; symmetric closure
+        # then establishes contact in the commanded hand phase instead.
+        value.position.y = centre_world_m[1] + 0.005
         value.position.z = centre_world_m[2] + 0.065
         return value
     final = client.move_hand_pose(final_pose(), ik_seed=M1B_NORMAL_SIDE_IK_SEED)
     return {
         "executed": bool(final.get("executed") and final.get("converged")),
         "converged": bool(final.get("converged")), "final": final,
-        "geometry": {"finger_board_axis_world": [1.0, 0.0, 0.0], "closing_axis_world": [0.0, 1.0, 0.0], "final_x_offset_m": -0.080, "final_hand_z_offset_m": 0.065, "ik_seed_source": "measured_scene1034_collision_checked_branch", "path_source": "MoveIt collision-checked trajectory from reset home"},
+        "geometry": {"finger_board_axis_world": [1.0, 0.0, 0.0], "closing_axis_world": [0.0, 1.0, 0.0], "final_x_offset_m": -0.080, "final_y_offset_m": 0.005, "final_hand_z_offset_m": 0.065, "ik_seed_source": "measured_scene1034_collision_checked_branch", "path_source": "MoveIt collision-checked trajectory from reset home"},
     }
 
 
