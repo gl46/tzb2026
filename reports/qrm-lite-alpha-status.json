@@ -21,7 +21,7 @@
   "gate_verdict": "GO_COARSE_AND_MLP_ONLY",
   "tests_passed": 12,
   "tests_failed": 0,
-  "commit": "98b5747247bf9d67c959d371790c753491b1efdf",
+  "commit": "7400427722b798107f7b703481a6615a527540fa",
   "pushed": true,
   "blockers": [],
   "limitations": [
