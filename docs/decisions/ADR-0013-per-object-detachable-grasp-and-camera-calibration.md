@@ -106,7 +106,7 @@ Approve the following four contracts as one change set.
 - Reset detach contract: **APPROVED**
 - Broker same-entity selection replacing target-id gate: **APPROVED**
 - TF-only camera calibration contract: **APPROVED**
-- Implementation SHA: **PENDING**
+- Implementation SHA: **9086967** (`codex/m1b-beta-closed-loop`)
 
 ## Amendment 1 (2026-07-19): physical non-coupling reset verification
 
@@ -142,3 +142,5 @@ Amendment approval:
 
 - Human approver: **project owner, approved in Codex conversation on 2026-07-19**
 - Physical non-coupling verification replacing 12/12 message receipt: **APPROVED**
+- Amendment implementation SHA: **9086967** (`codex/m1b-beta-closed-loop`)
+- Physical reset evidence: **PASS** — `reports/m1b-reset-physical-noncoupling.json`
