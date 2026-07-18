@@ -1,0 +1,24 @@
+{
+  "model_id": "/home/gl/xh-202607-qrm-lite/hf-cache/manual/Qwen3.5-4B",
+  "revision": "",
+  "hf_endpoint": "https://hf-mirror.com",
+  "text_ok": true,
+  "multimodal_ok": true,
+  "hidden_states_ok": true,
+  "lora_step_ok": true,
+  "peak_vram_mb": 17824.9,
+  "forward_seconds": 9.991745233535767,
+  "error": null,
+  "pooled_shape": [
+    1,
+    2560
+  ],
+  "device": "cuda",
+  "dtype": "torch.bfloat16",
+  "multimodal_pooled_shape": [
+    1,
+    2560
+  ],
+  "lora_loss": 7.305510520935059,
+  "adapter_out": "artifacts/qrm_lite/smoke_adapter"
+}

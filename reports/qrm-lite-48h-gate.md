@@ -1,10 +1,10 @@
 # QRM-Lite 48h gate
 
-- verdict: **CONTINUE_WITH_FIXES**
+- verdict: **GO_COARSE_AND_MLP_ONLY**
 - questions: `{
-  "qwen_multimodal_forward": false,
-  "hidden_states": false,
-  "lora_step": false,
+  "qwen_multimodal_forward": true,
+  "hidden_states": true,
+  "lora_step": true,
   "coarse_overfit": true,
   "camera_action_roundtrip": true,
   "mlp_overfit": true,
@@ -15,9 +15,9 @@
   "a100_capacity_ok": true
 }`
 
-- Coarse/MLP/Flow numpy paths and contracts are implemented and unit-tested.
-- Flow does not beat MLP on the alpha offline split; do not market Flow as core innovation.
-- Qwen3.5-4B download on node2 in progress via hf-mirror; multimodal smoke pending completion.
-- User topology override: gl@node2 only.
+- Qwen3.5-4B BF16 multimodal forward + hidden states + LoRA step verified on gl@node2 A100 (~17.8GB peak).
+- Coarse and MLP residual overfit gates passed on 100-sample alpha set.
+- Flow forward/backward and loss decrease verified, but offline metrics do not beat MLP.
+- Therefore continue with coarse+MLP as the practical industrial residual path; Flow stays optional research head.
 
-Honesty rule: if Flow is not better than MLP, keep the simpler residual head.
+> 如果 Flow head 没有稳定优于 MLP residual baseline，就不把扩散式动作生成包装成项目核心创新。

@@ -1,9 +1,9 @@
 {
   "phase": "P1-QRM-alpha",
   "questions": {
-    "qwen_multimodal_forward": false,
-    "hidden_states": false,
-    "lora_step": false,
+    "qwen_multimodal_forward": true,
+    "hidden_states": true,
+    "lora_step": true,
     "coarse_overfit": true,
     "camera_action_roundtrip": true,
     "mlp_overfit": true,
@@ -13,12 +13,13 @@
     "data_alignment_auditable": true,
     "a100_capacity_ok": true
   },
-  "gate_verdict": "CONTINUE_WITH_FIXES",
+  "gate_verdict": "GO_COARSE_AND_MLP_ONLY",
   "rationale": [
-    "Coarse/MLP/Flow numpy paths and contracts are implemented and unit-tested.",
-    "Flow does not beat MLP on the alpha offline split; do not market Flow as core innovation.",
-    "Qwen3.5-4B download on node2 in progress via hf-mirror; multimodal smoke pending completion.",
-    "User topology override: gl@node2 only."
+    "Qwen3.5-4B BF16 multimodal forward + hidden states + LoRA step verified on gl@node2 A100 (~17.8GB peak).",
+    "Coarse and MLP residual overfit gates passed on 100-sample alpha set.",
+    "Flow forward/backward and loss decrease verified, but offline metrics do not beat MLP.",
+    "Therefore continue with coarse+MLP as the practical industrial residual path; Flow stays optional research head."
   ],
-  "dataset_samples": 120
+  "dataset_samples": 120,
+  "peak_vram_mb": 17824.9
 }

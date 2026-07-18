@@ -91,17 +91,25 @@ class Qwen35Backbone:
 
         self._device, self._dtype = self._resolve_device_dtype()
         kwargs: dict[str, Any] = {
-            "revision": self.revision,
             "trust_remote_code": self.trust_remote_code,
             "local_files_only": self.local_files_only,
         }
+        # Local directories / empty revision should not pass a bogus revision pin.
+        if self.revision:
+            kwargs["revision"] = self.revision
         if self.cache_dir:
             kwargs["cache_dir"] = self.cache_dir
 
         self._processor = AutoProcessor.from_pretrained(self.model_id, **kwargs)
         model_kwargs = dict(kwargs)
-        model_kwargs["torch_dtype"] = self._dtype
-        self._model = AutoModelForImageTextToText.from_pretrained(self.model_id, **model_kwargs)
+        # transformers>=4.46 prefers dtype=; keep torch_dtype as fallback for older builds.
+        model_kwargs["dtype"] = self._dtype
+        try:
+            self._model = AutoModelForImageTextToText.from_pretrained(self.model_id, **model_kwargs)
+        except TypeError:
+            model_kwargs.pop("dtype", None)
+            model_kwargs["torch_dtype"] = self._dtype
+            self._model = AutoModelForImageTextToText.from_pretrained(self.model_id, **model_kwargs)
         self._model.to(self._device)
         self._model.eval()
 
@@ -133,15 +141,55 @@ class Qwen35Backbone:
         self._peft_attached = True
 
     def _prepare_batch(self, batch: dict[str, Any]) -> dict[str, Any]:
-        """batch keys: texts:list[str], images: optional list of PIL/np/path."""
+        """batch keys: texts:list[str], images: optional list of PIL/np/path.
+
+        Qwen3.5 / Qwen3-VL processors require chat-template image placeholders so that
+        image token counts match vision features. Plain text+images without template
+        yields tokens:0 features:N errors.
+        """
         self.load()
         assert self._processor is not None
         texts = batch["texts"]
         images = batch.get("images")
         if images is None:
-            proc = self._processor(text=texts, return_tensors="pt", padding=True)
+            # text-only: still prefer chat template when available
+            rendered: list[str] = []
+            for t in texts:
+                if hasattr(self._processor, "apply_chat_template"):
+                    messages = [{"role": "user", "content": [{"type": "text", "text": t}]}]
+                    rendered.append(
+                        self._processor.apply_chat_template(
+                            messages, tokenize=False, add_generation_prompt=True
+                        )
+                    )
+                else:
+                    rendered.append(t)
+            proc = self._processor(text=rendered, return_tensors="pt", padding=True)
         else:
-            proc = self._processor(text=texts, images=images, return_tensors="pt", padding=True)
+            if len(images) != len(texts):
+                raise ValueError("texts and images must have the same batch size")
+            rendered = []
+            for t, img in zip(texts, images):
+                if hasattr(self._processor, "apply_chat_template"):
+                    messages = [
+                        {
+                            "role": "user",
+                            "content": [
+                                {"type": "image", "image": img},
+                                {"type": "text", "text": t},
+                            ],
+                        }
+                    ]
+                    rendered.append(
+                        self._processor.apply_chat_template(
+                            messages, tokenize=False, add_generation_prompt=True
+                        )
+                    )
+                else:
+                    rendered.append(t)
+            proc = self._processor(
+                text=rendered, images=images, return_tensors="pt", padding=True
+            )
         import torch
 
         return {k: (v.to(self._device) if hasattr(v, "to") else v) for k, v in proc.items()}

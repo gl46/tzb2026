@@ -1,14 +1,16 @@
 {
   "phase": "P1-QRM-alpha",
-  "status": "PARTIAL",
+  "status": "PASS_QRM_ALPHA_WITH_LIMITATIONS",
   "base_model": "Qwen/Qwen3.5-4B",
   "base_revision": "851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a",
   "branch": "codex/qrm-lite-alpha",
   "base_commit": "0709cc19b66e52e8043eb26babb9a6f3e8ca9a72",
   "gpu": "NVIDIA A100-SXM4-80GB @ gl@node2",
-  "qwen_multimodal_forward": false,
-  "hidden_states_verified": false,
-  "lora_train_step_verified": false,
+  "qwen_multimodal_forward": true,
+  "hidden_states_verified": true,
+  "lora_train_step_verified": true,
+  "peak_vram_mb": 17824.9,
+  "forward_seconds": 9.991745233535767,
   "dataset_samples": 120,
   "camera_action_roundtrip": true,
   "coarse_overfit_verified": true,
@@ -16,14 +18,42 @@
   "flow_forward_backward_verified": true,
   "flow_loss_decreased": true,
   "flow_outperforms_mlp_preliminary": false,
-  "gate_verdict": "CONTINUE_WITH_FIXES",
+  "gate_verdict": "GO_COARSE_AND_MLP_ONLY",
   "tests_passed": 12,
   "tests_failed": 0,
-  "commit": "",
-  "pushed": false,
-  "blockers": [
-    "Qwen3.5-4B weight download still running on node2 via hf-mirror (xet path 401; wget resume used)"
+  "commit": "98b5747247bf9d67c959d371790c753491b1efdf",
+  "pushed": true,
+  "blockers": [],
+  "limitations": [
+    "Flow does not outperform MLP on alpha offline split; keep MLP as primary residual head",
+    "Dataset is mostly geometric synthetic fixtures + 20 empty-grasp logs, not full Gazebo RGB-D scale",
+    "Closed-loop Gazebo smoke not required for alpha and not run",
+    "Flow numpy path is a prototype; torch path preferred on A100 for further work"
   ],
-  "next_command": "ssh gl@node2 'tail -f ~/xh-202607-qrm-lite/logs/qwen-download.log'",
-  "topology_override": "remote only gl@node2; paper 2606.17846v2 reference; no fx@chxy writes"
+  "next_command": "ssh gl@node2 'cd ~/xh-202607-qrm-lite && source .venv-qrm-lite/bin/activate && PYTHONPATH=src python scripts/qrm_lite/train_mlp_refiner.py --limit 100 --epochs 400'",
+  "topology_override": "remote only gl@node2; paper 2606.17846v2 reference; no fx@chxy writes; domestic mirrors only",
+  "backbone_smoke": {
+    "model_id": "/home/gl/xh-202607-qrm-lite/hf-cache/manual/Qwen3.5-4B",
+    "revision": "",
+    "hf_endpoint": "https://hf-mirror.com",
+    "text_ok": true,
+    "multimodal_ok": true,
+    "hidden_states_ok": true,
+    "lora_step_ok": true,
+    "peak_vram_mb": 17824.9,
+    "forward_seconds": 9.991745233535767,
+    "error": null,
+    "pooled_shape": [
+      1,
+      2560
+    ],
+    "device": "cuda",
+    "dtype": "torch.bfloat16",
+    "multimodal_pooled_shape": [
+      1,
+      2560
+    ],
+    "lora_loss": 7.305510520935059,
+    "adapter_out": "artifacts/qrm_lite/smoke_adapter"
+  }
 }

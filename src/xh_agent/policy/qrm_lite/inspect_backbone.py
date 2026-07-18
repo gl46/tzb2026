@@ -21,6 +21,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument(
         "--revision",
         default=os.environ.get("QRM_MODEL_REVISION", "851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a"),
+        help="HF revision pin; pass empty string for local model directories",
     )
     p.add_argument("--device", default=None, help="cuda|cpu|mps; default auto")
     p.add_argument("--dtype", default="bfloat16")
@@ -67,9 +68,14 @@ def main(argv: list[str] | None = None) -> int:
     try:
         import torch
 
+        revision = args.revision or None
+        # Local filesystem model path: do not force a remote revision.
+        if Path(args.model_id).exists():
+            revision = None
+            args.local_files_only = True
         bb = Qwen35Backbone(
             model_id=args.model_id,
-            revision=args.revision,
+            revision=revision or "",
             device=args.device,
             dtype=args.dtype,
             cache_dir=args.cache_dir,
@@ -123,7 +129,7 @@ def main(argv: list[str] | None = None) -> int:
             # reload smoke
             bb2 = Qwen35Backbone(
                 model_id=args.model_id,
-                revision=args.revision,
+                revision=revision or "",
                 device=args.device,
                 dtype=args.dtype,
                 cache_dir=args.cache_dir,
