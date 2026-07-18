@@ -34,7 +34,11 @@ def detach_and_observe(object_name: str, timeout_s: float) -> M1BResetVerificati
     )
     lines: list[str] = []
     try:
-        time.sleep(0.10)
+        # Gazebo transport subscriptions are established asynchronously.  The
+        # state topic is one-shot, so wait for the monitor subscription before
+        # publishing detach; this is delivery ordering, not a retry or a
+        # weakened RESET_VERIFIED criterion.
+        time.sleep(0.40)
         command = subprocess.run(
             ["gz", "topic", "-t", detach_topic, "-m", "gz.msgs.Empty", "-p", "unused: true"],
             check=False,
