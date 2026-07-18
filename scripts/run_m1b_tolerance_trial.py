@@ -13,6 +13,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import select
 import subprocess
 import sys
@@ -71,6 +72,23 @@ M1B_MAX_FINGER_POSITION_M = 0.040
 M1B_NEAR_REOBSERVATION_DURATION_S = 8.0
 M1B_NEAR_REOBSERVATION_MAX_ASSOCIATION_DISTANCE_M = 0.050
 M1B_NEAR_REOBSERVATION_FRAME_COUNT = 3
+CALIBRATION_SETTLE_S = 2.0
+
+
+def calibration_live_model_center(entity_name: str) -> list[float]:
+    """Read post-settle simulator truth for calibration initialization only."""
+    command = subprocess.run(
+        ["timeout", "2", "gz", "model", "-m", entity_name, "-p"],
+        check=False, capture_output=True, text=True, timeout=4.0,
+    )
+    match = re.search(
+        r"- Pose \[ XYZ \(m\) \] \[ RPY \(rad\) \]:\s*"
+        r"\[\s*([-+0-9.eE]+)\s+([-+0-9.eE]+)\s+([-+0-9.eE]+)\s*\]",
+        command.stdout,
+    )
+    if match is None:
+        raise RuntimeError(f"CALIBRATION_SUPERVISION_POSE_UNAVAILABLE:{entity_name}")
+    return [float(value) for value in match.groups()]
 
 
 def m1b_close_finger_targets_from_perceived_diameter(
@@ -347,7 +365,13 @@ def main() -> int:
     normal = [label for label in labels if label["orientation_state"] == "normal"]
     if not 1 <= args.object_slot <= len(normal):
         raise SystemExit(f"object slot must be in [1, {len(normal)}]")
-    truth_center = [float(value) for value in normal[args.object_slot - 1]["position_3d_world"]]
+    target_label = normal[args.object_slot - 1]
+    target_entity = str(target_label["actual_sim_entity_id"])
+    # Spawn labels are not assumed to remain physical truth after gravity and
+    # the mandatory settling window.  This is evaluator-only calibration
+    # initialization, explicitly outside online policy input.
+    time.sleep(CALIBRATION_SETTLE_S)
+    truth_center = calibration_live_model_center(target_entity)
     target = list(truth_center)
     target["xyz".index(axis)] += float(trial["offset_m"])
     calibration: M1BStaticCameraCalibrationV1 | None = None
@@ -403,7 +427,6 @@ def main() -> int:
         contact_start_index = len(raw)
         if ready:
             cylinder_scene_applied = apply_calibration_cylinder_scene(client, labels)
-            target_entity = str(normal[args.object_slot - 1]["actual_sim_entity_id"])
             # Keep the target collision-checked through the entire transit to
             # high precontact.  Enabling finger/target contact early lets a
             # planner legally side-swipe the free cylinder before close,
@@ -493,7 +516,7 @@ def main() -> int:
             "schema_version": "M1BToleranceTrialEvidenceV1",
             "provenance": "CALIBRATION_ONLY_INITIALIZATION",
             "trial": trial,
-            "supervision_initialization": {"orientation_state": "normal", "object_slot": args.object_slot, "truth_center_used_only_for_initial_target_pose": truth_center},
+            "supervision_initialization": {"orientation_state": "normal", "object_slot": args.object_slot, "actual_sim_entity_id": target_entity, "settle_s": CALIBRATION_SETTLE_S, "truth_center_source": "EVALUATOR_ONLY_GAZEBO_MODEL_POSE_AFTER_SETTLE", "truth_center_used_only_for_initial_target_pose": truth_center},
             "public_aperture_input": {**public_evidence, **aperture},
             "near_pregrasp_public_reobservation": near_reobservation,
             "baseline_perception_free": args.calibration_fixture_diameter_m is not None and not args.enable_near_pregrasp_reobservation,

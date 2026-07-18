@@ -213,6 +213,10 @@ def test_m1b_tolerance_attach_uses_detachablejoint_empty_payload() -> None:
     assert '"--enable-near-pregrasp-reobservation", action="store_true"' in source
     assert '"source": "CALIBRATION_FIXTURE_DECLARED_GEOMETRY"' in source
     assert '"baseline_perception_free": args.calibration_fixture_diameter_m is not None' in source
+    assert 'CALIBRATION_SETTLE_S = 2.0' in source
+    assert 'def calibration_live_model_center(entity_name: str)' in source
+    assert 'time.sleep(CALIBRATION_SETTLE_S)' in source
+    assert '"EVALUATOR_ONLY_GAZEBO_MODEL_POSE_AFTER_SETTLE"' in source
     assert '"evidence_sha256": hashlib.sha256(raw).hexdigest()' in source
     assert 'close = client.command_hand(close_targets)' in source
     assert '"source": "ACTUAL_PUBLIC_RGBD_GEOMETRIC_OUTPUT"' in source
