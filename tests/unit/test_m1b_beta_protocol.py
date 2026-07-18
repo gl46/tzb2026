@@ -184,6 +184,13 @@ def test_m1b_tolerance_attach_uses_detachablejoint_empty_payload() -> None:
     assert '"-p", "unused: true"' not in source
 
 
+def test_m1b_moveit_execution_waits_for_planned_trajectory() -> None:
+    source = (Path(__file__).parents[2] / "scripts/m1a_moveit_execution_client.py").read_text()
+    assert 'trajectory_duration_s = final_time.sec + final_time.nanosec * 1e-9' in source
+    assert 'result_timeout_s = min(90.0, max(30.0, trajectory_duration_s + 15.0))' in source
+    assert 'timeout_sec=result_timeout_s' in source
+
+
 def test_m1b_moveit_server_does_not_start_a_second_simulation() -> None:
     source = (Path(__file__).parents[2] / "robot_ws/src/xh_sim/launch/m1b_moveit_server.launch.py").read_text()
     assert "simulation.launch.py" not in source.replace("``simulation.launch.py``", "")

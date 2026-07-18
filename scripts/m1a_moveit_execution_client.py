@@ -240,7 +240,15 @@ class EvidenceClient(Node):
         if handle is None or not handle.accepted:
             return False, None, [], [], 0.0, False
         result_future = handle.get_result_async()
-        rclpy.spin_until_future_complete(self, result_future, timeout_sec=30.0)
+        # A collision-checked detour can legitimately exceed the historical
+        # fixed 30 s wait.  Timing out the client while the controller keeps
+        # moving is unsafe: callers may plan a second trajectory against a
+        # stale start state.  Bound the wait from the approved trajectory's
+        # own final time plus a finite transport/controller margin instead.
+        final_time = trajectory.joint_trajectory.points[-1].time_from_start
+        trajectory_duration_s = final_time.sec + final_time.nanosec * 1e-9
+        result_timeout_s = min(90.0, max(30.0, trajectory_duration_s + 15.0))
+        rclpy.spin_until_future_complete(self, result_future, timeout_sec=result_timeout_s)
         wrapped = result_future.result()
         result = wrapped.result if wrapped else None
         controller_succeeded = bool(result and result.error_code.val == 1)
