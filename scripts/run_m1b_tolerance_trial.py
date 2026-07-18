@@ -62,11 +62,10 @@ M1B_NORMAL_PRECONTACT_HAND_Z_OFFSET_M = 0.220
 M1B_NORMAL_CONTACT_HAND_Z_OFFSET_M = 0.065
 M1B_NORMAL_SIDE_HAND_X_OFFSET_M = -0.080
 # Live calibration link-pose evidence at the settled target shows the physical
-# board midpoint is left of the commanded hand Y.  The calibration-only
-# centreline sweep (-4, -2, 0, +2, +4 mm) produced the only bilateral,
-# observed-attach result at +4 mm; negative values retained right-only
-# contact.  This is a fixed hand-chain correction, not target pose input.
-M1B_NORMAL_HAND_Y_CENTERLINE_BIAS_M = 0.004
+# board midpoint is 0.8 mm left of the commanded hand Y.  +1 mm is the
+# approved fixed hand-chain correction; calibration-only sweeps may override
+# it, but isolated sweep successes are not promoted to production defaults.
+M1B_NORMAL_HAND_Y_CENTERLINE_BIAS_M = 0.001
 M1B_FINGER_BOARD_THICKNESS_M = 0.018
 M1B_MAX_FINGER_POSITION_M = 0.040
 M1B_NEAR_REOBSERVATION_DURATION_S = 8.0
@@ -74,11 +73,10 @@ M1B_NEAR_REOBSERVATION_MAX_ASSOCIATION_DISTANCE_M = 0.050
 M1B_NEAR_REOBSERVATION_FRAME_COUNT = 3
 CALIBRATION_SETTLE_S = 2.0
 HAND_FEEDBACK_READY_TIMEOUT_S = 12.0
-# The M1B cylinder is a free dynamic body.  A 0.8 s close can impulse it out
-# of the pad corridor before the opposite pad loads.  This only changes the
-# trajectory timing; width, controller tolerance, contact broker and attach
-# gates remain the production contract.
-M1B_NORMAL_CLOSE_DURATION_S = 2.0
+# Production hand timing remains the S1-verified 0.8 s trajectory.  Any
+# alternative timing must earn a calibration-only repeatability result before
+# it can become the production default.
+M1B_NORMAL_CLOSE_DURATION_S = 0.8
 
 
 def calibration_live_model_center(entity_name: str) -> list[float]:

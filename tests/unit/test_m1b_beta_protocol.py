@@ -195,7 +195,7 @@ def test_m1b_tolerance_attach_uses_detachablejoint_empty_payload() -> None:
     assert 'M1B_NORMAL_PRECONTACT_HAND_Z_OFFSET_M = 0.220' in source
     assert 'M1B_NORMAL_CONTACT_HAND_Z_OFFSET_M = 0.065' in source
     assert 'M1B_NORMAL_SIDE_HAND_X_OFFSET_M = -0.080' in source
-    assert 'M1B_NORMAL_HAND_Y_CENTERLINE_BIAS_M = 0.004' in source
+    assert 'M1B_NORMAL_HAND_Y_CENTERLINE_BIAS_M = 0.001' in source
     assert 'value.position.y = centre_world_m[1] + hand_y_centerline_bias_m' in source
     assert 'hand_y_centerline_bias_m = M1B_NORMAL_HAND_Y_CENTERLINE_BIAS_M if args.calibration_hand_y_bias_m is None else args.calibration_hand_y_bias_m' in source
     assert 'value.position.x = centre_world_m[0] + M1B_NORMAL_SIDE_HAND_X_OFFSET_M' in source
@@ -226,7 +226,7 @@ def test_m1b_tolerance_attach_uses_detachablejoint_empty_payload() -> None:
     assert 'def wait_for_finite_hand_feedback(client: CalibrationClient)' in source
     assert 'hand_feedback_ready = client.wait_calibration_ready() and wait_for_finite_hand_feedback(client)' in source
     assert '"evidence_sha256": hashlib.sha256(raw).hexdigest()' in source
-    assert 'M1B_NORMAL_CLOSE_DURATION_S = 2.0' in source
+    assert 'M1B_NORMAL_CLOSE_DURATION_S = 0.8' in source
     assert 'close = client.command_hand(close_targets, duration_s=M1B_NORMAL_CLOSE_DURATION_S)' in source
     assert '"hand_close_duration_s": M1B_NORMAL_CLOSE_DURATION_S' in source
     assert '--calibration-hand-y-bias-m' in source
