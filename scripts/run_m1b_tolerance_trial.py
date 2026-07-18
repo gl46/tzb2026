@@ -73,6 +73,11 @@ M1B_NEAR_REOBSERVATION_MAX_ASSOCIATION_DISTANCE_M = 0.050
 M1B_NEAR_REOBSERVATION_FRAME_COUNT = 3
 CALIBRATION_SETTLE_S = 2.0
 HAND_FEEDBACK_READY_TIMEOUT_S = 12.0
+# The M1B cylinder is a free dynamic body.  A 0.8 s close can impulse it out
+# of the pad corridor before the opposite pad loads.  This only changes the
+# trajectory timing; width, controller tolerance, contact broker and attach
+# gates remain the production contract.
+M1B_NORMAL_CLOSE_DURATION_S = 2.0
 
 
 def calibration_live_model_center(entity_name: str) -> list[float]:
@@ -501,7 +506,7 @@ def main() -> int:
             # the controller terminal success here; only the non-contact
             # approach requires strict terminal convergence.
             if contact_descend.get("executed"):
-                close = client.command_hand(close_targets)
+                close = client.command_hand(close_targets, duration_s=M1B_NORMAL_CLOSE_DURATION_S)
             if close.get("succeeded"):
                 deadline = time.monotonic() + 0.35
                 while time.monotonic() < deadline:
@@ -543,6 +548,7 @@ def main() -> int:
                 "contact_descend_terminal_convergence_required": False,
                 "contact_descend_contact_authorization": "POST_CLOSE_BILATERAL_SAME_ENTITY_WINDOW",
             },
+            "hand_close_duration_s": M1B_NORMAL_CLOSE_DURATION_S,
             "open_hand": open_hand, "approach": approach, "close": close, "contact_descend": contact_descend,
             "hand_feedback_ready": hand_feedback_ready,
             "raw_contact_samples": [{"timestamp_s": item.timestamp_s, "finger": item.finger, "collision_pairs": list(item.collision_pairs)} for item in raw],

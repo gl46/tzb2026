@@ -225,7 +225,9 @@ def test_m1b_tolerance_attach_uses_detachablejoint_empty_payload() -> None:
     assert 'def wait_for_finite_hand_feedback(client: CalibrationClient)' in source
     assert 'hand_feedback_ready = client.wait_calibration_ready() and wait_for_finite_hand_feedback(client)' in source
     assert '"evidence_sha256": hashlib.sha256(raw).hexdigest()' in source
-    assert 'close = client.command_hand(close_targets)' in source
+    assert 'M1B_NORMAL_CLOSE_DURATION_S = 2.0' in source
+    assert 'close = client.command_hand(close_targets, duration_s=M1B_NORMAL_CLOSE_DURATION_S)' in source
+    assert '"hand_close_duration_s": M1B_NORMAL_CLOSE_DURATION_S' in source
     assert '"source": "ACTUAL_PUBLIC_RGBD_GEOMETRIC_OUTPUT"' in source
     assert 'if contact_descend.get("executed"):' in source
     assert 'only the non-contact\n            # approach requires strict terminal convergence' in source
@@ -367,7 +369,10 @@ def test_m1b_tolerance_summary_requires_all_trials_and_applies_signed_monotonic_
 
 def test_m1b_remote_tolerance_campaign_requires_fresh_partitions_and_full_reset() -> None:
     source = (Path(__file__).parents[2] / "scripts/run_m1b_tolerance_campaign_remote.sh").read_text()
-    assert 'for index in $(seq 0 80)' in source
+    assert 'for index in $(seq "$start_index" "$end_index")' in source
+    assert 'M1B_TOLERANCE_START_INDEX:-0' in source
+    assert 'M1B_TOLERANCE_END_INDEX:-80' in source
+    assert 'PARTIAL_CAMPAIGN_COMPLETE:$start_index:$end_index' in source
     assert 'partition="m1b_tolerance_campaign_$index"' in source
     assert '--resume-world --activate-controllers' in source
     assert '--calibration-fixture-diameter-m "$fixture_diameter_m"' in source

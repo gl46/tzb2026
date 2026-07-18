@@ -14,10 +14,16 @@ scene_dir="${M1B_TOLERANCE_SCENE_DIR:-$root/data/generated/m1b_beta_tolerance_ba
 fixture_diameter_m="${M1B_TOLERANCE_FIXTURE_DIAMETER_M:-0.05}"
 trial_timeout_s="${M1B_TOLERANCE_TRIAL_TIMEOUT_S:-150}"
 spawn_manifest="$root/data/generated/m1b_beta_contact_probe/panda/panda.manifest.json"
+start_index="${M1B_TOLERANCE_START_INDEX:-0}"
+end_index="${M1B_TOLERANCE_END_INDEX:-80}"
 
 [[ -f "$worklist" ]] || { echo "WORKLIST_MISSING:$worklist" >&2; exit 2; }
 [[ -d "$scene_dir" ]] || { echo "SCENE_DIRECTORY_MISSING:$scene_dir" >&2; exit 2; }
 [[ -f "$spawn_manifest" ]] || { echo "SPAWN_MANIFEST_MISSING:$spawn_manifest" >&2; exit 2; }
+[[ "$start_index" =~ ^[0-9]+$ && "$end_index" =~ ^[0-9]+$ && "$start_index" -le "$end_index" && "$end_index" -le 80 ]] || {
+  echo "INVALID_TRIAL_INDEX_RANGE:$start_index:$end_index" >&2
+  exit 2
+}
 if [[ -e "$run_dir" ]] && [[ -n "$(find "$run_dir" -mindepth 1 -maxdepth 1 -print -quit)" ]]; then
   echo "RUN_DIRECTORY_NOT_EMPTY:$run_dir" >&2
   exit 2
@@ -50,7 +56,7 @@ cleanup_partition() {
   done
 }
 
-for index in $(seq 0 80); do
+for index in $(seq "$start_index" "$end_index"); do
   trial_path="$run_dir/trials/trial-$(printf '%03d' "$index").json"
   python3 - "$worklist" "$index" "$trial_path" <<'PY'
 import json, sys
@@ -105,4 +111,8 @@ PY
   echo "COMPLETED_TRIAL:$index"
 done
 
-python3 scripts/summarize_m1b_tolerance_campaign.py --worklist "$worklist" --raw-dir "$run_dir/raw" --output "$run_dir/m1b-tolerance-envelope.json"
+if [[ "$start_index" -eq 0 && "$end_index" -eq 80 ]]; then
+  python3 scripts/summarize_m1b_tolerance_campaign.py --worklist "$worklist" --raw-dir "$run_dir/raw" --output "$run_dir/m1b-tolerance-envelope.json"
+else
+  echo "PARTIAL_CAMPAIGN_COMPLETE:$start_index:$end_index"
+fi
