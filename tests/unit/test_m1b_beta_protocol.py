@@ -186,6 +186,7 @@ def test_m1b_tolerance_attach_uses_detachablejoint_empty_payload() -> None:
     assert '"-p", "unused: true"' not in source
     assert 'approach_motion_accepted = bool(approach.get("executed") and approach.get("converged"))' in source
     assert '"motion_gate_requires_terminal_convergence": True' in source
+    assert 'M1B_NORMAL_PRECONTACT_HAND_Z_OFFSET_M = 0.220' in source
 
 
 def test_m1b_moveit_execution_waits_for_planned_trajectory() -> None:

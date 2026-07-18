@@ -48,6 +48,8 @@ M1B_NORMAL_SIDE_IK_SEED = [
     -2.7829882206873315, 1.4459771370327215, 2.997318074330887,
     -1.286336046330572,
 ]
+M1B_NORMAL_PRECONTACT_HAND_Z_OFFSET_M = 0.220
+M1B_NORMAL_CONTACT_HAND_Z_OFFSET_M = 0.065
 
 
 def _m1b_normal_side_pose(centre_world_m: list[float], *, hand_z_offset_m: float) -> Pose:
@@ -73,9 +75,11 @@ def m1b_normal_side_precontact(client: CalibrationClient, centre_world_m: list[f
     MoveIt/controller path used in runtime; only ``centre_world_m`` differs in
     this calibration invocation.
     """
-    # At +120 mm the board's lower face is above the cylinder top.  This phase
-    # completes before a close command, so accidental approach contact can
-    # never authorize a grasp.  The carried-over motion gate is the action
+    # The original +120 mm nominal clearance still contacted a 90 mm cylinder
+    # in the physical simulator through the extended finger board.  +220 mm
+    # is the bounded non-contact phase; it completes before a close command,
+    # so accidental approach contact can never authorize a grasp.  The
+    # carried-over motion gate is the action
     # controller's terminal result (in particular, it must not abort), not an
     # extra post-action joint-error threshold: the latter is diagnostic
     # evidence and varies with controller-state delivery timing.
@@ -83,20 +87,20 @@ def m1b_normal_side_precontact(client: CalibrationClient, centre_world_m: list[f
     attempts = 0
     while attempts < 3 and not final.get("executed"):
         final = client.move_hand_pose(
-            _m1b_normal_side_pose(centre_world_m, hand_z_offset_m=0.120),
+            _m1b_normal_side_pose(centre_world_m, hand_z_offset_m=M1B_NORMAL_PRECONTACT_HAND_Z_OFFSET_M),
             ik_seed=M1B_NORMAL_SIDE_IK_SEED,
         )
         attempts += 1
     return {
         "executed": bool(final.get("executed")),
         "converged": bool(final.get("converged")), "final": final, "attempts": attempts,
-        "geometry": {"finger_board_axis_world": [1.0, 0.0, 0.0], "closing_axis_world": [0.0, 1.0, 0.0], "final_x_offset_m": -0.080, "final_y_offset_m": 0.0, "precontact_hand_z_offset_m": 0.120, "contact_hand_z_offset_m": 0.065, "ik_seed_source": "measured_scene1034_collision_checked_branch", "path_source": "MoveIt collision-checked trajectory from reset home"},
+        "geometry": {"finger_board_axis_world": [1.0, 0.0, 0.0], "closing_axis_world": [0.0, 1.0, 0.0], "final_x_offset_m": -0.080, "final_y_offset_m": 0.0, "precontact_hand_z_offset_m": M1B_NORMAL_PRECONTACT_HAND_Z_OFFSET_M, "contact_hand_z_offset_m": M1B_NORMAL_CONTACT_HAND_Z_OFFSET_M, "ik_seed_source": "measured_scene1034_collision_checked_branch", "path_source": "MoveIt collision-checked trajectory from reset home"},
     }
 
 
 def m1b_normal_side_contact_descend(client: CalibrationClient, centre_world_m: list[float], *, ik_seed: list[float] | None) -> dict[str, object]:
     """Execute the contact-bearing final descent after close has been issued."""
-    return client.move_hand_pose(_m1b_normal_side_pose(centre_world_m, hand_z_offset_m=0.065), ik_seed=ik_seed)
+    return client.move_hand_pose(_m1b_normal_side_pose(centre_world_m, hand_z_offset_m=M1B_NORMAL_CONTACT_HAND_Z_OFFSET_M), ik_seed=ik_seed)
 
 
 def apply_calibration_cylinder_scene(client: CalibrationClient, labels: list[dict[str, object]]) -> bool:
