@@ -198,7 +198,8 @@ def test_m1b_tolerance_attach_uses_detachablejoint_empty_payload() -> None:
     assert 'M1B_NORMAL_HAND_Y_CENTERLINE_BIAS_M = 0.001' in source
     assert 'value.position.y = centre_world_m[1] + hand_y_centerline_bias_m' in source
     assert 'hand_y_centerline_bias_m = M1B_NORMAL_HAND_Y_CENTERLINE_BIAS_M if args.calibration_hand_y_bias_m is None else args.calibration_hand_y_bias_m' in source
-    assert 'value.position.x = centre_world_m[0] + M1B_NORMAL_SIDE_HAND_X_OFFSET_M' in source
+    assert 'hand_x_offset_m: float = M1B_NORMAL_SIDE_HAND_X_OFFSET_M' in source
+    assert 'value.position.x = centre_world_m[0] + hand_x_offset_m' in source
     assert 'def m1b_close_finger_targets_from_perceived_diameter(' in source
     assert 'width_window_from_perceived_diameter(perceived_diameter_m)' in source
     assert 'M1B_FINGER_BOARD_THICKNESS_M = 0.018' in source
@@ -231,6 +232,14 @@ def test_m1b_tolerance_attach_uses_detachablejoint_empty_payload() -> None:
     assert '"hand_close_duration_s": M1B_NORMAL_CLOSE_DURATION_S' in source
     assert '--calibration-hand-y-bias-m' in source
     assert '--calibration-keep-target-collision-through-descend' in source
+    assert '--calibration-lateral-insertion' in source
+    assert 'M1B_CALIBRATION_LATERAL_INSERTION_HAND_X_OFFSET_M = -0.200' in source
+    assert 'def m1b_calibration_lateral_insertion(' in source
+    assert '("high_clear", M1B_NORMAL_PRECONTACT_HAND_Z_OFFSET_M, M1B_CALIBRATION_LATERAL_INSERTION_HAND_X_OFFSET_M)' in source
+    assert '("low_clear", M1B_NORMAL_CONTACT_HAND_Z_OFFSET_M, M1B_CALIBRATION_LATERAL_INSERTION_HAND_X_OFFSET_M)' in source
+    assert '("lateral_insert", M1B_NORMAL_CONTACT_HAND_Z_OFFSET_M, M1B_NORMAL_SIDE_HAND_X_OFFSET_M)' in source
+    assert '--calibration-lateral-insertion requires --calibration-keep-target-collision-through-descend' in source
+    assert '"calibration_lateral_insertion": args.calibration_lateral_insertion' in source
     assert '"calibration_motion_diagnostic": calibration_motion' in source
     assert 'if calibration_motion is not None' in source
     assert '"source": "ACTUAL_PUBLIC_RGBD_GEOMETRIC_OUTPUT"' in source
