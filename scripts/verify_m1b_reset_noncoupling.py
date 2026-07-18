@@ -76,10 +76,32 @@ def positions(names: list[str]) -> tuple[dict[str, list[float] | None], int]:
     return final, POSE_SNAPSHOT_ATTEMPTS
 
 
+def set_world_pause(world_name: str, paused: bool) -> dict[str, object]:
+    try:
+        result = subprocess.run(
+            [
+                "gz", "service", "--service", f"/world/{world_name}/control",
+                "--reqtype", "gz.msgs.WorldControl", "--reptype", "gz.msgs.Boolean",
+                "--timeout", "5000", "--req", f"pause: {'true' if paused else 'false'}",
+            ],
+            check=False, capture_output=True, text=True, timeout=7.0,
+        )
+    except subprocess.TimeoutExpired:
+        return {"paused": paused, "returncode": None, "stdout": "", "stderr": "timeout", "succeeded": False}
+    return {
+        "paused": paused,
+        "returncode": result.returncode,
+        "stdout": result.stdout.strip(),
+        "stderr": result.stderr.strip(),
+        "succeeded": result.returncode == 0 and "data: true" in result.stdout,
+    }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--spawn-manifest", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument("--world-name", default="industrial_cylinder_v1")
     args = parser.parse_args()
     manifest = json.loads(args.spawn_manifest.read_text(encoding="utf-8"))
     names = manifest.get("per_object_detachables", {}).get("objects", [])
@@ -93,13 +115,16 @@ def main() -> int:
             rclpy.spin_once(client, timeout_sec=0.05)
         home = client.move_joint_target(HOME_ARM_POSITIONS) if ready else {"executed": False}
         time.sleep(SETTLE_S)
+        before_pause = set_world_pause(args.world_name, True)
         before, before_attempts = positions(names)
         before_joints = [client.latest.get(name, math.nan) for name in JOINTS]
         before_fk = client.fk(before_joints) if all(math.isfinite(value) for value in before_joints) else None
         jog_target = list(HOME_ARM_POSITIONS)
         jog_target[0] += HOME_JOG_DELTA_RAD
-        jog = client.move_joint_target(jog_target) if home.get("executed") else {"executed": False}
+        before_unpause = set_world_pause(args.world_name, False)
+        jog = client.move_joint_target(jog_target) if home.get("executed") and before_unpause["succeeded"] else {"executed": False}
         time.sleep(SETTLE_S)
+        after_pause = set_world_pause(args.world_name, True)
         after, after_attempts = positions(names)
         after_joints = [client.latest.get(name, math.nan) for name in JOINTS]
         after_fk = client.fk(after_joints) if all(math.isfinite(value) for value in after_joints) else None
@@ -110,6 +135,7 @@ def main() -> int:
         ee_displacement = math.dist(before_fk[:3], after_fk[:3]) if before_fk and after_fk else None
         passed = bool(
             home.get("executed") and jog.get("executed")
+            and before_pause["succeeded"] and before_unpause["succeeded"] and after_pause["succeeded"]
             and ee_displacement is not None and ee_displacement >= MIN_EE_DISPLACEMENT_M
             and all(value is not None and value <= MAX_OBJECT_DISPLACEMENT_M for value in displacements.values())
         )
@@ -120,6 +146,11 @@ def main() -> int:
             "settle_window_s": SETTLE_S,
             "pose_snapshot_max_attempts": POSE_SNAPSHOT_ATTEMPTS,
             "pose_snapshot_attempts": {"before": before_attempts, "after": after_attempts},
+            "world_pause_controls": {
+                "before_snapshot": before_pause,
+                "before_jog": before_unpause,
+                "after_snapshot": after_pause,
+            },
             "home_pose_source": "S1 HOME_ARM_POSITIONS through MoveIt execution chain",
             "jog_joint_delta_rad": {"panda_joint1": HOME_JOG_DELTA_RAD},
             "minimum_ee_displacement_m": MIN_EE_DISPLACEMENT_M,

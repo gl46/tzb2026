@@ -148,6 +148,8 @@ def test_m1b_amendment_reset_gate_is_physical_and_fails_closed_on_missing_pose()
     assert 'ThreadPoolExecutor(max_workers=len(names))' in source
     assert 'POSE_SNAPSHOT_ATTEMPTS = 3' in source
     assert 'if all(sample is not None for sample in final.values()):' in source
+    assert 'def set_world_pause(world_name: str, paused: bool)' in source
+    assert '"world_pause_controls"' in source
     assert '"object_positions_before_m": before' in source
     assert '"object_positions_after_m": after' in source
     assert '"RESET_PHYSICAL_NONCOUPLING_VERIFIED" if passed else "INVALID_RESET"' in source
