@@ -17,7 +17,6 @@ import time
 from pathlib import Path
 
 import rclpy
-from geometry_msgs.msg import Pose
 
 ROOT = Path(__file__).resolve().parents[1]
 for directory in (ROOT / "src", ROOT / "scripts"):
@@ -37,11 +36,11 @@ SETTLE_S = 2.0
 MAX_OBJECT_DISPLACEMENT_M = 0.001
 MIN_EE_DISPLACEMENT_M = 0.02
 MAX_HOME_JOINT_ERROR_RAD = 0.10
-# A joint-space micro-jog can sweep a lower arm link through an incoming zone.
-# This reset probe moves the high S1-home hand 30 mm downward in world Z using
-# the same MoveIt IK/plan/execute chain and the injected cylinder obstacles.
-# The upward branch is at the Panda's local reach boundary in this fixture.
-HOME_JOG_WORLD_Z_M = -0.03
+# A Cartesian Z branch is at the Panda's local reach boundary in this fixture.
+# A 50 mrad negative panda_joint3 jog is collision-checked against all twelve
+# cylinders and moves the hand by more than the 20 mm reset minimum.
+HOME_JOG_JOINT_INDEX = 2
+HOME_JOG_DELTA_RAD = -0.05
 POSE_SNAPSHOT_ATTEMPTS = 3
 POSE_QUERY_TIMEOUT_S = 5
 
@@ -97,16 +96,6 @@ def set_world_pause(world_name: str, paused: bool) -> dict[str, object]:
     }
 
 
-def lifted_home_pose(home_fk: list[float] | None) -> Pose | None:
-    if home_fk is None:
-        return None
-    pose = Pose()
-    pose.position.x, pose.position.y = home_fk[:2]
-    pose.position.z = home_fk[2] + HOME_JOG_WORLD_Z_M
-    pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w = home_fk[3:]
-    return pose
-
-
 def verify_live_home(client: CalibrationClient) -> dict[str, object]:
     positions = [client.latest.get(name, math.nan) for name in JOINTS]
     if not all(math.isfinite(value) for value in positions):
@@ -150,12 +139,13 @@ def main() -> int:
         before_joints = [client.latest.get(name, math.nan) for name in JOINTS]
         before_fk = client.fk(before_joints) if all(math.isfinite(value) for value in before_joints) else None
         live_home_positions = home.get("observed_joint_positions_rad")
-        jog_pose = client.fk(live_home_positions) if isinstance(live_home_positions, list) else None
-        jog_pose = lifted_home_pose(jog_pose)
+        jog_target = list(live_home_positions) if isinstance(live_home_positions, list) else []
+        if jog_target:
+            jog_target[HOME_JOG_JOINT_INDEX] += HOME_JOG_DELTA_RAD
         before_unpause = set_world_pause(args.world_name, False)
         jog = (
-            client.move_hand_pose(jog_pose, ik_seed=live_home_positions)
-            if home.get("verified") and collision_scene_applied and before_unpause["succeeded"] and jog_pose is not None
+            client.move_joint_target(jog_target)
+            if home.get("verified") and collision_scene_applied and before_unpause["succeeded"] and jog_target
             else {"executed": False}
         )
         time.sleep(SETTLE_S)
@@ -192,7 +182,7 @@ def main() -> int:
                 "objects": names,
                 "applied": collision_scene_applied,
             },
-            "jog_hand_delta_m": {"world_z": HOME_JOG_WORLD_Z_M},
+            "jog_joint_delta_rad": {JOINTS[HOME_JOG_JOINT_INDEX]: HOME_JOG_DELTA_RAD},
             "minimum_ee_displacement_m": MIN_EE_DISPLACEMENT_M,
             "maximum_object_displacement_m": MAX_OBJECT_DISPLACEMENT_M,
             "home": home,
