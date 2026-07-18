@@ -36,6 +36,7 @@ POSE_RE = re.compile(
 SETTLE_S = 2.0
 MAX_OBJECT_DISPLACEMENT_M = 0.001
 MIN_EE_DISPLACEMENT_M = 0.02
+MAX_HOME_JOINT_ERROR_RAD = 0.01
 # A joint-space micro-jog can sweep a lower arm link through an incoming zone.
 # This reset probe instead lifts the high S1-home hand 30 mm in world Z using
 # the same MoveIt IK/plan/execute chain and the injected cylinder obstacles.
@@ -105,6 +106,20 @@ def lifted_home_pose(home_fk: list[float] | None) -> Pose | None:
     return pose
 
 
+def verify_live_home(client: CalibrationClient) -> dict[str, object]:
+    positions = [client.latest.get(name, math.nan) for name in JOINTS]
+    if not all(math.isfinite(value) for value in positions):
+        return {"verified": False, "reason": "JOINT_STATE_UNAVAILABLE"}
+    errors = [abs(actual - expected) for actual, expected in zip(positions, HOME_ARM_POSITIONS)]
+    return {
+        "verified": max(errors) <= MAX_HOME_JOINT_ERROR_RAD,
+        "observed_joint_positions_rad": positions,
+        "per_joint_error_rad": errors,
+        "maximum_joint_error_rad": max(errors),
+        "maximum_allowed_joint_error_rad": MAX_HOME_JOINT_ERROR_RAD,
+    }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--spawn-manifest", required=True, type=Path)
@@ -127,7 +142,7 @@ def main() -> int:
         for _ in range(20):
             rclpy.spin_once(client, timeout_sec=0.05)
         collision_scene_applied = apply_calibration_cylinder_scene(client, labels) if ready else False
-        home = client.move_joint_target(HOME_ARM_POSITIONS) if ready and collision_scene_applied else {"executed": False}
+        home = verify_live_home(client) if ready and collision_scene_applied else {"verified": False}
         time.sleep(SETTLE_S)
         before_pause = set_world_pause(args.world_name, True)
         before, before_attempts = positions(names)
@@ -137,7 +152,7 @@ def main() -> int:
         before_unpause = set_world_pause(args.world_name, False)
         jog = (
             client.move_hand_pose(jog_pose, ik_seed=HOME_ARM_POSITIONS)
-            if home.get("executed") and collision_scene_applied and before_unpause["succeeded"] and jog_pose is not None
+            if home.get("verified") and collision_scene_applied and before_unpause["succeeded"] and jog_pose is not None
             else {"executed": False}
         )
         time.sleep(SETTLE_S)
@@ -151,7 +166,7 @@ def main() -> int:
         }
         ee_displacement = math.dist(before_fk[:3], after_fk[:3]) if before_fk and after_fk else None
         passed = bool(
-            collision_scene_applied and home.get("executed") and jog.get("executed")
+            collision_scene_applied and home.get("verified") and jog.get("executed")
             and before_pause["succeeded"] and before_unpause["succeeded"] and after_pause["succeeded"]
             and ee_displacement is not None and ee_displacement >= MIN_EE_DISPLACEMENT_M
             and all(value is not None and value <= MAX_OBJECT_DISPLACEMENT_M for value in displacements.values())
@@ -168,7 +183,7 @@ def main() -> int:
                 "before_jog": before_unpause,
                 "after_snapshot": after_pause,
             },
-            "home_pose_source": "S1 HOME_ARM_POSITIONS through MoveIt execution chain",
+            "home_pose_source": "S1 HOME_ARM_POSITIONS verified against live joint state",
             "planner_cylinder_scene": {
                 "source": "RESET_INFRASTRUCTURE_SUPERVISION_ONLY",
                 "objects": names,
