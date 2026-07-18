@@ -230,6 +230,8 @@ def test_m1b_tolerance_attach_uses_detachablejoint_empty_payload() -> None:
     assert 'close = client.command_hand(close_targets, duration_s=M1B_NORMAL_CLOSE_DURATION_S)' in source
     assert '"hand_close_duration_s": M1B_NORMAL_CLOSE_DURATION_S' in source
     assert '--calibration-hand-y-bias-m' in source
+    assert '"calibration_motion_diagnostic": calibration_motion' in source
+    assert 'if calibration_motion is not None' in source
     assert '"source": "ACTUAL_PUBLIC_RGBD_GEOMETRIC_OUTPUT"' in source
     assert 'if contact_descend.get("executed"):' in source
     assert 'only the non-contact\n            # approach requires strict terminal convergence' in source

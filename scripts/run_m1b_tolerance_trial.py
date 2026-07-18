@@ -95,6 +95,11 @@ def calibration_live_model_center(entity_name: str) -> list[float]:
     return [float(value) for value in match.groups()]
 
 
+def calibration_displacement_m(initial: list[float], current: list[float]) -> list[float]:
+    """Evaluator-only per-axis displacement for primitive diagnosis."""
+    return [float(value) - float(origin) for origin, value in zip(initial, current)]
+
+
 def wait_for_finite_hand_feedback(client: CalibrationClient) -> bool:
     """Do not send the first physical hand goal before joint feedback exists."""
     deadline = time.monotonic() + HAND_FEEDBACK_READY_TIMEOUT_S
@@ -394,6 +399,9 @@ def main() -> int:
     # initialization, explicitly outside online policy input.
     time.sleep(CALIBRATION_SETTLE_S)
     truth_center = calibration_live_model_center(target_entity)
+    calibration_motion: dict[str, object] | None = (
+        {"initial_center_world_m": truth_center} if args.calibration_fixture_diameter_m is not None else None
+    )
     target = list(truth_center)
     target["xyz".index(axis)] += float(trial["offset_m"])
     calibration: M1BStaticCameraCalibrationV1 | None = None
@@ -465,6 +473,10 @@ def main() -> int:
             # production motion acceptance requires both execution and the
             # bounded terminal convergence evidence.
             approach_motion_accepted = bool(approach.get("executed") and approach.get("converged"))
+            if calibration_motion is not None:
+                after_pregrasp = calibration_live_model_center(target_entity)
+                calibration_motion["after_pregrasp_center_world_m"] = after_pregrasp
+                calibration_motion["pregrasp_displacement_world_xyz_m"] = calibration_displacement_m(truth_center, after_pregrasp)
             if approach_motion_accepted and open_hand.get("succeeded"):
                 target_touch_exception_applied = client.set_target_touch_exception(True, target_id=target_entity)
             final_target = list(target)
@@ -504,6 +516,10 @@ def main() -> int:
                 m1b_normal_side_contact_descend(client, final_target, ik_seed=approach.get("final", {}).get("ik_solution"), hand_y_centerline_bias_m=hand_y_centerline_bias_m)
                 if near_reobservation.get("succeeded") else {"executed": False, "reason": "PUBLIC_NEAR_REOBSERVATION_GATE_REJECTED"}
             )
+            if calibration_motion is not None and contact_descend.get("executed"):
+                after_descend = calibration_live_model_center(target_entity)
+                calibration_motion["after_descend_center_world_m"] = after_descend
+                calibration_motion["descend_displacement_world_xyz_m"] = calibration_displacement_m(truth_center, after_descend)
             # Descend while open so the cylinder enters between both pads;
             # only then close to the public perception-derived jaw width.
             # The evidence window begins immediately before that close,
@@ -559,6 +575,7 @@ def main() -> int:
             },
             "hand_close_duration_s": M1B_NORMAL_CLOSE_DURATION_S,
             "calibration_hand_y_centerline_bias_m": hand_y_centerline_bias_m,
+            "calibration_motion_diagnostic": calibration_motion,
             "open_hand": open_hand, "approach": approach, "close": close, "contact_descend": contact_descend,
             "hand_feedback_ready": hand_feedback_ready,
             "raw_contact_samples": [{"timestamp_s": item.timestamp_s, "finger": item.finger, "collision_pairs": list(item.collision_pairs)} for item in raw],
