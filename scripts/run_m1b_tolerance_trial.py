@@ -210,13 +210,20 @@ def main() -> int:
             target_touch_exception_applied = client.set_target_touch_exception(True, target_id=target_entity) if cylinder_scene_applied else False
             open_hand = client.command_hand([0.04, 0.04])
             approach = m1b_normal_side_approach(client, target) if target_touch_exception_applied else {"executed": False, "reason": "CALIBRATION_COLLISION_SCENE_UNAVAILABLE"}
-            if approach.get("executed") and approach.get("converged"):
+            # ADR-0013 carries over the controller-*aborted* gate, not an
+            # unloaded joint-settle requirement.  A successful trajectory can
+            # legitimately show a load-induced joint offset once the fingers
+            # contact a free object.  The contact window below is scoped to
+            # the close command, so approach grazes can never authorize attach.
+            contact_start_index = len(raw)
+            if approach.get("executed"):
                 close = client.command_hand([0.01, 0.01])
             deadline = time.monotonic() + 0.35
             while time.monotonic() < deadline:
                 rclpy.spin_once(client, timeout_sec=0.02)
-        feedback, internal = broker_from_window(raw)
-        motion_gate_passed = bool(approach.get("executed") and approach.get("converged") and close.get("succeeded"))
+        post_close_raw = raw[contact_start_index:] if ready else []
+        feedback, internal = broker_from_window(post_close_raw)
+        motion_gate_passed = bool(approach.get("executed") and close.get("succeeded"))
         attach = {"sent": False, "state_confirmed": False, "reason": "BILATERAL_GATE_REJECTED"}
         if feedback.grasp_success and not motion_gate_passed:
             attach["reason"] = "MOTION_OR_HAND_GATE_REJECTED"
@@ -232,6 +239,7 @@ def main() -> int:
             "production_grasp_primitive": "m1b_normal_side_approach + physical_hand + m1b_internal_bilateral_broker",
             "ready": ready, "calibration_collision_scene_applied": cylinder_scene_applied if ready else False, "target_touch_exception_applied": target_touch_exception_applied if ready else False, "open_hand": open_hand, "approach": approach, "close": close,
             "raw_contact_samples": [{"timestamp_s": item.timestamp_s, "finger": item.finger, "collision_pairs": list(item.collision_pairs)} for item in raw],
+            "post_close_contact_samples": [{"timestamp_s": item.timestamp_s, "finger": item.finger, "collision_pairs": list(item.collision_pairs)} for item in post_close_raw],
             "cylinder_side_contact_samples": cylinder_contact_samples,
             "gate": {"grasp_success": feedback.grasp_success, "tactile_state": feedback.tactile_state, "reobservation_required": feedback.reobservation_required, "motion_gate_passed": motion_gate_passed, "internal_actuation_record": internal},
             "attach": attach,
