@@ -8,6 +8,7 @@ from pydantic import ValidationError
 from xh_agent.agent.closed_loop import record_step
 from xh_agent.agent.skill_planner import plan
 from xh_agent.grasp.m1b_broker import M1BContactBroker, width_window_from_perceived_diameter
+from xh_agent.grasp.hand_preflight import M1BHandPreflightV1, evaluate_hand_preflight
 from xh_agent.grasp.post_grasp import evaluate_post_grasp_identity, evaluator_supervision_record
 from xh_agent.grasp.reset import M1BResetVerificationV1, validate_reset_records
 from xh_agent.recovery.manager import recovery_for
@@ -112,3 +113,12 @@ def test_m1b_moveit_server_does_not_start_a_second_simulation() -> None:
     source = (Path(__file__).parents[2] / "robot_ws/src/xh_sim/launch/m1b_moveit_server.launch.py").read_text()
     assert "simulation.launch.py" not in source.replace("``simulation.launch.py``", "")
     assert "moveit_ros_move_group" in source
+
+
+def test_m1b_hand_preflight_requires_physical_endpoint_feedback() -> None:
+    good = M1BHandPreflightV1(True, True, 0.04, 0.04, 0.04)
+    assert evaluate_hand_preflight(good)[0] == "HAND_PREFLIGHT_VERIFIED"
+    stalled = M1BHandPreflightV1(True, False, 0.0023, -0.0007, 0.04)
+    status, reasons = evaluate_hand_preflight(stalled)
+    assert status == "HAND_ACTUATION_UNVERIFIED"
+    assert {"HAND_CONTROLLER_NOT_SUCCEEDED", "LEFT_FINGER_ENDPOINT_ERROR", "RIGHT_FINGER_ENDPOINT_ERROR"} <= set(reasons)
