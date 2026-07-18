@@ -196,7 +196,8 @@ def test_m1b_tolerance_attach_uses_detachablejoint_empty_payload() -> None:
     assert 'M1B_NORMAL_CONTACT_HAND_Z_OFFSET_M = 0.065' in source
     assert 'M1B_NORMAL_SIDE_HAND_X_OFFSET_M = -0.080' in source
     assert 'M1B_NORMAL_HAND_Y_CENTERLINE_BIAS_M = 0.001' in source
-    assert 'value.position.y = centre_world_m[1] + M1B_NORMAL_HAND_Y_CENTERLINE_BIAS_M' in source
+    assert 'value.position.y = centre_world_m[1] + hand_y_centerline_bias_m' in source
+    assert 'hand_y_centerline_bias_m = M1B_NORMAL_HAND_Y_CENTERLINE_BIAS_M if args.calibration_hand_y_bias_m is None else args.calibration_hand_y_bias_m' in source
     assert 'value.position.x = centre_world_m[0] + M1B_NORMAL_SIDE_HAND_X_OFFSET_M' in source
     assert 'def m1b_close_finger_targets_from_perceived_diameter(' in source
     assert 'width_window_from_perceived_diameter(perceived_diameter_m)' in source
@@ -228,6 +229,7 @@ def test_m1b_tolerance_attach_uses_detachablejoint_empty_payload() -> None:
     assert 'M1B_NORMAL_CLOSE_DURATION_S = 2.0' in source
     assert 'close = client.command_hand(close_targets, duration_s=M1B_NORMAL_CLOSE_DURATION_S)' in source
     assert '"hand_close_duration_s": M1B_NORMAL_CLOSE_DURATION_S' in source
+    assert '--calibration-hand-y-bias-m' in source
     assert '"source": "ACTUAL_PUBLIC_RGBD_GEOMETRIC_OUTPUT"' in source
     assert 'if contact_descend.get("executed"):' in source
     assert 'only the non-contact\n            # approach requires strict terminal convergence' in source
@@ -372,6 +374,7 @@ def test_m1b_remote_tolerance_campaign_requires_fresh_partitions_and_full_reset(
     assert 'for index in $(seq "$start_index" "$end_index")' in source
     assert 'M1B_TOLERANCE_START_INDEX:-0' in source
     assert 'M1B_TOLERANCE_END_INDEX:-80' in source
+    assert 'M1B_TOLERANCE_CALIBRATION_HAND_Y_BIAS_M' in source
     assert 'PARTIAL_CAMPAIGN_COMPLETE:$start_index:$end_index' in source
     assert 'partition="m1b_tolerance_campaign_$index"' in source
     assert '--resume-world --activate-controllers' in source

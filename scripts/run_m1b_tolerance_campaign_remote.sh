@@ -12,6 +12,11 @@ run_dir="$2"
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 scene_dir="${M1B_TOLERANCE_SCENE_DIR:-$root/data/generated/m1b_beta_tolerance_baseclear/scenes}"
 fixture_diameter_m="${M1B_TOLERANCE_FIXTURE_DIAMETER_M:-0.05}"
+calibration_hand_y_bias_m="${M1B_TOLERANCE_CALIBRATION_HAND_Y_BIAS_M:-}"
+calibration_hand_y_bias_args=()
+if [[ -n "$calibration_hand_y_bias_m" ]]; then
+  calibration_hand_y_bias_args=(--calibration-hand-y-bias-m "$calibration_hand_y_bias_m")
+fi
 trial_timeout_s="${M1B_TOLERANCE_TRIAL_TIMEOUT_S:-150}"
 spawn_manifest="$root/data/generated/m1b_beta_contact_probe/panda/panda.manifest.json"
 start_index="${M1B_TOLERANCE_START_INDEX:-0}"
@@ -96,7 +101,7 @@ PY
   fi
   if ! timeout "$trial_timeout_s" env GZ_PARTITION="$partition" ROS_DOMAIN_ID="$domain" \
     python3 scripts/run_m1b_tolerance_trial.py --trial "$trial_path" --supervision "$supervision" --object-slot "$object_slot" \
-    --calibration-fixture-diameter-m "$fixture_diameter_m" --output "$run_dir/raw/trial-$(printf '%03d' "$index").json"; then
+    --calibration-fixture-diameter-m "$fixture_diameter_m" "${calibration_hand_y_bias_args[@]}" --output "$run_dir/raw/trial-$(printf '%03d' "$index").json"; then
     cleanup_partition "$partition"
     echo "INFRASTRUCTURE_FAILURE:TRIAL:index=$index" >&2
     exit 3

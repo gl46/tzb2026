@@ -233,7 +233,9 @@ def select_near_public_track(
     return track, metadata
 
 
-def _m1b_normal_side_pose(centre_world_m: list[float], *, hand_z_offset_m: float) -> Pose:
+def _m1b_normal_side_pose(
+    centre_world_m: list[float], *, hand_z_offset_m: float, hand_y_centerline_bias_m: float,
+) -> Pose:
     """Return one side-grasp hand pose; only the vertical phase may vary."""
     value = Pose()
     # Side grasp uses the middle of the 12 cm boards to overlap the cylinder
@@ -245,14 +247,16 @@ def _m1b_normal_side_pose(centre_world_m: list[float], *, hand_z_offset_m: float
     # so final descent is now centred on the public centre estimate.  A
     # closing-axis bias would turn a nominal cylindrical grasp into unilateral
     # contact and must not be silently treated as self-centring.
-    value.position.y = centre_world_m[1] + M1B_NORMAL_HAND_Y_CENTERLINE_BIAS_M
+    value.position.y = centre_world_m[1] + hand_y_centerline_bias_m
     value.position.z = centre_world_m[2] + hand_z_offset_m
     value.orientation.x = 1.0
     value.orientation.w = 0.0
     return value
 
 
-def m1b_normal_side_precontact(client: CalibrationClient, centre_world_m: list[float]) -> dict[str, object]:
+def m1b_normal_side_precontact(
+    client: CalibrationClient, centre_world_m: list[float], *, hand_y_centerline_bias_m: float,
+) -> dict[str, object]:
     """M1B's fixed public normal-cylinder side-grasp primitive.
 
     The 12 cm finger boards run along world X and close along world Y.  Its
@@ -272,20 +276,22 @@ def m1b_normal_side_precontact(client: CalibrationClient, centre_world_m: list[f
     attempts = 0
     while attempts < 3 and not final.get("executed"):
         final = client.move_hand_pose(
-            _m1b_normal_side_pose(centre_world_m, hand_z_offset_m=M1B_NORMAL_PRECONTACT_HAND_Z_OFFSET_M),
+            _m1b_normal_side_pose(centre_world_m, hand_z_offset_m=M1B_NORMAL_PRECONTACT_HAND_Z_OFFSET_M, hand_y_centerline_bias_m=hand_y_centerline_bias_m),
             ik_seed=M1B_NORMAL_SIDE_IK_SEED,
         )
         attempts += 1
     return {
         "executed": bool(final.get("executed")),
         "converged": bool(final.get("converged")), "final": final, "attempts": attempts,
-        "geometry": {"finger_board_axis_world": [1.0, 0.0, 0.0], "closing_axis_world": [0.0, 1.0, 0.0], "side_hand_x_offset_m": M1B_NORMAL_SIDE_HAND_X_OFFSET_M, "hand_y_centerline_bias_m": M1B_NORMAL_HAND_Y_CENTERLINE_BIAS_M, "final_y_offset_m": M1B_NORMAL_HAND_Y_CENTERLINE_BIAS_M, "precontact_hand_z_offset_m": M1B_NORMAL_PRECONTACT_HAND_Z_OFFSET_M, "contact_hand_z_offset_m": M1B_NORMAL_CONTACT_HAND_Z_OFFSET_M, "ik_seed_source": "measured_scene1034_collision_checked_branch", "path_source": "MoveIt collision-checked trajectory from reset home"},
+        "geometry": {"finger_board_axis_world": [1.0, 0.0, 0.0], "closing_axis_world": [0.0, 1.0, 0.0], "side_hand_x_offset_m": M1B_NORMAL_SIDE_HAND_X_OFFSET_M, "hand_y_centerline_bias_m": hand_y_centerline_bias_m, "final_y_offset_m": hand_y_centerline_bias_m, "precontact_hand_z_offset_m": M1B_NORMAL_PRECONTACT_HAND_Z_OFFSET_M, "contact_hand_z_offset_m": M1B_NORMAL_CONTACT_HAND_Z_OFFSET_M, "ik_seed_source": "measured_scene1034_collision_checked_branch", "path_source": "MoveIt collision-checked trajectory from reset home"},
     }
 
 
-def m1b_normal_side_contact_descend(client: CalibrationClient, centre_world_m: list[float], *, ik_seed: list[float] | None) -> dict[str, object]:
+def m1b_normal_side_contact_descend(
+    client: CalibrationClient, centre_world_m: list[float], *, ik_seed: list[float] | None, hand_y_centerline_bias_m: float,
+) -> dict[str, object]:
     """Execute the contact-bearing final descent before the physical close."""
-    return client.move_hand_pose(_m1b_normal_side_pose(centre_world_m, hand_z_offset_m=M1B_NORMAL_CONTACT_HAND_Z_OFFSET_M), ik_seed=ik_seed)
+    return client.move_hand_pose(_m1b_normal_side_pose(centre_world_m, hand_z_offset_m=M1B_NORMAL_CONTACT_HAND_Z_OFFSET_M, hand_y_centerline_bias_m=hand_y_centerline_bias_m), ik_seed=ik_seed)
 
 
 def apply_calibration_cylinder_scene(client: CalibrationClient, labels: list[dict[str, object]]) -> bool:
@@ -366,11 +372,15 @@ def main() -> int:
     parser.add_argument("--public-track-id", help="Production-side public target track ID")
     parser.add_argument("--public-pipeline-python", default=os.environ.get("M1B_PUBLIC_PIPELINE_PYTHON", sys.executable), help="Python with the declared public RGB-D dependencies")
     parser.add_argument("--enable-near-pregrasp-reobservation", action="store_true", help="Enable the production NO-GO remediation; excluded from the baseline tolerance envelope")
+    parser.add_argument("--calibration-hand-y-bias-m", type=float, help="Calibration-only centreline sweep; absent uses the production fixed hand-chain correction")
     parser.add_argument("--output", required=True, type=Path)
     args = parser.parse_args()
     trial = json.loads(args.trial.read_text(encoding="utf-8"))
     if trial.get("provenance") != "CALIBRATION_ONLY_INITIALIZATION":
         raise SystemExit("trial is not calibration-only")
+    if args.calibration_hand_y_bias_m is not None and args.calibration_fixture_diameter_m is None:
+        raise SystemExit("--calibration-hand-y-bias-m is calibration-only")
+    hand_y_centerline_bias_m = M1B_NORMAL_HAND_Y_CENTERLINE_BIAS_M if args.calibration_hand_y_bias_m is None else args.calibration_hand_y_bias_m
     axis = str(trial["axis"])
     if axis not in {"x", "y", "z"}:
         raise SystemExit("trial axis must be x, y, or z")
@@ -449,7 +459,7 @@ def main() -> int:
             # descent receives this narrow exception.
             target_touch_exception_applied = False
             open_hand = client.command_hand([0.04, 0.04])
-            approach = m1b_normal_side_precontact(client, target) if cylinder_scene_applied else {"executed": False, "reason": "CALIBRATION_COLLISION_SCENE_UNAVAILABLE"}
+            approach = m1b_normal_side_precontact(client, target, hand_y_centerline_bias_m=hand_y_centerline_bias_m) if cylinder_scene_applied else {"executed": False, "reason": "CALIBRATION_COLLISION_SCENE_UNAVAILABLE"}
             # A controller action can report success while the physical arm
             # was deflected by an unmodelled/free-cylinder contact.  Do not
             # close or enter the contact-bearing descent from that state:
@@ -492,7 +502,7 @@ def main() -> int:
             if target_touch_exception_applied and not args.enable_near_pregrasp_reobservation:
                 near_reobservation = {"attempted": False, "succeeded": True, "mode": "BASELINE_PERCEPTION_FREE_TOLERANCE"}
             contact_descend = (
-                m1b_normal_side_contact_descend(client, final_target, ik_seed=approach.get("final", {}).get("ik_solution"))
+                m1b_normal_side_contact_descend(client, final_target, ik_seed=approach.get("final", {}).get("ik_solution"), hand_y_centerline_bias_m=hand_y_centerline_bias_m)
                 if near_reobservation.get("succeeded") else {"executed": False, "reason": "PUBLIC_NEAR_REOBSERVATION_GATE_REJECTED"}
             )
             # Descend while open so the cylinder enters between both pads;
@@ -549,6 +559,7 @@ def main() -> int:
                 "contact_descend_contact_authorization": "POST_CLOSE_BILATERAL_SAME_ENTITY_WINDOW",
             },
             "hand_close_duration_s": M1B_NORMAL_CLOSE_DURATION_S,
+            "calibration_hand_y_centerline_bias_m": hand_y_centerline_bias_m,
             "open_hand": open_hand, "approach": approach, "close": close, "contact_descend": contact_descend,
             "hand_feedback_ready": hand_feedback_ready,
             "raw_contact_samples": [{"timestamp_s": item.timestamp_s, "finger": item.finger, "collision_pairs": list(item.collision_pairs)} for item in raw],
