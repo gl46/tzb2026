@@ -10,6 +10,7 @@ and for assigning three distinct scene/object slots to each grid point.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import select
 import subprocess
@@ -70,6 +71,43 @@ def m1b_close_finger_targets_from_perceived_diameter(
         "total_jaw_width_window_m": [lower_m, upper_m],
         "selected_total_jaw_width_m": total_jaw_width_m,
         "per_finger_target_m": total_jaw_width_m / 2.0,
+    }
+
+
+def public_perceived_diameter_from_evidence(
+    evidence_path: Path, camera_info_path: Path, track_id: str,
+) -> tuple[float, dict[str, object]]:
+    """Load one selected diameter from an actual public geometric-RGB-D run.
+
+    The tolerance runner intentionally has no switch for a fixture diameter:
+    its aperture must be reproducible from a captured public observation.  A
+    caller supplies the public target track selected by the production-side
+    tracker; this calibration helper never looks up that selection in labels.
+    """
+    raw = evidence_path.read_bytes()
+    evidence = json.loads(raw)
+    camera = json.loads(camera_info_path.read_text(encoding="utf-8"))
+    matches = [item for item in evidence.get("results", []) if item.get("track_id") == track_id]
+    if len(matches) != 1:
+        raise SystemExit("public perception evidence must contain exactly one selected track")
+    result = matches[0]
+    bbox = result.get("bbox_or_mask", {})
+    intrinsics = camera.get("k", [])
+    focal_m = min(float(intrinsics[0]), float(intrinsics[4])) if len(intrinsics) >= 5 else 0.0
+    depth_m = float(result.get("position_3d", [0.0, 0.0, 0.0])[2])
+    pixel_diameter = min(int(bbox.get("width", 0)), int(bbox.get("height", 0)))
+    if focal_m <= 0.0 or depth_m <= 0.0 or pixel_diameter <= 0:
+        raise SystemExit("selected public track has invalid geometry for diameter")
+    diameter_m = pixel_diameter * depth_m / focal_m
+    return diameter_m, {
+        "source": "ACTUAL_PUBLIC_RGBD_GEOMETRIC_OUTPUT",
+        "evidence_path": str(evidence_path),
+        "evidence_sha256": hashlib.sha256(raw).hexdigest(),
+        "camera_info_path": str(camera_info_path),
+        "track_id": track_id,
+        "pixel_diameter": pixel_diameter,
+        "depth_m": depth_m,
+        "focal_px": focal_m,
     }
 
 
@@ -195,10 +233,9 @@ def main() -> int:
     parser.add_argument("--trial", required=True, type=Path, help="One record from the immutable worklist")
     parser.add_argument("--supervision", required=True, type=Path)
     parser.add_argument("--object-slot", required=True, type=int, help="1-based normal-object slot, calibration only")
-    parser.add_argument(
-        "--perceived-diameter-m", required=True, type=float,
-        help="Public RGB-D/tracker diameter for this target; supervision is forbidden",
-    )
+    parser.add_argument("--public-perception-evidence", required=True, type=Path, help="Actual public RGB-D geometric output")
+    parser.add_argument("--public-camera-info", required=True, type=Path, help="Camera intrinsics paired with that public frame")
+    parser.add_argument("--public-track-id", required=True, help="Production-side public target track ID")
     parser.add_argument("--output", required=True, type=Path)
     args = parser.parse_args()
     trial = json.loads(args.trial.read_text(encoding="utf-8"))
@@ -214,7 +251,10 @@ def main() -> int:
     truth_center = [float(value) for value in normal[args.object_slot - 1]["position_3d_world"]]
     target = list(truth_center)
     target["xyz".index(axis)] += float(trial["offset_m"])
-    close_targets, aperture = m1b_close_finger_targets_from_perceived_diameter(args.perceived_diameter_m)
+    perceived_diameter_m, public_evidence = public_perceived_diameter_from_evidence(
+        args.public_perception_evidence, args.public_camera_info, args.public_track_id,
+    )
+    close_targets, aperture = m1b_close_finger_targets_from_perceived_diameter(perceived_diameter_m)
     rclpy.init()
     client = CalibrationClient()
     raw: list[M1BContactSampleV1] = []
@@ -309,7 +349,7 @@ def main() -> int:
             "provenance": "CALIBRATION_ONLY_INITIALIZATION",
             "trial": trial,
             "supervision_initialization": {"orientation_state": "normal", "object_slot": args.object_slot, "truth_center_used_only_for_initial_target_pose": truth_center},
-            "public_aperture_input": {"source": "CALLER_PUBLIC_PERCEPTION_MEASUREMENT", **aperture},
+            "public_aperture_input": {**public_evidence, **aperture},
             "offset_vector_m": [target[index] - truth_center[index] for index in range(3)],
             "production_grasp_primitive": "open_physical_hand + m1b_normal_side_precontact + m1b_normal_side_contact_descend + close_physical_hand + m1b_internal_bilateral_broker",
             "ready": ready, "calibration_collision_scene_applied": cylinder_scene_applied if ready else False, "target_touch_exception_applied": target_touch_exception_applied if ready else False, "motion_gate_requires_terminal_convergence": True, "open_hand": open_hand, "approach": approach, "close": close, "contact_descend": contact_descend,
