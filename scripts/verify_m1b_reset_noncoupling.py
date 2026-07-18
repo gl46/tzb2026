@@ -116,6 +116,8 @@ def main() -> int:
             "home": home,
             "jog": jog,
             "ee_displacement_m": ee_displacement,
+            "object_positions_before_m": before,
+            "object_positions_after_m": after,
             "object_displacements_m": displacements,
             "status": "RESET_PHYSICAL_NONCOUPLING_VERIFIED" if passed else "INVALID_RESET",
         }

@@ -146,6 +146,8 @@ def test_m1b_amendment_reset_gate_is_physical_and_fails_closed_on_missing_pose()
     assert 'except subprocess.TimeoutExpired:' in source
     assert 'return None' in source
     assert 'ThreadPoolExecutor(max_workers=len(names))' in source
+    assert '"object_positions_before_m": before' in source
+    assert '"object_positions_after_m": after' in source
     assert '"RESET_PHYSICAL_NONCOUPLING_VERIFIED" if passed else "INVALID_RESET"' in source
     assert '"online_truth_access": False' in source
 
