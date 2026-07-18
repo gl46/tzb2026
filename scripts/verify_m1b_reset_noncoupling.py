@@ -40,6 +40,7 @@ MIN_EE_DISPLACEMENT_M = 0.02
 # exceed the Amendment-1 20 mm minimum while staying collision-checked by
 # MoveIt.
 HOME_JOG_DELTA_RAD = 0.10
+POSE_SNAPSHOT_ATTEMPTS = 3
 
 
 def supervision_model_position(name: str) -> list[float] | None:
@@ -57,14 +58,22 @@ def supervision_model_position(name: str) -> list[float] | None:
     return [float(value) for value in match.groups()] if match else None
 
 
-def positions(names: list[str]) -> dict[str, list[float] | None]:
+def positions(names: list[str]) -> tuple[dict[str, list[float] | None], int]:
     # `gz model` is a CLI transport query.  Serializing twelve calls stretches
     # one logical snapshot long enough to mistake ordinary settling for motion
     # caused by the jog.  Issue the independent evaluator-side reads together
     # so every named object belongs to the same before/after observation.
-    with ThreadPoolExecutor(max_workers=len(names)) as executor:
-        samples = executor.map(supervision_model_position, names)
-        return dict(zip(names, samples, strict=True))
+    final: dict[str, list[float] | None] = {name: None for name in names}
+    for attempt in range(1, POSE_SNAPSHOT_ATTEMPTS + 1):
+        with ThreadPoolExecutor(max_workers=len(names)) as executor:
+            samples = executor.map(supervision_model_position, names)
+            final = dict(zip(names, samples, strict=True))
+        # Never combine an object sampled in one CLI snapshot with objects
+        # sampled in another.  A complete attempt is one atomic evaluator-side
+        # before/after observation; incomplete attempts are discarded.
+        if all(sample is not None for sample in final.values()):
+            return final, attempt
+    return final, POSE_SNAPSHOT_ATTEMPTS
 
 
 def main() -> int:
@@ -84,14 +93,14 @@ def main() -> int:
             rclpy.spin_once(client, timeout_sec=0.05)
         home = client.move_joint_target(HOME_ARM_POSITIONS) if ready else {"executed": False}
         time.sleep(SETTLE_S)
-        before = positions(names)
+        before, before_attempts = positions(names)
         before_joints = [client.latest.get(name, math.nan) for name in JOINTS]
         before_fk = client.fk(before_joints) if all(math.isfinite(value) for value in before_joints) else None
         jog_target = list(HOME_ARM_POSITIONS)
         jog_target[0] += HOME_JOG_DELTA_RAD
         jog = client.move_joint_target(jog_target) if home.get("executed") else {"executed": False}
         time.sleep(SETTLE_S)
-        after = positions(names)
+        after, after_attempts = positions(names)
         after_joints = [client.latest.get(name, math.nan) for name in JOINTS]
         after_fk = client.fk(after_joints) if all(math.isfinite(value) for value in after_joints) else None
         displacements = {
@@ -109,6 +118,8 @@ def main() -> int:
             "provenance": "RESET_INFRASTRUCTURE_SUPERVISION_ONLY",
             "online_truth_access": False,
             "settle_window_s": SETTLE_S,
+            "pose_snapshot_max_attempts": POSE_SNAPSHOT_ATTEMPTS,
+            "pose_snapshot_attempts": {"before": before_attempts, "after": after_attempts},
             "home_pose_source": "S1 HOME_ARM_POSITIONS through MoveIt execution chain",
             "jog_joint_delta_rad": {"panda_joint1": HOME_JOG_DELTA_RAD},
             "minimum_ee_displacement_m": MIN_EE_DISPLACEMENT_M,
