@@ -191,6 +191,8 @@ def test_m1b_tolerance_attach_uses_detachablejoint_empty_payload() -> None:
     assert 'M1B_CYLINDER_RADIUS_M = 0.025' in source
     assert 'M1B_FINGER_LENGTH_M = 0.120' in source
     assert 'M1B_FINGER_CONTACT_INSET_M = 0.002' in source
+    assert 'M1B_NORMAL_HAND_Y_CENTERLINE_BIAS_M = -0.003' in source
+    assert 'value.position.y = centre_world_m[1] + M1B_NORMAL_HAND_Y_CENTERLINE_BIAS_M' in source
     assert 'M1B_CYLINDER_RADIUS_M + M1B_FINGER_LENGTH_M - M1B_FINGER_CONTACT_INSET_M' in source
     assert 'def m1b_close_finger_targets_from_perceived_diameter(' in source
     assert 'width_window_from_perceived_diameter(perceived_diameter_m)' in source

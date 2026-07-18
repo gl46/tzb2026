@@ -58,6 +58,12 @@ M1B_NORMAL_CONTACT_HAND_Z_OFFSET_M = 0.065
 M1B_CYLINDER_RADIUS_M = 0.025
 M1B_FINGER_LENGTH_M = 0.120
 M1B_FINGER_CONTACT_INSET_M = 0.002
+# Measured from live Gazebo link poses at the tangent side-grasp pose: the
+# midpoint of the two physical finger boards is +3 mm in world Y relative to
+# the commanded hand origin.  This fixed kinematic correction restores a
+# symmetric pad corridor; it is neither simulator-object truth nor a runtime
+# target-specific offset.
+M1B_NORMAL_HAND_Y_CENTERLINE_BIAS_M = -0.003
 M1B_FINGER_BOARD_THICKNESS_M = 0.018
 M1B_MAX_FINGER_POSITION_M = 0.040
 
@@ -141,7 +147,7 @@ def _m1b_normal_side_pose(centre_world_m: list[float], *, hand_z_offset_m: float
     # so final descent is now centred on the public centre estimate.  A
     # closing-axis bias would turn a nominal cylindrical grasp into unilateral
     # contact and must not be silently treated as self-centring.
-    value.position.y = centre_world_m[1]
+    value.position.y = centre_world_m[1] + M1B_NORMAL_HAND_Y_CENTERLINE_BIAS_M
     value.position.z = centre_world_m[2] + hand_z_offset_m
     value.orientation.x = 1.0
     value.orientation.w = 0.0
@@ -175,7 +181,7 @@ def m1b_normal_side_precontact(client: CalibrationClient, centre_world_m: list[f
     return {
         "executed": bool(final.get("executed")),
         "converged": bool(final.get("converged")), "final": final, "attempts": attempts,
-        "geometry": {"finger_board_axis_world": [1.0, 0.0, 0.0], "closing_axis_world": [0.0, 1.0, 0.0], "cylinder_radius_m": M1B_CYLINDER_RADIUS_M, "finger_length_m": M1B_FINGER_LENGTH_M, "finger_contact_inset_m": M1B_FINGER_CONTACT_INSET_M, "final_x_offset_m": -(M1B_CYLINDER_RADIUS_M + M1B_FINGER_LENGTH_M - M1B_FINGER_CONTACT_INSET_M), "final_y_offset_m": 0.0, "precontact_hand_z_offset_m": M1B_NORMAL_PRECONTACT_HAND_Z_OFFSET_M, "contact_hand_z_offset_m": M1B_NORMAL_CONTACT_HAND_Z_OFFSET_M, "ik_seed_source": "measured_scene1034_collision_checked_branch", "path_source": "MoveIt collision-checked trajectory from reset home"},
+        "geometry": {"finger_board_axis_world": [1.0, 0.0, 0.0], "closing_axis_world": [0.0, 1.0, 0.0], "cylinder_radius_m": M1B_CYLINDER_RADIUS_M, "finger_length_m": M1B_FINGER_LENGTH_M, "finger_contact_inset_m": M1B_FINGER_CONTACT_INSET_M, "hand_y_centerline_bias_m": M1B_NORMAL_HAND_Y_CENTERLINE_BIAS_M, "final_x_offset_m": -(M1B_CYLINDER_RADIUS_M + M1B_FINGER_LENGTH_M - M1B_FINGER_CONTACT_INSET_M), "final_y_offset_m": M1B_NORMAL_HAND_Y_CENTERLINE_BIAS_M, "precontact_hand_z_offset_m": M1B_NORMAL_PRECONTACT_HAND_Z_OFFSET_M, "contact_hand_z_offset_m": M1B_NORMAL_CONTACT_HAND_Z_OFFSET_M, "ik_seed_source": "measured_scene1034_collision_checked_branch", "path_source": "MoveIt collision-checked trajectory from reset home"},
     }
 
 
