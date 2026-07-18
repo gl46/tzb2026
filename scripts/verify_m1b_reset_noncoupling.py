@@ -34,11 +34,11 @@ POSE_RE = re.compile(
 SETTLE_S = 2.0
 MAX_OBJECT_DISPLACEMENT_M = 0.001
 MIN_EE_DISPLACEMENT_M = 0.02
-# The 50 mrad probe moved the calibrated Panda hand only 11.4 mm on the
-# actual S1 chain.  This 100 mrad home-neighbourhood jog was measured to
-# exceed the Amendment-1 20 mm minimum while staying collision-checked by
-# MoveIt.
-HOME_JOG_DELTA_RAD = 0.10
+# A base-joint jog swept a lower arm link through the incoming zones.  The
+# wrist-side panda_joint6 jog stays above the table at the S1 home posture;
+# FK predicts roughly 25 mm hand translation for this 180 mrad probe.
+HOME_JOG_JOINT_INDEX = 5
+HOME_JOG_DELTA_RAD = 0.18
 POSE_SNAPSHOT_ATTEMPTS = 3
 
 
@@ -116,7 +116,7 @@ def main() -> int:
         before_joints = [client.latest.get(name, math.nan) for name in JOINTS]
         before_fk = client.fk(before_joints) if all(math.isfinite(value) for value in before_joints) else None
         jog_target = list(HOME_ARM_POSITIONS)
-        jog_target[0] += HOME_JOG_DELTA_RAD
+        jog_target[HOME_JOG_JOINT_INDEX] += HOME_JOG_DELTA_RAD
         before_unpause = set_world_pause(args.world_name, False)
         jog = client.move_joint_target(jog_target) if home.get("executed") and before_unpause["succeeded"] else {"executed": False}
         time.sleep(SETTLE_S)
@@ -148,7 +148,7 @@ def main() -> int:
                 "after_snapshot": after_pause,
             },
             "home_pose_source": "S1 HOME_ARM_POSITIONS through MoveIt execution chain",
-            "jog_joint_delta_rad": {"panda_joint1": HOME_JOG_DELTA_RAD},
+            "jog_joint_delta_rad": {JOINTS[HOME_JOG_JOINT_INDEX]: HOME_JOG_DELTA_RAD},
             "minimum_ee_displacement_m": MIN_EE_DISPLACEMENT_M,
             "maximum_object_displacement_m": MAX_OBJECT_DISPLACEMENT_M,
             "home": home,
