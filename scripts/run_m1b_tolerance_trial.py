@@ -50,7 +50,22 @@ M1B_NORMAL_SIDE_IK_SEED = [
 ]
 
 
-def m1b_normal_side_approach(client: CalibrationClient, centre_world_m: list[float]) -> dict[str, object]:
+def _m1b_normal_side_pose(centre_world_m: list[float], *, hand_z_offset_m: float) -> Pose:
+    """Return one side-grasp hand pose; only the vertical phase may vary."""
+    value = Pose()
+    value.position.x = centre_world_m[0] - 0.080
+    # The high precontact phase removes the old approach-graze failure mode,
+    # so final descent is now centred on the public centre estimate.  A
+    # closing-axis bias would turn a nominal cylindrical grasp into unilateral
+    # contact and must not be silently treated as self-centring.
+    value.position.y = centre_world_m[1]
+    value.position.z = centre_world_m[2] + hand_z_offset_m
+    value.orientation.x = 1.0
+    value.orientation.w = 0.0
+    return value
+
+
+def m1b_normal_side_precontact(client: CalibrationClient, centre_world_m: list[float]) -> dict[str, object]:
     """M1B's fixed public normal-cylinder side-grasp primitive.
 
     The 12 cm finger boards run along world X and close along world Y.  Its
@@ -58,39 +73,23 @@ def m1b_normal_side_approach(client: CalibrationClient, centre_world_m: list[flo
     MoveIt/controller path used in runtime; only ``centre_world_m`` differs in
     this calibration invocation.
     """
-    def pose(x_offset_m: float) -> Pose:
-        value = Pose()
-        value.position.x = centre_world_m[0] + x_offset_m
-        value.position.y = centre_world_m[1]
-        value.position.z = centre_world_m[2] + 0.055
-        value.orientation.x = 1.0
-        value.orientation.w = 0.0
-        return value
-    # The planner itself supplies the collision-checked path from the reset
-    # home pose.  A prior fixed -245 mm staging point placed the hand behind
-    # the Panda base for the leftmost legal cylinders, so it was not a valid
-    # universal pregrasp.  Do not turn that unreachable waypoint into a
-    # geometry gate; the actual grasp pose stays the fixed production side
-    # primitive and its full MoveIt trajectory remains recorded below.
-    # This 80 mm board-axis offset and 65 mm hand-height offset are the
-    # collision-checked normal-cylinder geometry.  They were selected by a
-    # real MoveIt IK audit on the industrial world; the older -145/55 mm pose
-    # puts the hand into the base/table envelope for legal left-side scenes.
-    def final_pose() -> Pose:
-        value = pose(-0.080)
-        # The physical pad board has a 6 mm open-jaw clearance at nominal
-        # centre.  A measured +5 mm closing-axis bias prevents the right pad
-        # from grazing a free cylinder during arm settling; symmetric closure
-        # then establishes contact in the commanded hand phase instead.
-        value.position.y = centre_world_m[1] + 0.005
-        value.position.z = centre_world_m[2] + 0.065
-        return value
-    final = client.move_hand_pose(final_pose(), ik_seed=M1B_NORMAL_SIDE_IK_SEED)
+    # At +120 mm the board's lower face is above the cylinder top.  This phase
+    # completes before a close command, so accidental approach contact can
+    # never authorize a grasp.  The carried-over motion gate is the action
+    # controller's terminal result (in particular, it must not abort), not an
+    # extra post-action joint-error threshold: the latter is diagnostic
+    # evidence and varies with controller-state delivery timing.
+    final = client.move_hand_pose(_m1b_normal_side_pose(centre_world_m, hand_z_offset_m=0.120), ik_seed=M1B_NORMAL_SIDE_IK_SEED)
     return {
-        "executed": bool(final.get("executed") and final.get("converged")),
+        "executed": bool(final.get("executed")),
         "converged": bool(final.get("converged")), "final": final,
-        "geometry": {"finger_board_axis_world": [1.0, 0.0, 0.0], "closing_axis_world": [0.0, 1.0, 0.0], "final_x_offset_m": -0.080, "final_y_offset_m": 0.005, "final_hand_z_offset_m": 0.065, "ik_seed_source": "measured_scene1034_collision_checked_branch", "path_source": "MoveIt collision-checked trajectory from reset home"},
+        "geometry": {"finger_board_axis_world": [1.0, 0.0, 0.0], "closing_axis_world": [0.0, 1.0, 0.0], "final_x_offset_m": -0.080, "final_y_offset_m": 0.0, "precontact_hand_z_offset_m": 0.120, "contact_hand_z_offset_m": 0.065, "ik_seed_source": "measured_scene1034_collision_checked_branch", "path_source": "MoveIt collision-checked trajectory from reset home"},
     }
+
+
+def m1b_normal_side_contact_descend(client: CalibrationClient, centre_world_m: list[float], *, ik_seed: list[float] | None) -> dict[str, object]:
+    """Execute the contact-bearing final descent after close has been issued."""
+    return client.move_hand_pose(_m1b_normal_side_pose(centre_world_m, hand_z_offset_m=0.065), ik_seed=ik_seed)
 
 
 def apply_calibration_cylinder_scene(client: CalibrationClient, labels: list[dict[str, object]]) -> bool:
@@ -209,7 +208,7 @@ def main() -> int:
             target_entity = str(normal[args.object_slot - 1]["actual_sim_entity_id"])
             target_touch_exception_applied = client.set_target_touch_exception(True, target_id=target_entity) if cylinder_scene_applied else False
             open_hand = client.command_hand([0.04, 0.04])
-            approach = m1b_normal_side_approach(client, target) if target_touch_exception_applied else {"executed": False, "reason": "CALIBRATION_COLLISION_SCENE_UNAVAILABLE"}
+            approach = m1b_normal_side_precontact(client, target) if target_touch_exception_applied else {"executed": False, "reason": "CALIBRATION_COLLISION_SCENE_UNAVAILABLE"}
             # ADR-0013 carries over the controller-*aborted* gate, not an
             # unloaded joint-settle requirement.  A successful trajectory can
             # legitimately show a load-induced joint offset once the fingers
@@ -218,12 +217,20 @@ def main() -> int:
             contact_start_index = len(raw)
             if approach.get("executed"):
                 close = client.command_hand([0.01, 0.01])
-            deadline = time.monotonic() + 0.35
-            while time.monotonic() < deadline:
-                rclpy.spin_once(client, timeout_sec=0.02)
-        post_close_raw = raw[contact_start_index:] if ready else []
+            contact_descend = (
+                m1b_normal_side_contact_descend(client, target, ik_seed=approach.get("final", {}).get("ik_solution"))
+                if close.get("succeeded") else {"executed": False, "reason": "CLOSE_GATE_REJECTED"}
+            )
+            if close.get("succeeded"):
+                deadline = time.monotonic() + 0.35
+                while time.monotonic() < deadline:
+                    rclpy.spin_once(client, timeout_sec=0.02)
+        # Contact events only become attach evidence after a successfully
+        # commanded close.  Otherwise background contacts remain diagnostic
+        # raw telemetry and cannot be mislabelled as a contact window.
+        post_close_raw = raw[contact_start_index:] if ready and close.get("succeeded") else []
         feedback, internal = broker_from_window(post_close_raw)
-        motion_gate_passed = bool(approach.get("executed") and close.get("succeeded"))
+        motion_gate_passed = bool(approach.get("executed") and close.get("succeeded") and contact_descend.get("executed"))
         attach = {"sent": False, "state_confirmed": False, "reason": "BILATERAL_GATE_REJECTED"}
         if feedback.grasp_success and not motion_gate_passed:
             attach["reason"] = "MOTION_OR_HAND_GATE_REJECTED"
@@ -236,8 +243,8 @@ def main() -> int:
             "trial": trial,
             "supervision_initialization": {"orientation_state": "normal", "object_slot": args.object_slot, "truth_center_used_only_for_initial_target_pose": truth_center},
             "offset_vector_m": [target[index] - truth_center[index] for index in range(3)],
-            "production_grasp_primitive": "m1b_normal_side_approach + physical_hand + m1b_internal_bilateral_broker",
-            "ready": ready, "calibration_collision_scene_applied": cylinder_scene_applied if ready else False, "target_touch_exception_applied": target_touch_exception_applied if ready else False, "open_hand": open_hand, "approach": approach, "close": close,
+            "production_grasp_primitive": "m1b_normal_side_precontact + physical_hand + m1b_normal_side_contact_descend + m1b_internal_bilateral_broker",
+            "ready": ready, "calibration_collision_scene_applied": cylinder_scene_applied if ready else False, "target_touch_exception_applied": target_touch_exception_applied if ready else False, "open_hand": open_hand, "approach": approach, "close": close, "contact_descend": contact_descend,
             "raw_contact_samples": [{"timestamp_s": item.timestamp_s, "finger": item.finger, "collision_pairs": list(item.collision_pairs)} for item in raw],
             "post_close_contact_samples": [{"timestamp_s": item.timestamp_s, "finger": item.finger, "collision_pairs": list(item.collision_pairs)} for item in post_close_raw],
             "cylinder_side_contact_samples": cylinder_contact_samples,
