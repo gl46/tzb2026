@@ -29,6 +29,7 @@ for directory in (ROOT / "src", ROOT / "scripts"):
         sys.path.insert(0, str(directory))
 
 from m1a_contact_calibration_client import CalibrationClient  # noqa: E402
+from xh_agent.grasp.m1b_broker import width_window_from_perceived_diameter  # noqa: E402
 from xh_agent.grasp.m1b_contact_window import M1BContactSampleV1, broker_from_window  # noqa: E402
 
 
@@ -50,6 +51,26 @@ M1B_NORMAL_SIDE_IK_SEED = [
 ]
 M1B_NORMAL_PRECONTACT_HAND_Z_OFFSET_M = 0.220
 M1B_NORMAL_CONTACT_HAND_Z_OFFSET_M = 0.065
+
+
+def m1b_close_finger_targets_from_perceived_diameter(
+    perceived_diameter_m: float,
+) -> tuple[list[float], dict[str, float]]:
+    """Turn the public perceived diameter into the physical hand command.
+
+    ``width_window_from_perceived_diameter`` is expressed in total jaw width,
+    whereas the Panda hand controller takes one target per symmetric finger.
+    The midpoint is deliberately selected inside the already bounded public
+    window; it is never read from simulator supervision or a fixture label.
+    """
+    lower_m, upper_m = width_window_from_perceived_diameter(perceived_diameter_m)
+    total_jaw_width_m = (lower_m + upper_m) / 2.0
+    return [total_jaw_width_m / 2.0, total_jaw_width_m / 2.0], {
+        "perceived_diameter_m": perceived_diameter_m,
+        "total_jaw_width_window_m": [lower_m, upper_m],
+        "selected_total_jaw_width_m": total_jaw_width_m,
+        "per_finger_target_m": total_jaw_width_m / 2.0,
+    }
 
 
 def _m1b_normal_side_pose(centre_world_m: list[float], *, hand_z_offset_m: float) -> Pose:
@@ -99,7 +120,7 @@ def m1b_normal_side_precontact(client: CalibrationClient, centre_world_m: list[f
 
 
 def m1b_normal_side_contact_descend(client: CalibrationClient, centre_world_m: list[float], *, ik_seed: list[float] | None) -> dict[str, object]:
-    """Execute the contact-bearing final descent after close has been issued."""
+    """Execute the contact-bearing final descent before the physical close."""
     return client.move_hand_pose(_m1b_normal_side_pose(centre_world_m, hand_z_offset_m=M1B_NORMAL_CONTACT_HAND_Z_OFFSET_M), ik_seed=ik_seed)
 
 
@@ -174,6 +195,10 @@ def main() -> int:
     parser.add_argument("--trial", required=True, type=Path, help="One record from the immutable worklist")
     parser.add_argument("--supervision", required=True, type=Path)
     parser.add_argument("--object-slot", required=True, type=int, help="1-based normal-object slot, calibration only")
+    parser.add_argument(
+        "--perceived-diameter-m", required=True, type=float,
+        help="Public RGB-D/tracker diameter for this target; supervision is forbidden",
+    )
     parser.add_argument("--output", required=True, type=Path)
     args = parser.parse_args()
     trial = json.loads(args.trial.read_text(encoding="utf-8"))
@@ -189,6 +214,7 @@ def main() -> int:
     truth_center = [float(value) for value in normal[args.object_slot - 1]["position_3d_world"]]
     target = list(truth_center)
     target["xyz".index(axis)] += float(trial["offset_m"])
+    close_targets, aperture = m1b_close_finger_targets_from_perceived_diameter(args.perceived_diameter_m)
     rclpy.init()
     client = CalibrationClient()
     raw: list[M1BContactSampleV1] = []
@@ -247,10 +273,10 @@ def main() -> int:
                 m1b_normal_side_contact_descend(client, target, ik_seed=approach.get("final", {}).get("ik_solution"))
                 if target_touch_exception_applied else {"executed": False, "reason": "TOUCH_EXCEPTION_GATE_REJECTED"}
             )
-            # Descend while open so the 50 mm cylinder enters between both
-            # pads; only then issue the 20 mm close.  The evidence window
-            # begins immediately before that close, excluding all approach
-            # contact telemetry from attach authorization.
+            # Descend while open so the cylinder enters between both pads;
+            # only then close to the public perception-derived jaw width.
+            # The evidence window begins immediately before that close,
+            # excluding all approach contact telemetry from authorization.
             contact_start_index = len(raw)
             # Once both boards enter the free-cylinder contact zone, load can
             # move an otherwise successful controller endpoint by more than
@@ -258,7 +284,7 @@ def main() -> int:
             # the controller terminal success here; only the non-contact
             # approach requires strict terminal convergence.
             if contact_descend.get("executed"):
-                close = client.command_hand([0.01, 0.01])
+                close = client.command_hand(close_targets)
             if close.get("succeeded"):
                 deadline = time.monotonic() + 0.35
                 while time.monotonic() < deadline:
@@ -283,6 +309,7 @@ def main() -> int:
             "provenance": "CALIBRATION_ONLY_INITIALIZATION",
             "trial": trial,
             "supervision_initialization": {"orientation_state": "normal", "object_slot": args.object_slot, "truth_center_used_only_for_initial_target_pose": truth_center},
+            "public_aperture_input": {"source": "CALLER_PUBLIC_PERCEPTION_MEASUREMENT", **aperture},
             "offset_vector_m": [target[index] - truth_center[index] for index in range(3)],
             "production_grasp_primitive": "open_physical_hand + m1b_normal_side_precontact + m1b_normal_side_contact_descend + close_physical_hand + m1b_internal_bilateral_broker",
             "ready": ready, "calibration_collision_scene_applied": cylinder_scene_applied if ready else False, "target_touch_exception_applied": target_touch_exception_applied if ready else False, "motion_gate_requires_terminal_convergence": True, "open_hand": open_hand, "approach": approach, "close": close, "contact_descend": contact_descend,

@@ -187,6 +187,11 @@ def test_m1b_tolerance_attach_uses_detachablejoint_empty_payload() -> None:
     assert 'approach_motion_accepted = bool(approach.get("executed") and approach.get("converged"))' in source
     assert '"motion_gate_requires_terminal_convergence": True' in source
     assert 'M1B_NORMAL_PRECONTACT_HAND_Z_OFFSET_M = 0.220' in source
+    assert 'def m1b_close_finger_targets_from_perceived_diameter(' in source
+    assert 'width_window_from_perceived_diameter(perceived_diameter_m)' in source
+    assert 'parser.add_argument(\n        "--perceived-diameter-m", required=True' in source
+    assert 'close = client.command_hand(close_targets)' in source
+    assert '"source": "CALLER_PUBLIC_PERCEPTION_MEASUREMENT"' in source
     assert 'if contact_descend.get("executed"):' in source
     assert 'only the non-contact\n            # approach requires strict terminal convergence' in source
     assert 'contact_start_index = len(raw)' in source
