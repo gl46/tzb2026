@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from pathlib import Path
 import select
 import subprocess
@@ -122,6 +123,7 @@ def main() -> int:
                 check=False,
                 capture_output=True,
                 text=True,
+                env={key: value for key, value in os.environ.items() if key != "PYTHONPATH"},
             )
             payload["world_resume"] = {
                 "attempted": True,
@@ -147,6 +149,7 @@ def main() -> int:
                 check=False,
                 capture_output=True,
                 text=True,
+                env={key: value for key, value in os.environ.items() if key != "PYTHONPATH"},
             )
             payload["controller_activation"] = {
                 "attempted": True,
