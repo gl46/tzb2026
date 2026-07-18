@@ -281,9 +281,12 @@ def test_m1a_moveit_configuration_preserves_controlled_joint_names_limits_and_un
     assert "calibration_mode" in simulation_launch
     assert "gz-sim-detachable-joint-system" in source_urdf.read_text()
     assert "<position_proportional_gain>1.0</position_proportional_gain>" in source_urdf.read_text()
-    # Finger pair, static grasp target and dynamic target-equivalent/table
-    # control each have their own explicit Gazebo contact bridge.
-    assert simulation_launch.count("ros_gz_interfaces/msg/Contacts[gz.msgs.Contacts") == 5
+    # The five M1A bridges remain unchanged.  ADR-0013 adds exactly the two
+    # private M1B finger streams, conditional on industrial scene supervision;
+    # they never replace or alter an M1A supervision topic.
+    assert simulation_launch.count("ros_gz_interfaces/msg/Contacts[gz.msgs.Contacts") == 7
+    assert "/xh/actuation_internal/m1b/panda_leftfinger_contacts" in simulation_launch
+    assert "/xh/actuation_internal/m1b/panda_rightfinger_contacts" in simulation_launch
     assert '"/xh/supervision/panda_leftfinger_contacts"' in simulation_launch
     assert '"/xh/supervision/panda_rightfinger_contacts"' in simulation_launch
     assert "dynamic_pose/info" in simulation_launch
