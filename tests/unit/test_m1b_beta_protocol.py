@@ -183,6 +183,7 @@ def test_m1b_launch_has_paused_startup_contract_without_changing_default_m1a_run
     assert "ros2 control switch_controllers" in reset
     assert "for attempt in range(1, 4)" in reset
     assert "CONTROLLERS_ALREADY_ACTIVE" in reset
+    assert "WORLD_CONTROL_TIMEOUT_MS = 10000" in reset
 
 
 def test_m1b_hand_preflight_requires_physical_endpoint_feedback() -> None:

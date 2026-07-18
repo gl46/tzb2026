@@ -22,6 +22,8 @@ if str(ROOT / "src") not in sys.path:
 
 from xh_agent.grasp.reset import M1BResetVerificationV1, validate_reset_records  # noqa: E402
 
+WORLD_CONTROL_TIMEOUT_MS = 10000
+
 
 def detach_and_observe(object_name: str, timeout_s: float) -> M1BResetVerificationV1:
     detach_topic = f"/xh/m1b/{object_name}/detach"
@@ -101,14 +103,14 @@ def detach_all_and_observe_legacy(
             unpause = subprocess.run(
                 ["gz", "service", "--service", f"/world/{world_name}/control",
                  "--reqtype", "gz.msgs.WorldControl", "--reptype", "gz.msgs.Boolean",
-                 "--timeout", "3000", "--req", "pause: false"],
+                 "--timeout", str(WORLD_CONTROL_TIMEOUT_MS), "--req", "pause: false"],
                 check=False, capture_output=True, text=True,
             )
             time.sleep(0.40)
             pause = subprocess.run(
                 ["gz", "service", "--service", f"/world/{world_name}/control",
                  "--reqtype", "gz.msgs.WorldControl", "--reptype", "gz.msgs.Boolean",
-                 "--timeout", "3000", "--req", "pause: true"],
+                 "--timeout", str(WORLD_CONTROL_TIMEOUT_MS), "--req", "pause: true"],
                 check=False, capture_output=True, text=True,
             )
             processing_pulse = {
@@ -300,7 +302,7 @@ def main() -> int:
                 [
                     "gz", "service", "--service", f"/world/{args.world_name}/control",
                     "--reqtype", "gz.msgs.WorldControl", "--reptype", "gz.msgs.Boolean",
-                    "--timeout", "3000", "--req", "pause: false",
+                    "--timeout", str(WORLD_CONTROL_TIMEOUT_MS), "--req", "pause: false",
                 ],
                 check=False,
                 capture_output=True,
