@@ -51,7 +51,10 @@ M1B_NORMAL_SIDE_IK_SEED = [
     -1.286336046330572,
 ]
 M1B_NORMAL_PRECONTACT_HAND_Z_OFFSET_M = 0.220
-M1B_NORMAL_CONTACT_HAND_Z_OFFSET_M = 0.055
+# The calibration-only IK sweep in the isolated zero-offset scene found the
+# side-grasp final pose is reachable from 65 mm upward; 55--60 mm is not.
+# Keep the 65 mm plane while retaining the tangent-tip X placement.
+M1B_NORMAL_CONTACT_HAND_Z_OFFSET_M = 0.065
 M1B_CYLINDER_RADIUS_M = 0.025
 M1B_FINGER_LENGTH_M = 0.120
 M1B_FINGER_CONTACT_INSET_M = 0.002

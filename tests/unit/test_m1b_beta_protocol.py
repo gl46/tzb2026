@@ -187,7 +187,7 @@ def test_m1b_tolerance_attach_uses_detachablejoint_empty_payload() -> None:
     assert 'approach_motion_accepted = bool(approach.get("executed") and approach.get("converged"))' in source
     assert '"motion_gate_requires_terminal_convergence": True' in source
     assert 'M1B_NORMAL_PRECONTACT_HAND_Z_OFFSET_M = 0.220' in source
-    assert 'M1B_NORMAL_CONTACT_HAND_Z_OFFSET_M = 0.055' in source
+    assert 'M1B_NORMAL_CONTACT_HAND_Z_OFFSET_M = 0.065' in source
     assert 'M1B_CYLINDER_RADIUS_M = 0.025' in source
     assert 'M1B_FINGER_LENGTH_M = 0.120' in source
     assert 'M1B_FINGER_CONTACT_INSET_M = 0.002' in source
