@@ -206,9 +206,15 @@ def main() -> int:
         if ready:
             cylinder_scene_applied = apply_calibration_cylinder_scene(client, labels)
             target_entity = str(normal[args.object_slot - 1]["actual_sim_entity_id"])
-            target_touch_exception_applied = client.set_target_touch_exception(True, target_id=target_entity) if cylinder_scene_applied else False
+            # Keep the target collision-checked through the entire transit to
+            # high precontact.  Enabling finger/target contact early lets a
+            # planner legally side-swipe the free cylinder before close,
+            # which both moves the calibration target and makes stale approach
+            # contacts look tempting.  Only the deliberately contact-bearing
+            # descent receives this narrow exception.
+            target_touch_exception_applied = False
             open_hand = client.command_hand([0.04, 0.04])
-            approach = m1b_normal_side_precontact(client, target) if target_touch_exception_applied else {"executed": False, "reason": "CALIBRATION_COLLISION_SCENE_UNAVAILABLE"}
+            approach = m1b_normal_side_precontact(client, target) if cylinder_scene_applied else {"executed": False, "reason": "CALIBRATION_COLLISION_SCENE_UNAVAILABLE"}
             # ADR-0013 carries over the controller-*aborted* gate, not an
             # unloaded joint-settle requirement.  A successful trajectory can
             # legitimately show a load-induced joint offset once the fingers
@@ -216,6 +222,8 @@ def main() -> int:
             # the close command, so approach grazes can never authorize attach.
             contact_start_index = len(raw)
             if approach.get("executed"):
+                target_touch_exception_applied = client.set_target_touch_exception(True, target_id=target_entity)
+            if approach.get("executed") and target_touch_exception_applied:
                 close = client.command_hand([0.01, 0.01])
             contact_descend = (
                 m1b_normal_side_contact_descend(client, target, ik_seed=approach.get("final", {}).get("ik_solution"))
