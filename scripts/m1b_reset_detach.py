@@ -118,7 +118,21 @@ def detach_all_and_observe(object_names: list[str], timeout_s: float) -> list[M1
                     ["gz", "topic", "-t", f"/xh/m1b/{name}/attach", "-m", "gz.msgs.Empty", "-p", "unused: true"],
                     check=False, capture_output=True, text=True, timeout=timeout_s,
                 )
-            time.sleep(0.10)
+            # `gz topic -e` exits after printing a one-shot state on this
+            # Gazebo build.  Replace the monitor after the attach transition
+            # so the final detach has a fresh subscriber.
+            for name in missing:
+                monitors[name].terminate()
+                try:
+                    monitors[name].wait(timeout=1.0)
+                except subprocess.TimeoutExpired:
+                    monitors[name].kill()
+                    monitors[name].wait(timeout=1.0)
+                monitors[name] = subprocess.Popen(
+                    ["gz", "topic", "-e", "-t", f"/xh/m1b/{name}/grasp_state"],
+                    stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True,
+                )
+            time.sleep(1.0)
             for name in missing:
                 subprocess.run(
                     ["gz", "topic", "-t", f"/xh/m1b/{name}/detach", "-m", "gz.msgs.Empty", "-p", "unused: true"],
