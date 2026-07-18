@@ -194,7 +194,7 @@ def main() -> int:
     parser.add_argument("--spawn-manifest", type=Path, required=True)
     parser.add_argument("--timeout-s", type=float, default=2.0)
     parser.add_argument("--world-name", help="Required with --resume-world after a paused M1B reset")
-    parser.add_argument("--resume-world", action="store_true", help="Resume Gazebo only after RESET_VERIFIED")
+    parser.add_argument("--resume-world", action="store_true", help="Resume Gazebo for Amendment-1 physical reset verification")
     parser.add_argument(
         "--activate-controllers",
         action="store_true",
@@ -216,11 +216,19 @@ def main() -> int:
     records, detach_processing_pulse = detach_all_and_observe(
         objects, args.timeout_s, world_name=args.world_name,
     )
-    status, reasons = validate_reset_records(records, objects)
+    auxiliary_status, auxiliary_reasons = validate_reset_records(records, objects)
+    # Amendment 1 makes one-shot `grasp_state` receipt auxiliary evidence.
+    # Controllers may now be activated only to run the mandatory MoveIt jog;
+    # the companion physical non-coupling verifier is the sole final reset
+    # decision and remains fail-closed.
+    status = "RESET_PHYSICAL_CHECK_REQUIRED"
+    reasons: tuple[str, ...] = ()
     payload = {
         "schema_version": "M1BResetDetachEvidenceV1",
         "status": status,
         "reasons": list(reasons),
+        "auxiliary_grasp_state_status": auxiliary_status,
+        "auxiliary_grasp_state_reasons": list(auxiliary_reasons),
         "spawn_manifest": str(args.spawn_manifest),
         "objects": [record.object_name for record in records],
         "detach_processing_pulse": detach_processing_pulse,
@@ -238,9 +246,7 @@ def main() -> int:
     if args.resume_world:
         if not args.world_name:
             raise SystemExit("--resume-world requires --world-name")
-        if status != "RESET_VERIFIED":
-            payload["world_resume"] = {"attempted": False, "reason": "RESET_NOT_VERIFIED"}
-        else:
+        if status != "INVALID_RESET":
             result = subprocess.run(
                 [
                     "gz", "service", "--service", f"/world/{args.world_name}/control",
@@ -264,9 +270,7 @@ def main() -> int:
                 payload["status"] = status
                 payload["reasons"].append("WORLD_RESUME_FAILED")
     if args.activate_controllers:
-        if status != "RESET_VERIFIED":
-            payload["controller_activation"] = {"attempted": False, "reason": "WORLD_NOT_RESUMED"}
-        else:
+        if status != "INVALID_RESET":
             attempts = []
             for attempt in range(1, 4):
                 result = subprocess.run(
@@ -320,7 +324,7 @@ def main() -> int:
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({"status": status, "objects": len(objects), "reasons": payload["reasons"]}))
-    return 0 if status == "RESET_VERIFIED" else 2
+    return 0 if status == "RESET_PHYSICAL_CHECK_REQUIRED" else 2
 
 
 if __name__ == "__main__":

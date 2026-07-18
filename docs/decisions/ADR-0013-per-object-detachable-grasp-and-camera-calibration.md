@@ -107,3 +107,38 @@ Approve the following four contracts as one change set.
 - Broker same-entity selection replacing target-id gate: **APPROVED**
 - TF-only camera calibration contract: **APPROVED**
 - Implementation SHA: **PENDING**
+
+## Amendment 1 (2026-07-19): physical non-coupling reset verification
+
+Status: **APPROVED — implementation authorized by project owner in Codex conversation**
+
+Rationale: the Gazebo DetachableJoint system publishes `grasp_state` only on a
+state transition — no latch, no periodic republish, no query service (already
+evidenced in M1A GATE4: re-requesting the current state produces no message).
+One-shot messages race subscription setup across N topics, and a missed
+message is indistinguishable from a failed detach, so message-receipt
+verification cannot be made reliable without modifying the plugin.
+
+Change to §2 verification:
+
+1. After the detach broadcast, reset verification is a **physical
+   non-coupling check**: command a bounded arm jog (EE displacement >= 0.02 m
+   inside the home-safe volume), record all N object poses before and after
+   (supervision-side, reset-provenance only). PASS iff no object displaces
+   more than the settle-noise threshold (1 mm).
+2. Any displacement above threshold → `INVALID_RESET`, fail-closed
+   (unchanged).
+3. `grasp_state` messages are collected best-effort and retained as auxiliary
+   evidence; a missing message is a warning, not a failure, when the physical
+   check passes.
+4. The jog and pose reads are reset-infrastructure evidence
+   (evaluator-side), never Observation-path inputs (consistent with
+   ADR-0011).
+5. Optional later hardening, not required to unblock: a project-local
+   DetachableJoint variant with periodic state publication may replace this
+   check after its own whitelist/manifest review.
+
+Amendment approval:
+
+- Human approver: **project owner, approved in Codex conversation on 2026-07-19**
+- Physical non-coupling verification replacing 12/12 message receipt: **APPROVED**
