@@ -79,10 +79,17 @@ def m1b_normal_side_precontact(client: CalibrationClient, centre_world_m: list[f
     # controller's terminal result (in particular, it must not abort), not an
     # extra post-action joint-error threshold: the latter is diagnostic
     # evidence and varies with controller-state delivery timing.
-    final = client.move_hand_pose(_m1b_normal_side_pose(centre_world_m, hand_z_offset_m=0.120), ik_seed=M1B_NORMAL_SIDE_IK_SEED)
+    final = {"executed": False}
+    attempts = 0
+    while attempts < 3 and not final.get("executed"):
+        final = client.move_hand_pose(
+            _m1b_normal_side_pose(centre_world_m, hand_z_offset_m=0.120),
+            ik_seed=M1B_NORMAL_SIDE_IK_SEED,
+        )
+        attempts += 1
     return {
         "executed": bool(final.get("executed")),
-        "converged": bool(final.get("converged")), "final": final,
+        "converged": bool(final.get("converged")), "final": final, "attempts": attempts,
         "geometry": {"finger_board_axis_world": [1.0, 0.0, 0.0], "closing_axis_world": [0.0, 1.0, 0.0], "final_x_offset_m": -0.080, "final_y_offset_m": 0.0, "precontact_hand_z_offset_m": 0.120, "contact_hand_z_offset_m": 0.065, "ik_seed_source": "measured_scene1034_collision_checked_branch", "path_source": "MoveIt collision-checked trajectory from reset home"},
     }
 
