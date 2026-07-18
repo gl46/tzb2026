@@ -17,7 +17,7 @@ CYLINDER_HALF_LENGTH_M = 0.045
 # Keep a small positive gap so Gazebo does not begin a reset with a cylinder
 # already intersecting the tabletop.  The physical-reset check remains the
 # authority on whether the object has subsequently settled.
-SPAWN_CLEARANCE_M = 0.002
+SPAWN_CLEARANCE_M = 0.0001
 # Low residual velocity decay prevents a settled free cylinder from drifting
 # numerically during the reset jog while preserving normal gravity/contact and
 # detachable-joint transport dynamics.

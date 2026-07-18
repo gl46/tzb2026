@@ -34,11 +34,12 @@ POSE_RE = re.compile(
 SETTLE_S = 2.0
 MAX_OBJECT_DISPLACEMENT_M = 0.001
 MIN_EE_DISPLACEMENT_M = 0.02
-# A base-joint jog swept a lower arm link through the incoming zones.  The
-# wrist-side panda_joint6 jog stays above the table at the S1 home posture;
-# FK predicts roughly 25 mm hand translation for this 180 mrad probe.
-HOME_JOG_JOINT_INDEX = 5
-HOME_JOG_DELTA_RAD = 0.18
+# A base-joint jog swept a lower arm link through the incoming zones, while a
+# wrist-only jog did not reliably converge on this controller.  A 30 mrad
+# shoulder-side panda_joint2 jog predicts about 29 mm hand translation from
+# the S1 home posture without the base sweep.
+HOME_JOG_JOINT_INDEX = 1
+HOME_JOG_DELTA_RAD = 0.03
 POSE_SNAPSHOT_ATTEMPTS = 3
 POSE_QUERY_TIMEOUT_S = 5
 

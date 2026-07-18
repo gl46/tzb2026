@@ -143,8 +143,8 @@ def test_m1b_amendment_reset_gate_is_physical_and_fails_closed_on_missing_pose()
     assert 'SETTLE_S = 2.0' in source
     assert 'MAX_OBJECT_DISPLACEMENT_M = 0.001' in source
     assert 'MIN_EE_DISPLACEMENT_M = 0.02' in source
-    assert 'HOME_JOG_JOINT_INDEX = 5' in source
-    assert 'HOME_JOG_DELTA_RAD = 0.18' in source
+    assert 'HOME_JOG_JOINT_INDEX = 1' in source
+    assert 'HOME_JOG_DELTA_RAD = 0.03' in source
     assert 'except subprocess.TimeoutExpired:' in source
     assert 'return None' in source
     assert 'final = {name: supervision_model_position(name) for name in names}' in source
