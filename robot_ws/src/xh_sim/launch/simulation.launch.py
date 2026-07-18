@@ -164,15 +164,28 @@ def _robot_actions(context, share: Path):
             f"/world/{world_name_value}/model/panda_controller/link/panda_rightfinger/"
             "sensor/right_finger_contact/contact"
         )
+        # Each cylinder also publishes its own physical contact stream.  Keep
+        # these bridges actuation-internal: the broker can use a cylinder's
+        # contact pair to recover an independently observed finger event when
+        # one finger-mounted sensor drops an event.  The static 12-topic upper
+        # bound matches the industrial generator; absent models simply have no
+        # publisher and never create synthetic contact data.
+        cylinder_contacts = [
+            f"/xh/actuation_internal/cylinders/cylinder_{index:02d}/contacts"
+            for index in range(1, 13)
+        ]
         actions.append(Node(
             package="ros_gz_bridge", executable="parameter_bridge", output="screen",
             arguments=[
                 f"{left_contact}@ros_gz_interfaces/msg/Contacts[gz.msgs.Contacts",
                 f"{right_contact}@ros_gz_interfaces/msg/Contacts[gz.msgs.Contacts",
+                *(f"{topic}@ros_gz_interfaces/msg/Contacts[gz.msgs.Contacts" for topic in cylinder_contacts),
             ],
             remappings=[
                 (left_contact, "/xh/actuation_internal/m1b/panda_leftfinger_contacts"),
                 (right_contact, "/xh/actuation_internal/m1b/panda_rightfinger_contacts"),
+                *( (topic, f"/xh/actuation_internal/m1b/cylinder_{index:02d}_contacts")
+                   for index, topic in enumerate(cylinder_contacts, start=1) ),
             ],
         ))
     return actions

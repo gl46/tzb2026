@@ -33,6 +33,10 @@ RAW_CONTACT_TOPICS = {
     "left": "/xh/actuation_internal/m1b/panda_leftfinger_contacts",
     "right": "/xh/actuation_internal/m1b/panda_rightfinger_contacts",
 }
+CYLINDER_CONTACT_TOPICS = [
+    f"/xh/actuation_internal/m1b/cylinder_{index:02d}_contacts"
+    for index in range(1, 13)
+]
 
 
 def m1b_normal_side_approach(client: CalibrationClient, centre_world_m: list[float]) -> dict[str, object]:
@@ -113,12 +117,30 @@ def main() -> int:
     rclpy.init()
     client = CalibrationClient()
     raw: list[M1BContactSampleV1] = []
+    cylinder_contact_samples = 0
     def on_contact(message: Contacts, finger: str) -> None:
         timestamp = message.header.stamp.sec + message.header.stamp.nanosec * 1e-9
         pairs = tuple((contact.collision1.name, contact.collision2.name) for contact in message.contacts)
         raw.append(M1BContactSampleV1(timestamp, finger, pairs))
     for finger, topic in RAW_CONTACT_TOPICS.items():
         client.create_subscription(Contacts, topic, lambda message, finger=finger: on_contact(message, finger), 1000)
+    def on_cylinder_contact(message: Contacts) -> None:
+        """Recover finger events from the independently measured cylinder side.
+
+        This remains inside the actuator broker.  The callback never receives
+        a task target or supervision identifier; it classifies only the two
+        physical finger collision names present in each contact pair.
+        """
+        nonlocal cylinder_contact_samples
+        timestamp = message.header.stamp.sec + message.header.stamp.nanosec * 1e-9
+        pairs = tuple((contact.collision1.name, contact.collision2.name) for contact in message.contacts)
+        for finger, marker in (("left", "panda_leftfinger"), ("right", "panda_rightfinger")):
+            finger_pairs = tuple(pair for pair in pairs if any(marker in side for side in pair))
+            if finger_pairs:
+                raw.append(M1BContactSampleV1(timestamp, finger, finger_pairs))
+                cylinder_contact_samples += 1
+    for topic in CYLINDER_CONTACT_TOPICS:
+        client.create_subscription(Contacts, topic, on_cylinder_contact, 1000)
     try:
         ready = client.wait_calibration_ready() and client.apply_scene()
         approach = {"executed": False, "reason": "MOVEIT_UNAVAILABLE"}
@@ -148,6 +170,7 @@ def main() -> int:
             "production_grasp_primitive": "m1b_normal_side_approach + physical_hand + m1b_internal_bilateral_broker",
             "ready": ready, "open_hand": open_hand, "approach": approach, "close": close,
             "raw_contact_samples": [{"timestamp_s": item.timestamp_s, "finger": item.finger, "collision_pairs": list(item.collision_pairs)} for item in raw],
+            "cylinder_side_contact_samples": cylinder_contact_samples,
             "gate": {"grasp_success": feedback.grasp_success, "tactile_state": feedback.tactile_state, "reobservation_required": feedback.reobservation_required, "internal_actuation_record": internal},
             "attach": attach,
             "bilateral_same_entity_contact": feedback.grasp_success,
