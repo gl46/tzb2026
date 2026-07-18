@@ -60,12 +60,11 @@ M1B_NORMAL_CONTACT_HAND_Z_OFFSET_M = 0.065
 M1B_CYLINDER_RADIUS_M = 0.025
 M1B_FINGER_LENGTH_M = 0.120
 M1B_FINGER_CONTACT_INSET_M = 0.002
-# Measured from live Gazebo link poses at the tangent side-grasp pose: the
-# midpoint of the two physical finger boards is +3 mm in world Y relative to
-# the commanded hand origin.  This fixed kinematic correction restores a
-# symmetric pad corridor; it is neither simulator-object truth nor a runtime
-# target-specific offset.
-M1B_NORMAL_HAND_Y_CENTERLINE_BIAS_M = -0.003
+# The hand-frame Y centreline is symmetric in the spawned URDF.  Dynamic
+# cylinder settling is handled by the public near-pregrasp reobservation
+# below; baking a target-specific settling displacement into the hand chain
+# would turn it into an untracked simulator calibration leak.
+M1B_NORMAL_HAND_Y_CENTERLINE_BIAS_M = 0.0
 M1B_FINGER_BOARD_THICKNESS_M = 0.018
 M1B_MAX_FINGER_POSITION_M = 0.040
 M1B_NEAR_REOBSERVATION_DURATION_S = 8.0
