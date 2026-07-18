@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import sys
 
 import pytest
 from pydantic import ValidationError
@@ -16,6 +17,12 @@ from xh_agent.grasp.reset import M1BResetVerificationV1, validate_reset_records
 from xh_agent.recovery.manager import recovery_for
 from xh_agent.runtime.m1b_camera_calibration import M1BStaticCameraCalibrationV1
 from xh_agent.task_compiler.deterministic import DeterministicTaskCompiler
+
+SCRIPTS = Path(__file__).parents[2] / "scripts"
+if str(SCRIPTS) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS))
+from audit_m1b_center_reachability import percentile90, perceived_diameter_m  # noqa: E402
+from xh_agent.perception.interfaces import BBoxV1, PerceptionResultV1  # noqa: E402
 
 
 @pytest.mark.parametrize("instruction,selector,destination", [
@@ -95,6 +102,16 @@ def test_m1b_camera_center_correction_uses_only_perceived_diameter() -> None:
     assert center == pytest.approx(calibration.optical_to_world((-0.25, 0.10, 1.325)))
     with pytest.raises(ValueError):
         calibration.visible_surface_to_center_world(surface, 0.2)
+
+
+def test_m1b_center_audit_uses_public_bbox_depth_and_nearest_rank_p90() -> None:
+    prediction = PerceptionResultV1(
+        frame_id="camera", timestamp_ns=1, track_id="track-1234abcd", category="industrial_cylinder",
+        bbox_or_mask=BBoxV1(x=10, y=20, width=20, height=30), position_3d=[0.0, 0.0, 1.0],
+        orientation_state="normal", confidence=0.9, visibility=0.9, source_components=["test"],
+    )
+    assert perceived_diameter_m(prediction, [1000.0, 0.0, 0.0, 0.0, 800.0, 0.0, 0.0, 0.0, 1.0]) == pytest.approx(0.025)
+    assert percentile90([0.001, 0.002, 0.003, 0.004]) == pytest.approx(0.004)
 
 
 def test_post_grasp_identity_routes_wrong_object_without_entity_leak() -> None:
