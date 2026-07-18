@@ -14,6 +14,7 @@ from xh_agent.perception.evaluator import SimulatorLabel, evaluate
 from xh_agent.perception.geometric_rgbd import GeometricRGBDBaseline
 from xh_agent.perception.interfaces import PerceptionInputV1
 from xh_agent.perception.pose_state import orientation_state
+from xh_agent.perception.tracker import PublicTrackAssociator
 from xh_agent.recording.episode_recorder import EpisodeRecorder
 
 
@@ -29,6 +30,27 @@ def test_geometric_baseline_backprojects_and_excludes_oracle() -> None:
     assert results[0].position_3d[2] == pytest.approx(0.8)
     assert results[0].track_id.startswith("track-")
     assert "entity" not in results[0].model_dump_json()
+
+
+def test_public_temporal_tracker_survives_bounded_rgbd_motion_without_entity_ids() -> None:
+    tracker = PublicTrackAssociator(maximum_association_distance_m=0.05)
+    initial = tracker.associate([([0.10, -0.02, 1.00], "industrial_cylinder", "red")], timestamp_ns=1)
+    moved = tracker.associate([([0.11, -0.018, 1.004], "industrial_cylinder", "red")], timestamp_ns=2)
+    distinct = tracker.associate([([0.11, -0.018, 1.004], "industrial_cylinder", "blue")], timestamp_ns=3)
+    assert initial == moved
+    assert distinct[0] != initial[0]
+
+
+def test_geometric_baseline_keeps_track_id_across_small_public_frame_shift() -> None:
+    first = np.ones((24, 24), dtype=float)
+    first[6:16, 5:15] = 0.8
+    second = np.ones((24, 24), dtype=float)
+    second[6:16, 6:16] = 0.8
+    baseline = GeometricRGBDBaseline(min_component_pixels=12)
+    initial = baseline.infer(observation(), first)[0]
+    later = baseline.infer(observation().model_copy(update={"timestamp_ns": 2}), second)[0]
+    assert later.track_id == initial.track_id
+    assert "public_temporal_tracker_v1" in later.source_components
 
 
 def test_online_input_and_result_reject_oracle_or_nan() -> None:

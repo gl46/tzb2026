@@ -12,7 +12,7 @@ import numpy as np
 
 from .interfaces import BBoxV1, PerceptionInputV1, PerceptionResultV1
 from .pose_state import orientation_state
-from .tracker import track_id_from_geometry
+from .tracker import PublicTrackAssociator
 
 
 COLOR_PROTOTYPES = np.asarray([
@@ -41,6 +41,7 @@ class GeometricRGBDBaseline:
         if not 0 < color_similarity <= 1:
             raise ValueError("color_similarity must be in (0, 1]")
         self.color_similarity = color_similarity
+        self._track_associator = PublicTrackAssociator()
 
     def infer(self, observation: PerceptionInputV1, depth_m: np.ndarray, rgb: np.ndarray | None = None) -> list[PerceptionResultV1]:
         if depth_m.ndim != 2 or not np.isfinite(depth_m).any():
@@ -62,7 +63,7 @@ class GeometricRGBDBaseline:
         fx, fy, cx, cy = observation.camera_intrinsics[0], observation.camera_intrinsics[4], observation.camera_intrinsics[2], observation.camera_intrinsics[5]
         if fx <= 0 or fy <= 0:
             raise ValueError("camera focal lengths must be positive")
-        results: list[PerceptionResultV1] = []
+        untracked: list[dict[str, object]] = []
         for pixels, color_name in components:
             if not self.min_component_pixels <= len(pixels) <= self.max_component_pixels:
                 continue
@@ -79,15 +80,23 @@ class GeometricRGBDBaseline:
             height = max(0.005, float(np.median(table[rows, cols] - depth_m[rows, cols])))
             state = orientation_state(height, lateral)
             confidence = min(0.99, len(pixels) / float(self.min_component_pixels * 4))
-            results.append(PerceptionResultV1(
+            untracked.append({"bbox": bbox, "position": position, "state": state, "confidence": confidence, "color": color_name, "pixels": len(pixels)})
+        track_ids = self._track_associator.associate(
+            [(list(item["position"]), "industrial_cylinder", item["color"]) for item in untracked],
+            timestamp_ns=observation.timestamp_ns,
+        )
+        results = [
+            PerceptionResultV1(
                 frame_id=observation.frame_id, timestamp_ns=observation.timestamp_ns,
-                track_id=track_id_from_geometry(position, "industrial_cylinder"), category="industrial_cylinder",
-                attributes={"orientation": state, **({"visual_color": color_name} if color_name else {})}, bbox_or_mask=bbox, position_3d=position,
-                orientation_state=state, confidence=confidence,
-                covariance_or_quality={"component_pixels": float(len(pixels)), "depth_median_m": z},
-                visibility=min(1.0, len(pixels) / 100.0), relations=[],
-                source_components=["geometric_rgbd_v1", *( ["color_prototype_v1"] if color_name else [])],
-            ))
+                track_id=track_id, category="industrial_cylinder",
+                attributes={"orientation": str(item["state"]), **({"visual_color": str(item["color"])} if item["color"] else {})}, bbox_or_mask=item["bbox"], position_3d=list(item["position"]),
+                orientation_state=str(item["state"]), confidence=float(item["confidence"]),
+                covariance_or_quality={"component_pixels": float(item["pixels"]), "depth_median_m": float(item["position"][2])},
+                visibility=min(1.0, float(item["pixels"]) / 100.0), relations=[],
+                source_components=["geometric_rgbd_v1", "public_temporal_tracker_v1", *( ["color_prototype_v1"] if item["color"] else [])],
+            )
+            for item, track_id in zip(untracked, track_ids)
+        ]
         return sorted(results, key=lambda item: item.position_3d[0])
 
     def _color_components(self, foreground: np.ndarray, rgb: np.ndarray) -> list[tuple[list[tuple[int, int]], str]]:
