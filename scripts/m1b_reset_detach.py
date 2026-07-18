@@ -69,7 +69,9 @@ def detach_and_observe(object_name: str, timeout_s: float) -> M1BResetVerificati
     return M1BResetVerificationV1(object_name, detach_topic, state_topic, any("detached" in line for line in lines), tuple(lines))
 
 
-def detach_all_and_observe(object_names: list[str], timeout_s: float) -> list[M1BResetVerificationV1]:
+def detach_all_and_observe(
+    object_names: list[str], timeout_s: float, *, world_name: str | None = None,
+) -> tuple[list[M1BResetVerificationV1], dict[str, object] | None]:
     """Arm every one-shot state monitor before broadcasting the N detaches."""
     monitors: dict[str, subprocess.Popen[str]] = {}
     lines: dict[str, list[str]] = {name: [] for name in object_names}
@@ -88,6 +90,33 @@ def detach_all_and_observe(object_names: list[str], timeout_s: float) -> list[M1
                 ["gz", "topic", "-t", f"/xh/m1b/{name}/detach", "-m", "gz.msgs.Empty", "-p", "unused: true"],
                 check=False, capture_output=True, text=True, timeout=timeout_s,
             )
+        processing_pulse = None
+        if world_name:
+            # DetachableJoint handles transport commands during simulation
+            # updates.  A paused fresh world may accept a detach publish but
+            # never execute the state transition.  Controllers are still
+            # inactive here, so pulse exactly long enough to process the
+            # already-broadcast reset commands, then pause again before any
+            # episode may begin.
+            unpause = subprocess.run(
+                ["gz", "service", "--service", f"/world/{world_name}/control",
+                 "--reqtype", "gz.msgs.WorldControl", "--reptype", "gz.msgs.Boolean",
+                 "--timeout", "3000", "--req", "pause: false"],
+                check=False, capture_output=True, text=True,
+            )
+            time.sleep(0.40)
+            pause = subprocess.run(
+                ["gz", "service", "--service", f"/world/{world_name}/control",
+                 "--reqtype", "gz.msgs.WorldControl", "--reptype", "gz.msgs.Boolean",
+                 "--timeout", "3000", "--req", "pause: true"],
+                check=False, capture_output=True, text=True,
+            )
+            processing_pulse = {
+                "controllers_active": False,
+                "unpause_returncode": unpause.returncode,
+                "pause_returncode": pause.returncode,
+                "duration_s": 0.40,
+            }
         observed = {name: False for name in object_names}
         def collect(deadline: float) -> None:
             while time.monotonic() < deadline and not all(observed.values()):
@@ -148,7 +177,7 @@ def detach_all_and_observe(object_names: list[str], timeout_s: float) -> list[M1
                 name, f"/xh/m1b/{name}/detach", f"/xh/m1b/{name}/grasp_state",
                 observed[name], tuple(lines[name]),
             ))
-        return records
+        return records, processing_pulse
     finally:
         for monitor in monitors.values():
             monitor.terminate()
@@ -184,7 +213,9 @@ def main() -> int:
     objects = per_object["objects"]
     if not objects or any(not isinstance(name, str) or not name.startswith("cylinder_") for name in objects):
         raise SystemExit("spawn manifest has invalid detachable object list")
-    records = detach_all_and_observe(objects, args.timeout_s)
+    records, detach_processing_pulse = detach_all_and_observe(
+        objects, args.timeout_s, world_name=args.world_name,
+    )
     status, reasons = validate_reset_records(records, objects)
     payload = {
         "schema_version": "M1BResetDetachEvidenceV1",
@@ -192,6 +223,7 @@ def main() -> int:
         "reasons": list(reasons),
         "spawn_manifest": str(args.spawn_manifest),
         "objects": [record.object_name for record in records],
+        "detach_processing_pulse": detach_processing_pulse,
         "records": [
             {
                 "object_name": record.object_name,
