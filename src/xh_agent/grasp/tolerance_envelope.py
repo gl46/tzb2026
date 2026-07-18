@@ -33,11 +33,16 @@ def tolerance_envelope(trials: list[OffsetTrialV1]) -> dict[str, float | None]:
         grouped[(trial.axis, abs(trial.offset_m))].append(trial.bilateral_same_entity_contact)
     output: dict[str, float | None] = {}
     for axis in AXES:
-        eligible = [
+        passes = {
             offset for (recorded_axis, offset), outcomes in grouped.items()
-            if recorded_axis == axis and len(outcomes) >= 3 and sum(outcomes) / len(outcomes) >= 0.8
-        ]
-        output[axis] = max(eligible) if eligible else None
+            if recorded_axis == axis and len(outcomes) >= 3 and sum(outcomes) >= 2
+        }
+        # A tolerance boundary is a monotone closure: an isolated success at a
+        # large offset cannot erase a failure at a smaller offset.
+        output[axis] = max(
+            (offset for offset in passes if all(smaller in passes for smaller in {value for recorded_axis, value in grouped if recorded_axis == axis and value <= offset})),
+            default=None,
+        )
     return output
 
 
