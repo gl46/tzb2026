@@ -235,9 +235,15 @@ def main() -> int:
             # contact a free object.  The contact window below is scoped to
             # the close command, so approach grazes can never authorize attach.
             contact_start_index = len(raw)
-            if approach.get("executed"):
+            # A controller action can report success while the physical arm
+            # was deflected by an unmodelled/free-cylinder contact.  Do not
+            # close or enter the contact-bearing descent from that state:
+            # production motion acceptance requires both execution and the
+            # bounded terminal convergence evidence.
+            approach_motion_accepted = bool(approach.get("executed") and approach.get("converged"))
+            if approach_motion_accepted:
                 target_touch_exception_applied = client.set_target_touch_exception(True, target_id=target_entity)
-            if approach.get("executed") and target_touch_exception_applied:
+            if approach_motion_accepted and target_touch_exception_applied:
                 close = client.command_hand([0.01, 0.01])
             contact_descend = (
                 m1b_normal_side_contact_descend(client, target, ik_seed=approach.get("final", {}).get("ik_solution"))
@@ -252,7 +258,10 @@ def main() -> int:
         # raw telemetry and cannot be mislabelled as a contact window.
         post_close_raw = raw[contact_start_index:] if ready and close.get("succeeded") else []
         feedback, internal = broker_from_window(post_close_raw)
-        motion_gate_passed = bool(approach.get("executed") and close.get("succeeded") and contact_descend.get("executed"))
+        motion_gate_passed = bool(
+            approach.get("executed") and approach.get("converged")
+            and close.get("succeeded") and contact_descend.get("executed") and contact_descend.get("converged")
+        )
         attach = {"sent": False, "state_confirmed": False, "reason": "BILATERAL_GATE_REJECTED"}
         if feedback.grasp_success and not motion_gate_passed:
             attach["reason"] = "MOTION_OR_HAND_GATE_REJECTED"
@@ -266,7 +275,7 @@ def main() -> int:
             "supervision_initialization": {"orientation_state": "normal", "object_slot": args.object_slot, "truth_center_used_only_for_initial_target_pose": truth_center},
             "offset_vector_m": [target[index] - truth_center[index] for index in range(3)],
             "production_grasp_primitive": "m1b_normal_side_precontact + physical_hand + m1b_normal_side_contact_descend + m1b_internal_bilateral_broker",
-            "ready": ready, "calibration_collision_scene_applied": cylinder_scene_applied if ready else False, "target_touch_exception_applied": target_touch_exception_applied if ready else False, "open_hand": open_hand, "approach": approach, "close": close, "contact_descend": contact_descend,
+            "ready": ready, "calibration_collision_scene_applied": cylinder_scene_applied if ready else False, "target_touch_exception_applied": target_touch_exception_applied if ready else False, "motion_gate_requires_terminal_convergence": True, "open_hand": open_hand, "approach": approach, "close": close, "contact_descend": contact_descend,
             "raw_contact_samples": [{"timestamp_s": item.timestamp_s, "finger": item.finger, "collision_pairs": list(item.collision_pairs)} for item in raw],
             "post_close_contact_samples": [{"timestamp_s": item.timestamp_s, "finger": item.finger, "collision_pairs": list(item.collision_pairs)} for item in post_close_raw],
             "cylinder_side_contact_samples": cylinder_contact_samples,
