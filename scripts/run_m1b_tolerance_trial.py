@@ -211,8 +211,11 @@ def main() -> int:
             while time.monotonic() < deadline:
                 rclpy.spin_once(client, timeout_sec=0.02)
         feedback, internal = broker_from_window(raw)
+        motion_gate_passed = bool(approach.get("executed") and approach.get("converged") and close.get("succeeded"))
         attach = {"sent": False, "state_confirmed": False, "reason": "BILATERAL_GATE_REJECTED"}
-        if feedback.grasp_success and internal["attach_topic"] and internal["actual_sim_entity_id"]:
+        if feedback.grasp_success and not motion_gate_passed:
+            attach["reason"] = "MOTION_OR_HAND_GATE_REJECTED"
+        if feedback.grasp_success and motion_gate_passed and internal["attach_topic"] and internal["actual_sim_entity_id"]:
             entity = str(internal["actual_sim_entity_id"])
             attach = attach_and_observe(str(internal["attach_topic"]), f"/xh/m1b/{entity}/grasp_state")
         payload = {
@@ -225,7 +228,7 @@ def main() -> int:
             "ready": ready, "calibration_collision_scene_applied": cylinder_scene_applied if ready else False, "target_touch_exception_applied": target_touch_exception_applied if ready else False, "open_hand": open_hand, "approach": approach, "close": close,
             "raw_contact_samples": [{"timestamp_s": item.timestamp_s, "finger": item.finger, "collision_pairs": list(item.collision_pairs)} for item in raw],
             "cylinder_side_contact_samples": cylinder_contact_samples,
-            "gate": {"grasp_success": feedback.grasp_success, "tactile_state": feedback.tactile_state, "reobservation_required": feedback.reobservation_required, "internal_actuation_record": internal},
+            "gate": {"grasp_success": feedback.grasp_success, "tactile_state": feedback.tactile_state, "reobservation_required": feedback.reobservation_required, "motion_gate_passed": motion_gate_passed, "internal_actuation_record": internal},
             "attach": attach,
             "bilateral_same_entity_contact": feedback.grasp_success,
             "online_truth_access": False,
