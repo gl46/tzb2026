@@ -36,10 +36,11 @@ from m1a_moveit_execution_client import JOINTS, set_allowed_pair  # noqa: E402
 POSE_RE = re.compile(
     r"Pose \[ XYZ \(m\) \] \[ RPY \(rad\) \]:\s*"
     r"\[\s*([-+0-9.eE]+)\s+([-+0-9.eE]+)\s+([-+0-9.eE]+)\s*\]"
+    r"\s*\[\s*([-+0-9.eE]+)\s+([-+0-9.eE]+)\s+([-+0-9.eE]+)\s*\]"
 )
 
 
-def gazebo_position(model: str, *, link: str | None = None) -> list[float] | None:
+def gazebo_pose(model: str, *, link: str | None = None) -> list[float] | None:
     command = ["timeout", "2", "gz", "model", "-m", model]
     command.extend(["-l", link] if link else ["-p"])
     result = subprocess.run(command, capture_output=True, text=True, check=False, timeout=4.0)
@@ -56,8 +57,22 @@ def distance(first: list[float] | None, second: list[float] | None) -> float | N
     return math.dist(first, second)
 
 
+def rpy_quaternion(roll: float, pitch: float, yaw: float) -> list[float]:
+    cr, sr = math.cos(roll / 2), math.sin(roll / 2)
+    cp, sp = math.cos(pitch / 2), math.sin(pitch / 2)
+    cy, sy = math.cos(yaw / 2), math.sin(yaw / 2)
+    return [sr * cp * cy - cr * sp * sy, cr * sp * cy + sr * cp * sy, cr * cp * sy - sr * sp * cy, cr * cp * cy + sr * sp * sy]
+
+
+def xyz(pose: list[float] | None) -> list[float] | None:
+    return pose[:3] if pose is not None else None
+
+
 def relative(cylinder: list[float] | None, link: list[float] | None) -> list[float] | None:
-    return [a - b for a, b in zip(cylinder, link)] if cylinder is not None and link is not None else None
+    if cylinder is None or link is None:
+        return None
+    quat = rpy_quaternion(*link[3:])
+    return quaternion_rotate([-quat[0], -quat[1], -quat[2], quat[3]], tuple(a - b for a, b in zip(cylinder[:3], link[:3])))
 
 
 def attach_cylinder_to_moveit(client: CalibrationClient, entity: str, cylinder_world: list[float] | None) -> bool:
@@ -140,9 +155,9 @@ def main() -> int:
         for _ in range(20):
             rclpy.spin_once(client, timeout_sec=0.05)
         current = [client.latest.get(name, math.nan) for name in JOINTS]
-        before_link = gazebo_position("panda_controller", link="panda_link7")
-        before_cylinder = gazebo_position(args.entity)
-        moveit_carried_object_applied = attach_cylinder_to_moveit(client, args.entity, before_cylinder) if ready else False
+        before_link = gazebo_pose("panda_controller", link="panda_link7")
+        before_cylinder = gazebo_pose(args.entity)
+        moveit_carried_object_applied = attach_cylinder_to_moveit(client, args.entity, xyz(before_cylinder)) if ready else False
         transport_collision_exceptions_applied = (
             configure_transport_collision_exceptions(client, args.entity)
             if moveit_carried_object_applied else False
@@ -152,10 +167,10 @@ def main() -> int:
         # measurable follow test while remaining far inside Panda limits.
         move_target[0] += 0.10
         attached_move = client.move_joint_target(move_target) if transport_collision_exceptions_applied else {"executed": False}
-        after_link = gazebo_position("panda_controller", link="panda_link7")
-        after_cylinder = gazebo_position(args.entity)
-        link_motion = distance(before_link, after_link)
-        cylinder_motion = distance(before_cylinder, after_cylinder)
+        after_link = gazebo_pose("panda_controller", link="panda_link7")
+        after_cylinder = gazebo_pose(args.entity)
+        link_motion = distance(xyz(before_link), xyz(after_link))
+        cylinder_motion = distance(xyz(before_cylinder), xyz(after_cylinder))
         relative_drift = distance(relative(before_cylinder, before_link), relative(after_cylinder, after_link))
         attached_follow = bool(
             attached_move.get("executed")
@@ -166,14 +181,14 @@ def main() -> int:
         detach = detach_and_observe(args.entity, 2.0) if attached_follow else None
         detach_verified = bool(detach and detach.detached_observed)
         moveit_carried_object_removed = remove_attached_cylinder_from_moveit(client, args.entity) if detach_verified else False
-        before_decouple_link = gazebo_position("panda_controller", link="panda_link7")
-        before_decouple_cylinder = gazebo_position(args.entity)
+        before_decouple_link = gazebo_pose("panda_controller", link="panda_link7")
+        before_decouple_cylinder = gazebo_pose(args.entity)
         decouple_target = list(move_target)
         decouple_target[0] -= 0.12
         detached_move = client.move_joint_target(decouple_target) if detach_verified and moveit_carried_object_removed else {"executed": False}
-        after_decouple_link = gazebo_position("panda_controller", link="panda_link7")
-        after_decouple_cylinder = gazebo_position(args.entity)
-        decouple_link_motion = distance(before_decouple_link, after_decouple_link)
+        after_decouple_link = gazebo_pose("panda_controller", link="panda_link7")
+        after_decouple_cylinder = gazebo_pose(args.entity)
+        decouple_link_motion = distance(xyz(before_decouple_link), xyz(after_decouple_link))
         decouple_relative_change = distance(
             relative(before_decouple_cylinder, before_decouple_link),
             relative(after_decouple_cylinder, after_decouple_link),
