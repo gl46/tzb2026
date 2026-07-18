@@ -12,6 +12,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import select
 import subprocess
 import sys
@@ -32,6 +33,7 @@ for directory in (ROOT / "src", ROOT / "scripts"):
 from m1a_contact_calibration_client import CalibrationClient  # noqa: E402
 from xh_agent.grasp.m1b_broker import width_window_from_perceived_diameter  # noqa: E402
 from xh_agent.grasp.m1b_contact_window import M1BContactSampleV1, broker_from_window  # noqa: E402
+from xh_agent.runtime.m1b_camera_calibration import M1BStaticCameraCalibrationV1  # noqa: E402
 
 
 RAW_CONTACT_TOPICS = {
@@ -66,6 +68,8 @@ M1B_FINGER_CONTACT_INSET_M = 0.002
 M1B_NORMAL_HAND_Y_CENTERLINE_BIAS_M = -0.003
 M1B_FINGER_BOARD_THICKNESS_M = 0.018
 M1B_MAX_FINGER_POSITION_M = 0.040
+M1B_NEAR_REOBSERVATION_DURATION_S = 8.0
+M1B_NEAR_REOBSERVATION_MAX_ASSOCIATION_DISTANCE_M = 0.050
 
 
 def m1b_close_finger_targets_from_perceived_diameter(
@@ -95,9 +99,10 @@ def m1b_close_finger_targets_from_perceived_diameter(
     }
 
 
-def public_perceived_diameter_from_evidence(
+def public_track_from_evidence(
     evidence_path: Path, camera_info_path: Path, track_id: str,
-) -> tuple[float, dict[str, object]]:
+    calibration: M1BStaticCameraCalibrationV1,
+) -> tuple[dict[str, object], dict[str, object]]:
     """Load one selected diameter from an actual public geometric-RGB-D run.
 
     The tolerance runner intentionally has no switch for a fixture diameter:
@@ -120,7 +125,14 @@ def public_perceived_diameter_from_evidence(
     if focal_m <= 0.0 or depth_m <= 0.0 or pixel_diameter <= 0:
         raise SystemExit("selected public track has invalid geometry for diameter")
     diameter_m = pixel_diameter * depth_m / focal_m
-    return diameter_m, {
+    surface_optical_m = [float(value) for value in result["position_3d"]]
+    center_world_m = list(calibration.visible_surface_to_center_world(tuple(surface_optical_m), diameter_m))
+    return {
+        "track_id": track_id,
+        "visual_color": result.get("attributes", {}).get("visual_color"),
+        "perceived_diameter_m": diameter_m,
+        "estimated_center_world_m": center_world_m,
+    }, {
         "source": "ACTUAL_PUBLIC_RGBD_GEOMETRIC_OUTPUT",
         "evidence_path": str(evidence_path),
         "evidence_sha256": hashlib.sha256(raw).hexdigest(),
@@ -130,6 +142,60 @@ def public_perceived_diameter_from_evidence(
         "depth_m": depth_m,
         "focal_px": focal_m,
     }
+
+
+def capture_near_public_observation(
+    output_dir: Path, *, public_pipeline_python: str,
+) -> Path:
+    """Capture then infer a fresh public RGB-D frame at pregrasp.
+
+    Both child tools consume public ROS camera topics only.  They receive no
+    supervision file, simulator entity name, or calibration target pose.
+    """
+    recorder = subprocess.run(
+        [public_pipeline_python, str(ROOT / "scripts" / "record_m1b_alpha_ros.py"),
+         "--output-dir", str(output_dir), "--duration-s", str(M1B_NEAR_REOBSERVATION_DURATION_S), "--sensor-only"],
+        cwd=ROOT, check=False, capture_output=True, text=True, timeout=M1B_NEAR_REOBSERVATION_DURATION_S + 10.0,
+    )
+    if recorder.returncode != 0:
+        raise RuntimeError(f"PUBLIC_RGBD_CAPTURE_FAILED:{recorder.stderr.strip() or recorder.stdout.strip()}")
+    evidence_path = output_dir / "geometric.json"
+    inference = subprocess.run(
+        [public_pipeline_python, str(ROOT / "scripts" / "run_geometric_rgbd.py"), str(output_dir), "--output", str(evidence_path)],
+        cwd=ROOT, check=False, capture_output=True, text=True, timeout=30.0,
+    )
+    if inference.returncode != 0:
+        raise RuntimeError(f"PUBLIC_RGBD_INFERENCE_FAILED:{inference.stderr.strip() or inference.stdout.strip()}")
+    return evidence_path
+
+
+def select_near_public_track(
+    evidence_path: Path, camera_info_path: Path, *, initial: dict[str, object],
+    calibration: M1BStaticCameraCalibrationV1,
+) -> tuple[dict[str, object], dict[str, object]]:
+    """Associate a reobservation using public colour and static-TF geometry."""
+    evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
+    candidates: list[tuple[float, dict[str, object], dict[str, object]]] = []
+    initial_center = [float(value) for value in initial["estimated_center_world_m"]]
+    initial_color = initial.get("visual_color")
+    for result in evidence.get("results", []):
+        if initial_color and result.get("attributes", {}).get("visual_color") != initial_color:
+            continue
+        try:
+            track, metadata = public_track_from_evidence(
+                evidence_path, camera_info_path, str(result["track_id"]), calibration,
+            )
+        except (KeyError, TypeError, ValueError, SystemExit):
+            continue
+        distance_m = sum((float(actual) - expected) ** 2 for actual, expected in zip(track["estimated_center_world_m"], initial_center)) ** 0.5
+        candidates.append((distance_m, track, metadata))
+    if not candidates:
+        raise RuntimeError("PUBLIC_NEAR_REOBSERVATION_TARGET_UNMATCHED")
+    distance_m, track, metadata = min(candidates, key=lambda item: item[0])
+    if distance_m > M1B_NEAR_REOBSERVATION_MAX_ASSOCIATION_DISTANCE_M:
+        raise RuntimeError(f"PUBLIC_NEAR_REOBSERVATION_ASSOCIATION_TOO_FAR:{distance_m:.6f}")
+    metadata["association_distance_to_initial_public_center_m"] = distance_m
+    return track, metadata
 
 
 def _m1b_normal_side_pose(centre_world_m: list[float], *, hand_z_offset_m: float) -> Pose:
@@ -264,6 +330,7 @@ def main() -> int:
     parser.add_argument("--public-perception-evidence", required=True, type=Path, help="Actual public RGB-D geometric output")
     parser.add_argument("--public-camera-info", required=True, type=Path, help="Camera intrinsics paired with that public frame")
     parser.add_argument("--public-track-id", required=True, help="Production-side public target track ID")
+    parser.add_argument("--public-pipeline-python", default=os.environ.get("M1B_PUBLIC_PIPELINE_PYTHON", sys.executable), help="Python with the declared public RGB-D dependencies")
     parser.add_argument("--output", required=True, type=Path)
     args = parser.parse_args()
     trial = json.loads(args.trial.read_text(encoding="utf-8"))
@@ -279,10 +346,11 @@ def main() -> int:
     truth_center = [float(value) for value in normal[args.object_slot - 1]["position_3d_world"]]
     target = list(truth_center)
     target["xyz".index(axis)] += float(trial["offset_m"])
-    perceived_diameter_m, public_evidence = public_perceived_diameter_from_evidence(
-        args.public_perception_evidence, args.public_camera_info, args.public_track_id,
+    calibration = M1BStaticCameraCalibrationV1.from_file(ROOT / "configs" / "m1b_camera_calibration.json")
+    initial_public_track, public_evidence = public_track_from_evidence(
+        args.public_perception_evidence, args.public_camera_info, args.public_track_id, calibration,
     )
-    close_targets, aperture = m1b_close_finger_targets_from_perceived_diameter(perceived_diameter_m)
+    close_targets, aperture = m1b_close_finger_targets_from_perceived_diameter(float(initial_public_track["perceived_diameter_m"]))
     rclpy.init()
     client = CalibrationClient()
     raw: list[M1BContactSampleV1] = []
@@ -316,6 +384,7 @@ def main() -> int:
         open_hand = {"succeeded": False}
         close = {"succeeded": False}
         contact_descend = {"executed": False, "reason": "MOVEIT_UNAVAILABLE"}
+        near_reobservation: dict[str, object] = {"attempted": False, "succeeded": False}
         contact_start_index = len(raw)
         if ready:
             cylinder_scene_applied = apply_calibration_cylinder_scene(client, labels)
@@ -337,9 +406,23 @@ def main() -> int:
             approach_motion_accepted = bool(approach.get("executed") and approach.get("converged"))
             if approach_motion_accepted and open_hand.get("succeeded"):
                 target_touch_exception_applied = client.set_target_touch_exception(True, target_id=target_entity)
+            final_target = list(target)
+            if target_touch_exception_applied:
+                near_reobservation["attempted"] = True
+                near_directory = args.output.parent / f"{args.output.stem}.near_rgbd"
+                try:
+                    near_evidence_path = capture_near_public_observation(near_directory, public_pipeline_python=args.public_pipeline_python)
+                    near_track, near_metadata = select_near_public_track(
+                        near_evidence_path, near_directory / "camera_info.json", initial=initial_public_track, calibration=calibration,
+                    )
+                    public_delta = [float(current) - float(previous) for current, previous in zip(near_track["estimated_center_world_m"], initial_public_track["estimated_center_world_m"])]
+                    final_target = [coordinate + delta for coordinate, delta in zip(target, public_delta)]
+                    near_reobservation = {"attempted": True, "succeeded": True, "evidence_path": str(near_evidence_path), "selected_public_track": near_track, "metadata": near_metadata, "public_center_delta_world_m": public_delta, "final_target_world_m": final_target}
+                except (OSError, RuntimeError, subprocess.TimeoutExpired) as error:
+                    near_reobservation = {"attempted": True, "succeeded": False, "reason": str(error)}
             contact_descend = (
-                m1b_normal_side_contact_descend(client, target, ik_seed=approach.get("final", {}).get("ik_solution"))
-                if target_touch_exception_applied else {"executed": False, "reason": "TOUCH_EXCEPTION_GATE_REJECTED"}
+                m1b_normal_side_contact_descend(client, final_target, ik_seed=approach.get("final", {}).get("ik_solution"))
+                if near_reobservation.get("succeeded") else {"executed": False, "reason": "PUBLIC_NEAR_REOBSERVATION_GATE_REJECTED"}
             )
             # Descend while open so the cylinder enters between both pads;
             # only then close to the public perception-derived jaw width.
@@ -378,6 +461,7 @@ def main() -> int:
             "trial": trial,
             "supervision_initialization": {"orientation_state": "normal", "object_slot": args.object_slot, "truth_center_used_only_for_initial_target_pose": truth_center},
             "public_aperture_input": {**public_evidence, **aperture},
+            "near_pregrasp_public_reobservation": near_reobservation,
             "offset_vector_m": [target[index] - truth_center[index] for index in range(3)],
             "production_grasp_primitive": "open_physical_hand + m1b_normal_side_precontact + m1b_normal_side_contact_descend + close_physical_hand + m1b_internal_bilateral_broker",
             "ready": ready, "calibration_collision_scene_applied": cylinder_scene_applied if ready else False, "target_touch_exception_applied": target_touch_exception_applied if ready else False, "motion_gate_requires_terminal_convergence": True, "open_hand": open_hand, "approach": approach, "close": close, "contact_descend": contact_descend,

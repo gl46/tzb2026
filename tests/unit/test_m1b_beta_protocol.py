@@ -199,7 +199,12 @@ def test_m1b_tolerance_attach_uses_detachablejoint_empty_payload() -> None:
     assert 'M1B_FINGER_BOARD_THICKNESS_M = 0.018' in source
     assert 'per_finger_target_m = (selected_inner_gap_m + M1B_FINGER_BOARD_THICKNESS_M) / 2.0' in source
     assert '"inner_pad_gap_window_m"' in source
-    assert 'def public_perceived_diameter_from_evidence(' in source
+    assert 'def public_track_from_evidence(' in source
+    assert 'def capture_near_public_observation(' in source
+    assert 'def select_near_public_track(' in source
+    assert 'M1B_NEAR_REOBSERVATION_MAX_ASSOCIATION_DISTANCE_M = 0.050' in source
+    assert '"near_pregrasp_public_reobservation": near_reobservation' in source
+    assert '"PUBLIC_NEAR_REOBSERVATION_GATE_REJECTED"' in source
     assert '"--public-perception-evidence", required=True, type=Path' in source
     assert '"--public-camera-info", required=True, type=Path' in source
     assert '"--public-track-id", required=True' in source
