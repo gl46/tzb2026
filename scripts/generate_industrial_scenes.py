@@ -6,7 +6,10 @@ import argparse
 import json
 import math
 import random
+from functools import lru_cache
 from pathlib import Path
+
+from sample_panda_fk_workspace import Model, load_model, position_only_reachability_gate
 
 
 COLORS = [(0.8, 0.1, 0.1), (0.1, 0.7, 0.2), (0.1, 0.2, 0.8), (0.8, 0.6, 0.1), (0.7, 0.1, 0.7), (0.1, 0.7, 0.7)]
@@ -30,6 +33,68 @@ ANGULAR_VELOCITY_DECAY = 0.5
 # centre-offset tolerance.  Keep the physical cylinder envelope outside it.
 ROBOT_BASE_XY = (-0.35, 0.0)
 ROBOT_BASE_KEEP_OUT_RADIUS_M = 0.19
+# These targets are intentionally checked with the controlled-URDF FK/DLS
+# sampler before writing any scene.  This is a layout prefilter only; it does
+# not claim orientation feasibility or collision-free MoveIt execution.
+LAYOUT_REACHABILITY_SAMPLES = 512
+LAYOUT_REACHABILITY_MAX_DISTANCE_M = 0.002
+LAYOUT_REACHABILITY_SEED = 20260719
+BIN_CENTER_XY = (0.20, 0.0)
+BIN_YAW_RAD = math.pi / 2
+BIN_CELL_LOCAL_X_M = (-0.14, 0.0, 0.14)
+BIN_CELL_LOCAL_Y_M = (-0.075, 0.075)
+BIN_DROP_TARGET_Z_M = 0.56
+# A finite lattice makes every possible spawn target independently auditable
+# before it is selected.  Its 7 cm pitch exceeds the 6 cm object separation
+# rule and it retains seed-randomized subsets without making FK acceptance a
+# stochastic property of arbitrary floating-point coordinates.
+INCOMING_GRID_X_M = (-0.53, -0.46, -0.39, -0.32, -0.25, -0.18, -0.11)
+INCOMING_GRID_Y_BY_LANE_M = ((-0.34, -0.27, -0.20, -0.13), (0.13, 0.20, 0.27, 0.34))
+
+
+@lru_cache(maxsize=1)
+def controlled_urdf_model() -> Model:
+    return load_model()
+
+
+def bin_cell_targets() -> tuple[tuple[float, float, float], ...]:
+    """Return all six partition-cell drop targets after the tangential rotation."""
+    cosine, sine = math.cos(BIN_YAW_RAD), math.sin(BIN_YAW_RAD)
+    return tuple(
+        (
+            BIN_CENTER_XY[0] + cosine * local_x - sine * local_y,
+            BIN_CENTER_XY[1] + sine * local_x + cosine * local_y,
+            BIN_DROP_TARGET_Z_M,
+        )
+        for local_x in BIN_CELL_LOCAL_X_M
+        for local_y in BIN_CELL_LOCAL_Y_M
+    )
+
+
+@lru_cache(maxsize=256)
+def cached_layout_reachability(target_xyz: tuple[float, float, float]) -> dict[str, object]:
+    """Evaluate one member of the finite approved layout target set once."""
+    evidence = position_only_reachability_gate(
+        controlled_urdf_model(),
+        target_xyz=target_xyz,
+        samples=LAYOUT_REACHABILITY_SAMPLES,
+        # The same deterministic covering set is used for every target.  A
+        # target-specific random stream can put a perfectly valid point in a
+        # poor DLS basin and turn layout acceptance into seed luck.
+        seed=LAYOUT_REACHABILITY_SEED,
+        maximum_target_distance_m=LAYOUT_REACHABILITY_MAX_DISTANCE_M,
+    )
+    if not evidence["passed"]:
+        raise RuntimeError(
+            "ADR-0014 layout reachability gate rejected "
+            f"{target_xyz}: final distance {evidence['final_target_distance_m']} m"
+        )
+    return evidence
+
+
+def layout_reachability(target_xyz: tuple[float, float, float], *, gate_index: int) -> dict[str, object]:
+    """Expose the cached FK result with the scene-local point identifier."""
+    return {**cached_layout_reachability(target_xyz), "layout_gate_index": gate_index}
 
 
 def split(seed: int) -> str:
@@ -55,23 +120,37 @@ def part_sdf(index: int, state: str, x: float, y: float, color: tuple[float, flo
 
 def render(template: str, seed: int, *, orientations: tuple[str, ...] = ORIENTATIONS) -> tuple[str, dict[str, object]]:
     rng = random.Random(seed)
+    bin_evidence = [
+        layout_reachability(target, gate_index=10_000 + index)
+        for index, target in enumerate(bin_cell_targets())
+    ]
     count = rng.randint(6, 12)
     parts = []
     labels = []
+    spawn_evidence = []
     positions: list[tuple[float, float]] = []
     for index in range(count):
         state = orientations[index % len(orientations)]
         # Split two incoming zones and enforce a 6 cm centre separation. This
         # prevents the simulator generator from creating unobservable stacks.
-        for _ in range(500):
-            # The calibration envelope retains both incoming lanes while
-            # extending their outer X edge enough to fit twelve objects after
-            # excluding the fixed robot-base footprint.
-            x = rng.uniform(-0.55, -0.08)
-            y = rng.uniform(-0.36, -0.08) if index % 2 == 0 else rng.uniform(0.08, 0.36)
+        lane = index % 2
+        candidates = [
+            (x, y)
+            for x in INCOMING_GRID_X_M
+            for y in INCOMING_GRID_Y_BY_LANE_M[lane]
+        ]
+        rng.shuffle(candidates)
+        for x, y in candidates:
             clear_of_base = math.dist((x, y), ROBOT_BASE_XY) >= ROBOT_BASE_KEEP_OUT_RADIUS_M
-            if clear_of_base and all((x - other_x) ** 2 + (y - other_y) ** 2 >= 0.06 ** 2 for other_x, other_y in positions):
+            target = (x, y, cylinder_pose(state)[2])
+            evidence = layout_reachability(target, gate_index=seed * 100 + index)
+            if (
+                clear_of_base
+                and all((x - other_x) ** 2 + (y - other_y) ** 2 >= 0.06 ** 2 for other_x, other_y in positions)
+                and evidence["passed"]
+            ):
                 positions.append((x, y))
+                spawn_evidence.append(evidence)
                 break
         else:
             raise RuntimeError(f"could not place non-overlapping cylinder for seed {seed}")
@@ -79,11 +158,11 @@ def render(template: str, seed: int, *, orientations: tuple[str, ...] = ORIENTAT
         color = COLORS[index % len(COLORS)]
         _, _, z = cylinder_pose(state)
         parts.append(part_sdf(index + 1, state, x, y, color, yaw))
-        labels.append({"actual_sim_entity_id": f"cylinder_{index + 1:02d}", "category": "industrial_cylinder", "orientation_state": state, "position_3d_world": [x, y, z], "incoming_region": "incoming_a" if index % 2 == 0 else "incoming_b", "yaw": yaw})
+        labels.append({"actual_sim_entity_id": f"cylinder_{index + 1:02d}", "category": "industrial_cylinder", "orientation_state": state, "position_3d_world": [x, y, z], "incoming_region": "incoming_a" if index % 2 == 0 else "incoming_b", "yaw": yaw, "layout_reachability": spawn_evidence[index]})
     begin, end = "<!-- M1B_RANDOM_PARTS_BEGIN -->", "<!-- M1B_RANDOM_PARTS_END -->"
     start, finish = template.index(begin) + len(begin), template.index(end)
     scene = template[:start] + "\n" + "\n".join(parts) + "\n    " + template[finish:]
-    return scene, {"scene_id": "IndustrialCylinderBenchmarkV1", "seed": seed, "split": split(seed), "part_count": count, "randomization": {"material": "reflective_metal" if split(seed) == "test" else "matte_metal", "camera_offset_m": 0.02 if split(seed) == "test" else 0.0, "light_intensity": rng.uniform(0.7, 1.3)}, "simulator_supervision": {"training_and_evaluation_only": True, "objects": labels}}
+    return scene, {"scene_id": "IndustrialCylinderBenchmarkV1", "seed": seed, "split": split(seed), "part_count": count, "randomization": {"material": "reflective_metal" if split(seed) == "test" else "matte_metal", "camera_offset_m": 0.02 if split(seed) == "test" else 0.0, "light_intensity": rng.uniform(0.7, 1.3)}, "layout_reachability": {"bin_cells": bin_evidence, "scope": "generation_prefilter_only; orientation_and_collision_remain_for_MoveIt"}, "simulator_supervision": {"training_and_evaluation_only": True, "objects": labels}}
 
 
 def main() -> int:

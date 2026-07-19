@@ -26,7 +26,7 @@ SCRIPTS = Path(__file__).parents[2] / "scripts"
 if str(SCRIPTS) not in sys.path:
     sys.path.insert(0, str(SCRIPTS))
 from audit_m1b_center_reachability import percentile90, perceived_diameter_m  # noqa: E402
-from generate_industrial_scenes import ROBOT_BASE_KEEP_OUT_RADIUS_M, ROBOT_BASE_XY, render  # noqa: E402
+from generate_industrial_scenes import BIN_DROP_TARGET_Z_M, ROBOT_BASE_KEEP_OUT_RADIUS_M, ROBOT_BASE_XY, bin_cell_targets, render  # noqa: E402
 from summarize_m1b_tolerance_campaign import summarize  # noqa: E402
 from xh_agent.perception.interfaces import BBoxV1, PerceptionResultV1  # noqa: E402
 
@@ -288,6 +288,36 @@ def test_m1b_generated_cylinders_clear_the_fixed_robot_base() -> None:
     for label in supervision["simulator_supervision"]["objects"]:
         x, y, _ = label["position_3d_world"]
         assert math.dist((x, y), ROBOT_BASE_XY) >= ROBOT_BASE_KEEP_OUT_RADIUS_M
+        assert label["layout_reachability"]["passed"] is True
+    assert len(supervision["layout_reachability"]["bin_cells"]) == 6
+    assert all(item["passed"] for item in supervision["layout_reachability"]["bin_cells"])
+
+
+def test_m1b_adr_0014_scene_geometry_and_bin_layout_are_consistent() -> None:
+    root = Path(__file__).parents[2]
+    template = (root / "robot_ws/src/xh_sim/worlds/industrial_cylinder_v1.sdf").read_text()
+    assert template.count("<radius>0.015</radius>") == 12
+    assert template.count("<length>0.08</length>") == 12
+    assert template.count("<mass>0.045</mass>") == 6
+    assert "<radius>0.025</radius>" not in template
+    assert "<length>0.09</length>" not in template
+    assert "<mass>0.06</mass>" not in template
+    assert "<pose>0.20 0 0.45 0 0 1.57079632679</pose>" in template
+    assert len(bin_cell_targets()) == 6
+    assert all(target[2] == BIN_DROP_TARGET_Z_M for target in bin_cell_targets())
+
+
+def test_m1b_adr_0014_preserves_hand_contracts_while_narrowing_geometry() -> None:
+    urdf = (Path(__file__).parents[2] / "robot_ws/src/xh_sim/urdf/panda_controlled.urdf").read_text()
+    assert '<box size="0.07 0.06 0.11"/>' in urdf
+    assert urdf.count('<box size="0.08 0.010 0.022"/>') == 4
+    assert urdf.count('name="tapered_tip_collision"') == 2
+    assert urdf.count('<box size="0.02 0.006 0.012"/>') == 4
+    assert '<joint name="panda_finger_joint1" type="prismatic">' in urdf
+    assert '<joint name="panda_finger_joint2" type="prismatic">' in urdf
+    assert urdf.count('lower="0" upper="0.04"') == 2
+    assert '/xh/supervision/panda_leftfinger_contacts' in urdf
+    assert '/xh/supervision/panda_rightfinger_contacts' in urdf
 
 
 def test_m1b_moveit_server_does_not_start_a_second_simulation() -> None:

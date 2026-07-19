@@ -405,6 +405,42 @@ def refine_position_only(
     }
 
 
+def position_only_reachability_gate(
+    model: Model, *, target_xyz: Vector, samples: int, seed: int, maximum_target_distance_m: float
+) -> dict[str, object]:
+    """Fail closed on a bounded, deterministic controlled-URDF FK check.
+
+    This is deliberately narrower than MoveIt planning: it establishes only
+    that a fingertip can be positioned at the requested point under the
+    current bounded URDF.  Orientation and collision are left to the
+    subsequent S1/MoveIt gates and are stated in the evidence rather than
+    inferred from this prefilter.
+    """
+    if samples <= 0:
+        raise ValueError("samples must be positive")
+    if maximum_target_distance_m <= 0:
+        raise ValueError("maximum_target_distance_m must be positive")
+    random_source = random.Random(seed)
+    metrics = empty_metrics()
+    for _ in range(samples):
+        positions = tuple(random_source.uniform(joint.lower, joint.upper) for joint in model.arm)  # type: ignore[arg-type]
+        update_metrics(metrics, fingertip_positions(model, positions), positions, target_xyz)
+    refinement = refine_position_only(model, metrics, tuple(model.arm), model.post_arm, target_xyz)
+    final_distance = float(refinement["final_target_distance_m"])
+    return {
+        "method": "ADR-0006_controlled_urdf_bounded_DLS_position_only",
+        "target_xyz_m": [round(value, 6) for value in target_xyz],
+        "uniform_arm_joint_samples": samples,
+        "random_seed": seed,
+        "maximum_target_distance_m": maximum_target_distance_m,
+        "final_target_distance_m": final_distance,
+        "passed": final_distance <= maximum_target_distance_m,
+        "position_only_refinement": refinement,
+        "orientation_not_solved": True,
+        "collision_not_checked": True,
+    }
+
+
 def sample_chunk(
     model: Model, samples: int, seed: int, target_total_reach_m: float, target_xyz: Vector
 ) -> tuple[dict[str, object], ...]:
