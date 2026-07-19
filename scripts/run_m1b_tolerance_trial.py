@@ -25,7 +25,8 @@ from typing import Callable
 
 import rclpy
 from geometry_msgs.msg import Pose
-from moveit_msgs.msg import CollisionObject, PlanningScene
+from moveit_msgs.msg import CollisionObject, PlanningScene, PlanningSceneComponents
+from moveit_msgs.srv import GetPlanningScene
 from ros_gz_interfaces.msg import Contacts
 from shape_msgs.msg import SolidPrimitive
 
@@ -593,14 +594,24 @@ def apply_calibration_cylinder_scene(client: CalibrationClient, labels: list[dic
     # separate removal a shorter later scene inherits collision objects from
     # the preceding seed and its corridor result is not an independent audit.
     # Generated industrial scenes contain at most twelve named cylinders.
+    expected_ids = {f"cylinder_{index:02d}" for index in range(1, 13)}
+    request = GetPlanningScene.Request()
+    request.components = PlanningSceneComponents(components=PlanningSceneComponents.WORLD_OBJECT_NAMES)
+    future = client.scene_get_client.call_async(request)
+    rclpy.spin_until_future_complete(client, future, timeout_sec=10.0)
+    result = future.result()
+    existing_ids = {
+        item.id for item in (result.scene.world.collision_objects if result is not None else [])
+        if item.id in expected_ids
+    }
     removal = PlanningScene(is_diff=True)
-    for index in range(1, 13):
+    for object_id in sorted(existing_ids):
         item = CollisionObject()
-        item.id = f"cylinder_{index:02d}"
+        item.id = object_id
         item.header.frame_id = "world"
         item.operation = CollisionObject.REMOVE
         removal.world.collision_objects.append(item)
-    if not client.apply_scene_diff(removal):
+    if existing_ids and not client.apply_scene_diff(removal):
         return False
 
     scene = PlanningScene(is_diff=True)

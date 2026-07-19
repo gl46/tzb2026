@@ -364,9 +364,11 @@ def test_m1b_adr_0016_orientation_scan_requires_kinematics_and_populated_corrido
 
 def test_m1b_scene_admission_replaces_prior_seed_collision_objects() -> None:
     source = (Path(__file__).parents[2] / "scripts/run_m1b_tolerance_trial.py").read_text()
-    assert 'for index in range(1, 13):' in source
+    assert 'expected_ids = {f"cylinder_{index:02d}" for index in range(1, 13)}' in source
+    assert 'PlanningSceneComponents.WORLD_OBJECT_NAMES' in source
+    assert 'for object_id in sorted(existing_ids):' in source
     assert 'item.operation = CollisionObject.REMOVE' in source
-    assert 'if not client.apply_scene_diff(removal):' in source
+    assert 'if existing_ids and not client.apply_scene_diff(removal):' in source
 
 
 def test_m1b_adr_0016_top_contact_height_includes_tapered_tip_clearance() -> None:
