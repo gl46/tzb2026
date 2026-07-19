@@ -256,6 +256,8 @@ def test_m1b_tolerance_attach_uses_detachablejoint_empty_payload() -> None:
     assert 'lateral_target_touch_exception_restored = client.set_target_touch_exception(False, target_id=target_entity)' in source
     assert '"calibration_lateral_target_touch_exception_restored": lateral_target_touch_exception_restored' in source
     assert 'def m1b_calibration_vertical_board_ik_probe(' in source
+    assert 'def m1b_calibration_scene_labels_at_lift(' in source
+    assert 'virtual_labels = m1b_calibration_scene_labels_at_lift(labels, lift_m=lift_m)' in source
     assert 'M1B_CALIBRATION_VERTICAL_BOARD_HAND_X_OFFSETS_M' in source
     assert 'M1B_CALIBRATION_VERTICAL_BOARD_HAND_Z_OFFSETS_M' in source
     assert '"executed_physical_motion": False' in source

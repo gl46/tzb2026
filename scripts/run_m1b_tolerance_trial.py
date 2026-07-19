@@ -522,21 +522,32 @@ def apply_calibration_cylinder_scene(client: CalibrationClient, labels: list[dic
     return client.apply_scene_diff(scene)
 
 
+def m1b_calibration_scene_labels_at_lift(
+    labels: list[dict[str, object]], *, lift_m: float,
+) -> list[dict[str, object]]:
+    """Translate the complete calibration fixture for one height candidate."""
+    virtual_labels: list[dict[str, object]] = []
+    for label in labels:
+        copy = dict(label)
+        position = list(copy["position_3d_world"])
+        position[2] = float(position[2]) + lift_m
+        copy["position_3d_world"] = position
+        virtual_labels.append(copy)
+    return virtual_labels
+
+
 def m1b_calibration_target_height_scan(
     client: CalibrationClient, labels: list[dict[str, object]], *, target_entity: str,
     target_world_m: list[float], hand_y_centerline_bias_m: float,
 ) -> dict[str, object]:
-    """No-motion scan of virtual raised-target planning scenes."""
+    """No-motion scan of virtual whole-fixture raised planning scenes."""
     candidates: list[dict[str, object]] = []
     for lift_m in M1B_CALIBRATION_TARGET_HEIGHT_LIFTS_M:
-        virtual_labels = []
-        for label in labels:
-            copy = dict(label)
-            if str(copy["actual_sim_entity_id"]) == target_entity:
-                position = list(copy["position_3d_world"])
-                position[2] = float(target_world_m[2]) + lift_m
-                copy["position_3d_world"] = position
-            virtual_labels.append(copy)
+        # A physical pedestal lifts every cylinder.  Scanning only the target
+        # would leave its neighbours at stale lower collision heights and can
+        # manufacture an IK/planning result that the physical fixture cannot
+        # reproduce.  Translate the entire supervised fixture identically.
+        virtual_labels = m1b_calibration_scene_labels_at_lift(labels, lift_m=lift_m)
         scene_applied = apply_calibration_cylinder_scene(client, virtual_labels)
         exception_applied = client.set_target_touch_exception(True, target_id=target_entity) if scene_applied else False
         virtual_target = [target_world_m[0], target_world_m[1], target_world_m[2] + lift_m]
