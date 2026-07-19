@@ -32,9 +32,21 @@ tmp_root="$(mktemp -d)"
 pid=""; pgid=""; gate_tmp=""
 stop_sim() {
   if [ -n "$pgid" ]; then
-    kill -TERM -- "-$pgid" 2>/dev/null || true
-    sleep 1
-    kill -KILL -- "-$pgid" 2>/dev/null || true
+    # `setsid ... &` normally gives the launch a private process group.  On
+    # some non-interactive shells, however, `$!` still reports the caller's
+    # group briefly; killing that group terminates this ordered audit after
+    # Gate 1.  Only signal a verified private group, otherwise signal the
+    # recorded launch process itself.
+    caller_pgid="$(ps -o pgid= -p "$$" | tr -d ' ')"
+    if [ "$pgid" != "$caller_pgid" ]; then
+      kill -TERM -- "-$pgid" 2>/dev/null || true
+      sleep 1
+      kill -KILL -- "-$pgid" 2>/dev/null || true
+    else
+      kill -TERM "$pid" 2>/dev/null || true
+      sleep 1
+      kill -KILL "$pid" 2>/dev/null || true
+    fi
   fi
   [ -z "$pid" ] || wait "$pid" 2>/dev/null || true
   pid=""; pgid=""

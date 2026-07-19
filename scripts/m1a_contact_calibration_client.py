@@ -51,13 +51,17 @@ CONTACT_TOPICS = {
     "cube_environment": "/xh/supervision/red_cube_environment_contacts",
 }
 CUBE_SIZE_M = 0.05
-PAD_SIZE_M = (0.10, 0.010, 0.022)
+# ADR-0016 moves the contact pads from local +X to local +Z.  These are the
+# main pad dimensions only; the tapered distal tip is deliberately excluded
+# from the AABB evidence because its purpose is clearance rather than the S0
+# contact surface.
+PAD_SIZE_M = (0.022, 0.010, 0.080)
 FINGER_LENGTH_M = 0.10
-FINGER_ROOT_Z_M = 0.055
+FINGER_ROOT_Z_M = 0.10
 PLANNING_SCENE_WORLD_OBJECT_PADDING_M = 0.0
 CALIBRATION_CUBE_XYZ = [0.17, 0.12, 0.755]
 CALIBRATION_FIXTURE_XYZ = [0.17, 0.12, 0.59]
-CALIBRATION_FIXTURE_SIZE_M = [0.03, 0.03, 0.28]
+CALIBRATION_FIXTURE_SIZE_M = [0.01, 0.01, 0.28]
 CONTACT_RETREAT_HEIGHT_M = 0.220
 HAND_POST_GOAL_OBSERVATION_SLACK_M = 0.0001
 # The nominal side-contact pose placed the 12 cm finger pad exactly tangent to
@@ -71,14 +75,23 @@ CALIBRATION_FINGER_TARGET_INSET_M = 0.002
 # pre-close pose; the corresponding before/after poses are recorded below.
 BILATERAL_PRECONTACT_CLEARANCE_M = 0.001
 BILATERAL_FINAL_FINGER_INSET_M = 0.0
-BILATERAL_PRECONTACT_FINGER_M = 0.034
+# The 30 mm final command contacts a 50 mm S0 cube.  Use the fully open
+# 40 mm state for the vertical terminal descent so neither inline pad clips a
+# sidewall before closure.
+BILATERAL_PRECONTACT_FINGER_M = 0.040
+BILATERAL_PRECONTACT_VERTICAL_STANDOFF_M = 0.050
+# The inline tapered tip extends 20 mm beyond the named 80 mm contact pad.
+# A 30 mm lift cleared the named-pad AABB but still drove that tip into the
+# bilateral support.  A 40 mm lift leaves the tip 5 mm above the support and
+# retains a 25 mm overlap with the cube's upper sidewall.
+BILATERAL_CONTACT_VERTICAL_OFFSET_M = 0.040
 BILATERAL_STEADY_WIDTH_RANGE_M = (0.045, 0.070)
 # The unchanged public finger-contact topic observes the main named collision
 # box, whose ADR-0014 geometry is 80 mm long from the finger-link origin.
-# With the table top at z=0.450 m and this orientation mapping local +X to
-# world -Z, a target link origin of 0.450 + 0.080 = 0.530 m makes that named
-# collision (not merely the unobserved tapered tip) reach the tabletop.
-TABLE_TOUCH_HAND_Z_M = 0.530
+# With the table top at z=0.450 m, the ADR-0016 inline main-pad centre is
+# 10 cm along local +Z from the hand.  Rx(pi) maps that axis down, so a 0.550 m
+# hand origin places the named 8 cm pad across the tabletop.
+TABLE_TOUCH_HAND_Z_M = 0.550
 
 
 def calibration_bilateral_branch_seed() -> list[float]:
@@ -718,7 +731,7 @@ class CalibrationClient(EvidenceClient):
             if pose is None:
                 output[side] = None
                 continue
-            translation = quaternion_rotate(pose[3:], (0.06, 0.0, 0.0))
+            translation = quaternion_rotate(pose[3:], (0.0, 0.0, 0.04))
             center = [pose[index] + translation[index] for index in range(3)]
             separation = aabb_separation(center, PAD_SIZE_M, cube_xyz, (CUBE_SIZE_M,) * 3)
             output[side] = {"link_pose": pose, "pad_center_world": center, "aabb_separation_m": separation}
@@ -737,7 +750,7 @@ class CalibrationClient(EvidenceClient):
             cr, sr = math.cos(roll / 2.0), math.sin(roll / 2.0)
             quaternion = [sr * cp * cy - cr * sp * sy, cr * sp * cy + sr * cp * sy,
                           cr * cp * sy - sr * sp * cy, cr * cp * cy + sr * sp * sy]
-            translation = quaternion_rotate(quaternion, (0.06, 0.0, 0.0))
+            translation = quaternion_rotate(quaternion, (0.0, 0.0, 0.04))
             center = [pose[index] + translation[index] for index in range(3)]
             separation = aabb_separation(center, PAD_SIZE_M, cube_xyz, (CUBE_SIZE_M,) * 3)
             simulator[side] = {
@@ -808,19 +821,23 @@ class CalibrationClient(EvidenceClient):
 def hand_pose(
     cube_xyz: list[float], *, y_offset: float = 0.0,
     finger_target_inset_m: float = CALIBRATION_FINGER_TARGET_INSET_M,
+    vertical_standoff_m: float = 0.0,
+    contact_vertical_offset_m: float = 0.0,
 ) -> Pose:
-    """Runtime-oracle side contact pose, derived from the hand/finger chain."""
+    """Runtime-oracle inline-pad contact pose, derived from ADR-0016 geometry."""
     pose = Pose()
-    # With RPY [pi, 0, 0], a finger runs along world +X from its hand frame and
-    # its centreline is 5.5 cm below the hand.  Align its tip with the cube's
-    # west face with a recorded 2 mm finger-only overlap margin.  The palm
-    # remains clear of the high calibration fixture and table.
-    pose.position.x = cube_xyz[0] - (
-        CUBE_SIZE_M / 2.0 + FINGER_LENGTH_M - finger_target_inset_m
-    )
+    # With RPY [pi, 0, 0], the inline main pad is vertical and centred 10 cm
+    # below the hand.  Its 8 cm height spans the cube's sidewall while its
+    # local +/-Y closure faces provide the individual/bilateral S0 contacts.
+    # The named-pad offset places the selected open finger 2 mm into that
+    # sidewall; no privileged online input is involved.
+    pose.position.x = cube_xyz[0]
     pose.position.y = cube_xyz[1] + y_offset
-    pose.position.z = cube_xyz[2] + FINGER_ROOT_Z_M
-    # RPY [pi, 0, 0] puts the finger centreline at the cube's centre height.
+    pose.position.z = (
+        cube_xyz[2] + FINGER_ROOT_Z_M - finger_target_inset_m
+        + vertical_standoff_m + contact_vertical_offset_m
+    )
+    # RPY [pi, 0, 0] directs local +Z (the inline tool/finger axis) downward.
     pose.orientation.x = 1.0
     pose.orientation.w = 0.0
     return pose
@@ -829,7 +846,7 @@ def hand_pose(
 def calibration_retreat_pose(cube_xyz: list[float], *, y_offset: float) -> Pose:
     """Lift from the runtime target before restoring normal ACM checks."""
     pose = Pose()
-    pose.position.x = cube_xyz[0] - (CUBE_SIZE_M / 2.0 + FINGER_LENGTH_M + 0.10)
+    pose.position.x = cube_xyz[0]
     pose.position.y = cube_xyz[1] + y_offset
     pose.position.z = cube_xyz[2] + CONTACT_RETREAT_HEIGHT_M
     pose.orientation.x = 1.0
@@ -849,8 +866,8 @@ def table_touch_pose(cube_xyz: list[float]) -> Pose:
     pose.position.x = -0.25
     pose.position.y = -0.25
     pose.position.z = TABLE_TOUCH_HAND_Z_M
-    pose.orientation.y = math.sqrt(0.5)
-    pose.orientation.w = math.sqrt(0.5)
+    pose.orientation.x = 1.0
+    pose.orientation.w = 0.0
     return pose
 
 
@@ -933,15 +950,14 @@ def main() -> int:
         trials.append({"label": "idle", "expected": "none", "contacts": classify_contacts(idle_events)})
 
         specifications = (
-            # ADR-0008 redefines left/right as pose-induced, fixed-aperture
-            # labelled contact.  Both fingers stay at the same 4 cm command;
-            # the runtime-oracle lateral approach, not an unavailable
-            # independent channel, selects the named pad.  No joint-angle seed
-            # is carried between conditions: every pose derives from the
-            # runtime cube geometry and starts IK from measured state.
-            [(f"left_{index}", "left", 0.040, [0.040, 0.040]) for index in range(1, 4)]
-            + [(f"right_{index}", "right", -0.040, [0.040, 0.040]) for index in range(1, 4)]
-            + [(f"bilateral_{index}", "bilateral", 0.0, [0.010, 0.010]) for index in range(1, 4)]
+            # ADR-0016 keeps ADR-0008's pose-induced, fixed-aperture labels,
+            # but rederives them for vertical pads and local +/-Y closure.
+            # At a 4 cm opening, 12 mm hand offsets give one pad a measured
+            # 2 mm sidewall inset.  At 30 mm per finger the two inner faces
+            # meet a 50 mm S0 cube without a side push.
+            [(f"left_{index}", "left", 0.012, [0.040, 0.040]) for index in range(1, 4)]
+            + [(f"right_{index}", "right", -0.012, [0.040, 0.040]) for index in range(1, 4)]
+            + [(f"bilateral_{index}", "bilateral", 0.0, [0.030, 0.030]) for index in range(1, 4)]
         )
         scope = os.environ.get("M1A_CALIBRATION_SCOPE", "full")
         selected_label = os.environ.get("M1A_CALIBRATION_LABEL", "")
@@ -970,7 +986,6 @@ def main() -> int:
             client.update_cube_scene(cube["xyz"], target_id=target_model)
             exception_set = client.set_target_touch_exception(True, target_id=target_model)
             target_pose = hand_pose(cube["xyz"], y_offset=y_offset)
-            start = {name: len(events) for name, events in client.contacts.items()}
             if expected in {"left", "right"}:
                 # Keep the symmetric aperture fixed across the entire named-pad
                 # contact window.  Motion causes the label; the following
@@ -988,10 +1003,13 @@ def main() -> int:
                 precontact_pose = hand_pose(
                     cube["xyz"], y_offset=y_offset,
                     finger_target_inset_m=-BILATERAL_PRECONTACT_CLEARANCE_M,
+                    vertical_standoff_m=BILATERAL_PRECONTACT_VERTICAL_STANDOFF_M,
+                    contact_vertical_offset_m=BILATERAL_CONTACT_VERTICAL_OFFSET_M,
                 )
                 target_pose = hand_pose(
                     cube["xyz"], y_offset=y_offset,
                     finger_target_inset_m=BILATERAL_FINAL_FINGER_INSET_M,
+                    contact_vertical_offset_m=BILATERAL_CONTACT_VERTICAL_OFFSET_M,
                 )
                 precontact_motion = client.move_hand_pose(
                     precontact_pose, ik_seed=calibration_bilateral_branch_seed()
@@ -1024,6 +1042,11 @@ def main() -> int:
                     "controller_result_error_string": "BILATERAL_CONTACT_POSE_NOT_CONVERGED",
                     "observed_positions_m": [],
                 }
+            # S0 labels a settled contact condition.  Do not include transient
+            # contacts while a non-selected pad crosses the target during the
+            # collision-checked arm trajectory; begin the evidence window only
+            # after the final pose and hand command have converged.
+            start = {name: len(events) for name, events in client.contacts.items()}
             client.contact_window(0.45)
             events = {name: client.contacts[name][start[name]:] for name in client.contacts}
             cube_after = runtime_bilateral_cube_pose() if expected == "bilateral" else runtime_cube_pose()

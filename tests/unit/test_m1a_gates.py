@@ -342,9 +342,13 @@ def test_m1a_contact_calibration_uses_oracle_geometry_hand_control_and_per_trial
     assert "FREE_DYNAMIC_SELF_CENTERING" in client
     assert "target_cube_events" in client
     assert "BILATERAL_PRECONTACT_CLEARANCE_M = 0.001" in client
+    assert "BILATERAL_PRECONTACT_VERTICAL_STANDOFF_M = 0.050" in client
+    assert "BILATERAL_PRECONTACT_FINGER_M = 0.040" in client
+    assert "BILATERAL_CONTACT_VERTICAL_OFFSET_M = 0.040" in client
     assert "BILATERAL_FINAL_FINGER_INSET_M = 0.0" in client
     assert "BILATERAL_STEADY_WIDTH_RANGE_M = (0.045, 0.070)" in client
-    assert "TABLE_TOUCH_HAND_Z_M = 0.530" in client
+    assert "TABLE_TOUCH_HAND_Z_M = 0.550" in client
+    assert "pose.orientation.x = 1.0" in client
     assert "table_contact_pad_evidence" in client
     assert "bilateral_steady_gripper_width_m" in client
     assert 'precontact_motion.get("converged") is True' in client
@@ -379,9 +383,10 @@ def test_m1a_contact_calibration_uses_oracle_geometry_hand_control_and_per_trial
     assert "controller_target_reference_seen" in client
     assert "set_target_touch_exception" in client
     assert "target_touch_exception_restored" in client
-    assert '"left", 0.040, [0.040, 0.040]' in client
-    assert '"right", -0.040, [0.040, 0.040]' in client
-    assert '"bilateral", 0.0, [0.010, 0.010]' in client
+    assert '"left", 0.012, [0.040, 0.040]' in client
+    assert '"right", -0.012, [0.040, 0.040]' in client
+    assert '"bilateral", 0.0, [0.030, 0.030]' in client
+    assert "begin the evidence window only" in client
     assert "POSE_INDUCED_FIXED_SYMMETRIC_APERTURE" in client
     assert "SYMMETRIC_MIMIC_CLOSE" in client
     assert "calibration_retreat_pose" in client
@@ -389,8 +394,8 @@ def test_m1a_contact_calibration_uses_oracle_geometry_hand_control_and_per_trial
     assert "pose-induced, fixed-aperture" in client
     assert "M1A_CALIBRATION_SCOPE" in client
     assert "M1A_CALIBRATION_LABEL" in client and "M1A_CALIBRATION_LABEL" in runner
-    assert "FINGER_LENGTH_M = 0.10" in client and "FINGER_ROOT_Z_M = 0.055" in client
-    assert "Runtime-oracle side contact pose" in client
+    assert "FINGER_LENGTH_M = 0.10" in client and "FINGER_ROOT_Z_M = 0.10" in client
+    assert "Runtime-oracle inline-pad contact pose" in client
     assert "pose_vector(target_pose)" in client and "pose_vector(retreat_pose)" in client
     isolated_runner = (root / "scripts/run_isolated_contact_calibration.sh").read_text()
     aggregator = (root / "scripts/aggregate_isolated_contact_calibration.py").read_text()
