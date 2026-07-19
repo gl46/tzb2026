@@ -168,3 +168,10 @@ Applying the unchanged criterion `p90 <= 0.6 * measured_tolerance` yields
 wrong-object drill was run. The next permitted work is an interference report
 and a change that produces a nonzero physical envelope; gate thresholds must
 not be relaxed.
+
+The required interference report is now recorded in
+`reports/m1b-adr0014-interference-report.json` and
+`reports/m1b-adr0014-interference-report.md`: 69/81 terminal contact-descend
+IK requests failed before close, and the only observed contacts were table
+interference or a one-finger non-target-cylinder contact. This establishes a
+physical terminal-path blocker; it does not authorize a gate relaxation.
