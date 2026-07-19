@@ -362,6 +362,13 @@ def test_m1b_adr_0016_orientation_scan_requires_kinematics_and_populated_corrido
     assert 'ORIENTATION_FEASIBILITY_VERIFIED' in source
 
 
+def test_m1b_scene_admission_replaces_prior_seed_collision_objects() -> None:
+    source = (Path(__file__).parents[2] / "scripts/run_m1b_tolerance_trial.py").read_text()
+    assert 'for index in range(1, 13):' in source
+    assert 'item.operation = CollisionObject.REMOVE' in source
+    assert 'if not client.apply_scene_diff(removal):' in source
+
+
 def test_m1b_adr_0016_top_contact_height_includes_tapered_tip_clearance() -> None:
     source = (Path(__file__).parents[2] / "scripts/run_m1b_tolerance_trial.py").read_text()
     assert 'M1B_TOP_CONTACT_CENTERLINE_Z_M = 0.120' in source

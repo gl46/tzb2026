@@ -588,6 +588,21 @@ def apply_calibration_cylinder_scene(client: CalibrationClient, labels: list[dic
     online policy input: production creates the equivalent obstacles from
     public perception tracks before planning.
     """
+    # Scene admission may assess several generated scenes in one MoveIt
+    # session.  A diff only updates names it contains, so without this
+    # separate removal a shorter later scene inherits collision objects from
+    # the preceding seed and its corridor result is not an independent audit.
+    # Generated industrial scenes contain at most twelve named cylinders.
+    removal = PlanningScene(is_diff=True)
+    for index in range(1, 13):
+        item = CollisionObject()
+        item.id = f"cylinder_{index:02d}"
+        item.header.frame_id = "world"
+        item.operation = CollisionObject.REMOVE
+        removal.world.collision_objects.append(item)
+    if not client.apply_scene_diff(removal):
+        return False
+
     scene = PlanningScene(is_diff=True)
     for label in labels:
         item = CollisionObject()
