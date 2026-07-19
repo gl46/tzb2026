@@ -56,7 +56,11 @@ M1B_NORMAL_SIDE_IK_SEED = [
     -2.7829882206873315, 1.4459771370327215, 2.997318074330887,
     -1.286336046330572,
 ]
-M1B_TOP_CONTACT_CENTERLINE_Z_M = 0.100
+# ADR-0016 S0 measured that the inline tapered tip extends beyond the named
+# main pad.  On a 30 mm cylinder at the table, a 100 mm hand offset puts that
+# tip into the tabletop; 140 mm preserves upper-sidewall overlap while giving
+# the tip the measured 5 mm table clearance.
+M1B_TOP_CONTACT_CENTERLINE_Z_M = 0.140
 M1B_TOP_PRECONTACT_STANDOFF_M = 0.150
 M1B_NORMAL_PRECONTACT_HAND_Z_OFFSET_M = 0.220
 # The calibration-only IK sweep in the isolated zero-offset scene found the

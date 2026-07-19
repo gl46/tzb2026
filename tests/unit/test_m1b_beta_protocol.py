@@ -361,6 +361,12 @@ def test_m1b_adr_0016_orientation_scan_requires_kinematics_and_populated_corrido
     assert 'ORIENTATION_FEASIBILITY_VERIFIED' in source
 
 
+def test_m1b_adr_0016_top_contact_height_includes_tapered_tip_clearance() -> None:
+    source = (Path(__file__).parents[2] / "scripts/run_m1b_tolerance_trial.py").read_text()
+    assert 'M1B_TOP_CONTACT_CENTERLINE_Z_M = 0.140' in source
+    assert 'tip into the tabletop' in source
+
+
 def test_m1b_moveit_server_does_not_start_a_second_simulation() -> None:
     source = (Path(__file__).parents[2] / "robot_ws/src/xh_sim/launch/m1b_moveit_server.launch.py").read_text()
     assert "simulation.launch.py" not in source.replace("``simulation.launch.py``", "")

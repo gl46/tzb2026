@@ -48,6 +48,7 @@ def pose_results(client: CalibrationClient, center: list[float], *, collision_aw
         entries[name] = {
             "pose_world_xyzw": [pose.position.x, pose.position.y, pose.position.z, pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w],
             "ik_solved": solution is not None,
+            "ik_error": None if solution is not None else client.last_ik_error,
             "corridor_planned_from_home": plan is not None if collision_aware else None,
         }
         seed = solution
