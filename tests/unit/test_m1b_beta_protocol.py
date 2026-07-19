@@ -203,7 +203,7 @@ def test_m1b_tolerance_attach_uses_detachablejoint_empty_payload() -> None:
     assert 'value.position.x = centre_world_m[0] + hand_x_offset_m' in source
     assert 'def m1b_close_finger_targets_from_perceived_diameter(' in source
     assert 'width_window_from_perceived_diameter(perceived_diameter_m)' in source
-    assert 'M1B_FINGER_BOARD_THICKNESS_M = 0.018' in source
+    assert 'M1B_FINGER_BOARD_THICKNESS_M = 0.010' in source
     assert 'per_finger_target_m = (selected_inner_gap_m + M1B_FINGER_BOARD_THICKNESS_M) / 2.0' in source
     assert '"inner_pad_gap_window_m"' in source
     assert 'def public_track_from_evidence(' in source

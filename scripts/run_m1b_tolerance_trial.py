@@ -90,7 +90,7 @@ M1B_CALIBRATION_VERTICAL_BOARD_HAND_Z_OFFSETS_M = (-0.040, -0.030, -0.020)
 # approved fixed hand-chain correction; calibration-only sweeps may override
 # it, but isolated sweep successes are not promoted to production defaults.
 M1B_NORMAL_HAND_Y_CENTERLINE_BIAS_M = 0.001
-M1B_FINGER_BOARD_THICKNESS_M = 0.018
+M1B_FINGER_BOARD_THICKNESS_M = 0.010
 M1B_MAX_FINGER_POSITION_M = 0.040
 M1B_NEAR_REOBSERVATION_DURATION_S = 8.0
 M1B_NEAR_REOBSERVATION_MAX_ASSOCIATION_DISTANCE_M = 0.050
@@ -511,7 +511,7 @@ def apply_calibration_cylinder_scene(client: CalibrationClient, labels: list[dic
         item = CollisionObject()
         item.id = str(label["actual_sim_entity_id"])
         item.header.frame_id = "world"
-        item.primitives = [SolidPrimitive(type=SolidPrimitive.CYLINDER, dimensions=[0.09, 0.025])]
+        item.primitives = [SolidPrimitive(type=SolidPrimitive.CYLINDER, dimensions=[0.08, 0.015])]
         pose = Pose()
         pose.position.x, pose.position.y, pose.position.z = (float(value) for value in label["position_3d_world"])
         pose.orientation.w = 1.0

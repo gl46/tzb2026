@@ -12,8 +12,9 @@ from pathlib import Path
 COLORS = [(0.8, 0.1, 0.1), (0.1, 0.7, 0.2), (0.1, 0.2, 0.8), (0.8, 0.6, 0.1), (0.7, 0.1, 0.7), (0.1, 0.7, 0.7)]
 ORIENTATIONS = ("normal", "inverted", "tilted")
 TABLE_TOP_Z = 0.45
-CYLINDER_RADIUS_M = 0.025
-CYLINDER_HALF_LENGTH_M = 0.045
+CYLINDER_RADIUS_M = 0.015
+CYLINDER_HALF_LENGTH_M = 0.040
+CYLINDER_MASS_KG = 0.045
 # Keep a small positive gap so Gazebo does not begin a reset with a cylinder
 # already intersecting the tabletop.  The physical-reset check remains the
 # authority on whether the object has subsequently settled.
@@ -49,7 +50,7 @@ def cylinder_pose(state: str) -> tuple[float, float, float]:
 def part_sdf(index: int, state: str, x: float, y: float, color: tuple[float, float, float], yaw: float) -> str:
     roll, pitch, z = cylinder_pose(state)
     red, green, blue = color
-    return f'''    <model name="cylinder_{index:02d}"><pose>{x:.4f} {y:.4f} {z:.4f} {roll:.4f} {pitch:.4f} {yaw:.4f}</pose><link name="link"><inertial><mass>0.06</mass></inertial><velocity_decay><linear>{LINEAR_VELOCITY_DECAY}</linear><angular>{ANGULAR_VELOCITY_DECAY}</angular></velocity_decay><collision name="collision"><geometry><cylinder><radius>0.025</radius><length>0.09</length></cylinder></geometry></collision><visual name="visual"><geometry><cylinder><radius>0.025</radius><length>0.09</length></cylinder></geometry><material><diffuse>{red:.3f} {green:.3f} {blue:.3f} 1</diffuse><specular>0.15 0.15 0.15 1</specular></material></visual><sensor name="contact" type="contact"><always_on>1</always_on><update_rate>30</update_rate><topic>/xh/actuation_internal/cylinders/cylinder_{index:02d}/contacts</topic><contact><collision>collision</collision></contact></sensor></link></model>'''
+    return f'''    <model name="cylinder_{index:02d}"><pose>{x:.4f} {y:.4f} {z:.4f} {roll:.4f} {pitch:.4f} {yaw:.4f}</pose><link name="link"><inertial><mass>{CYLINDER_MASS_KG}</mass></inertial><velocity_decay><linear>{LINEAR_VELOCITY_DECAY}</linear><angular>{ANGULAR_VELOCITY_DECAY}</angular></velocity_decay><collision name="collision"><geometry><cylinder><radius>{CYLINDER_RADIUS_M}</radius><length>{2 * CYLINDER_HALF_LENGTH_M}</length></cylinder></geometry></collision><visual name="visual"><geometry><cylinder><radius>{CYLINDER_RADIUS_M}</radius><length>{2 * CYLINDER_HALF_LENGTH_M}</length></cylinder></geometry><material><diffuse>{red:.3f} {green:.3f} {blue:.3f} 1</diffuse><specular>0.15 0.15 0.15 1</specular></material></visual><sensor name="contact" type="contact"><always_on>1</always_on><update_rate>30</update_rate><topic>/xh/actuation_internal/cylinders/cylinder_{index:02d}/contacts</topic><contact><collision>collision</collision></contact></sensor></link></model>'''
 
 
 def render(template: str, seed: int, *, orientations: tuple[str, ...] = ORIENTATIONS) -> tuple[str, dict[str, object]]:
@@ -60,7 +61,7 @@ def render(template: str, seed: int, *, orientations: tuple[str, ...] = ORIENTAT
     positions: list[tuple[float, float]] = []
     for index in range(count):
         state = orientations[index % len(orientations)]
-        # Split two incoming zones and enforce a 9 cm centre separation. This
+        # Split two incoming zones and enforce a 6 cm centre separation. This
         # prevents the simulator generator from creating unobservable stacks.
         for _ in range(500):
             # The calibration envelope retains both incoming lanes while
@@ -69,7 +70,7 @@ def render(template: str, seed: int, *, orientations: tuple[str, ...] = ORIENTAT
             x = rng.uniform(-0.55, -0.08)
             y = rng.uniform(-0.36, -0.08) if index % 2 == 0 else rng.uniform(0.08, 0.36)
             clear_of_base = math.dist((x, y), ROBOT_BASE_XY) >= ROBOT_BASE_KEEP_OUT_RADIUS_M
-            if clear_of_base and all((x - other_x) ** 2 + (y - other_y) ** 2 >= 0.09 ** 2 for other_x, other_y in positions):
+            if clear_of_base and all((x - other_x) ** 2 + (y - other_y) ** 2 >= 0.06 ** 2 for other_x, other_y in positions):
                 positions.append((x, y))
                 break
         else:

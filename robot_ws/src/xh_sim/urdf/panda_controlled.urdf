@@ -54,10 +54,10 @@
   <link name="panda_link8"><inertial><mass value="0.2"/><inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/></inertial><visual><geometry><box size="0.04 0.04 0.04"/></geometry><material name="xh_dark"/></visual><collision><geometry><box size="0.04 0.04 0.04"/></geometry></collision></link>
   <joint name="panda_joint8" type="fixed"><origin xyz="0 0 0.107" rpy="0 0 0"/><parent link="panda_link7"/><child link="panda_link8"/></joint>
 
-  <link name="panda_hand"><inertial><mass value="0.5"/><inertia ixx="0.003" ixy="0" ixz="0" iyy="0.003" iyz="0" izz="0.003"/></inertial><visual><origin xyz="0 0 0.055"/><geometry><box size="0.10 0.08 0.11"/></geometry><material name="xh_dark"/></visual><collision><origin xyz="0 0 0.055"/><geometry><box size="0.10 0.08 0.11"/></geometry></collision></link>
+  <link name="panda_hand"><inertial><mass value="0.5"/><inertia ixx="0.003" ixy="0" ixz="0" iyy="0.003" iyz="0" izz="0.003"/></inertial><visual><origin xyz="0 0 0.055"/><geometry><box size="0.07 0.06 0.11"/></geometry><material name="xh_dark"/></visual><collision><origin xyz="0 0 0.055"/><geometry><box size="0.07 0.06 0.11"/></geometry></collision></link>
   <joint name="panda_hand_joint" type="fixed"><origin xyz="0 0 0" rpy="0 0 -0.785398163397"/><parent link="panda_link8"/><child link="panda_hand"/></joint>
 
-  <link name="panda_rightfinger"><inertial><mass value="0.08"/><inertia ixx="0.0002" ixy="0" ixz="0" iyy="0.0002" iyz="0" izz="0.0002"/></inertial><visual><origin xyz="0.06 0 0"/><geometry><box size="0.12 0.018 0.035"/></geometry><material name="xh_dark"/></visual><collision name="collision"><origin xyz="0.06 0 0"/><geometry><box size="0.12 0.018 0.035"/></geometry></collision></link>
+  <link name="panda_rightfinger"><inertial><mass value="0.08"/><inertia ixx="0.0002" ixy="0" ixz="0" iyy="0.0002" iyz="0" izz="0.0002"/></inertial><visual><origin xyz="0.04 0 0"/><geometry><box size="0.08 0.010 0.022"/></geometry><material name="xh_dark"/></visual><visual name="tapered_tip_visual"><origin xyz="0.09 0 0"/><geometry><box size="0.02 0.006 0.012"/></geometry><material name="xh_dark"/></visual><collision name="collision"><origin xyz="0.04 0 0"/><geometry><box size="0.08 0.010 0.022"/></geometry></collision><collision name="tapered_tip_collision"><origin xyz="0.09 0 0"/><geometry><box size="0.02 0.006 0.012"/></geometry></collision></link>
   <!-- q2 is the physical master selected by ADR-0008's pre-authorized
        PANDA_MIMIC_Q2_MASTER fallback. It is deliberately declared before its
        q1 follower because the URDF→Gazebo importer resolves mimic leaders in
@@ -65,7 +65,7 @@
        q1 follower constraint before this model can promote S0. -->
   <joint name="panda_finger_joint2" type="prismatic"><origin xyz="0 0 0.055" rpy="0 0 0"/><parent link="panda_hand"/><child link="panda_rightfinger"/><axis xyz="0 -1 0"/><limit effort="20" lower="0" upper="0.04" velocity="0.2"/><dynamics damping="1.0"/></joint>
 
-  <link name="panda_leftfinger"><inertial><mass value="0.08"/><inertia ixx="0.0002" ixy="0" ixz="0" iyy="0.0002" iyz="0" izz="0.0002"/></inertial><visual><origin xyz="0.06 0 0"/><geometry><box size="0.12 0.018 0.035"/></geometry><material name="xh_dark"/></visual><collision name="collision"><origin xyz="0.06 0 0"/><geometry><box size="0.12 0.018 0.035"/></geometry></collision></link>
+  <link name="panda_leftfinger"><inertial><mass value="0.08"/><inertia ixx="0.0002" ixy="0" ixz="0" iyy="0.0002" iyz="0" izz="0.0002"/></inertial><visual><origin xyz="0.04 0 0"/><geometry><box size="0.08 0.010 0.022"/></geometry><material name="xh_dark"/></visual><visual name="tapered_tip_visual"><origin xyz="0.09 0 0"/><geometry><box size="0.02 0.006 0.012"/></geometry><material name="xh_dark"/></visual><collision name="collision"><origin xyz="0.04 0 0"/><geometry><box size="0.08 0.010 0.022"/></geometry></collision><collision name="tapered_tip_collision"><origin xyz="0.09 0 0"/><geometry><box size="0.02 0.006 0.012"/></geometry></collision></link>
   <!-- ADR-0008 pre-authorized active-joint fallback: q1 is the follower after
        the bounded q1-master close probe left it physically at 4 cm. The
        positive-open joint protocol is unchanged. -->

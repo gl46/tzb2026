@@ -387,7 +387,7 @@ def test_m1a_contact_calibration_uses_oracle_geometry_hand_control_and_per_trial
     assert "pose-induced, fixed-aperture" in client
     assert "M1A_CALIBRATION_SCOPE" in client
     assert "M1A_CALIBRATION_LABEL" in client and "M1A_CALIBRATION_LABEL" in runner
-    assert "FINGER_LENGTH_M = 0.12" in client and "FINGER_ROOT_Z_M = 0.055" in client
+    assert "FINGER_LENGTH_M = 0.10" in client and "FINGER_ROOT_Z_M = 0.055" in client
     assert "Runtime-oracle side contact pose" in client
     assert "pose_vector(target_pose)" in client and "pose_vector(retreat_pose)" in client
     isolated_runner = (root / "scripts/run_isolated_contact_calibration.sh").read_text()
@@ -781,7 +781,7 @@ def test_adr_0006_fk_sampling_keeps_end_effector_and_protocol_invariants() -> No
     assert module.ARM_JOINTS == tuple(f"panda_joint{index}" for index in range(1, 8))
     assert 0 < scale < 1
     assert module.serial_translation_m(model) == pytest.approx(1.3192623327153459)
-    assert module.fixed_end_effector_extension_m(model) == pytest.approx(0.115)
+    assert module.fixed_end_effector_extension_m(model) == pytest.approx(0.095)
     report = module.sample_workspace(model, samples=100, seed=7, target_total_reach_m=0.85)
     candidate = report["candidate_definition"]
     assert candidate["scaled_transforms"] == [*module.ARM_JOINTS, "panda_joint8", module.HAND_JOINT]

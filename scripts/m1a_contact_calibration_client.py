@@ -51,8 +51,8 @@ CONTACT_TOPICS = {
     "cube_environment": "/xh/supervision/red_cube_environment_contacts",
 }
 CUBE_SIZE_M = 0.05
-PAD_SIZE_M = (0.12, 0.018, 0.035)
-FINGER_LENGTH_M = 0.12
+PAD_SIZE_M = (0.10, 0.010, 0.022)
+FINGER_LENGTH_M = 0.10
 FINGER_ROOT_Z_M = 0.055
 PLANNING_SCENE_WORLD_OBJECT_PADDING_M = 0.0
 CALIBRATION_CUBE_XYZ = [0.17, 0.12, 0.755]
