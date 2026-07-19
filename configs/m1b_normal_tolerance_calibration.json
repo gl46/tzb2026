@@ -7,8 +7,8 @@
   "repetitions_per_point": 3,
   "calibration_instances": [
     {"scene_seed": 5017, "object_slot": 1},
-    {"scene_seed": 5018, "object_slot": 1},
-    {"scene_seed": 5019, "object_slot": 1}
+    {"scene_seed": 5017, "object_slot": 2},
+    {"scene_seed": 5017, "object_slot": 3}
   ],
   "success_predicate": "bilateral_same_entity_contact",
   "minimum_success_rate": 0.8,
