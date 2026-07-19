@@ -77,6 +77,12 @@ M1B_CALIBRATION_LATERAL_INSERTION_CLEAR_HAND_X_OFFSETS_M = (-0.200, -0.160, -0.1
 # 105 mm.  These are evaluated from low to high and never alter the runtime
 # primitive until a repeatable calibration result exists.
 M1B_CALIBRATION_LATERAL_INSERTION_HAND_Z_OFFSETS_M = (0.065, 0.080, 0.095, 0.105)
+# Coarse calibration-only yaw grid.  Each candidate preserves a horizontal
+# board axis and a horizontal closing axis; the cylinder is rotationally
+# symmetric, so this explores Panda reachability rather than a new object
+# model.  A successful coarse cell must be repeated and then locally refined
+# before it may become a production primitive.
+M1B_CALIBRATION_LATERAL_INSERTION_YAWS_RAD = tuple(math.radians(value) for value in range(0, 360, 30))
 # Live calibration link-pose evidence at the settled target shows the physical
 # board midpoint is 0.8 mm left of the commanded hand Y.  +1 mm is the
 # approved fixed hand-chain correction; calibration-only sweeps may override
@@ -256,29 +262,32 @@ def select_near_public_track(
 def _m1b_normal_side_pose(
     centre_world_m: list[float], *, hand_z_offset_m: float, hand_y_centerline_bias_m: float,
     hand_x_offset_m: float = M1B_NORMAL_SIDE_HAND_X_OFFSET_M, mirrored_x_entry: bool = False,
+    hand_yaw_rad: float = 0.0,
 ) -> Pose:
-    """Return one side-grasp hand pose; only the vertical phase may vary."""
+    """Return one side-grasp hand pose; production retains yaw zero."""
     value = Pose()
     # Side grasp uses the middle of the 12 cm boards to overlap the cylinder
     # along X, then closes along Y.  A fingertip-tangent approach was measured
     # to push the free cylinder along X during the vertical descent; this
     # fixed -80 mm board-centre placement is the collision-checked branch.
-    value.position.x = centre_world_m[0] + hand_x_offset_m
+    yaw_rad = math.pi if mirrored_x_entry else hand_yaw_rad
+    board_x = math.cos(yaw_rad)
+    board_y = math.sin(yaw_rad)
+    # Preserve the production +Y bias at yaw zero while rotating it with the
+    # jaw-centreline for calibration yaw candidates.
+    bias_x = -math.sin(yaw_rad) * hand_y_centerline_bias_m
+    bias_y = math.cos(yaw_rad) * hand_y_centerline_bias_m
+    value.position.x = centre_world_m[0] + hand_x_offset_m * board_x + bias_x
     # The high precontact phase removes the old approach-graze failure mode,
     # so final descent is now centred on the public centre estimate.  A
     # closing-axis bias would turn a nominal cylindrical grasp into unilateral
     # contact and must not be silently treated as self-centring.
-    value.position.y = centre_world_m[1] + hand_y_centerline_bias_m
+    value.position.y = centre_world_m[1] + hand_x_offset_m * board_y + bias_y
     value.position.z = centre_world_m[2] + hand_z_offset_m
-    # The production branch remains the historical -X entry.  The
-    # calibration-only mirror rotates the same parallel boards by pi about Y:
-    # their X span reverses while the two pads still close symmetrically along
-    # world Y.  It supplies a second arm-workspace branch without changing
-    # the gripper geometry or feeding simulator truth to runtime.
-    if mirrored_x_entry:
-        value.orientation.y = 1.0
-    else:
-        value.orientation.x = 1.0
+    # Rz(yaw) * Rx(pi): yaw zero is exactly the production quaternion
+    # (x=1,y=0); yaw pi is the previously tested mirrored quaternion.
+    value.orientation.x = math.cos(yaw_rad / 2.0)
+    value.orientation.y = math.sin(yaw_rad / 2.0)
     return value
 
 
@@ -337,36 +346,33 @@ def m1b_calibration_lateral_insertion(
     granting an ACM exception or becoming an online truth-dependent policy.
     """
     candidate_attempts: list[dict[str, object]] = []
-    insertion_families = (
-        ("negative_x", False, -1.0),
-        ("positive_x_mirrored", True, 1.0),
-    )
     lateral_contact_authorization = {"requested": authorize_lateral_target_contact is not None, "applied": False}
     for z_offset_m in candidate_hand_z_offsets_m:
-        for family_name, mirrored_x_entry, direction in insertion_families:
+        for yaw_rad in M1B_CALIBRATION_LATERAL_INSERTION_YAWS_RAD:
+            family_name = f"yaw_{round(math.degrees(yaw_rad)):03d}"
             for magnitude_m in (abs(value) for value in M1B_CALIBRATION_LATERAL_INSERTION_CLEAR_HAND_X_OFFSETS_M):
-                clear_x_offset_m = direction * magnitude_m
-                final_x_offset_m = direction * abs(M1B_NORMAL_SIDE_HAND_X_OFFSET_M)
+                clear_x_offset_m = -magnitude_m
+                final_x_offset_m = -abs(M1B_NORMAL_SIDE_HAND_X_OFFSET_M)
                 low_pose = _m1b_normal_side_pose(
                     centre_world_m, hand_z_offset_m=z_offset_m,
                     hand_y_centerline_bias_m=hand_y_centerline_bias_m,
-                    hand_x_offset_m=clear_x_offset_m, mirrored_x_entry=mirrored_x_entry,
+                    hand_x_offset_m=clear_x_offset_m, hand_yaw_rad=yaw_rad,
                 )
                 low_seed = client.ik(low_pose, seed=M1B_NORMAL_SIDE_IK_SEED)
                 if low_seed is None:
-                    candidate_attempts.append({"family": family_name, "mirrored_x_entry": mirrored_x_entry, "clear_hand_x_offset_m": clear_x_offset_m, "hand_z_offset_m": z_offset_m, "failed_stage": "low_clear_preflight_ik", "ik_error": client.last_ik_error})
+                    candidate_attempts.append({"family": family_name, "yaw_rad": yaw_rad, "clear_hand_x_offset_m": clear_x_offset_m, "hand_z_offset_m": z_offset_m, "failed_stage": "low_clear_preflight_ik", "ik_error": client.last_ik_error})
                     continue
                 final_pose = _m1b_normal_side_pose(
                     centre_world_m, hand_z_offset_m=z_offset_m,
                     hand_y_centerline_bias_m=hand_y_centerline_bias_m,
-                    hand_x_offset_m=final_x_offset_m, mirrored_x_entry=mirrored_x_entry,
+                    hand_x_offset_m=final_x_offset_m, hand_yaw_rad=yaw_rad,
                 )
                 final_seed = client.ik(
                     final_pose, seed=low_seed,
                     avoid_collisions=authorize_lateral_target_contact is None,
                 )
                 if final_seed is None:
-                    candidate_attempts.append({"family": family_name, "mirrored_x_entry": mirrored_x_entry, "clear_hand_x_offset_m": clear_x_offset_m, "hand_z_offset_m": z_offset_m, "failed_stage": "lateral_insert_preflight_ik", "ik_error": client.last_ik_error})
+                    candidate_attempts.append({"family": family_name, "yaw_rad": yaw_rad, "clear_hand_x_offset_m": clear_x_offset_m, "hand_z_offset_m": z_offset_m, "failed_stage": "lateral_insert_preflight_ik", "ik_error": client.last_ik_error})
                     continue
                 stages: dict[str, dict[str, object]] = {}
                 seed: list[float] | None = M1B_NORMAL_SIDE_IK_SEED
@@ -378,20 +384,20 @@ def m1b_calibration_lateral_insertion(
                     if name == "lateral_insert" and authorize_lateral_target_contact is not None:
                         lateral_contact_authorization["applied"] = authorize_lateral_target_contact()
                         if not lateral_contact_authorization["applied"]:
-                            candidate_attempts.append({"family": family_name, "mirrored_x_entry": mirrored_x_entry, "clear_hand_x_offset_m": clear_x_offset_m, "hand_z_offset_m": z_offset_m, "failed_stage": "LATERAL_TARGET_CONTACT_AUTHORIZATION_REJECTED", "stages": stages})
+                            candidate_attempts.append({"family": family_name, "yaw_rad": yaw_rad, "clear_hand_x_offset_m": clear_x_offset_m, "hand_z_offset_m": z_offset_m, "failed_stage": "LATERAL_TARGET_CONTACT_AUTHORIZATION_REJECTED", "stages": stages})
                             break
                     stage = client.move_hand_pose(
                         _m1b_normal_side_pose(
                             centre_world_m, hand_z_offset_m=stage_z_offset_m,
                             hand_y_centerline_bias_m=hand_y_centerline_bias_m,
                             hand_x_offset_m=x_offset_m,
-                            mirrored_x_entry=mirrored_x_entry,
+                            hand_yaw_rad=yaw_rad,
                         ),
                         ik_seed=seed,
                     )
                     stages[name] = stage
                     if not (stage.get("executed") and stage.get("converged")):
-                        candidate_attempts.append({"family": family_name, "mirrored_x_entry": mirrored_x_entry, "clear_hand_x_offset_m": clear_x_offset_m, "hand_z_offset_m": z_offset_m, "failed_stage": name, "stages": stages})
+                        candidate_attempts.append({"family": family_name, "yaw_rad": yaw_rad, "clear_hand_x_offset_m": clear_x_offset_m, "hand_z_offset_m": z_offset_m, "failed_stage": name, "stages": stages})
                         break
                     seed = stage.get("ik_solution")
                 else:
@@ -400,12 +406,13 @@ def m1b_calibration_lateral_insertion(
                         "candidate_attempts": candidate_attempts,
                         "lateral_target_contact_authorization": lateral_contact_authorization,
                         "geometry": {
-                            "insertion_axis_world": [1.0, 0.0, 0.0],
+                            "insertion_axis_world": [math.cos(yaw_rad), math.sin(yaw_rad), 0.0],
                             "family": family_name,
-                            "mirrored_x_entry": mirrored_x_entry,
+                            "yaw_rad": yaw_rad,
+                            "yaw_degrees": math.degrees(yaw_rad),
                             "clear_hand_x_offset_m": clear_x_offset_m,
                             "candidate_clear_hand_x_offsets_m": list(M1B_CALIBRATION_LATERAL_INSERTION_CLEAR_HAND_X_OFFSETS_M),
-                            "candidate_hand_z_offsets_m": list(M1B_CALIBRATION_LATERAL_INSERTION_HAND_Z_OFFSETS_M),
+                            "candidate_hand_z_offsets_m": list(candidate_hand_z_offsets_m),
                             "final_hand_x_offset_m": final_x_offset_m,
                             "hand_z_offset_m": z_offset_m,
                         },
@@ -416,7 +423,7 @@ def m1b_calibration_lateral_insertion(
         "lateral_target_contact_authorization": lateral_contact_authorization,
         "geometry": {
             "insertion_axis_world": [1.0, 0.0, 0.0],
-            "families": [item[0] for item in insertion_families],
+            "yaw_candidates_degrees": [math.degrees(value) for value in M1B_CALIBRATION_LATERAL_INSERTION_YAWS_RAD],
             "candidate_clear_hand_x_offsets_m": list(M1B_CALIBRATION_LATERAL_INSERTION_CLEAR_HAND_X_OFFSETS_M),
             "candidate_hand_z_offsets_m": list(candidate_hand_z_offsets_m),
             "final_hand_x_offset_m": M1B_NORMAL_SIDE_HAND_X_OFFSET_M,

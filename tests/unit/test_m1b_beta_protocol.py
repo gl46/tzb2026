@@ -196,7 +196,8 @@ def test_m1b_tolerance_attach_uses_detachablejoint_empty_payload() -> None:
     assert 'M1B_NORMAL_CONTACT_HAND_Z_OFFSET_M = 0.065' in source
     assert 'M1B_NORMAL_SIDE_HAND_X_OFFSET_M = -0.080' in source
     assert 'M1B_NORMAL_HAND_Y_CENTERLINE_BIAS_M = 0.001' in source
-    assert 'value.position.y = centre_world_m[1] + hand_y_centerline_bias_m' in source
+    assert 'bias_y = math.cos(yaw_rad) * hand_y_centerline_bias_m' in source
+    assert 'value.position.y = centre_world_m[1] + hand_x_offset_m * board_y + bias_y' in source
     assert 'hand_y_centerline_bias_m = M1B_NORMAL_HAND_Y_CENTERLINE_BIAS_M if args.calibration_hand_y_bias_m is None else args.calibration_hand_y_bias_m' in source
     assert 'hand_x_offset_m: float = M1B_NORMAL_SIDE_HAND_X_OFFSET_M' in source
     assert 'value.position.x = centre_world_m[0] + hand_x_offset_m' in source
@@ -238,6 +239,7 @@ def test_m1b_tolerance_attach_uses_detachablejoint_empty_payload() -> None:
     assert 'requires one explicit lateral insertion height' in source
     assert 'M1B_CALIBRATION_LATERAL_INSERTION_CLEAR_HAND_X_OFFSETS_M = (-0.200, -0.160, -0.140, -0.120)' in source
     assert 'M1B_CALIBRATION_LATERAL_INSERTION_HAND_Z_OFFSETS_M = (0.065, 0.080, 0.095, 0.105)' in source
+    assert 'M1B_CALIBRATION_LATERAL_INSERTION_YAWS_RAD = tuple(math.radians(value) for value in range(0, 360, 30))' in source
     assert 'def m1b_calibration_lateral_insertion(' in source
     assert 'for magnitude_m in (abs(value) for value in M1B_CALIBRATION_LATERAL_INSERTION_CLEAR_HAND_X_OFFSETS_M):' in source
     assert '("high_clear", M1B_NORMAL_PRECONTACT_HAND_Z_OFFSET_M, clear_x_offset_m)' in source
@@ -248,9 +250,10 @@ def test_m1b_tolerance_attach_uses_detachablejoint_empty_payload() -> None:
     assert 'authorize_lateral_target_contact=authorize_lateral_target_contact' in source
     assert '"low_clear_preflight_ik"' in source
     assert '"lateral_insert_preflight_ik"' in source
-    assert '("positive_x_mirrored", True, 1.0)' in source
-    assert 'mirrored_x_entry=mirrored_x_entry' in source
-    assert 'value.orientation.y = 1.0' in source
+    assert 'for yaw_rad in M1B_CALIBRATION_LATERAL_INSERTION_YAWS_RAD:' in source
+    assert 'value.orientation.x = math.cos(yaw_rad / 2.0)' in source
+    assert 'value.orientation.y = math.sin(yaw_rad / 2.0)' in source
+    assert '"yaw_candidates_degrees"' in source
     assert '--calibration-lateral-insertion requires --calibration-keep-target-collision-through-descend' in source
     assert '"calibration_lateral_insertion": args.calibration_lateral_insertion' in source
     assert '"calibration_motion_diagnostic": calibration_motion' in source
