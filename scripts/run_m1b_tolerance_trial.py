@@ -359,7 +359,10 @@ def m1b_calibration_vertical_board_ik_probe(
                 centre_world_m, hand_x_offset_m=hand_x_offset_m,
                 hand_z_offset_m=hand_z_offset_m, hand_y_centerline_bias_m=hand_y_centerline_bias_m,
             )
-            solution = client.ik(pose, seed=M1B_NORMAL_SIDE_IK_SEED)
+            # This is a new orientation family; do not bias the solver with
+            # the horizontal-board branch's measured seed.  Starting from the
+            # reset-home joint state makes this a genuine feasibility probe.
+            solution = client.ik(pose)
             trajectory = client.plan(solution) if solution is not None else None
             candidates.append({
                 "hand_x_offset_m": hand_x_offset_m, "hand_z_offset_m": hand_z_offset_m,

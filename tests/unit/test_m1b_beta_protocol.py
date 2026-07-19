@@ -258,6 +258,7 @@ def test_m1b_tolerance_attach_uses_detachablejoint_empty_payload() -> None:
     assert 'M1B_CALIBRATION_VERTICAL_BOARD_HAND_Z_OFFSETS_M' in source
     assert '"executed_physical_motion": False' in source
     assert '"finger_board_axis_world": [0.0, 0.0, 1.0]' in source
+    assert 'solution = client.ik(pose)' in source
     assert '"low_clear_preflight_ik"' in source
     assert '"lateral_insert_preflight_ik"' in source
     assert 'for yaw_rad in M1B_CALIBRATION_LATERAL_INSERTION_YAWS_RAD:' in source
