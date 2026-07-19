@@ -26,7 +26,7 @@ SCRIPTS = Path(__file__).parents[2] / "scripts"
 if str(SCRIPTS) not in sys.path:
     sys.path.insert(0, str(SCRIPTS))
 from audit_m1b_center_reachability import percentile90, perceived_diameter_m  # noqa: E402
-from generate_industrial_scenes import BIN_DROP_TARGET_Z_M, ROBOT_BASE_KEEP_OUT_RADIUS_M, ROBOT_BASE_XY, bin_cell_targets, render  # noqa: E402
+from generate_industrial_scenes import BIN_DROP_TARGET_Z_M, CYLINDER_HALF_LENGTH_M, ROBOT_BASE_KEEP_OUT_RADIUS_M, ROBOT_BASE_XY, SPAWN_CLEARANCE_M, TABLE_TOP_Z, bin_cell_targets, render  # noqa: E402
 from summarize_m1b_tolerance_campaign import summarize  # noqa: E402
 from xh_agent.perception.interfaces import BBoxV1, PerceptionResultV1  # noqa: E402
 
@@ -293,6 +293,21 @@ def test_m1b_generated_cylinders_clear_the_fixed_robot_base() -> None:
         assert label["layout_reachability"]["passed"] is True
     assert len(supervision["layout_reachability"]["bin_cells"]) == 6
     assert all(item["passed"] for item in supervision["layout_reachability"]["bin_cells"])
+
+
+def test_m1b_calibration_pedestal_is_normal_only_and_lifts_labels() -> None:
+    template = (Path(__file__).parents[2] / "robot_ws/src/xh_sim/worlds/industrial_cylinder_v1.sdf").read_text()
+    scene, supervision = render(template, 1017, orientations=("normal",), pedestal_lift_m=0.04)
+    labels = supervision["simulator_supervision"]["objects"]
+    assert scene.count('name="cylinder_pedestal_') == len(labels)
+    assert supervision["calibration_fixture"] == {
+        "kind": "static_narrow_pedestal",
+        "pedestal_lift_m": 0.04,
+        "calibration_only": True,
+    }
+    assert all(label["position_3d_world"][2] == pytest.approx(TABLE_TOP_Z + 0.04 + CYLINDER_HALF_LENGTH_M + SPAWN_CLEARANCE_M) for label in labels)
+    with pytest.raises(ValueError, match="normal cylinders"):
+        render(template, 1017, pedestal_lift_m=0.04)
 
 
 def test_m1b_adr_0014_scene_geometry_and_bin_layout_are_consistent() -> None:
