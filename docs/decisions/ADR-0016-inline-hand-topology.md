@@ -105,4 +105,7 @@ same revalidation cascade.
 - Side-grasp retirement / top-down consolidation: **APPROVED**
 - Orientation-feasibility pre-scan gate: **APPROVED**
 - Pre-authorized franka-geometry fallback: **APPROVED**
-- Implementation SHA: **PENDING — recorded after implementation**
+- Implementation SHA: **`7bca346`** (`feat: adopt ADR0016 inline top grasp topology`)
+- Measured follow-up: `reports/m1b-adr0016-top-contact-height-calibration.json`
+  selects the 120 mm top-contact centreline from physical zero-offset probes;
+  it does **not** satisfy the required 81-trial envelope or perception gate.

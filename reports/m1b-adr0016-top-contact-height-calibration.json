@@ -1,0 +1,63 @@
+{
+  "schema_version": "M1BTopContactHeightCalibrationV1",
+  "status": "MEASURED_SINGLE_POINT_SELECTION",
+  "provenance": "CALIBRATION_ONLY_INITIALIZATION",
+  "online_truth_access": false,
+  "purpose": "Select a production top-contact hand height using bounded physical zero-offset probes after ADR-0016 inline-hand topology implementation.",
+  "selection": {
+    "production_contact_centerline_z_m": 0.12,
+    "selection_rule": "Use the only measured height with bilateral same-entity contact and confirmed detachable attach; do not infer a wider height envelope from three points."
+  },
+  "trials": [
+    {
+      "contact_centerline_z_m": 0.1,
+      "scene_seed": 5017,
+      "object_slot": 1,
+      "reset_status": "RESET_PHYSICAL_NONCOUPLING_VERIFIED",
+      "approach_converged": true,
+      "final_descent_ik_solved": false,
+      "bilateral_same_entity_contact": false,
+      "attach_state_confirmed": false,
+      "raw_evidence_path": "/tmp/m1b-height-100-r2/raw/trial-000.json",
+      "raw_evidence_sha256": "995d661272825734f372db2614a0f27cdfd604d1d28ba69ecefc437e60e024e4"
+    },
+    {
+      "contact_centerline_z_m": 0.12,
+      "scene_seed": 5017,
+      "object_slot": 1,
+      "reset_status": "RESET_PHYSICAL_NONCOUPLING_VERIFIED",
+      "approach_converged": true,
+      "final_descent_ik_solved": true,
+      "bilateral_same_entity_contact": true,
+      "attach_state_confirmed": true,
+      "attached_entity": "cylinder_01",
+      "raw_contact_sample_count": 1326,
+      "raw_evidence_path": "/tmp/m1b-height-120r2/result.json",
+      "raw_evidence_sha256": "8954dddea839f4f726f65be3ad94f7210338b1b8d0e1fcb9b5e84b1f081de982"
+    },
+    {
+      "contact_centerline_z_m": 0.14,
+      "scene_seed": 5017,
+      "object_slot": 1,
+      "reset_status": "RESET_PHYSICAL_NONCOUPLING_VERIFIED",
+      "approach_converged": true,
+      "final_descent_ik_solved": true,
+      "bilateral_same_entity_contact": false,
+      "attach_state_confirmed": false,
+      "raw_contact_sample_count": 0,
+      "raw_evidence_path": "/tmp/m1b-zero-offset-5017r2/trial-result.json",
+      "raw_evidence_sha256": "2dbbffd7ee9be83e4b443803bd3dc533a742efef0b4c19df2cdec930a9fde539"
+    }
+  ],
+  "production_primitive": "open_physical_hand + m1b_top_down_precontact + m1b_top_down_contact_descend + close_physical_hand + m1b_internal_bilateral_broker",
+  "source_sha256": {
+    "run_m1b_tolerance_trial.py": "6a7e385298d2a1e15d0ba1c96d526bad81b55537c8eba9eb63ab48878c55ff21",
+    "run_m1b_tolerance_campaign_remote.sh": "74e3c84cd4d211ea8ed1415cf2db95a268ea27d40e7b6a61dd244fcab81f9a9a",
+    "panda_controlled.urdf": "13f8c715948d602388b0024b38f0ab354359e5232f981596d854f866a5eee854"
+  },
+  "limitations": [
+    "This is a bounded zero-offset height selection, not an offset tolerance envelope.",
+    "The 100 mm result is a final-descent IK failure, not a physical-contact observation.",
+    "The 140 mm result executed but produced no finger-contact samples."
+  ]
+}
