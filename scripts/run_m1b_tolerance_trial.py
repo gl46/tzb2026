@@ -85,6 +85,7 @@ M1B_CALIBRATION_LATERAL_INSERTION_HAND_Z_OFFSETS_M = (0.065, 0.080, 0.095, 0.105
 M1B_CALIBRATION_LATERAL_INSERTION_YAWS_RAD = tuple(math.radians(value) for value in range(0, 360, 30))
 M1B_CALIBRATION_VERTICAL_BOARD_HAND_X_OFFSETS_M = (-0.120, -0.080, -0.040, 0.0, 0.040, 0.080, 0.120)
 M1B_CALIBRATION_VERTICAL_BOARD_HAND_Z_OFFSETS_M = (-0.040, -0.030, -0.020)
+M1B_CALIBRATION_TARGET_HEIGHT_LIFTS_M = (0.0, 0.010, 0.020, 0.030, 0.040, 0.060, 0.080, 0.100)
 # Live calibration link-pose evidence at the settled target shows the physical
 # board midpoint is 0.8 mm left of the commanded hand Y.  +1 mm is the
 # approved fixed hand-chain correction; calibration-only sweeps may override
@@ -521,6 +522,42 @@ def apply_calibration_cylinder_scene(client: CalibrationClient, labels: list[dic
     return client.apply_scene_diff(scene)
 
 
+def m1b_calibration_target_height_scan(
+    client: CalibrationClient, labels: list[dict[str, object]], *, target_entity: str,
+    target_world_m: list[float], hand_y_centerline_bias_m: float,
+) -> dict[str, object]:
+    """No-motion scan of virtual raised-target planning scenes."""
+    candidates: list[dict[str, object]] = []
+    for lift_m in M1B_CALIBRATION_TARGET_HEIGHT_LIFTS_M:
+        virtual_labels = []
+        for label in labels:
+            copy = dict(label)
+            if str(copy["actual_sim_entity_id"]) == target_entity:
+                position = list(copy["position_3d_world"])
+                position[2] = float(target_world_m[2]) + lift_m
+                copy["position_3d_world"] = position
+            virtual_labels.append(copy)
+        scene_applied = apply_calibration_cylinder_scene(client, virtual_labels)
+        exception_applied = client.set_target_touch_exception(True, target_id=target_entity) if scene_applied else False
+        virtual_target = [target_world_m[0], target_world_m[1], target_world_m[2] + lift_m]
+        pre_pose = _m1b_normal_side_pose(virtual_target, hand_z_offset_m=M1B_NORMAL_PRECONTACT_HAND_Z_OFFSET_M, hand_y_centerline_bias_m=hand_y_centerline_bias_m)
+        pre_ik = client.ik(pre_pose, seed=M1B_NORMAL_SIDE_IK_SEED)
+        pre_plan = client.plan(pre_ik) if pre_ik is not None else None
+        contact_pose = _m1b_normal_side_pose(virtual_target, hand_z_offset_m=M1B_NORMAL_CONTACT_HAND_Z_OFFSET_M, hand_y_centerline_bias_m=hand_y_centerline_bias_m)
+        contact_ik = client.ik(contact_pose, seed=pre_ik or M1B_NORMAL_SIDE_IK_SEED)
+        contact_plan = client.plan(contact_ik) if contact_ik is not None else None
+        restored = client.set_target_touch_exception(False, target_id=target_entity) if exception_applied else False
+        candidates.append({
+            "lift_m": lift_m, "virtual_target_center_world_m": virtual_target,
+            "scene_applied": scene_applied, "target_touch_exception_applied": exception_applied,
+            "precontact_ik_solved": pre_ik is not None, "precontact_planned_from_reset_home": pre_plan is not None,
+            "contact_ik_solved": contact_ik is not None, "contact_planned_from_reset_home": contact_plan is not None,
+            "target_touch_exception_restored": restored,
+        })
+    restored_scene = apply_calibration_cylinder_scene(client, labels)
+    return {"executed_physical_motion": False, "candidate_count": len(candidates), "candidates": candidates, "original_scene_restored": restored_scene}
+
+
 def attach_and_observe(topic: str, state_topic: str) -> dict[str, object]:
     """Subscribe before publish so the one-shot DetachableJoint state is evidence."""
     monitor = subprocess.Popen(["gz", "topic", "-e", "-t", state_topic], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
@@ -582,6 +619,7 @@ def main() -> int:
     parser.add_argument("--calibration-lateral-insertion-hand-z-offset-m", type=float, help="Calibration-only single lateral-insertion height")
     parser.add_argument("--calibration-lateral-insert-target-touch-exception", action="store_true", help="Calibration-only: authorize target contact only for final lateral insert")
     parser.add_argument("--calibration-vertical-board-ik-probe", action="store_true", help="Calibration-only: plan vertical-board poses without physical motion")
+    parser.add_argument("--calibration-target-height-scan", action="store_true", help="Calibration-only: scan virtual target elevations without physical motion")
     parser.add_argument("--output", required=True, type=Path)
     args = parser.parse_args()
     trial = json.loads(args.trial.read_text(encoding="utf-8"))
@@ -607,6 +645,8 @@ def main() -> int:
             raise SystemExit("--calibration-lateral-insert-target-touch-exception requires one explicit lateral insertion height")
     if args.calibration_vertical_board_ik_probe and args.calibration_fixture_diameter_m is None:
         raise SystemExit("--calibration-vertical-board-ik-probe is calibration-only")
+    if args.calibration_target_height_scan and args.calibration_fixture_diameter_m is None:
+        raise SystemExit("--calibration-target-height-scan is calibration-only")
     hand_y_centerline_bias_m = M1B_NORMAL_HAND_Y_CENTERLINE_BIAS_M if args.calibration_hand_y_bias_m is None else args.calibration_hand_y_bias_m
     axis = str(trial["axis"])
     if axis not in {"x", "y", "z"}:
@@ -679,6 +719,7 @@ def main() -> int:
         contact_descend = {"executed": False, "reason": "MOVEIT_UNAVAILABLE"}
         lateral_target_touch_exception_restored: bool | None = None
         vertical_board_ik_probe: dict[str, object] | None = None
+        target_height_scan: dict[str, object] | None = None
         near_reobservation: dict[str, object] = {"attempted": False, "succeeded": False}
         contact_start_index = len(raw)
         if ready:
@@ -690,7 +731,13 @@ def main() -> int:
             # contacts look tempting.  Only the deliberately contact-bearing
             # descent receives this narrow exception.
             target_touch_exception_applied = False
-            if args.calibration_vertical_board_ik_probe and cylinder_scene_applied:
+            if args.calibration_target_height_scan and cylinder_scene_applied:
+                target_height_scan = m1b_calibration_target_height_scan(
+                    client, labels, target_entity=target_entity, target_world_m=target,
+                    hand_y_centerline_bias_m=hand_y_centerline_bias_m,
+                )
+                approach = {"executed": False, "reason": "CALIBRATION_TARGET_HEIGHT_SCAN_NO_PHYSICAL_MOTION"}
+            elif args.calibration_vertical_board_ik_probe and cylinder_scene_applied:
                 vertical_board_ik_probe = m1b_calibration_vertical_board_ik_probe(
                     client, target, hand_y_centerline_bias_m=hand_y_centerline_bias_m,
                 )
@@ -826,6 +873,7 @@ def main() -> int:
             "calibration_lateral_insert_target_touch_exception": args.calibration_lateral_insert_target_touch_exception,
             "calibration_lateral_target_touch_exception_restored": lateral_target_touch_exception_restored,
             "calibration_vertical_board_ik_probe": vertical_board_ik_probe,
+            "calibration_target_height_scan": target_height_scan,
             "calibration_motion_diagnostic": calibration_motion,
             "open_hand": open_hand, "approach": approach, "close": close, "contact_descend": contact_descend,
             "hand_feedback_ready": hand_feedback_ready,

@@ -1,0 +1,11 @@
+{
+  "schema_version": "M1BTerminalClearanceHeightScanV1",
+  "status": "COMPLETE_CALIBRATION_ONLY_NO_PHYSICAL_GRASP_MOTION",
+  "source": "/tmp/m1b-adr0015-height-scan-20260719/raw/trial-000.json",
+  "candidate_lifts_m": [0.0, 0.01, 0.02, 0.03, 0.04, 0.06, 0.08, 0.1],
+  "first_contact_pose_planned_lift_m": 0.03,
+  "selected_followup_lift_m": 0.04,
+  "selection_rationale": "first planned 30 mm cell plus one 10 mm scan-resolution margin",
+  "physical_grasp_motion_executed": false,
+  "attach_sent": false
+}

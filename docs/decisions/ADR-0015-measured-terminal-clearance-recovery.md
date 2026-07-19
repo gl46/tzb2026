@@ -42,6 +42,17 @@ vertical-board pose families do not provide a promotable path.
 - `reports/m1b-adr0014-interference-report.md`
 - `reports/m1b-adr0014-perception-reachability-gate.json`
 
+## Height-scan result (2026-07-19)
+
+The reset-isolated, no-motion scan evaluated target lifts of 0, 10, 20, 30,
+40, 60, 80, and 100 mm with the virtual cylinder collision scene updated at
+each candidate. Contact-pose planning first succeeded at **30 mm**; 20 mm had
+an IK solution but no plan. The selected physical follow-up elevation is
+**40 mm**: the first feasible 30 mm cell plus one 10 mm scan-resolution margin.
+The scan source is
+`/tmp/m1b-adr0015-height-scan-20260719/raw/trial-000.json`; it executed no
+grasp motion, close, attach, or transport.
+
 ## Approval
 
 Project owner approved ADR-0015 calibration measurement and the ensuing

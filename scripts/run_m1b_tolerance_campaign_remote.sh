@@ -18,6 +18,7 @@ calibration_lateral_insertion="${M1B_TOLERANCE_CALIBRATION_LATERAL_INSERTION:-0}
 calibration_lateral_insertion_height_m="${M1B_TOLERANCE_CALIBRATION_LATERAL_INSERTION_HEIGHT_M:-}"
 calibration_lateral_insert_target_touch_exception="${M1B_TOLERANCE_CALIBRATION_LATERAL_INSERT_TARGET_TOUCH_EXCEPTION:-0}"
 calibration_vertical_board_ik_probe="${M1B_TOLERANCE_CALIBRATION_VERTICAL_BOARD_IK_PROBE:-0}"
+calibration_target_height_scan="${M1B_TOLERANCE_CALIBRATION_TARGET_HEIGHT_SCAN:-0}"
 calibration_hand_y_bias_args=()
 if [[ -n "$calibration_hand_y_bias_m" ]]; then
   calibration_hand_y_bias_args=(--calibration-hand-y-bias-m "$calibration_hand_y_bias_m")
@@ -41,6 +42,10 @@ fi
 vertical_board_ik_probe_args=()
 if [[ "$calibration_vertical_board_ik_probe" == 1 ]]; then
   vertical_board_ik_probe_args=(--calibration-vertical-board-ik-probe)
+fi
+target_height_scan_args=()
+if [[ "$calibration_target_height_scan" == 1 ]]; then
+  target_height_scan_args=(--calibration-target-height-scan)
 fi
 trial_timeout_s="${M1B_TOLERANCE_TRIAL_TIMEOUT_S:-150}"
 reset_max_attempts="${M1B_TOLERANCE_RESET_MAX_ATTEMPTS:-3}"
@@ -196,7 +201,7 @@ PY
   fi
   if ! timeout "$trial_timeout_s" env GZ_PARTITION="$partition" ROS_DOMAIN_ID="$domain" \
     python3 scripts/run_m1b_tolerance_trial.py --trial "$trial_path" --supervision "$supervision" --object-slot "$object_slot" \
-    --calibration-fixture-diameter-m "$fixture_diameter_m" "${calibration_hand_y_bias_args[@]}" "${keep_target_collision_args[@]}" "${lateral_insertion_args[@]}" "${lateral_insertion_height_args[@]}" "${lateral_insert_target_touch_args[@]}" "${vertical_board_ik_probe_args[@]}" --output "$run_dir/raw/trial-$(printf '%03d' "$index").json"; then
+    --calibration-fixture-diameter-m "$fixture_diameter_m" "${calibration_hand_y_bias_args[@]}" "${keep_target_collision_args[@]}" "${lateral_insertion_args[@]}" "${lateral_insertion_height_args[@]}" "${lateral_insert_target_touch_args[@]}" "${vertical_board_ik_probe_args[@]}" "${target_height_scan_args[@]}" --output "$run_dir/raw/trial-$(printf '%03d' "$index").json"; then
     cleanup_partition "$partition"
     echo "INFRASTRUCTURE_FAILURE:TRIAL:index=$index" >&2
     exit 3
