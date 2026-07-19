@@ -331,6 +331,7 @@ def test_m1b_adr_0014_scene_geometry_and_bin_layout_are_consistent() -> None:
     assert "<pose>0.20 0 0.45 0 0 1.57079632679</pose>" in template
     assert len(bin_cell_targets()) == 6
     assert all(target[2] == BIN_DROP_TARGET_Z_M for target in bin_cell_targets())
+    assert min(target[1] for target in bin_cell_targets()) == pytest.approx(0.01)
 
 
 def test_m1b_adr_0016_makes_the_hand_inline_without_changing_its_contracts() -> None:

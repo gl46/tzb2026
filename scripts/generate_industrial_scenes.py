@@ -40,7 +40,12 @@ ROBOT_BASE_KEEP_OUT_RADIUS_M = 0.19
 LAYOUT_REACHABILITY_SAMPLES = 512
 LAYOUT_REACHABILITY_MAX_DISTANCE_M = 0.002
 LAYOUT_REACHABILITY_SEED = 20260719
-BIN_CENTER_XY = (0.20, 0.0)
+# ADR-0016 orientation scan rejected the two negative-Y bin cells at the
+# former tangential origin: their full-scene final-contact corridor was
+# unavailable although empty-scene IK passed.  Preserve the approved 0.55 m
+# radial placement and shift the bin 150 mm tangentially into the measured
+# corridor.
+BIN_CENTER_XY = (0.20, 0.15)
 BIN_YAW_RAD = math.pi / 2
 BIN_CELL_LOCAL_X_M = (-0.14, 0.0, 0.14)
 BIN_CELL_LOCAL_Y_M = (-0.075, 0.075)
@@ -49,7 +54,10 @@ BIN_DROP_TARGET_Z_M = 0.56
 # before it is selected.  Its 7 cm pitch exceeds the 6 cm object separation
 # rule and it retains seed-randomized subsets without making FK acceptance a
 # stochastic property of arbitrary floating-point coordinates.
-INCOMING_GRID_X_M = (-0.53, -0.46, -0.39, -0.32, -0.25, -0.18, -0.11)
+# The ADR-0016 scan found the x=-0.39 m column has no empty-scene vertical
+# pregrasp IK.  It is excluded before seed selection rather than permitted as
+# a later MoveIt failure.
+INCOMING_GRID_X_M = (-0.53, -0.46, -0.32, -0.25, -0.18, -0.11)
 INCOMING_GRID_Y_BY_LANE_M = ((-0.34, -0.27, -0.20, -0.13), (0.13, 0.20, 0.27, 0.34))
 
 
