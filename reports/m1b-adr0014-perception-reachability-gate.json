@@ -1,0 +1,17 @@
+{
+  "schema_version": "M1BPerceptionReachabilityGateV1",
+  "status": "NO_GO",
+  "reasons": [
+    "TOLERANCE_UNMEASURED:x",
+    "TOLERANCE_UNMEASURED:y",
+    "TOLERANCE_UNMEASURED:z"
+  ],
+  "tolerance_envelope_m": { "x": null, "y": null, "z": null },
+  "perception_axis_audit_m": {
+    "x": { "median_m": 0.0020955828538374854, "p90_m": 0.0070121000005323175 },
+    "y": { "median_m": 0.002457471759267138, "p90_m": 0.012094859325643359 },
+    "z": { "median_m": 0.004871262783156305, "p90_m": 0.012214221030839578 }
+  },
+  "criterion": "per_axis_p90_m <= 0.6 * measured_tolerance_m",
+  "truth_boundary": "tolerance truth is calibration_only; perception truth is offline_evaluation_only"
+}

@@ -144,3 +144,27 @@ Amendment approval:
 - Physical non-coupling verification replacing 12/12 message receipt: **APPROVED**
 - Amendment implementation SHA: **9086967** (`codex/m1b-beta-closed-loop`)
 - Physical reset evidence: **PASS** — `reports/m1b-reset-physical-noncoupling.json`
+
+## Measured ADR-0014 revalidation (2026-07-19)
+
+Status: **NO-GO — do not run acceptance items 3 or 4.**
+
+The approved ADR-0014 30 mm-cylinder geometry was remeasured rather than
+assumed to solve the prior 50 mm configuration. The 81-trial, calibration-only
+offset campaign used the production grasp primitive and all production gates.
+It measured no bilateral same-entity contact and therefore no nonzero
+per-axis tolerance envelope. The physical source evidence is summarized in
+`reports/m1b-adr0014-tolerance-envelope.json` and
+`reports/m1b-adr0014-tolerance-envelope.md`.
+
+Separately, 30 held-out scenes were actually rendered in Gazebo and audited
+offline with the public RGB-D pipeline (255 matched instances; no exclusions).
+The aggregate p90 centre errors were x=7.0121 mm, y=12.0949 mm, and z=12.2142
+mm; this evidence is in `reports/m1b-adr0014-perception-metrics.json`.
+
+Applying the unchanged criterion `p90 <= 0.6 * measured_tolerance` yields
+**NO-GO** because every tolerance term is unmeasured/zero, as recorded in
+`reports/m1b-adr0014-perception-reachability-gate.json`. No round-trip or
+wrong-object drill was run. The next permitted work is an interference report
+and a change that produces a nonzero physical envelope; gate thresholds must
+not be relaxed.

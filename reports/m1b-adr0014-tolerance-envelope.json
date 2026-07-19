@@ -1,0 +1,26 @@
+{
+  "schema_version": "M1BToleranceEnvelopeV1",
+  "status": "COMPLETE_CALIBRATION_ONLY",
+  "configuration": "ADR-0014, 30 mm cylinder, production grasp primitive and gates unchanged",
+  "trial_count": 81,
+  "success_predicate": "bilateral_same_entity_contact_and_observed_attach",
+  "point_pass_rule": "at_least_2_of_3",
+  "monotonic_closure": "both_signed_offsets_and_all_smaller_magnitudes_pass",
+  "tolerance_envelope_m": {
+    "x": null,
+    "y": null,
+    "z": null
+  },
+  "aggregate": {
+    "successful_trials": 0,
+    "bilateral_same_entity_contact_trials": 0,
+    "point_passes": 0
+  },
+  "raw_evidence": {
+    "directory": "/tmp/m1b-tolerance-campaign-adr0014-physical-r2-20260719/raw",
+    "trial_files": 81,
+    "envelope_source": "/tmp/m1b-tolerance-campaign-adr0014-physical-r2-20260719/m1b-tolerance-envelope.json",
+    "envelope_source_sha256": "b3006faf752d685dfc96ef3576d32c9039cb58383b2bf625178128dbc11eac5a"
+  },
+  "truth_boundary": "CALIBRATION_ONLY_INITIALIZATION; supervision centre is used only to command controlled offsets."
+}
