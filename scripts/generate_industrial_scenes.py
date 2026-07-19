@@ -54,10 +54,10 @@ BIN_DROP_TARGET_Z_M = 0.56
 # before it is selected.  Its 7 cm pitch exceeds the 6 cm object separation
 # rule and it retains seed-randomized subsets without making FK acceptance a
 # stochastic property of arbitrary floating-point coordinates.
-# The ADR-0016 scan found the x=-0.39 m column has no empty-scene vertical
-# pregrasp IK.  It is excluded before seed selection rather than permitted as
-# a later MoveIt failure.
-INCOMING_GRID_X_M = (-0.53, -0.46, -0.32, -0.25, -0.18, -0.11)
+# The ADR-0016 scan found x=-0.39, -0.32, and -0.18 m columns contain
+# empty-scene vertical-pregrasp IK failures.  They are excluded before seed
+# selection rather than permitted as later MoveIt failures.
+INCOMING_GRID_X_M = (-0.53, -0.46, -0.25, -0.11)
 INCOMING_GRID_Y_BY_LANE_M = ((-0.34, -0.27, -0.20, -0.13), (0.13, 0.20, 0.27, 0.34))
 
 
