@@ -126,18 +126,23 @@ cleanup_partition() {
   done
 }
 
-wait_for_m1b_controllers() {
+wait_for_m1b_controller_load() {
   local deadline=$((SECONDS + 90)) state
   while (( SECONDS < deadline )); do
     state="$(ros2 control list_controllers 2>/dev/null || true)"
-    if grep -Eq '^joint_state_broadcaster[[:space:]]+joint_state_broadcaster/JointStateBroadcaster[[:space:]]+active' <<<"$state" \
-      && grep -Eq '^panda_arm_controller[[:space:]]+joint_trajectory_controller/JointTrajectoryController[[:space:]]+active' <<<"$state" \
-      && grep -Eq '^panda_hand_physical_controller[[:space:]]+joint_trajectory_controller/JointTrajectoryController[[:space:]]+active' <<<"$state"; then
+    # The paused launch deliberately leaves these controllers inactive.  The
+    # detach utility resumes the world and activates them only after all-N
+    # detach has been issued, so requiring `active` here would deadlock the
+    # reset lifecycle.  Confirm that all expected controllers are loaded;
+    # m1b_reset_detach.py then fail-closes if its post-resume activation fails.
+    if grep -Eq '^joint_state_broadcaster[[:space:]]+joint_state_broadcaster/JointStateBroadcaster[[:space:]]+(active|inactive)$' <<<"$state" \
+      && grep -Eq '^panda_arm_controller[[:space:]]+joint_trajectory_controller/JointTrajectoryController[[:space:]]+(active|inactive)$' <<<"$state" \
+      && grep -Eq '^panda_hand_physical_controller[[:space:]]+joint_trajectory_controller/JointTrajectoryController[[:space:]]+(active|inactive)$' <<<"$state"; then
       return 0
     fi
     sleep 1
   done
-  printf 'M1B_CONTROLLERS_NOT_ACTIVE\n%s\n' "$state" >&2
+  printf 'M1B_CONTROLLERS_NOT_LOADED\n%s\n' "$state" >&2
   return 1
 }
 
@@ -176,9 +181,9 @@ PY
       nohup bash -lc "source /opt/ros/jazzy/setup.bash; source '$root/robot_ws/install/setup.bash'; exec ros2 launch xh_sim m1b_moveit_server.launch.py" \
       >"$run_dir/logs/trial-$(printf '%03d' "$index")-reset-$reset_attempt-moveit.log" 2>&1 < /dev/null &
     sleep 5
-    if ! (export GZ_PARTITION="$partition" ROS_DOMAIN_ID="$domain"; wait_for_m1b_controllers); then
+    if ! (export GZ_PARTITION="$partition" ROS_DOMAIN_ID="$domain"; wait_for_m1b_controller_load); then
       cleanup_partition "$partition"
-      echo "INVALID_RESET_RETRY:CONTROLLERS_NOT_ACTIVE:index=$index:attempt=$reset_attempt" >&2
+      echo "INVALID_RESET_RETRY:CONTROLLERS_NOT_LOADED:index=$index:attempt=$reset_attempt" >&2
       continue
     fi
     reset_record="$run_dir/trials/trial-$(printf '%03d' "$index")-reset-attempt-$reset_attempt.json"
