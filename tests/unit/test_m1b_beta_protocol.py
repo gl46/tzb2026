@@ -349,6 +349,18 @@ def test_m1b_adr_0016_makes_the_hand_inline_without_changing_its_contracts() -> 
     assert '/xh/supervision/panda_rightfinger_contacts' in urdf
 
 
+def test_m1b_adr_0016_orientation_scan_requires_kinematics_and_populated_corridor() -> None:
+    source = (Path(__file__).parents[2] / "scripts/scan_m1b_orientation_feasibility.py").read_text()
+    assert '"empty_scene_kinematic"' in source
+    assert '"populated_scene_corridor"' in source
+    assert 'client.ik(pose, avoid_collisions=collision_aware' in source
+    assert 'client.plan(solution) if collision_aware' in source
+    assert 'apply_calibration_cylinder_scene(client, labels)' in source
+    assert 'bin_cell_targets()' in source
+    assert '"scene_admission": "FAIL_CLOSED"' in source
+    assert 'ORIENTATION_FEASIBILITY_VERIFIED' in source
+
+
 def test_m1b_moveit_server_does_not_start_a_second_simulation() -> None:
     source = (Path(__file__).parents[2] / "robot_ws/src/xh_sim/launch/m1b_moveit_server.launch.py").read_text()
     assert "simulation.launch.py" not in source.replace("``simulation.launch.py``", "")
