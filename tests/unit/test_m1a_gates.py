@@ -648,6 +648,8 @@ def test_adr_0008_adapter_is_fail_closed_and_keeps_one_physical_master() -> None
     assert "HAND_MIMIC_PHYSICAL_CONSTRAINT_VERIFIED" in physical_audit
     assert "GATE1:" in bullet_audit and "GATE2:" in bullet_audit and "GATE3:" in bullet_audit
     assert "GATE4:" in bullet_audit and "GATE5:" in bullet_audit
+    assert 'contacts.get("target_cube_events", 0) > 0' in bullet_audit
+    assert 'event_counts", {}).get("cube", 0) > 0' not in bullet_audit
     assert 'invoke("/xh/p0/red_cube/detach","detached")' in bullet_audit
     assert "attached_relative_drift_m" in bullet_audit
     assert "detached_relative_change_m" in bullet_audit

@@ -86,7 +86,11 @@ if marker == "GATE2":
 if marker == "GATE3":
     trial = next((x for x in data.get("trials", []) if x.get("label") == "bilateral_1"), {})
     contacts = trial.get("contacts", {})
-    ok = contacts.get("left_target") and contacts.get("right_target") and contacts.get("event_counts", {}).get("cube", 0) > 0
+    # The bilateral calibration target has its own contact sensor/topic.  The
+    # client normalizes whichever target channel is active into
+    # ``target_cube_events``; checking the static-cube-only ``cube`` channel
+    # here would reject valid bilateral contact evidence before GATE4/5.
+    ok = contacts.get("left_target") and contacts.get("right_target") and contacts.get("target_cube_events", 0) > 0
     raise SystemExit(0 if not ok else 1)
 if marker == "GATE4":
     required = ("initial_detach", "attach", "attached_follow", "detach", "detached_decoupled")
