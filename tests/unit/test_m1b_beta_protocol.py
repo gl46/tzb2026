@@ -248,6 +248,10 @@ def test_m1b_tolerance_attach_uses_detachablejoint_empty_payload() -> None:
     assert '"candidate_attempts": candidate_attempts' in source
     assert '"lateral_target_contact_authorization": lateral_contact_authorization' in source
     assert 'authorize_lateral_target_contact=authorize_lateral_target_contact' in source
+    assert 'failed_physical_candidate' in source
+    assert 'Do not chain a\n                        # second candidate through that altered state' in source
+    assert 'lateral_target_touch_exception_restored = client.set_target_touch_exception(False, target_id=target_entity)' in source
+    assert '"calibration_lateral_target_touch_exception_restored": lateral_target_touch_exception_restored' in source
     assert '"low_clear_preflight_ik"' in source
     assert '"lateral_insert_preflight_ik"' in source
     assert 'for yaw_rad in M1B_CALIBRATION_LATERAL_INSERTION_YAWS_RAD:' in source

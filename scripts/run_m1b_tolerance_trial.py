@@ -385,7 +385,11 @@ def m1b_calibration_lateral_insertion(
                         lateral_contact_authorization["applied"] = authorize_lateral_target_contact()
                         if not lateral_contact_authorization["applied"]:
                             candidate_attempts.append({"family": family_name, "yaw_rad": yaw_rad, "clear_hand_x_offset_m": clear_x_offset_m, "hand_z_offset_m": z_offset_m, "failed_stage": "LATERAL_TARGET_CONTACT_AUTHORIZATION_REJECTED", "stages": stages})
-                            break
+                            return {
+                                "executed": False, "converged": False, "candidate_attempts": candidate_attempts,
+                                "lateral_target_contact_authorization": lateral_contact_authorization,
+                                "failed_physical_candidate": {"family": family_name, "yaw_rad": yaw_rad, "clear_hand_x_offset_m": clear_x_offset_m, "hand_z_offset_m": z_offset_m},
+                            }
                     stage = client.move_hand_pose(
                         _m1b_normal_side_pose(
                             centre_world_m, hand_z_offset_m=stage_z_offset_m,
@@ -398,7 +402,15 @@ def m1b_calibration_lateral_insertion(
                     stages[name] = stage
                     if not (stage.get("executed") and stage.get("converged")):
                         candidate_attempts.append({"family": family_name, "yaw_rad": yaw_rad, "clear_hand_x_offset_m": clear_x_offset_m, "hand_z_offset_m": z_offset_m, "failed_stage": name, "stages": stages})
-                        break
+                        # A failed physical candidate can leave the simulator
+                        # in contact with the table or target.  Do not chain a
+                        # second candidate through that altered state; record
+                        # it and require a reset-isolated follow-up instead.
+                        return {
+                            "executed": False, "converged": False, "candidate_attempts": candidate_attempts,
+                            "lateral_target_contact_authorization": lateral_contact_authorization,
+                            "failed_physical_candidate": {"family": family_name, "yaw_rad": yaw_rad, "clear_hand_x_offset_m": clear_x_offset_m, "hand_z_offset_m": z_offset_m},
+                        }
                     seed = stage.get("ik_solution")
                 else:
                     return {
@@ -608,6 +620,7 @@ def main() -> int:
         open_hand = {"succeeded": False}
         close = {"succeeded": False}
         contact_descend = {"executed": False, "reason": "MOVEIT_UNAVAILABLE"}
+        lateral_target_touch_exception_restored: bool | None = None
         near_reobservation: dict[str, object] = {"attempted": False, "succeeded": False}
         contact_start_index = len(raw)
         if ready:
@@ -679,6 +692,11 @@ def main() -> int:
                     m1b_normal_side_contact_descend(client, final_target, ik_seed=approach.get("final", {}).get("ik_solution"), hand_y_centerline_bias_m=hand_y_centerline_bias_m)
                     if near_reobservation.get("succeeded") else {"executed": False, "reason": "PUBLIC_NEAR_REOBSERVATION_GATE_REJECTED"}
                 )
+            if args.calibration_lateral_insert_target_touch_exception:
+                # This exception is narrowly scoped to the final insert.  A
+                # failed candidate must leave the planning scene restored
+                # before it is recorded or any later motion is considered.
+                lateral_target_touch_exception_restored = client.set_target_touch_exception(False, target_id=target_entity)
             if calibration_motion is not None and contact_descend.get("executed"):
                 after_descend = calibration_live_model_center(target_entity)
                 calibration_motion["after_descend_center_world_m"] = after_descend
@@ -742,6 +760,7 @@ def main() -> int:
             "calibration_lateral_insertion": args.calibration_lateral_insertion,
             "calibration_lateral_insertion_hand_z_offset_m": args.calibration_lateral_insertion_hand_z_offset_m,
             "calibration_lateral_insert_target_touch_exception": args.calibration_lateral_insert_target_touch_exception,
+            "calibration_lateral_target_touch_exception_restored": lateral_target_touch_exception_restored,
             "calibration_motion_diagnostic": calibration_motion,
             "open_hand": open_hand, "approach": approach, "close": close, "contact_descend": contact_descend,
             "hand_feedback_ready": hand_feedback_ready,
