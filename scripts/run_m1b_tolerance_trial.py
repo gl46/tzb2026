@@ -83,6 +83,8 @@ M1B_CALIBRATION_LATERAL_INSERTION_HAND_Z_OFFSETS_M = (0.065, 0.080, 0.095, 0.105
 # model.  A successful coarse cell must be repeated and then locally refined
 # before it may become a production primitive.
 M1B_CALIBRATION_LATERAL_INSERTION_YAWS_RAD = tuple(math.radians(value) for value in range(0, 360, 30))
+M1B_CALIBRATION_VERTICAL_BOARD_HAND_X_OFFSETS_M = (-0.120, -0.080, -0.040, 0.0, 0.040, 0.080, 0.120)
+M1B_CALIBRATION_VERTICAL_BOARD_HAND_Z_OFFSETS_M = (-0.040, -0.030, -0.020)
 # Live calibration link-pose evidence at the settled target shows the physical
 # board midpoint is 0.8 mm left of the commanded hand Y.  +1 mm is the
 # approved fixed hand-chain correction; calibration-only sweeps may override
@@ -331,6 +333,55 @@ def m1b_normal_side_contact_descend(
     return client.move_hand_pose(_m1b_normal_side_pose(centre_world_m, hand_z_offset_m=M1B_NORMAL_CONTACT_HAND_Z_OFFSET_M, hand_y_centerline_bias_m=hand_y_centerline_bias_m), ik_seed=ik_seed)
 
 
+def _m1b_vertical_board_pose(
+    centre_world_m: list[float], *, hand_x_offset_m: float, hand_z_offset_m: float,
+    hand_y_centerline_bias_m: float,
+) -> Pose:
+    """Calibration-only side pinch with the 120 mm boards along world Z."""
+    value = Pose()
+    value.position.x = centre_world_m[0] + hand_x_offset_m
+    value.position.y = centre_world_m[1] + hand_y_centerline_bias_m
+    value.position.z = centre_world_m[2] + hand_z_offset_m
+    # Ry(-pi/2): local board X -> world +Z, local jaw Y remains world +Y.
+    value.orientation.y = -math.sqrt(0.5)
+    value.orientation.w = math.sqrt(0.5)
+    return value
+
+
+def m1b_calibration_vertical_board_ik_probe(
+    client: CalibrationClient, centre_world_m: list[float], *, hand_y_centerline_bias_m: float,
+) -> dict[str, object]:
+    """Evaluate vertical-board end poses without moving the physical arm."""
+    candidates: list[dict[str, object]] = []
+    for hand_z_offset_m in M1B_CALIBRATION_VERTICAL_BOARD_HAND_Z_OFFSETS_M:
+        for hand_x_offset_m in M1B_CALIBRATION_VERTICAL_BOARD_HAND_X_OFFSETS_M:
+            pose = _m1b_vertical_board_pose(
+                centre_world_m, hand_x_offset_m=hand_x_offset_m,
+                hand_z_offset_m=hand_z_offset_m, hand_y_centerline_bias_m=hand_y_centerline_bias_m,
+            )
+            solution = client.ik(pose, seed=M1B_NORMAL_SIDE_IK_SEED)
+            trajectory = client.plan(solution) if solution is not None else None
+            candidates.append({
+                "hand_x_offset_m": hand_x_offset_m, "hand_z_offset_m": hand_z_offset_m,
+                "world_pose_xyz_m": [pose.position.x, pose.position.y, pose.position.z],
+                "ik_solved": solution is not None,
+                "planned_from_reset_home": trajectory is not None,
+                "ik_error": client.last_ik_error if solution is None else None,
+            })
+    planned = [item for item in candidates if item["planned_from_reset_home"]]
+    return {
+        "executed_physical_motion": False,
+        "candidate_count": len(candidates),
+        "planned_candidate_count": len(planned),
+        "candidates": candidates,
+        "geometry": {
+            "finger_board_axis_world": [0.0, 0.0, 1.0],
+            "closing_axis_world": [0.0, 1.0, 0.0],
+            "orientation_quaternion_xyzw": [0.0, -math.sqrt(0.5), 0.0, math.sqrt(0.5)],
+        },
+    }
+
+
 def m1b_calibration_lateral_insertion(
     client: CalibrationClient, centre_world_m: list[float], *, hand_y_centerline_bias_m: float,
     candidate_hand_z_offsets_m: tuple[float, ...] = M1B_CALIBRATION_LATERAL_INSERTION_HAND_Z_OFFSETS_M,
@@ -527,6 +578,7 @@ def main() -> int:
     parser.add_argument("--calibration-lateral-insertion", action="store_true", help="Calibration-only collision-preserving open-hand lateral insertion probe")
     parser.add_argument("--calibration-lateral-insertion-hand-z-offset-m", type=float, help="Calibration-only single lateral-insertion height")
     parser.add_argument("--calibration-lateral-insert-target-touch-exception", action="store_true", help="Calibration-only: authorize target contact only for final lateral insert")
+    parser.add_argument("--calibration-vertical-board-ik-probe", action="store_true", help="Calibration-only: plan vertical-board poses without physical motion")
     parser.add_argument("--output", required=True, type=Path)
     args = parser.parse_args()
     trial = json.loads(args.trial.read_text(encoding="utf-8"))
@@ -550,6 +602,8 @@ def main() -> int:
             raise SystemExit("--calibration-lateral-insert-target-touch-exception is calibration-only lateral insertion")
         if args.calibration_lateral_insertion_hand_z_offset_m is None:
             raise SystemExit("--calibration-lateral-insert-target-touch-exception requires one explicit lateral insertion height")
+    if args.calibration_vertical_board_ik_probe and args.calibration_fixture_diameter_m is None:
+        raise SystemExit("--calibration-vertical-board-ik-probe is calibration-only")
     hand_y_centerline_bias_m = M1B_NORMAL_HAND_Y_CENTERLINE_BIAS_M if args.calibration_hand_y_bias_m is None else args.calibration_hand_y_bias_m
     axis = str(trial["axis"])
     if axis not in {"x", "y", "z"}:
@@ -621,6 +675,7 @@ def main() -> int:
         close = {"succeeded": False}
         contact_descend = {"executed": False, "reason": "MOVEIT_UNAVAILABLE"}
         lateral_target_touch_exception_restored: bool | None = None
+        vertical_board_ik_probe: dict[str, object] | None = None
         near_reobservation: dict[str, object] = {"attempted": False, "succeeded": False}
         contact_start_index = len(raw)
         if ready:
@@ -632,8 +687,14 @@ def main() -> int:
             # contacts look tempting.  Only the deliberately contact-bearing
             # descent receives this narrow exception.
             target_touch_exception_applied = False
-            open_hand = client.command_hand([0.04, 0.04])
-            approach = m1b_normal_side_precontact(client, target, hand_y_centerline_bias_m=hand_y_centerline_bias_m) if cylinder_scene_applied else {"executed": False, "reason": "CALIBRATION_COLLISION_SCENE_UNAVAILABLE"}
+            if args.calibration_vertical_board_ik_probe and cylinder_scene_applied:
+                vertical_board_ik_probe = m1b_calibration_vertical_board_ik_probe(
+                    client, target, hand_y_centerline_bias_m=hand_y_centerline_bias_m,
+                )
+                approach = {"executed": False, "reason": "CALIBRATION_VERTICAL_BOARD_IK_PROBE_NO_PHYSICAL_MOTION"}
+            else:
+                open_hand = client.command_hand([0.04, 0.04])
+                approach = m1b_normal_side_precontact(client, target, hand_y_centerline_bias_m=hand_y_centerline_bias_m) if cylinder_scene_applied else {"executed": False, "reason": "CALIBRATION_COLLISION_SCENE_UNAVAILABLE"}
             # A controller action can report success while the physical arm
             # was deflected by an unmodelled/free-cylinder contact.  Do not
             # close or enter the contact-bearing descent from that state:
@@ -761,6 +822,7 @@ def main() -> int:
             "calibration_lateral_insertion_hand_z_offset_m": args.calibration_lateral_insertion_hand_z_offset_m,
             "calibration_lateral_insert_target_touch_exception": args.calibration_lateral_insert_target_touch_exception,
             "calibration_lateral_target_touch_exception_restored": lateral_target_touch_exception_restored,
+            "calibration_vertical_board_ik_probe": vertical_board_ik_probe,
             "calibration_motion_diagnostic": calibration_motion,
             "open_hand": open_hand, "approach": approach, "close": close, "contact_descend": contact_descend,
             "hand_feedback_ready": hand_feedback_ready,
