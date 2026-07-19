@@ -716,8 +716,14 @@ def main() -> int:
     parser.add_argument("--calibration-lateral-insert-target-touch-exception", action="store_true", help="Calibration-only: authorize target contact only for final lateral insert")
     parser.add_argument("--calibration-vertical-board-ik-probe", action="store_true", help="Calibration-only: plan vertical-board poses without physical motion")
     parser.add_argument("--calibration-target-height-scan", action="store_true", help="Calibration-only: scan virtual target elevations without physical motion")
+    parser.add_argument("--calibration-top-contact-height-m", type=float, help="Calibration-only physical top-contact hand offset; does not change the production default")
     parser.add_argument("--output", required=True, type=Path)
     args = parser.parse_args()
+    global M1B_TOP_CONTACT_CENTERLINE_Z_M
+    if args.calibration_top_contact_height_m is not None:
+        if args.calibration_fixture_diameter_m is None or not 0.10 <= args.calibration_top_contact_height_m <= 0.14:
+            raise SystemExit("--calibration-top-contact-height-m requires calibration mode and must be in [0.10, 0.14] m")
+        M1B_TOP_CONTACT_CENTERLINE_Z_M = args.calibration_top_contact_height_m
     trial = json.loads(args.trial.read_text(encoding="utf-8"))
     if trial.get("provenance") != "CALIBRATION_ONLY_INITIALIZATION":
         raise SystemExit("trial is not calibration-only")
@@ -962,6 +968,7 @@ def main() -> int:
             "offset_vector_m": [target[index] - truth_center[index] for index in range(3)],
             "production_grasp_primitive": "open_physical_hand + m1b_top_down_precontact + m1b_top_down_contact_descend + close_physical_hand + m1b_internal_bilateral_broker",
             "top_grasp_yaw": {"yaw_rad": top_grasp_yaw_rad, "source": top_grasp_yaw_source},
+            "calibration_top_contact_height_m": args.calibration_top_contact_height_m,
             "ready": ready, "calibration_collision_scene_applied": cylinder_scene_applied if ready else False, "target_touch_exception_applied": target_touch_exception_applied if ready else False,
             # The non-contact pregrasp must converge to its planned terminal
             # state.  The final descent deliberately permits contact to
