@@ -377,6 +377,12 @@ def test_m1b_adr_0016_top_contact_height_includes_tapered_tip_clearance() -> Non
     assert 'tip into the tabletop' in source
 
 
+def test_m1b_gz_ros2_control_names_robot_description_source() -> None:
+    urdf = (Path(__file__).parents[2] / "robot_ws/src/xh_sim/urdf/panda_controlled.urdf").read_text()
+    assert '<robot_param>robot_description</robot_param>' in urdf
+    assert '<robot_param_node>robot_state_publisher</robot_param_node>' in urdf
+
+
 def test_m1b_moveit_server_does_not_start_a_second_simulation() -> None:
     source = (Path(__file__).parents[2] / "robot_ws/src/xh_sim/launch/m1b_moveit_server.launch.py").read_text()
     assert "simulation.launch.py" not in source.replace("``simulation.launch.py``", "")
