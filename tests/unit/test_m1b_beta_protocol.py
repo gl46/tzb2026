@@ -523,6 +523,7 @@ def test_m1b_remote_tolerance_campaign_requires_fresh_partitions_and_full_reset(
     assert '--calibration-top-contact-height-m' in source
     assert 'wait_for_m1b_controller_load()' in source
     assert 'M1B_CONTROLLERS_NOT_LOADED' in source
+    assert 'timeout 10 ros2 control list_controllers' in source
     assert 'm1b_reset_detach.py then fail-closes' in source
     assert 'PARTIAL_CAMPAIGN_COMPLETE:$start_index:$end_index' in source
     assert 'partition="m1b_tolerance_campaign_${index}_reset_${reset_attempt}"' in source

@@ -129,7 +129,10 @@ cleanup_partition() {
 wait_for_m1b_controller_load() {
   local deadline=$((SECONDS + 90)) state
   while (( SECONDS < deadline )); do
-    state="$(ros2 control list_controllers 2>/dev/null || true)"
+    # When Gazebo fails before exposing controller_manager, the CLI otherwise
+    # waits forever and defeats this function's bounded reset retry contract.
+    # A timeout is an infrastructure rejection, never a skipped episode.
+    state="$(timeout 10 ros2 control list_controllers 2>/dev/null || true)"
     # The paused launch deliberately leaves these controllers inactive.  The
     # detach utility resumes the world and activates them only after all-N
     # detach has been issued, so requiring `active` here would deadlock the
