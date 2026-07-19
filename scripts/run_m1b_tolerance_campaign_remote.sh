@@ -117,6 +117,21 @@ cleanup_partition() {
   done
 }
 
+wait_for_m1b_controllers() {
+  local deadline=$((SECONDS + 90)) state
+  while (( SECONDS < deadline )); do
+    state="$(ros2 control list_controllers 2>/dev/null || true)"
+    if grep -Eq '^joint_state_broadcaster[[:space:]]+joint_state_broadcaster/JointStateBroadcaster[[:space:]]+active' <<<"$state" \
+      && grep -Eq '^panda_arm_controller[[:space:]]+joint_trajectory_controller/JointTrajectoryController[[:space:]]+active' <<<"$state" \
+      && grep -Eq '^panda_hand_physical_controller[[:space:]]+joint_trajectory_controller/JointTrajectoryController[[:space:]]+active' <<<"$state"; then
+      return 0
+    fi
+    sleep 1
+  done
+  printf 'M1B_CONTROLLERS_NOT_ACTIVE\n%s\n' "$state" >&2
+  return 1
+}
+
 for index in $(seq "$start_index" "$end_index"); do
   trial_path="$run_dir/trials/trial-$(printf '%03d' "$index").json"
   python3 - "$worklist" "$index" "$trial_path" <<'PY'
@@ -151,7 +166,12 @@ PY
     env GZ_PARTITION="$partition" ROS_DOMAIN_ID="$domain" \
       nohup bash -lc "source /opt/ros/jazzy/setup.bash; source '$root/robot_ws/install/setup.bash'; exec ros2 launch xh_sim m1b_moveit_server.launch.py" \
       >"$run_dir/logs/trial-$(printf '%03d' "$index")-reset-$reset_attempt-moveit.log" 2>&1 < /dev/null &
-    sleep 18
+    sleep 5
+    if ! (export GZ_PARTITION="$partition" ROS_DOMAIN_ID="$domain"; wait_for_m1b_controllers); then
+      cleanup_partition "$partition"
+      echo "INVALID_RESET_RETRY:CONTROLLERS_NOT_ACTIVE:index=$index:attempt=$reset_attempt" >&2
+      continue
+    fi
     reset_record="$run_dir/trials/trial-$(printf '%03d' "$index")-reset-attempt-$reset_attempt.json"
     if ! timeout "$trial_timeout_s" env GZ_PARTITION="$partition" ROS_DOMAIN_ID="$domain" \
       python3 scripts/m1b_reset_detach.py --spawn-manifest "$spawn_manifest" --world-name industrial_cylinder_v1 --resume-world --activate-controllers \
