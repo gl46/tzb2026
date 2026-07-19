@@ -365,6 +365,9 @@ def test_m1b_moveit_server_does_not_start_a_second_simulation() -> None:
     source = (Path(__file__).parents[2] / "robot_ws/src/xh_sim/launch/m1b_moveit_server.launch.py").read_text()
     assert "simulation.launch.py" not in source.replace("``simulation.launch.py``", "")
     assert "moveit_ros_move_group" in source
+    execution = (Path(__file__).parents[2] / "robot_ws/src/xh_sim/launch/moveit_execution.launch.py").read_text()
+    assert 'DeclareLaunchArgument(\n            "world_name"' in execution
+    assert '"world_name": world_name' in execution
 
 
 def test_m1b_launch_has_paused_startup_contract_without_changing_default_m1a_run() -> None:
