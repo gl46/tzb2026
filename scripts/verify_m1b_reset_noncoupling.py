@@ -145,8 +145,20 @@ def main() -> int:
     if not names or any(not isinstance(name, str) or not name.startswith("cylinder_") for name in names):
         raise SystemExit("spawn manifest lacks generated cylinder list")
     labels = supervision.get("simulator_supervision", {}).get("objects", [])
-    if {str(label.get("actual_sim_entity_id")) for label in labels} != set(names):
-        raise SystemExit("scene supervision object set does not match spawn manifest")
+    observed_names = [str(label.get("actual_sim_entity_id")) for label in labels]
+    # The detachable-plugin manifest describes the complete actuator contract
+    # (twelve addressable cylinder topics), while each randomized scene may
+    # contain a strict subset of those cylinders.  Reset evidence must sample
+    # every cylinder *actually spawned in this scene*, not invent poses for
+    # absent whitelist members.  Still fail closed if supervision is empty,
+    # duplicated, malformed, or refers to an entity outside that contract.
+    if (
+        not observed_names
+        or any(name == "None" or not name.startswith("cylinder_") for name in observed_names)
+        or len(set(observed_names)) != len(observed_names)
+        or not set(observed_names).issubset(set(names))
+    ):
+        raise SystemExit("scene supervision object set is not a unique spawn-manifest subset")
     rclpy.init()
     client = CalibrationClient()
     try:
@@ -163,7 +175,7 @@ def main() -> int:
         home = home_approach["home_after"]
         time.sleep(SETTLE_S)
         before_pause = set_world_pause(args.world_name, True)
-        before, before_attempts = positions(names)
+        before, before_attempts = positions(observed_names)
         before_joints = [client.latest.get(name, math.nan) for name in JOINTS]
         before_fk = client.fk(before_joints) if all(math.isfinite(value) for value in before_joints) else None
         live_home_positions = home.get("observed_joint_positions_rad")
@@ -178,12 +190,12 @@ def main() -> int:
         )
         time.sleep(SETTLE_S)
         after_pause = set_world_pause(args.world_name, True)
-        after, after_attempts = positions(names)
+        after, after_attempts = positions(observed_names)
         after_joints = [client.latest.get(name, math.nan) for name in JOINTS]
         after_fk = client.fk(after_joints) if all(math.isfinite(value) for value in after_joints) else None
         displacements = {
             name: (math.dist(before[name], after[name]) if before[name] is not None and after[name] is not None else None)
-            for name in names
+            for name in observed_names
         }
         ee_displacement = math.dist(before_fk[:3], after_fk[:3]) if before_fk and after_fk else None
         passed = bool(
@@ -212,7 +224,8 @@ def main() -> int:
             },
             "planner_cylinder_scene": {
                 "source": "RESET_INFRASTRUCTURE_SUPERVISION_ONLY",
-                "objects": names,
+                "objects": observed_names,
+                "spawn_manifest_object_count": len(names),
                 "applied": collision_scene_applied,
             },
             "jog_joint_delta_rad": {JOINTS[HOME_JOG_JOINT_INDEX]: HOME_JOG_DELTA_RAD},

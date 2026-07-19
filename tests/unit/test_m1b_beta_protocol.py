@@ -172,6 +172,8 @@ def test_m1b_amendment_reset_gate_is_physical_and_fails_closed_on_missing_pose()
     assert '"object_positions_after_m": after' in source
     assert '"RESET_PHYSICAL_NONCOUPLING_VERIFIED" if passed else "INVALID_RESET"' in source
     assert '"online_truth_access": False' in source
+    assert "issubset(set(names))" in source
+    assert "positions(observed_names)" in source
 
 
 def test_m1b_amendment_detach_does_not_wait_on_auxiliary_one_shot_state() -> None:
