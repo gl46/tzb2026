@@ -188,6 +188,7 @@ def test_geometric_evaluator_cli_has_a_help_path() -> None:
 def test_industrial_capture_loads_project_gazebo_overlay() -> None:
     source = (Path(__file__).parents[2] / "scripts/capture_industrial_dataset_remote.sh").read_text()
     assert 'source "$root/robot_ws/install/setup.bash"' in source
+    assert source.index('source "$root/robot_ws/install/setup.bash"') < source.index("set -u")
     assert '"/xh/camera/rgbd/image@sensor_msgs/msg/Image[gz.msgs.Image"' in source
     assert 'python3 scripts/record_m1b_alpha_ros.py --sensor-only' in source
 
