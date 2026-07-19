@@ -26,3 +26,11 @@ contact-descend path that clears the table and neighboring cylinders. This is
 an evidence-backed diagnosis, not a license to relax any gate. After a
 corrective motion/geometry change, the full 81-trial envelope and the unchanged
 p90 gate must be rerun before either acceptance exercise.
+
+Two reset-isolated calibration diagnostics narrowed the cause further. With
+target collision retained, a 60-degree candidate at 65 mm executed its
+high-clear and low-clear stages but its final lateral pose could not be planned.
+With a target-touch exception limited to the final 65 mm insert, the yaw-0
+candidate again executed high-clear and low-clear, but final-insert IK failed
+with `-31`; the exception was restored. Neither diagnostic closed the hand,
+formed contact, attached an object, or changes the production primitive.

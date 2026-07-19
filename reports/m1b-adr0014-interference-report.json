@@ -31,6 +31,19 @@
     "target_contact_samples": 0
   },
   "finding": "The primary measured blocker is contact-descend terminal feasibility, not perception: 69/81 trials failed IK before close. Of the five descents that executed, observed contact was table interference or one-finger contact with a non-target cylinder; no bilateral target contact formed.",
+  "isolated_lateral_diagnostics": [
+    {
+      "mode": "target collision retained throughout lateral insertion",
+      "source": "/tmp/m1b-adr0014-lateral-insertion-diagnostic-20260719/raw/trial-000.json",
+      "observed": "A 60 degree candidate at 65 mm executed and converged at high-clear and low-clear. Its final lateral pose had an IK solution but failed MoveIt planning (5 attempts); no close or contact occurred."
+    },
+    {
+      "mode": "65 mm lateral insertion with target-touch exception limited to final insert",
+      "source": "/tmp/m1b-adr0014-lateral-target-contact-h065-diagnostic-20260719/raw/trial-000.json",
+      "observed": "The yaw-0 high-clear and low-clear stages executed and converged. The final lateral stage failed IK (-31), produced no contact, and the temporary target-touch exception was restored."
+    }
+  ],
+  "diagnostic_conclusion": "Neither retaining target collision nor allowing only the final target touch produced an executable terminal insertion. These diagnostics are calibration-only and do not alter the production primitive or acceptance state.",
   "inference_boundary": "The report does not identify a final corrective geometry or planner change. It establishes that any corrective action must first make a collision-safe terminal descend physically feasible and avoid table/non-target contact, then remeasure the full envelope.",
   "prohibited_shortcuts": [
     "Do not relax bilateral, attach, reset, or perception gate thresholds.",
