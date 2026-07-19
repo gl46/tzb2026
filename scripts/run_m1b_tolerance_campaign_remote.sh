@@ -124,6 +124,38 @@ PY
     echo "INFRASTRUCTURE_FAILURE:RESET:index=$index" >&2
     exit 3
   fi
+  # Amendment 1 deliberately makes one-shot grasp_state messages auxiliary.
+  # A reset becomes valid only after the S1 MoveIt jog has physically shown
+  # that all generated cylinders stay uncoupled.  This is evaluator-side
+  # reset infrastructure, never an input to the tolerance primitive.
+  reset_physical="$run_dir/trials/trial-$(printf '%03d' "$index")-reset-physical-noncoupling.json"
+  if ! timeout "$trial_timeout_s" env GZ_PARTITION="$partition" ROS_DOMAIN_ID="$domain" \
+    python3 scripts/verify_m1b_reset_noncoupling.py --spawn-manifest "$spawn_manifest" --scene-supervision "$supervision" \
+    --world-name industrial_cylinder_v1 --output "$reset_physical"; then
+    cleanup_partition "$partition"
+    echo "INFRASTRUCTURE_FAILURE:RESET_PHYSICAL_NONCOUPLING:index=$index" >&2
+    exit 3
+  fi
+  if ! python3 - "$reset_physical" <<'PY'
+import json, sys
+record = json.load(open(sys.argv[1]))
+if record.get("status") != "RESET_PHYSICAL_NONCOUPLING_VERIFIED":
+    raise SystemExit("reset physical non-coupling gate did not verify")
+PY
+  then
+    cleanup_partition "$partition"
+    echo "INFRASTRUCTURE_FAILURE:RESET_PHYSICAL_NONCOUPLING_STATUS:index=$index" >&2
+    exit 3
+  fi
+  # The verifier pauses the world for its after-jog supervision snapshot;
+  # the production-equivalent tolerance primitive must start with simulation
+  # running, just as it does after the detach transaction.
+  if ! env GZ_PARTITION="$partition" timeout 10 gz service --service /world/industrial_cylinder_v1/control \
+    --reqtype gz.msgs.WorldControl --reptype gz.msgs.Boolean --req 'pause: false' | grep -q 'data: true'; then
+    cleanup_partition "$partition"
+    echo "INFRASTRUCTURE_FAILURE:RESET_POST_VERIFY_RESUME:index=$index" >&2
+    exit 3
+  fi
   if ! timeout "$trial_timeout_s" env GZ_PARTITION="$partition" ROS_DOMAIN_ID="$domain" \
     python3 scripts/run_m1b_tolerance_trial.py --trial "$trial_path" --supervision "$supervision" --object-slot "$object_slot" \
     --calibration-fixture-diameter-m "$fixture_diameter_m" "${calibration_hand_y_bias_args[@]}" "${keep_target_collision_args[@]}" "${lateral_insertion_args[@]}" "${lateral_insertion_height_args[@]}" "${lateral_insert_target_touch_args[@]}" "${vertical_board_ik_probe_args[@]}" --output "$run_dir/raw/trial-$(printf '%03d' "$index").json"; then

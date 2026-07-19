@@ -341,6 +341,15 @@ def test_m1b_launch_has_paused_startup_contract_without_changing_default_m1a_run
     assert "WORLD_CONTROL_TIMEOUT_MS = 10000" in reset
 
 
+def test_m1b_tolerance_campaign_requires_amendment_1_physical_reset_proof() -> None:
+    source = (Path(__file__).parents[2] / "scripts/run_m1b_tolerance_campaign_remote.sh").read_text()
+    assert "scripts/verify_m1b_reset_noncoupling.py" in source
+    assert '"RESET_PHYSICAL_NONCOUPLING_VERIFIED"' in source
+    assert "INFRASTRUCTURE_FAILURE:RESET_PHYSICAL_NONCOUPLING" in source
+    assert "INFRASTRUCTURE_FAILURE:RESET_POST_VERIFY_RESUME" in source
+    assert "--req 'pause: false'" in source
+
+
 def test_m1b_hand_preflight_requires_physical_endpoint_feedback() -> None:
     good = M1BHandPreflightV1(True, True, 0.04, 0.04, 0.04)
     assert evaluate_hand_preflight(good)[0] == "HAND_PREFLIGHT_VERIFIED"
