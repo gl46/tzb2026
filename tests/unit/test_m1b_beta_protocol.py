@@ -233,6 +233,9 @@ def test_m1b_tolerance_attach_uses_detachablejoint_empty_payload() -> None:
     assert '--calibration-hand-y-bias-m' in source
     assert '--calibration-keep-target-collision-through-descend' in source
     assert '--calibration-lateral-insertion' in source
+    assert '--calibration-lateral-insertion-hand-z-offset-m' in source
+    assert '--calibration-lateral-insert-target-touch-exception' in source
+    assert 'requires one explicit lateral insertion height' in source
     assert 'M1B_CALIBRATION_LATERAL_INSERTION_CLEAR_HAND_X_OFFSETS_M = (-0.200, -0.160, -0.140, -0.120)' in source
     assert 'M1B_CALIBRATION_LATERAL_INSERTION_HAND_Z_OFFSETS_M = (0.065, 0.080, 0.095, 0.105)' in source
     assert 'def m1b_calibration_lateral_insertion(' in source
@@ -241,6 +244,8 @@ def test_m1b_tolerance_attach_uses_detachablejoint_empty_payload() -> None:
     assert '("low_clear", z_offset_m, clear_x_offset_m)' in source
     assert '("lateral_insert", z_offset_m, final_x_offset_m)' in source
     assert '"candidate_attempts": candidate_attempts' in source
+    assert '"lateral_target_contact_authorization": lateral_contact_authorization' in source
+    assert 'authorize_lateral_target_contact=authorize_lateral_target_contact' in source
     assert '"low_clear_preflight_ik"' in source
     assert '"lateral_insert_preflight_ik"' in source
     assert '("positive_x_mirrored", True, 1.0)' in source

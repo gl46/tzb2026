@@ -21,6 +21,7 @@ import sys
 import time
 from pathlib import Path
 from statistics import median
+from typing import Callable
 
 import rclpy
 from geometry_msgs.msg import Pose
@@ -323,6 +324,8 @@ def m1b_normal_side_contact_descend(
 
 def m1b_calibration_lateral_insertion(
     client: CalibrationClient, centre_world_m: list[float], *, hand_y_centerline_bias_m: float,
+    candidate_hand_z_offsets_m: tuple[float, ...] = M1B_CALIBRATION_LATERAL_INSERTION_HAND_Z_OFFSETS_M,
+    authorize_lateral_target_contact: Callable[[], bool] | None = None,
 ) -> dict[str, object]:
     """Prove a collision-preserving open-hand insertion before promotion.
 
@@ -338,7 +341,8 @@ def m1b_calibration_lateral_insertion(
         ("negative_x", False, -1.0),
         ("positive_x_mirrored", True, 1.0),
     )
-    for z_offset_m in M1B_CALIBRATION_LATERAL_INSERTION_HAND_Z_OFFSETS_M:
+    lateral_contact_authorization = {"requested": authorize_lateral_target_contact is not None, "applied": False}
+    for z_offset_m in candidate_hand_z_offsets_m:
         for family_name, mirrored_x_entry, direction in insertion_families:
             for magnitude_m in (abs(value) for value in M1B_CALIBRATION_LATERAL_INSERTION_CLEAR_HAND_X_OFFSETS_M):
                 clear_x_offset_m = direction * magnitude_m
@@ -357,7 +361,11 @@ def m1b_calibration_lateral_insertion(
                     hand_y_centerline_bias_m=hand_y_centerline_bias_m,
                     hand_x_offset_m=final_x_offset_m, mirrored_x_entry=mirrored_x_entry,
                 )
-                if client.ik(final_pose, seed=low_seed) is None:
+                final_seed = client.ik(
+                    final_pose, seed=low_seed,
+                    avoid_collisions=authorize_lateral_target_contact is None,
+                )
+                if final_seed is None:
                     candidate_attempts.append({"family": family_name, "mirrored_x_entry": mirrored_x_entry, "clear_hand_x_offset_m": clear_x_offset_m, "hand_z_offset_m": z_offset_m, "failed_stage": "lateral_insert_preflight_ik", "ik_error": client.last_ik_error})
                     continue
                 stages: dict[str, dict[str, object]] = {}
@@ -367,6 +375,11 @@ def m1b_calibration_lateral_insertion(
                     ("low_clear", z_offset_m, clear_x_offset_m),
                     ("lateral_insert", z_offset_m, final_x_offset_m),
                 ):
+                    if name == "lateral_insert" and authorize_lateral_target_contact is not None:
+                        lateral_contact_authorization["applied"] = authorize_lateral_target_contact()
+                        if not lateral_contact_authorization["applied"]:
+                            candidate_attempts.append({"family": family_name, "mirrored_x_entry": mirrored_x_entry, "clear_hand_x_offset_m": clear_x_offset_m, "hand_z_offset_m": z_offset_m, "failed_stage": "LATERAL_TARGET_CONTACT_AUTHORIZATION_REJECTED", "stages": stages})
+                            break
                     stage = client.move_hand_pose(
                         _m1b_normal_side_pose(
                             centre_world_m, hand_z_offset_m=stage_z_offset_m,
@@ -385,6 +398,7 @@ def m1b_calibration_lateral_insertion(
                     return {
                         "executed": True, "converged": True, "stages": stages,
                         "candidate_attempts": candidate_attempts,
+                        "lateral_target_contact_authorization": lateral_contact_authorization,
                         "geometry": {
                             "insertion_axis_world": [1.0, 0.0, 0.0],
                             "family": family_name,
@@ -399,11 +413,12 @@ def m1b_calibration_lateral_insertion(
     return {
         "executed": False, "converged": False,
         "candidate_attempts": candidate_attempts,
+        "lateral_target_contact_authorization": lateral_contact_authorization,
         "geometry": {
             "insertion_axis_world": [1.0, 0.0, 0.0],
             "families": [item[0] for item in insertion_families],
             "candidate_clear_hand_x_offsets_m": list(M1B_CALIBRATION_LATERAL_INSERTION_CLEAR_HAND_X_OFFSETS_M),
-            "candidate_hand_z_offsets_m": list(M1B_CALIBRATION_LATERAL_INSERTION_HAND_Z_OFFSETS_M),
+            "candidate_hand_z_offsets_m": list(candidate_hand_z_offsets_m),
             "final_hand_x_offset_m": M1B_NORMAL_SIDE_HAND_X_OFFSET_M,
             "hand_z_offset_m": M1B_NORMAL_CONTACT_HAND_Z_OFFSET_M,
         },
@@ -491,6 +506,8 @@ def main() -> int:
     parser.add_argument("--calibration-hand-y-bias-m", type=float, help="Calibration-only centreline sweep; absent uses the production fixed hand-chain correction")
     parser.add_argument("--calibration-keep-target-collision-through-descend", action="store_true", help="Calibration-only contact-free final-descent probe")
     parser.add_argument("--calibration-lateral-insertion", action="store_true", help="Calibration-only collision-preserving open-hand lateral insertion probe")
+    parser.add_argument("--calibration-lateral-insertion-hand-z-offset-m", type=float, help="Calibration-only single lateral-insertion height")
+    parser.add_argument("--calibration-lateral-insert-target-touch-exception", action="store_true", help="Calibration-only: authorize target contact only for final lateral insert")
     parser.add_argument("--output", required=True, type=Path)
     args = parser.parse_args()
     trial = json.loads(args.trial.read_text(encoding="utf-8"))
@@ -504,6 +521,16 @@ def main() -> int:
         raise SystemExit("--calibration-lateral-insertion is calibration-only")
     if args.calibration_lateral_insertion and not args.calibration_keep_target_collision_through_descend:
         raise SystemExit("--calibration-lateral-insertion requires --calibration-keep-target-collision-through-descend")
+    if args.calibration_lateral_insertion_hand_z_offset_m is not None:
+        if not args.calibration_lateral_insertion or args.calibration_fixture_diameter_m is None:
+            raise SystemExit("--calibration-lateral-insertion-hand-z-offset-m is calibration-only lateral insertion")
+        if not 0.065 <= args.calibration_lateral_insertion_hand_z_offset_m <= 0.105:
+            raise SystemExit("calibration lateral insertion height must be in [0.065, 0.105] m")
+    if args.calibration_lateral_insert_target_touch_exception:
+        if not args.calibration_lateral_insertion or args.calibration_fixture_diameter_m is None:
+            raise SystemExit("--calibration-lateral-insert-target-touch-exception is calibration-only lateral insertion")
+        if args.calibration_lateral_insertion_hand_z_offset_m is None:
+            raise SystemExit("--calibration-lateral-insert-target-touch-exception requires one explicit lateral insertion height")
     hand_y_centerline_bias_m = M1B_NORMAL_HAND_Y_CENTERLINE_BIAS_M if args.calibration_hand_y_bias_m is None else args.calibration_hand_y_bias_m
     axis = str(trial["axis"])
     if axis not in {"x", "y", "z"}:
@@ -630,11 +657,15 @@ def main() -> int:
                     near_reobservation = {"attempted": True, "succeeded": True, "aggregation": "PER_AXIS_MEDIAN_OF_PUBLIC_RGBD_FRAMES", "frames": near_frames, "selected_public_track": near_track, "public_center_delta_world_m": public_delta, "final_target_world_m": final_target}
                 except (OSError, RuntimeError, subprocess.TimeoutExpired) as error:
                     near_reobservation = {"attempted": True, "succeeded": False, "reason": str(error)}
-            if (target_touch_exception_applied or args.calibration_keep_target_collision_through_descend) and not args.enable_near_pregrasp_reobservation:
+            if (target_touch_exception_applied or args.calibration_keep_target_collision_through_descend or args.calibration_lateral_insert_target_touch_exception) and not args.enable_near_pregrasp_reobservation:
                 near_reobservation = {"attempted": False, "succeeded": True, "mode": "BASELINE_PERCEPTION_FREE_TOLERANCE"}
             if args.calibration_lateral_insertion and near_reobservation.get("succeeded"):
+                def authorize_lateral_target_contact() -> bool:
+                    return client.set_target_touch_exception(True, target_id=target_entity)
                 contact_descend = m1b_calibration_lateral_insertion(
                     client, final_target, hand_y_centerline_bias_m=hand_y_centerline_bias_m,
+                    candidate_hand_z_offsets_m=(args.calibration_lateral_insertion_hand_z_offset_m,) if args.calibration_lateral_insertion_hand_z_offset_m is not None else M1B_CALIBRATION_LATERAL_INSERTION_HAND_Z_OFFSETS_M,
+                    authorize_lateral_target_contact=authorize_lateral_target_contact if args.calibration_lateral_insert_target_touch_exception else None,
                 )
             else:
                 contact_descend = (
@@ -702,6 +733,8 @@ def main() -> int:
             "calibration_hand_y_centerline_bias_m": hand_y_centerline_bias_m,
             "calibration_keep_target_collision_through_descend": args.calibration_keep_target_collision_through_descend,
             "calibration_lateral_insertion": args.calibration_lateral_insertion,
+            "calibration_lateral_insertion_hand_z_offset_m": args.calibration_lateral_insertion_hand_z_offset_m,
+            "calibration_lateral_insert_target_touch_exception": args.calibration_lateral_insert_target_touch_exception,
             "calibration_motion_diagnostic": calibration_motion,
             "open_hand": open_hand, "approach": approach, "close": close, "contact_descend": contact_descend,
             "hand_feedback_ready": hand_feedback_ready,
