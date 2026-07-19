@@ -8,6 +8,10 @@ source /opt/ros/jazzy/setup.bash
 set -u
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$root"
+# The industrial worlds contain project-local Gazebo systems and meshes.
+# Loading this overlay is required for a real frame capture, not merely a
+# manifest that names scene specifications.
+source "$root/robot_ws/install/setup.bash"
 dataset_root="${DATASET_ROOT:-data/generated/m1b_alpha_v1}"
 capture_attempts="${CAPTURE_ATTEMPTS:-3}"
 if ! [[ "$capture_attempts" =~ ^[1-9][0-9]*$ ]]; then

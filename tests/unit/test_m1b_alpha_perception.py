@@ -146,7 +146,9 @@ def test_random_scene_generator_makes_seed_specific_six_to_twelve_part_scenes(tm
     assert labels["simulator_supervision"]["training_and_evaluation_only"] is True
     assert not (output / "scene-1000.sdf").read_text().count("M1B_RANDOM_PARTS_BEGIN") > 1
     positions = [item["position_3d_world"][:2] for item in labels["simulator_supervision"]["objects"]]
-    assert all((first[0] - second[0]) ** 2 + (first[1] - second[1]) ** 2 >= 0.09 ** 2 for index, first in enumerate(positions) for second in positions[index + 1:])
+    # ADR-0014's 30 mm cylinders use a 60 mm centre spacing; the old 90 mm
+    # assertion was inherited from the 50 mm scene geometry.
+    assert all((first[0] - second[0]) ** 2 + (first[1] - second[1]) ** 2 >= 0.06 ** 2 for index, first in enumerate(positions) for second in positions[index + 1:])
     by_orientation = {item["orientation_state"]: item["position_3d_world"][2] for item in labels["simulator_supervision"]["objects"]}
     assert min(by_orientation.values()) > 0.45
     assert by_orientation["tilted"] > by_orientation["normal"]
@@ -181,6 +183,13 @@ def test_open_vocab_cli_has_a_dependency_free_help_path() -> None:
 
 def test_geometric_evaluator_cli_has_a_help_path() -> None:
     subprocess.run([sys.executable, "scripts/evaluate_captured_geometric.py", "--help"], check=True, stdout=subprocess.DEVNULL)
+
+
+def test_industrial_capture_loads_project_gazebo_overlay() -> None:
+    source = (Path(__file__).parents[2] / "scripts/capture_industrial_dataset_remote.sh").read_text()
+    assert 'source "$root/robot_ws/install/setup.bash"' in source
+    assert '"/xh/camera/rgbd/image@sensor_msgs/msg/Image[gz.msgs.Image"' in source
+    assert 'python3 scripts/record_m1b_alpha_ros.py --sensor-only' in source
 
 
 def test_color_prototype_calibration_cli_has_a_help_path() -> None:
