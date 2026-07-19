@@ -104,4 +104,5 @@ nonzero envelope and a GO are physically possible.
 - Cylinder 30 mm scene correction: **APPROVED**
 - Reachability-constrained layout (incl. bin relocation): **APPROVED**
 - Drop-in release placement primitive: **APPROVED**
-- Implementation SHA: **PENDING**
+- Implementation SHAs: `7e7f398` (hand/cylinder geometry) and `1bae81d`
+  (FK-gated layout and complete standalone scene geometry)
