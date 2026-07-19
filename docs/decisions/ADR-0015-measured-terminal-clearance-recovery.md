@@ -42,16 +42,25 @@ vertical-board pose families do not provide a promotable path.
 - `reports/m1b-adr0014-interference-report.md`
 - `reports/m1b-adr0014-perception-reachability-gate.json`
 
-## Height-scan result (2026-07-19)
+## Initial height-scan result and correction (2026-07-19)
 
 The reset-isolated, no-motion scan evaluated target lifts of 0, 10, 20, 30,
 40, 60, 80, and 100 mm with the virtual cylinder collision scene updated at
 each candidate. Contact-pose planning first succeeded at **30 mm**; 20 mm had
-an IK solution but no plan. The selected physical follow-up elevation is
-**40 mm**: the first feasible 30 mm cell plus one 10 mm scan-resolution margin.
-The scan source is
+an IK solution but no plan. It initially selected **40 mm**: the first feasible
+30 mm cell plus one 10 mm scan-resolution margin. The scan source is
 `/tmp/m1b-adr0015-height-scan-20260719/raw/trial-000.json`; it executed no
 grasp motion, close, attach, or transport.
+
+That initial scan moved only the target collision object virtually. A physical
+40 mm pedestal necessarily moves every cylinder, so the initial result was not
+geometry-equivalent to the physical fixture and is **not** a promotable
+production dimension. The isolated physical follow-up,
+`reports/m1b-adr0015-pedestal40-followup.json`, verified reset non-coupling and
+executed/converged the pregrasp, but the contact descend still failed IK (-31);
+there was no close, bilateral contact, or attach. The height scan now translates
+the entire collision fixture for every candidate. It must be rerun before any
+further physical candidate or 81-trial campaign is authorized.
 
 ## Approval
 

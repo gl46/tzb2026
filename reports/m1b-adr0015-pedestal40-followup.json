@@ -1,0 +1,49 @@
+{
+  "schema_version": "M1BClearanceFixtureFollowupV1",
+  "status": "NO_GO_FULL_FIXTURE_CONTACT_DESCEND_IK_FAILED",
+  "provenance": "CALIBRATION_ONLY_INITIALIZATION",
+  "fixture": {
+    "kind": "static_narrow_pedestal",
+    "pedestal_lift_m": 0.04,
+    "orientation_mode": "normal",
+    "scene_source": "/tmp/m1b-adr0015-pedestal40-v2-20260719/scenes/scene-1017.sdf"
+  },
+  "trial_source": "/tmp/m1b-adr0015-pedestal40-single-v2-20260719/raw/trial-000.json",
+  "trial_sha256": "b48b2bf07419cd9c144804a8302ec214e9fb7b488f8e23dfd1fd27f965c0b8be",
+  "reset_physical_source": "/tmp/m1b-adr0015-pedestal40-single-v2-20260719/trials/trial-000-reset-physical-attempt-1.json",
+  "reset_physical_sha256": "d815bc47b1c4811c84d2fc35dda38209018977efc1ca39efef895fd7d35d64ff",
+  "trial": {
+    "axis": "x",
+    "offset_m": 0.0,
+    "repetition": 1,
+    "scene_seed": 1017,
+    "object_slot": 7,
+    "target_entity": "cylinder_07",
+    "settled_truth_center_world_m": [-0.32, -0.27, 0.529999]
+  },
+  "reset_physical_noncoupling": {
+    "status": "RESET_PHYSICAL_NONCOUPLING_VERIFIED",
+    "ee_displacement_m": 0.024138519093071735
+  },
+  "pregrasp": {
+    "planned": true,
+    "executed": true,
+    "converged": true,
+    "plan_attempts": 1,
+    "max_final_joint_error_rad": 9.363803821216266e-07
+  },
+  "contact_descend": {
+    "ik_solved": false,
+    "planned": false,
+    "executed": false,
+    "ik_error_code": -31
+  },
+  "post_contact": {
+    "close_succeeded": false,
+    "raw_contact_samples": 0,
+    "bilateral_same_entity_contact": false,
+    "attach_sent": false,
+    "attach_reason": "BILATERAL_GATE_REJECTED"
+  },
+  "decision": "Do not start the 81-trial campaign. Re-run the no-motion scan with the whole fixture collision scene translated for every candidate."
+}
