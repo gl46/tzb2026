@@ -344,6 +344,8 @@ def test_m1a_contact_calibration_uses_oracle_geometry_hand_control_and_per_trial
     assert "BILATERAL_PRECONTACT_CLEARANCE_M = 0.001" in client
     assert "BILATERAL_FINAL_FINGER_INSET_M = 0.0" in client
     assert "BILATERAL_STEADY_WIDTH_RANGE_M = (0.045, 0.070)" in client
+    assert "TABLE_TOUCH_HAND_Z_M = 0.530" in client
+    assert "table_contact_pad_evidence" in client
     assert "bilateral_steady_gripper_width_m" in client
     assert 'precontact_motion.get("converged") is True' in client
     assert "def calibration_bilateral_branch_seed()" in client

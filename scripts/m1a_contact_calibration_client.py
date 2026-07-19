@@ -73,6 +73,12 @@ BILATERAL_PRECONTACT_CLEARANCE_M = 0.001
 BILATERAL_FINAL_FINGER_INSET_M = 0.0
 BILATERAL_PRECONTACT_FINGER_M = 0.034
 BILATERAL_STEADY_WIDTH_RANGE_M = (0.045, 0.070)
+# The unchanged public finger-contact topic observes the main named collision
+# box, whose ADR-0014 geometry is 80 mm long from the finger-link origin.
+# With the table top at z=0.450 m and this orientation mapping local +X to
+# world -Z, a target link origin of 0.450 + 0.080 = 0.530 m makes that named
+# collision (not merely the unobserved tapered tip) reach the tabletop.
+TABLE_TOUCH_HAND_Z_M = 0.530
 
 
 def calibration_bilateral_branch_seed() -> list[float]:
@@ -842,7 +848,7 @@ def table_touch_pose(cube_xyz: list[float]) -> Pose:
     pose = Pose()
     pose.position.x = -0.25
     pose.position.y = -0.25
-    pose.position.z = 0.562
+    pose.position.z = TABLE_TOUCH_HAND_Z_M
     pose.orientation.y = math.sqrt(0.5)
     pose.orientation.w = math.sqrt(0.5)
     return pose
@@ -1107,6 +1113,7 @@ def main() -> int:
             start = {name: len(events) for name, events in client.contacts.items()}
             client.contact_window(0.45)
             events = {name: client.contacts[name][start[name]:] for name in client.contacts}
+            table_contact_pad_evidence = client.pad_evidence(cube["xyz"])
             client.command_hand([0.04, 0.04])
             retreat = client.move_joint_target(TARGETS[0][1]) if exception_set else {
                 "planned": False, "executed": False
@@ -1115,6 +1122,8 @@ def main() -> int:
                 {
                     "label": f"table_{index}", "expected": "finger_table",
                     "cube_pose": cube, "motion": motion, "retreat": retreat,
+                    "table_contact_hand_pose": pose_vector(table_touch_pose(cube["xyz"])),
+                    "table_contact_pad_evidence": table_contact_pad_evidence,
                     "calibration_only_allowed_collision_pairs": [
                         ["panda_leftfinger", "work_table"],
                         ["panda_rightfinger", "work_table"],
