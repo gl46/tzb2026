@@ -377,10 +377,23 @@ def test_m1b_adr_0016_top_contact_height_includes_tapered_tip_clearance() -> Non
     assert 'tip into the tabletop' in source
 
 
-def test_m1b_gz_ros2_control_names_robot_description_source() -> None:
+def test_m1b_gz_ros2_control_keeps_standard_description_topic_contract() -> None:
     urdf = (Path(__file__).parents[2] / "robot_ws/src/xh_sim/urdf/panda_controlled.urdf").read_text()
-    assert '<robot_param>robot_description</robot_param>' in urdf
-    assert '<robot_param_node>robot_state_publisher</robot_param_node>' in urdf
+    assert "<robot_param>" not in urdf
+    assert "<robot_param_node>" not in urdf
+
+
+def test_m1b_startup_replays_generated_description_to_controller_manager() -> None:
+    root = Path(__file__).parents[2]
+    launch = (root / "robot_ws/src/xh_sim/launch/simulation.launch.py").read_text()
+    relay = (root / "robot_ws/src/xh_sim/scripts/robot_description_relay.py").read_text()
+    cmake = (root / "robot_ws/src/xh_sim/CMakeLists.txt").read_text()
+    assert "robot_description_relay.py" in launch
+    assert '"urdf_path": str(generated_urdf)' in launch
+    assert "TimerAction(period=3.0, actions=[robot_description_relay])" in launch
+    assert "DurabilityPolicy.TRANSIENT_LOCAL" in relay
+    assert 'create_publisher(String, "/robot_description", qos)' in relay
+    assert "robot_description_relay.py" in cmake
 
 
 def test_m1b_moveit_server_does_not_start_a_second_simulation() -> None:

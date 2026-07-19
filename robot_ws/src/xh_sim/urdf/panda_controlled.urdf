@@ -100,12 +100,6 @@
   <gazebo>
     <plugin filename="gz_ros2_control-system" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
       <parameters>$(find xh_sim)/config/panda_controllers.yaml</parameters>
-      <!-- Query the already-running robot_state_publisher parameter service
-           explicitly.  Relying on the plugin's implicit robot-description
-           topic fallback can race a fresh paused Gazebo world and leave
-           controller_manager permanently uninitialised. -->
-      <robot_param>robot_description</robot_param>
-      <robot_param_node>robot_state_publisher</robot_param_node>
       <hold_joints>true</hold_joints>
       <!-- Jazzy gz_ros2_control documents 1.0 as the largest non-oscillatory
            position-interface gain. The previous default 0.1 left joints 5/6

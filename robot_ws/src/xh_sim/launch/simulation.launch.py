@@ -9,7 +9,7 @@ import tempfile
 
 from ament_index_python.packages import get_package_prefix, get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, OpaqueFunction, RegisterEventHandler
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, OpaqueFunction, RegisterEventHandler, TimerAction
 from launch.event_handlers import OnProcessExit
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, PythonExpression
@@ -76,6 +76,15 @@ def _robot_actions(context, share: Path):
         output="screen",
         parameters=[robot_description],
     )
+    # Gazebo creates controller_manager only after the model spawn.  Preserve
+    # the generated description across that boundary rather than relying on
+    # robot_state_publisher's earlier volatile publication.
+    robot_description_relay = Node(
+        package="xh_sim",
+        executable="robot_description_relay.py",
+        output="screen",
+        parameters=[{"urdf_path": str(generated_urdf)}],
+    )
     spawn_robot = Node(
         package="ros_gz_sim",
         executable="create",
@@ -112,6 +121,9 @@ def _robot_actions(context, share: Path):
     actions = [
         robot_state_publisher,
         spawn_robot,
+        # The Gazebo plugin subscribes only after the model exists.  Start the
+        # transient description relay after that subscription can be created.
+        TimerAction(period=3.0, actions=[robot_description_relay]),
         RegisterEventHandler(OnProcessExit(
             target_action=spawn_robot,
             on_exit=[joint_state_broadcaster],
