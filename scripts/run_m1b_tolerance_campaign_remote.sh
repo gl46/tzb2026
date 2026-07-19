@@ -126,29 +126,6 @@ cleanup_partition() {
   done
 }
 
-wait_for_m1b_controller_load() {
-  local deadline=$((SECONDS + 90)) state
-  while (( SECONDS < deadline )); do
-    # When Gazebo fails before exposing controller_manager, the CLI otherwise
-    # waits forever and defeats this function's bounded reset retry contract.
-    # A timeout is an infrastructure rejection, never a skipped episode.
-    state="$(timeout 10 ros2 control list_controllers 2>/dev/null || true)"
-    # The paused launch deliberately leaves these controllers inactive.  The
-    # detach utility resumes the world and activates them only after all-N
-    # detach has been issued, so requiring `active` here would deadlock the
-    # reset lifecycle.  Confirm that all expected controllers are loaded;
-    # m1b_reset_detach.py then fail-closes if its post-resume activation fails.
-    if grep -Eq '^joint_state_broadcaster[[:space:]]+joint_state_broadcaster/JointStateBroadcaster[[:space:]]+(active|inactive)$' <<<"$state" \
-      && grep -Eq '^panda_arm_controller[[:space:]]+joint_trajectory_controller/JointTrajectoryController[[:space:]]+(active|inactive)$' <<<"$state" \
-      && grep -Eq '^panda_hand_physical_controller[[:space:]]+joint_trajectory_controller/JointTrajectoryController[[:space:]]+(active|inactive)$' <<<"$state"; then
-      return 0
-    fi
-    sleep 1
-  done
-  printf 'M1B_CONTROLLERS_NOT_LOADED\n%s\n' "$state" >&2
-  return 1
-}
-
 for index in $(seq "$start_index" "$end_index"); do
   trial_path="$run_dir/trials/trial-$(printf '%03d' "$index").json"
   python3 - "$worklist" "$index" "$trial_path" <<'PY'
@@ -173,7 +150,10 @@ PY
     # A failed physical check destroys this world.  The next attempt is a new
     # episode, not a waiver or a re-use of the rejected reset.
     partition="m1b_tolerance_campaign_${index}_reset_${reset_attempt}"
-    domain=$((130 + index))
+    # Retries must not share a DDS graph.  A failed Gazebo launch can leave a
+    # late ROS participant alive briefly, so reuse would let reset N+1 query
+    # reset N's controller manager.
+    domain=$((130 + index + reset_attempt))
     generated="$run_dir/generated-$index-reset-$reset_attempt"
     mkdir -p "$generated"
     env GZ_PARTITION="$partition" ROS_DOMAIN_ID="$domain" XH_SIM_GENERATED_SDF_DIR="$generated" \
@@ -184,12 +164,11 @@ PY
       nohup bash -lc "source /opt/ros/jazzy/setup.bash; source '$root/robot_ws/install/setup.bash'; exec ros2 launch xh_sim m1b_moveit_server.launch.py" \
       >"$run_dir/logs/trial-$(printf '%03d' "$index")-reset-$reset_attempt-moveit.log" 2>&1 < /dev/null &
     sleep 5
-    if ! (export GZ_PARTITION="$partition" ROS_DOMAIN_ID="$domain"; wait_for_m1b_controller_load); then
-      cleanup_partition "$partition"
-      echo "INVALID_RESET_RETRY:CONTROLLERS_NOT_LOADED:index=$index:attempt=$reset_attempt" >&2
-      continue
-    fi
     reset_record="$run_dir/trials/trial-$(printf '%03d' "$index")-reset-attempt-$reset_attempt.json"
+    # Paused Gazebo cannot be required to have loaded controllers before its
+    # first world-control transition.  The reset transaction broadcasts every
+    # detach while paused, resumes the world, then activates controllers and
+    # fails closed if that lifecycle does not complete.
     if ! timeout "$trial_timeout_s" env GZ_PARTITION="$partition" ROS_DOMAIN_ID="$domain" \
       python3 scripts/m1b_reset_detach.py --spawn-manifest "$spawn_manifest" --world-name industrial_cylinder_v1 --resume-world --activate-controllers \
       --output "$reset_record"; then

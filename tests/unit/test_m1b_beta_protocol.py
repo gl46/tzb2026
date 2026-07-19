@@ -540,10 +540,11 @@ def test_m1b_remote_tolerance_campaign_requires_fresh_partitions_and_full_reset(
     assert 'M1B_TOLERANCE_KEEP_TARGET_COLLISION_THROUGH_DESCEND' in source
     assert 'M1B_TOLERANCE_TOP_CONTACT_HEIGHT_M' in source
     assert '--calibration-top-contact-height-m' in source
-    assert 'wait_for_m1b_controller_load()' in source
-    assert 'M1B_CONTROLLERS_NOT_LOADED' in source
-    assert 'timeout 10 ros2 control list_controllers' in source
-    assert 'm1b_reset_detach.py then fail-closes' in source
+    assert 'domain=$((130 + index + reset_attempt))' in source
+    assert 'Paused Gazebo cannot be required to have loaded controllers' in source
+    assert source.index('scripts/m1b_reset_detach.py') < source.index('scripts/verify_m1b_reset_noncoupling.py')
+    assert 'wait_for_m1b_controller_load()' not in source
+    assert 'fails closed if that lifecycle does not complete' in source
     assert 'PARTIAL_CAMPAIGN_COMPLETE:$start_index:$end_index' in source
     assert 'partition="m1b_tolerance_campaign_${index}_reset_${reset_attempt}"' in source
     assert 'for reset_attempt in $(seq 1 "$reset_max_attempts")' in source
