@@ -660,6 +660,7 @@ def test_adr_0008_adapter_is_fail_closed_and_keeps_one_physical_master() -> None
     assert "</dev/null" in bullet_audit
     bullet_summary = (root / "scripts/summarize_m1a_bullet_capability_audit.py").read_text()
     assert "M1A_BULLET_CAPABILITY_BLOCKED" in bullet_summary
+    assert 'contacts.get("target_cube_events", 0) > 0' in bullet_summary
     assert "SetMimicConstraintFeature" in bullet_summary
     assert "bullet_plugin_interface_count" in bullet_summary
     assert "CONTACT_TELEMETRY_BLOCKED_BULLET_CAPABILITY_AUDIT" in s0_runner
