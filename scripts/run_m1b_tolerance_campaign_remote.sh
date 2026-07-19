@@ -43,6 +43,8 @@ if [[ "$calibration_vertical_board_ik_probe" == 1 ]]; then
   vertical_board_ik_probe_args=(--calibration-vertical-board-ik-probe)
 fi
 trial_timeout_s="${M1B_TOLERANCE_TRIAL_TIMEOUT_S:-150}"
+reset_max_attempts="${M1B_TOLERANCE_RESET_MAX_ATTEMPTS:-3}"
+allow_resume="${M1B_TOLERANCE_ALLOW_RESUME:-0}"
 spawn_manifest="$root/data/generated/m1b_beta_contact_probe/panda/panda.manifest.json"
 start_index="${M1B_TOLERANCE_START_INDEX:-0}"
 end_index="${M1B_TOLERANCE_END_INDEX:-80}"
@@ -54,9 +56,33 @@ end_index="${M1B_TOLERANCE_END_INDEX:-80}"
   echo "INVALID_TRIAL_INDEX_RANGE:$start_index:$end_index" >&2
   exit 2
 }
+[[ "$reset_max_attempts" =~ ^[1-9][0-9]*$ ]] || { echo "INVALID_RESET_MAX_ATTEMPTS:$reset_max_attempts" >&2; exit 2; }
 if [[ -e "$run_dir" ]] && [[ -n "$(find "$run_dir" -mindepth 1 -maxdepth 1 -print -quit)" ]]; then
-  echo "RUN_DIRECTORY_NOT_EMPTY:$run_dir" >&2
-  exit 2
+  # A rejected reset is never an episode.  An operator may resume only from a
+  # contiguous, worklist-bound raw prefix, so every retained raw file still
+  # represents exactly one verified-reset production primitive.
+  if [[ "$allow_resume" != 1 || "$start_index" -eq 0 ]]; then
+    echo "RUN_DIRECTORY_NOT_EMPTY:$run_dir" >&2
+    exit 2
+  fi
+  python3 - "$worklist" "$run_dir/raw" "$start_index" <<'PY'
+import json, sys
+from pathlib import Path
+
+worklist = json.load(open(sys.argv[1], encoding="utf-8"))["trials"]
+raw_dir, start = Path(sys.argv[2]), int(sys.argv[3])
+for index in range(start):
+    path = raw_dir / f"trial-{index:03d}.json"
+    if not path.is_file():
+        raise SystemExit(f"RESUME_MISSING_RAW_PREFIX:{path}")
+    record = json.load(path.open(encoding="utf-8"))
+    if record.get("provenance") != "CALIBRATION_ONLY_INITIALIZATION" or record.get("trial") != worklist[index]:
+        raise SystemExit(f"RESUME_RAW_PREFIX_MISMATCH:{path}")
+for path in raw_dir.glob("trial-*.json"):
+    index = int(path.stem.removeprefix("trial-"))
+    if index >= start:
+        raise SystemExit(f"RESUME_RAW_ALREADY_EXISTS:{path}")
+PY
 fi
 mkdir -p "$run_dir/raw" "$run_dir/logs" "$run_dir/trials"
 
@@ -105,55 +131,67 @@ PY
   scene="$scene_dir/scene-$seed.sdf"
   supervision="$scene_dir/scene-$seed.supervision.json"
   [[ -f "$scene" && -f "$supervision" ]] || { echo "TRIAL_SCENE_MISSING:index=$index" >&2; exit 3; }
-  partition="m1b_tolerance_campaign_$index"
-  domain=$((130 + index))
-  generated="$run_dir/generated-$index"
-  mkdir -p "$generated"
-  env GZ_PARTITION="$partition" ROS_DOMAIN_ID="$domain" XH_SIM_GENERATED_SDF_DIR="$generated" \
-    nohup bash -lc "source /opt/ros/jazzy/setup.bash; source '$root/robot_ws/install/setup.bash'; exec ros2 launch xh_sim simulation.launch.py world_name:=industrial_cylinder_v1 world_file:='$scene' m1b_scene_supervision:='$supervision' start_paused:=true" \
-    >"$run_dir/logs/trial-$(printf '%03d' "$index")-simulation.log" 2>&1 < /dev/null &
-  sleep 25
-  env GZ_PARTITION="$partition" ROS_DOMAIN_ID="$domain" \
-    nohup bash -lc "source /opt/ros/jazzy/setup.bash; source '$root/robot_ws/install/setup.bash'; exec ros2 launch xh_sim m1b_moveit_server.launch.py" \
-    >"$run_dir/logs/trial-$(printf '%03d' "$index")-moveit.log" 2>&1 < /dev/null &
-  sleep 18
-  if ! timeout "$trial_timeout_s" env GZ_PARTITION="$partition" ROS_DOMAIN_ID="$domain" \
-    python3 scripts/m1b_reset_detach.py --spawn-manifest "$spawn_manifest" --world-name industrial_cylinder_v1 --resume-world --activate-controllers \
-    --output "$run_dir/trials/trial-$(printf '%03d' "$index")-reset.json"; then
-    cleanup_partition "$partition"
-    echo "INFRASTRUCTURE_FAILURE:RESET:index=$index" >&2
-    exit 3
-  fi
-  # Amendment 1 deliberately makes one-shot grasp_state messages auxiliary.
-  # A reset becomes valid only after the S1 MoveIt jog has physically shown
-  # that all generated cylinders stay uncoupled.  This is evaluator-side
-  # reset infrastructure, never an input to the tolerance primitive.
-  reset_physical="$run_dir/trials/trial-$(printf '%03d' "$index")-reset-physical-noncoupling.json"
-  if ! timeout "$trial_timeout_s" env GZ_PARTITION="$partition" ROS_DOMAIN_ID="$domain" \
-    python3 scripts/verify_m1b_reset_noncoupling.py --spawn-manifest "$spawn_manifest" --scene-supervision "$supervision" \
-    --world-name industrial_cylinder_v1 --output "$reset_physical"; then
-    cleanup_partition "$partition"
-    echo "INFRASTRUCTURE_FAILURE:RESET_PHYSICAL_NONCOUPLING:index=$index" >&2
-    exit 3
-  fi
-  if ! python3 - "$reset_physical" <<'PY'
+  reset_verified=0
+  for reset_attempt in $(seq 1 "$reset_max_attempts"); do
+    # A failed physical check destroys this world.  The next attempt is a new
+    # episode, not a waiver or a re-use of the rejected reset.
+    partition="m1b_tolerance_campaign_${index}_reset_${reset_attempt}"
+    domain=$((130 + index))
+    generated="$run_dir/generated-$index-reset-$reset_attempt"
+    mkdir -p "$generated"
+    env GZ_PARTITION="$partition" ROS_DOMAIN_ID="$domain" XH_SIM_GENERATED_SDF_DIR="$generated" \
+      nohup bash -lc "source /opt/ros/jazzy/setup.bash; source '$root/robot_ws/install/setup.bash'; exec ros2 launch xh_sim simulation.launch.py world_name:=industrial_cylinder_v1 world_file:='$scene' m1b_scene_supervision:='$supervision' start_paused:=true" \
+      >"$run_dir/logs/trial-$(printf '%03d' "$index")-reset-$reset_attempt-simulation.log" 2>&1 < /dev/null &
+    sleep 25
+    env GZ_PARTITION="$partition" ROS_DOMAIN_ID="$domain" \
+      nohup bash -lc "source /opt/ros/jazzy/setup.bash; source '$root/robot_ws/install/setup.bash'; exec ros2 launch xh_sim m1b_moveit_server.launch.py" \
+      >"$run_dir/logs/trial-$(printf '%03d' "$index")-reset-$reset_attempt-moveit.log" 2>&1 < /dev/null &
+    sleep 18
+    reset_record="$run_dir/trials/trial-$(printf '%03d' "$index")-reset-attempt-$reset_attempt.json"
+    if ! timeout "$trial_timeout_s" env GZ_PARTITION="$partition" ROS_DOMAIN_ID="$domain" \
+      python3 scripts/m1b_reset_detach.py --spawn-manifest "$spawn_manifest" --world-name industrial_cylinder_v1 --resume-world --activate-controllers \
+      --output "$reset_record"; then
+      cleanup_partition "$partition"
+      echo "INVALID_RESET_RETRY:DETACH:index=$index:attempt=$reset_attempt" >&2
+      continue
+    fi
+    # Amendment 1 deliberately makes one-shot grasp_state messages auxiliary.
+    # A reset becomes valid only after the S1 MoveIt jog has physically shown
+    # that all generated cylinders stay uncoupled.  This is evaluator-side
+    # reset infrastructure, never an input to the tolerance primitive.
+    reset_physical="$run_dir/trials/trial-$(printf '%03d' "$index")-reset-physical-attempt-$reset_attempt.json"
+    if ! timeout "$trial_timeout_s" env GZ_PARTITION="$partition" ROS_DOMAIN_ID="$domain" \
+      python3 scripts/verify_m1b_reset_noncoupling.py --spawn-manifest "$spawn_manifest" --scene-supervision "$supervision" \
+      --world-name industrial_cylinder_v1 --output "$reset_physical"; then
+      cleanup_partition "$partition"
+      echo "INVALID_RESET_RETRY:PHYSICAL_NONCOUPLING:index=$index:attempt=$reset_attempt" >&2
+      continue
+    fi
+    if ! python3 - "$reset_physical" <<'PY'
 import json, sys
 record = json.load(open(sys.argv[1]))
 if record.get("status") != "RESET_PHYSICAL_NONCOUPLING_VERIFIED":
     raise SystemExit("reset physical non-coupling gate did not verify")
 PY
-  then
-    cleanup_partition "$partition"
-    echo "INFRASTRUCTURE_FAILURE:RESET_PHYSICAL_NONCOUPLING_STATUS:index=$index" >&2
-    exit 3
-  fi
-  # The verifier pauses the world for its after-jog supervision snapshot;
-  # the production-equivalent tolerance primitive must start with simulation
-  # running, just as it does after the detach transaction.
-  if ! env GZ_PARTITION="$partition" timeout 10 gz service --service /world/industrial_cylinder_v1/control \
-    --reqtype gz.msgs.WorldControl --reptype gz.msgs.Boolean --req 'pause: false' | grep -q 'data: true'; then
-    cleanup_partition "$partition"
-    echo "INFRASTRUCTURE_FAILURE:RESET_POST_VERIFY_RESUME:index=$index" >&2
+    then
+      cleanup_partition "$partition"
+      echo "INVALID_RESET_RETRY:PHYSICAL_NONCOUPLING_STATUS:index=$index:attempt=$reset_attempt" >&2
+      continue
+    fi
+    # The verifier pauses the world for its after-jog supervision snapshot;
+    # the production-equivalent tolerance primitive must start with simulation
+    # running, just as it does after the detach transaction.
+    if ! env GZ_PARTITION="$partition" timeout 10 gz service --service /world/industrial_cylinder_v1/control \
+      --reqtype gz.msgs.WorldControl --reptype gz.msgs.Boolean --req 'pause: false' | grep -q 'data: true'; then
+      cleanup_partition "$partition"
+      echo "INVALID_RESET_RETRY:POST_VERIFY_RESUME:index=$index:attempt=$reset_attempt" >&2
+      continue
+    fi
+    reset_verified=1
+    break
+  done
+  if [[ "$reset_verified" -ne 1 ]]; then
+    echo "INFRASTRUCTURE_FAILURE:RESET_RETRY_EXHAUSTED:index=$index:attempts=$reset_max_attempts" >&2
     exit 3
   fi
   if ! timeout "$trial_timeout_s" env GZ_PARTITION="$partition" ROS_DOMAIN_ID="$domain" \
@@ -173,7 +211,7 @@ PY
   echo "COMPLETED_TRIAL:$index"
 done
 
-if [[ "$start_index" -eq 0 && "$end_index" -eq 80 ]]; then
+if [[ "$end_index" -eq 80 ]] && [[ "$(find "$run_dir/raw" -maxdepth 1 -name 'trial-*.json' -type f | wc -l)" -eq 81 ]]; then
   python3 scripts/summarize_m1b_tolerance_campaign.py --worklist "$worklist" --raw-dir "$run_dir/raw" --output "$run_dir/m1b-tolerance-envelope.json"
 else
   echo "PARTIAL_CAMPAIGN_COMPLETE:$start_index:$end_index"

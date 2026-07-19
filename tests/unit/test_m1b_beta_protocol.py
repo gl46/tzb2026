@@ -347,9 +347,14 @@ def test_m1b_tolerance_campaign_requires_amendment_1_physical_reset_proof() -> N
     source = (Path(__file__).parents[2] / "scripts/run_m1b_tolerance_campaign_remote.sh").read_text()
     assert "scripts/verify_m1b_reset_noncoupling.py" in source
     assert '"RESET_PHYSICAL_NONCOUPLING_VERIFIED"' in source
-    assert "INFRASTRUCTURE_FAILURE:RESET_PHYSICAL_NONCOUPLING" in source
-    assert "INFRASTRUCTURE_FAILURE:RESET_POST_VERIFY_RESUME" in source
+    assert "INVALID_RESET_RETRY:PHYSICAL_NONCOUPLING" in source
+    assert "INVALID_RESET_RETRY:POST_VERIFY_RESUME" in source
     assert "--req 'pause: false'" in source
+    assert "M1B_TOLERANCE_RESET_MAX_ATTEMPTS" in source
+    assert "INVALID_RESET_RETRY:PHYSICAL_NONCOUPLING" in source
+    assert "INFRASTRUCTURE_FAILURE:RESET_RETRY_EXHAUSTED" in source
+    assert "M1B_TOLERANCE_ALLOW_RESUME" in source
+    assert "RESUME_RAW_PREFIX_MISMATCH" in source
 
 
 def test_m1b_hand_preflight_requires_physical_endpoint_feedback() -> None:
@@ -457,7 +462,8 @@ def test_m1b_remote_tolerance_campaign_requires_fresh_partitions_and_full_reset(
     assert 'M1B_TOLERANCE_CALIBRATION_HAND_Y_BIAS_M' in source
     assert 'M1B_TOLERANCE_KEEP_TARGET_COLLISION_THROUGH_DESCEND' in source
     assert 'PARTIAL_CAMPAIGN_COMPLETE:$start_index:$end_index' in source
-    assert 'partition="m1b_tolerance_campaign_$index"' in source
+    assert 'partition="m1b_tolerance_campaign_${index}_reset_${reset_attempt}"' in source
+    assert 'for reset_attempt in $(seq 1 "$reset_max_attempts")' in source
     assert '--resume-world --activate-controllers' in source
     assert '--calibration-fixture-diameter-m "$fixture_diameter_m"' in source
     assert 'cleanup_partition "$partition"' in source
