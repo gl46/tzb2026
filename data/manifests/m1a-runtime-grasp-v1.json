@@ -37,7 +37,7 @@
   "file_hashes": {
     "reports/m1a-preflight.json": "89da2eb6199b577ac41e8b4e3fbe6dcc676e98d71d75f3511b8bcbc2bff28326",
     "reports/m1a-m0-smoke.json": "99e80754e53cdc7920f2a3c3a50d16725f7676427ecc5b17ac2de244e1e7e988",
-    "reports/m1a-home-self-collision.json": "e18a0ed3d122bfac56ea066f460832bbd4b7e7ebcef162b9d4330cd6291f2d5b",
+    "reports/m1a-home-self-collision.json": "178580c11571b47b32ebcc2f9eed6e6fe6db630faa4dad7d2d93c416e67763c2",
     "reports/m1a-contact-calibration.json": "e16b516f946a47d91d328372205156ab4fe241ece5de620b910dca1640120009",
     "reports/m1a-motion-execution.json": "e9b976b1f0ab8da37e29165ada07bbb23e96539fe8bec7b94e80526dad51755d",
     "reports/m1a-friction-trials.json": "c69576170fa476377e2c2bfc91bf0b6805c2a59acd84ce685e1ae3e7604df8ac",
@@ -46,6 +46,6 @@
     "reports/m1a-hand-actuation-probe.json": "3d6d9e006059dceb6d52075a825a545e47b6ccf7b4a605509b4a80a3645c8ad4",
     "reports/m1a-hand-mimic-physical-audit.json": "9bd02a22c89d58f3ae957cc7b171acc8c566d9f9490c9fe6d00db49ccc2ea2f5",
     "reports/m1a-bullet-mimic-counterfactuals.json": "4bcd7284f1d044aed1fd86cf088c35a42d4891bf04042939d43c1ed37bb068de",
-    "reports/m1a-bullet-capability-audit.json": "87977dffbbddf0644fc4a2355f9b677773357d905dc1744bf3f835d0f01828ee"
+    "reports/m1a-bullet-capability-audit.json": "b90fdc785b5794fd37dc0115b9d00a1f96a86acce82cc4e85debff8d36bb7fd4"
   }
 }
