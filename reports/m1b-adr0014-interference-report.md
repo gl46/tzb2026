@@ -34,3 +34,9 @@ With a target-touch exception limited to the final 65 mm insert, the yaw-0
 candidate again executed high-clear and low-clear, but final-insert IK failed
 with `-31`; the exception was restored. Neither diagnostic closed the hand,
 formed contact, attached an object, or changes the production primitive.
+
+Finally, a non-moving vertical-board IK/planning scan considered 21 candidates
+from reset home and found zero collision-checked plans. The current horizontal,
+lateral, and vertical-board pose families therefore provide no physical path to
+promote. A further production geometry/scene or primitive change requires a
+new approved decision before the 81-trial measurement can resume.

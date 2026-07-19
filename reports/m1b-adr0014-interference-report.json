@@ -44,6 +44,12 @@
     }
   ],
   "diagnostic_conclusion": "Neither retaining target collision nor allowing only the final target touch produced an executable terminal insertion. These diagnostics are calibration-only and do not alter the production primitive or acceptance state.",
+  "vertical_board_feasibility_probe": {
+    "source": "/tmp/m1b-adr0014-vertical-board-ik-diagnostic-20260719/raw/trial-000.json",
+    "candidate_count": 21,
+    "planned_candidate_count_from_reset_home": 0,
+    "conclusion": "The existing vertical-board orientation family also has no collision-checked plan from reset home for this target."
+  },
   "inference_boundary": "The report does not identify a final corrective geometry or planner change. It establishes that any corrective action must first make a collision-safe terminal descend physically feasible and avoid table/non-target contact, then remeasure the full envelope.",
   "prohibited_shortcuts": [
     "Do not relax bilateral, attach, reset, or perception gate thresholds.",
