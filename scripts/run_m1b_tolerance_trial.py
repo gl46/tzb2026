@@ -56,6 +56,8 @@ M1B_NORMAL_SIDE_IK_SEED = [
     -2.7829882206873315, 1.4459771370327215, 2.997318074330887,
     -1.286336046330572,
 ]
+M1B_TOP_CONTACT_CENTERLINE_Z_M = 0.100
+M1B_TOP_PRECONTACT_STANDOFF_M = 0.150
 M1B_NORMAL_PRECONTACT_HAND_Z_OFFSET_M = 0.220
 # The calibration-only IK sweep in the isolated zero-offset scene found the
 # side-grasp final pose is reachable from 65 mm upward; 55--60 mm is not.
@@ -292,6 +294,76 @@ def _m1b_normal_side_pose(
     value.orientation.x = math.cos(yaw_rad / 2.0)
     value.orientation.y = math.sin(yaw_rad / 2.0)
     return value
+
+
+def _m1b_top_pose(
+    centre_world_m: list[float], *, hand_z_offset_m: float,
+    hand_y_centerline_bias_m: float, yaw_rad: float,
+) -> Pose:
+    """Return ADR-0016's vertical-tool inline-hand pose.
+
+    Local +Z is the re-oriented finger-board axis and maps to world down.
+    The target centre lies at the measured pad centre-line, 100 mm distal to
+    the hand origin, so the compact palm remains above a 30 mm cylinder.
+    """
+    value = Pose()
+    # Rz(yaw) Rx(pi): local +Z -> world down; local +/-Y still close the jaw.
+    value.orientation.x = math.cos(yaw_rad / 2.0)
+    value.orientation.y = math.sin(yaw_rad / 2.0)
+    value.orientation.z = 0.0
+    value.orientation.w = 0.0
+    # The centre-line correction remains along the rotating closing direction.
+    value.position.x = centre_world_m[0] + math.sin(yaw_rad) * hand_y_centerline_bias_m
+    value.position.y = centre_world_m[1] - math.cos(yaw_rad) * hand_y_centerline_bias_m
+    value.position.z = centre_world_m[2] + hand_z_offset_m
+    return value
+
+
+def m1b_top_down_precontact(
+    client: CalibrationClient, centre_world_m: list[float], *, hand_y_centerline_bias_m: float,
+    yaw_rad: float,
+) -> dict[str, object]:
+    """Execute the sole ADR-0016 M1B production pick family's pregrasp."""
+    final = {"executed": False}
+    attempts = 0
+    while attempts < 3 and not final.get("executed"):
+        final = client.move_hand_pose(
+            _m1b_top_pose(
+                centre_world_m,
+                hand_z_offset_m=M1B_TOP_CONTACT_CENTERLINE_Z_M + M1B_TOP_PRECONTACT_STANDOFF_M,
+                hand_y_centerline_bias_m=hand_y_centerline_bias_m,
+                yaw_rad=yaw_rad,
+            ),
+        )
+        attempts += 1
+    return {
+        "executed": bool(final.get("executed")), "converged": bool(final.get("converged")),
+        "final": final, "attempts": attempts,
+        "geometry": {
+            "finger_board_axis_world": [0.0, 0.0, -1.0],
+            "tool_axis_world": [0.0, 0.0, -1.0],
+            "closing_axis_world": [math.sin(yaw_rad), -math.cos(yaw_rad), 0.0],
+            "contact_centerline_z_m": M1B_TOP_CONTACT_CENTERLINE_Z_M,
+            "precontact_hand_z_offset_m": M1B_TOP_CONTACT_CENTERLINE_Z_M + M1B_TOP_PRECONTACT_STANDOFF_M,
+            "contact_hand_z_offset_m": M1B_TOP_CONTACT_CENTERLINE_Z_M,
+            "yaw_rad": yaw_rad,
+            "path_source": "MoveIt collision-checked vertical-tool trajectory from reset home",
+        },
+    }
+
+
+def m1b_top_down_contact_descend(
+    client: CalibrationClient, centre_world_m: list[float], *, ik_seed: list[float] | None,
+    hand_y_centerline_bias_m: float, yaw_rad: float,
+) -> dict[str, object]:
+    """Descend the inline hand vertically to the pad centre-line."""
+    return client.move_hand_pose(
+        _m1b_top_pose(
+            centre_world_m, hand_z_offset_m=M1B_TOP_CONTACT_CENTERLINE_Z_M,
+            hand_y_centerline_bias_m=hand_y_centerline_bias_m, yaw_rad=yaw_rad,
+        ),
+        ik_seed=ik_seed,
+    )
 
 
 def m1b_normal_side_precontact(
@@ -538,7 +610,7 @@ def m1b_calibration_scene_labels_at_lift(
 
 def m1b_calibration_target_height_scan(
     client: CalibrationClient, labels: list[dict[str, object]], *, target_entity: str,
-    target_world_m: list[float], hand_y_centerline_bias_m: float,
+    target_world_m: list[float], hand_y_centerline_bias_m: float, yaw_rad: float,
 ) -> dict[str, object]:
     """No-motion scan of virtual whole-fixture raised planning scenes."""
     candidates: list[dict[str, object]] = []
@@ -551,15 +623,23 @@ def m1b_calibration_target_height_scan(
         scene_applied = apply_calibration_cylinder_scene(client, virtual_labels)
         exception_applied = client.set_target_touch_exception(True, target_id=target_entity) if scene_applied else False
         virtual_target = [target_world_m[0], target_world_m[1], target_world_m[2] + lift_m]
-        pre_pose = _m1b_normal_side_pose(virtual_target, hand_z_offset_m=M1B_NORMAL_PRECONTACT_HAND_Z_OFFSET_M, hand_y_centerline_bias_m=hand_y_centerline_bias_m)
-        pre_ik = client.ik(pre_pose, seed=M1B_NORMAL_SIDE_IK_SEED)
+        pre_pose = _m1b_top_pose(
+            virtual_target,
+            hand_z_offset_m=M1B_TOP_CONTACT_CENTERLINE_Z_M + M1B_TOP_PRECONTACT_STANDOFF_M,
+            hand_y_centerline_bias_m=hand_y_centerline_bias_m, yaw_rad=yaw_rad,
+        )
+        pre_ik = client.ik(pre_pose)
         pre_plan = client.plan(pre_ik) if pre_ik is not None else None
-        contact_pose = _m1b_normal_side_pose(virtual_target, hand_z_offset_m=M1B_NORMAL_CONTACT_HAND_Z_OFFSET_M, hand_y_centerline_bias_m=hand_y_centerline_bias_m)
-        contact_ik = client.ik(contact_pose, seed=pre_ik or M1B_NORMAL_SIDE_IK_SEED)
+        contact_pose = _m1b_top_pose(
+            virtual_target, hand_z_offset_m=M1B_TOP_CONTACT_CENTERLINE_Z_M,
+            hand_y_centerline_bias_m=hand_y_centerline_bias_m, yaw_rad=yaw_rad,
+        )
+        contact_ik = client.ik(contact_pose, seed=pre_ik)
         contact_plan = client.plan(contact_ik) if contact_ik is not None else None
         restored = client.set_target_touch_exception(False, target_id=target_entity) if exception_applied else False
         candidates.append({
             "lift_m": lift_m, "virtual_target_center_world_m": virtual_target,
+            "top_down_yaw_rad": yaw_rad,
             "scene_applied": scene_applied, "target_touch_exception_applied": exception_applied,
             "precontact_ik_solved": pre_ik is not None, "precontact_planned_from_reset_home": pre_plan is not None,
             "contact_ik_solved": contact_ik is not None, "contact_planned_from_reset_home": contact_plan is not None,
@@ -622,6 +702,7 @@ def main() -> int:
     aperture_source.add_argument("--public-perception-evidence", type=Path, help="Actual public RGB-D geometric output for a production-style run")
     parser.add_argument("--public-camera-info", type=Path, help="Camera intrinsics paired with public perception evidence")
     parser.add_argument("--public-track-id", help="Production-side public target track ID")
+    parser.add_argument("--public-free-gap-yaw-rad", type=float, help="Perception-selected top-grasp yaw in the planning frame")
     parser.add_argument("--public-pipeline-python", default=os.environ.get("M1B_PUBLIC_PIPELINE_PYTHON", sys.executable), help="Python with the declared public RGB-D dependencies")
     parser.add_argument("--enable-near-pregrasp-reobservation", action="store_true", help="Enable the production NO-GO remediation; excluded from the baseline tolerance envelope")
     parser.add_argument("--calibration-hand-y-bias-m", type=float, help="Calibration-only centreline sweep; absent uses the production fixed hand-chain correction")
@@ -683,14 +764,20 @@ def main() -> int:
     if args.calibration_fixture_diameter_m is not None:
         perceived_diameter_m = args.calibration_fixture_diameter_m
         public_evidence: dict[str, object] = {"source": "CALIBRATION_FIXTURE_DECLARED_GEOMETRY", "perceived_diameter_m": perceived_diameter_m}
+        top_grasp_yaw_rad = 0.0
+        top_grasp_yaw_source = "CALIBRATION_FIXED_ZERO_YAW"
     else:
-        if args.public_perception_evidence is None or args.public_camera_info is None or not args.public_track_id:
-            raise SystemExit("public perception evidence, camera info, and target track are required together")
+        if args.public_perception_evidence is None or args.public_camera_info is None or not args.public_track_id or args.public_free_gap_yaw_rad is None:
+            raise SystemExit("public perception evidence, camera info, target track, and free-gap yaw are required together")
+        if not math.isfinite(args.public_free_gap_yaw_rad):
+            raise SystemExit("public free-gap yaw must be finite")
         calibration = M1BStaticCameraCalibrationV1.from_file(ROOT / "configs" / "m1b_camera_calibration.json")
         initial_public_track, public_evidence = public_track_from_evidence(
             args.public_perception_evidence, args.public_camera_info, args.public_track_id, calibration,
         )
         perceived_diameter_m = float(initial_public_track["perceived_diameter_m"])
+        top_grasp_yaw_rad = float(args.public_free_gap_yaw_rad)
+        top_grasp_yaw_source = "PUBLIC_PERCEPTION_FREE_GAP"
     if args.enable_near_pregrasp_reobservation and initial_public_track is None:
         raise SystemExit("near-pregrasp reobservation requires public perception evidence")
     close_targets, aperture = m1b_close_finger_targets_from_perceived_diameter(perceived_diameter_m)
@@ -745,7 +832,7 @@ def main() -> int:
             if args.calibration_target_height_scan and cylinder_scene_applied:
                 target_height_scan = m1b_calibration_target_height_scan(
                     client, labels, target_entity=target_entity, target_world_m=target,
-                    hand_y_centerline_bias_m=hand_y_centerline_bias_m,
+                    hand_y_centerline_bias_m=hand_y_centerline_bias_m, yaw_rad=top_grasp_yaw_rad,
                 )
                 approach = {"executed": False, "reason": "CALIBRATION_TARGET_HEIGHT_SCAN_NO_PHYSICAL_MOTION"}
             elif args.calibration_vertical_board_ik_probe and cylinder_scene_applied:
@@ -755,7 +842,10 @@ def main() -> int:
                 approach = {"executed": False, "reason": "CALIBRATION_VERTICAL_BOARD_IK_PROBE_NO_PHYSICAL_MOTION"}
             else:
                 open_hand = client.command_hand([0.04, 0.04])
-                approach = m1b_normal_side_precontact(client, target, hand_y_centerline_bias_m=hand_y_centerline_bias_m) if cylinder_scene_applied else {"executed": False, "reason": "CALIBRATION_COLLISION_SCENE_UNAVAILABLE"}
+                approach = m1b_top_down_precontact(
+                    client, target, hand_y_centerline_bias_m=hand_y_centerline_bias_m,
+                    yaw_rad=top_grasp_yaw_rad,
+                ) if cylinder_scene_applied else {"executed": False, "reason": "CALIBRATION_COLLISION_SCENE_UNAVAILABLE"}
             # A controller action can report success while the physical arm
             # was deflected by an unmodelled/free-cylinder contact.  Do not
             # close or enter the contact-bearing descent from that state:
@@ -811,7 +901,10 @@ def main() -> int:
                 )
             else:
                 contact_descend = (
-                    m1b_normal_side_contact_descend(client, final_target, ik_seed=approach.get("final", {}).get("ik_solution"), hand_y_centerline_bias_m=hand_y_centerline_bias_m)
+                    m1b_top_down_contact_descend(
+                        client, final_target, ik_seed=approach.get("final", {}).get("ik_solution"),
+                        hand_y_centerline_bias_m=hand_y_centerline_bias_m, yaw_rad=top_grasp_yaw_rad,
+                    )
                     if near_reobservation.get("succeeded") else {"executed": False, "reason": "PUBLIC_NEAR_REOBSERVATION_GATE_REJECTED"}
                 )
             if args.calibration_lateral_insert_target_touch_exception:
@@ -863,7 +956,8 @@ def main() -> int:
             "near_pregrasp_public_reobservation": near_reobservation,
             "baseline_perception_free": args.calibration_fixture_diameter_m is not None and not args.enable_near_pregrasp_reobservation,
             "offset_vector_m": [target[index] - truth_center[index] for index in range(3)],
-            "production_grasp_primitive": "open_physical_hand + m1b_normal_side_precontact + m1b_normal_side_contact_descend + close_physical_hand + m1b_internal_bilateral_broker",
+            "production_grasp_primitive": "open_physical_hand + m1b_top_down_precontact + m1b_top_down_contact_descend + close_physical_hand + m1b_internal_bilateral_broker",
+            "top_grasp_yaw": {"yaw_rad": top_grasp_yaw_rad, "source": top_grasp_yaw_source},
             "ready": ready, "calibration_collision_scene_applied": cylinder_scene_applied if ready else False, "target_touch_exception_applied": target_touch_exception_applied if ready else False,
             # The non-contact pregrasp must converge to its planned terminal
             # state.  The final descent deliberately permits contact to

@@ -786,7 +786,9 @@ def test_adr_0006_fk_sampling_keeps_end_effector_and_protocol_invariants() -> No
     assert module.ARM_JOINTS == tuple(f"panda_joint{index}" for index in range(1, 8))
     assert 0 < scale < 1
     assert module.serial_translation_m(model) == pytest.approx(1.3192623327153459)
-    assert module.fixed_end_effector_extension_m(model) == pytest.approx(0.095)
+    # ADR-0016 moves the finger roots to the compact palm's distal face and
+    # rotates the pad along local +Z: 60 mm root + 40 mm pad centre.
+    assert module.fixed_end_effector_extension_m(model) == pytest.approx(0.100)
     report = module.sample_workspace(model, samples=100, seed=7, target_total_reach_m=0.85)
     candidate = report["candidate_definition"]
     assert candidate["scaled_transforms"] == [*module.ARM_JOINTS, "panda_joint8", module.HAND_JOINT]

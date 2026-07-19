@@ -277,6 +277,12 @@ def test_m1b_tolerance_attach_uses_detachablejoint_empty_payload() -> None:
     assert 'if contact_descend.get("executed"):' in source
     assert 'only the non-contact\n            # approach requires strict terminal convergence' in source
     assert 'contact_start_index = len(raw)' in source
+    assert 'def m1b_top_down_precontact(' in source
+    assert 'def m1b_top_down_contact_descend(' in source
+    assert '"tool_axis_world": [0.0, 0.0, -1.0]' in source
+    assert '--public-free-gap-yaw-rad' in source
+    assert '"PUBLIC_PERCEPTION_FREE_GAP"' in source
+    assert 'm1b_top_down_precontact + m1b_top_down_contact_descend' in source
 
 
 def test_m1b_moveit_execution_waits_for_planned_trajectory() -> None:
@@ -327,12 +333,15 @@ def test_m1b_adr_0014_scene_geometry_and_bin_layout_are_consistent() -> None:
     assert all(target[2] == BIN_DROP_TARGET_Z_M for target in bin_cell_targets())
 
 
-def test_m1b_adr_0014_preserves_hand_contracts_while_narrowing_geometry() -> None:
+def test_m1b_adr_0016_makes_the_hand_inline_without_changing_its_contracts() -> None:
     urdf = (Path(__file__).parents[2] / "robot_ws/src/xh_sim/urdf/panda_controlled.urdf").read_text()
-    assert '<box size="0.07 0.06 0.11"/>' in urdf
-    assert urdf.count('<box size="0.08 0.010 0.022"/>') == 4
+    assert '<box size="0.07 0.06 0.06"/>' in urdf
+    assert urdf.count('<box size="0.022 0.010 0.08"/>') == 4
     assert urdf.count('name="tapered_tip_collision"') == 2
-    assert urdf.count('<box size="0.02 0.006 0.012"/>') == 4
+    assert urdf.count('<box size="0.012 0.006 0.02"/>') == 4
+    assert urdf.count('<origin xyz="0 0 0.06" rpy="0 0 0"/>') == 2
+    assert urdf.count('<origin xyz="0 0 0.04"/>') >= 4
+    assert urdf.count('<origin xyz="0 0 0.09"/>') >= 4
     assert '<joint name="panda_finger_joint1" type="prismatic">' in urdf
     assert '<joint name="panda_finger_joint2" type="prismatic">' in urdf
     assert urdf.count('lower="0" upper="0.04"') == 2
