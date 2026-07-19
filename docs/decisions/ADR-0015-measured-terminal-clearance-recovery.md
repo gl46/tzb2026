@@ -62,6 +62,18 @@ there was no close, bilateral contact, or attach. The height scan now translates
 the entire collision fixture for every candidate. It must be rerun before any
 further physical candidate or 81-trial campaign is authorized.
 
+## Full-fixture height-scan result (2026-07-19)
+
+The corrected no-motion scan translated every cylinder collision object for
+each 0, 10, 20, 30, 40, 60, 80, and 100 mm candidate. It found **no**
+contact-pose IK solution at any candidate; 80 mm additionally lost the
+precontact IK solution. The source is
+`/tmp/m1b-adr0015-fullfixture-height-scan-20260719/raw/trial-000.json` and the
+compact evidence is `reports/m1b-adr0015-fullfixture-height-scan.json`. This
+closes static vertical scene elevation as an ADR-0015 recovery path. No
+physical follow-up, 81-trial campaign, perception gate, round-trip, or
+WRONG_OBJECT exercise is authorized from this result.
+
 ## Approval
 
 Project owner approved ADR-0015 calibration measurement and the ensuing
