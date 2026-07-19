@@ -60,7 +60,12 @@ M1B_NORMAL_SIDE_IK_SEED = [
 # main pad.  On a 30 mm cylinder at the table, a 100 mm hand offset puts that
 # tip into the tabletop; 140 mm preserves upper-sidewall overlap while giving
 # the tip the measured 5 mm table clearance.
-M1B_TOP_CONTACT_CENTERLINE_Z_M = 0.140
+# The bounded physical contact-height calibration on the ADR-0016 inline hand
+# found bilateral same-entity contact and a confirmed detachable attach at
+# 120 mm.  140 mm was a real no-contact trial, so retain the measured 120 mm
+# value as the production primitive's centreline rather than extrapolating
+# from tapered-tip geometry.
+M1B_TOP_CONTACT_CENTERLINE_Z_M = 0.120
 M1B_TOP_PRECONTACT_STANDOFF_M = 0.150
 M1B_NORMAL_PRECONTACT_HAND_Z_OFFSET_M = 0.220
 # The calibration-only IK sweep in the isolated zero-offset scene found the

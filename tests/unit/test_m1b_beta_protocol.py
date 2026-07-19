@@ -364,7 +364,7 @@ def test_m1b_adr_0016_orientation_scan_requires_kinematics_and_populated_corrido
 
 def test_m1b_adr_0016_top_contact_height_includes_tapered_tip_clearance() -> None:
     source = (Path(__file__).parents[2] / "scripts/run_m1b_tolerance_trial.py").read_text()
-    assert 'M1B_TOP_CONTACT_CENTERLINE_Z_M = 0.140' in source
+    assert 'M1B_TOP_CONTACT_CENTERLINE_Z_M = 0.120' in source
     assert 'tip into the tabletop' in source
 
 
@@ -510,6 +510,8 @@ def test_m1b_remote_tolerance_campaign_requires_fresh_partitions_and_full_reset(
     assert 'M1B_TOLERANCE_END_INDEX:-80' in source
     assert 'M1B_TOLERANCE_CALIBRATION_HAND_Y_BIAS_M' in source
     assert 'M1B_TOLERANCE_KEEP_TARGET_COLLISION_THROUGH_DESCEND' in source
+    assert 'M1B_TOLERANCE_TOP_CONTACT_HEIGHT_M' in source
+    assert '--calibration-top-contact-height-m' in source
     assert 'PARTIAL_CAMPAIGN_COMPLETE:$start_index:$end_index' in source
     assert 'partition="m1b_tolerance_campaign_${index}_reset_${reset_attempt}"' in source
     assert 'for reset_attempt in $(seq 1 "$reset_max_attempts")' in source

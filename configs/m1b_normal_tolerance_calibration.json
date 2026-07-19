@@ -6,9 +6,9 @@
   "offsets_m": [0.0, -0.005, 0.005, -0.01, 0.01, -0.015, 0.015, -0.02, 0.02],
   "repetitions_per_point": 3,
   "calibration_instances": [
-    {"scene_seed": 1017, "object_slot": 7},
-    {"scene_seed": 1018, "object_slot": 4},
-    {"scene_seed": 1019, "object_slot": 2}
+    {"scene_seed": 5017, "object_slot": 1},
+    {"scene_seed": 5018, "object_slot": 1},
+    {"scene_seed": 5019, "object_slot": 1}
   ],
   "success_predicate": "bilateral_same_entity_contact",
   "minimum_success_rate": 0.8,

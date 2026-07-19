@@ -47,6 +47,15 @@ target_height_scan_args=()
 if [[ "$calibration_target_height_scan" == 1 ]]; then
   target_height_scan_args=(--calibration-target-height-scan)
 fi
+calibration_top_contact_height_m="${M1B_TOLERANCE_TOP_CONTACT_HEIGHT_M:-}"
+top_contact_height_args=()
+if [[ -n "$calibration_top_contact_height_m" ]]; then
+  if ! [[ "$calibration_top_contact_height_m" =~ ^0\.(10|11|12|13|14)$ ]]; then
+    echo "INVALID_TOP_CONTACT_HEIGHT_M:$calibration_top_contact_height_m" >&2
+    exit 2
+  fi
+  top_contact_height_args=(--calibration-top-contact-height-m "$calibration_top_contact_height_m")
+fi
 trial_timeout_s="${M1B_TOLERANCE_TRIAL_TIMEOUT_S:-150}"
 reset_max_attempts="${M1B_TOLERANCE_RESET_MAX_ATTEMPTS:-3}"
 allow_resume="${M1B_TOLERANCE_ALLOW_RESUME:-0}"
@@ -221,7 +230,7 @@ PY
   fi
   if ! timeout "$trial_timeout_s" env GZ_PARTITION="$partition" ROS_DOMAIN_ID="$domain" \
     python3 scripts/run_m1b_tolerance_trial.py --trial "$trial_path" --supervision "$supervision" --object-slot "$object_slot" \
-    --calibration-fixture-diameter-m "$fixture_diameter_m" "${calibration_hand_y_bias_args[@]}" "${keep_target_collision_args[@]}" "${lateral_insertion_args[@]}" "${lateral_insertion_height_args[@]}" "${lateral_insert_target_touch_args[@]}" "${vertical_board_ik_probe_args[@]}" "${target_height_scan_args[@]}" --output "$run_dir/raw/trial-$(printf '%03d' "$index").json"; then
+    --calibration-fixture-diameter-m "$fixture_diameter_m" "${calibration_hand_y_bias_args[@]}" "${keep_target_collision_args[@]}" "${lateral_insertion_args[@]}" "${lateral_insertion_height_args[@]}" "${lateral_insert_target_touch_args[@]}" "${vertical_board_ik_probe_args[@]}" "${target_height_scan_args[@]}" "${top_contact_height_args[@]}" --output "$run_dir/raw/trial-$(printf '%03d' "$index").json"; then
     cleanup_partition "$partition"
     echo "INFRASTRUCTURE_FAILURE:TRIAL:index=$index" >&2
     exit 3
