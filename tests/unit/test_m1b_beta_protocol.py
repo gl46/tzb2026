@@ -306,6 +306,7 @@ def test_m1b_calibration_pedestal_is_normal_only_and_lifts_labels() -> None:
         "calibration_only": True,
     }
     assert all(label["position_3d_world"][2] == pytest.approx(TABLE_TOP_Z + 0.04 + CYLINDER_HALF_LENGTH_M + SPAWN_CLEARANCE_M) for label in labels)
+    assert all(label["layout_reachability"]["passed"] is True for label in labels)
     with pytest.raises(ValueError, match="normal cylinders"):
         render(template, 1017, pedestal_lift_m=0.04)
 

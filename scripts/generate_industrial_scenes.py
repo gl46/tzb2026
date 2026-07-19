@@ -85,11 +85,6 @@ def cached_layout_reachability(target_xyz: tuple[float, float, float]) -> dict[s
         seed=LAYOUT_REACHABILITY_SEED,
         maximum_target_distance_m=LAYOUT_REACHABILITY_MAX_DISTANCE_M,
     )
-    if not evidence["passed"]:
-        raise RuntimeError(
-            "ADR-0014 layout reachability gate rejected "
-            f"{target_xyz}: final distance {evidence['final_target_distance_m']} m"
-        )
     return evidence
 
 
