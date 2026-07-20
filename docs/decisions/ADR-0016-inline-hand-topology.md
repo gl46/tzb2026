@@ -109,3 +109,10 @@ same revalidation cascade.
 - Measured follow-up: `reports/m1b-adr0016-top-contact-height-calibration.json`
   selects the 120 mm top-contact centreline from physical zero-offset probes;
   it does **not** satisfy the required 81-trial envelope or perception gate.
+- Completed revalidation: the 81-trial campaign is recorded in
+  `reports/m1b-adr0016-tolerance-envelope.json` (summary SHA-256
+  `bb602416012693c3225de9e342f35ee29bd049c8bc3072ffa74f50d9ec335a3d`).
+  Zero-offset success was X/Y/Z = 0/3, so every signed-monotonic envelope is
+  unmeasured. The actual RGB-D p90 comparison is **NO-GO** in
+  `reports/m1b-adr0016-perception-reachability-gate.json`; ADR-0013
+  acceptance items 3 and 4 remain unrun.

@@ -1,0 +1,25 @@
+{
+  "schema_version": "M1BPerceptionReachabilityGateV1",
+  "status": "NO_GO",
+  "reasons": [
+    "TOLERANCE_UNMEASURED:x",
+    "TOLERANCE_UNMEASURED:y",
+    "TOLERANCE_UNMEASURED:z"
+  ],
+  "tolerance_envelope_m": {
+    "x": null,
+    "y": null,
+    "z": null
+  },
+  "perception_axis_audit_m": {
+    "x": {"median_m": 0.0034674291669735124, "p90_m": 0.00987957407729051},
+    "y": {"median_m": 0.004558959014103803, "p90_m": 0.015126043675093626},
+    "z": {"median_m": 0.006227143395644341, "p90_m": 0.017299207075278322}
+  },
+  "criterion": "per_axis_p90_m <= 0.6 * measured_tolerance_m",
+  "inputs": {
+    "tolerance_summary_sha256": "bb602416012693c3225de9e342f35ee29bd049c8bc3072ffa74f50d9ec335a3d",
+    "perception_evidence": "reports/m1b-alpha-perception-metrics.json"
+  },
+  "truth_boundary": "Tolerance truth is calibration-only; perception truth is offline actual-Gazebo RGB-D evaluation only."
+}

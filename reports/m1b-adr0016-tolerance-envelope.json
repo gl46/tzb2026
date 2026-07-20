@@ -1,0 +1,21 @@
+{
+  "schema_version": "M1BADR0016ToleranceEnvelopeEvidenceV1",
+  "status": "COMPLETE_CALIBRATION_ONLY",
+  "trial_count": 81,
+  "source_summary": "/tmp/m1b-tolerance-adr0016-run/m1b-tolerance-envelope.json",
+  "source_summary_sha256": "bb602416012693c3225de9e342f35ee29bd049c8bc3072ffa74f50d9ec335a3d",
+  "success_predicate": "bilateral_same_entity_contact_and_observed_attach",
+  "point_pass_rule": "at_least_2_of_3",
+  "monotonic_closure": "both_signed_offsets_and_all_smaller_magnitudes_pass",
+  "tolerance_envelope_m": {
+    "x": null,
+    "y": null,
+    "z": null
+  },
+  "zero_offset_results": {
+    "x": {"successes": 0, "attempts": 3, "pass": false},
+    "y": {"successes": 0, "attempts": 3, "pass": false},
+    "z": {"successes": 0, "attempts": 3, "pass": false}
+  },
+  "truth_boundary": "Simulator truth supplied only the calibration-only target initialization. Contact, broker, and attach evidence came from the production path."
+}
