@@ -1,0 +1,25 @@
+{
+  "schema_version": "M1BADR0016ToleranceEnvelopeEvidenceV2",
+  "status": "COMPLETE_CALIBRATION_ONLY",
+  "trial_count": 81,
+  "source_summary": "node2:/tmp/m1b-tolerance-adr0016b-run/m1b-tolerance-envelope.json",
+  "source_summary_sha256": "1e758295cd7e28dbdb5273de2bc370035935d62c2c1925356562e960240689ca",
+  "success_predicate": "bilateral_same_entity_contact_and_observed_attach",
+  "point_pass_rule": "at_least_2_of_3",
+  "monotonic_closure": "both_signed_offsets_and_all_smaller_magnitudes_pass",
+  "hand_model": "ADR-0016 pre-authorized franka-copy fallback (URDF sha256 6678ff409d60f074283805879f53edaa939ead34f97a5a961ee67f6229b44ba8)",
+  "production_primitive": "open_physical_hand + calibration_free_gap_yaw + m1b_top_down_precontact + seeded_waypoint_vertical_descend + two_stage_close(squeeze 2 mm) + m1b_internal_bilateral_broker",
+  "worklist": "scene 5017, slots 1/2/4 (slot 3 replaced per corridor-extended ADR-0016 §3 pre-scan)",
+  "tolerance_envelope_m": {
+    "x": 0.015,
+    "y": 0.015,
+    "z": 0.005
+  },
+  "zero_offset_results": {
+    "x": {"successes": 3, "attempts": 3, "pass": true},
+    "y": {"successes": 2, "attempts": 3, "pass": true},
+    "z": {"successes": 2, "attempts": 3, "pass": true}
+  },
+  "previous_campaign_zero_offset": {"x": "0/3", "y": "0/3", "z": "0/3"},
+  "truth_boundary": "Simulator truth supplied only the calibration-only target initialization (centre and label-derived free-gap yaw). Contact, broker, and attach evidence came from the production path."
+}

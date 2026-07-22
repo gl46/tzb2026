@@ -8,8 +8,9 @@
   "calibration_instances": [
     {"scene_seed": 5017, "object_slot": 1},
     {"scene_seed": 5017, "object_slot": 2},
-    {"scene_seed": 5017, "object_slot": 3}
+    {"scene_seed": 5017, "object_slot": 4}
   ],
+  "instance_admission": "ADR-0016 §3 orientation-feasibility pre-scan on the acting model; slot 3 (cylinder_03) is rejected by the scan (pregrasp empty-scene IK -31 at base-axis radius 0.224 m) and replaced by scanned-passing slot 4",
   "success_predicate": "bilateral_same_entity_contact",
   "minimum_success_rate": 0.8,
   "truth_boundary": "calibration_only_never_available_to_online_policy"

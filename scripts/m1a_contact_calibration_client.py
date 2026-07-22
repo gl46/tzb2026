@@ -16,7 +16,7 @@ from builtin_interfaces.msg import Duration
 from control_msgs.action import FollowJointTrajectory
 from control_msgs.msg import JointTolerance, JointTrajectoryControllerState
 from geometry_msgs.msg import Pose, PoseArray, PoseStamped
-from moveit_msgs.msg import AttachedCollisionObject, CollisionObject, PlanningScene, PlanningSceneComponents, RobotState
+from moveit_msgs.msg import AttachedCollisionObject, CollisionObject, PlanningScene, PlanningSceneComponents, RobotState, RobotTrajectory
 from moveit_msgs.srv import ApplyPlanningScene, GetPlanningScene, GetPositionIK
 from rclpy.action import ActionClient
 from ros_gz_interfaces.msg import Contacts
@@ -51,20 +51,31 @@ CONTACT_TOPICS = {
     "cube_environment": "/xh/supervision/red_cube_environment_contacts",
 }
 CUBE_SIZE_M = 0.05
-# ADR-0016 moves the contact pads from local +X to local +Z.  These are the
-# main pad dimensions only; the tapered distal tip is deliberately excluded
-# from the AABB evidence because its purpose is clearance rather than the S0
-# contact surface.
-PAD_SIZE_M = (0.022, 0.010, 0.080)
-FINGER_LENGTH_M = 0.10
-FINGER_ROOT_Z_M = 0.10
+# ADR-0016 pre-authorized fallback: the pads are now the primitive-approximated
+# copy of the official franka finger.stl.  The S0 AABB evidence tracks the
+# distal contact pad ("tapered_tip_collision"), whose face lies exactly on the
+# finger-link y=0 plane; the recessed proximal body is excluded because it sits
+# 2.5 mm behind that face and cannot make the S0 contact.
+PAD_SIZE_M = (0.021, 0.0208, 0.0538)
+# Signed per-side plate-box centres in each finger-link frame.  The grasp
+# element is a full-length plate (the proven old-hand contact element was a
+# plate; a 17.8 mm block measured zero bullet contact response even at
+# 4.5 mm modelled overlap).  Its face is modelled 6.5 mm proud of the link
+# y=0 plane (measured shallow-penetration dead-band compensation for free
+# dynamic targets); the public inner-gap mapping remains 2q - 0.006.
+PAD_CENTER_IN_FINGER_M = {
+    "left": (0.0, 0.0039, 0.0269),
+    "right": (0.0, -0.0039, 0.0269),
+}
+FINGER_LENGTH_M = 0.1122
+FINGER_ROOT_Z_M = 0.1032
 PLANNING_SCENE_WORLD_OBJECT_PADDING_M = 0.0
 CALIBRATION_CUBE_XYZ = [0.17, 0.12, 0.755]
 CALIBRATION_FIXTURE_XYZ = [0.17, 0.12, 0.59]
 CALIBRATION_FIXTURE_SIZE_M = [0.01, 0.01, 0.28]
 CONTACT_RETREAT_HEIGHT_M = 0.220
 HAND_POST_GOAL_OBSERVATION_SLACK_M = 0.0001
-# The nominal side-contact pose placed the 12 cm finger pad exactly tangent to
+# The nominal side-contact pose placed the finger pad exactly tangent to
 # the cube's west face.  The full S0 run recorded 0.30--0.94 mm FK / Gazebo
 # AABB gaps for otherwise executed right and bilateral trials, so the fixture
 # needs a measured 2 mm finger-only overlap margin.  This is calibration-only:
@@ -75,22 +86,24 @@ CALIBRATION_FINGER_TARGET_INSET_M = 0.002
 # pre-close pose; the corresponding before/after poses are recorded below.
 BILATERAL_PRECONTACT_CLEARANCE_M = 0.001
 BILATERAL_FINAL_FINGER_INSET_M = 0.0
-# The 30 mm final command contacts a 50 mm S0 cube.  Use the fully open
-# 40 mm state for the vertical terminal descent so neither inline pad clips a
-# sidewall before closure.
+# The 25 mm-per-finger final command closes to a 50 mm inner gap on the 50 mm
+# S0 cube.  Use the fully open 40 mm state for the vertical terminal descent
+# so neither pad clips a sidewall before closure.
 BILATERAL_PRECONTACT_FINGER_M = 0.040
 BILATERAL_PRECONTACT_VERTICAL_STANDOFF_M = 0.050
-# The inline tapered tip extends 20 mm beyond the named 80 mm contact pad.
-# A 30 mm lift cleared the named-pad AABB but still drove that tip into the
-# bilateral support.  A 40 mm lift leaves the tip 5 mm above the support and
-# retains a 25 mm overlap with the cube's upper sidewall.
-BILATERAL_CONTACT_VERTICAL_OFFSET_M = 0.040
+# The franka-copy palm spans hand-frame x +/-0.0317, so at the bilateral pose
+# it overlaps the backstop column (x 0.1975..0.2075, top z 0.805) by 4 mm in
+# x.  The backstop is physical-only (not a planning-scene object), so a pose
+# whose palm bottom descends below its top stalls the arm on a sensorless
+# contact.  Palm bottom = cube_z + 0.1032 - inset + offset - 0.066; a 20 mm
+# offset keeps it at 0.8104 (5.4 mm above the backstop) while 16 mm of the
+# 17.8 mm pad still overlaps the cube sidewall.
+BILATERAL_CONTACT_VERTICAL_OFFSET_M = 0.020
 BILATERAL_STEADY_WIDTH_RANGE_M = (0.045, 0.070)
-# The unchanged public finger-contact topic observes the main named collision
-# box, whose ADR-0014 geometry is 80 mm long from the finger-link origin.
-# With the table top at z=0.450 m, the ADR-0016 inline main-pad centre is
-# 10 cm along local +Z from the hand.  Rx(pi) maps that axis down, so a 0.550 m
-# hand origin places the named 8 cm pad across the tabletop.
+# The public finger-contact topics observe both named collision elements.
+# With the table top at z=0.450 m, the franka-copy pad spans local +Z
+# 0.0944--0.1122 from the hand.  Rx(pi) maps that axis down, so a 0.550 m
+# hand origin presses the distal pad end into the tabletop.
 TABLE_TOUCH_HAND_Z_M = 0.550
 
 
@@ -308,12 +321,13 @@ class CalibrationClient(EvidenceClient):
     def ik(
         self, pose: Pose, *, avoid_collisions: bool = True, timeout_s: float = 3.0,
         seed: list[float] | None = None, ik_link: str = "panda_hand",
+        hand_positions: list[float] | None = None,
     ) -> list[float] | None:
         positions = seed or [self.latest.get(name, math.nan) for name in JOINTS]
         if not all(math.isfinite(value) for value in positions):
             return None
-        hand_positions = [self.latest_hand.get(name, math.nan) for name in HAND_JOINTS]
-        if not all(math.isfinite(value) for value in hand_positions):
+        hand_values = hand_positions or [self.latest_hand.get(name, math.nan) for name in HAND_JOINTS]
+        if not all(math.isfinite(value) for value in hand_values):
             return None
         request = GetPositionIK.Request()
         ik = request.ik_request
@@ -324,7 +338,7 @@ class CalibrationClient(EvidenceClient):
         # default closed-finger state instead of the physical state it will
         # actually plan from.
         ik.robot_state = RobotState(
-            joint_state=JointState(name=JOINTS + HAND_JOINTS, position=positions + hand_positions)
+            joint_state=JointState(name=JOINTS + HAND_JOINTS, position=positions + hand_values)
         )
         ik.avoid_collisions = avoid_collisions
         ik.pose_stamped = PoseStamped()
@@ -696,6 +710,95 @@ class CalibrationClient(EvidenceClient):
             "max_final_joint_error_rad": max(final_errors),
         }
 
+    def move_hand_cartesian(
+        self, pose: Pose, *, duration_s: float = 3.0, max_step_m: float = 0.005,
+        max_joint_step_rad: float = 0.35, ik_link: str = "panda_hand",
+    ) -> dict:
+        """Plan and execute a straight tool-frame segment to one pose.
+
+        The ADR-0016 final descent must stay a vertical tool-axis translation.
+        An OMPL joint-space plan may legally bow sideways between the same two
+        endpoints, and with the finger/target ACM exception enabled such a bow
+        was measured displacing the free calibration target by 10--18 mm
+        before the close (ADR-0016 campaign raws 000/027/044).  The MoveIt
+        cartesian service reports only a completed fraction with no failure
+        cause, so this client walks the segment itself: one collision-aware
+        IK per max_step_m, each seeded from the previous solution, recording
+        the exact failing waypoint and IK error, plus a per-step
+        joint-continuity guard that rejects IK branch jumps instead of
+        silently truncating the path.
+        """
+        positions = [self.latest.get(name, math.nan) for name in JOINTS]
+        hand_positions = [self.latest_hand.get(name, math.nan) for name in HAND_JOINTS]
+        if not all(math.isfinite(value) for value in positions + hand_positions):
+            return {"planned": False, "executed": False, "reason": "JOINT_STATE_UNAVAILABLE"}
+        start_pose = self.fk_link(ik_link, positions)
+        if start_pose is None:
+            return {"planned": False, "executed": False, "reason": "START_FK_UNAVAILABLE"}
+        target_xyz = [pose.position.x, pose.position.y, pose.position.z]
+        segment = [target - start for target, start in zip(target_xyz, start_pose[:3])]
+        length_m = math.sqrt(sum(value ** 2 for value in segment))
+        steps = max(2, math.ceil(length_m / max_step_m))
+        waypoints: list[list[float]] = []
+        seed = positions
+        for index in range(1, steps + 1):
+            ratio = index / steps
+            waypoint = Pose()
+            waypoint.position.x = start_pose[0] + segment[0] * ratio
+            waypoint.position.y = start_pose[1] + segment[1] * ratio
+            waypoint.position.z = start_pose[2] + segment[2] * ratio
+            waypoint.orientation = pose.orientation
+            solution = self.ik(waypoint, seed=seed, ik_link=ik_link)
+            if solution is None:
+                return {
+                    "planned": False, "executed": False,
+                    "reason": "CARTESIAN_WAYPOINT_IK_REJECTED",
+                    "failed_waypoint_index": index, "waypoint_count": steps,
+                    "fraction": (index - 1) / steps,
+                    "failed_waypoint_z_m": waypoint.position.z,
+                    "ik_error": self.last_ik_error,
+                }
+            joint_step = max(abs(current - previous) for current, previous in zip(solution, seed))
+            if joint_step > max_joint_step_rad:
+                return {
+                    "planned": False, "executed": False,
+                    "reason": "CARTESIAN_JOINT_JUMP_REJECTED",
+                    "failed_waypoint_index": index, "waypoint_count": steps,
+                    "fraction": (index - 1) / steps,
+                    "max_observed_joint_step_rad": joint_step,
+                    "max_joint_step_rad": max_joint_step_rad,
+                }
+            waypoints.append(solution)
+            seed = solution
+        trajectory = RobotTrajectory()
+        trajectory.joint_trajectory.joint_names = list(JOINTS)
+        points = [JointTrajectoryPoint(positions=list(positions), time_from_start=Duration(sec=0, nanosec=0))]
+        for index, solution in enumerate(waypoints, start=1):
+            seconds = duration_s * index / steps
+            points.append(JointTrajectoryPoint(
+                positions=list(solution),
+                time_from_start=Duration(sec=int(seconds), nanosec=int((seconds - int(seconds)) * 1e9)),
+            ))
+        trajectory.joint_trajectory.points = points
+        expected = list(waypoints[-1])
+        executed, goal_uuid, samples, controller_samples, settle_s, converged = self.execute(
+            trajectory, expected
+        )
+        observed = [self.latest.get(name, math.nan) for name in JOINTS]
+        final_errors = [abs(actual - target) for actual, target in zip(observed, expected)]
+        return {
+            "planned": True, "cartesian": True, "fraction": 1.0,
+            "planning_method": "SEEDED_PER_WAYPOINT_COLLISION_AWARE_IK",
+            "max_step_m": max_step_m, "duration_s": duration_s, "point_count": len(points),
+            "executed": executed, "converged": converged, "goal_uuid": goal_uuid,
+            "joint_state_samples": len(samples),
+            "controller_state_samples": len(controller_samples),
+            "post_controller_settle_s": settle_s,
+            "expected_final_joints": expected, "observed_final_joints": observed,
+            "per_joint_final_error_rad": final_errors,
+            "max_final_joint_error_rad": max(final_errors),
+        }
+
     def move_joint_target(self, target: list[float]) -> dict:
         """Plan and execute a collision-checked retreat through MoveIt."""
         trajectory = self.plan(target)
@@ -731,7 +834,7 @@ class CalibrationClient(EvidenceClient):
             if pose is None:
                 output[side] = None
                 continue
-            translation = quaternion_rotate(pose[3:], (0.0, 0.0, 0.04))
+            translation = quaternion_rotate(pose[3:], PAD_CENTER_IN_FINGER_M[side])
             center = [pose[index] + translation[index] for index in range(3)]
             separation = aabb_separation(center, PAD_SIZE_M, cube_xyz, (CUBE_SIZE_M,) * 3)
             output[side] = {"link_pose": pose, "pad_center_world": center, "aabb_separation_m": separation}
@@ -750,7 +853,7 @@ class CalibrationClient(EvidenceClient):
             cr, sr = math.cos(roll / 2.0), math.sin(roll / 2.0)
             quaternion = [sr * cp * cy - cr * sp * sy, cr * sp * cy + sr * cp * sy,
                           cr * cp * sy - sr * sp * cy, cr * cp * cy + sr * sp * sy]
-            translation = quaternion_rotate(quaternion, (0.0, 0.0, 0.04))
+            translation = quaternion_rotate(quaternion, PAD_CENTER_IN_FINGER_M[side])
             center = [pose[index] + translation[index] for index in range(3)]
             separation = aabb_separation(center, PAD_SIZE_M, cube_xyz, (CUBE_SIZE_M,) * 3)
             simulator[side] = {
@@ -950,14 +1053,17 @@ def main() -> int:
         trials.append({"label": "idle", "expected": "none", "contacts": classify_contacts(idle_events)})
 
         specifications = (
-            # ADR-0016 keeps ADR-0008's pose-induced, fixed-aperture labels,
-            # but rederives them for vertical pads and local +/-Y closure.
-            # At a 4 cm opening, 12 mm hand offsets give one pad a measured
-            # 2 mm sidewall inset.  At 30 mm per finger the two inner faces
-            # meet a 50 mm S0 cube without a side push.
-            [(f"left_{index}", "left", 0.012, [0.040, 0.040]) for index in range(1, 4)]
-            + [(f"right_{index}", "right", -0.012, [0.040, 0.040]) for index in range(1, 4)]
-            + [(f"bilateral_{index}", "bilateral", 0.0, [0.030, 0.030]) for index in range(1, 4)]
+            # The franka-copy pads keep ADR-0008's pose-induced, fixed-aperture
+            # labels; each collision face sits 6.5 mm proud of its finger-link
+            # y=0 plane.  Static S0 targets have no dead band, so the named-pad
+            # inset stays 2 mm of the modelled skin:
+            # |offset| = (q - 0.0065) - (cube_half - inset) = 0.0335 - 0.023.
+            # The free bilateral cube needs the measured dynamic-pair overlap:
+            # 27 mm per finger targets the skin 4.5 mm inside each sidewall
+            # while the achieved steady width stays inside the public window.
+            [(f"left_{index}", "left", 0.0105, [0.040, 0.040]) for index in range(1, 4)]
+            + [(f"right_{index}", "right", -0.0105, [0.040, 0.040]) for index in range(1, 4)]
+            + [(f"bilateral_{index}", "bilateral", 0.0, [0.027, 0.027]) for index in range(1, 4)]
         )
         scope = os.environ.get("M1A_CALIBRATION_SCOPE", "full")
         selected_label = os.environ.get("M1A_CALIBRATION_LABEL", "")

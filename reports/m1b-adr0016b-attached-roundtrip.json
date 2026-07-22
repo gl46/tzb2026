@@ -1,0 +1,50 @@
+{
+  "schema_version": "M1BAttachedRoundTripEvidenceV1",
+  "provenance": "SUPERVISION_EVALUATION_ONLY",
+  "online_truth_access": false,
+  "entity_source": "actuation_internal_broker_attach_record",
+  "entity": "cylinder_01",
+  "moveit_carried_object_applied": true,
+  "transport_collision_exceptions_applied": true,
+  "attached_move": {
+    "planned": true,
+    "plan_attempts": 1,
+    "executed": true,
+    "converged": true,
+    "goal_uuid": "f1012ddad0b74ebe89e1740d4f6a03b7",
+    "joint_state_samples": 184,
+    "controller_state_samples": 184,
+    "post_controller_settle_s": 0.0009703636169433594
+  },
+  "attached_follow": true,
+  "attached_follow_metrics": {
+    "link_motion_m": 0.027656972502426935,
+    "cylinder_motion_m": 0.027737846455700182,
+    "relative_drift_m": 3.923630715596577e-06
+  },
+  "detach": {
+    "topic": "/xh/m1b/cylinder_01/detach",
+    "state_topic": "/xh/m1b/cylinder_01/grasp_state",
+    "detached_observed": true,
+    "state_lines": [
+      "data: \"detached\""
+    ]
+  },
+  "moveit_carried_object_removed": true,
+  "hand_released_before_decouple": true,
+  "detached_move": {
+    "planned": true,
+    "plan_attempts": 1,
+    "executed": true,
+    "converged": true,
+    "goal_uuid": "3be7ac8e5e65488da11ee2188a06771b",
+    "joint_state_samples": 179,
+    "controller_state_samples": 179,
+    "post_controller_settle_s": 0.0007817745208740234
+  },
+  "detached_decoupled": true,
+  "detached_decouple_metrics": {
+    "link_motion_m": 0.032950336219832406,
+    "relative_change_m": 0.03314898391726433
+  }
+}

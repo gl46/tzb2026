@@ -54,24 +54,49 @@
   <link name="panda_link8"><inertial><mass value="0.2"/><inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/></inertial><visual><geometry><box size="0.04 0.04 0.04"/></geometry><material name="xh_dark"/></visual><collision><geometry><box size="0.04 0.04 0.04"/></geometry></collision></link>
   <joint name="panda_joint8" type="fixed"><origin xyz="0 0 0.107" rpy="0 0 0"/><parent link="panda_link7"/><child link="panda_link8"/></joint>
 
-  <!-- ADR-0016: compact inline palm.  The wrist, palm and pads now share
-       local +Z as the tool/finger axis; closing remains local +/-Y. -->
-  <link name="panda_hand"><inertial><mass value="0.5"/><inertia ixx="0.003" ixy="0" ixz="0" iyy="0.003" iyz="0" izz="0.003"/></inertial><visual><origin xyz="0 0 0.03"/><geometry><box size="0.07 0.06 0.06"/></geometry><material name="xh_dark"/></visual><collision><origin xyz="0 0 0.03"/><geometry><box size="0.07 0.06 0.06"/></geometry></collision></link>
+  <!-- ADR-0016 pre-authorized fallback: primitive-approximated copy of the
+       official moveit_resources_panda_description collision geometry.
+       Source meshes (node2 /opt/ros/jazzy, jazzy binary release):
+         hand.stl   sha256 94493e94f30fe940f2c8ca2f155c3bbe67bbff406d3edf5e261670d2f0f6e2ed
+         finger.stl sha256 2d07a740392f3b9b0816f65d64fff9927d3d57c897870fc4b6ff9c56fff3a0c8
+       Palm box = the hand.stl axis-aligned bounds; each finger keeps the two
+       contract collision elements with their geometries deliberately swapped
+       relative to visual intuition: S0 measured that the runtime-spawned
+       bullet-featherstone robot only collides each link's FIRST element
+       (255/255 S0 contact events on the first element while the tip box sat
+       2.5 mm deeper), so element "collision" carries the full-length grasp plate
+       (z 0-0.0538): the proven old-hand contact element was an 80 mm plate
+       and the interim 17.8 mm block measured zero contact response at
+       4.5 mm modelled overlap, matching bullet's small-convex margin
+       pathology, so the grasp surface keeps a plate-class extent.  The pad collision face is modelled 6.5 mm proud of
+       the link y=0 plane while the public inner-gap mapping stays
+       2q - 0.006, so a window-edge close command lands its modelled overlap
+       4.5 mm inside a centred target: the live M1B diagnostic measured a
+       2-3 mm shallow-penetration dead band in bullet-featherstone contact
+       generation against free dynamic bodies (0 events at 2 mm commanded
+       overlap vs >1000 at 3.5 mm), and a persistent stall force requires
+       the command to sit beyond that band.  Element
+       "tapered_tip_collision" carries the recessed
+       proximal body (z 0-0.036, 2.5 mm behind the pad face).  Finger joints
+       move to the official 0.0584 m root.  Joint names, [0, 0.04] m limits,
+       q2-master mimic, controller blocks, and collision element names are
+       unchanged. -->
+  <link name="panda_hand"><inertial><mass value="0.5"/><inertia ixx="0.003" ixy="0" ixz="0" iyy="0.003" iyz="0" izz="0.003"/></inertial><visual><origin xyz="0 -0.0018 0.02005"/><geometry><box size="0.0633 0.2044 0.0919"/></geometry><material name="xh_dark"/></visual><collision><origin xyz="0 -0.0018 0.02005"/><geometry><box size="0.0633 0.2044 0.0919"/></geometry></collision></link>
   <joint name="panda_hand_joint" type="fixed"><origin xyz="0 0 0" rpy="0 0 -0.785398163397"/><parent link="panda_link8"/><child link="panda_hand"/></joint>
 
-  <link name="panda_rightfinger"><inertial><mass value="0.08"/><inertia ixx="0.0002" ixy="0" ixz="0" iyy="0.0002" iyz="0" izz="0.0002"/></inertial><visual><origin xyz="0 0 0.04"/><geometry><box size="0.022 0.010 0.08"/></geometry><material name="xh_dark"/></visual><visual name="tapered_tip_visual"><origin xyz="0 0 0.09"/><geometry><box size="0.012 0.006 0.02"/></geometry><material name="xh_dark"/></visual><collision name="collision"><origin xyz="0 0 0.04"/><geometry><box size="0.022 0.010 0.08"/></geometry></collision><collision name="tapered_tip_collision"><origin xyz="0 0 0.09"/><geometry><box size="0.012 0.006 0.02"/></geometry></collision></link>
+  <link name="panda_rightfinger"><inertial><mass value="0.08"/><inertia ixx="0.0002" ixy="0" ixz="0" iyy="0.0002" iyz="0" izz="0.0002"/></inertial><visual><origin xyz="0 -0.01445 0.018"/><geometry><box size="0.021 0.0239 0.036"/></geometry><material name="xh_dark"/></visual><visual name="tapered_tip_visual"><origin xyz="0 -0.0039 0.0269"/><geometry><box size="0.021 0.0208 0.0538"/></geometry><material name="xh_dark"/></visual><collision name="collision"><origin xyz="0 -0.0039 0.0269"/><geometry><box size="0.021 0.0208 0.0538"/></geometry></collision><collision name="tapered_tip_collision"><origin xyz="0 -0.01445 0.018"/><geometry><box size="0.021 0.0239 0.036"/></geometry></collision></link>
   <!-- q2 is the physical master selected by ADR-0008's pre-authorized
        PANDA_MIMIC_Q2_MASTER fallback. It is deliberately declared before its
        q1 follower because the URDF→Gazebo importer resolves mimic leaders in
        declaration order. The spawned-SDF audit must still prove the physical
        q1 follower constraint before this model can promote S0. -->
-  <joint name="panda_finger_joint2" type="prismatic"><origin xyz="0 0 0.06" rpy="0 0 0"/><parent link="panda_hand"/><child link="panda_rightfinger"/><axis xyz="0 -1 0"/><limit effort="20" lower="0" upper="0.04" velocity="0.2"/><dynamics damping="1.0"/></joint>
+  <joint name="panda_finger_joint2" type="prismatic"><origin xyz="0 0 0.0584" rpy="0 0 0"/><parent link="panda_hand"/><child link="panda_rightfinger"/><axis xyz="0 -1 0"/><limit effort="20" lower="0" upper="0.04" velocity="0.2"/><dynamics damping="1.0"/></joint>
 
-  <link name="panda_leftfinger"><inertial><mass value="0.08"/><inertia ixx="0.0002" ixy="0" ixz="0" iyy="0.0002" iyz="0" izz="0.0002"/></inertial><visual><origin xyz="0 0 0.04"/><geometry><box size="0.022 0.010 0.08"/></geometry><material name="xh_dark"/></visual><visual name="tapered_tip_visual"><origin xyz="0 0 0.09"/><geometry><box size="0.012 0.006 0.02"/></geometry><material name="xh_dark"/></visual><collision name="collision"><origin xyz="0 0 0.04"/><geometry><box size="0.022 0.010 0.08"/></geometry></collision><collision name="tapered_tip_collision"><origin xyz="0 0 0.09"/><geometry><box size="0.012 0.006 0.02"/></geometry></collision></link>
+  <link name="panda_leftfinger"><inertial><mass value="0.08"/><inertia ixx="0.0002" ixy="0" ixz="0" iyy="0.0002" iyz="0" izz="0.0002"/></inertial><visual><origin xyz="0 0.01445 0.018"/><geometry><box size="0.021 0.0239 0.036"/></geometry><material name="xh_dark"/></visual><visual name="tapered_tip_visual"><origin xyz="0 0.0039 0.0269"/><geometry><box size="0.021 0.0208 0.0538"/></geometry><material name="xh_dark"/></visual><collision name="collision"><origin xyz="0 0.0039 0.0269"/><geometry><box size="0.021 0.0208 0.0538"/></geometry></collision><collision name="tapered_tip_collision"><origin xyz="0 0.01445 0.018"/><geometry><box size="0.021 0.0239 0.036"/></geometry></collision></link>
   <!-- ADR-0008 pre-authorized active-joint fallback: q1 is the follower after
        the bounded q1-master close probe left it physically at 4 cm. The
        positive-open joint protocol is unchanged. -->
-  <joint name="panda_finger_joint1" type="prismatic"><origin xyz="0 0 0.06" rpy="0 0 0"/><parent link="panda_hand"/><child link="panda_leftfinger"/><axis xyz="0 1 0"/><limit effort="20" lower="0" upper="0.04" velocity="0.2"/><dynamics damping="1.0"/><mimic joint="panda_finger_joint2" multiplier="1" offset="0"/></joint>
+  <joint name="panda_finger_joint1" type="prismatic"><origin xyz="0 0 0.0584" rpy="0 0 0"/><parent link="panda_hand"/><child link="panda_leftfinger"/><axis xyz="0 1 0"/><limit effort="20" lower="0" upper="0.04" velocity="0.2"/><dynamics damping="1.0"/><mimic joint="panda_finger_joint2" multiplier="1" offset="0"/></joint>
 
   <ros2_control name="GazeboSimSystem" type="system">
     <hardware><plugin>gz_ros2_control/GazeboSimSystem</plugin></hardware>
@@ -120,19 +145,22 @@
     </plugin>
   </gazebo>
   <!-- Separate finger sensors are required for M1A's bilateral-contact gate.
-       They are supervision telemetry only and are never injected into ObservationV0. -->
+       They are supervision telemetry only and are never injected into ObservationV0.
+       Both collision elements are bound: with the franka-copy geometry the
+       distal pad ("tapered_tip_collision") is the grasp contact face, while
+       the recessed proximal body still covers incidental contacts. -->
   <gazebo reference="panda_leftfinger">
     <sensor name="left_finger_contact" type="contact">
       <always_on>1</always_on><update_rate>30</update_rate>
       <topic>/xh/supervision/panda_leftfinger_contacts</topic>
-      <contact><collision>panda_leftfinger_fixed_joint_lump__collision_collision</collision></contact>
+      <contact><collision>panda_leftfinger_fixed_joint_lump__collision_collision</collision><collision>panda_leftfinger_fixed_joint_lump__tapered_tip_collision_collision_1</collision></contact>
     </sensor>
   </gazebo>
   <gazebo reference="panda_rightfinger">
     <sensor name="right_finger_contact" type="contact">
       <always_on>1</always_on><update_rate>30</update_rate>
       <topic>/xh/supervision/panda_rightfinger_contacts</topic>
-      <contact><collision>panda_rightfinger_fixed_joint_lump__collision_collision</collision></contact>
+      <contact><collision>panda_rightfinger_fixed_joint_lump__collision_collision</collision><collision>panda_rightfinger_fixed_joint_lump__tapered_tip_collision_collision_1</collision></contact>
     </sensor>
   </gazebo>
 </robot>

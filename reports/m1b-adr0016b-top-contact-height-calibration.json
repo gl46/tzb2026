@@ -1,0 +1,26 @@
+{
+  "schema_version": "M1BTopContactHeightCalibrationV2",
+  "status": "MEASURED_SINGLE_POINT_SELECTION",
+  "provenance": "CALIBRATION_ONLY_INITIALIZATION",
+  "online_truth_access": false,
+  "purpose": "Select the production top-contact hand height and close squeeze for the ADR-0016 pre-authorized franka-copy fallback hand, using bounded physical zero-offset probes (scene 5017 slot 1, free-gap yaw, seeded-waypoint vertical descent, two-stage stall close).",
+  "selection": {
+    "production_contact_centerline_z_m": 0.12,
+    "production_close_squeeze_m": 0.002,
+    "production_close_primitive": "two_stage: pre-close 2 mm clear of the modelled skin, 0.4 s settle, then window-edge squeeze at 1.2 s",
+    "selection_rule": "Use the only measured height with repeatable (2/2) bilateral same-entity contact plus confirmed detachable attach under the production two-stage close; do not infer a wider height envelope."
+  },
+  "trials": [
+    {"contact_centerline_z_m": 0.10, "close_squeeze_m": 0.002, "close_stage": "single", "result": "reject", "reason": "descent corridor seeded-IK branch jump (CARTESIAN_JOINT_JUMP_REJECTED)", "raw_evidence": "node2:/tmp/m1b-probe-h10/raw/trial-000.json", "raw_sha256": "0fe28016483df0a893af6a49ae13eca3107c8e7271720d8df987c1fe6561d927"},
+    {"contact_centerline_z_m": 0.11, "close_squeeze_m": 0.002, "close_stage": "single", "result": "pass_then_fail", "bilateral": [true, false], "attach": [true, false], "reason": "1/2: repeat run ghost-contact single side (engine dead band)", "raw_evidence": ["node2:/tmp/m1b-adr0016b-probe-h11-s2/raw/trial-000.json", "node2:/tmp/m1b-probe-h11-rep/raw/trial-000.json"], "raw_sha256": ["035a4413c84fd31c6f40c8d43a2fbce6313261a331abb1940da2c38b57a47c24", "ef8d7c1eba1a253e27024bf1e3ee819c734a1475857f40819be0f739410d358b"]},
+    {"contact_centerline_z_m": 0.11, "close_squeeze_m": 0.0, "close_stage": "single", "result": "reject", "reason": "kiss control: single-sided ghost contact, no stall, no bilateral window", "raw_evidence": "node2:/tmp/m1b-probe-h11-kiss/raw/trial-000.json", "raw_sha256": "3b7cebd64b62dfcba0385bef27ab06eee8159884d71a4f8cbf75307a25771bfc"},
+    {"contact_centerline_z_m": 0.12, "close_squeeze_m": 0.002, "close_stage": "single", "result": "pass_then_fail", "bilateral": [true, false], "attach": [true, false], "reason": "1/2 single-stage: repeat run ghost-contact single side", "raw_evidence": ["node2:/tmp/m1b-probe-h12/raw/trial-000.json", "node2:/tmp/m1b-probe-h12-rep/raw/trial-000.json"], "raw_sha256": ["aa7b03e1973b60dd567ec589f7c542c922b42f85a6961041dcb9fdb695d5d276", "3c903a04d7d3bcaf7368a514d58fb0ae592a9a533c840d8e3af26d103b7c147e"]},
+    {"contact_centerline_z_m": 0.12, "close_squeeze_m": 0.002, "close_stage": "two_stage", "result": "select", "bilateral": [true, true], "attach": [true, true], "bilateral_overlap_s": [0.663, 0.201], "post_close_samples": [1665, 707], "raw_evidence": ["node2:/tmp/m1b-probe-h12-2s-1/raw/trial-000.json", "node2:/tmp/m1b-probe-h12-2s-2/raw/trial-000.json"], "raw_sha256": ["fc4b284cfe1e6325b19f6f5bb3aff12aff7ef7ed90e86b2da72f3ad0b6d3e379", "c9c7ba45deb49005dbab3d360c59b4faeeecf6c490aed66cbbd287f229c08a21"]}
+  ],
+  "production_primitive": "open_physical_hand + free_gap_yaw + m1b_top_down_precontact + seeded_waypoint_vertical_descend + two_stage_close + m1b_internal_bilateral_broker",
+  "limitations": [
+    "Bounded zero-offset height/squeeze selection at slot 1 only, not an offset tolerance envelope.",
+    "The 0.10 m rejection is a descent-corridor kinematic result, not a physical-contact observation.",
+    "Single-stage closes are recorded as measured evidence of the bullet-featherstone per-pair force-response dead band; the production primitive is the two-stage close."
+  ]
+}

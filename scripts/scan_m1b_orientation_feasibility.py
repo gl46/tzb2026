@@ -20,15 +20,112 @@ for directory in (ROOT / "src", ROOT / "scripts"):
     if str(directory) not in sys.path:
         sys.path.insert(0, str(directory))
 
-from generate_industrial_scenes import bin_cell_targets
-from m1a_contact_calibration_client import CalibrationClient
-from run_m1b_tolerance_trial import (
+from generate_industrial_scenes import bin_cell_targets  # noqa: E402
+from m1a_contact_calibration_client import CalibrationClient  # noqa: E402
+from run_m1b_tolerance_trial import (  # noqa: E402
+    M1B_FREE_GAP_MIN_CLEARANCE_M,
     M1B_NORMAL_HAND_Y_CENTERLINE_BIAS_M,
     M1B_TOP_CONTACT_CENTERLINE_Z_M,
     M1B_TOP_PRECONTACT_STANDOFF_M,
     _m1b_top_pose,
     apply_calibration_cylinder_scene,
+    m1b_calibration_free_gap_yaw,
 )
+
+# The production descent travels with the jaw fully open; corridor
+# admission must therefore collision-check exactly that aperture.
+SCAN_OPEN_HAND_M = [0.04, 0.04]
+# Candidate production contact heights admitted by the campaign guard; the
+# corridor is walked per height so the physical probes choose only among
+# corridor-valid ones.
+SCAN_CONTACT_HEIGHTS_M = (0.12, 0.11)
+SCAN_MAX_STEP_M = 0.005
+SCAN_MAX_JOINT_STEP_RAD = 0.35
+
+
+def descent_corridor(
+    client: CalibrationClient, center: list[float], *, yaw_rad: float,
+    contact_height_m: float,
+) -> dict[str, object]:
+    """Walk the straight open-jaw descent with seeded collision-aware IK.
+
+    Endpoint IK feasibility is not corridor feasibility: the slot-1 probes
+    measured a seeded-IK branch fold at hand offsets around +0.125 m where
+    every yaw candidate jumps 0.38--0.46 rad within one 5 mm step, although
+    both endpoints solve.  This is the same no-motion walk the production
+    descent executes, so a scene point that fails here fails the trial.
+    """
+    pregrasp = _m1b_top_pose(
+        center, hand_z_offset_m=contact_height_m + M1B_TOP_PRECONTACT_STANDOFF_M,
+        hand_y_centerline_bias_m=M1B_NORMAL_HAND_Y_CENTERLINE_BIAS_M, yaw_rad=yaw_rad,
+    )
+    seed = client.ik(pregrasp, avoid_collisions=True, hand_positions=SCAN_OPEN_HAND_M)
+    if seed is None:
+        return {"complete": False, "stage": "pregrasp_ik", "ik_error": client.last_ik_error}
+    steps = max(2, math.ceil(M1B_TOP_PRECONTACT_STANDOFF_M / SCAN_MAX_STEP_M))
+    for index in range(1, steps + 1):
+        offset = contact_height_m + M1B_TOP_PRECONTACT_STANDOFF_M * (1.0 - index / steps)
+        pose = _m1b_top_pose(
+            center, hand_z_offset_m=offset,
+            hand_y_centerline_bias_m=M1B_NORMAL_HAND_Y_CENTERLINE_BIAS_M, yaw_rad=yaw_rad,
+        )
+        solution = client.ik(pose, seed=seed, avoid_collisions=True, hand_positions=SCAN_OPEN_HAND_M)
+        if solution is None:
+            return {
+                "complete": False, "stage": "waypoint_ik",
+                "failed_hand_z_offset_m": offset, "ik_error": client.last_ik_error,
+            }
+        joint_step = max(abs(current - previous) for current, previous in zip(solution, seed))
+        if joint_step > SCAN_MAX_JOINT_STEP_RAD:
+            return {
+                "complete": False, "stage": "joint_jump",
+                "failed_hand_z_offset_m": offset,
+                "max_observed_joint_step_rad": joint_step,
+            }
+        seed = solution
+    return {"complete": True}
+
+
+def cylinder_descent_corridors(
+    client: CalibrationClient, labels: list[dict[str, object]], identifier: str,
+    center: list[float],
+) -> dict[str, object]:
+    """Evaluate free-gap yaw candidates and per-height descent corridors."""
+    free_gap = m1b_calibration_free_gap_yaw(labels, identifier)
+    ranked = sorted(
+        [c for c in free_gap["candidates"] if c["min_clearance_m"] >= M1B_FREE_GAP_MIN_CLEARANCE_M],
+        key=lambda c: -float(c["min_clearance_m"]),
+    )
+    yaw_candidates: list[float] = []
+    for candidate in ranked[:2]:
+        for flip in (0.0, math.pi):
+            value = (float(candidate["yaw_rad"]) + flip) % (2.0 * math.pi)
+            if value not in yaw_candidates:
+                yaw_candidates.append(value)
+    heights: dict[str, object] = {}
+    for height in SCAN_CONTACT_HEIGHTS_M:
+        attempts = []
+        selected = None
+        for yaw_value in yaw_candidates:
+            walk = descent_corridor(client, center, yaw_rad=yaw_value, contact_height_m=height)
+            attempts.append({"yaw_rad": yaw_value, **walk})
+            if walk["complete"]:
+                selected = yaw_value
+                break
+        heights[f"{height:.2f}"] = {
+            "corridor_complete": selected is not None,
+            "selected_yaw_rad": selected,
+            "attempts": attempts,
+        }
+    return {
+        "free_gap_yaw": {
+            "selected_yaw_rad": free_gap["selected_yaw_rad"],
+            "min_clearance_m": free_gap["min_clearance_m"],
+            "clearance_ok": free_gap["clearance_ok"],
+        },
+        "contact_heights": heights,
+        "any_height_complete": any(value["corridor_complete"] for value in heights.values()),
+    }
 
 
 def pose_results(client: CalibrationClient, center: list[float], *, collision_aware: bool) -> dict[str, object]:
@@ -43,7 +140,7 @@ def pose_results(client: CalibrationClient, center: list[float], *, collision_aw
             center, hand_z_offset_m=offset,
             hand_y_centerline_bias_m=M1B_NORMAL_HAND_Y_CENTERLINE_BIAS_M, yaw_rad=0.0,
         )
-        solution = client.ik(pose, avoid_collisions=collision_aware, seed=seed)
+        solution = client.ik(pose, avoid_collisions=collision_aware, seed=seed, hand_positions=SCAN_OPEN_HAND_M)
         plan = client.plan(solution) if collision_aware and solution is not None else None
         entries[name] = {
             "pose_world_xyzw": [pose.position.x, pose.position.y, pose.position.z, pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w],
@@ -83,14 +180,30 @@ def main() -> int:
             empty = pose_results(client, center, collision_aware=False) if ready else {}
             exception = client.set_target_touch_exception(True, target_id=identifier) if populated and is_cylinder else False
             full = pose_results(client, center, collision_aware=True) if populated else {}
+            descent = (
+                cylinder_descent_corridors(client, labels, identifier, center)
+                if populated and is_cylinder and exception else None
+            )
             restored = client.set_target_touch_exception(False, target_id=identifier) if exception else not is_cylinder
             records.append({
                 "id": identifier, "center_world_m": center,
                 "empty_scene_kinematic": empty,
                 "populated_scene_corridor": full,
+                "descent_corridor": descent,
                 "target_touch_exception_scoped": exception,
                 "target_touch_exception_restored": restored,
-                "passed": bool(ready and populated and restored and passed(empty, require_corridor=False) and passed(full, require_corridor=True)),
+                "passed": bool(
+                    ready and populated and restored
+                    and (
+                        # A cylinder's production feasibility is its selected
+                        # free-gap-yaw descent corridor (which subsumes both
+                        # endpoint IKs at the acting yaw); the fixed yaw-0
+                        # endpoint entries remain recorded as diagnostics.
+                        (descent is not None and descent["any_height_complete"])
+                        if is_cylinder
+                        else (passed(empty, require_corridor=False) and passed(full, require_corridor=True))
+                    )
+                ),
             })
         status = "ORIENTATION_FEASIBILITY_VERIFIED" if records and all(record["passed"] for record in records) else "ORIENTATION_FEASIBILITY_REJECTED"
         payload = {

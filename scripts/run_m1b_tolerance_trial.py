@@ -61,11 +61,11 @@ M1B_NORMAL_SIDE_IK_SEED = [
 # main pad.  On a 30 mm cylinder at the table, a 100 mm hand offset puts that
 # tip into the tabletop; 140 mm preserves upper-sidewall overlap while giving
 # the tip the measured 5 mm table clearance.
-# The bounded physical contact-height calibration on the ADR-0016 inline hand
-# found bilateral same-entity contact and a confirmed detachable attach at
-# 120 mm.  140 mm was a real no-contact trial, so retain the measured 120 mm
-# value as the production primitive's centreline rather than extrapolating
-# from tapered-tip geometry.
+# ADR-0016b (franka-copy hand) re-measured the centreline with bounded
+# zero-offset probes: 100 mm fails the descent corridor (seeded-IK branch
+# fold), 110 mm passed 2/4 with single-sided dead-band failures, and 120 mm
+# passed the full bilateral+attach predicate 2/2 under the two-stage close,
+# so the production centreline remains the measured 120 mm.
 M1B_TOP_CONTACT_CENTERLINE_Z_M = 0.120
 M1B_TOP_PRECONTACT_STANDOFF_M = 0.150
 M1B_NORMAL_PRECONTACT_HAND_Z_OFFSET_M = 0.220
@@ -103,7 +103,25 @@ M1B_CALIBRATION_TARGET_HEIGHT_LIFTS_M = (0.0, 0.010, 0.020, 0.030, 0.040, 0.060,
 # approved fixed hand-chain correction; calibration-only sweeps may override
 # it, but isolated sweep successes are not promoted to production defaults.
 M1B_NORMAL_HAND_Y_CENTERLINE_BIAS_M = 0.001
-M1B_FINGER_BOARD_THICKNESS_M = 0.010
+# ADR-0016 pre-authorized fallback hand: the public inner-pad gap is
+# 2q - 0.006 while each pad's collision face is modelled 6.5 mm proud of its
+# finger-link y=0 plane.  The 0.5 mm-per-side difference is measured engine
+# compensation: the live M1B diagnostic recorded a 2-3 mm shallow-penetration
+# dead band in bullet-featherstone contact generation against free dynamic
+# bodies (0 events at 2 mm commanded overlap vs >1000 at 3.5 mm), so the
+# ADR-0013 window-edge close command must land its modelled overlap about
+# 4.5 mm inside a centred target to guarantee a persistent stall force.
+M1B_FINGER_BOARD_THICKNESS_M = 0.006
+# Measured close margin: command the jaw this far below the perceived
+# diameter so both position-controlled fingers stall against the target with
+# sustained force instead of stopping at a zero-force kiss.  Frozen from the
+# bounded ADR-0016b zero-offset probes on the franka-copy hand: kiss
+# (squeeze 0) produced single-sided ghost contact and no bilateral window,
+# while the 2 mm window-edge squeeze with the two-stage close measured
+# bilateral same-entity windows of 0.20-0.66 s and confirmed attaches (2/2
+# at the 120 mm centreline).  The ADR-0013 window's lower edge still bounds
+# every command.
+M1B_CLOSE_SQUEEZE_M = 0.002
 M1B_MAX_FINGER_POSITION_M = 0.040
 M1B_NEAR_REOBSERVATION_DURATION_S = 8.0
 M1B_NEAR_REOBSERVATION_MAX_ASSOCIATION_DISTANCE_M = 0.050
@@ -114,6 +132,68 @@ HAND_FEEDBACK_READY_TIMEOUT_S = 12.0
 # alternative timing must earn a calibration-only repeatability result before
 # it can become the production default.
 M1B_NORMAL_CLOSE_DURATION_S = 0.8
+
+
+# Calibration-only free-gap yaw selection.  ADR-0016 §2 makes the production
+# top-grasp yaw a perception free-gap output (--public-free-gap-yaw-rad); the
+# perception-free tolerance experiment previously pinned yaw 0, which aims the
+# open jaw straight at whatever neighbour happens to sit on the closing axis.
+# The straight cartesian descent then fail-closes on that neighbour's planning
+# primitive (probe evidence: fraction 0.71 toward slot 1, neighbour 70 mm away
+# on -y while the open finger sweep extends 51.4 mm half-width).  Deriving the
+# yaw from the supervision labels is the same class of calibration-only
+# initialization as the target centre itself.
+M1B_CALIBRATION_FREE_GAP_YAW_CANDIDATES_RAD = tuple(math.radians(v) for v in range(0, 180, 15))
+M1B_FINGER_SWEEP_BOUND_RADIUS_M = 0.0148  # half-diagonal of the 0.021 x 0.0208 plate footprint
+M1B_FINGER_SWEEP_CENTER_OFFSET_M = 0.0039  # plate-box centre beyond the finger origin
+M1B_FREE_GAP_MIN_CLEARANCE_M = 0.005
+# The reset lifecycle hands the trial an arm at the SRDF home posture, and
+# the corridor pre-scan validates each descent from a home-seeded pregrasp
+# branch.  A yaw retry must therefore re-enter through home: re-planning the
+# pregrasp from the failed descend posture selects a different IK branch
+# whose corridor was never admitted (measured: the same 270-degree descent
+# completes home-seeded but jumps 0.38 rad when re-approached in place).
+M1B_RESET_HOME_JOINTS_RAD = [0.0, -0.5, 0.0, -1.5, 0.0, 1.0, 0.0]
+
+
+def m1b_calibration_free_gap_yaw(
+    labels: list[dict[str, object]], target_entity: str, *, open_finger_m: float = 0.04,
+    neighbor_radius_m: float = 0.015,
+) -> dict[str, object]:
+    """Pick the descent yaw whose open-jaw sweep clears the labelled scene.
+
+    Pure geometry on calibration labels: each finger's descent footprint is
+    bounded by a circle of M1B_FINGER_SWEEP_BOUND_RADIUS_M around a centre
+    open_finger_m + M1B_FINGER_SWEEP_CENTER_OFFSET_M outward along the
+    closing axis.  The selected yaw maximises the minimum clearance to every
+    labelled neighbour; production replaces this with the perception
+    free-gap yaw.
+    """
+    target = next(label for label in labels if str(label["actual_sim_entity_id"]) == target_entity)
+    target_xy = [float(v) for v in target["position_3d_world"][:2]]
+    neighbors = [
+        [float(v) for v in label["position_3d_world"][:2]]
+        for label in labels if str(label["actual_sim_entity_id"]) != target_entity
+    ]
+    arm_offset = open_finger_m + M1B_FINGER_SWEEP_CENTER_OFFSET_M
+    candidates = []
+    for yaw_rad in M1B_CALIBRATION_FREE_GAP_YAW_CANDIDATES_RAD:
+        closing = (math.sin(yaw_rad), -math.cos(yaw_rad))
+        clearance = math.inf
+        for sign in (1.0, -1.0):
+            centre = (target_xy[0] + sign * arm_offset * closing[0], target_xy[1] + sign * arm_offset * closing[1])
+            for neighbor in neighbors:
+                distance = math.hypot(centre[0] - neighbor[0], centre[1] - neighbor[1])
+                clearance = min(clearance, distance - M1B_FINGER_SWEEP_BOUND_RADIUS_M - neighbor_radius_m)
+        candidates.append({"yaw_rad": yaw_rad, "min_clearance_m": clearance})
+    best = max(candidates, key=lambda item: item["min_clearance_m"])
+    return {
+        "selected_yaw_rad": best["yaw_rad"],
+        "min_clearance_m": best["min_clearance_m"],
+        "clearance_ok": best["min_clearance_m"] >= M1B_FREE_GAP_MIN_CLEARANCE_M,
+        "candidates": candidates,
+        "source": "CALIBRATION_LABEL_FREE_GAP_GEOMETRY",
+    }
 
 
 def calibration_live_model_center(entity_name: str) -> list[float]:
@@ -149,25 +229,28 @@ def wait_for_finite_hand_feedback(client: CalibrationClient) -> bool:
 
 
 def m1b_close_finger_targets_from_perceived_diameter(
-    perceived_diameter_m: float,
+    perceived_diameter_m: float, *, squeeze_m: float | None = None,
 ) -> tuple[list[float], dict[str, float]]:
     """Turn the public perceived diameter into the physical hand command.
 
     ``width_window_from_perceived_diameter`` is the desired inner-pad gap.
     The Panda controller instead takes one positive-open position per finger;
-    for its 18 mm boards, ``inner_gap = 2q - 0.018``.  Select the perceived
-    diameter clamped to the public window: a fixed 28 mm lower edge pushed a
-    free perceived-30 mm cylinder into one pad before bilateral contact. This
-    is never read from simulator supervision or a fixture label.
+    for the franka-copy pads with faces on the link y=0 planes,
+    ``inner_gap = 2q``.  Select the perceived diameter minus the measured
+    close squeeze, clamped to the public window, so both fingers stall on the
+    target with sustained force rather than ending at a zero-force kiss.
+    This is never read from simulator supervision or a fixture label.
     """
+    selected_squeeze_m = M1B_CLOSE_SQUEEZE_M if squeeze_m is None else squeeze_m
     lower_m, upper_m = width_window_from_perceived_diameter(perceived_diameter_m)
-    selected_inner_gap_m = min(upper_m, max(lower_m, perceived_diameter_m))
+    selected_inner_gap_m = min(upper_m, max(lower_m, perceived_diameter_m - selected_squeeze_m))
     per_finger_target_m = (selected_inner_gap_m + M1B_FINGER_BOARD_THICKNESS_M) / 2.0
     if per_finger_target_m > M1B_MAX_FINGER_POSITION_M:
         raise SystemExit("public aperture is outside the physical Panda-hand capacity")
     return [per_finger_target_m, per_finger_target_m], {
         "perceived_diameter_m": perceived_diameter_m,
         "inner_pad_gap_window_m": [lower_m, upper_m],
+        "close_squeeze_m": selected_squeeze_m,
         "selected_inner_pad_gap_m": selected_inner_gap_m,
         "finger_board_thickness_m": M1B_FINGER_BOARD_THICKNESS_M,
         "per_finger_target_m": per_finger_target_m,
@@ -363,17 +446,27 @@ def m1b_top_down_precontact(
 
 
 def m1b_top_down_contact_descend(
-    client: CalibrationClient, centre_world_m: list[float], *, ik_seed: list[float] | None,
+    client: CalibrationClient, centre_world_m: list[float], *,
     hand_y_centerline_bias_m: float, yaw_rad: float,
 ) -> dict[str, object]:
-    """Descend the inline hand vertically to the pad centre-line."""
-    return client.move_hand_pose(
+    """Descend vertically to the pad centre-line on a straight cartesian path.
+
+    An OMPL joint-space descend between the same endpoints may bow sideways;
+    with the finger/target ACM exception active that bow was measured to
+    displace the free target 10--18 mm before the close (campaign raws
+    000/027/044), which converts a nominal centred grasp into a unilateral
+    press.  The cartesian segment keeps the tool axis on the vertical line
+    and is still collision-checked against the scene and current ACM.
+    """
+    result = client.move_hand_cartesian(
         _m1b_top_pose(
             centre_world_m, hand_z_offset_m=M1B_TOP_CONTACT_CENTERLINE_Z_M,
             hand_y_centerline_bias_m=hand_y_centerline_bias_m, yaw_rad=yaw_rad,
         ),
-        ik_seed=ik_seed,
+        duration_s=3.0,
     )
+    result["path_source"] = "MoveIt computeCartesianPath straight vertical descent"
+    return result
 
 
 def m1b_normal_side_precontact(
@@ -748,6 +841,7 @@ def main() -> int:
     parser.add_argument("--calibration-vertical-board-ik-probe", action="store_true", help="Calibration-only: plan vertical-board poses without physical motion")
     parser.add_argument("--calibration-target-height-scan", action="store_true", help="Calibration-only: scan virtual target elevations without physical motion")
     parser.add_argument("--calibration-top-contact-height-m", type=float, help="Calibration-only physical top-contact hand offset; does not change the production default")
+    parser.add_argument("--calibration-close-squeeze-m", type=float, help="Calibration-only close-squeeze probe below the perceived diameter; does not change the production default")
     parser.add_argument("--output", required=True, type=Path)
     args = parser.parse_args()
     global M1B_TOP_CONTACT_CENTERLINE_Z_M
@@ -780,6 +874,9 @@ def main() -> int:
         raise SystemExit("--calibration-vertical-board-ik-probe is calibration-only")
     if args.calibration_target_height_scan and args.calibration_fixture_diameter_m is None:
         raise SystemExit("--calibration-target-height-scan is calibration-only")
+    if args.calibration_close_squeeze_m is not None:
+        if args.calibration_fixture_diameter_m is None or not 0.0 <= args.calibration_close_squeeze_m <= 0.004:
+            raise SystemExit("--calibration-close-squeeze-m requires calibration mode and must be in [0.0, 0.004] m")
     hand_y_centerline_bias_m = M1B_NORMAL_HAND_Y_CENTERLINE_BIAS_M if args.calibration_hand_y_bias_m is None else args.calibration_hand_y_bias_m
     axis = str(trial["axis"])
     if axis not in {"x", "y", "z"}:
@@ -802,11 +899,17 @@ def main() -> int:
     target["xyz".index(axis)] += float(trial["offset_m"])
     calibration: M1BStaticCameraCalibrationV1 | None = None
     initial_public_track: dict[str, object] | None = None
+    free_gap_yaw: dict[str, object] | None = None
     if args.calibration_fixture_diameter_m is not None:
         perceived_diameter_m = args.calibration_fixture_diameter_m
         public_evidence: dict[str, object] = {"source": "CALIBRATION_FIXTURE_DECLARED_GEOMETRY", "perceived_diameter_m": perceived_diameter_m}
-        top_grasp_yaw_rad = 0.0
-        top_grasp_yaw_source = "CALIBRATION_FIXED_ZERO_YAW"
+        free_gap_yaw = m1b_calibration_free_gap_yaw(labels, target_entity)
+        if not free_gap_yaw["clearance_ok"]:
+            raise SystemExit(
+                f"CALIBRATION_FREE_GAP_YAW_CLEARANCE_REJECTED:{free_gap_yaw['min_clearance_m']:.4f}"
+            )
+        top_grasp_yaw_rad = float(free_gap_yaw["selected_yaw_rad"])
+        top_grasp_yaw_source = "CALIBRATION_LABEL_FREE_GAP_GEOMETRY"
     else:
         if args.public_perception_evidence is None or args.public_camera_info is None or not args.public_track_id or args.public_free_gap_yaw_rad is None:
             raise SystemExit("public perception evidence, camera info, target track, and free-gap yaw are required together")
@@ -821,17 +924,25 @@ def main() -> int:
         top_grasp_yaw_source = "PUBLIC_PERCEPTION_FREE_GAP"
     if args.enable_near_pregrasp_reobservation and initial_public_track is None:
         raise SystemExit("near-pregrasp reobservation requires public perception evidence")
-    close_targets, aperture = m1b_close_finger_targets_from_perceived_diameter(perceived_diameter_m)
+    close_targets, aperture = m1b_close_finger_targets_from_perceived_diameter(
+        perceived_diameter_m, squeeze_m=args.calibration_close_squeeze_m,
+    )
     rclpy.init()
     client = CalibrationClient()
     raw: list[M1BContactSampleV1] = []
     cylinder_contact_samples = 0
+    contact_channel_diag: dict[str, dict[str, int]] = {}
+    contact_subscriptions: dict[str, object] = {}
     def on_contact(message: Contacts, finger: str) -> None:
         timestamp = message.header.stamp.sec + message.header.stamp.nanosec * 1e-9
         pairs = tuple((contact.collision1.name, contact.collision2.name) for contact in message.contacts)
         raw.append(M1BContactSampleV1(timestamp, finger, pairs))
+        contact_channel_diag[finger]["messages"] = contact_channel_diag[finger].get("messages", 0) + 1
     for finger, topic in RAW_CONTACT_TOPICS.items():
-        client.create_subscription(Contacts, topic, lambda message, finger=finger: on_contact(message, finger), 1000)
+        contact_channel_diag[finger] = {"messages": 0}
+        contact_subscriptions[finger] = client.create_subscription(
+            Contacts, topic, lambda message, finger=finger: on_contact(message, finger), 1000
+        )
     def on_cylinder_contact(message: Contacts) -> None:
         """Recover finger events from the independently measured cylinder side.
 
@@ -924,7 +1035,9 @@ def main() -> int:
                         "perceived_diameter_m": median(float(frame["selected_public_track"]["perceived_diameter_m"]) for frame in near_frames),
                         "estimated_center_world_m": [median(float(frame["selected_public_track"]["estimated_center_world_m"][axis]) for frame in near_frames) for axis in range(3)],
                     }
-                    close_targets, aperture = m1b_close_finger_targets_from_perceived_diameter(float(near_track["perceived_diameter_m"]))
+                    close_targets, aperture = m1b_close_finger_targets_from_perceived_diameter(
+                        float(near_track["perceived_diameter_m"]), squeeze_m=args.calibration_close_squeeze_m,
+                    )
                     public_delta = [float(current) - float(previous) for current, previous in zip(near_track["estimated_center_world_m"], initial_public_track["estimated_center_world_m"])]
                     final_target = [coordinate + delta for coordinate, delta in zip(target, public_delta)]
                     near_reobservation = {"attempted": True, "succeeded": True, "aggregation": "PER_AXIS_MEDIAN_OF_PUBLIC_RGBD_FRAMES", "frames": near_frames, "selected_public_track": near_track, "public_center_delta_world_m": public_delta, "final_target_world_m": final_target}
@@ -943,11 +1056,60 @@ def main() -> int:
             else:
                 contact_descend = (
                     m1b_top_down_contact_descend(
-                        client, final_target, ik_seed=approach.get("final", {}).get("ik_solution"),
+                        client, final_target,
                         hand_y_centerline_bias_m=hand_y_centerline_bias_m, yaw_rad=top_grasp_yaw_rad,
                     )
                     if near_reobservation.get("succeeded") else {"executed": False, "reason": "PUBLIC_NEAR_REOBSERVATION_GATE_REJECTED"}
                 )
+            # The jaw is symmetric under a pi yaw flip, but the wrist is not:
+            # the measured slot-1 descent ends on an IK branch boundary
+            # (CARTESIAN_JOINT_JUMP_REJECTED, 0.45 rad in one 5 mm step) at
+            # yaw 90 deg while the identical grasp at yaw+pi uses a different
+            # wrist branch.  Retry the physically identical flip first, then
+            # the next-ranked clear yaw, before recording a descend failure.
+            yaw_retry_attempts: list[dict[str, object]] = []
+            if (
+                args.calibration_fixture_diameter_m is not None and free_gap_yaw is not None
+                and not contact_descend.get("executed")
+                and str(contact_descend.get("reason", "")).startswith("CARTESIAN")
+            ):
+                ranked = sorted(
+                    [c for c in free_gap_yaw["candidates"] if c["min_clearance_m"] >= M1B_FREE_GAP_MIN_CLEARANCE_M],
+                    key=lambda c: -float(c["min_clearance_m"]),
+                )
+                alternates: list[float] = []
+                for candidate in ranked[:2]:
+                    for flip in (math.pi, 0.0):
+                        yaw_value = (float(candidate["yaw_rad"]) + flip) % (2.0 * math.pi)
+                        if abs(yaw_value - top_grasp_yaw_rad) > 1e-9 and yaw_value not in alternates:
+                            alternates.append(yaw_value)
+                for yaw_value in alternates[:3]:
+                    home_return = client.move_joint_target(M1B_RESET_HOME_JOINTS_RAD)
+                    entry: dict[str, object] = {"yaw_rad": yaw_value, "home_return": {
+                        "executed": home_return.get("executed"), "converged": home_return.get("converged"),
+                    }}
+                    if not (home_return.get("executed") and home_return.get("converged")):
+                        yaw_retry_attempts.append(entry)
+                        continue
+                    retry_approach = m1b_top_down_precontact(
+                        client, target, hand_y_centerline_bias_m=hand_y_centerline_bias_m,
+                        yaw_rad=yaw_value,
+                    )
+                    entry["approach"] = retry_approach
+                    if retry_approach.get("executed") and retry_approach.get("converged"):
+                        retry_descend = m1b_top_down_contact_descend(
+                            client, final_target,
+                            hand_y_centerline_bias_m=hand_y_centerline_bias_m, yaw_rad=yaw_value,
+                        )
+                        entry["contact_descend"] = retry_descend
+                        if retry_descend.get("executed"):
+                            approach = retry_approach
+                            contact_descend = retry_descend
+                            top_grasp_yaw_rad = yaw_value
+                            top_grasp_yaw_source = "CALIBRATION_LABEL_FREE_GAP_GEOMETRY_YAW_RETRY"
+                            yaw_retry_attempts.append(entry)
+                            break
+                    yaw_retry_attempts.append(entry)
             if args.calibration_lateral_insert_target_touch_exception:
                 # This exception is narrowly scoped to the final insert.  A
                 # failed candidate must leave the planning scene restored
@@ -962,13 +1124,58 @@ def main() -> int:
             # The evidence window begins immediately before that close,
             # excluding all approach contact telemetry from authorization.
             contact_start_index = len(raw)
+            for finger, subscription in contact_subscriptions.items():
+                contact_channel_diag[finger]["matched_publishers_before_close"] = subscription.get_publisher_count()
             # Once both boards enter the free-cylinder contact zone, load can
             # move an otherwise successful controller endpoint by more than
             # the no-contact joint-settle diagnostic.  The production gate is
             # the controller terminal success here; only the non-contact
             # approach requires strict terminal convergence.
             if contact_descend.get("executed"):
-                close = client.command_hand(close_targets, duration_s=M1B_NORMAL_CLOSE_DURATION_S)
+                # Two-stage close.  Single-stage closes measured a per-pair
+                # force-response lottery in bullet-featherstone: a pad could
+                # stream 30 Hz contact events while exerting no force
+                # (fingers reach a 4.5 mm-overlap command unresisted), and
+                # which side engaged varied per instance.  Both live
+                # diagnostics that first paused just clear of the surface and
+                # then pressed measured full bilateral force engagement (2/2),
+                # matching the S0 bilateral precontact-close precedent, so
+                # the production primitive establishes the contact pairs at a
+                # 2 mm-clear pre-close before the squeezing command.
+                # "2 mm clear" is measured at the modelled collision skin
+                # (6.5 mm proud faces): public pre-close gap = d + 0.011
+                # places each skin face 2 mm outside the perceived surface.
+                preclose_targets, _ = m1b_close_finger_targets_from_perceived_diameter(
+                    perceived_diameter_m + 0.011, squeeze_m=0.0,
+                )
+                preclose = client.command_hand(
+                    preclose_targets, duration_s=M1B_NORMAL_CLOSE_DURATION_S,
+                    goal_tolerance_m=0.002,
+                )
+                settle_deadline = time.monotonic() + 0.4
+                while time.monotonic() < settle_deadline:
+                    rclpy.spin_once(client, timeout_sec=0.02)
+                # A squeezed close is DESIGNED to stall against the target
+                # above its command: the fingers stop where the engine's
+                # contact response balances, measured at up to ~1 mm modelled
+                # overlap.  Accept any stall between the command and the
+                # perceived-diameter surface plus that engine margin; the
+                # mimic-symmetry contract stays at the same tolerance.
+                per_finger_target_m = float(aperture["per_finger_target_m"])
+                close_goal_tolerance_m = 0.001 + max(
+                    0.0,
+                    (float(aperture["perceived_diameter_m"]) + M1B_FINGER_BOARD_THICKNESS_M) / 2.0
+                    + 0.003 - per_finger_target_m,
+                )
+                close = client.command_hand(
+                    close_targets, duration_s=1.2,
+                    goal_tolerance_m=close_goal_tolerance_m,
+                )
+                close["preclose"] = {
+                    "succeeded": preclose.get("succeeded"),
+                    "targets_m": preclose_targets,
+                    "observed_positions_m": preclose.get("observed_positions_m"),
+                }
             if close.get("succeeded"):
                 deadline = time.monotonic() + 0.35
                 while time.monotonic() < deadline:
@@ -999,7 +1206,10 @@ def main() -> int:
             "offset_vector_m": [target[index] - truth_center[index] for index in range(3)],
             "production_grasp_primitive": "open_physical_hand + m1b_top_down_precontact + m1b_top_down_contact_descend + close_physical_hand + m1b_internal_bilateral_broker",
             "top_grasp_yaw": {"yaw_rad": top_grasp_yaw_rad, "source": top_grasp_yaw_source},
+            "calibration_free_gap_yaw": free_gap_yaw if args.calibration_fixture_diameter_m is not None else None,
+            "calibration_yaw_retry_attempts": yaw_retry_attempts if ready else [],
             "calibration_top_contact_height_m": args.calibration_top_contact_height_m,
+            "calibration_close_squeeze_m": args.calibration_close_squeeze_m,
             "ready": ready, "calibration_collision_scene_applied": cylinder_scene_applied if ready else False, "target_touch_exception_applied": target_touch_exception_applied if ready else False,
             # The non-contact pregrasp must converge to its planned terminal
             # state.  The final descent deliberately permits contact to
@@ -1027,6 +1237,7 @@ def main() -> int:
             "raw_contact_samples": [{"timestamp_s": item.timestamp_s, "finger": item.finger, "collision_pairs": list(item.collision_pairs)} for item in raw],
             "post_close_contact_samples": [{"timestamp_s": item.timestamp_s, "finger": item.finger, "collision_pairs": list(item.collision_pairs)} for item in post_close_raw],
             "cylinder_side_contact_samples": cylinder_contact_samples,
+            "contact_channel_diagnostic": contact_channel_diag,
             "gate": {"grasp_success": feedback.grasp_success, "tactile_state": feedback.tactile_state, "reobservation_required": feedback.reobservation_required, "motion_gate_passed": motion_gate_passed, "internal_actuation_record": internal},
             "attach": attach,
             "bilateral_same_entity_contact": feedback.grasp_success,

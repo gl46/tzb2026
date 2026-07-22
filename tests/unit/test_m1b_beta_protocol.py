@@ -205,7 +205,7 @@ def test_m1b_tolerance_attach_uses_detachablejoint_empty_payload() -> None:
     assert 'value.position.x = centre_world_m[0] + hand_x_offset_m' in source
     assert 'def m1b_close_finger_targets_from_perceived_diameter(' in source
     assert 'width_window_from_perceived_diameter(perceived_diameter_m)' in source
-    assert 'M1B_FINGER_BOARD_THICKNESS_M = 0.010' in source
+    assert 'M1B_FINGER_BOARD_THICKNESS_M = 0.006' in source
     assert 'per_finger_target_m = (selected_inner_gap_m + M1B_FINGER_BOARD_THICKNESS_M) / 2.0' in source
     assert '"inner_pad_gap_window_m"' in source
     assert 'def public_track_from_evidence(' in source
@@ -231,7 +231,14 @@ def test_m1b_tolerance_attach_uses_detachablejoint_empty_payload() -> None:
     assert 'hand_feedback_ready = client.wait_calibration_ready() and wait_for_finite_hand_feedback(client)' in source
     assert '"evidence_sha256": hashlib.sha256(raw).hexdigest()' in source
     assert 'M1B_NORMAL_CLOSE_DURATION_S = 0.8' in source
-    assert 'close = client.command_hand(close_targets, duration_s=M1B_NORMAL_CLOSE_DURATION_S)' in source
+    # The final descent is a straight seeded-waypoint cartesian segment and
+    # the close is two-stage (pre-close clear of the modelled skin, settle,
+    # then window-edge squeeze) — the measured remedy for the OMPL side-bow
+    # and the bullet-featherstone per-pair force-response dead band.
+    assert 'def move_hand_cartesian(' in (Path(__file__).parents[2] / "scripts/m1a_contact_calibration_client.py").read_text()
+    assert 'MoveIt computeCartesianPath straight vertical descent' in source or 'seeded_waypoint' in source or 'SEEDED_PER_WAYPOINT' in (Path(__file__).parents[2] / "scripts/m1a_contact_calibration_client.py").read_text()
+    assert 'preclose = client.command_hand(' in source
+    assert 'close = client.command_hand(' in source and 'duration_s=1.2' in source
     assert '"hand_close_duration_s": M1B_NORMAL_CLOSE_DURATION_S' in source
     assert '--calibration-hand-y-bias-m' in source
     assert '--calibration-keep-target-collision-through-descend' in source
@@ -334,20 +341,31 @@ def test_m1b_adr_0014_scene_geometry_and_bin_layout_are_consistent() -> None:
     assert min(target[1] for target in bin_cell_targets()) == pytest.approx(0.01)
 
 
-def test_m1b_adr_0016_makes_the_hand_inline_without_changing_its_contracts() -> None:
+def test_m1b_adr_0016b_franka_fallback_hand_keeps_its_contracts() -> None:
     urdf = (Path(__file__).parents[2] / "robot_ws/src/xh_sim/urdf/panda_controlled.urdf").read_text()
-    assert '<box size="0.07 0.06 0.06"/>' in urdf
-    assert urdf.count('<box size="0.022 0.010 0.08"/>') == 4
-    assert urdf.count('name="tapered_tip_collision"') == 2
-    assert urdf.count('<box size="0.012 0.006 0.02"/>') == 4
-    assert urdf.count('<origin xyz="0 0 0.06" rpy="0 0 0"/>') == 2
-    assert urdf.count('<origin xyz="0 0 0.04"/>') >= 4
-    assert urdf.count('<origin xyz="0 0 0.09"/>') >= 4
+    # ADR-0016 §4 pre-authorized fallback: the hand geometry is a
+    # primitive-approximated copy of the official franka_description meshes,
+    # so the inline-topology boxes are intentionally gone.  What must remain
+    # unchanged are the ADR-0016 "unchanged contracts": joint names, [0,0.04]
+    # limits, the q2-master mimic, both named collision elements, and both
+    # finger contact-sensor topics.
     assert '<joint name="panda_finger_joint1" type="prismatic">' in urdf
     assert '<joint name="panda_finger_joint2" type="prismatic">' in urdf
     assert urdf.count('lower="0" upper="0.04"') == 2
+    assert '<mimic joint="panda_finger_joint2" multiplier="1" offset="0"/>' in urdf
+    assert urdf.count('<origin xyz="0 0 0.0584" rpy="0 0 0"/>') == 2
+    # Both contract collision element names are retained on both fingers.
+    assert urdf.count('name="collision"') == 2
+    assert urdf.count('name="tapered_tip_collision"') == 2
+    # The grasp element is a full-length plate (the measured bullet-featherstone
+    # dead band rejected the short block), face modelled proud of the y=0 plane.
+    assert urdf.count('<box size="0.021 0.0208 0.0538"/>') == 4
     assert '/xh/supervision/panda_leftfinger_contacts' in urdf
     assert '/xh/supervision/panda_rightfinger_contacts' in urdf
+    # Both collision elements are bound to the finger contact sensors so the
+    # distal grasp plate is observed, not only the recessed proximal body.
+    assert urdf.count('panda_leftfinger_fixed_joint_lump__tapered_tip_collision_collision_1') == 1
+    assert urdf.count('panda_rightfinger_fixed_joint_lump__tapered_tip_collision_collision_1') == 1
 
 
 def test_m1b_adr_0016_orientation_scan_requires_kinematics_and_populated_corridor() -> None:

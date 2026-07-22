@@ -41,14 +41,24 @@ POSE_RE = re.compile(
 
 
 def gazebo_pose(model: str, *, link: str | None = None) -> list[float] | None:
-    command = ["timeout", "2", "gz", "model", "-m", model]
-    command.extend(["-l", link] if link else ["-p"])
-    result = subprocess.run(command, capture_output=True, text=True, check=False, timeout=4.0)
-    matches = POSE_RE.findall(result.stdout)
-    # A link query prints the model-root pose first and the requested link pose
-    # later.  The final pose is therefore the requested link, while a model
-    # query contains only its model pose.
-    return [float(value) for value in matches[-1]] if matches else None
+    # The Gazebo transport `gz model` CLI intermittently returns no pose under
+    # a shared physics/render workload (observed timing out at ~2 s).  A None
+    # here would corrupt every downstream follow/decouple metric, so retry a
+    # few times before treating the pose as genuinely unavailable.
+    for _ in range(5):
+        command = ["timeout", "2", "gz", "model", "-m", model]
+        command.extend(["-l", link] if link else ["-p"])
+        try:
+            result = subprocess.run(command, capture_output=True, text=True, check=False, timeout=4.0)
+        except subprocess.TimeoutExpired:
+            continue
+        matches = POSE_RE.findall(result.stdout)
+        # A link query prints the model-root pose first and the requested link
+        # pose later.  The final pose is therefore the requested link, while a
+        # model query contains only its model pose.
+        if matches:
+            return [float(value) for value in matches[-1]]
+    return None
 
 
 def distance(first: list[float] | None, second: list[float] | None) -> float | None:
@@ -181,11 +191,18 @@ def main() -> int:
         detach = detach_and_observe(args.entity, 2.0) if attached_follow else None
         detach_verified = bool(detach and detach.detached_observed)
         moveit_carried_object_removed = remove_attached_cylinder_from_moveit(client, args.entity) if detach_verified else False
+        # Release the jaws before the decouple move.  After detach the fingers
+        # are still physically clamped on the freed cylinder, which remains a
+        # planning-scene collision object; a collision-checked arm plan cannot
+        # then move without opening.  Opening is the physically honest release
+        # step, and it must precede the decouple test rather than assume the
+        # arm can retreat through the grasped body.
+        hand_released = client.command_hand([0.04, 0.04]).get("succeeded", False) if moveit_carried_object_removed else False
         before_decouple_link = gazebo_pose("panda_controller", link="panda_link7")
         before_decouple_cylinder = gazebo_pose(args.entity)
         decouple_target = list(move_target)
         decouple_target[0] -= 0.12
-        detached_move = client.move_joint_target(decouple_target) if detach_verified and moveit_carried_object_removed else {"executed": False}
+        detached_move = client.move_joint_target(decouple_target) if detach_verified and moveit_carried_object_removed and hand_released else {"executed": False}
         after_decouple_link = gazebo_pose("panda_controller", link="panda_link7")
         after_decouple_cylinder = gazebo_pose(args.entity)
         decouple_link_motion = distance(xyz(before_decouple_link), xyz(after_decouple_link))
@@ -211,6 +228,7 @@ def main() -> int:
             "attached_follow_metrics": {"link_motion_m": link_motion, "cylinder_motion_m": cylinder_motion, "relative_drift_m": relative_drift},
             "detach": None if detach is None else {"topic": detach.detach_topic, "state_topic": detach.grasp_state_topic, "detached_observed": detach.detached_observed, "state_lines": list(detach.state_lines)},
             "moveit_carried_object_removed": moveit_carried_object_removed,
+            "hand_released_before_decouple": hand_released,
             "detached_move": detached_move,
             "detached_decoupled": detached_decoupled,
             "detached_decouple_metrics": {"link_motion_m": decouple_link_motion, "relative_change_m": decouple_relative_change},

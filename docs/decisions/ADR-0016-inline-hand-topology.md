@@ -116,3 +116,40 @@ same revalidation cascade.
   unmeasured. The actual RGB-D p90 comparison is **NO-GO** in
   `reports/m1b-adr0016-perception-reachability-gate.json`; ADR-0013
   acceptance items 3 and 4 remain unrun.
+
+## §4 fallback executed (2026-07-22 → 07-23)
+
+The inline hand's 81-trial campaign yielded a zero envelope on every axis —
+exactly the pre-authorized §4 trigger. The fallback (primitive-approximated
+copy of the official `franka_description` hand geometry, same joint contract)
+was implemented and revalidated; full detail and per-step evidence in
+`reports/m1b-adr0016b-franka-hand-fallback.md`.
+
+Diagnosis of the inline campaign's 0/9 zero-offset failures found three
+mechanisms, none of them the pad topology: a zero-force kiss-gap close, an
+OMPL joint-space "descent" that bowed sideways and shoved the free target
+10–18 mm, and slot-3 pregrasp IK −31 (the §3 scan's exact target). The
+fallback build additionally had to compensate three measured
+bullet-featherstone contact behaviours (first-collision-element-only physics
+on the spawned multibody; a shallow-penetration dead band that rejects small
+convex pads; a per-pair force-response lottery cured by a two-stage close).
+
+Fallback revalidation result:
+- Model URDF SHA-256 `6678ff409d60f074283805879f53edaa939ead34f97a5a961ee67f6229b44ba8`.
+- Gates 0–3 (bullet audit, home self-collision, S0 13/13, S1 10/10): **pass**.
+- §3 corridor-extended pre-scan: scene 5017 admits 12/17 (slots 1/2/4 used);
+  the r ≲ 0.27 m inner annulus fails the descent corridor — a scene-generation
+  follow-up, tracked in the fallback report.
+- Height/squeeze calibration: **120 mm centreline, 2 mm squeeze, two-stage
+  close** (`reports/m1b-adr0016b-top-contact-height-calibration.json`).
+- 81-trial envelope: **X 0.015 / Y 0.015 / Z 0.005 m** (nonzero on every
+  axis — the §4 success criterion), summary SHA-256 `1e758295…`,
+  `reports/m1b-adr0016b-tolerance-envelope.json`.
+- Perception p90 gate: **NO-GO**, but now because measured p90 exceeds
+  0.6×measured-envelope (worst on Z), not because the envelope is unmeasured
+  — a perception-accuracy problem with an already-coded reobservation path.
+- ADR-0013 acceptance 3 (round-trip): **pass**
+  (`reports/m1b-adr0016b-attached-roundtrip.json`). Acceptance 4 (live
+  wrong-object drill) remains; its logic is unit-verified.
+- M1A cube regression: blocked on a dirty working tree (commit required).
+- Unit suite 110/110, `validate_project` PASS.
