@@ -17,7 +17,7 @@ EPISODE_START="${M1A_S3_EPISODE_START:-1}"
 PREVIOUS_LOGS="${M1A_S3_PREVIOUS_LOGS:-}"
 RECONCILE_ONLY="${M1A_S3_RECONCILE_ONLY:-0}"
 PREFERRED_CANDIDATE_ID="${M1A_S3_PREFERRED_CANDIDATE_ID:-fingertip_down_close_world_y}"
-CLOSE_COMMAND_PER_FINGER_M="${M1A_S3_CLOSE_COMMAND_PER_FINGER_M:-0.033}"
+CLOSE_COMMAND_PER_FINGER_M="${M1A_S3_CLOSE_COMMAND_PER_FINGER_M:-0.027}"
 mkdir -p logs reports
 if ! [[ "$EPISODE_LIMIT" =~ ^[0-9]+$ && "$EPISODE_START" =~ ^[0-9]+$ ]] || \
    { [[ "$RECONCILE_ONLY" != "1" ]] && (( EPISODE_LIMIT < 1 || EPISODE_START < 1 || EPISODE_START + EPISODE_LIMIT - 1 > 10 )); } || \
@@ -117,10 +117,13 @@ data.update({
     "episode_id": f"{run_id}-episode-{int(episode):02d}",
     "seed": int(episode),
     "mode": "CONTACT_GATED_CONSTRAINED_GRASP",
-    # Each finger collision board is 18 mm thick.  At q=0.033 m the inner
-    # clearance is 2q - 0.018 = 0.048 m: a 2 mm contact preload on the 5 cm
-    # cube, rather than the old 1 cm command that pushed it through the pads.
-    # The gate still uses only the *observed* joint positions.
+    # ADR-0016b franka-copy pads: each collision face is modelled 6.5 mm proud
+    # of the finger-link y=0 plane, so the physical inner clearance is
+    # 2q - 0.013.  At q=0.027 m that is 0.041 m: a 4.5 mm-per-side preload on
+    # the 5 cm cube, clearing the measured 2-3 mm bullet-featherstone
+    # shallow-penetration dead band (the old 0.033 m left the pads ~1.5 mm
+    # short and produced CONTACT_CLOSURE_FAILURE 10/10).  The gate still uses
+    # only the *observed* joint positions.
     "close_command_per_finger_m": float(close_command),
     "preferred_candidate_id": data["preferred_candidate_id"],
 })
