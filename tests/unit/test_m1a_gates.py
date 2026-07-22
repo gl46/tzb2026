@@ -563,7 +563,9 @@ def test_m1a_s3_attach_is_runtime_gated_and_transport_keeps_a_carried_collision_
     assert "M1A_S3_UNKNOWN_PREFERRED_CANDIDATE" in runner
     assert '"preferred_candidate_id": data["preferred_candidate_id"]' in runner
     assert "M1A_S3_CLOSE_COMMAND_PER_FINGER_M must be within [0.0, 0.04]" in runner
-    assert 'CLOSE_COMMAND_PER_FINGER_M="${M1A_S3_CLOSE_COMMAND_PER_FINGER_M:-0.033}"' in runner
+    # ADR-0016b: re-tuned from 0.033 to 0.027 for the franka pad geometry
+    # (0.033 left the 6.5 mm-proud pads ~1.5 mm short of the 50 mm cube).
+    assert 'CLOSE_COMMAND_PER_FINGER_M="${M1A_S3_CLOSE_COMMAND_PER_FINGER_M:-0.027}"' in runner
     assert "calibration_mode:=false" in remote_runner
     assert "M1A_S3_LAUNCH_URDF_SHA256" in remote_runner
     assert "install/xh_sim/share/xh_sim/urdf/panda_controlled.urdf" in remote_runner

@@ -310,6 +310,22 @@ def test_m1b_generated_cylinders_clear_the_fixed_robot_base() -> None:
     assert all(item["passed"] for item in supervision["layout_reachability"]["bin_cells"])
 
 
+def test_m1b_adr_0016_corridor_prefilter_rejects_near_base_spawns() -> None:
+    from generate_industrial_scenes import MIN_TOP_GRASP_CORRIDOR_RADIUS_M
+    template = (Path(__file__).parents[2] / "robot_ws/src/xh_sim/worlds/industrial_cylinder_v1.sdf").read_text()
+    # The corridor radius sits between the measured infeasible ceiling (0.228 m)
+    # and the feasible floor (0.273 m) from the ADR-0016 §3 scan.
+    assert 0.228 < MIN_TOP_GRASP_CORRIDOR_RADIUS_M < 0.273
+    for seed in (1017, 5017, 1042, 1099, 1200):
+        _, supervision = render(template, seed, orientations=("normal",))
+        for label in supervision["simulator_supervision"]["objects"]:
+            x, y, _ = label["position_3d_world"]
+            reach = label["layout_reachability"]
+            assert math.dist((x, y), ROBOT_BASE_XY) >= MIN_TOP_GRASP_CORRIDOR_RADIUS_M
+            assert reach["top_grasp_corridor_radius_ok"] is True
+            assert reach["min_top_grasp_corridor_radius_m"] == MIN_TOP_GRASP_CORRIDOR_RADIUS_M
+
+
 def test_m1b_calibration_pedestal_is_normal_only_and_lifts_labels() -> None:
     template = (Path(__file__).parents[2] / "robot_ws/src/xh_sim/worlds/industrial_cylinder_v1.sdf").read_text()
     scene, supervision = render(template, 1017, orientations=("normal",), pedestal_lift_m=0.04)

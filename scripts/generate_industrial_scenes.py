@@ -34,6 +34,18 @@ ANGULAR_VELOCITY_DECAY = 0.5
 # centre-offset tolerance.  Keep the physical cylinder envelope outside it.
 ROBOT_BASE_XY = (-0.35, 0.0)
 ROBOT_BASE_KEEP_OUT_RADIUS_M = 0.19
+# ADR-0016 §3 corridor prefilter (measured on the franka-copy hand,
+# reports/m1b-adr0016b-orientation-prescan3-5017.json): the vertical-tool
+# descent seeds a per-waypoint collision-aware IK, and for spawn points nearer
+# the base axis than ~0.25 m that seed folds to a different branch mid-descent
+# (>0.35 rad jump in one 5 mm step) at every yaw, so no descent corridor
+# exists even though the position-only FK gate and both endpoint IKs pass. The
+# scan measured a clean separation — corridor-feasible spawns were all at
+# base-axis radius >= 0.273 m, infeasible ones all <= 0.228 m — so reject any
+# spawn nearer than 0.25 m as a fail-closed necessary condition. This is a
+# generation prefilter, not a replacement for the live orientation-feasibility
+# scan, which remains the authoritative per-scene admission gate.
+MIN_TOP_GRASP_CORRIDOR_RADIUS_M = 0.25
 # These targets are intentionally checked with the controlled-URDF FK/DLS
 # sampler before writing any scene.  This is a layout prefilter only; it does
 # not claim orientation feasibility or collision-free MoveIt execution.
@@ -172,11 +184,20 @@ def render(
         ]
         rng.shuffle(candidates)
         for x, y in candidates:
-            clear_of_base = math.dist((x, y), ROBOT_BASE_XY) >= ROBOT_BASE_KEEP_OUT_RADIUS_M
+            base_axis_radius_m = math.dist((x, y), ROBOT_BASE_XY)
+            clear_of_base = base_axis_radius_m >= ROBOT_BASE_KEEP_OUT_RADIUS_M
+            # ADR-0016 §3 fail-closed: a spawn nearer the base axis than the
+            # measured descent-corridor radius has no vertical-tool descent
+            # corridor at any yaw, so it must never be emitted as a pick target.
+            corridor_radius_ok = base_axis_radius_m >= MIN_TOP_GRASP_CORRIDOR_RADIUS_M
             target = (x, y, cylinder_pose(state, pedestal_lift_m=pedestal_lift_m)[2])
             evidence = layout_reachability(target, gate_index=seed * 100 + index)
+            evidence["base_axis_radius_m"] = base_axis_radius_m
+            evidence["top_grasp_corridor_radius_ok"] = corridor_radius_ok
+            evidence["min_top_grasp_corridor_radius_m"] = MIN_TOP_GRASP_CORRIDOR_RADIUS_M
             if (
                 clear_of_base
+                and corridor_radius_ok
                 and all((x - other_x) ** 2 + (y - other_y) ** 2 >= 0.06 ** 2 for other_x, other_y in positions)
                 and evidence["passed"]
             ):
