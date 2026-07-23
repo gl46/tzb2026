@@ -91,7 +91,9 @@ def relative(cylinder: list[float] | None, link: list[float] | None) -> list[flo
     return quaternion_rotate([-quat[0], -quat[1], -quat[2], quat[3]], tuple(a - b for a, b in zip(cylinder[:3], link[:3])))
 
 
-def attach_cylinder_to_moveit(client: CalibrationClient, entity: str, cylinder_world: list[float] | None) -> dict[str, object]:
+def attach_cylinder_to_moveit(
+    client: CalibrationClient, carrier_collision_id: str, cylinder_world: list[float] | None,
+) -> dict[str, object]:
     """Mirror the already-observed Gazebo attach in MoveIt for transport planning.
 
     The physical grasp has already happened when this evaluator-side mirror is
@@ -115,7 +117,10 @@ def attach_cylinder_to_moveit(client: CalibrationClient, entity: str, cylinder_w
         preflight["status"] = "FK_OR_CYLINDER_POSE_UNAVAILABLE"
         return preflight
     remove_scene = PlanningScene(is_diff=True)
-    remove = CollisionObject(id=entity)
+    # The production planning scene contains only public-track collision IDs.
+    # The broker's actual Gazebo entity is deliberately unavailable to the
+    # production planner, so it must never be used as a planning-scene key.
+    remove = CollisionObject(id=carrier_collision_id)
     remove.header.frame_id = "world"
     remove.operation = CollisionObject.REMOVE
     remove_scene.world.collision_objects = [remove]
@@ -131,7 +136,7 @@ def attach_cylinder_to_moveit(client: CalibrationClient, entity: str, cylinder_w
     attached = AttachedCollisionObject()
     attached.link_name = "panda_link7"
     attached.touch_links = ["panda_link7", "panda_link8", "panda_hand", "panda_leftfinger", "panda_rightfinger"]
-    attached.object.id = entity
+    attached.object.id = carrier_collision_id
     attached.object.header.frame_id = "panda_link7"
     attached.object.primitives = [SolidPrimitive(type=SolidPrimitive.CYLINDER, dimensions=[M1B_CYLINDER_LENGTH_M, M1B_CYLINDER_RADIUS_M])]
     pose = Pose()
@@ -147,23 +152,23 @@ def attach_cylinder_to_moveit(client: CalibrationClient, entity: str, cylinder_w
     return preflight
 
 
-def remove_attached_cylinder_from_moveit(client: CalibrationClient, entity: str) -> bool:
+def remove_attached_cylinder_from_moveit(client: CalibrationClient, carrier_collision_id: str) -> bool:
     scene = PlanningScene(is_diff=True)
     attached = AttachedCollisionObject()
-    attached.object.id = entity
+    attached.object.id = carrier_collision_id
     attached.object.operation = CollisionObject.REMOVE
     scene.robot_state.is_diff = True
     scene.robot_state.attached_collision_objects = [attached]
     return client.apply_scene_diff(scene)
 
 
-def configure_transport_collision_exceptions(client: CalibrationClient, entity: str) -> bool:
+def configure_transport_collision_exceptions(client: CalibrationClient, carrier_collision_id: str) -> bool:
     """Permit only the physical grasp/initial-static contacts needed to transport."""
     matrix = client.current_acm()
     if matrix is None:
         return False
     for link in ("panda_link7", "panda_link8", "panda_hand", "panda_leftfinger", "panda_rightfinger", "work_table"):
-        set_allowed_pair(matrix, entity, link, True)
+        set_allowed_pair(matrix, carrier_collision_id, link, True)
     # Closed parallel fingers meet in this simplified Panda model.  It is a
     # self-contact inherent in the physical grasp state, not a free-space
     # collision exemption.
@@ -181,10 +186,16 @@ def configure_transport_collision_exceptions(client: CalibrationClient, entity: 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--entity", required=True, help="Actuation-internal entity selected by the broker")
+    parser.add_argument(
+        "--public-collision-id", required=True,
+        help="Public RGB-D planning-scene collision ID selected before the grasp",
+    )
     parser.add_argument("--output", required=True, type=Path)
     args = parser.parse_args()
     if not re.fullmatch(r"cylinder_[0-9]{2}", args.entity):
         raise SystemExit("entity must be a generated cylinder id")
+    if not re.fullmatch(r"m1b_public_track-[a-f0-9]{8}", args.public_collision_id):
+        raise SystemExit("public-collision-id must be a public RGB-D track collision id")
 
     rclpy.init()
     client = CalibrationClient()
@@ -196,13 +207,13 @@ def main() -> int:
         before_link = gazebo_pose("panda_controller", link="panda_link7")
         before_cylinder = gazebo_pose(args.entity)
         moveit_carried_object_preflight = (
-            attach_cylinder_to_moveit(client, args.entity, xyz(before_cylinder))
+            attach_cylinder_to_moveit(client, args.public_collision_id, xyz(before_cylinder))
             if ready
             else {"status": "CALIBRATION_CLIENT_NOT_READY", "attached_object_applied": False}
         )
         moveit_carried_object_applied = bool(moveit_carried_object_preflight["attached_object_applied"])
         transport_collision_exceptions_applied = (
-            configure_transport_collision_exceptions(client, args.entity)
+            configure_transport_collision_exceptions(client, args.public_collision_id)
             if moveit_carried_object_applied else False
         )
         move_target = list(current)
@@ -223,7 +234,10 @@ def main() -> int:
         )
         detach = detach_and_observe(args.entity, 2.0) if attached_follow else None
         detach_verified = bool(detach and detach.detached_observed)
-        moveit_carried_object_removed = remove_attached_cylinder_from_moveit(client, args.entity) if detach_verified else False
+        moveit_carried_object_removed = (
+            remove_attached_cylinder_from_moveit(client, args.public_collision_id)
+            if detach_verified else False
+        )
         # Release the jaws before the decouple move.  After detach the fingers
         # are still physically clamped on the freed cylinder, which remains a
         # planning-scene collision object; a collision-checked arm plan cannot
@@ -254,6 +268,7 @@ def main() -> int:
             "online_truth_access": False,
             "entity_source": "actuation_internal_broker_attach_record",
             "entity": args.entity,
+            "public_carrier_collision_id": args.public_collision_id,
             "moveit_carried_object_preflight": moveit_carried_object_preflight,
             "moveit_carried_object_applied": moveit_carried_object_applied,
             "transport_collision_exceptions_applied": transport_collision_exceptions_applied,

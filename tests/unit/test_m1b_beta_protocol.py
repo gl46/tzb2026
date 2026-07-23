@@ -184,6 +184,11 @@ def test_wrong_object_carried_track_association_fails_closed_when_public_vacancy
 
 def test_attached_roundtrip_records_moveit_carrier_preflight_before_transport() -> None:
     source = (Path(__file__).parents[2] / "scripts/run_m1b_attached_roundtrip.py").read_text()
+    assert 'parser.add_argument(\n        "--public-collision-id", required=True,' in source
+    assert 'remove = CollisionObject(id=carrier_collision_id)' in source
+    assert 'attached.object.id = carrier_collision_id' in source
+    assert 'set_allowed_pair(matrix, carrier_collision_id, link, True)' in source
+    assert '"public_carrier_collision_id": args.public_collision_id' in source
     assert '"moveit_carried_object_preflight": moveit_carried_object_preflight' in source
     assert 'preflight["status"] = "FK_OR_CYLINDER_POSE_UNAVAILABLE"' in source
     assert 'preflight["status"] = "WORLD_OBJECT_REMOVE_REJECTED"' in source
