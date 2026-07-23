@@ -21,6 +21,7 @@ OPEN_FINGER_M = 0.04
 NEIGHBOR_RADIUS_M = 0.015
 MIN_CLEARANCE_M = 0.005
 YAW_CANDIDATES_RAD = tuple(math.radians(value) for value in range(0, 180, 15))
+INDUSTRIAL_DIAMETER_RANGE_M = (0.020, 0.040)
 
 
 def public_tracks(
@@ -45,6 +46,8 @@ def public_tracks(
             orientation = str(result["orientation_state"])
             if not track_id or track_id in tracks or focal <= 0.0 or depth <= 0.0 or len(surface) != 3:
                 raise ValueError("invalid or duplicate public track geometry")
+            if not INDUSTRIAL_DIAMETER_RANGE_M[0] <= diameter <= INDUSTRIAL_DIAMETER_RANGE_M[1]:
+                raise ValueError("public perceived diameter is outside the approved industrial-cylinder class band")
             baseline = calibration.visible_surface_to_center_world(surface, diameter)
             xy_center = xy_correction.correct_xy(
                 baseline, surface_optical_m=surface, perceived_diameter_m=diameter,

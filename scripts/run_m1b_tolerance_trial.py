@@ -134,6 +134,12 @@ M1B_FINGER_BOARD_THICKNESS_M = 0.006
 # every command.
 M1B_CLOSE_SQUEEZE_M = 0.002
 M1B_MAX_FINGER_POSITION_M = 0.040
+# The approved current industrial class is 30 mm in diameter.  Bounding a
+# production aperture estimate to this deliberately broad public class band
+# rejects components whose long visible axis was mistaken for their diameter;
+# accepting such a value would command an open jaw that cannot contact a
+# 30 mm cylinder.  This is a public observation gate, never a label lookup.
+M1B_PUBLIC_INDUSTRIAL_DIAMETER_RANGE_M = (0.020, 0.040)
 M1B_NEAR_REOBSERVATION_DURATION_S = 8.0
 M1B_NEAR_REOBSERVATION_MAX_ASSOCIATION_DISTANCE_M = 0.050
 M1B_NEAR_REOBSERVATION_FRAME_COUNT = 3
@@ -306,6 +312,8 @@ def public_track_from_evidence(
     if focal_m <= 0.0 or depth_m <= 0.0 or pixel_diameter <= 0:
         raise SystemExit("selected public track has invalid geometry for diameter")
     diameter_m = pixel_diameter * depth_m / focal_m
+    if not M1B_PUBLIC_INDUSTRIAL_DIAMETER_RANGE_M[0] <= diameter_m <= M1B_PUBLIC_INDUSTRIAL_DIAMETER_RANGE_M[1]:
+        raise SystemExit("selected public track diameter is outside the approved industrial-cylinder class band")
     surface_optical_m = [float(value) for value in result["position_3d"]]
     if len(surface_optical_m) != 3:
         raise SystemExit("selected public track has invalid surface geometry")

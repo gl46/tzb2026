@@ -379,6 +379,10 @@ def test_m1b_public_target_selector_is_perception_only() -> None:
     assert 'M1BPublicGeometryXYCorrectionV1' in source
     assert 'M1BTableSupportedCylinderCenterV1' in source
     assert 'simulator_supervision' not in source
+    assert 'INDUSTRIAL_DIAMETER_RANGE_M = (0.020, 0.040)' in source
+    runner = (Path(__file__).parents[2] / "scripts/run_m1b_tolerance_trial.py").read_text()
+    assert 'M1B_PUBLIC_INDUSTRIAL_DIAMETER_RANGE_M = (0.020, 0.040)' in runner
+    assert 'selected public track diameter is outside the approved industrial-cylinder class band' in runner
 
 
 def test_m1b_public_geometry_gate_passes_measured_inputs_by_name() -> None:
