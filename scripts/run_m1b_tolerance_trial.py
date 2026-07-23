@@ -518,7 +518,8 @@ def m1b_top_down_contact_seek_descent(
             return {
                 "executed": False, "converged": False,
                 "seek_contact_found": False,
-                "reason": "CONTACT_SEEK_WAYPOINT_MOTION_REJECTED",
+                "reason": f"CONTACT_SEEK_{motion.get('reason', 'WAYPOINT_MOTION_REJECTED')}",
+                "motion_failure_reason": motion.get("reason"),
                 "waypoints": waypoints,
             }
         expected = motion.get("expected_final_joints")
@@ -1172,7 +1173,7 @@ def main() -> int:
             if (
                 args.calibration_fixture_diameter_m is not None and free_gap_yaw is not None
                 and not contact_descend.get("executed")
-                and str(contact_descend.get("reason", "")).startswith("CARTESIAN")
+                and "CARTESIAN" in str(contact_descend.get("reason", ""))
             ):
                 ranked = sorted(
                     [c for c in free_gap_yaw["candidates"] if c["min_clearance_m"] >= M1B_FREE_GAP_MIN_CLEARANCE_M],
@@ -1198,6 +1199,7 @@ def main() -> int:
                     )
                     entry["approach"] = retry_approach
                     if retry_approach.get("executed") and retry_approach.get("converged"):
+                        seek_contact_start_index = len(raw)
                         retry_descend = (
                             m1b_top_down_contact_seek_descent(
                                 client, final_target,

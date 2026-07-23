@@ -221,6 +221,7 @@ def test_m1b_tolerance_attach_uses_detachablejoint_empty_payload() -> None:
     assert '"contact_descend_contact_authorization": "POST_CLOSE_BILATERAL_SAME_ENTITY_WINDOW"' in source
     assert 'def m1b_top_down_contact_seek_descent(' in source
     assert '"CONTACT_SEEK_BILATERAL_WINDOW_NOT_OBSERVED"' in source
+    assert '"CARTESIAN" in str(contact_descend.get("reason", ""))' in source
     assert '"--enable-contact-seeking-terminal-descent", action="store_true"' in source
     assert 'contact_samples_since_seek_start=lambda: raw[seek_contact_start_index:]' in source
     assert 'contact_descend.get("seek_contact_found")' in source
