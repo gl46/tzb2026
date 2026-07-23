@@ -372,6 +372,13 @@ def test_m1b_public_production_grasp_rejects_supervision_inputs() -> None:
     assert 'return f"m1b_public_{track_id}"' in source
 
 
+def test_m1b_public_geometry_gate_passes_measured_inputs_by_name() -> None:
+    source = (Path(__file__).parents[2] / "scripts/run_m1b_adr0016b_public_geometry_gate.sh").read_text()
+    assert '--tolerance-trials reports/m1b-adr0016b-tolerance-envelope.json' in source
+    assert '--perception-errors "$test_audit"' in source
+    assert 'CURRENT_GEOMETRY_SPLIT_INCOMPLETE' in source
+
+
 def test_m1b_acceptance_utilities_match_current_public_geometry_contract() -> None:
     root = Path(__file__).parents[2]
     roundtrip = (root / "scripts" / "run_m1b_attached_roundtrip.py").read_text(encoding="utf-8")

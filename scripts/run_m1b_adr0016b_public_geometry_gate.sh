@@ -35,7 +35,10 @@ cd "$root"
 "$python_bin" scripts/audit_m1b_center_reachability.py "$manifest" --split train --output "$train_audit"
 "$python_bin" scripts/fit_m1b_public_geometry_xy_correction.py "$train_audit" --output "$xy_correction"
 "$python_bin" scripts/audit_m1b_center_reachability.py "$manifest" --split test --xy-correction "$xy_correction" --table-supported-z configs/m1b_table_supported_cylinder_center.json --output "$test_audit"
-"$python_bin" scripts/evaluate_m1b_reachability_gate.py reports/m1b-adr0016b-tolerance-envelope.json "$test_audit" --output "$gate"
+"$python_bin" scripts/evaluate_m1b_reachability_gate.py \
+  --tolerance-trials reports/m1b-adr0016b-tolerance-envelope.json \
+  --perception-errors "$test_audit" \
+  --output "$gate"
 "$python_bin" - "$gate" <<'PY'
 import json
 import sys
