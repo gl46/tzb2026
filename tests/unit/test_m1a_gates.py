@@ -317,6 +317,9 @@ def test_m1a_execution_client_uses_moveit_plan_execute_fk_and_no_pose_write() ->
     assert '"/panda_arm_controller/controller_state"' in source
     assert '"q_des"' in source and '"q_act"' in source
     assert "max_tracking_error <= 0.05" in source
+    assert 'b["timestamp_s"] >= a["timestamp_s"]' in source
+    assert "joint_state_distinct_timestamp_count" in source
+    assert "distinct_sample_timestamps >= 20" in source
     assert "current_acm()" in source
     assert 'set_allowed_pair(matrix, "panda_link0", "work_table", True)' in source
     assert "post_controller_converged" in source

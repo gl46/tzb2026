@@ -307,7 +307,12 @@ def segment_evidence(client: EvidenceClient, trial: int, name: str, target: list
     actual = [client.latest.get(joint, math.nan) for joint in JOINTS]
     actual_fk = client.fk(actual) if all(math.isfinite(value) for value in actual) else None
     errors = [abs(a - b) for a, b in zip(actual, expected)]
-    monotonic = all(b["timestamp_s"] > a["timestamp_s"] for a, b in zip(samples, samples[1:]))
+    # Gazebo may publish multiple joint-state messages for the same simulation
+    # tick. Repeated stamps are valid; only a backwards stamp invalidates the
+    # trajectory timeline. Require enough *distinct* ticks as well, so a burst
+    # of duplicate messages cannot satisfy the sampling evidence by itself.
+    monotonic = all(b["timestamp_s"] >= a["timestamp_s"] for a, b in zip(samples, samples[1:]))
+    distinct_sample_timestamps = len({sample["timestamp_s"] for sample in samples})
     max_jump = max((abs(b["positions"][j] - a["positions"][j])
                     for a, b in zip(samples, samples[1:])
                     for j in range(7) if b["timestamp_s"] - a["timestamp_s"] <= 0.1), default=0.0)
@@ -329,12 +334,14 @@ def segment_evidence(client: EvidenceClient, trial: int, name: str, target: list
         "post_controller_settle_s": settle_duration, "post_controller_converged": settled,
         "per_joint_final_error": errors, "max_final_joint_error_rad": max(errors),
         "expected_ee_pose": expected_fk, "observed_ee_pose": actual_fk, "ee_position_error_m": ee_error,
-        "joint_state_sample_count": len(samples), "timestamps_monotonic": monotonic,
+        "joint_state_sample_count": len(samples),
+        "joint_state_distinct_timestamp_count": distinct_sample_timestamps,
+        "timestamps_monotonic": monotonic,
         "controller_state_sample_count": len(controller_samples),
         "max_tracking_error_rad": max_tracking_error,
         "max_adjacent_joint_jump_rad": max_jump, "max_velocity_limit_ratio": max_velocity_ratio,
         "samples": samples, "controller_samples": controller_samples,
-        "success": bool(executed and settled and len(samples) >= 20 and monotonic
+        "success": bool(executed and settled and len(samples) >= 20 and distinct_sample_timestamps >= 20 and monotonic
                                      and max_tracking_error <= 0.05 and max(errors) <= 0.05
                                      and ee_error is not None and ee_error <= 0.02 and max_jump <= 0.08
                                      and max_velocity_ratio <= 1.5 and completed - started >= 0.25),
