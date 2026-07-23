@@ -1,0 +1,32 @@
+{
+  "schema_version": "M1BWrongObjectDrillEvidenceV1",
+  "provenance": "SUPERVISION_EVALUATION_ONLY",
+  "online_truth_access": false,
+  "intended_target_entity": "cylinder_01",
+  "target_public_track_id": "track-550f6239",
+  "attached_entity": "cylinder_02",
+  "carried_public_track_id": "track-b0b7a018",
+  "vacated_pre_grasp_tracks": [
+    "track-b0b7a018",
+    "track-30a06a3e",
+    "track-27615244"
+  ],
+  "identity_status": "WRONG_OBJECT",
+  "wrong_object_detected": true,
+  "recovery_triggered": true,
+  "recovery_subgoals": [
+    "Reobserve",
+    "SafePlaceNonTarget",
+    "ReassociateTarget",
+    "Approach",
+    "Regrasp"
+  ],
+  "supervision_record": {
+    "actual_sim_entity_id": "cylinder_02",
+    "wrong_object": true,
+    "truth_boundary": "evaluation_only_not_available_to_policy"
+  },
+  "pre_track_count": 10,
+  "post_track_count": 7,
+  "carried_track_association": "VACATED_SPAWN_NEAREST_ATTACHED_ENTITY"
+}
