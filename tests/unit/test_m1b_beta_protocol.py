@@ -182,6 +182,15 @@ def test_wrong_object_carried_track_association_fails_closed_when_public_vacancy
     assert "UNIQUE_VACATED_PUBLIC_TRACK" in source
 
 
+def test_attached_roundtrip_records_moveit_carrier_preflight_before_transport() -> None:
+    source = (Path(__file__).parents[2] / "scripts/run_m1b_attached_roundtrip.py").read_text()
+    assert '"moveit_carried_object_preflight": moveit_carried_object_preflight' in source
+    assert 'preflight["status"] = "FK_OR_CYLINDER_POSE_UNAVAILABLE"' in source
+    assert 'preflight["status"] = "WORLD_OBJECT_REMOVE_REJECTED"' in source
+    assert '"ATTACHED_OBJECT_REJECTED"' in source
+    assert '"APPLIED"' in source
+
+
 def test_m1b_reset_requires_every_generated_detachable_state() -> None:
     good = [
         M1BResetVerificationV1("cylinder_01", "/xh/m1b/cylinder_01/detach", "/xh/m1b/cylinder_01/grasp_state", True, ('data: "detached"',)),

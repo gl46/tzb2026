@@ -91,19 +91,38 @@ def relative(cylinder: list[float] | None, link: list[float] | None) -> list[flo
     return quaternion_rotate([-quat[0], -quat[1], -quat[2], quat[3]], tuple(a - b for a, b in zip(cylinder[:3], link[:3])))
 
 
-def attach_cylinder_to_moveit(client: CalibrationClient, entity: str, cylinder_world: list[float] | None) -> bool:
-    """Mirror the already-observed Gazebo attach in MoveIt for transport planning."""
+def attach_cylinder_to_moveit(client: CalibrationClient, entity: str, cylinder_world: list[float] | None) -> dict[str, object]:
+    """Mirror the already-observed Gazebo attach in MoveIt for transport planning.
+
+    The physical grasp has already happened when this evaluator-side mirror is
+    created.  Preserve a small, explicit preflight record so a false return
+    cannot silently look like a transport failure (or prompt an unnecessary
+    re-grasp).
+    """
     positions = [client.latest.get(name, math.nan) for name in JOINTS]
-    link = client.fk_link("panda_link7", positions) if all(math.isfinite(v) for v in positions) else None
+    missing_or_nonfinite_joints = [name for name, value in zip(JOINTS, positions) if not math.isfinite(value)]
+    link = client.fk_link("panda_link7", positions) if not missing_or_nonfinite_joints else None
+    preflight: dict[str, object] = {
+        "joint_state_available": not missing_or_nonfinite_joints,
+        "joint_state_missing_or_nonfinite": missing_or_nonfinite_joints,
+        "fk_link": "panda_link7",
+        "fk_link_available": link is not None,
+        "cylinder_world_available": cylinder_world is not None,
+        "world_object_removed": False,
+        "attached_object_applied": False,
+    }
     if link is None or cylinder_world is None:
-        return False
+        preflight["status"] = "FK_OR_CYLINDER_POSE_UNAVAILABLE"
+        return preflight
     remove_scene = PlanningScene(is_diff=True)
     remove = CollisionObject(id=entity)
     remove.header.frame_id = "world"
     remove.operation = CollisionObject.REMOVE
     remove_scene.world.collision_objects = [remove]
     if not client.apply_scene_diff(remove_scene):
-        return False
+        preflight["status"] = "WORLD_OBJECT_REMOVE_REJECTED"
+        return preflight
+    preflight["world_object_removed"] = True
     relative_xyz = quaternion_rotate(
         [-link[3], -link[4], -link[5], link[6]],
         tuple(value - origin for value, origin in zip(cylinder_world, link[:3])),
@@ -122,7 +141,10 @@ def attach_cylinder_to_moveit(client: CalibrationClient, entity: str, cylinder_w
     attached.object.operation = CollisionObject.ADD
     scene.robot_state.is_diff = True
     scene.robot_state.attached_collision_objects = [attached]
-    return client.apply_scene_diff(scene)
+    attached_object_applied = client.apply_scene_diff(scene)
+    preflight["attached_object_applied"] = attached_object_applied
+    preflight["status"] = "APPLIED" if attached_object_applied else "ATTACHED_OBJECT_REJECTED"
+    return preflight
 
 
 def remove_attached_cylinder_from_moveit(client: CalibrationClient, entity: str) -> bool:
@@ -173,7 +195,12 @@ def main() -> int:
         current = [client.latest.get(name, math.nan) for name in JOINTS]
         before_link = gazebo_pose("panda_controller", link="panda_link7")
         before_cylinder = gazebo_pose(args.entity)
-        moveit_carried_object_applied = attach_cylinder_to_moveit(client, args.entity, xyz(before_cylinder)) if ready else False
+        moveit_carried_object_preflight = (
+            attach_cylinder_to_moveit(client, args.entity, xyz(before_cylinder))
+            if ready
+            else {"status": "CALIBRATION_CLIENT_NOT_READY", "attached_object_applied": False}
+        )
+        moveit_carried_object_applied = bool(moveit_carried_object_preflight["attached_object_applied"])
         transport_collision_exceptions_applied = (
             configure_transport_collision_exceptions(client, args.entity)
             if moveit_carried_object_applied else False
@@ -227,6 +254,7 @@ def main() -> int:
             "online_truth_access": False,
             "entity_source": "actuation_internal_broker_attach_record",
             "entity": args.entity,
+            "moveit_carried_object_preflight": moveit_carried_object_preflight,
             "moveit_carried_object_applied": moveit_carried_object_applied,
             "transport_collision_exceptions_applied": transport_collision_exceptions_applied,
             "attached_move": attached_move,
