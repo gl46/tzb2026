@@ -22,17 +22,23 @@ if ! [[ "$capture_attempts" =~ ^[1-9][0-9]*$ ]]; then
 fi
 gz_pid=""
 bridge_pid=""
-cleanup() {
-  for pid in "$bridge_pid" "$gz_pid"; do
-    [[ -z "$pid" ]] && continue
-    kill -INT "$pid" 2>/dev/null || true
-    for _ in {1..20}; do
-      kill -0 "$pid" 2>/dev/null || break
-      sleep 0.1
-    done
-    kill -0 "$pid" 2>/dev/null && kill -KILL "$pid" 2>/dev/null || true
-    wait "$pid" 2>/dev/null || true
+terminate_process_group() {
+  local pid="$1"
+  [[ -z "$pid" ]] && return 0
+  # Both Gazebo and `ros2 run` can spawn children that outlive their launcher.
+  # They are started through `setsid` below, so this kills exactly the per-seed
+  # process group and cannot accumulate publishers from earlier worlds.
+  kill -INT -- "-$pid" 2>/dev/null || true
+  for _ in {1..20}; do
+    kill -0 "$pid" 2>/dev/null || break
+    sleep 0.1
   done
+  kill -0 "$pid" 2>/dev/null && kill -KILL -- "-$pid" 2>/dev/null || true
+  wait "$pid" 2>/dev/null || true
+}
+cleanup() {
+  terminate_process_group "$bridge_pid"
+  terminate_process_group "$gz_pid"
 }
 trap cleanup EXIT
 for ((offset=0; offset<count; offset++)); do
@@ -42,11 +48,11 @@ for ((offset=0; offset<count; offset++)); do
   mkdir -p "$output" logs
   captured="false"
   for ((attempt=1; attempt<=capture_attempts; attempt++)); do
-    gz sim -s -r "$dataset_root/scenes/scene-$seed.sdf" >"logs/m1b-alpha-dataset-$seed-attempt-$attempt.log" 2>&1 &
+    setsid gz sim -s -r "$dataset_root/scenes/scene-$seed.sdf" >"logs/m1b-alpha-dataset-$seed-attempt-$attempt.log" 2>&1 &
     gz_pid=$!
     bridge_pid=""
     sleep 4
-    ros2 run ros_gz_bridge parameter_bridge "/xh/camera/rgbd/image@sensor_msgs/msg/Image[gz.msgs.Image" "/xh/camera/rgbd/depth_image@sensor_msgs/msg/Image[gz.msgs.Image" "/xh/camera/rgbd/camera_info@sensor_msgs/msg/CameraInfo[gz.msgs.CameraInfo" >"$output/bridge-attempt-$attempt.log" 2>&1 &
+    setsid ros2 run ros_gz_bridge parameter_bridge "/xh/camera/rgbd/image@sensor_msgs/msg/Image[gz.msgs.Image" "/xh/camera/rgbd/depth_image@sensor_msgs/msg/Image[gz.msgs.Image" "/xh/camera/rgbd/camera_info@sensor_msgs/msg/CameraInfo[gz.msgs.CameraInfo" >"$output/bridge-attempt-$attempt.log" 2>&1 &
     bridge_pid=$!
     sleep 2
     if python3 scripts/record_m1b_alpha_ros.py --sensor-only --output-dir "$output" --duration-s 12 --max-skew-ms 200; then
