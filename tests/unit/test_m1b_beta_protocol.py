@@ -621,6 +621,12 @@ def test_m1b_reachability_gate_accepts_only_complete_actual_evidence() -> None:
         "tolerance_envelope_m": {"x": 0.02, "y": None, "z": 0.01},
     })
     assert envelope == {"x": 0.02, "y": None, "z": 0.01}
+    assert measured_tolerance_envelope({
+        "schema_version": "M1BADR0016ToleranceEnvelopeEvidenceV2",
+        "status": "COMPLETE_CALIBRATION_ONLY",
+        "trial_count": 81,
+        "tolerance_envelope_m": {"x": 0.015, "y": 0.015, "z": 0.005},
+    }) == {"x": 0.015, "y": 0.015, "z": 0.005}
     with pytest.raises(ValueError, match="not complete"):
         measured_tolerance_envelope({"schema_version": "M1BToleranceEnvelopeV1", "status": "RUNNING", "trial_count": 81, "tolerance_envelope_m": {"x": 0.02, "y": 0.01, "z": 0.01}})
     errors = actual_perception_errors({"status": "ACTUAL_GAZEBO_RGBD_FRAMES_EVALUATED", "matches": [{"error_world_xyz_m": [0.001, -0.002, 0.003]}]})

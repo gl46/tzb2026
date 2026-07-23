@@ -18,8 +18,16 @@ def measured_tolerance_envelope(payload: dict[str, object]) -> dict[str, float |
     worklist.  Recomputing from a lossy summary would both fail on its schema
     and weaken that validation boundary.
     """
-    if payload.get("schema_version") != "M1BToleranceEnvelopeV1":
-        raise ValueError("tolerance evidence must be M1BToleranceEnvelopeV1")
+    accepted_schemas = {
+        "M1BToleranceEnvelopeV1",
+        # ADR-0016's fallback-hand campaign preserves the same required
+        # status/count/envelope contract but carries hand-model provenance in
+        # its measured-evidence V2 schema. Treating it as a format error
+        # would incorrectly prevent the unchanged p90 comparison.
+        "M1BADR0016ToleranceEnvelopeEvidenceV2",
+    }
+    if payload.get("schema_version") not in accepted_schemas:
+        raise ValueError("tolerance evidence has an unsupported measured-envelope schema")
     if payload.get("status") != "COMPLETE_CALIBRATION_ONLY":
         raise ValueError("tolerance campaign is not complete")
     if payload.get("trial_count") != 81:
