@@ -138,3 +138,25 @@ class M1BStaticCameraCalibrationV1:
         """Arguments for tf2_ros/static_transform_publisher, world -> sensor frame."""
         x, y, z, w = _quaternion_from_rotation(self.world_from_optical_rotation)
         return ["--x", str(self.translation_m[0]), "--y", str(self.translation_m[1]), "--z", str(self.translation_m[2]), "--qx", str(x), "--qy", str(y), "--qz", str(z), "--qw", str(w), "--frame-id", self.parent_frame, "--child-frame-id", self.camera_optical_frame]
+
+    def episode_tf_evidence(self) -> dict[str, object]:
+        """Serialize the permitted static camera chain for an episode record.
+
+        Runtime uses this checked-in transform rather than a Gazebo pose query.
+        Keeping the frame names, numeric transform, and canonical hash together
+        makes the planning-frame conversion reproducible without exposing any
+        simulator object state.
+        """
+        quaternion_xyzw = _quaternion_from_rotation(self.world_from_optical_rotation)
+        return {
+            "source": "STATIC_TF_FROM_VERSIONED_SCENE_SDF",
+            "parent_frame": self.parent_frame,
+            "camera_link_frame": self.camera_link_frame,
+            "camera_optical_frame": self.camera_optical_frame,
+            "world_to_camera_link_translation_m": list(self.translation_m),
+            "world_to_camera_link_rpy_rad": list(self.rpy_rad),
+            "camera_link_to_optical_axes": "gazebo_camera_link_to_ros_optical_v1",
+            "world_to_camera_optical_quaternion_xyzw": list(quaternion_xyzw),
+            "source_path": self.source_path,
+            "tf_chain_sha256": self.fingerprint,
+        }

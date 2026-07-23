@@ -114,6 +114,11 @@ def test_m1b_static_camera_calibration_is_versioned_and_invertible() -> None:
     tf_args = calibration.static_tf_arguments()
     assert "--frame-id" in tf_args and "world" in tf_args
     assert "--child-frame-id" in tf_args and calibration.camera_optical_frame in tf_args
+    evidence = calibration.episode_tf_evidence()
+    assert evidence["parent_frame"] == "world"
+    assert evidence["camera_optical_frame"] == calibration.camera_optical_frame
+    assert evidence["world_to_camera_link_translation_m"] == [-0.8, -0.8, 1.4]
+    assert evidence["tf_chain_sha256"] == calibration.fingerprint
 
 
 def test_m1b_public_geometry_corrections_are_bounded_and_public_only(tmp_path: Path) -> None:

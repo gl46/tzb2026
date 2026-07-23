@@ -121,6 +121,7 @@ def main() -> int:
         "provenance": "PUBLIC_PERCEPTION_ONLY",
         "online_truth_access": False,
         "evidence_sha256": hashlib.sha256(args.evidence.read_bytes()).hexdigest(),
+        "camera_to_world_tf": calibration.episode_tf_evidence(),
         "xy_correction_fingerprint": xy_correction.fingerprint,
         "table_supported_z_fingerprint": table_supported_z.fingerprint,
         "requested_rank": args.rank,

@@ -192,6 +192,7 @@ def main() -> int:
             "UNIQUE_VACATED_PUBLIC_TRACK" if carried_track_id is not None
             else "AMBIGUOUS_OR_UNOBSERVED_PUBLIC_VACANCY"
         ),
+        "camera_to_world_tf": calibration.episode_tf_evidence(),
         "public_center_estimator": {
             "xy_correction_fingerprint": xy_correction.fingerprint,
             "table_supported_z_fingerprint": table_supported_z.fingerprint,

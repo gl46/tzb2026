@@ -182,6 +182,7 @@ def main() -> int:
             "online_truth_access": False,
             "public_track_id": args.public_track_id,
             "public_carrier_collision_id": carrier_collision_id,
+            "camera_to_world_tf": calibration.episode_tf_evidence(),
             "public_collision_scene": scene_evidence,
             "public_scene_applied": scene_applied,
             "carrier_attach": attach,

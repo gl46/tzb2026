@@ -771,6 +771,36 @@ def test_adr_0009_bullet_spawn_representation_is_gated_before_s0() -> None:
     assert "must explicitly detach and observe `detached` before it may attach" in urdf
 
 
+def test_m1b_detachable_whitelist_enumerates_every_generated_topic_contract() -> None:
+    root = Path(__file__).parents[2]
+    specification = importlib.util.spec_from_file_location(
+        "m1b_spawn_generator", root / "robot_ws/src/xh_sim/scripts/generate_panda_spawn_sdf.py"
+    )
+    assert specification is not None and specification.loader is not None
+    generator = importlib.util.module_from_spec(specification)
+    specification.loader.exec_module(generator)
+
+    names = ["cylinder_01", "cylinder_02"]
+    expected = generator.expected_detachable_plugin_contracts(names)
+    root_xml = ET.fromstring("""
+        <robot>
+          <gazebo>
+            <plugin filename="gz-sim-detachable-joint-system" name="gz::sim::systems::DetachableJoint">
+              <parent_link>panda_link7</parent_link><child_model>cylinder_01</child_model><child_link>link</child_link>
+              <detach_topic>/xh/m1b/cylinder_01/detach</detach_topic><attach_topic>/xh/m1b/cylinder_01/attach</attach_topic><output_topic>/xh/m1b/cylinder_01/grasp_state</output_topic>
+            </plugin>
+            <plugin filename="gz-sim-detachable-joint-system" name="gz::sim::systems::DetachableJoint">
+              <parent_link>panda_link7</parent_link><child_model>cylinder_02</child_model><child_link>link</child_link>
+              <detach_topic>/xh/m1b/cylinder_02/detach</detach_topic><attach_topic>/xh/m1b/cylinder_02/attach</attach_topic><output_topic>/xh/m1b/cylinder_02/grasp_state</output_topic>
+            </plugin>
+          </gazebo>
+        </robot>
+    """)
+    assert [generator.detachable_plugin_contract(item) for item in generator.detachable_plugins(root_xml)] == expected
+    assert expected[0]["attach_topic"] == "/xh/m1b/cylinder_01/attach"
+    assert expected[1]["output_topic"] == "/xh/m1b/cylinder_02/grasp_state"
+
+
 def test_m1a_s4_runs_a_fresh_oracle_batch_instead_of_relabelling_s1() -> None:
     root = Path(__file__).parents[2]
     source = (root / "scripts/run_b1_oracle_gate.sh").read_text()

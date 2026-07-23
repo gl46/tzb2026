@@ -1198,6 +1198,7 @@ def main() -> int:
     calibration: M1BStaticCameraCalibrationV1 | None = None
     xy_correction: M1BPublicGeometryXYCorrectionV1 | None = None
     table_supported_z: M1BTableSupportedCylinderCenterV1 | None = None
+    camera_to_world_tf: dict[str, object] | None = None
     initial_public_track: dict[str, object] | None = None
     free_gap_yaw: dict[str, object] | None = None
     if args.calibration_fixture_diameter_m is not None:
@@ -1213,6 +1214,7 @@ def main() -> int:
     else:
         assert args.public_perception_evidence is not None and args.public_camera_info is not None and args.public_track_id
         calibration = M1BStaticCameraCalibrationV1.from_file(ROOT / "configs" / "m1b_camera_calibration.json")
+        camera_to_world_tf = calibration.episode_tf_evidence()
         xy_correction = M1BPublicGeometryXYCorrectionV1.from_file(args.public_xy_correction)
         table_supported_z = M1BTableSupportedCylinderCenterV1.from_file(args.public_table_supported_z)
         public_tracks, public_scene_evidence = public_tracks_from_evidence(
@@ -1548,6 +1550,7 @@ def main() -> int:
                 if calibration_mode else None
             ),
             "public_aperture_input": {**public_evidence, **aperture},
+            "camera_to_world_tf": camera_to_world_tf,
             "public_collision_scene": public_scene_evidence if not calibration_mode else None,
             "public_planning_target": (
                 {"track_id": args.public_track_id, "collision_id": planning_target_id,

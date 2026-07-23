@@ -495,6 +495,34 @@ def detachable_plugins(root: ET.Element) -> list[ET.Element]:
     ]
 
 
+def detachable_plugin_contract(plugin: ET.Element) -> dict[str, str]:
+    """Return the complete ADR-0013 allowlisted contract for one plugin."""
+    if plugin.attrib != {
+        "filename": "gz-sim-detachable-joint-system",
+        "name": "gz::sim::systems::DetachableJoint",
+    }:
+        raise ValueError(f"unexpected detachable plugin attributes: {plugin.attrib}")
+    fields = ("parent_link", "child_model", "child_link", "detach_topic", "attach_topic", "output_topic")
+    values = {field: text(plugin.find(field)) for field in fields}
+    if any(not value for value in values.values()):
+        raise ValueError(f"incomplete detachable plugin contract: {values}")
+    return values
+
+
+def expected_detachable_plugin_contracts(names: list[str]) -> list[dict[str, str]]:
+    return [
+        {
+            "parent_link": "panda_link7",
+            "child_model": name,
+            "child_link": "link",
+            "detach_topic": f"/xh/m1b/{name}/detach",
+            "attach_topic": f"/xh/m1b/{name}/attach",
+            "output_topic": f"/xh/m1b/{name}/grasp_state",
+        }
+        for name in names
+    ]
+
+
 def inject_per_object_detachables(urdf_root: ET.Element, scene_supervision: Path) -> list[str]:
     """Replace the M1A cube constraint with ADR-0013's N object constraints."""
     payload = json.loads(scene_supervision.read_text(encoding="utf-8"))
@@ -515,6 +543,8 @@ def inject_per_object_detachables(urdf_root: ET.Element, scene_supervision: Path
         ET.SubElement(plugin, "detach_topic").text = f"/xh/m1b/{name}/detach"
         ET.SubElement(plugin, "attach_topic").text = f"/xh/m1b/{name}/attach"
         ET.SubElement(plugin, "output_topic").text = f"/xh/m1b/{name}/grasp_state"
+    if [detachable_plugin_contract(plugin) for plugin in detachable_plugins(urdf_root)] != expected_detachable_plugin_contracts(names):
+        raise ValueError("beta prepared-URDF detachable plugin contract mismatch")
     return names
 
 
@@ -584,14 +614,21 @@ def generate(args: argparse.Namespace) -> dict:
     collision_evidence = verify_collisions(urdf_root, final_model)
     sensor_evidence = verify_sensors(urdf_root, final_model)
     plugin_evidence = verify_plugins(urdf_root, final_model)
+    detachable_whitelist: dict[str, object] | None = None
     if args.mode == "beta":
         generated_detachables = [item for item in final_model.findall("plugin") if item.attrib.get("name") == "gz::sim::systems::DetachableJoint"]
-        if len(generated_detachables) != len(beta_objects):
-            raise ValueError("beta generated SDF detachable plugin count mismatch")
-        expected_topics = {f"/xh/m1b/{name}/{suffix}" for name in beta_objects for suffix in ("attach", "detach", "grasp_state")}
-        actual_topics = {text(item.find(tag)) for item in generated_detachables for tag in ("attach_topic", "detach_topic", "output_topic")}
-        if actual_topics != expected_topics:
-            raise ValueError("beta generated SDF detachable topic contract mismatch")
+        expected_detachables = expected_detachable_plugin_contracts(beta_objects)
+        actual_detachables = [detachable_plugin_contract(item) for item in generated_detachables]
+        if actual_detachables != expected_detachables:
+            raise ValueError(
+                "beta generated SDF detachable plugin contract mismatch: "
+                f"expected={expected_detachables}, actual={actual_detachables}"
+            )
+        detachable_whitelist = {
+            "replaces_source_detachable_plugin_count": 1,
+            "generated_detachable_plugin_count": len(actual_detachables),
+            "contracts": actual_detachables,
+        }
     mimic_evidence = verify_mimic(urdf_root, final_model)
     ros2_control_evidence = verify_ros2_control_contract(urdf_root, final_model)
     generated_ros2_control = child(final_model, "ros2_control")
@@ -614,13 +651,16 @@ def generate(args: argparse.Namespace) -> dict:
         "whitelist_diff": {
             "verified": True,
             "only_delta": {
-                "path": f"model/joint[{MIMIC_FOLLOWER}]/axis/mimic",
-                "joint": MIMIC_MASTER,
-                "axis": "axis",
-                "multiplier": BULLET_SDF_MIMIC_MULTIPLIER,
-                "semantic_multiplier": SEMANTIC_MIMIC_MULTIPLIER,
-                "offset": 0.0,
-                "reference": 0.0,
+                "mimic_block": {
+                    "path": f"model/joint[{MIMIC_FOLLOWER}]/axis/mimic",
+                    "joint": MIMIC_MASTER,
+                    "axis": "axis",
+                    "multiplier": BULLET_SDF_MIMIC_MULTIPLIER,
+                    "semantic_multiplier": SEMANTIC_MIMIC_MULTIPLIER,
+                    "offset": 0.0,
+                    "reference": 0.0,
+                },
+                "per_object_detachable_joint_blocks": detachable_whitelist,
             },
         },
         "per_object_detachables": {"count": len(beta_objects), "objects": beta_objects} if args.mode == "beta" else None,
