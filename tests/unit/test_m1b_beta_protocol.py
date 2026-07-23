@@ -198,6 +198,19 @@ def test_wrong_object_multiframe_reobservation_retains_one_frame_dropouts() -> N
     assert vacated_tracks_from_post_frames(pre, post_frames) == ["track-carried"]
 
 
+def test_public_postgrasp_lift_is_public_only_and_retains_physical_attach() -> None:
+    source = (Path(__file__).parents[2] / "scripts/run_m1b_public_postgrasp_lift.py").read_text()
+    assert "--public-perception-evidence" in source
+    assert "--public-track-id" in source
+    assert "public_collision_id(args.public_track_id)" in source
+    assert "apply_public_cylinder_scene(client, tracks)" in source
+    assert "client.move_hand_cartesian" in source
+    assert '"online_truth_access": False' in source
+    assert '"physical_detach_command_sent": False' in source
+    assert "gazebo_pose" not in source
+    assert "--supervision" not in source
+
+
 def test_attached_roundtrip_records_moveit_carrier_preflight_before_transport() -> None:
     source = (Path(__file__).parents[2] / "scripts/run_m1b_attached_roundtrip.py").read_text()
     assert 'parser.add_argument(\n        "--public-collision-id", required=True,' in source
