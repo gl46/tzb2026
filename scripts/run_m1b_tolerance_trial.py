@@ -38,6 +38,7 @@ for directory in (ROOT / "src", ROOT / "scripts"):
 from m1a_contact_calibration_client import CalibrationClient  # noqa: E402
 from xh_agent.grasp.m1b_broker import width_window_from_perceived_diameter  # noqa: E402
 from xh_agent.grasp.m1b_contact_window import M1BContactSampleV1, broker_from_window  # noqa: E402
+from xh_agent.grasp.contact_seek import descending_contact_seek_offsets_m  # noqa: E402
 from xh_agent.runtime.m1b_camera_calibration import M1BStaticCameraCalibrationV1  # noqa: E402
 
 
@@ -68,6 +69,15 @@ M1B_NORMAL_SIDE_IK_SEED = [
 # so the production centreline remains the measured 120 mm.
 M1B_TOP_CONTACT_CENTERLINE_Z_M = 0.120
 M1B_TOP_PRECONTACT_STANDOFF_M = 0.150
+# ADR-0013 Amendment 2: replace the fixed final height only when this explicit
+# primitive is selected.  The search always moves along the already-verified
+# straight tool axis; it cannot use a truth pose or a contact identity to
+# choose an endpoint.  A physical same-entity bilateral window is the sole
+# stop signal, otherwise the primitive fails before close/attach.
+M1B_CONTACT_SEEK_MIN_HAND_Z_OFFSET_M = 0.060
+M1B_CONTACT_SEEK_STEP_M = 0.005
+M1B_CONTACT_SEEK_WAYPOINT_DURATION_S = 0.50
+M1B_CONTACT_SEEK_OBSERVATION_S = 0.15
 M1B_NORMAL_PRECONTACT_HAND_Z_OFFSET_M = 0.220
 # The calibration-only IK sweep in the isolated zero-offset scene found the
 # side-grasp final pose is reachable from 65 mm upward; 55--60 mm is not.
@@ -469,6 +479,75 @@ def m1b_top_down_contact_descend(
     return result
 
 
+def m1b_top_down_contact_seek_descent(
+    client: CalibrationClient, centre_world_m: list[float], *,
+    hand_y_centerline_bias_m: float, yaw_rad: float,
+    contact_samples_since_seek_start: Callable[[], list[M1BContactSampleV1]],
+) -> dict[str, object]:
+    """Seek a physical bilateral contact window along the vertical tool axis.
+
+    This deliberately avoids using the target's simulator identity or pose as
+    a stop condition.  Each 5 mm waypoint is a normal collision-aware MoveIt
+    Cartesian action.  After it settles, the existing actuator-internal
+    broker must observe a 100 ms same-entity bilateral window; one-sided,
+    table, unknown, and no-contact observations all continue or fail closed.
+    """
+
+    waypoints: list[dict[str, object]] = []
+    for hand_z_offset_m in descending_contact_seek_offsets_m(
+        start_m=M1B_TOP_CONTACT_CENTERLINE_Z_M + M1B_TOP_PRECONTACT_STANDOFF_M,
+        minimum_m=M1B_CONTACT_SEEK_MIN_HAND_Z_OFFSET_M,
+        step_m=M1B_CONTACT_SEEK_STEP_M,
+    ):
+        motion = client.move_hand_cartesian(
+            _m1b_top_pose(
+                centre_world_m, hand_z_offset_m=hand_z_offset_m,
+                hand_y_centerline_bias_m=hand_y_centerline_bias_m, yaw_rad=yaw_rad,
+            ),
+            duration_s=M1B_CONTACT_SEEK_WAYPOINT_DURATION_S,
+        )
+        entry: dict[str, object] = {
+            "hand_z_offset_m": hand_z_offset_m,
+            "motion": motion,
+        }
+        if not motion.get("executed"):
+            entry["seek_result"] = "MOTION_REJECTED"
+            waypoints.append(entry)
+            return {
+                "executed": False, "converged": False,
+                "seek_contact_found": False,
+                "reason": "CONTACT_SEEK_WAYPOINT_MOTION_REJECTED",
+                "waypoints": waypoints,
+            }
+        deadline = time.monotonic() + M1B_CONTACT_SEEK_OBSERVATION_S
+        while time.monotonic() < deadline:
+            rclpy.spin_once(client, timeout_sec=0.02)
+        feedback, internal = broker_from_window(contact_samples_since_seek_start())
+        entry["broker_feedback"] = {
+            "grasp_success": feedback.grasp_success,
+            "tactile_state": feedback.tactile_state,
+            "reobservation_required": feedback.reobservation_required,
+        }
+        entry["internal_actuation_record"] = internal
+        waypoints.append(entry)
+        if feedback.grasp_success:
+            return {
+                "executed": True, "converged": bool(motion.get("converged")),
+                "seek_contact_found": True,
+                "contact_hand_z_offset_m": hand_z_offset_m,
+                "seek_feedback": entry["broker_feedback"],
+                "waypoints": waypoints,
+                "path_source": "MOVEIT_STAGED_VERTICAL_CONTACT_SEEK",
+            }
+    return {
+        "executed": True, "converged": True,
+        "seek_contact_found": False,
+        "reason": "CONTACT_SEEK_BILATERAL_WINDOW_NOT_OBSERVED",
+        "waypoints": waypoints,
+        "path_source": "MOVEIT_STAGED_VERTICAL_CONTACT_SEEK",
+    }
+
+
 def m1b_normal_side_precontact(
     client: CalibrationClient, centre_world_m: list[float], *, hand_y_centerline_bias_m: float,
 ) -> dict[str, object]:
@@ -833,6 +912,7 @@ def main() -> int:
     parser.add_argument("--public-free-gap-yaw-rad", type=float, help="Perception-selected top-grasp yaw in the planning frame")
     parser.add_argument("--public-pipeline-python", default=os.environ.get("M1B_PUBLIC_PIPELINE_PYTHON", sys.executable), help="Python with the declared public RGB-D dependencies")
     parser.add_argument("--enable-near-pregrasp-reobservation", action="store_true", help="Enable the production NO-GO remediation; excluded from the baseline tolerance envelope")
+    parser.add_argument("--enable-contact-seeking-terminal-descent", action="store_true", help="Use the ADR-0013 Amendment 2 physical bilateral-contact terminal descent")
     parser.add_argument("--calibration-hand-y-bias-m", type=float, help="Calibration-only centreline sweep; absent uses the production fixed hand-chain correction")
     parser.add_argument("--calibration-keep-target-collision-through-descend", action="store_true", help="Calibration-only contact-free final-descent probe")
     parser.add_argument("--calibration-lateral-insertion", action="store_true", help="Calibration-only collision-preserving open-hand lateral insertion probe")
@@ -1045,6 +1125,7 @@ def main() -> int:
                     near_reobservation = {"attempted": True, "succeeded": False, "reason": str(error)}
             if (target_touch_exception_applied or args.calibration_keep_target_collision_through_descend or args.calibration_lateral_insert_target_touch_exception) and not args.enable_near_pregrasp_reobservation:
                 near_reobservation = {"attempted": False, "succeeded": True, "mode": "BASELINE_PERCEPTION_FREE_TOLERANCE"}
+            seek_contact_start_index = len(raw)
             if args.calibration_lateral_insertion and near_reobservation.get("succeeded"):
                 def authorize_lateral_target_contact() -> bool:
                     return client.set_target_touch_exception(True, target_id=target_entity)
@@ -1054,13 +1135,20 @@ def main() -> int:
                     authorize_lateral_target_contact=authorize_lateral_target_contact if args.calibration_lateral_insert_target_touch_exception else None,
                 )
             else:
-                contact_descend = (
-                    m1b_top_down_contact_descend(
+                if not near_reobservation.get("succeeded"):
+                    contact_descend = {"executed": False, "reason": "PUBLIC_NEAR_REOBSERVATION_GATE_REJECTED"}
+                elif args.enable_contact_seeking_terminal_descent:
+                    contact_descend = m1b_top_down_contact_seek_descent(
+                        client, final_target,
+                        hand_y_centerline_bias_m=hand_y_centerline_bias_m,
+                        yaw_rad=top_grasp_yaw_rad,
+                        contact_samples_since_seek_start=lambda: raw[seek_contact_start_index:],
+                    )
+                else:
+                    contact_descend = m1b_top_down_contact_descend(
                         client, final_target,
                         hand_y_centerline_bias_m=hand_y_centerline_bias_m, yaw_rad=top_grasp_yaw_rad,
                     )
-                    if near_reobservation.get("succeeded") else {"executed": False, "reason": "PUBLIC_NEAR_REOBSERVATION_GATE_REJECTED"}
-                )
             # The jaw is symmetric under a pi yaw flip, but the wrist is not:
             # the measured slot-1 descent ends on an IK branch boundary
             # (CARTESIAN_JOINT_JUMP_REJECTED, 0.45 rad in one 5 mm step) at
@@ -1097,9 +1185,17 @@ def main() -> int:
                     )
                     entry["approach"] = retry_approach
                     if retry_approach.get("executed") and retry_approach.get("converged"):
-                        retry_descend = m1b_top_down_contact_descend(
-                            client, final_target,
-                            hand_y_centerline_bias_m=hand_y_centerline_bias_m, yaw_rad=yaw_value,
+                        retry_descend = (
+                            m1b_top_down_contact_seek_descent(
+                                client, final_target,
+                                hand_y_centerline_bias_m=hand_y_centerline_bias_m,
+                                yaw_rad=yaw_value,
+                                contact_samples_since_seek_start=lambda: raw[seek_contact_start_index:],
+                            ) if args.enable_contact_seeking_terminal_descent else
+                            m1b_top_down_contact_descend(
+                                client, final_target,
+                                hand_y_centerline_bias_m=hand_y_centerline_bias_m, yaw_rad=yaw_value,
+                            )
                         )
                         entry["contact_descend"] = retry_descend
                         if retry_descend.get("executed"):
@@ -1188,6 +1284,7 @@ def main() -> int:
         motion_gate_passed = bool(
             open_hand.get("succeeded") and approach.get("executed") and approach.get("converged")
             and close.get("succeeded") and contact_descend.get("executed")
+            and (not args.enable_contact_seeking_terminal_descent or contact_descend.get("seek_contact_found"))
         )
         attach = {"sent": False, "state_confirmed": False, "reason": "BILATERAL_GATE_REJECTED"}
         if feedback.grasp_success and not motion_gate_passed:
@@ -1204,12 +1301,19 @@ def main() -> int:
             "near_pregrasp_public_reobservation": near_reobservation,
             "baseline_perception_free": args.calibration_fixture_diameter_m is not None and not args.enable_near_pregrasp_reobservation,
             "offset_vector_m": [target[index] - truth_center[index] for index in range(3)],
-            "production_grasp_primitive": "open_physical_hand + m1b_top_down_precontact + m1b_top_down_contact_descend + close_physical_hand + m1b_internal_bilateral_broker",
+            "production_grasp_primitive": (
+                "open_physical_hand + m1b_top_down_precontact + m1b_top_down_contact_seek_descent "
+                "+ close_physical_hand + m1b_internal_bilateral_broker"
+                if args.enable_contact_seeking_terminal_descent else
+                "open_physical_hand + m1b_top_down_precontact + m1b_top_down_contact_descend "
+                "+ close_physical_hand + m1b_internal_bilateral_broker"
+            ),
             "top_grasp_yaw": {"yaw_rad": top_grasp_yaw_rad, "source": top_grasp_yaw_source},
             "calibration_free_gap_yaw": free_gap_yaw if args.calibration_fixture_diameter_m is not None else None,
             "calibration_yaw_retry_attempts": yaw_retry_attempts if ready else [],
             "calibration_top_contact_height_m": args.calibration_top_contact_height_m,
             "calibration_close_squeeze_m": args.calibration_close_squeeze_m,
+            "contact_seeking_terminal_descent_enabled": args.enable_contact_seeking_terminal_descent,
             "ready": ready, "calibration_collision_scene_applied": cylinder_scene_applied if ready else False, "target_touch_exception_applied": target_touch_exception_applied if ready else False,
             # The non-contact pregrasp must converge to its planned terminal
             # state.  The final descent deliberately permits contact to
@@ -1221,6 +1325,7 @@ def main() -> int:
                 "contact_descend_controller_execution_required": True,
                 "contact_descend_terminal_convergence_required": False,
                 "contact_descend_contact_authorization": "POST_CLOSE_BILATERAL_SAME_ENTITY_WINDOW",
+                "contact_seek_preclose_bilateral_window_required": args.enable_contact_seeking_terminal_descent,
             },
             "hand_close_duration_s": M1B_NORMAL_CLOSE_DURATION_S,
             "calibration_hand_y_centerline_bias_m": hand_y_centerline_bias_m,

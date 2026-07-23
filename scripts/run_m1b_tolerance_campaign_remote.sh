@@ -19,6 +19,7 @@ calibration_lateral_insertion_height_m="${M1B_TOLERANCE_CALIBRATION_LATERAL_INSE
 calibration_lateral_insert_target_touch_exception="${M1B_TOLERANCE_CALIBRATION_LATERAL_INSERT_TARGET_TOUCH_EXCEPTION:-0}"
 calibration_vertical_board_ik_probe="${M1B_TOLERANCE_CALIBRATION_VERTICAL_BOARD_IK_PROBE:-0}"
 calibration_target_height_scan="${M1B_TOLERANCE_CALIBRATION_TARGET_HEIGHT_SCAN:-0}"
+contact_seeking_terminal_descent="${M1B_TOLERANCE_CONTACT_SEEKING_TERMINAL_DESCENT:-0}"
 calibration_hand_y_bias_args=()
 if [[ -n "$calibration_hand_y_bias_m" ]]; then
   calibration_hand_y_bias_args=(--calibration-hand-y-bias-m "$calibration_hand_y_bias_m")
@@ -47,6 +48,10 @@ target_height_scan_args=()
 if [[ "$calibration_target_height_scan" == 1 ]]; then
   target_height_scan_args=(--calibration-target-height-scan)
 fi
+contact_seeking_terminal_descent_args=()
+if [[ "$contact_seeking_terminal_descent" == 1 ]]; then
+  contact_seeking_terminal_descent_args=(--enable-contact-seeking-terminal-descent)
+fi
 calibration_top_contact_height_m="${M1B_TOLERANCE_TOP_CONTACT_HEIGHT_M:-}"
 top_contact_height_args=()
 if [[ -n "$calibration_top_contact_height_m" ]]; then
@@ -55,6 +60,15 @@ if [[ -n "$calibration_top_contact_height_m" ]]; then
     exit 2
   fi
   top_contact_height_args=(--calibration-top-contact-height-m "$calibration_top_contact_height_m")
+fi
+calibration_close_squeeze_m="${M1B_TOLERANCE_CLOSE_SQUEEZE_M:-}"
+close_squeeze_args=()
+if [[ -n "$calibration_close_squeeze_m" ]]; then
+  if ! [[ "$calibration_close_squeeze_m" =~ ^0\.00[0-4]$ ]]; then
+    echo "INVALID_CLOSE_SQUEEZE_M:$calibration_close_squeeze_m" >&2
+    exit 2
+  fi
+  close_squeeze_args=(--calibration-close-squeeze-m "$calibration_close_squeeze_m")
 fi
 trial_timeout_s="${M1B_TOLERANCE_TRIAL_TIMEOUT_S:-150}"
 reset_max_attempts="${M1B_TOLERANCE_RESET_MAX_ATTEMPTS:-3}"
@@ -217,7 +231,7 @@ PY
   fi
   if ! timeout "$trial_timeout_s" env GZ_PARTITION="$partition" ROS_DOMAIN_ID="$domain" \
     python3 scripts/run_m1b_tolerance_trial.py --trial "$trial_path" --supervision "$supervision" --object-slot "$object_slot" \
-    --calibration-fixture-diameter-m "$fixture_diameter_m" "${calibration_hand_y_bias_args[@]}" "${keep_target_collision_args[@]}" "${lateral_insertion_args[@]}" "${lateral_insertion_height_args[@]}" "${lateral_insert_target_touch_args[@]}" "${vertical_board_ik_probe_args[@]}" "${target_height_scan_args[@]}" "${top_contact_height_args[@]}" --output "$run_dir/raw/trial-$(printf '%03d' "$index").json"; then
+    --calibration-fixture-diameter-m "$fixture_diameter_m" "${calibration_hand_y_bias_args[@]}" "${keep_target_collision_args[@]}" "${lateral_insertion_args[@]}" "${lateral_insertion_height_args[@]}" "${lateral_insert_target_touch_args[@]}" "${vertical_board_ik_probe_args[@]}" "${target_height_scan_args[@]}" "${contact_seeking_terminal_descent_args[@]}" "${top_contact_height_args[@]}" "${close_squeeze_args[@]}" --output "$run_dir/raw/trial-$(printf '%03d' "$index").json"; then
     cleanup_partition "$partition"
     echo "INFRASTRUCTURE_FAILURE:TRIAL:index=$index" >&2
     exit 3

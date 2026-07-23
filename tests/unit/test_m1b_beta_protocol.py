@@ -12,6 +12,7 @@ from pydantic import ValidationError
 from xh_agent.agent.closed_loop import record_step
 from xh_agent.agent.skill_planner import plan
 from xh_agent.grasp.m1b_broker import M1BContactBroker, width_window_from_perceived_diameter
+from xh_agent.grasp.contact_seek import descending_contact_seek_offsets_m
 from xh_agent.grasp.hand_preflight import M1BHandPreflightV1, evaluate_hand_preflight
 from xh_agent.grasp.m1b_contact_window import M1BContactSampleV1, broker_from_window
 from xh_agent.grasp.tolerance_envelope import OffsetTrialV1, perception_axis_audit, reachability_gate, tolerance_envelope
@@ -86,6 +87,19 @@ def test_m1b_width_window_is_perception_derived_and_clamped() -> None:
     assert 0 <= lower < upper <= 0.08
     with pytest.raises(ValueError):
         width_window_from_perceived_diameter(0.2)
+
+
+def test_contact_seek_schedule_is_bounded_and_pose_independent() -> None:
+    assert descending_contact_seek_offsets_m(start_m=0.270, minimum_m=0.060, step_m=0.005) == (
+        0.270, 0.265, 0.260, 0.255, 0.250, 0.245, 0.240, 0.235,
+        0.230, 0.225, 0.220, 0.215, 0.210, 0.205, 0.200, 0.195,
+        0.190, 0.185, 0.180, 0.175, 0.170, 0.165, 0.160, 0.155,
+        0.150, 0.145, 0.140, 0.135, 0.130, 0.125, 0.120, 0.115,
+        0.110, 0.105, 0.100, 0.095, 0.090, 0.085, 0.080, 0.075,
+        0.070, 0.065, 0.060,
+    )
+    with pytest.raises(ValueError):
+        descending_contact_seek_offsets_m(start_m=0.05, minimum_m=0.06, step_m=0.005)
 
 
 def test_m1b_static_camera_calibration_is_versioned_and_invertible() -> None:
@@ -205,6 +219,11 @@ def test_m1b_tolerance_attach_uses_detachablejoint_empty_payload() -> None:
     assert '"pregrasp_terminal_convergence_required": True' in source
     assert '"contact_descend_terminal_convergence_required": False' in source
     assert '"contact_descend_contact_authorization": "POST_CLOSE_BILATERAL_SAME_ENTITY_WINDOW"' in source
+    assert 'def m1b_top_down_contact_seek_descent(' in source
+    assert '"CONTACT_SEEK_BILATERAL_WINDOW_NOT_OBSERVED"' in source
+    assert '"--enable-contact-seeking-terminal-descent", action="store_true"' in source
+    assert 'contact_samples_since_seek_start=lambda: raw[seek_contact_start_index:]' in source
+    assert 'contact_descend.get("seek_contact_found")' in source
     assert 'M1B_NORMAL_PRECONTACT_HAND_Z_OFFSET_M = 0.220' in source
     assert 'M1B_NORMAL_CONTACT_HAND_Z_OFFSET_M = 0.065' in source
     assert 'M1B_NORMAL_SIDE_HAND_X_OFFSET_M = -0.080' in source
