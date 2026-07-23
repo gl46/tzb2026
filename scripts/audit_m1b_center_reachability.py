@@ -17,6 +17,7 @@ from pathlib import Path
 from statistics import median
 
 from evaluate_captured_geometric import associate, infer
+from xh_agent.runtime.m1b_center_correction import M1BPublicGeometryXYCorrectionV1, M1BTableSupportedCylinderCenterV1
 from xh_agent.runtime.m1b_camera_calibration import M1BStaticCameraCalibrationV1
 
 
@@ -49,6 +50,24 @@ def category_metrics(matches: list[dict[str, object]]) -> dict[str, object]:
     }
 
 
+def public_geometry(prediction: object, diameter_m: float) -> dict[str, object]:
+    quality = prediction.covariance_or_quality
+    try:
+        support = [float(quality[f"support_plane_optical_{axis}_m"]) for axis in ("x", "y", "z")]
+    except (KeyError, TypeError, ValueError) as error:
+        raise ValueError(f"public support-plane geometry is unavailable: {error}") from error
+    if not all(math.isfinite(value) for value in support):
+        raise ValueError("public support-plane geometry is non-finite")
+    return {
+        "surface_optical_m": [float(value) for value in prediction.position_3d],
+        "support_plane_optical_m": support,
+        "perceived_diameter_m": diameter_m,
+        "orientation_state": str(prediction.orientation_state),
+        "observed_height_m": float(quality.get("observed_height_m", float("nan"))),
+        "lateral_extent_m": float(quality.get("lateral_extent_m", float("nan"))),
+    }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("manifest", type=Path)
@@ -57,9 +76,13 @@ def main() -> int:
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--color-similarity", type=float, default=0.95)
     parser.add_argument("--min-component-pixels", type=int, default=50)
+    parser.add_argument("--xy-correction", type=Path, help="Frozen training-only public-geometry X/Y correction used by the public runtime")
+    parser.add_argument("--table-supported-z", type=Path, help="Versioned public-RGB-D support-plane Z correction used by the public runtime")
     args = parser.parse_args()
 
     calibration = M1BStaticCameraCalibrationV1.from_file(args.calibration)
+    xy_correction = M1BPublicGeometryXYCorrectionV1.from_file(args.xy_correction) if args.xy_correction else None
+    table_supported_z = M1BTableSupportedCylinderCenterV1.from_file(args.table_supported_z) if args.table_supported_z else None
     manifest = json.loads(args.manifest.read_text(encoding="utf-8"))
     matches: list[dict[str, object]] = []
     exclusions: list[dict[str, object]] = []
@@ -75,7 +98,15 @@ def main() -> int:
         for prediction, label, pixel_distance in associate(predictions, labels, intrinsics):
             try:
                 diameter = perceived_diameter_m(prediction, intrinsics)
-                estimated = calibration.visible_surface_to_center_world(tuple(float(value) for value in prediction.position_3d), diameter)
+                baseline = calibration.visible_surface_to_center_world(tuple(float(value) for value in prediction.position_3d), diameter)
+                geometry = public_geometry(prediction, diameter)
+                estimated = xy_correction.correct_xy(
+                    baseline, surface_optical_m=tuple(geometry["surface_optical_m"]), perceived_diameter_m=diameter,
+                    orientation_state=str(geometry["orientation_state"]),
+                ) if xy_correction else baseline
+                estimated = table_supported_z.correct_z(
+                    estimated, calibration.optical_to_world(tuple(geometry["support_plane_optical_m"])),
+                ) if table_supported_z else estimated
             except ValueError as error:
                 exclusions.append({
                     "seed": sample["seed"], "track_id": prediction.track_id,
@@ -86,7 +117,12 @@ def main() -> int:
             matches.append({
                 "seed": sample["seed"],
                 "track_id": prediction.track_id,
+                # The evaluator keeps the labelled state for stratified
+                # reporting, but a runtime correction must be fitted and
+                # selected by this public classifier output, never the label.
+                "public_orientation_state": prediction.orientation_state,
                 "orientation_state": label["orientation_state"],
+                "public_geometry": geometry,
                 "estimated_center_world_m": list(estimated),
                 "perceived_diameter_m": diameter,
                 "error_world_xyz_m": [estimate - expected for estimate, expected in zip(estimated, truth)],
@@ -103,7 +139,11 @@ def main() -> int:
         "input": {
             "manifest": str(args.manifest), "split": args.split,
             "calibration_fingerprint": calibration.fingerprint,
-            "pipeline": "geometric_rgbd_v1 + perceived_radius + static_tf",
+            "pipeline": "geometric_rgbd_v1 + perceived_radius + static_tf"
+            + (" + frozen_public_geometry_xy_correction" if xy_correction else "")
+            + (" + public_rgbd_support_plane_z" if table_supported_z else ""),
+            "xy_correction_fingerprint": xy_correction.fingerprint if xy_correction else None,
+            "table_supported_z_fingerprint": table_supported_z.fingerprint if table_supported_z else None,
         },
         "metrics_by_orientation": {state: category_metrics(grouped[state]) for state in ("normal", "inverted", "tilted")},
         "all_matches": category_metrics(matches),

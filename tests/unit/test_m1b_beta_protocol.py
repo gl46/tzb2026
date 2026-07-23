@@ -21,6 +21,7 @@ from xh_agent.grasp.post_grasp import evaluate_post_grasp_identity, evaluator_su
 from xh_agent.grasp.reset import M1BResetVerificationV1, validate_reset_records
 from xh_agent.recovery.manager import recovery_for
 from xh_agent.runtime.m1b_camera_calibration import M1BStaticCameraCalibrationV1
+from xh_agent.runtime.m1b_center_correction import M1BPublicGeometryXYCorrectionV1, M1BTableSupportedCylinderCenterV1
 from xh_agent.task_compiler.deterministic import DeterministicTaskCompiler
 
 SCRIPTS = Path(__file__).parents[2] / "scripts"
@@ -113,6 +114,30 @@ def test_m1b_static_camera_calibration_is_versioned_and_invertible() -> None:
     tf_args = calibration.static_tf_arguments()
     assert "--frame-id" in tf_args and "world" in tf_args
     assert "--child-frame-id" in tf_args and calibration.camera_optical_frame in tf_args
+
+
+def test_m1b_public_geometry_corrections_are_bounded_and_public_only(tmp_path: Path) -> None:
+    payload = {
+        "schema_version": "M1BPublicGeometryXYCorrectionV1",
+        "feature_order": ["bias", "surface_optical_x_m", "surface_optical_y_m", "surface_optical_z_m", "perceived_diameter_m", "public_orientation_is_tilted"],
+        "signed_residual_coefficients_world_xy": {"x": [0.001, 0, 0, 0, 0, 0], "y": [-0.002, 0, 0, 0, 0, 0]},
+        "training_input_sha256": "a" * 64,
+        "truth_boundary": "simulator supervision is training-only; runtime uses public RGB-D geometry and public orientation_state only",
+    }
+    path = tmp_path / "correction.json"
+    path.write_text(json.dumps(payload), encoding="utf-8")
+    correction = M1BPublicGeometryXYCorrectionV1.from_file(path)
+    assert correction.correct_xy((0.1, 0.2, 0.3), surface_optical_m=(0.0, 0.0, 1.0), perceived_diameter_m=0.03, orientation_state="normal") == pytest.approx((0.099, 0.202, 0.3))
+    with pytest.raises(ValueError, match="orientation_state"):
+        correction.correct_xy((0.1, 0.2, 0.3), surface_optical_m=(0.0, 0.0, 1.0), perceived_diameter_m=0.03, orientation_state="unknown")
+    support_path = tmp_path / "support.json"
+    support_path.write_text(json.dumps({
+        "schema_version": "M1BTableSupportedCylinderCenterV1", "center_offset_above_support_m": 0.03915,
+        "support_world_z_bounds_m": [0.43, 0.47],
+        "truth_boundary": "runtime support plane comes from public RGB-D; dimensions come from the versioned industrial-cylinder class contract",
+    }), encoding="utf-8")
+    support = M1BTableSupportedCylinderCenterV1.from_file(support_path)
+    assert support.correct_z((0.1, 0.2, 0.3), (0.0, 0.0, 0.45)) == pytest.approx((0.1, 0.2, 0.48915))
 
 
 def test_m1b_camera_center_correction_uses_only_perceived_diameter() -> None:

@@ -72,6 +72,8 @@ class GeometricRGBDBaseline:
             z = float(np.median(depth_m[rows, cols]))
             u, v = float(np.mean(cols)), float(np.mean(rows))
             position = [(u - cx) * z / fx, (v - cy) * z / fy, z]
+            support_z = float(np.median(table[rows, cols]))
+            support_position = [(u - cx) * support_z / fx, (v - cy) * support_z / fy, support_z]
             bbox = BBoxV1(x=int(cols.min()), y=int(rows.min()), width=int(cols.max() - cols.min() + 1), height=int(rows.max() - rows.min() + 1))
             lateral = max(bbox.width / fx * z, bbox.height / fy * z)
             # The table is sloped in image coordinates.  The fitted local table
@@ -80,7 +82,7 @@ class GeometricRGBDBaseline:
             height = max(0.005, float(np.median(table[rows, cols] - depth_m[rows, cols])))
             state = orientation_state(height, lateral)
             confidence = min(0.99, len(pixels) / float(self.min_component_pixels * 4))
-            untracked.append({"bbox": bbox, "position": position, "state": state, "confidence": confidence, "color": color_name, "pixels": len(pixels)})
+            untracked.append({"bbox": bbox, "position": position, "support_position": support_position, "state": state, "confidence": confidence, "color": color_name, "pixels": len(pixels), "u": u, "v": v, "height": height, "lateral": lateral})
         track_ids = self._track_associator.associate(
             [(list(item["position"]), "industrial_cylinder", item["color"]) for item in untracked],
             timestamp_ns=observation.timestamp_ns,
@@ -91,7 +93,14 @@ class GeometricRGBDBaseline:
                 track_id=track_id, category="industrial_cylinder",
                 attributes={"orientation": str(item["state"]), **({"visual_color": str(item["color"])} if item["color"] else {})}, bbox_or_mask=item["bbox"], position_3d=list(item["position"]),
                 orientation_state=str(item["state"]), confidence=float(item["confidence"]),
-                covariance_or_quality={"component_pixels": float(item["pixels"]), "depth_median_m": float(item["position"][2])},
+                covariance_or_quality={
+                    "component_pixels": float(item["pixels"]), "depth_median_m": float(item["position"][2]),
+                    "component_centroid_u_px": float(item["u"]), "component_centroid_v_px": float(item["v"]),
+                    "support_plane_optical_x_m": float(item["support_position"][0]),
+                    "support_plane_optical_y_m": float(item["support_position"][1]),
+                    "support_plane_optical_z_m": float(item["support_position"][2]),
+                    "observed_height_m": float(item["height"]), "lateral_extent_m": float(item["lateral"]),
+                },
                 visibility=min(1.0, float(item["pixels"]) / 100.0), relations=[],
                 source_components=["geometric_rgbd_v1", "public_temporal_tracker_v1", *( ["color_prototype_v1"] if item["color"] else [])],
             )

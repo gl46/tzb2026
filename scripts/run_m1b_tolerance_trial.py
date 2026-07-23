@@ -39,6 +39,7 @@ from m1a_contact_calibration_client import CalibrationClient  # noqa: E402
 from xh_agent.grasp.m1b_broker import width_window_from_perceived_diameter  # noqa: E402
 from xh_agent.grasp.m1b_contact_window import M1BContactSampleV1, broker_from_window  # noqa: E402
 from xh_agent.grasp.contact_seek import descending_contact_seek_offsets_m  # noqa: E402
+from xh_agent.runtime.m1b_center_correction import M1BPublicGeometryXYCorrectionV1, M1BTableSupportedCylinderCenterV1  # noqa: E402
 from xh_agent.runtime.m1b_camera_calibration import M1BStaticCameraCalibrationV1  # noqa: E402
 
 
@@ -271,6 +272,8 @@ def m1b_close_finger_targets_from_perceived_diameter(
 def public_track_from_evidence(
     evidence_path: Path, camera_info_path: Path, track_id: str,
     calibration: M1BStaticCameraCalibrationV1,
+    xy_correction: M1BPublicGeometryXYCorrectionV1,
+    table_supported_z: M1BTableSupportedCylinderCenterV1,
 ) -> tuple[dict[str, object], dict[str, object]]:
     """Load one selected diameter from an actual public geometric-RGB-D run.
 
@@ -295,10 +298,29 @@ def public_track_from_evidence(
         raise SystemExit("selected public track has invalid geometry for diameter")
     diameter_m = pixel_diameter * depth_m / focal_m
     surface_optical_m = [float(value) for value in result["position_3d"]]
-    center_world_m = list(calibration.visible_surface_to_center_world(tuple(surface_optical_m), diameter_m))
+    if len(surface_optical_m) != 3:
+        raise SystemExit("selected public track has invalid surface geometry")
+    orientation_state = str(result.get("orientation_state", "unknown"))
+    quality = result.get("covariance_or_quality", {})
+    try:
+        support_optical_m = [float(quality[f"support_plane_optical_{axis}_m"]) for axis in ("x", "y", "z")]
+    except (KeyError, TypeError, ValueError) as error:
+        raise SystemExit(f"selected public track lacks support-plane geometry:{error}") from error
+    try:
+        baseline_center = calibration.visible_surface_to_center_world(tuple(surface_optical_m), diameter_m)
+        xy_center = xy_correction.correct_xy(
+            baseline_center, surface_optical_m=tuple(surface_optical_m), perceived_diameter_m=diameter_m,
+            orientation_state=orientation_state,
+        )
+        center_world_m = list(table_supported_z.correct_z(
+            xy_center, calibration.optical_to_world(tuple(support_optical_m)),
+        ))
+    except ValueError as error:
+        raise SystemExit(f"PUBLIC_GEOMETRY_CENTER_GATE_REJECTED:{error}") from error
     return {
         "track_id": track_id,
         "visual_color": result.get("attributes", {}).get("visual_color"),
+        "public_orientation_state": orientation_state,
         "perceived_diameter_m": diameter_m,
         "estimated_center_world_m": center_world_m,
     }, {
@@ -310,6 +332,11 @@ def public_track_from_evidence(
         "pixel_diameter": pixel_diameter,
         "depth_m": depth_m,
         "focal_px": focal_m,
+        "surface_optical_m": surface_optical_m,
+        "support_plane_optical_m": support_optical_m,
+        "xy_correction_fingerprint": xy_correction.fingerprint,
+        "table_supported_z_fingerprint": table_supported_z.fingerprint,
+        "center_estimator": "public_rgbd_surface + frozen_public_geometry_xy + public_rgbd_support_plane_z",
     }
 
 
@@ -341,6 +368,8 @@ def capture_near_public_observation(
 def select_near_public_track(
     evidence_path: Path, camera_info_path: Path, *, initial: dict[str, object],
     calibration: M1BStaticCameraCalibrationV1,
+    xy_correction: M1BPublicGeometryXYCorrectionV1,
+    table_supported_z: M1BTableSupportedCylinderCenterV1,
 ) -> tuple[dict[str, object], dict[str, object]]:
     """Associate a reobservation using public colour and static-TF geometry."""
     evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
@@ -352,7 +381,7 @@ def select_near_public_track(
             continue
         try:
             track, metadata = public_track_from_evidence(
-                evidence_path, camera_info_path, str(result["track_id"]), calibration,
+                evidence_path, camera_info_path, str(result["track_id"]), calibration, xy_correction, table_supported_z,
             )
         except (KeyError, TypeError, ValueError, SystemExit):
             continue
@@ -973,6 +1002,8 @@ def main() -> int:
     parser.add_argument("--public-camera-info", type=Path, help="Camera intrinsics paired with public perception evidence")
     parser.add_argument("--public-track-id", help="Production-side public target track ID")
     parser.add_argument("--public-free-gap-yaw-rad", type=float, help="Perception-selected top-grasp yaw in the planning frame")
+    parser.add_argument("--public-xy-correction", type=Path, default=ROOT / "configs" / "m1b_public_geometry_xy_correction.json", help="Frozen train-only public RGB-D X/Y correction")
+    parser.add_argument("--public-table-supported-z", type=Path, default=ROOT / "configs" / "m1b_table_supported_cylinder_center.json", help="Versioned public RGB-D support-plane Z estimator")
     parser.add_argument("--public-pipeline-python", default=os.environ.get("M1B_PUBLIC_PIPELINE_PYTHON", sys.executable), help="Python with the declared public RGB-D dependencies")
     parser.add_argument("--enable-near-pregrasp-reobservation", action="store_true", help="Enable the production NO-GO remediation; excluded from the baseline tolerance envelope")
     parser.add_argument("--enable-contact-seeking-terminal-descent", action="store_true", help="Use the ADR-0013 Amendment 2 physical bilateral-contact terminal descent")
@@ -1041,6 +1072,8 @@ def main() -> int:
     target = list(truth_center)
     target["xyz".index(axis)] += float(trial["offset_m"])
     calibration: M1BStaticCameraCalibrationV1 | None = None
+    xy_correction: M1BPublicGeometryXYCorrectionV1 | None = None
+    table_supported_z: M1BTableSupportedCylinderCenterV1 | None = None
     initial_public_track: dict[str, object] | None = None
     free_gap_yaw: dict[str, object] | None = None
     if args.calibration_fixture_diameter_m is not None:
@@ -1059,8 +1092,11 @@ def main() -> int:
         if not math.isfinite(args.public_free_gap_yaw_rad):
             raise SystemExit("public free-gap yaw must be finite")
         calibration = M1BStaticCameraCalibrationV1.from_file(ROOT / "configs" / "m1b_camera_calibration.json")
+        xy_correction = M1BPublicGeometryXYCorrectionV1.from_file(args.public_xy_correction)
+        table_supported_z = M1BTableSupportedCylinderCenterV1.from_file(args.public_table_supported_z)
         initial_public_track, public_evidence = public_track_from_evidence(
-            args.public_perception_evidence, args.public_camera_info, args.public_track_id, calibration,
+            args.public_perception_evidence, args.public_camera_info, args.public_track_id,
+            calibration, xy_correction, table_supported_z,
         )
         perceived_diameter_m = float(initial_public_track["perceived_diameter_m"])
         top_grasp_yaw_rad = float(args.public_free_gap_yaw_rad)
@@ -1155,7 +1191,7 @@ def main() -> int:
                 target_touch_exception_applied = client.set_target_touch_exception(True, target_id=target_entity)
             final_target = list(target)
             if target_touch_exception_applied and args.enable_near_pregrasp_reobservation:
-                assert initial_public_track is not None and calibration is not None
+                assert initial_public_track is not None and calibration is not None and xy_correction is not None and table_supported_z is not None
                 near_reobservation["attempted"] = True
                 near_directory = args.output.parent / f"{args.output.stem}.near_rgbd"
                 try:
@@ -1164,7 +1200,8 @@ def main() -> int:
                         frame_directory = near_directory / f"frame-{index:02d}"
                         near_evidence_path = capture_near_public_observation(frame_directory, public_pipeline_python=args.public_pipeline_python)
                         near_track, near_metadata = select_near_public_track(
-                            near_evidence_path, frame_directory / "camera_info.json", initial=initial_public_track, calibration=calibration,
+                            near_evidence_path, frame_directory / "camera_info.json", initial=initial_public_track,
+                            calibration=calibration, xy_correction=xy_correction, table_supported_z=table_supported_z,
                         )
                         near_frames.append({"evidence_path": str(near_evidence_path), "selected_public_track": near_track, "metadata": near_metadata})
                     near_track = {
