@@ -28,6 +28,7 @@ if str(SCRIPTS) not in sys.path:
 from audit_m1b_center_reachability import percentile90, perceived_diameter_m  # noqa: E402
 from generate_industrial_scenes import BIN_DROP_TARGET_Z_M, CYLINDER_HALF_LENGTH_M, ROBOT_BASE_KEEP_OUT_RADIUS_M, ROBOT_BASE_XY, SPAWN_CLEARANCE_M, TABLE_TOP_Z, bin_cell_targets, render  # noqa: E402
 from summarize_m1b_tolerance_campaign import summarize  # noqa: E402
+from m1b_wrong_object_drill import carried_track_from_vacancy  # noqa: E402
 from xh_agent.perception.interfaces import BBoxV1, PerceptionResultV1  # noqa: E402
 
 
@@ -130,6 +131,16 @@ def test_post_grasp_identity_routes_wrong_object_without_entity_leak() -> None:
     assert unobserved.reobservation_required is True
     supervision = evaluator_supervision_record(actual_sim_entity_id="cylinder_02", wrong_object=True)
     assert supervision["wrong_object"] is True
+
+
+def test_wrong_object_carried_track_association_fails_closed_when_public_vacancy_is_ambiguous() -> None:
+    assert carried_track_from_vacancy(["track-22222222"]) == "track-22222222"
+    assert carried_track_from_vacancy([]) is None
+    assert carried_track_from_vacancy(["track-22222222", "track-33333333"]) is None
+    source = (Path(__file__).parents[2] / "scripts/m1b_wrong_object_drill.py").read_text()
+    assert "VACATED_SPAWN_NEAREST_ATTACHED_ENTITY" not in source
+    assert "--target-public-track-id" in source
+    assert "UNIQUE_VACATED_PUBLIC_TRACK" in source
 
 
 def test_m1b_reset_requires_every_generated_detachable_state() -> None:

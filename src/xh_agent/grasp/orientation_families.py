@@ -13,9 +13,11 @@ import math
 from typing import Mapping, Sequence
 
 
-FINGER_LENGTH_M = 0.12
-FINGER_ROOT_Z_M = 0.055
-HAND_FINGER_LINE_X_M = 0.06
+# ADR-0016's inline hand has each finger joint at panda_hand +Z=58.4 mm and
+# its physical contact plate spans +Z=58.4..112.2 mm.  These are geometry
+# measurements from ``panda_controlled.urdf``, not a motion-policy parameter.
+FINGER_TIP_Z_M = 0.1122
+FINGER_CONTACT_CENTER_Z_M = 0.0853
 
 
 @dataclass(frozen=True)
@@ -79,16 +81,17 @@ def inverse_quaternion_rotate(quaternion_xyzw: Sequence[float], point: Sequence[
     return quaternion_rotate((-x, -y, -z, w), point)
 
 
-def _quaternion_from_axes(
-    local_x_world: Sequence[float], local_y_world: Sequence[float]
+def _quaternion_from_tool_axes(
+    local_z_world: Sequence[float], local_y_world: Sequence[float]
 ) -> tuple[float, float, float, float]:
-    """Return a quaternion whose local X/Y axes map to the supplied axes."""
+    """Return a quaternion whose inline local +Z/+Y axes map as specified."""
 
-    x_axis = _unit(local_x_world)
+    z_axis = _unit(local_z_world)
     y_axis = _unit(local_y_world)
-    if abs(_dot(x_axis, y_axis)) > 1e-6:
+    if abs(_dot(z_axis, y_axis)) > 1e-6:
         raise ValueError("finger and closing axes must be orthogonal")
-    z_axis = _unit(_cross(x_axis, y_axis))
+    # The rotation is right handed: local X × local Y = local Z.
+    x_axis = _unit(_cross(y_axis, z_axis))
     # Rotation matrix columns are world coordinates of local basis vectors.
     m00, m01, m02 = x_axis[0], y_axis[0], z_axis[0]
     m10, m11, m12 = x_axis[1], y_axis[1], z_axis[1]
@@ -127,9 +130,9 @@ def candidate_pose(
 ) -> PoseCandidate:
     """Construct one pose with finger tips clear of the table by construction.
 
-    Local X is the finger-board axis and local Y is the gripper closing axis.
-    The hand origin is derived from the finger-joint offset instead of from a
-    hand-palm approximation, which makes the table-clearance invariant explicit.
+    Local +Z is the inline finger-board axis and local Y is the gripper closing
+    axis. The hand origin comes directly from the measured distal endpoint,
+    which makes the table-clearance invariant explicit.
     """
 
     cube = _as_vector(cube_xyz_m)
@@ -142,13 +145,11 @@ def candidate_pose(
             for horizontal, vertical in zip(horizontal_axis, (0.0, 0.0, -1.0))
         )
     )
-    orientation = _quaternion_from_axes(finger_axis, closing_axis)
+    orientation = _quaternion_from_tool_axes(finger_axis, closing_axis)
     fingertip = (cube[0], cube[1], table_top_z_m + fingertip_table_clearance_m)
-    finger_root = tuple(
-        tip - FINGER_LENGTH_M * axis for tip, axis in zip(fingertip, finger_axis)
+    hand_position = tuple(
+        tip - FINGER_TIP_Z_M * axis for tip, axis in zip(fingertip, finger_axis)
     )
-    root_offset_world = quaternion_rotate(orientation, (0.0, 0.0, FINGER_ROOT_Z_M))
-    hand_position = tuple(root - offset for root, offset in zip(finger_root, root_offset_world))
     target_center_gripper_frame = inverse_quaternion_rotate(
         orientation, tuple(target - hand for target, hand in zip(cube, hand_position))
     )
@@ -177,7 +178,7 @@ def gripper_frame_corridor(
 
     relative_world = tuple(cube - hand for cube, hand in zip(cube_xyz_m, hand_position_xyz_m))
     cube_in_hand = inverse_quaternion_rotate(hand_orientation_xyzw, relative_world)
-    anchor = _as_vector(finger_center_line_anchor_m or (HAND_FINGER_LINE_X_M, 0.0, FINGER_ROOT_Z_M))
+    anchor = _as_vector(finger_center_line_anchor_m or (0.0, 0.0, FINGER_CONTACT_CENTER_Z_M))
     transverse_error = math.hypot(
         cube_in_hand[0] - anchor[0],
         cube_in_hand[2] - anchor[2],

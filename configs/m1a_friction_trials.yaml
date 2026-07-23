@@ -29,7 +29,8 @@ orientation_recovery_configuration:
     joint_protocol_changed: false
 
 # Every candidate is evaluated through collision-checked MoveIt IK in this
-# order.  Local X is the 12 cm finger-board axis; local Y is the closing axis.
+# order. Local +Z is the 112.2 mm inline finger-board axis; local Y is the
+# closing axis. These are the ADR-0016 hand coordinates, not legacy +X.
 # The 10 mm tip clearance is above the 0.45 m table top, and MoveIt receives
 # the exact primitive world object with zero object padding (verified at run
 # time before candidate evaluation).

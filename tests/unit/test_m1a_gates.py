@@ -512,20 +512,22 @@ def test_production_table_orientation_family_keeps_tip_clearance_and_height_guar
         table_top_z_m=protocol["table_top_z_m"],
         fingertip_table_clearance_m=protocol["fingertip_table_clearance_m"],
     )
-    # Local finger X points down, and the physical link's distal endpoint is
+    # Inline local finger +Z points down, and the physical link's distal endpoint is
     # exactly the configured 10 mm above the table rather than inside it.
-    assert quaternion_rotate(candidate.orientation_xyzw, (1.0, 0.0, 0.0)) == pytest.approx((0.0, 0.0, -1.0))
+    assert quaternion_rotate(candidate.orientation_xyzw, (0.0, 0.0, 1.0)) == pytest.approx((0.0, 0.0, -1.0))
     assert protocol["pregrasp_standoff_m"] == pytest.approx(0.10)
     fingertip = tuple(
         hand + offset
         for hand, offset in zip(
             candidate.position_xyz_m,
-            quaternion_rotate(candidate.orientation_xyzw, (0.12, 0.0, 0.055)),
+            quaternion_rotate(candidate.orientation_xyzw, (0.0, 0.0, 0.1122)),
         )
     )
     assert fingertip[2] == pytest.approx(0.460)
     assert candidate.fingertip_lowest_z_m == pytest.approx(0.460)
-    assert candidate.target_center_gripper_frame_m == pytest.approx((0.105, 0.0, 0.055))
+    # The 50 mm cube's centre lies in the measured contact plate span
+    # (hand-frame +Z 58.4..112.2 mm), not on the old local-X board line.
+    assert candidate.target_center_gripper_frame_m == pytest.approx((0.0, 0.0, 0.0972))
     side = protocol["candidates"][-1]
     assert candidate_is_eligible(cube, side, table_top_z_m=0.45) == (
         False,
@@ -535,17 +537,17 @@ def test_production_table_orientation_family_keeps_tip_clearance_and_height_guar
 
 def test_grasp_corridor_is_in_panda_hand_frame_not_a_world_vertical_heuristic() -> None:
     identity = gripper_frame_corridor(
-        [0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 1.0], [0.06, 0.0, 0.055]
+        [0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 1.0], [0.0, 0.0, 0.0853]
     )
     assert identity["coordinate_frame"] == "panda_hand"
     assert identity["target_in_grasp_corridor"] is True
     rotated_quaternion = [0.0, 2**-0.5, 0.0, 2**-0.5]
-    rotated_cube = quaternion_rotate(rotated_quaternion, (0.06, 0.0, 0.055))
+    rotated_cube = quaternion_rotate(rotated_quaternion, (0.0, 0.0, 0.0853))
     rotated = gripper_frame_corridor([0.0, 0.0, 0.0], rotated_quaternion, rotated_cube)
     assert rotated["target_in_grasp_corridor"] is True
     selected_cross_section = gripper_frame_corridor(
-        [0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 1.0], [0.105, 0.0, 0.055],
-        finger_center_line_anchor_m=[0.105, 0.0, 0.055],
+        [0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 1.0], [0.0, 0.0, 0.0972],
+        finger_center_line_anchor_m=[0.0, 0.0, 0.0972],
     )
     assert selected_cross_section["target_in_grasp_corridor"] is True
     source = (Path(__file__).parents[2] / "scripts/m1a_contact_gated_trial_client.py").read_text()
