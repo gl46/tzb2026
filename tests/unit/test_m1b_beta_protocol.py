@@ -220,6 +220,9 @@ def test_m1b_tolerance_attach_uses_detachablejoint_empty_payload() -> None:
     assert '"contact_descend_terminal_convergence_required": False' in source
     assert '"contact_descend_contact_authorization": "POST_CLOSE_BILATERAL_SAME_ENTITY_WINDOW"' in source
     assert 'def m1b_top_down_contact_seek_descent(' in source
+    assert 'def m1b_top_down_contact_descend_with_seek(' in source
+    assert '"MEASURED_CONTINUOUS_BASELINE_DESCENT"' in source
+    assert 'start_m=M1B_TOP_CONTACT_CENTERLINE_Z_M - M1B_CONTACT_SEEK_STEP_M' in source
     assert '"CONTACT_SEEK_BILATERAL_WINDOW_NOT_OBSERVED"' in source
     assert '"CARTESIAN" in str(contact_descend.get("reason", ""))' in source
     assert '"--enable-contact-seeking-terminal-descent", action="store_true"' in source

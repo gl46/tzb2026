@@ -486,17 +486,44 @@ def m1b_top_down_contact_seek_descent(
 ) -> dict[str, object]:
     """Seek a physical bilateral contact window along the vertical tool axis.
 
-    This deliberately avoids using the target's simulator identity or pose as
-    a stop condition.  Each 5 mm waypoint is a normal collision-aware MoveIt
-    Cartesian action.  After it settles, the existing actuator-internal
-    broker must observe a 100 ms same-entity bilateral window; one-sided,
-    table, unknown, and no-contact observations all continue or fail closed.
+    The caller has already executed the measured, continuous precontact-to-
+    120 mm Cartesian descent. This function deliberately avoids using the
+    target's simulator identity or pose as a stop condition. Each subsequent
+    5 mm downward waypoint is a normal collision-aware MoveIt Cartesian
+    action. After it settles, the existing actuator-internal broker must
+    observe a 100 ms same-entity bilateral window; one-sided, table, unknown,
+    and no-contact observations all continue or fail closed.
     """
 
     waypoints: list[dict[str, object]] = []
+    deadline = time.monotonic() + M1B_CONTACT_SEEK_OBSERVATION_S
+    while time.monotonic() < deadline:
+        rclpy.spin_once(client, timeout_sec=0.02)
+    feedback, internal = broker_from_window(contact_samples_since_seek_start())
+    initial_entry: dict[str, object] = {
+        "hand_z_offset_m": M1B_TOP_CONTACT_CENTERLINE_Z_M,
+        "motion": "MEASURED_CONTINUOUS_BASELINE_DESCENT",
+        "broker_feedback": {
+            "grasp_success": feedback.grasp_success,
+            "tactile_state": feedback.tactile_state,
+            "reobservation_required": feedback.reobservation_required,
+        },
+        "internal_actuation_record": internal,
+    }
+    waypoints.append(initial_entry)
+    if feedback.grasp_success:
+        return {
+            "executed": True, "converged": True,
+            "seek_contact_found": True,
+            "contact_hand_z_offset_m": M1B_TOP_CONTACT_CENTERLINE_Z_M,
+            "seek_feedback": initial_entry["broker_feedback"],
+            "waypoints": waypoints,
+            "path_source": "MEASURED_BASELINE_THEN_STAGED_VERTICAL_CONTACT_SEEK",
+        }
+
     ik_seed: list[float] | None = None
     for hand_z_offset_m in descending_contact_seek_offsets_m(
-        start_m=M1B_TOP_CONTACT_CENTERLINE_Z_M + M1B_TOP_PRECONTACT_STANDOFF_M,
+        start_m=M1B_TOP_CONTACT_CENTERLINE_Z_M - M1B_CONTACT_SEEK_STEP_M,
         minimum_m=M1B_CONTACT_SEEK_MIN_HAND_Z_OFFSET_M,
         step_m=M1B_CONTACT_SEEK_STEP_M,
     ):
@@ -560,6 +587,28 @@ def m1b_top_down_contact_seek_descent(
         "waypoints": waypoints,
         "path_source": "MOVEIT_STAGED_VERTICAL_CONTACT_SEEK",
     }
+
+
+def m1b_top_down_contact_descend_with_seek(
+    client: CalibrationClient, centre_world_m: list[float], *,
+    hand_y_centerline_bias_m: float, yaw_rad: float,
+    contact_samples_since_seek_start: Callable[[], list[M1BContactSampleV1]],
+) -> dict[str, object]:
+    """Keep the measured continuous descent, then seek only below its endpoint."""
+
+    baseline = m1b_top_down_contact_descend(
+        client, centre_world_m,
+        hand_y_centerline_bias_m=hand_y_centerline_bias_m, yaw_rad=yaw_rad,
+    )
+    if not baseline.get("executed"):
+        return baseline
+    seek = m1b_top_down_contact_seek_descent(
+        client, centre_world_m,
+        hand_y_centerline_bias_m=hand_y_centerline_bias_m, yaw_rad=yaw_rad,
+        contact_samples_since_seek_start=contact_samples_since_seek_start,
+    )
+    seek["baseline_descend"] = baseline
+    return seek
 
 
 def m1b_normal_side_precontact(
@@ -1152,7 +1201,7 @@ def main() -> int:
                 if not near_reobservation.get("succeeded"):
                     contact_descend = {"executed": False, "reason": "PUBLIC_NEAR_REOBSERVATION_GATE_REJECTED"}
                 elif args.enable_contact_seeking_terminal_descent:
-                    contact_descend = m1b_top_down_contact_seek_descent(
+                    contact_descend = m1b_top_down_contact_descend_with_seek(
                         client, final_target,
                         hand_y_centerline_bias_m=hand_y_centerline_bias_m,
                         yaw_rad=top_grasp_yaw_rad,
@@ -1201,7 +1250,7 @@ def main() -> int:
                     if retry_approach.get("executed") and retry_approach.get("converged"):
                         seek_contact_start_index = len(raw)
                         retry_descend = (
-                            m1b_top_down_contact_seek_descent(
+                            m1b_top_down_contact_descend_with_seek(
                                 client, final_target,
                                 hand_y_centerline_bias_m=hand_y_centerline_bias_m,
                                 yaw_rad=yaw_value,
