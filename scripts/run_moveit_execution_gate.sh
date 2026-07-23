@@ -138,6 +138,21 @@ echo "M1A_S1_LAUNCH_PID:$pid"
 echo "M1A_S1_LAUNCH_PGID:$launch_pgid"
 printf 'REMOTE_GAZEBO_URDF_SHA256:'; sha256sum "$HOME/$root/robot_ws/src/xh_sim/urdf/panda_controlled.urdf" | awk '{print $1}'
 if ! kill -0 "$pid" 2>/dev/null; then echo M1A_S1_LAUNCH_FAILED; sed -n '1,220p' "$launch_log"; exit 0; fi
+controller_action_ready=false
+for _ in $(seq 1 60); do
+  if ros2 control list_controllers 2>/dev/null | grep -q '^panda_arm_controller.*active' \
+    && ros2 action list 2>/dev/null | grep -qx '/panda_arm_controller/follow_joint_trajectory'; then
+    controller_action_ready=true
+    break
+  fi
+  sleep 1
+done
+echo "M1A_S1_CONTROLLER_ACTION_READY:$controller_action_ready"
+if [ "$controller_action_ready" != true ]; then
+  echo M1A_S1_CONTROLLER_ACTION_UNAVAILABLE
+  tail -n 160 "$launch_log"
+  exit 0
+fi
 python3 "$HOME/$root/scripts/m1a_moveit_execution_client.py"
 echo M1A_S1_LAUNCH_TAIL
 tail -n 160 "$launch_log"
@@ -152,7 +167,13 @@ raw = Path(log).read_text(errors="replace")
 remote_sha = next((line.split(":", 1)[1] for line in raw.splitlines() if line.startswith("REMOTE_GAZEBO_URDF_SHA256:")), None)
 runtime = next((json.loads(line) for line in raw.splitlines() if line.startswith("{") and '"segments"' in line), None)
 if runtime is None:
-    status, reason, trials, successes, segments = "BLOCKED", "No structured MoveIt execution evidence returned.", 0, 0, []
+    status = "BLOCKED"
+    reason = (
+        "panda_arm_controller FollowJointTrajectory action server did not become ready."
+        if "M1A_S1_CONTROLLER_ACTION_UNAVAILABLE" in raw
+        else "No structured MoveIt execution evidence returned."
+    )
+    trials, successes, segments = 0, 0, []
 else:
     status = runtime["status"]
     reason = f"{runtime['successful_trials']}/10 three-segment MoveIt trials passed all recorded gates."

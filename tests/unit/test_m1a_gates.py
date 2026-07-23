@@ -327,6 +327,10 @@ def test_m1a_execution_client_uses_moveit_plan_execute_fk_and_no_pose_write() ->
     assert "planned_by_name" in source
     assert "PLANNED_JOINT_SET_MISMATCH" in source
     assert "set_pose" not in source and "set_joint" not in source
+    s1_runner = (root / "scripts/run_moveit_execution_gate.sh").read_text()
+    assert "M1A_S1_CONTROLLER_ACTION_READY" in s1_runner
+    assert "'/panda_arm_controller/follow_joint_trajectory'" in s1_runner
+    assert "M1A_S1_CONTROLLER_ACTION_UNAVAILABLE" in s1_runner
 
 
 def test_m1a_contact_calibration_uses_oracle_geometry_hand_control_and_per_trial_windows() -> None:
