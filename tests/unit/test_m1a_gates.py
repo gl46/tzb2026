@@ -5,6 +5,7 @@ import hashlib
 import importlib.util
 import json
 from pathlib import Path
+import subprocess
 import sys
 import xml.etree.ElementTree as ET
 
@@ -237,11 +238,23 @@ def test_m1a_protocol_files_define_fail_closed_sensor_and_execution_gates() -> N
 
 
 def test_m1a_manifest_report_hashes_are_verifiable() -> None:
+    """Verify the immutable historical tree, not mutable current run outputs.
+
+    The manifest names the 2026-07-17 runtime evidence.  Later revalidation
+    runners intentionally write current evidence to the same report paths in
+    the working tree, so hashing the working copy would incorrectly mutate the
+    historical claim merely by executing a new experiment.
+    """
+
     root = Path(__file__).parents[2]
     manifest = json.loads((root / "data/manifests/m1a-runtime-grasp-v1.json").read_text())
     assert manifest["schema_version"] == "m1a-runtime-grasp-v1"
     for relative_path, expected_hash in manifest["file_hashes"].items():
-        actual_hash = hashlib.sha256((root / relative_path).read_bytes()).hexdigest()
+        result = subprocess.run(
+            ["git", "show", f"HEAD:{relative_path}"],
+            cwd=root, check=True, capture_output=True,
+        )
+        actual_hash = hashlib.sha256(result.stdout).hexdigest()
         assert actual_hash == expected_hash
 
 
