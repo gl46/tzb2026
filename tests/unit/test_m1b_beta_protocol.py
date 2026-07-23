@@ -205,6 +205,9 @@ def test_public_postgrasp_lift_is_public_only_and_retains_physical_attach() -> N
     assert "public_collision_id(args.public_track_id)" in source
     assert "apply_public_cylinder_scene(client, tracks)" in source
     assert "client.move_hand_cartesian" in source
+    assert "--observation-retreat" in source
+    assert "restrict_carrier_table_contact" in source
+    assert "client.move_joint_target(HOME_ARM_POSITIONS)" in source
     assert '"online_truth_access": False' in source
     assert '"physical_detach_command_sent": False' in source
     assert "gazebo_pose" not in source

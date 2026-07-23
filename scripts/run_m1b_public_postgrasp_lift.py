@@ -26,6 +26,7 @@ for directory in (ROOT / "src", ROOT / "scripts"):
         sys.path.insert(0, str(directory))
 
 from m1a_contact_calibration_client import CalibrationClient, quaternion_rotate  # noqa: E402
+from m1a_home_self_collision_client import HOME_ARM_POSITIONS  # noqa: E402
 from m1a_moveit_execution_client import JOINTS, set_allowed_pair  # noqa: E402
 from run_m1b_tolerance_trial import apply_public_cylinder_scene, public_collision_id, public_tracks_from_evidence  # noqa: E402
 from xh_agent.runtime.m1b_camera_calibration import M1BStaticCameraCalibrationV1  # noqa: E402
@@ -102,11 +103,24 @@ def configure_lift_contacts(client: CalibrationClient, carrier_collision_id: str
     return client.apply_scene_diff(PlanningScene(is_diff=True, allowed_collision_matrix=matrix))
 
 
+def restrict_carrier_table_contact(client: CalibrationClient, carrier_collision_id: str) -> bool:
+    """Restore table collision checking before any free-space observation retreat."""
+    matrix = client.current_acm()
+    if matrix is None:
+        return False
+    set_allowed_pair(matrix, carrier_collision_id, "work_table", False)
+    return client.apply_scene_diff(PlanningScene(is_diff=True, allowed_collision_matrix=matrix))
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--public-perception-evidence", required=True, type=Path)
     parser.add_argument("--public-camera-info", required=True, type=Path)
     parser.add_argument("--public-track-id", required=True)
+    parser.add_argument(
+        "--observation-retreat", action="store_true",
+        help="After the vertical lift, retreat with the public carrier to the verified home observation pose",
+    )
     parser.add_argument("--output", required=True, type=Path)
     args = parser.parse_args()
 
@@ -152,6 +166,16 @@ def main() -> int:
                 target_pose, duration_s=3.0, max_step_m=0.005,
                 ik_link="panda_link7", ik_seed=positions,
             )
+        lift_succeeded = bool(lift.get("executed") and lift.get("converged"))
+        table_contact_restricted = (
+            restrict_carrier_table_contact(client, carrier_collision_id)
+            if lift_succeeded else False
+        )
+        retreat = (
+            client.move_joint_target(HOME_ARM_POSITIONS)
+            if args.observation_retreat and lift_succeeded and table_contact_restricted
+            else {"planned": False, "executed": False, "reason": "OBSERVATION_RETREAT_NOT_REQUESTED_OR_LIFT_NOT_SAFE"}
+        )
         payload = {
             "schema_version": "M1BPublicPostGraspLiftEvidenceV1",
             "provenance": "PUBLIC_PERCEPTION_PRODUCTION",
@@ -164,11 +188,17 @@ def main() -> int:
             "contact_exceptions_applied": contact_exceptions_applied,
             "lift_distance_m": POST_GRASP_LIFT_M,
             "lift": lift,
+            "table_contact_restricted_before_retreat": table_contact_restricted,
+            "observation_retreat_requested": args.observation_retreat,
+            "observation_retreat_home_joint_positions_rad": HOME_ARM_POSITIONS if args.observation_retreat else None,
+            "observation_retreat": retreat,
             "physical_detach_command_sent": False,
         }
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
-        succeeded = bool(lift.get("executed") and lift.get("converged"))
+        succeeded = lift_succeeded and (
+            not args.observation_retreat or bool(retreat.get("executed") and retreat.get("converged"))
+        )
         print(json.dumps({"lift_succeeded": succeeded, "physical_detach_command_sent": False}))
         return 0 if succeeded else 2
     finally:
