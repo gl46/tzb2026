@@ -173,13 +173,9 @@ def configure_transport_collision_exceptions(client: CalibrationClient, carrier_
     # self-contact inherent in the physical grasp state, not a free-space
     # collision exemption.
     set_allowed_pair(matrix, "panda_leftfinger", "panda_rightfinger", True)
-    # These generated scene objects overlap the immobile base at reset.  They
-    # cannot be cleared by any arm trajectory, so retain checking against every
-    # moving link but allow the unavoidable base-only initial overlap.
-    for index in range(1, 13):
-        other = f"cylinder_{index:02d}"
-        if other != entity:
-            set_allowed_pair(matrix, other, "panda_link0", True)
+    # Production scenes use public-track IDs only.  Do not recreate the old
+    # calibration-only cylinder/base exemptions under guessed public IDs: any
+    # real public proxy/base overlap must remain a fail-closed planning error.
     return client.apply_scene_diff(PlanningScene(is_diff=True, allowed_collision_matrix=matrix))
 
 
