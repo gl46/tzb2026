@@ -19,3 +19,14 @@ under the existing calibration-only boundary, then re-run the physical
 tolerance envelope and the unchanged p90 comparison. No threshold may be
 relaxed, and no acceptance drill may run unless that comparison becomes `GO`.
 
+## Terminal-descent calibration result
+
+That bounded calibration candidate has now been rejected.  In its nominal
+zero-offset Gazebo probe, the retained continuous path reached the 120 mm
+baseline and staged moves to 115 and 110 mm executed, but all 223 contacts
+were left-finger-only; the next 105 mm point was rejected by IK (`-31`).  The
+broker correctly withheld close and attach.  See
+`m1b-contact-seek-terminal-descent-probe-20260724.md` for raw-record hashes
+and the precise protocol.  This is not a basis for an 81-trial rerun; M1B
+remains `NO_GO` until a new kinematic/contact primitive is reviewed and
+measured.
