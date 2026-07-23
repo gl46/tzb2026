@@ -1,0 +1,26 @@
+{
+  "schema_version": "M1BPerceptionReachabilityGateV1",
+  "status": "GO",
+  "reasons": [],
+  "tolerance_envelope_m": {
+    "x": 0.015,
+    "y": 0.015,
+    "z": 0.005
+  },
+  "perception_axis_audit_m": {
+    "x": {
+      "median_m": 0.0010425143304539364,
+      "p90_m": 0.0022951731941297515
+    },
+    "y": {
+      "median_m": 0.0018553840649561393,
+      "p90_m": 0.00479301628996498
+    },
+    "z": {
+      "median_m": 0.0007514142345786401,
+      "p90_m": 0.002080399509135411
+    }
+  },
+  "criterion": "per_axis_p90_m <= 0.6 * measured_tolerance_m",
+  "truth_boundary": "tolerance truth is calibration_only; perception truth is offline_evaluation_only"
+}

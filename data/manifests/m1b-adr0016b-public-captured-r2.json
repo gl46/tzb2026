@@ -1,0 +1,1811 @@
+{
+  "schema_version": "M1BAlphaCapturedDatasetV1",
+  "samples": [
+    {
+      "seed": 2000,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2000/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2000/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2000/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2000.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2001,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2001/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2001/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2001/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2001.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2002,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2002/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2002/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2002/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2002.supervision.json",
+      "max_stream_skew_ns": 66000000
+    },
+    {
+      "seed": 2003,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2003/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2003/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2003/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2003.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2004,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2004/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2004/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2004/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2004.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2005,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2005/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2005/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2005/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2005.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2006,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2006/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2006/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2006/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2006.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2007,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2007/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2007/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2007/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2007.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2008,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2008/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2008/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2008/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2008.supervision.json",
+      "max_stream_skew_ns": 0
+    },
+    {
+      "seed": 2009,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2009/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2009/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2009/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2009.supervision.json",
+      "max_stream_skew_ns": 0
+    },
+    {
+      "seed": 2010,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2010/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2010/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2010/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2010.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2011,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2011/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2011/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2011/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2011.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2012,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2012/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2012/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2012/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2012.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2013,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2013/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2013/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2013/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2013.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2014,
+      "split": "val",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2014/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2014/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2014/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2014.supervision.json",
+      "max_stream_skew_ns": 0
+    },
+    {
+      "seed": 2015,
+      "split": "val",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2015/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2015/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2015/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2015.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2016,
+      "split": "val",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2016/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2016/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2016/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2016.supervision.json",
+      "max_stream_skew_ns": 0
+    },
+    {
+      "seed": 2017,
+      "split": "test",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2017/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2017/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2017/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2017.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2018,
+      "split": "test",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2018/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2018/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2018/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2018.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2019,
+      "split": "test",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2019/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2019/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2019/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2019.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2020,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2020/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2020/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2020/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2020.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2021,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2021/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2021/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2021/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2021.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2022,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2022/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2022/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2022/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2022.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2023,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2023/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2023/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2023/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2023.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2024,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2024/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2024/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2024/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2024.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2025,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2025/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2025/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2025/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2025.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2026,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2026/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2026/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2026/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2026.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2027,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2027/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2027/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2027/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2027.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2028,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2028/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2028/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2028/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2028.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2029,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2029/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2029/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2029/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2029.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2030,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2030/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2030/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2030/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2030.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2031,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2031/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2031/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2031/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2031.supervision.json",
+      "max_stream_skew_ns": 0
+    },
+    {
+      "seed": 2032,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2032/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2032/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2032/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2032.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2033,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2033/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2033/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2033/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2033.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2034,
+      "split": "val",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2034/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2034/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2034/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2034.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2035,
+      "split": "val",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2035/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2035/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2035/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2035.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2036,
+      "split": "val",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2036/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2036/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2036/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2036.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2037,
+      "split": "test",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2037/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2037/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2037/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2037.supervision.json",
+      "max_stream_skew_ns": 66000000
+    },
+    {
+      "seed": 2038,
+      "split": "test",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2038/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2038/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2038/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2038.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2039,
+      "split": "test",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2039/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2039/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2039/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2039.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2040,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2040/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2040/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2040/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2040.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2041,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2041/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2041/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2041/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2041.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2042,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2042/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2042/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2042/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2042.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2043,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2043/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2043/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2043/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2043.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2044,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2044/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2044/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2044/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2044.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2045,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2045/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2045/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2045/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2045.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2046,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2046/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2046/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2046/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2046.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2047,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2047/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2047/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2047/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2047.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2048,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2048/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2048/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2048/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2048.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2049,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2049/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2049/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2049/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2049.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2050,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2050/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2050/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2050/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2050.supervision.json",
+      "max_stream_skew_ns": 0
+    },
+    {
+      "seed": 2051,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2051/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2051/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2051/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2051.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2052,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2052/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2052/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2052/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2052.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2053,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2053/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2053/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2053/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2053.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2054,
+      "split": "val",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2054/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2054/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2054/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2054.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2055,
+      "split": "val",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2055/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2055/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2055/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2055.supervision.json",
+      "max_stream_skew_ns": 0
+    },
+    {
+      "seed": 2056,
+      "split": "val",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2056/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2056/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2056/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2056.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2057,
+      "split": "test",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2057/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2057/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2057/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2057.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2058,
+      "split": "test",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2058/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2058/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2058/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2058.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2059,
+      "split": "test",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2059/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2059/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2059/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2059.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2060,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2060/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2060/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2060/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2060.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2061,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2061/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2061/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2061/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2061.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2062,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2062/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2062/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2062/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2062.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2063,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2063/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2063/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2063/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2063.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2064,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2064/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2064/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2064/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2064.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2065,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2065/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2065/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2065/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2065.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2066,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2066/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2066/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2066/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2066.supervision.json",
+      "max_stream_skew_ns": 0
+    },
+    {
+      "seed": 2067,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2067/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2067/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2067/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2067.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2068,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2068/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2068/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2068/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2068.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2069,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2069/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2069/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2069/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2069.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2070,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2070/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2070/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2070/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2070.supervision.json",
+      "max_stream_skew_ns": 0
+    },
+    {
+      "seed": 2071,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2071/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2071/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2071/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2071.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2072,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2072/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2072/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2072/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2072.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2073,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2073/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2073/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2073/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2073.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2074,
+      "split": "val",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2074/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2074/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2074/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2074.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2075,
+      "split": "val",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2075/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2075/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2075/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2075.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2076,
+      "split": "val",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2076/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2076/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2076/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2076.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2077,
+      "split": "test",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2077/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2077/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2077/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2077.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2078,
+      "split": "test",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2078/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2078/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2078/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2078.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2079,
+      "split": "test",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2079/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2079/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2079/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2079.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2080,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2080/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2080/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2080/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2080.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2081,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2081/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2081/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2081/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2081.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2082,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2082/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2082/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2082/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2082.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2083,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2083/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2083/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2083/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2083.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2084,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2084/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2084/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2084/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2084.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2085,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2085/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2085/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2085/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2085.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2086,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2086/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2086/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2086/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2086.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2087,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2087/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2087/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2087/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2087.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2088,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2088/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2088/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2088/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2088.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2089,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2089/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2089/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2089/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2089.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2090,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2090/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2090/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2090/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2090.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2091,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2091/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2091/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2091/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2091.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2092,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2092/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2092/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2092/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2092.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2093,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2093/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2093/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2093/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2093.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2094,
+      "split": "val",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2094/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2094/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2094/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2094.supervision.json",
+      "max_stream_skew_ns": 132000000
+    },
+    {
+      "seed": 2095,
+      "split": "val",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2095/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2095/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2095/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2095.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2096,
+      "split": "val",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2096/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2096/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2096/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2096.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2097,
+      "split": "test",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2097/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2097/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2097/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2097.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2098,
+      "split": "test",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2098/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2098/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2098/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2098.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2099,
+      "split": "test",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2099/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2099/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2099/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2099.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2100,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2100/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2100/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2100/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2100.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2101,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2101/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2101/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2101/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2101.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2102,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2102/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2102/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2102/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2102.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2103,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2103/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2103/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2103/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2103.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2104,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2104/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2104/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2104/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2104.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2105,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2105/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2105/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2105/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2105.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2106,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2106/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2106/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2106/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2106.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2107,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2107/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2107/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2107/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2107.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2108,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2108/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2108/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2108/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2108.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2109,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2109/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2109/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2109/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2109.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2110,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2110/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2110/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2110/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2110.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2111,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2111/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2111/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2111/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2111.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2112,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2112/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2112/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2112/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2112.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2113,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2113/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2113/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2113/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2113.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2114,
+      "split": "val",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2114/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2114/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2114/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2114.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2115,
+      "split": "val",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2115/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2115/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2115/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2115.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2116,
+      "split": "val",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2116/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2116/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2116/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2116.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2117,
+      "split": "test",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2117/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2117/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2117/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2117.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2118,
+      "split": "test",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2118/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2118/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2118/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2118.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2119,
+      "split": "test",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2119/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2119/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2119/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2119.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2120,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2120/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2120/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2120/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2120.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2121,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2121/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2121/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2121/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2121.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2122,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2122/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2122/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2122/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2122.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2123,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2123/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2123/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2123/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2123.supervision.json",
+      "max_stream_skew_ns": 0
+    },
+    {
+      "seed": 2124,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2124/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2124/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2124/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2124.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2125,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2125/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2125/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2125/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2125.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2126,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2126/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2126/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2126/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2126.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2127,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2127/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2127/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2127/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2127.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2128,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2128/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2128/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2128/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2128.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2129,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2129/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2129/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2129/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2129.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2130,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2130/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2130/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2130/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2130.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2131,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2131/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2131/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2131/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2131.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2132,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2132/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2132/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2132/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2132.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2133,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2133/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2133/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2133/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2133.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2134,
+      "split": "val",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2134/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2134/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2134/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2134.supervision.json",
+      "max_stream_skew_ns": 0
+    },
+    {
+      "seed": 2135,
+      "split": "val",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2135/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2135/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2135/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2135.supervision.json",
+      "max_stream_skew_ns": 0
+    },
+    {
+      "seed": 2136,
+      "split": "val",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2136/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2136/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2136/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2136.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2137,
+      "split": "test",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2137/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2137/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2137/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2137.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2138,
+      "split": "test",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2138/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2138/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2138/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2138.supervision.json",
+      "max_stream_skew_ns": 0
+    },
+    {
+      "seed": 2139,
+      "split": "test",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2139/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2139/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2139/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2139.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2140,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2140/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2140/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2140/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2140.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2141,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2141/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2141/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2141/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2141.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2142,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2142/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2142/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2142/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2142.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2143,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2143/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2143/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2143/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2143.supervision.json",
+      "max_stream_skew_ns": 0
+    },
+    {
+      "seed": 2144,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2144/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2144/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2144/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2144.supervision.json",
+      "max_stream_skew_ns": 0
+    },
+    {
+      "seed": 2145,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2145/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2145/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2145/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2145.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2146,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2146/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2146/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2146/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2146.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2147,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2147/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2147/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2147/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2147.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2148,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2148/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2148/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2148/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2148.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2149,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2149/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2149/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2149/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2149.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2150,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2150/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2150/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2150/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2150.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2151,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2151/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2151/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2151/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2151.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2152,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2152/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2152/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2152/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2152.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2153,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2153/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2153/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2153/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2153.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2154,
+      "split": "val",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2154/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2154/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2154/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2154.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2155,
+      "split": "val",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2155/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2155/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2155/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2155.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2156,
+      "split": "val",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2156/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2156/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2156/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2156.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2157,
+      "split": "test",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2157/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2157/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2157/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2157.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2158,
+      "split": "test",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2158/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2158/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2158/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2158.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2159,
+      "split": "test",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2159/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2159/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2159/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2159.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2160,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2160/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2160/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2160/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2160.supervision.json",
+      "max_stream_skew_ns": 0
+    },
+    {
+      "seed": 2161,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2161/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2161/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2161/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2161.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2162,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2162/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2162/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2162/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2162.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2163,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2163/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2163/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2163/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2163.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2164,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2164/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2164/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2164/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2164.supervision.json",
+      "max_stream_skew_ns": 0
+    },
+    {
+      "seed": 2165,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2165/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2165/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2165/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2165.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2166,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2166/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2166/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2166/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2166.supervision.json",
+      "max_stream_skew_ns": 0
+    },
+    {
+      "seed": 2167,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2167/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2167/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2167/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2167.supervision.json",
+      "max_stream_skew_ns": 0
+    },
+    {
+      "seed": 2168,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2168/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2168/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2168/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2168.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2169,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2169/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2169/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2169/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2169.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2170,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2170/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2170/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2170/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2170.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2171,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2171/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2171/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2171/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2171.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2172,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2172/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2172/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2172/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2172.supervision.json",
+      "max_stream_skew_ns": 0
+    },
+    {
+      "seed": 2173,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2173/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2173/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2173/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2173.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2174,
+      "split": "val",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2174/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2174/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2174/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2174.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2175,
+      "split": "val",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2175/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2175/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2175/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2175.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2176,
+      "split": "val",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2176/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2176/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2176/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2176.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2177,
+      "split": "test",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2177/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2177/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2177/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2177.supervision.json",
+      "max_stream_skew_ns": 0
+    },
+    {
+      "seed": 2178,
+      "split": "test",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2178/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2178/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2178/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2178.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2179,
+      "split": "test",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2179/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2179/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2179/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2179.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2180,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2180/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2180/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2180/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2180.supervision.json",
+      "max_stream_skew_ns": 0
+    },
+    {
+      "seed": 2181,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2181/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2181/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2181/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2181.supervision.json",
+      "max_stream_skew_ns": 0
+    },
+    {
+      "seed": 2182,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2182/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2182/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2182/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2182.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2183,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2183/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2183/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2183/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2183.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2184,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2184/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2184/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2184/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2184.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2185,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2185/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2185/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2185/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2185.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2186,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2186/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2186/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2186/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2186.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2187,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2187/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2187/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2187/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2187.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2188,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2188/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2188/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2188/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2188.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2189,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2189/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2189/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2189/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2189.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2190,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2190/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2190/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2190/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2190.supervision.json",
+      "max_stream_skew_ns": 0
+    },
+    {
+      "seed": 2191,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2191/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2191/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2191/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2191.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2192,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2192/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2192/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2192/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2192.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2193,
+      "split": "train",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2193/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2193/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2193/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2193.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2194,
+      "split": "val",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2194/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2194/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2194/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2194.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2195,
+      "split": "val",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2195/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2195/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2195/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2195.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2196,
+      "split": "val",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2196/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2196/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2196/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2196.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2197,
+      "split": "test",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2197/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2197/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2197/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2197.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2198,
+      "split": "test",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2198/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2198/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2198/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2198.supervision.json",
+      "max_stream_skew_ns": 198000000
+    },
+    {
+      "seed": 2199,
+      "split": "test",
+      "rgb": "data/generated/m1b_adr0016b_public_audit_r2/frames/2199/rgb.ppm",
+      "depth": "data/generated/m1b_adr0016b_public_audit_r2/frames/2199/depth.bin",
+      "camera_info": "data/generated/m1b_adr0016b_public_audit_r2/frames/2199/camera_info.json",
+      "supervision": "data/generated/m1b_adr0016b_public_audit_r2/scenes/scene-2199.supervision.json",
+      "max_stream_skew_ns": 0
+    }
+  ],
+  "split_by": "scene_seed",
+  "counts": {
+    "train": 140,
+    "val": 30,
+    "test": 30
+  }
+}

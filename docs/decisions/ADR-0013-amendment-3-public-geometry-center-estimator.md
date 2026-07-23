@@ -53,3 +53,28 @@ runtime replacement.
 5. Only `GO` permits fresh ADR-0013 round-trip and WRONG_OBJECT drills.
 
 No gate threshold is relaxed by this amendment.
+
+## Measured revalidation (2026-07-24)
+
+The approved revalidation was executed on a fresh current-geometry corpus:
+
+- Manifest `data/manifests/m1b-adr0016b-public-captured-r2.json`
+  (SHA-256 `20818a05f40141edf4ec6258b46470d291736de7bbe6067a645afb4cf66f3919`)
+  records 200 real Gazebo frames with the required 140/30/30 split.
+- The frozen training-only X/Y correction is
+  `configs/m1b_public_geometry_xy_correction.json`
+  (SHA-256 `1347fddea4af627b1df928138d0540a651971f2fca1aa31f8f94b97ff8ef58da`).
+- The held-out audit
+  `reports/m1b-adr0016b-current-geometry-perception-metrics.json`
+  (SHA-256 `bfe89ead610ca6a9f7e3c00a72f9a30e79bfb1af655617bb8de4ca2c088f9e5a`)
+  evaluated 30 scenes and 272 matched instances with zero exclusions. Its
+  all-instance absolute-error p90 is X/Y/Z = 2.295 / 4.793 / 2.080 mm.
+- The 81-trial ADR-0016b measured tolerance envelope is X/Y/Z =
+  15 / 15 / 5 mm, so the unchanged 0.6 limits are 9 / 9 / 3 mm. The resulting
+  gate is **GO**, recorded in
+  `reports/m1b-adr0016b-current-geometry-reachability-gate.json`
+  (SHA-256 `e38301e28ae0a5bbab9bbd9c5e764403f526f4cd7d21c9f1f933e0d36d311e27`).
+
+This GO authorizes only fresh, public-perception-driven ADR-0013 acceptance
+3 (round-trip) and acceptance 4 (WRONG_OBJECT). The superseded 50 mm × 100 mm
+audit and its diagnostic acceptance artifacts remain non-acceptance evidence.
