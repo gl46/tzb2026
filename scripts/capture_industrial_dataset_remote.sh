@@ -48,11 +48,15 @@ for ((offset=0; offset<count; offset++)); do
   mkdir -p "$output" logs
   captured="false"
   for ((attempt=1; attempt<=capture_attempts; attempt++)); do
-    setsid gz sim -s -r "$dataset_root/scenes/scene-$seed.sdf" >"logs/m1b-alpha-dataset-$seed-attempt-$attempt.log" 2>&1 &
+    # Gazebo transport is independent of ROS_DOMAIN_ID.  A per-attempt
+    # partition prevents a lingering unrelated world from publishing the same
+    # camera topic into this recorder's bridge.
+    partition="m1b_capture_${seed}_${attempt}_$$"
+    GZ_PARTITION="$partition" setsid gz sim -s -r "$dataset_root/scenes/scene-$seed.sdf" >"logs/m1b-alpha-dataset-$seed-attempt-$attempt.log" 2>&1 &
     gz_pid=$!
     bridge_pid=""
     sleep 4
-    setsid ros2 run ros_gz_bridge parameter_bridge "/xh/camera/rgbd/image@sensor_msgs/msg/Image[gz.msgs.Image" "/xh/camera/rgbd/depth_image@sensor_msgs/msg/Image[gz.msgs.Image" "/xh/camera/rgbd/camera_info@sensor_msgs/msg/CameraInfo[gz.msgs.CameraInfo" >"$output/bridge-attempt-$attempt.log" 2>&1 &
+    GZ_PARTITION="$partition" setsid ros2 run ros_gz_bridge parameter_bridge "/xh/camera/rgbd/image@sensor_msgs/msg/Image[gz.msgs.Image" "/xh/camera/rgbd/depth_image@sensor_msgs/msg/Image[gz.msgs.Image" "/xh/camera/rgbd/camera_info@sensor_msgs/msg/CameraInfo[gz.msgs.CameraInfo" >"$output/bridge-attempt-$attempt.log" 2>&1 &
     bridge_pid=$!
     sleep 2
     if python3 scripts/record_m1b_alpha_ros.py --sensor-only --output-dir "$output" --duration-s 12 --max-skew-ms 200; then
