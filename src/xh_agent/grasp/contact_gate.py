@@ -3,6 +3,41 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import math
+
+
+# A close against an object is intentionally different from a free-space
+# finger command.  The controller may terminate successfully while the
+# fingers remain open of the requested position, provided the remaining
+# error is bounded by the measured contact surface plus the engine margin.
+# Contact itself is still proved independently by the bilateral gate below.
+CONTACT_STALL_ENGINE_MARGIN_M = 0.003
+CONTACT_STALL_CONTRACT_MARGIN_M = 0.001
+MAX_FINGER_POSITION_M = 0.040
+
+
+def symmetric_contact_stall_goal_tolerance_m(
+    *, command_per_finger_m: float, contact_surface_per_finger_m: float,
+) -> float:
+    """Return the explicit action tolerance for a symmetric physical close.
+
+    A position-controlled close stops at a real object's surface rather than
+    at its free-space target.  This function bounds that expected positive
+    error to the measured contact surface, a 3 mm simulator-contact margin,
+    and the existing 1 mm controller contract.  It is deliberately only an
+    action tolerance: callers must still require bilateral same-entity
+    contact, corridor, speed, and successful controller action evidence before
+    attach.  The target-reference telemetry remains diagnostic because its
+    sampling is not guaranteed for every short action.
+    """
+
+    values = (command_per_finger_m, contact_surface_per_finger_m)
+    if not all(math.isfinite(value) and 0.0 <= value <= MAX_FINGER_POSITION_M for value in values):
+        raise ValueError("finger positions must be finite and within [0.0, 0.04] m")
+    return CONTACT_STALL_CONTRACT_MARGIN_M + max(
+        0.0,
+        contact_surface_per_finger_m + CONTACT_STALL_ENGINE_MARGIN_M - command_per_finger_m,
+    )
 
 
 @dataclass(frozen=True)

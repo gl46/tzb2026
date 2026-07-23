@@ -11,7 +11,11 @@ import xml.etree.ElementTree as ET
 import yaml
 import pytest
 
-from xh_agent.grasp.contact_gate import ContactGateInput, evaluate_contact_gate
+from xh_agent.grasp.contact_gate import (
+    ContactGateInput,
+    evaluate_contact_gate,
+    symmetric_contact_stall_goal_tolerance_m,
+)
 from xh_agent.grasp.contact_telemetry import ContactEvent, bilateral_contact_window
 from xh_agent.grasp.failure_attribution import FailureClass, attribute_failure
 from xh_agent.grasp.orientation_families import (
@@ -120,6 +124,22 @@ def test_contact_gate_rejects_each_critical_missing_condition() -> None:
         passed, reasons = evaluate_contact_gate(good_gate_input(**update))
         assert not passed
         assert reason in reasons
+
+
+def test_contact_stall_tolerance_is_bounded_and_requires_valid_finger_positions() -> None:
+    # ADR-0016b franka-copy geometry: q=27 mm command, q=31.5 mm cube
+    # surface.  The 3 mm measured engine allowance and 1 mm contract admit a
+    # physical stall but cannot turn an arbitrary finger position into PASS.
+    assert symmetric_contact_stall_goal_tolerance_m(
+        command_per_finger_m=0.027, contact_surface_per_finger_m=0.0315,
+    ) == pytest.approx(0.0085)
+    assert symmetric_contact_stall_goal_tolerance_m(
+        command_per_finger_m=0.033, contact_surface_per_finger_m=0.0315,
+    ) == pytest.approx(0.0025)
+    with pytest.raises(ValueError):
+        symmetric_contact_stall_goal_tolerance_m(
+            command_per_finger_m=0.027, contact_surface_per_finger_m=0.041,
+        )
 
 
 def test_continuity_rejects_teleport_short_series_and_nonmonotonic_time() -> None:
@@ -583,6 +603,8 @@ def test_m1a_s3_attach_is_runtime_gated_and_transport_keeps_a_carried_collision_
     assert "M1A_S3_LAUNCH_URDF_SHA256" in remote_runner
     assert "install/xh_sim/share/xh_sim/urdf/panda_controlled.urdf" in remote_runner
     assert "evaluate_contact_gate" in source
+    assert "symmetric_contact_stall_goal_tolerance_m" in source
+    assert '"close_controller_target_reference_seen": close.get("controller_target_reference_seen")' in source
     assert 'constraint_command(DETACH_TOPIC, "detached")' in source
     main = source[source.index("def main()") :]
     assert main.index('constraint_command(DETACH_TOPIC, "detached")') < main.index("cube = runtime_cube_pose()")
