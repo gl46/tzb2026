@@ -86,12 +86,45 @@ def carried_track_from_vacancy(vacated_track_ids: list[str]) -> str | None:
     return vacated_track_ids[0] if len(vacated_track_ids) == 1 else None
 
 
+def vacated_tracks_from_post_frames(
+    pre: dict[str, dict], post_frames: list[dict[str, dict]], *, match_m: float = VACATED_MATCH_M,
+) -> list[str]:
+    """Return only tracks absent from every independent public post frame.
+
+    A gripper or an RGB-D dropout can obscure an unrelated table object in one
+    frame.  Treating that one-frame omission as a carried object creates an
+    identity guess.  Public re-observation is allowed to accumulate frames;
+    conservatively retain a pre-grasp track whenever it reappears near its
+    table location in *any* post-grasp frame.
+    """
+    vacated: list[str] = []
+    for tid, track in pre.items():
+        centre = track["centre_world_m"]
+        still_there = any(
+            any(
+                ((centre[0] - candidate["centre_world_m"][0]) ** 2
+                 + (centre[1] - candidate["centre_world_m"][1]) ** 2) ** 0.5 <= match_m
+                for candidate in post.values()
+            )
+            for post in post_frames
+        )
+        if not still_there:
+            vacated.append(tid)
+    return vacated
+
+
 def main() -> int:
     p = argparse.ArgumentParser()
     p.add_argument("--pre-evidence", required=True, type=Path)
     p.add_argument("--pre-camera-info", required=True, type=Path)
-    p.add_argument("--post-evidence", required=True, type=Path)
-    p.add_argument("--post-camera-info", required=True, type=Path)
+    p.add_argument(
+        "--post-evidence", required=True, type=Path, action="append",
+        help="One or more public post-grasp geometric outputs; all must be independent observations",
+    )
+    p.add_argument(
+        "--post-camera-info", required=True, type=Path, action="append",
+        help="Camera-info file paired one-for-one with --post-evidence",
+    )
     p.add_argument("--target-public-track-id", required=True, help="Public pre-grasp target track chosen before actuation")
     p.add_argument("--attached-entity", required=True, help="Entity the broker actually attached (actuation-internal record)")
     p.add_argument("--supervision", type=Path, help="Optional evaluator-only simulator labels, read after the online decision")
@@ -104,22 +137,19 @@ def main() -> int:
     table_supported_z = M1BTableSupportedCylinderCenterV1.from_file(ROOT / "configs" / "m1b_table_supported_cylinder_center.json")
     if bool(args.supervision) != bool(args.evaluation_target_entity):
         p.error("--supervision and --evaluation-target-entity must be supplied together for evaluator-only scoring")
+    if len(args.post_evidence) != len(args.post_camera_info):
+        p.error("--post-evidence and --post-camera-info must have the same count")
     pre = track_world_centres(args.pre_evidence, args.pre_camera_info, calibration, xy_correction, table_supported_z)
-    post = track_world_centres(args.post_evidence, args.post_camera_info, calibration, xy_correction, table_supported_z)
+    post_frames = [
+        track_world_centres(evidence, camera, calibration, xy_correction, table_supported_z)
+        for evidence, camera in zip(args.post_evidence, args.post_camera_info)
+    ]
     target_track_id = str(args.target_public_track_id)
 
     # Identify the carried public track by the vacated-spawn method: the
     # pre-grasp track whose location has no post-grasp track within
     # VACATED_MATCH_M has left the table, i.e. was carried by the gripper.
-    vacated = []
-    for tid, t in pre.items():
-        c = t["centre_world_m"]
-        still_there = any(
-            ((c[0] - q["centre_world_m"][0]) ** 2 + (c[1] - q["centre_world_m"][1]) ** 2) ** 0.5 <= VACATED_MATCH_M
-            for q in post.values()
-        )
-        if not still_there:
-            vacated.append(tid)
+    vacated = vacated_tracks_from_post_frames(pre, post_frames)
     carried_track_id = carried_track_from_vacancy(vacated)
 
     identity = evaluate_post_grasp_identity(target_track_id=str(target_track_id), carried_track_id=carried_track_id)
@@ -155,7 +185,9 @@ def main() -> int:
         "recovery_subgoals": list(recovery.recovery_subgoals) if recovery is not None else None,
         "supervision_record": supervision,
         "pre_track_count": len(pre),
-        "post_track_count": len(post),
+        "post_track_count": len(post_frames[0]),
+        "post_observation_count": len(post_frames),
+        "post_track_counts": [len(post) for post in post_frames],
         "carried_track_association": (
             "UNIQUE_VACATED_PUBLIC_TRACK" if carried_track_id is not None
             else "AMBIGUOUS_OR_UNOBSERVED_PUBLIC_VACANCY"

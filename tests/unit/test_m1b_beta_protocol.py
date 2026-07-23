@@ -30,7 +30,7 @@ if str(SCRIPTS) not in sys.path:
 from audit_m1b_center_reachability import percentile90, perceived_diameter_m  # noqa: E402
 from generate_industrial_scenes import BIN_DROP_TARGET_Z_M, CYLINDER_HALF_LENGTH_M, ROBOT_BASE_KEEP_OUT_RADIUS_M, ROBOT_BASE_XY, SPAWN_CLEARANCE_M, TABLE_TOP_Z, bin_cell_targets, render  # noqa: E402
 from summarize_m1b_tolerance_campaign import summarize  # noqa: E402
-from m1b_wrong_object_drill import carried_track_from_vacancy  # noqa: E402
+from m1b_wrong_object_drill import carried_track_from_vacancy, vacated_tracks_from_post_frames  # noqa: E402
 from xh_agent.perception.interfaces import BBoxV1, PerceptionResultV1  # noqa: E402
 
 
@@ -180,6 +180,22 @@ def test_wrong_object_carried_track_association_fails_closed_when_public_vacancy
     assert "VACATED_SPAWN_NEAREST_ATTACHED_ENTITY" not in source
     assert "--target-public-track-id" in source
     assert "UNIQUE_VACATED_PUBLIC_TRACK" in source
+
+
+def test_wrong_object_multiframe_reobservation_retains_one_frame_dropouts() -> None:
+    pre = {
+        "track-carried": {"centre_world_m": [0.10, 0.10, 0.49]},
+        "track-briefly-occluded": {"centre_world_m": [0.20, 0.20, 0.49]},
+        "track-stable": {"centre_world_m": [0.30, 0.30, 0.49]},
+    }
+    post_frames = [
+        {"post-stable": {"centre_world_m": [0.301, 0.299, 0.49]}},
+        {
+            "post-occluded": {"centre_world_m": [0.199, 0.201, 0.49]},
+            "post-stable": {"centre_world_m": [0.300, 0.300, 0.49]},
+        },
+    ]
+    assert vacated_tracks_from_post_frames(pre, post_frames) == ["track-carried"]
 
 
 def test_attached_roundtrip_records_moveit_carrier_preflight_before_transport() -> None:
