@@ -7,6 +7,7 @@ by a separate offline producer; it is not subscribed to or embedded here.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import time
 from pathlib import Path
@@ -96,9 +97,37 @@ class SnapshotRecorder(Node):
         if not self.sensor_only:
             assert self.joints is not None and self.transforms is not None
             (self.output / "joint_states.json").write_text(json.dumps({"name": list(self.joints.name), "position": list(self.joints.position), "velocity": list(self.joints.velocity), "timestamp_ns": _stamp(self.joints.header)}, indent=2) + "\n")
-            (self.output / "tf.json").write_text(json.dumps({"transforms": [{"parent": transform.header.frame_id, "child": transform.child_frame_id, "timestamp_ns": _stamp(transform.header)} for transform in self.transforms]}, indent=2) + "\n")
+            transforms = [
+                {
+                    "parent_frame": transform.header.frame_id,
+                    "child_frame": transform.child_frame_id,
+                    "timestamp_ns": _stamp(transform.header),
+                    "translation_m": [
+                        transform.transform.translation.x,
+                        transform.transform.translation.y,
+                        transform.transform.translation.z,
+                    ],
+                    "rotation_xyzw": [
+                        transform.transform.rotation.x,
+                        transform.transform.rotation.y,
+                        transform.transform.rotation.z,
+                        transform.transform.rotation.w,
+                    ],
+                }
+                for transform in self.transforms
+            ]
+            chain_sha256 = hashlib.sha256(
+                json.dumps(transforms, sort_keys=True, separators=(",", ":")).encode()
+            ).hexdigest()
+            (self.output / "tf.json").write_text(
+                json.dumps({"transforms": transforms, "tf_chain_sha256": chain_sha256}, indent=2) + "\n"
+            )
             manifest["joint_states"] = {"uri": "joint_states.json", "timestamp_ns": _stamp(self.joints.header)}
-            manifest["tf"] = {"uri": "tf.json", "timestamp_ns": min(_stamp(transform.header) for transform in self.transforms)}
+            manifest["tf"] = {
+                "uri": "tf.json",
+                "timestamp_ns": min(_stamp(transform.header) for transform in self.transforms),
+                "tf_chain_sha256": chain_sha256,
+            }
         timestamps = [entry["timestamp_ns"] for entry in manifest.values() if isinstance(entry, dict) and "timestamp_ns" in entry]
         manifest["max_stream_skew_ns"] = max(timestamps) - min(timestamps)
         (self.output / "recording.json").write_text(json.dumps(manifest, indent=2) + "\n")

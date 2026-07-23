@@ -119,6 +119,10 @@ def test_m1b_static_camera_calibration_is_versioned_and_invertible() -> None:
     assert evidence["camera_optical_frame"] == calibration.camera_optical_frame
     assert evidence["world_to_camera_link_translation_m"] == [-0.8, -0.8, 1.4]
     assert evidence["tf_chain_sha256"] == calibration.fingerprint
+    recorder = (root / "scripts/record_m1b_alpha_ros.py").read_text(encoding="utf-8")
+    assert '"translation_m"' in recorder
+    assert '"rotation_xyzw"' in recorder
+    assert '"tf_chain_sha256"' in recorder
 
 
 def test_m1b_public_geometry_corrections_are_bounded_and_public_only(tmp_path: Path) -> None:
