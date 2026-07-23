@@ -105,6 +105,7 @@ BILATERAL_STEADY_WIDTH_RANGE_M = (0.045, 0.070)
 # 0.0944--0.1122 from the hand.  Rx(pi) maps that axis down, so a 0.550 m
 # hand origin presses the distal pad end into the tabletop.
 TABLE_TOUCH_HAND_Z_M = 0.550
+TABLE_TOUCH_PRECONTACT_STANDOFF_M = 0.100
 
 
 def calibration_bilateral_branch_seed() -> list[float]:
@@ -974,6 +975,14 @@ def table_touch_pose(cube_xyz: list[float]) -> Pose:
     return pose
 
 
+def table_touch_precontact_pose(cube_xyz: list[float]) -> Pose:
+    """Collision-free start for the S0 finger--table sensor condition."""
+
+    pose = table_touch_pose(cube_xyz)
+    pose.position.z += TABLE_TOUCH_PRECONTACT_STANDOFF_M
+    return pose
+
+
 def classify_contacts(events: dict[str, list[dict]], *, target_model: str = "object_red_cube") -> dict:
     pairs = {
         channel: sorted({(event["collision1"], event["collision2"]) for event in channel_events})
@@ -1235,9 +1244,18 @@ def main() -> int:
             if cube is None:
                 trials.append({"label": f"table_{index}", "expected": "finger_table", "reason": "RUNTIME_CUBE_POSE_UNAVAILABLE"})
                 continue
+            # Arrive above the table with ordinary collision checking, then
+            # make the only permitted finger--table interaction as a seeded,
+            # straight vertical descent. A direct OMPL path to the embedded
+            # endpoint can stall on a branch-dependent table collision before
+            # either finger reaches the sensor condition.
+            precontact = client.move_hand_pose(table_touch_precontact_pose(cube["xyz"]))
             exception_set = client.set_table_touch_exception(True)
-            motion = client.move_hand_pose(table_touch_pose(cube["xyz"])) if exception_set else {
-                "ik_solved": False, "planned": False, "executed": False
+            motion = client.move_hand_cartesian(table_touch_pose(cube["xyz"])) if (
+                exception_set and precontact.get("executed") and precontact.get("converged")
+            ) else {
+                "planned": False, "executed": False,
+                "reason": "TABLE_PRECONTACT_OR_EXCEPTION_UNAVAILABLE",
             }
             start = {name: len(events) for name, events in client.contacts.items()}
             client.contact_window(0.45)
@@ -1250,7 +1268,8 @@ def main() -> int:
             trials.append(
                 {
                     "label": f"table_{index}", "expected": "finger_table",
-                    "cube_pose": cube, "motion": motion, "retreat": retreat,
+                    "cube_pose": cube, "precontact_motion": precontact, "motion": motion, "retreat": retreat,
+                    "table_precontact_hand_pose": pose_vector(table_touch_precontact_pose(cube["xyz"])),
                     "table_contact_hand_pose": pose_vector(table_touch_pose(cube["xyz"])),
                     "table_contact_pad_evidence": table_contact_pad_evidence,
                     "calibration_only_allowed_collision_pairs": [

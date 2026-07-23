@@ -346,6 +346,10 @@ def test_m1a_contact_calibration_uses_oracle_geometry_hand_control_and_per_trial
     assert "target_cube_events" in client
     assert "BILATERAL_PRECONTACT_CLEARANCE_M = 0.001" in client
     assert "BILATERAL_PRECONTACT_VERTICAL_STANDOFF_M = 0.050" in client
+    assert "TABLE_TOUCH_PRECONTACT_STANDOFF_M = 0.100" in client
+    assert "def table_touch_precontact_pose" in client
+    assert "TABLE_PRECONTACT_OR_EXCEPTION_UNAVAILABLE" in client
+    assert "client.move_hand_cartesian(table_touch_pose" in client
     assert "BILATERAL_PRECONTACT_FINGER_M = 0.040" in client
     assert "BILATERAL_CONTACT_VERTICAL_OFFSET_M = 0.020" in client
     assert "BILATERAL_FINAL_FINGER_INSET_M = 0.0" in client
