@@ -39,6 +39,12 @@ POSE_RE = re.compile(
     r"\s*\[\s*([-+0-9.eE]+)\s+([-+0-9.eE]+)\s+([-+0-9.eE]+)\s*\]"
 )
 
+# ADR-0014 current industrial-cylinder class.  This collision proxy mirrors
+# the broker-attached physical object only for MoveIt transport planning; it
+# must stay aligned with the geometry used by the p90 and tolerance gates.
+M1B_CYLINDER_LENGTH_M = 0.080
+M1B_CYLINDER_RADIUS_M = 0.015
+
 
 def gazebo_pose(model: str, *, link: str | None = None) -> list[float] | None:
     # The Gazebo transport `gz model` CLI intermittently returns no pose under
@@ -108,7 +114,7 @@ def attach_cylinder_to_moveit(client: CalibrationClient, entity: str, cylinder_w
     attached.touch_links = ["panda_link7", "panda_link8", "panda_hand", "panda_leftfinger", "panda_rightfinger"]
     attached.object.id = entity
     attached.object.header.frame_id = "panda_link7"
-    attached.object.primitives = [SolidPrimitive(type=SolidPrimitive.CYLINDER, dimensions=[0.09, 0.025])]
+    attached.object.primitives = [SolidPrimitive(type=SolidPrimitive.CYLINDER, dimensions=[M1B_CYLINDER_LENGTH_M, M1B_CYLINDER_RADIUS_M])]
     pose = Pose()
     pose.position.x, pose.position.y, pose.position.z = relative_xyz
     pose.orientation.w = 1.0

@@ -355,6 +355,17 @@ def test_m1b_tolerance_attach_uses_detachablejoint_empty_payload() -> None:
     assert 'm1b_top_down_precontact + m1b_top_down_contact_descend' in source
 
 
+def test_m1b_acceptance_utilities_match_current_public_geometry_contract() -> None:
+    root = Path(__file__).parents[2]
+    roundtrip = (root / "scripts" / "run_m1b_attached_roundtrip.py").read_text(encoding="utf-8")
+    wrong_object = (root / "scripts" / "m1b_wrong_object_drill.py").read_text(encoding="utf-8")
+    assert "M1B_CYLINDER_LENGTH_M = 0.080" in roundtrip
+    assert "M1B_CYLINDER_RADIUS_M = 0.015" in roundtrip
+    assert "M1BPublicGeometryXYCorrectionV1" in wrong_object
+    assert "M1BTableSupportedCylinderCenterV1" in wrong_object
+    assert "UNIQUE_VACATED_PUBLIC_TRACK" in wrong_object
+
+
 def test_m1b_moveit_execution_waits_for_planned_trajectory() -> None:
     source = (Path(__file__).parents[2] / "scripts/m1a_moveit_execution_client.py").read_text()
     assert 'trajectory_duration_s = final_time.sec + final_time.nanosec * 1e-9' in source

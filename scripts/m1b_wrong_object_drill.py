@@ -28,12 +28,16 @@ for directory in (ROOT / "src", ROOT / "scripts"):
 
 from xh_agent.grasp.post_grasp import evaluate_post_grasp_identity, evaluator_supervision_record  # noqa: E402
 from xh_agent.recovery.manager import recovery_for  # noqa: E402
+from xh_agent.runtime.m1b_center_correction import M1BPublicGeometryXYCorrectionV1, M1BTableSupportedCylinderCenterV1  # noqa: E402
 from xh_agent.runtime.m1b_camera_calibration import M1BStaticCameraCalibrationV1  # noqa: E402
 
 VACATED_MATCH_M = 0.05
 
 
-def track_world_centres(evidence_path: Path, camera_info_path: Path, calibration: M1BStaticCameraCalibrationV1) -> dict[str, dict]:
+def track_world_centres(
+    evidence_path: Path, camera_info_path: Path, calibration: M1BStaticCameraCalibrationV1,
+    xy_correction: M1BPublicGeometryXYCorrectionV1, table_supported_z: M1BTableSupportedCylinderCenterV1,
+) -> dict[str, dict]:
     evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
     camera = json.loads(camera_info_path.read_text(encoding="utf-8"))
     intrinsics = camera.get("k", [])
@@ -46,7 +50,23 @@ def track_world_centres(evidence_path: Path, camera_info_path: Path, calibration
         if focal <= 0 or depth <= 0 or pix <= 0:
             continue
         diameter = pix * depth / focal
-        centre = calibration.visible_surface_to_center_world(tuple(float(v) for v in result["position_3d"]), diameter)
+        try:
+            surface = tuple(float(v) for v in result["position_3d"])
+            if len(surface) != 3:
+                continue
+            quality = result.get("covariance_or_quality", {})
+            support = tuple(float(quality[f"support_plane_optical_{axis}_m"]) for axis in ("x", "y", "z"))
+            baseline = calibration.visible_surface_to_center_world(surface, diameter)
+            xy_centre = xy_correction.correct_xy(
+                baseline, surface_optical_m=surface, perceived_diameter_m=diameter,
+                orientation_state=str(result.get("orientation_state", "unknown")),
+            )
+            centre = table_supported_z.correct_z(xy_centre, calibration.optical_to_world(support))
+        except (KeyError, TypeError, ValueError):
+            # Invalid public geometry remains absent; this makes vacancy
+            # association ambiguous or unobserved rather than guessing from
+            # the broker entity or evaluator supervision.
+            continue
         out[str(result["track_id"])] = {
             "track_id": str(result["track_id"]),
             "visual_color": result.get("attributes", {}).get("visual_color"),
@@ -80,10 +100,12 @@ def main() -> int:
     args = p.parse_args()
 
     calibration = M1BStaticCameraCalibrationV1.from_file(ROOT / "configs" / "m1b_camera_calibration.json")
+    xy_correction = M1BPublicGeometryXYCorrectionV1.from_file(ROOT / "configs" / "m1b_public_geometry_xy_correction.json")
+    table_supported_z = M1BTableSupportedCylinderCenterV1.from_file(ROOT / "configs" / "m1b_table_supported_cylinder_center.json")
     if bool(args.supervision) != bool(args.evaluation_target_entity):
         p.error("--supervision and --evaluation-target-entity must be supplied together for evaluator-only scoring")
-    pre = track_world_centres(args.pre_evidence, args.pre_camera_info, calibration)
-    post = track_world_centres(args.post_evidence, args.post_camera_info, calibration)
+    pre = track_world_centres(args.pre_evidence, args.pre_camera_info, calibration, xy_correction, table_supported_z)
+    post = track_world_centres(args.post_evidence, args.post_camera_info, calibration, xy_correction, table_supported_z)
     target_track_id = str(args.target_public_track_id)
 
     # Identify the carried public track by the vacated-spawn method: the
@@ -138,6 +160,10 @@ def main() -> int:
             "UNIQUE_VACATED_PUBLIC_TRACK" if carried_track_id is not None
             else "AMBIGUOUS_OR_UNOBSERVED_PUBLIC_VACANCY"
         ),
+        "public_center_estimator": {
+            "xy_correction_fingerprint": xy_correction.fingerprint,
+            "table_supported_z_fingerprint": table_supported_z.fingerprint,
+        },
     }
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
