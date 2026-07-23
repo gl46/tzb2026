@@ -372,6 +372,15 @@ def test_m1b_public_production_grasp_rejects_supervision_inputs() -> None:
     assert 'return f"m1b_public_{track_id}"' in source
 
 
+def test_m1b_public_target_selector_is_perception_only() -> None:
+    source = (Path(__file__).parents[2] / "scripts/select_m1b_public_grasp_target.py").read_text()
+    assert '"provenance": "PUBLIC_PERCEPTION_ONLY"' in source
+    assert '"online_truth_access": False' in source
+    assert 'M1BPublicGeometryXYCorrectionV1' in source
+    assert 'M1BTableSupportedCylinderCenterV1' in source
+    assert 'simulator_supervision' not in source
+
+
 def test_m1b_public_geometry_gate_passes_measured_inputs_by_name() -> None:
     source = (Path(__file__).parents[2] / "scripts/run_m1b_adr0016b_public_geometry_gate.sh").read_text()
     assert '--tolerance-trials reports/m1b-adr0016b-tolerance-envelope.json' in source
