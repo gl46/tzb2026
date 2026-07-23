@@ -1,32 +1,59 @@
 # M1B ADR-0016b acceptance status (2026-07-24)
 
-Status: **`NO_GO`**.
+Status: **`GO — ADR-0013 acceptance 3 and 4 PASS`**.
 
-The measured p90 gate remains closed: X/Y/Z perception p90 is 9.88 / 15.13 /
-17.30 mm, while the corresponding `0.6 × tolerance` limits are 9.0 / 9.0 /
-3.0 mm. The measured fallback-hand envelope is nonzero (15 / 15 / 5 mm), but
-that does not authorize ADR-0013 acceptance items 3 or 4.
+The current-geometry public perception gate is measured `GO`: held-out p90
+X/Y/Z is 2.295 / 4.793 / 2.080 mm, versus unchanged 0.6-times-envelope limits
+of 9 / 9 / 3 mm.  This supersedes the old 50 mm × 100 mm `NO_GO` audit and
+authorizes only fresh public-perception-driven acceptance records.
 
-The existing `m1b-adr0016b-attached-roundtrip` and
-`m1b-adr0016b-wrong-object-drill` files are diagnostic-only and must not be
-counted as accepted Beta evidence: they were executed while the p90 gate was
-`NO_GO`. The latter's former simulation-spawn proximity association has also
-been removed; current code accepts a carried public track only when exactly
-one pre-grasp public track is vacated, otherwise it fails closed and reobserves.
+## Acceptance 3 — physical round-trip
 
-The valid next work is to measure a contact-seeking terminal-descent candidate
-under the existing calibration-only boundary, then re-run the physical
-tolerance envelope and the unchanged p90 comparison. No threshold may be
-relaxed, and no acceptance drill may run unless that comparison becomes `GO`.
+The fresh industrial-world record is
+`reports/m1b-adr0013-current-geometry-attached-roundtrip.json` (SHA-256
+`30c103a07e9dbfdeb388a3c6315365e5adaf55937da02053cb3871756addac35`).
 
-## Terminal-descent calibration result
+- The production selection was public track `track-349bcd6a`; no simulator
+  truth was an online policy input.
+- The evaluator mirrored that public collision ID to `panda_link7` only after
+  the broker had physically attached its internal entity.
+- Attached motion executed and converged; link/object moved 28.523 / 28.503
+  mm with only 0.0077 mm relative drift.
+- Detach was observed, the physical hand was released, and the decouple move
+  executed with a 34.511 mm relative-change measurement.
 
-That bounded calibration candidate has now been rejected.  In its nominal
-zero-offset Gazebo probe, the retained continuous path reached the 120 mm
-baseline and staged moves to 115 and 110 mm executed, but all 223 contacts
-were left-finger-only; the next 105 mm point was rejected by IK (`-31`).  The
-broker correctly withheld close and attach.  See
-`m1b-contact-seek-terminal-descent-probe-20260724.md` for raw-record hashes
-and the precise protocol.  This is not a basis for an 81-trial rerun; M1B
-remains `NO_GO` until a new kinematic/contact primitive is reviewed and
-measured.
+The reset physical non-coupling source record SHA-256 is
+`163c11ba555d4b151070f767f8d05bef653205277bd698c95b31382d34fd7861`.
+The public selection and production-grasp source records are SHA-256
+`953173297a0dd4ba3a50da81b8c74a07a0f90a4c4fa2be1ee58af6ee43f55425` and
+`24e96196c778b8021c49817a8c914b34a7c43e96a5efdc771c5502f3350f09bf`.
+
+## Acceptance 4 — live WRONG_OBJECT drill
+
+The fresh drill is
+`reports/m1b-adr0013-current-geometry-wrong-object-drill.json` (SHA-256
+`8aedf30cdfacd135ac3f193cf25dd4f05f5044ccb48ed0b20a6dda0464f25626`).
+
+- The pre-actuation public task target was `track-edec3eae`; the deliberately
+  commanded non-target public track was `track-349bcd6a`.
+- The broker honestly attached `cylinder_03`; this identifier stays inside
+  actuation/evaluation records and never selected a public target.
+- A public collision-checked 100 mm lift and home-observation retreat exposed
+  the table without detach.  Three post-grasp public RGB-D observations each
+  recovered 9 tracks.  Their only persistent vacancy was
+  `track-349bcd6a`.
+- Before reading supervision, public identity comparison produced
+  `WRONG_OBJECT` and triggered
+  `Reobserve → SafePlaceNonTarget → ReassociateTarget → Approach → Regrasp`.
+  The later evaluator record scored `wrong_object=true`.
+
+The reset, intended-target selection, deliberately commanded selection,
+production grasp, and public lift/retreat source-record SHA-256 values are,
+respectively, `c64024015fcb59a45ce744f59e55e1d653c6f8f3883b97fe6161a5a4b713d5d8`,
+`c053b0610dda6b551cd0d94e74ad70310e91105499d756ed123a6e7705c23ac2`,
+`c478ca81ffb39803db9b314012cfaee349d1de4d7317796809496ad7892b3a7e`,
+`7999bdc365e0280b4a701cb7fc3014b78cd46087a18bb5ef11117c9501df0f77`, and
+`59f1ae4277d40ff0fcc5a4f44142ed818b8e634d00948dfa4c032b9dbafc3628`.
+
+The former diagnostic acceptance files remain historical only; they are not
+used by this conclusion.

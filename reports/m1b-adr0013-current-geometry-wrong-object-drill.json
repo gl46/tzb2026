@@ -1,0 +1,39 @@
+{
+  "schema_version": "M1BWrongObjectDrillEvidenceV1",
+  "provenance": "SUPERVISION_EVALUATION_ONLY",
+  "online_truth_access": false,
+  "target_public_track_id": "track-edec3eae",
+  "attached_entity": "cylinder_03",
+  "carried_public_track_id": "track-349bcd6a",
+  "vacated_pre_grasp_tracks": [
+    "track-349bcd6a"
+  ],
+  "identity_status": "WRONG_OBJECT",
+  "wrong_object_detected": true,
+  "recovery_triggered": true,
+  "recovery_subgoals": [
+    "Reobserve",
+    "SafePlaceNonTarget",
+    "ReassociateTarget",
+    "Approach",
+    "Regrasp"
+  ],
+  "supervision_record": {
+    "actual_sim_entity_id": "cylinder_03",
+    "wrong_object": true,
+    "truth_boundary": "evaluation_only_not_available_to_policy"
+  },
+  "pre_track_count": 10,
+  "post_track_count": 9,
+  "post_observation_count": 3,
+  "post_track_counts": [
+    9,
+    9,
+    9
+  ],
+  "carried_track_association": "UNIQUE_VACATED_PUBLIC_TRACK",
+  "public_center_estimator": {
+    "xy_correction_fingerprint": "8a48398a02824802a141c5ea9d2f8a857f7eabfde6f4d788666f3dcf39bea5e7",
+    "table_supported_z_fingerprint": "48c2a9632a01c26b6852f42c8adbf7076f6cb31de917974b2cd1902001d3e564"
+  }
+}

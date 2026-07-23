@@ -78,3 +78,37 @@ The approved revalidation was executed on a fresh current-geometry corpus:
 This GO authorizes only fresh, public-perception-driven ADR-0013 acceptance
 3 (round-trip) and acceptance 4 (WRONG_OBJECT). The superseded 50 mm × 100 mm
 audit and its diagnostic acceptance artifacts remain non-acceptance evidence.
+
+## Fresh ADR-0013 acceptance evidence (2026-07-24)
+
+Status: **PASS — acceptance 3 and 4 completed after the measured current-
+geometry GO.**
+
+Acceptance 3 is recorded in
+`reports/m1b-adr0013-current-geometry-attached-roundtrip.json` (SHA-256
+`30c103a07e9dbfdeb388a3c6315365e5adaf55937da02053cb3871756addac35`). The
+production grasp was selected from public RGB-D track `track-349bcd6a`. Only
+after the broker physically attached did the evaluator mirror the corresponding
+**public** collision ID into MoveIt. Attached motion moved the link/object
+28.523 / 28.503 mm with 0.0077 mm relative drift; detach was observed and the
+post-detach decouple moved 34.511 mm relative to the released object. The
+reset physical non-coupling input is SHA-256
+`163c11ba555d4b151070f767f8d05bef653205277bd698c95b31382d34fd7861`.
+
+Acceptance 4 is recorded in
+`reports/m1b-adr0013-current-geometry-wrong-object-drill.json` (SHA-256
+`8aedf30cdfacd135ac3f193cf25dd4f05f5044ccb48ed0b20a6dda0464f25626`). A
+public pre-actuation task target (`track-edec3eae`) was deliberately not the
+public commanded target (`track-349bcd6a`). The broker honestly attached the
+non-target. A public-only, collision-checked 100 mm lift followed by a
+collision-checked home observation retreat exposed the table without a detach.
+Across three post-grasp public RGB-D observations, `track-349bcd6a` was the
+unique persistent vacancy. The online public identity decision was therefore
+`WRONG_OBJECT`, and it triggered
+`Reobserve → SafePlaceNonTarget → ReassociateTarget → Approach → Regrasp`
+before supervision was read. Evaluator scoring subsequently recorded
+`wrong_object=true`.
+
+The production public-lift evidence has no simulator-entity input and no
+detach command; its source SHA-256 is
+`59f1ae4277d40ff0fcc5a4f44142ed818b8e634d00948dfa4c032b9dbafc3628`.
