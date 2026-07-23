@@ -284,7 +284,7 @@ def test_m1b_tolerance_attach_uses_detachablejoint_empty_payload() -> None:
     assert 'aperture_source.add_argument("--public-perception-evidence", type=Path' in source
     assert '"--enable-near-pregrasp-reobservation", action="store_true"' in source
     assert '"source": "CALIBRATION_FIXTURE_DECLARED_GEOMETRY"' in source
-    assert '"baseline_perception_free": args.calibration_fixture_diameter_m is not None' in source
+    assert '"baseline_perception_free": calibration_mode and not args.enable_near_pregrasp_reobservation' in source
     assert 'CALIBRATION_SETTLE_S = 2.0' in source
     assert 'def calibration_live_model_center(entity_name: str)' in source
     assert 'time.sleep(CALIBRATION_SETTLE_S)' in source
@@ -351,8 +351,25 @@ def test_m1b_tolerance_attach_uses_detachablejoint_empty_payload() -> None:
     assert 'def m1b_top_down_contact_descend(' in source
     assert '"tool_axis_world": [0.0, 0.0, -1.0]' in source
     assert '--public-free-gap-yaw-rad' in source
-    assert '"PUBLIC_PERCEPTION_FREE_GAP"' in source
+    assert '"PUBLIC_RGBD_FREE_GAP_GEOMETRY"' in source
     assert 'm1b_top_down_precontact + m1b_top_down_contact_descend' in source
+
+
+def test_m1b_public_production_grasp_rejects_supervision_inputs() -> None:
+    source = (Path(__file__).parents[2] / "scripts/run_m1b_tolerance_trial.py").read_text()
+    assert '"public production mode forbids --trial, --supervision, and --object-slot"' in source
+    assert '"public production requires --enable-near-pregrasp-reobservation"' in source
+    assert 'def public_tracks_from_evidence(' in source
+    assert 'def m1b_public_free_gap_yaw(' in source
+    assert 'def apply_public_cylinder_scene(' in source
+    assert '"PUBLIC_PERCEPTION_PRODUCTION"' in source
+    assert '"PUBLIC_RGBD_TRACKS"' in source
+    assert 'target_entity = str(target_label["actual_sim_entity_id"])' in source
+    # The privileged entity lookup remains exclusively under the calibration
+    # branch, while production receives its collision target from a public
+    # perception track with a namespace that cannot equal a simulator entity.
+    assert 'planning_target_id = public_collision_id(args.public_track_id)' in source
+    assert 'return f"m1b_public_{track_id}"' in source
 
 
 def test_m1b_acceptance_utilities_match_current_public_geometry_contract() -> None:

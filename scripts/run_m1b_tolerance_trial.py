@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Run one reset-isolated, calibration-only M1B tolerance trial.
+"""Run one reset-isolated M1B calibration or public-production grasp.
 
-The centre supplied here is privileged supervision and is confined to the
-initial target-pose calculation.  Contact selection and the optional attach
-request use only the M1B actuation-internal bridges, exactly as the production
-primitive does.  An outer runner is responsible for the mandatory full reset
-and for assigning three distinct scene/object slots to each grid point.
+Calibration mode admits privileged supervision only for the pre-authorized
+tolerance experiment. Public-production mode rejects every supervision input,
+constructs target and obstacle proxies from public RGB-D tracks, and asks the
+broker to identify an attached entity only from physical bilateral contacts.
+An outer runner owns the mandatory full reset and calibration worklist.
 """
 from __future__ import annotations
 
@@ -167,25 +167,17 @@ M1B_FREE_GAP_MIN_CLEARANCE_M = 0.005
 M1B_RESET_HOME_JOINTS_RAD = [0.0, -0.5, 0.0, -1.5, 0.0, 1.0, 0.0]
 
 
-def m1b_calibration_free_gap_yaw(
-    labels: list[dict[str, object]], target_entity: str, *, open_finger_m: float = 0.04,
-    neighbor_radius_m: float = 0.015,
+def m1b_free_gap_yaw_from_xy(
+    target_xy: list[float], neighbors: list[list[float]], *, source: str,
+    open_finger_m: float = 0.04, neighbor_radius_m: float = 0.015,
 ) -> dict[str, object]:
-    """Pick the descent yaw whose open-jaw sweep clears the labelled scene.
+    """Pick the safest open-jaw descent yaw from one explicit XY scene.
 
-    Pure geometry on calibration labels: each finger's descent footprint is
-    bounded by a circle of M1B_FINGER_SWEEP_BOUND_RADIUS_M around a centre
-    open_finger_m + M1B_FINGER_SWEEP_CENTER_OFFSET_M outward along the
-    closing axis.  The selected yaw maximises the minimum clearance to every
-    labelled neighbour; production replaces this with the perception
-    free-gap yaw.
+    The caller determines the source of the coordinates.  This shared helper
+    keeps the calibration-label geometry deliberately separate from the
+    production public-RGB-D geometry rather than quietly converting either
+    representation into the other.
     """
-    target = next(label for label in labels if str(label["actual_sim_entity_id"]) == target_entity)
-    target_xy = [float(v) for v in target["position_3d_world"][:2]]
-    neighbors = [
-        [float(v) for v in label["position_3d_world"][:2]]
-        for label in labels if str(label["actual_sim_entity_id"]) != target_entity
-    ]
     arm_offset = open_finger_m + M1B_FINGER_SWEEP_CENTER_OFFSET_M
     candidates = []
     for yaw_rad in M1B_CALIBRATION_FREE_GAP_YAW_CANDIDATES_RAD:
@@ -203,8 +195,25 @@ def m1b_calibration_free_gap_yaw(
         "min_clearance_m": best["min_clearance_m"],
         "clearance_ok": best["min_clearance_m"] >= M1B_FREE_GAP_MIN_CLEARANCE_M,
         "candidates": candidates,
-        "source": "CALIBRATION_LABEL_FREE_GAP_GEOMETRY",
+        "source": source,
     }
+
+
+def m1b_calibration_free_gap_yaw(
+    labels: list[dict[str, object]], target_entity: str, *, open_finger_m: float = 0.04,
+    neighbor_radius_m: float = 0.015,
+) -> dict[str, object]:
+    """Pick the descent yaw whose open-jaw sweep clears calibration labels."""
+    target = next(label for label in labels if str(label["actual_sim_entity_id"]) == target_entity)
+    target_xy = [float(v) for v in target["position_3d_world"][:2]]
+    neighbors = [
+        [float(v) for v in label["position_3d_world"][:2]]
+        for label in labels if str(label["actual_sim_entity_id"]) != target_entity
+    ]
+    return m1b_free_gap_yaw_from_xy(
+        target_xy, neighbors, source="CALIBRATION_LABEL_FREE_GAP_GEOMETRY",
+        open_finger_m=open_finger_m, neighbor_radius_m=neighbor_radius_m,
+    )
 
 
 def calibration_live_model_center(entity_name: str) -> list[float]:
@@ -338,6 +347,66 @@ def public_track_from_evidence(
         "table_supported_z_fingerprint": table_supported_z.fingerprint,
         "center_estimator": "public_rgbd_surface + frozen_public_geometry_xy + public_rgbd_support_plane_z",
     }
+
+
+def public_tracks_from_evidence(
+    evidence_path: Path, camera_info_path: Path,
+    calibration: M1BStaticCameraCalibrationV1,
+    xy_correction: M1BPublicGeometryXYCorrectionV1,
+    table_supported_z: M1BTableSupportedCylinderCenterV1,
+) -> tuple[dict[str, dict[str, object]], dict[str, object]]:
+    """Build a planning scene solely from valid public RGB-D tracks.
+
+    The rejection list is evidence, not a cue to fall back to a Gazebo model
+    name or pose.  A requested target absent from the returned mapping is a
+    fail-closed production admission failure.
+    """
+    raw = json.loads(evidence_path.read_text(encoding="utf-8"))
+    tracks: dict[str, dict[str, object]] = {}
+    rejected: list[dict[str, str]] = []
+    for result in raw.get("results", []):
+        track_id = str(result.get("track_id", ""))
+        if not track_id or track_id in tracks:
+            rejected.append({"track_id": track_id or "<missing>", "reason": "MISSING_OR_DUPLICATE_TRACK_ID"})
+            continue
+        try:
+            track, _ = public_track_from_evidence(
+                evidence_path, camera_info_path, track_id,
+                calibration, xy_correction, table_supported_z,
+            )
+        except (OSError, ValueError, SystemExit) as error:
+            rejected.append({"track_id": track_id, "reason": str(error)})
+            continue
+        tracks[track_id] = track
+    return tracks, {
+        "source": "ACTUAL_PUBLIC_RGBD_GEOMETRIC_OUTPUT",
+        "valid_track_count": len(tracks),
+        "rejected_tracks": rejected,
+        "xy_correction_fingerprint": xy_correction.fingerprint,
+        "table_supported_z_fingerprint": table_supported_z.fingerprint,
+    }
+
+
+def m1b_public_free_gap_yaw(
+    tracks: dict[str, dict[str, object]], target_track_id: str,
+) -> dict[str, object]:
+    """Choose the production descent yaw from public RGB-D centres only."""
+    target = tracks.get(target_track_id)
+    if target is None:
+        raise SystemExit("PUBLIC_TARGET_TRACK_NOT_ADMITTED_TO_PLANNING_SCENE")
+    target_xy = [float(value) for value in target["estimated_center_world_m"][:2]]
+    neighbours = [
+        [float(value) for value in track["estimated_center_world_m"][:2]]
+        for track_id, track in tracks.items() if track_id != target_track_id
+    ]
+    return m1b_free_gap_yaw_from_xy(
+        target_xy, neighbours, source="PUBLIC_RGBD_FREE_GAP_GEOMETRY",
+    )
+
+
+def public_collision_id(track_id: str) -> str:
+    """Keep public tracking IDs distinct from simulator entity identifiers."""
+    return f"m1b_public_{track_id}"
 
 
 def capture_near_public_observation(
@@ -845,14 +914,10 @@ def m1b_calibration_lateral_insertion(
     }
 
 
-def apply_calibration_cylinder_scene(client: CalibrationClient, labels: list[dict[str, object]]) -> bool:
-    """Add every supervised cylinder as a collision object during calibration.
-
-    This initialization-only scene prevents the planner from taking an arm or
-    finger trajectory through neighbouring physical cylinders.  It is not an
-    online policy input: production creates the equivalent obstacles from
-    public perception tracks before planning.
-    """
+def apply_m1b_cylinder_scene(
+    client: CalibrationClient, cylinders: list[tuple[str, list[float]]],
+) -> bool:
+    """Replace M1B cylinder collision proxies with one explicit input scene."""
     # Scene admission may assess several generated scenes in one MoveIt
     # session.  A diff only updates names it contains, so without this
     # separate removal a shorter later scene inherits collision objects from
@@ -866,7 +931,7 @@ def apply_calibration_cylinder_scene(client: CalibrationClient, labels: list[dic
     result = future.result()
     existing_ids = {
         item.id for item in (result.scene.world.collision_objects if result is not None else [])
-        if item.id in expected_ids
+        if item.id in expected_ids or item.id.startswith("m1b_public_")
     }
     removal = PlanningScene(is_diff=True)
     for object_id in sorted(existing_ids):
@@ -879,18 +944,44 @@ def apply_calibration_cylinder_scene(client: CalibrationClient, labels: list[dic
         return False
 
     scene = PlanningScene(is_diff=True)
-    for label in labels:
+    for object_id, center_world_m in cylinders:
         item = CollisionObject()
-        item.id = str(label["actual_sim_entity_id"])
+        item.id = object_id
         item.header.frame_id = "world"
         item.primitives = [SolidPrimitive(type=SolidPrimitive.CYLINDER, dimensions=[0.08, 0.015])]
         pose = Pose()
-        pose.position.x, pose.position.y, pose.position.z = (float(value) for value in label["position_3d_world"])
+        pose.position.x, pose.position.y, pose.position.z = (float(value) for value in center_world_m)
         pose.orientation.w = 1.0
         item.primitive_poses = [pose]
         item.operation = CollisionObject.ADD
         scene.world.collision_objects.append(item)
     return client.apply_scene_diff(scene)
+
+
+def apply_calibration_cylinder_scene(client: CalibrationClient, labels: list[dict[str, object]]) -> bool:
+    """Add every supervised cylinder as a calibration-only collision proxy."""
+    return apply_m1b_cylinder_scene(
+        client,
+        [
+            (str(label["actual_sim_entity_id"]), [float(value) for value in label["position_3d_world"]])
+            for label in labels
+        ],
+    )
+
+
+def apply_public_cylinder_scene(
+    client: CalibrationClient, tracks: dict[str, dict[str, object]],
+) -> bool:
+    """Build the production collision scene from public RGB-D tracks only."""
+    if not tracks:
+        return False
+    return apply_m1b_cylinder_scene(
+        client,
+        [
+            (public_collision_id(track_id), [float(value) for value in track["estimated_center_world_m"]])
+            for track_id, track in tracks.items()
+        ],
+    )
 
 
 def m1b_calibration_scene_labels_at_lift(
@@ -993,15 +1084,15 @@ def attach_and_observe(topic: str, state_topic: str) -> dict[str, object]:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--trial", required=True, type=Path, help="One record from the immutable worklist")
-    parser.add_argument("--supervision", required=True, type=Path)
-    parser.add_argument("--object-slot", required=True, type=int, help="1-based normal-object slot, calibration only")
+    parser.add_argument("--trial", type=Path, help="One immutable calibration worklist record")
+    parser.add_argument("--supervision", type=Path, help="Evaluator-only labels; calibration mode only")
+    parser.add_argument("--object-slot", type=int, help="1-based normal-object slot, calibration mode only")
     aperture_source = parser.add_mutually_exclusive_group(required=True)
     aperture_source.add_argument("--calibration-fixture-diameter-m", type=float, help="Declared physical cylinder diameter for the perception-free tolerance experiment")
     aperture_source.add_argument("--public-perception-evidence", type=Path, help="Actual public RGB-D geometric output for a production-style run")
     parser.add_argument("--public-camera-info", type=Path, help="Camera intrinsics paired with public perception evidence")
     parser.add_argument("--public-track-id", help="Production-side public target track ID")
-    parser.add_argument("--public-free-gap-yaw-rad", type=float, help="Perception-selected top-grasp yaw in the planning frame")
+    parser.add_argument("--public-free-gap-yaw-rad", type=float, help="Deprecated: production derives yaw from the public RGB-D scene")
     parser.add_argument("--public-xy-correction", type=Path, default=ROOT / "configs" / "m1b_public_geometry_xy_correction.json", help="Frozen train-only public RGB-D X/Y correction")
     parser.add_argument("--public-table-supported-z", type=Path, default=ROOT / "configs" / "m1b_table_supported_cylinder_center.json", help="Versioned public RGB-D support-plane Z estimator")
     parser.add_argument("--public-pipeline-python", default=os.environ.get("M1B_PUBLIC_PIPELINE_PYTHON", sys.executable), help="Python with the declared public RGB-D dependencies")
@@ -1018,15 +1109,31 @@ def main() -> int:
     parser.add_argument("--calibration-close-squeeze-m", type=float, help="Calibration-only close-squeeze probe below the perceived diameter; does not change the production default")
     parser.add_argument("--output", required=True, type=Path)
     args = parser.parse_args()
+    calibration_mode = args.calibration_fixture_diameter_m is not None
+    if calibration_mode:
+        if args.trial is None or args.supervision is None or args.object_slot is None:
+            raise SystemExit("calibration mode requires --trial, --supervision, and --object-slot")
+    else:
+        if args.trial is not None or args.supervision is not None or args.object_slot is not None:
+            raise SystemExit("public production mode forbids --trial, --supervision, and --object-slot")
+        if args.public_perception_evidence is None or args.public_camera_info is None or not args.public_track_id:
+            raise SystemExit("public production mode requires perception evidence, camera info, and target track")
+        if args.public_free_gap_yaw_rad is not None:
+            raise SystemExit("public production derives free-gap yaw from RGB-D tracks; do not supply --public-free-gap-yaw-rad")
+        if not args.enable_near_pregrasp_reobservation:
+            raise SystemExit("public production requires --enable-near-pregrasp-reobservation")
     global M1B_TOP_CONTACT_CENTERLINE_Z_M
     if args.calibration_top_contact_height_m is not None:
         if args.calibration_fixture_diameter_m is None or not 0.10 <= args.calibration_top_contact_height_m <= 0.14:
             raise SystemExit("--calibration-top-contact-height-m requires calibration mode and must be in [0.10, 0.14] m")
         M1B_TOP_CONTACT_CENTERLINE_Z_M = args.calibration_top_contact_height_m
-    trial = json.loads(args.trial.read_text(encoding="utf-8"))
-    if trial.get("provenance") != "CALIBRATION_ONLY_INITIALIZATION":
-        raise SystemExit("trial is not calibration-only")
-    if args.calibration_hand_y_bias_m is not None and args.calibration_fixture_diameter_m is None:
+    trial: dict[str, object] | None = None
+    if calibration_mode:
+        assert args.trial is not None
+        trial = json.loads(args.trial.read_text(encoding="utf-8"))
+        if trial.get("provenance") != "CALIBRATION_ONLY_INITIALIZATION":
+            raise SystemExit("trial is not calibration-only")
+    if args.calibration_hand_y_bias_m is not None and not calibration_mode:
         raise SystemExit("--calibration-hand-y-bias-m is calibration-only")
     if args.calibration_keep_target_collision_through_descend and args.calibration_fixture_diameter_m is None:
         raise SystemExit("--calibration-keep-target-collision-through-descend is calibration-only")
@@ -1052,25 +1159,34 @@ def main() -> int:
         if args.calibration_fixture_diameter_m is None or not 0.0 <= args.calibration_close_squeeze_m <= 0.004:
             raise SystemExit("--calibration-close-squeeze-m requires calibration mode and must be in [0.0, 0.004] m")
     hand_y_centerline_bias_m = M1B_NORMAL_HAND_Y_CENTERLINE_BIAS_M if args.calibration_hand_y_bias_m is None else args.calibration_hand_y_bias_m
-    axis = str(trial["axis"])
-    if axis not in {"x", "y", "z"}:
-        raise SystemExit("trial axis must be x, y, or z")
-    labels = json.loads(args.supervision.read_text(encoding="utf-8"))["simulator_supervision"]["objects"]
-    normal = [label for label in labels if label["orientation_state"] == "normal"]
-    if not 1 <= args.object_slot <= len(normal):
-        raise SystemExit(f"object slot must be in [1, {len(normal)}]")
-    target_label = normal[args.object_slot - 1]
-    target_entity = str(target_label["actual_sim_entity_id"])
-    # Spawn labels are not assumed to remain physical truth after gravity and
-    # the mandatory settling window.  This is evaluator-only calibration
-    # initialization, explicitly outside online policy input.
-    time.sleep(CALIBRATION_SETTLE_S)
-    truth_center = calibration_live_model_center(target_entity)
-    calibration_motion: dict[str, object] | None = (
-        {"initial_center_world_m": truth_center} if args.calibration_fixture_diameter_m is not None else None
-    )
-    target = list(truth_center)
-    target["xyz".index(axis)] += float(trial["offset_m"])
+    labels: list[dict[str, object]] = []
+    target_entity: str | None = None
+    planning_target_id: str | None = None
+    truth_center: list[float] | None = None
+    public_tracks: dict[str, dict[str, object]] = {}
+    public_scene_evidence: dict[str, object] | None = None
+    axis: str | None = None
+    if calibration_mode:
+        assert args.supervision is not None and args.object_slot is not None and trial is not None
+        axis = str(trial["axis"])
+        if axis not in {"x", "y", "z"}:
+            raise SystemExit("trial axis must be x, y, or z")
+        labels = json.loads(args.supervision.read_text(encoding="utf-8"))["simulator_supervision"]["objects"]
+        normal = [label for label in labels if label["orientation_state"] == "normal"]
+        if not 1 <= args.object_slot <= len(normal):
+            raise SystemExit(f"object slot must be in [1, {len(normal)}]")
+        target_label = normal[args.object_slot - 1]
+        target_entity = str(target_label["actual_sim_entity_id"])
+        planning_target_id = target_entity
+        # Spawn labels are not assumed to remain physical truth after gravity
+        # and the mandatory settling window. This is evaluator-only
+        # calibration initialization, explicitly outside online policy input.
+        time.sleep(CALIBRATION_SETTLE_S)
+        truth_center = calibration_live_model_center(target_entity)
+        target = list(truth_center)
+        target["xyz".index(axis)] += float(trial["offset_m"])
+    else:
+        target = []
     calibration: M1BStaticCameraCalibrationV1 | None = None
     xy_correction: M1BPublicGeometryXYCorrectionV1 | None = None
     table_supported_z: M1BTableSupportedCylinderCenterV1 | None = None
@@ -1087,20 +1203,32 @@ def main() -> int:
         top_grasp_yaw_rad = float(free_gap_yaw["selected_yaw_rad"])
         top_grasp_yaw_source = "CALIBRATION_LABEL_FREE_GAP_GEOMETRY"
     else:
-        if args.public_perception_evidence is None or args.public_camera_info is None or not args.public_track_id or args.public_free_gap_yaw_rad is None:
-            raise SystemExit("public perception evidence, camera info, target track, and free-gap yaw are required together")
-        if not math.isfinite(args.public_free_gap_yaw_rad):
-            raise SystemExit("public free-gap yaw must be finite")
+        assert args.public_perception_evidence is not None and args.public_camera_info is not None and args.public_track_id
         calibration = M1BStaticCameraCalibrationV1.from_file(ROOT / "configs" / "m1b_camera_calibration.json")
         xy_correction = M1BPublicGeometryXYCorrectionV1.from_file(args.public_xy_correction)
         table_supported_z = M1BTableSupportedCylinderCenterV1.from_file(args.public_table_supported_z)
-        initial_public_track, public_evidence = public_track_from_evidence(
+        public_tracks, public_scene_evidence = public_tracks_from_evidence(
+            args.public_perception_evidence, args.public_camera_info,
+            calibration, xy_correction, table_supported_z,
+        )
+        initial_public_track = public_tracks.get(args.public_track_id)
+        if initial_public_track is None:
+            raise SystemExit("PUBLIC_TARGET_TRACK_NOT_ADMITTED_TO_PLANNING_SCENE")
+        _, public_evidence = public_track_from_evidence(
             args.public_perception_evidence, args.public_camera_info, args.public_track_id,
             calibration, xy_correction, table_supported_z,
         )
         perceived_diameter_m = float(initial_public_track["perceived_diameter_m"])
-        top_grasp_yaw_rad = float(args.public_free_gap_yaw_rad)
-        top_grasp_yaw_source = "PUBLIC_PERCEPTION_FREE_GAP"
+        target = [float(value) for value in initial_public_track["estimated_center_world_m"]]
+        planning_target_id = public_collision_id(args.public_track_id)
+        free_gap_yaw = m1b_public_free_gap_yaw(public_tracks, args.public_track_id)
+        if not free_gap_yaw["clearance_ok"]:
+            raise SystemExit(f"PUBLIC_FREE_GAP_YAW_CLEARANCE_REJECTED:{free_gap_yaw['min_clearance_m']:.4f}")
+        top_grasp_yaw_rad = float(free_gap_yaw["selected_yaw_rad"])
+        top_grasp_yaw_source = "PUBLIC_RGBD_FREE_GAP_GEOMETRY"
+    calibration_motion: dict[str, object] | None = (
+        {"initial_center_world_m": truth_center} if calibration_mode else None
+    )
     if args.enable_near_pregrasp_reobservation and initial_public_track is None:
         raise SystemExit("near-pregrasp reobservation requires public perception evidence")
     close_targets, aperture = m1b_close_finger_targets_from_perceived_diameter(
@@ -1152,7 +1280,10 @@ def main() -> int:
         near_reobservation: dict[str, object] = {"attempted": False, "succeeded": False}
         contact_start_index = len(raw)
         if ready:
-            cylinder_scene_applied = apply_calibration_cylinder_scene(client, labels)
+            cylinder_scene_applied = (
+                apply_calibration_cylinder_scene(client, labels)
+                if calibration_mode else apply_public_cylinder_scene(client, public_tracks)
+            )
             # Keep the target collision-checked through the entire transit to
             # high precontact.  Enabling finger/target contact early lets a
             # planner legally side-swipe the free cylinder before close,
@@ -1184,11 +1315,13 @@ def main() -> int:
             # bounded terminal convergence evidence.
             approach_motion_accepted = bool(approach.get("executed") and approach.get("converged"))
             if calibration_motion is not None:
+                assert target_entity is not None and truth_center is not None
                 after_pregrasp = calibration_live_model_center(target_entity)
                 calibration_motion["after_pregrasp_center_world_m"] = after_pregrasp
                 calibration_motion["pregrasp_displacement_world_xyz_m"] = calibration_displacement_m(truth_center, after_pregrasp)
             if approach_motion_accepted and open_hand.get("succeeded") and not args.calibration_keep_target_collision_through_descend:
-                target_touch_exception_applied = client.set_target_touch_exception(True, target_id=target_entity)
+                assert planning_target_id is not None
+                target_touch_exception_applied = client.set_target_touch_exception(True, target_id=planning_target_id)
             final_target = list(target)
             if target_touch_exception_applied and args.enable_near_pregrasp_reobservation:
                 assert initial_public_track is not None and calibration is not None and xy_correction is not None and table_supported_z is not None
@@ -1311,8 +1444,10 @@ def main() -> int:
                 # This exception is narrowly scoped to the final insert.  A
                 # failed candidate must leave the planning scene restored
                 # before it is recorded or any later motion is considered.
+                assert target_entity is not None
                 lateral_target_touch_exception_restored = client.set_target_touch_exception(False, target_id=target_entity)
             if calibration_motion is not None and contact_descend.get("executed"):
+                assert target_entity is not None and truth_center is not None
                 after_descend = calibration_live_model_center(target_entity)
                 calibration_motion["after_descend_center_world_m"] = after_descend
                 calibration_motion["descend_displacement_world_xyz_m"] = calibration_displacement_m(truth_center, after_descend)
@@ -1395,13 +1530,27 @@ def main() -> int:
             attach = attach_and_observe(str(internal["attach_topic"]), f"/xh/m1b/{entity}/grasp_state")
         payload = {
             "schema_version": "M1BToleranceTrialEvidenceV1",
-            "provenance": "CALIBRATION_ONLY_INITIALIZATION",
+            "provenance": "CALIBRATION_ONLY_INITIALIZATION" if calibration_mode else "PUBLIC_PERCEPTION_PRODUCTION",
             "trial": trial,
-            "supervision_initialization": {"orientation_state": "normal", "object_slot": args.object_slot, "actual_sim_entity_id": target_entity, "settle_s": CALIBRATION_SETTLE_S, "truth_center_source": "EVALUATOR_ONLY_GAZEBO_MODEL_POSE_AFTER_SETTLE", "truth_center_used_only_for_initial_target_pose": truth_center},
+            "supervision_initialization": (
+                {"orientation_state": "normal", "object_slot": args.object_slot, "actual_sim_entity_id": target_entity,
+                 "settle_s": CALIBRATION_SETTLE_S,
+                 "truth_center_source": "EVALUATOR_ONLY_GAZEBO_MODEL_POSE_AFTER_SETTLE",
+                 "truth_center_used_only_for_initial_target_pose": truth_center}
+                if calibration_mode else None
+            ),
             "public_aperture_input": {**public_evidence, **aperture},
+            "public_collision_scene": public_scene_evidence if not calibration_mode else None,
+            "public_planning_target": (
+                {"track_id": args.public_track_id, "collision_id": planning_target_id,
+                 "estimated_center_world_m": target}
+                if not calibration_mode else None
+            ),
             "near_pregrasp_public_reobservation": near_reobservation,
-            "baseline_perception_free": args.calibration_fixture_diameter_m is not None and not args.enable_near_pregrasp_reobservation,
-            "offset_vector_m": [target[index] - truth_center[index] for index in range(3)],
+            "baseline_perception_free": calibration_mode and not args.enable_near_pregrasp_reobservation,
+            "offset_vector_m": (
+                [target[index] - truth_center[index] for index in range(3)] if truth_center is not None else None
+            ),
             "production_grasp_primitive": (
                 "open_physical_hand + m1b_top_down_precontact + m1b_top_down_contact_seek_descent "
                 "+ close_physical_hand + m1b_internal_bilateral_broker"
@@ -1410,12 +1559,16 @@ def main() -> int:
                 "+ close_physical_hand + m1b_internal_bilateral_broker"
             ),
             "top_grasp_yaw": {"yaw_rad": top_grasp_yaw_rad, "source": top_grasp_yaw_source},
-            "calibration_free_gap_yaw": free_gap_yaw if args.calibration_fixture_diameter_m is not None else None,
+            "calibration_free_gap_yaw": free_gap_yaw if calibration_mode else None,
+            "public_free_gap_yaw": free_gap_yaw if not calibration_mode else None,
             "calibration_yaw_retry_attempts": yaw_retry_attempts if ready else [],
             "calibration_top_contact_height_m": args.calibration_top_contact_height_m,
             "calibration_close_squeeze_m": args.calibration_close_squeeze_m,
             "contact_seeking_terminal_descent_enabled": args.enable_contact_seeking_terminal_descent,
-            "ready": ready, "calibration_collision_scene_applied": cylinder_scene_applied if ready else False, "target_touch_exception_applied": target_touch_exception_applied if ready else False,
+            "ready": ready,
+            "cylinder_collision_scene_applied": cylinder_scene_applied if ready else False,
+            "collision_scene_source": "CALIBRATION_SUPERVISION" if calibration_mode else "PUBLIC_RGBD_TRACKS",
+            "target_touch_exception_applied": target_touch_exception_applied if ready else False,
             # The non-contact pregrasp must converge to its planned terminal
             # state.  The final descent deliberately permits contact to
             # prevent the controller from driving through a free cylinder;
