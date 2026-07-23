@@ -7,6 +7,11 @@ X/Y/Z is 2.295 / 4.793 / 2.080 mm, versus unchanged 0.6-times-envelope limits
 of 9 / 9 / 3 mm.  This supersedes the old 50 mm × 100 mm `NO_GO` audit and
 authorizes only fresh public-perception-driven acceptance records.
 
+The matching beta spawn evidence is
+`reports/m1b-adr0013-per-object-spawn-provenance.json`: the remote generated
+SDF manifest verified 11 per-cylinder detachable contracts, with only the
+finger mimic and detachable plugin blocks differing from the source model.
+
 ## Acceptance 3 — physical round-trip
 
 The fresh industrial-world record is
@@ -32,7 +37,7 @@ The public selection and production-grasp source records are SHA-256
 
 The fresh drill is
 `reports/m1b-adr0013-current-geometry-wrong-object-drill.json` (SHA-256
-`8aedf30cdfacd135ac3f193cf25dd4f05f5044ccb48ed0b20a6dda0464f25626`).
+`62e45bca91156a40e071a759e0c8311a9ab8eb5a36013fdc6a40bf984dd3bfc7`).
 
 - The pre-actuation public task target was `track-edec3eae`; the deliberately
   commanded non-target public track was `track-349bcd6a`.
@@ -45,7 +50,9 @@ The fresh drill is
 - Before reading supervision, public identity comparison produced
   `WRONG_OBJECT` and triggered
   `Reobserve → SafePlaceNonTarget → ReassociateTarget → Approach → Regrasp`.
-  The later evaluator record scored `wrong_object=true`.
+  The later evaluator record scored `wrong_object=true`. Its episode record
+  includes static-TF frame names, numeric transform values, and chain SHA-256
+  `3749611ee229c40b0109edcfbec3f3d7f7d80b3e7baf9b59cd25bd2eb0046573`.
 
 The reset, intended-target selection, deliberately commanded selection,
 production grasp, and public lift/retreat source-record SHA-256 values are,

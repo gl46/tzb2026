@@ -79,6 +79,11 @@ This GO authorizes only fresh, public-perception-driven ADR-0013 acceptance
 3 (round-trip) and acceptance 4 (WRONG_OBJECT). The superseded 50 mm × 100 mm
 audit and its diagnostic acceptance artifacts remain non-acceptance evidence.
 
+The corresponding generated-SDF provenance is recorded in
+`reports/m1b-adr0013-per-object-spawn-provenance.json`. Its node2 manifest
+verified the 11 per-cylinder attach/detach/grasp-state contracts and reports
+only the allowed finger-mimic plus detachable-plugin whitelist deltas.
+
 ## Fresh ADR-0013 acceptance evidence (2026-07-24)
 
 Status: **PASS — acceptance 3 and 4 completed after the measured current-
@@ -97,7 +102,7 @@ reset physical non-coupling input is SHA-256
 
 Acceptance 4 is recorded in
 `reports/m1b-adr0013-current-geometry-wrong-object-drill.json` (SHA-256
-`8aedf30cdfacd135ac3f193cf25dd4f05f5044ccb48ed0b20a6dda0464f25626`). A
+`62e45bca91156a40e071a759e0c8311a9ab8eb5a36013fdc6a40bf984dd3bfc7`). A
 public pre-actuation task target (`track-edec3eae`) was deliberately not the
 public commanded target (`track-349bcd6a`). The broker honestly attached the
 non-target. A public-only, collision-checked 100 mm lift followed by a
@@ -107,7 +112,9 @@ unique persistent vacancy. The online public identity decision was therefore
 `WRONG_OBJECT`, and it triggered
 `Reobserve → SafePlaceNonTarget → ReassociateTarget → Approach → Regrasp`
 before supervision was read. Evaluator scoring subsequently recorded
-`wrong_object=true`.
+`wrong_object=true`. The record includes the permitted static-TF chain's frame
+names, numeric transform, and SHA-256
+`3749611ee229c40b0109edcfbec3f3d7f7d80b3e7baf9b59cd25bd2eb0046573`.
 
 The production public-lift evidence has no simulator-entity input and no
 detach command; its source SHA-256 is
