@@ -714,6 +714,7 @@ class CalibrationClient(EvidenceClient):
     def move_hand_cartesian(
         self, pose: Pose, *, duration_s: float = 3.0, max_step_m: float = 0.005,
         max_joint_step_rad: float = 0.35, ik_link: str = "panda_hand",
+        ik_seed: list[float] | None = None,
     ) -> dict:
         """Plan and execute a straight tool-frame segment to one pose.
 
@@ -741,7 +742,11 @@ class CalibrationClient(EvidenceClient):
         length_m = math.sqrt(sum(value ** 2 for value in segment))
         steps = max(2, math.ceil(length_m / max_step_m))
         waypoints: list[list[float]] = []
-        seed = positions
+        # A staged Cartesian primitive may intentionally issue multiple short
+        # controller actions.  Preserve the verified branch across actions
+        # when the caller supplies its prior planned endpoint; otherwise a
+        # solver can select an unrelated valid branch at a waypoint boundary.
+        seed = list(ik_seed) if ik_seed is not None else positions
         for index in range(1, steps + 1):
             ratio = index / steps
             waypoint = Pose()
@@ -790,6 +795,7 @@ class CalibrationClient(EvidenceClient):
         return {
             "planned": True, "cartesian": True, "fraction": 1.0,
             "planning_method": "SEEDED_PER_WAYPOINT_COLLISION_AWARE_IK",
+            "ik_seed_source": "caller_previous_cartesian_endpoint" if ik_seed is not None else "current_joint_state",
             "max_step_m": max_step_m, "duration_s": duration_s, "point_count": len(points),
             "executed": executed, "converged": converged, "goal_uuid": goal_uuid,
             "joint_state_samples": len(samples),

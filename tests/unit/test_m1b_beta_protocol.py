@@ -224,6 +224,10 @@ def test_m1b_tolerance_attach_uses_detachablejoint_empty_payload() -> None:
     assert '"--enable-contact-seeking-terminal-descent", action="store_true"' in source
     assert 'contact_samples_since_seek_start=lambda: raw[seek_contact_start_index:]' in source
     assert 'contact_descend.get("seek_contact_found")' in source
+    assert 'ik_seed=ik_seed' in source
+    calibration = (Path(__file__).parents[2] / "scripts/m1a_contact_calibration_client.py").read_text()
+    assert 'ik_seed: list[float] | None = None' in calibration
+    assert '"caller_previous_cartesian_endpoint"' in calibration
     assert 'M1B_NORMAL_PRECONTACT_HAND_Z_OFFSET_M = 0.220' in source
     assert 'M1B_NORMAL_CONTACT_HAND_Z_OFFSET_M = 0.065' in source
     assert 'M1B_NORMAL_SIDE_HAND_X_OFFSET_M = -0.080' in source

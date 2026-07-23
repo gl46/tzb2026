@@ -494,6 +494,7 @@ def m1b_top_down_contact_seek_descent(
     """
 
     waypoints: list[dict[str, object]] = []
+    ik_seed: list[float] | None = None
     for hand_z_offset_m in descending_contact_seek_offsets_m(
         start_m=M1B_TOP_CONTACT_CENTERLINE_Z_M + M1B_TOP_PRECONTACT_STANDOFF_M,
         minimum_m=M1B_CONTACT_SEEK_MIN_HAND_Z_OFFSET_M,
@@ -505,6 +506,7 @@ def m1b_top_down_contact_seek_descent(
                 hand_y_centerline_bias_m=hand_y_centerline_bias_m, yaw_rad=yaw_rad,
             ),
             duration_s=M1B_CONTACT_SEEK_WAYPOINT_DURATION_S,
+            ik_seed=ik_seed,
         )
         entry: dict[str, object] = {
             "hand_z_offset_m": hand_z_offset_m,
@@ -519,6 +521,17 @@ def m1b_top_down_contact_seek_descent(
                 "reason": "CONTACT_SEEK_WAYPOINT_MOTION_REJECTED",
                 "waypoints": waypoints,
             }
+        expected = motion.get("expected_final_joints")
+        if not isinstance(expected, list) or len(expected) != 7:
+            entry["seek_result"] = "MOTION_ENDPOINT_SEED_UNAVAILABLE"
+            waypoints.append(entry)
+            return {
+                "executed": False, "converged": False,
+                "seek_contact_found": False,
+                "reason": "CONTACT_SEEK_MOTION_ENDPOINT_SEED_UNAVAILABLE",
+                "waypoints": waypoints,
+            }
+        ik_seed = [float(value) for value in expected]
         deadline = time.monotonic() + M1B_CONTACT_SEEK_OBSERVATION_S
         while time.monotonic() < deadline:
             rclpy.spin_once(client, timeout_sec=0.02)
