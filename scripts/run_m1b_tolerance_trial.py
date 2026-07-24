@@ -66,9 +66,19 @@ M1B_NORMAL_SIDE_IK_SEED = [
 # ADR-0016b (franka-copy hand) re-measured the centreline with bounded
 # zero-offset probes: 100 mm fails the descent corridor (seeded-IK branch
 # fold), 110 mm passed 2/4 with single-sided dead-band failures, and 120 mm
-# passed the full bilateral+attach predicate 2/2 under the two-stage close,
-# so the production centreline remains the measured 120 mm.
-M1B_TOP_CONTACT_CENTERLINE_Z_M = 0.120
+# passed the full bilateral+attach predicate 2/2 under the two-stage close.
+# The centreline was then re-derived from the measured Z-envelope bounds
+# (reports/m1b-adr0016b-z-envelope-geometry.md).  The Z axis is clamped by two
+# hard geometric bounds that move oppositely with this constant:
+#   negative delta: the palm box bottom (hand-frame local z 0.0660) must clear
+#     the cylinder top face  ->  delta >= 0.106 - H
+#   positive delta: the plate tip (local z 0.1122) must stay below the measured
+#     +17.8 mm tipping height  ->  delta <= 0.130 - H
+# They meet at H = 0.118 m, which maximises the symmetric envelope.  Measured
+# confirmation: at 120 mm the +10 mm grid point sat exactly on the tipping
+# bound and scored 1/3; at 118 mm it scores 2/3 while -10 mm holds 3/3, so the
+# measurable envelope doubles from 5 mm to >= 10 mm.
+M1B_TOP_CONTACT_CENTERLINE_Z_M = 0.118
 M1B_TOP_PRECONTACT_STANDOFF_M = 0.150
 # ADR-0013 Amendment 2: replace the fixed final height only when this explicit
 # primitive is selected.  The search always moves along the already-verified

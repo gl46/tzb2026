@@ -55,7 +55,11 @@ fi
 calibration_top_contact_height_m="${M1B_TOLERANCE_TOP_CONTACT_HEIGHT_M:-}"
 top_contact_height_args=()
 if [[ -n "$calibration_top_contact_height_m" ]]; then
-  if ! [[ "$calibration_top_contact_height_m" =~ ^0\.(10|11|12|13|14)$ ]]; then
+  # Millimetre resolution inside the same bounded [0.10, 0.14] m range: the
+  # measured Z-envelope optimum balances the palm-vs-cylinder-top descent limit
+  # (delta >= 106 mm - H) against the contact-height tipping limit
+  # (delta <= 130 mm - H), which meet at H = 118 mm rather than on a 10 mm grid.
+  if ! [[ "$calibration_top_contact_height_m" =~ ^0\.1[0-4]$|^0\.1[0-3][0-9]$ ]]; then
     echo "INVALID_TOP_CONTACT_HEIGHT_M:$calibration_top_contact_height_m" >&2
     exit 2
   fi
