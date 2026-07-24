@@ -57,3 +57,41 @@ Near-pregrasp reobservation then closes the modest x/y margins.
 Neither lever is another hand iteration; the ADR-0016b hand's grasp envelope
 is nonzero and measured. This is a perception-accuracy / descent-tolerance
 problem, cleanly separated from the topology work.
+
+---
+
+## Addendum (2026-07-24): both premises of the analysis above have changed
+
+This analysis was written against perception metrics measuring p90 X/Y/Z =
+9.88 / 15.13 / 17.30 mm. Both of its inputs have since been superseded, and the
+conclusion it reached — "Z needs a 5.8× depth-error cut that reobservation
+cannot deliver" — is no longer the operative problem.
+
+**1. The perception side was fixed, and it was not sensor accuracy.** The
+17.30 mm Z p90 was a measurement artifact of cross-contaminated RGB-D capture,
+not a depth-sensor limit. Isolating each capture into its own world and process
+group (`fix: isolate each M1B RGB-D capture world`, `fix: isolate RGB-D capture
+process groups`) and re-gating centres on public geometry brought the
+current-geometry held-out p90 to **2.295 / 4.793 / 2.080 mm** — a 4–8× drop,
+which no amount of moving the camera closer would have produced. The gate is
+now measured `GO` (`reports/m1b-adr0016b-current-geometry-reachability-gate.json`).
+
+**2. The recommended contact-seeking descent was implemented and measured-
+rejected.** Its bounded zero-offset probe reached the 120 mm baseline and staged
+115 and 110 mm, but all 223 contacts were left-finger-only and 105 mm was
+rejected by IK −31; the broker correctly withheld close and attach
+(`docs: record rejected M1B contact-seek probe`).
+
+**3. What actually remained was the envelope side of the same ratio.** With the
+perception numerator fixed, the gate passed but only by **0.92 mm** on Z
+(`0.6 × 5 mm = 3.0 mm` limit vs 2.080 mm p90). Since the gate is a p90
+statistic while a grasp needs per-trial accuracy, a sub-millimetre margin still
+leaves a meaningful fraction of individual trials outside tolerance — which is
+precisely the "acceptance passed when recorded, will not replay stably" gap.
+
+The resolution is in `reports/m1b-adr0016b-z-envelope-geometry.md`: the 5 mm Z
+envelope was two hard geometric bounds (palm-vs-cylinder-top below, plate-tip
+tipping above) whose opposite sensitivity to the contact centreline meets at
+**118 mm**, not the 120 mm in use. Re-deriving that constant doubles the
+measurable envelope and takes the Z margin to ~3.9 mm. So the lever was neither
+perception accuracy nor a new descent primitive — it was one geometry constant.
