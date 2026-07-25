@@ -1,6 +1,16 @@
-# M1B Z-envelope: the 5 mm limit is two hard geometric bounds, not grasp noise
+# M1B Z-envelope: two hard geometric bounds, and a noise-dominated measurement
 
-Status: **root cause proven; optimum contact centreline derived and under measurement.**
+Status: **two findings, both root-caused.** (1) The Z envelope's two bounds are
+hard geometry, proven and movable — the optimum centreline is 118 mm, not the
+120 mm in use. (2) More importantly, at the measured ~65 % per-trial reliability
+the *envelope numbers themselves are lottery draws*, so reliability — not
+envelope width — is the real blocker for both measurement and demonstration.
+See the addendum for (2), which supersedes the framing of (1) as the headline.
+
+The immediate reliability defect found and fixed: a **+1 mm hand-chain bias
+measured on the pre-ADR-0016 hand** was still being applied against a measured
+**±2.5 mm** both-pad contact band, consuming ~40 % of the error budget for no
+geometric reason.
 
 The ADR-0016b campaign measured a Z tolerance envelope of only 5 mm (versus
 15 mm on X and Y), which left the perception gate passing by just 0.92 mm
@@ -112,3 +122,134 @@ into two boxes flanking that channel would move the palm bound by 7.6 mm
 (`δ ≥ 0.0984 − H`), giving `H ≈ 114 mm` and `E ≈ 16 mm`. That is a robot-model
 change and carries the full revalidation cascade, so it is recorded as the
 next lever rather than taken here.
+
+---
+
+## Addendum: the envelope numbers are noise-dominated, and that is the deeper finding
+
+The 118 mm revalidation was stopped after 22 of 81 trials because its partial
+X-axis results exposed a problem with the measurement itself rather than with
+the centreline:
+
+| X offset | H = 120 mm (81-trial run) | H = 118 mm (partial run) |
+| --- | --- | --- |
+| −15 mm | 2/3 | 2/3 |
+| −10 mm | 3/3 | 2/3 |
+| −5 mm | 2/3 | **1/3** |
+| 0 | 3/3 | 2/3 |
+| +5 mm | 2/3 | **1/3** |
+| +10 mm | 3/3 | 2/3 |
+| per-trial | 65 % | 60 % |
+
+A 5-point swing in per-trial reliability moved individual grid points across
+the 2-of-3 threshold in both directions, and the ±5 mm failures would truncate
+the monotone closure to **0 mm** — a *worse* X envelope than the 15 mm measured
+at 120 mm, from a change that geometry says should barely affect X at all.
+
+**The measurement is a lottery at this reliability.** With per-trial success
+`p`, a 3-repetition point passes with probability `3p²(1−p) + p³`, and the
+signed monotone closure needs four consecutive points (±5, ±10) to pass before
+it can report 10 mm:
+
+| per-trial p | single point passes | reports ≥10 mm | reports ≥15 mm |
+| --- | --- | --- | --- |
+| 60 % | 65 % | **18 %** | 7 % |
+| 65 % | 72 % | **27 %** | 14 % |
+| 70 % | 78 % | 38 % | 23 % |
+| 80 % | 90 % | 64 % | 52 % |
+| 90 % | 97 % | 89 % | 84 % |
+| 95 % | 99 % | 97 % | 96 % |
+
+So the original X = Y = 15 mm was a 7–14 % draw, and Z = 5 mm was an unlucky
+one. **Envelope width is not the limiting quantity — per-trial reliability is**,
+and it is also exactly what an unattended demonstration needs. This is the
+mechanism behind the reported "acceptance passed when recorded, will not replay
+stably": at ~65 % per trial, any particular replay is close to a coin flip.
+
+### Where the unreliability comes from
+
+Reliability is not uniform in offset, and it is not dominated by the large
+artificial offsets alone (both runs pooled, 102 trials):
+
+| ⏐δ⏐ band | per-trial success |
+| --- | --- |
+| ≤ 5 mm | **72 %** |
+| 6–10 mm | 79 % |
+| 11–15 mm | 67 % |
+| 16–20 mm | 22 % |
+| all | 64 % |
+
+Production residual error is the current-geometry perception p90 of
+2.3 / 4.8 / 2.1 mm, i.e. entirely inside the ≤ 5 mm band — where reliability is
+still only 72 %. So even with perfect targeting roughly one grasp in four
+fails, and that is the demo blocker.
+
+Characterising every ≤ 5 mm failure (10 of them) gives:
+
+- **5 single-sided contact** — and the descent barely moved the cylinder
+  (0.5–1.2 mm, median 0.65 mm versus 0.58 mm on successes), so the target was
+  essentially centred and one pad still never registered contact.
+- 2 descent `CARTESIAN_JOINT_JUMP` (the separate IK-branch-fold issue),
+- 2 bilateral contact achieved but attach unconfirmed (552/1384 and 199/1186
+  samples) — an attach-publication issue, not grasp physics,
+- 1 reobservation gate rejection.
+
+### The error budget, and the 1 mm that was being wasted
+
+At the close stall the collision gap is 25 mm against the 30 mm cylinder, so
+**both pads register only while the target is within about ±2.5 mm** of the jaw
+centreline. Against that budget the pipeline was still applying a **+1 mm**
+`M1B_NORMAL_HAND_Y_CENTERLINE_BIAS_M` hand-chain correction measured on the
+*pre-ADR-0016 sideways-pad hand*. For the franka-copy hand it is unjustified:
+
+- **by construction** — both finger joints sit at origin `(0, 0, 0.0584)` with
+  axes ±y and the two grasp-plate boxes are mirrored and equal-width, so the
+  jaw midpoint is the hand `y = 0` axis;
+- **by measurement** — the ADR-0009 hand probe's recorded link poses put the
+  jaw midpoint at `y = −0.000416 m` at every commanded opening
+  (`q = 0.01 / 0.02 / 0.04`), constant to within **5 µm**.
+
+That correction was therefore consuming ~40 % of a ±2.5 mm budget for no
+reason, and it is retired to zero. Its effect on reliability is measured
+directly against the same nine small-offset trials.
+
+### Measured effect of retiring the bias, and what it exposed underneath
+
+The same nine small-offset trials (x, δ = 0 / ±5 mm, slots 1/2/4) rerun at
+H = 118 mm with the bias retired:
+
+| δx | H=120, bias +1 mm | H=118, bias +1 mm | **H=118, bias 0** |
+| --- | --- | --- | --- |
+| −5 mm | 2/3 | 1/3 | 2/3 |
+| 0 | 3/3 | 2/3 | **3/3** |
+| +5 mm | 2/3 | 1/3 | 1/3 |
+| total | 7/9 (78 %) | 4/9 (44 %) | 6/9 (67 %) |
+| **single-sided failures** | — | — | **5 → 0** |
+
+The headline number barely moved, but the **failure mode changed completely**:
+single-sided contact went from 5 cases in this offset band to **zero**. Every
+one of the nine trials now registers contact on *both* pads against the same
+cylinder. The bias was indeed causing the single-sided failures.
+
+What the three remaining failures show is a different defect — **the evidence
+window, not the grasp**:
+
+| trial | left / right samples | simultaneous overlap | broker needs |
+| --- | --- | --- | --- |
+| δ=−5 mm slot1 | 930 / 914 | **0.000 s** | ≥ 0.100 s |
+| δ=+5 mm slot1 | 77 / 1575 | **0.075 s** | ≥ 0.100 s |
+| δ=+5 mm slot4 | 99 / 110 | **0.097 s** | ≥ 0.100 s |
+| successes | — | 0.280 – 0.755 s | — |
+
+The overlap distribution is bimodal: solid grasps sit at 0.28–0.76 s (3–7×
+the requirement) while these sit at 0–0.097 s. The last one misses the
+threshold by **3 milliseconds**. The cause is that the post-close observation
+window was only **0.35 s**, so a pad that engages late in the 1.2 s close has
+its overlap truncated by the end of observation rather than by physics.
+`M1B_POST_CLOSE_OBSERVATION_S` is therefore raised to 1.0 s — observing
+sustained bilateral same-entity contact for longer is strictly more evidence
+and never a relaxation of the ADR-0013 predicate.
+
+(The 0.000 s case is genuinely different: its two windows abut exactly, i.e.
+contact transferred from one pad to the other rather than being simultaneous.
+A longer window cannot rescue that one, and should not.)

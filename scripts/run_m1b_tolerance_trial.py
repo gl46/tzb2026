@@ -119,11 +119,23 @@ M1B_CALIBRATION_LATERAL_INSERTION_YAWS_RAD = tuple(math.radians(value) for value
 M1B_CALIBRATION_VERTICAL_BOARD_HAND_X_OFFSETS_M = (-0.120, -0.080, -0.040, 0.0, 0.040, 0.080, 0.120)
 M1B_CALIBRATION_VERTICAL_BOARD_HAND_Z_OFFSETS_M = (-0.040, -0.030, -0.020)
 M1B_CALIBRATION_TARGET_HEIGHT_LIFTS_M = (0.0, 0.010, 0.020, 0.030, 0.040, 0.060, 0.080, 0.100)
-# Live calibration link-pose evidence at the settled target shows the physical
-# board midpoint is 0.8 mm left of the commanded hand Y.  +1 mm is the
-# approved fixed hand-chain correction; calibration-only sweeps may override
-# it, but isolated sweep successes are not promoted to production defaults.
-M1B_NORMAL_HAND_Y_CENTERLINE_BIAS_M = 0.001
+# The historical +1 mm hand-chain correction was measured on the pre-ADR-0016
+# sideways-pad hand, whose board midpoint sat 0.8 mm left of the commanded
+# hand Y.  It is unjustified for the ADR-0016b franka-copy hand and is now a
+# pure systematic error, so it is retired to zero on two pieces of evidence:
+#   * construction: both finger joints have origin (0, 0, 0.0584) with axes
+#     +/-y, and the two grasp-plate boxes are mirrored and equal-width, so the
+#     jaw midpoint is the hand y=0 axis by construction;
+#   * measurement: the ADR-0009 hand probe's link poses put the jaw midpoint at
+#     y = -0.000416 m at every commanded opening (q = 0.01 / 0.02 / 0.04),
+#     constant to within 5 micrometres, i.e. the mimic closes symmetrically
+#     with no opening-dependent bias.
+# This matters because the measured both-pad contact band at the close stall is
+# only about +/-2.5 mm (25 mm collision gap against the 30 mm cylinder), so a
+# 1 mm systematic offset consumed ~40 % of the error budget and is a direct
+# cause of the single-sided-contact failures that dominate the campaign.
+# Calibration-only sweeps may still override this value.
+M1B_NORMAL_HAND_Y_CENTERLINE_BIAS_M = 0.0
 # ADR-0016 pre-authorized fallback hand: the public inner-pad gap is
 # 2q - 0.006 while each pad's collision face is modelled 6.5 mm proud of its
 # finger-link y=0 plane.  The 0.5 mm-per-side difference is measured engine
@@ -159,6 +171,10 @@ HAND_FEEDBACK_READY_TIMEOUT_S = 12.0
 # alternative timing must earn a calibration-only repeatability result before
 # it can become the production default.
 M1B_NORMAL_CLOSE_DURATION_S = 0.8
+# Post-close evidence window.  Must comfortably exceed the broker's 0.100 s
+# bilateral-overlap requirement even when the second pad engages late in the
+# close; 0.35 s was measured truncating real grasps at 0.075-0.097 s overlap.
+M1B_POST_CLOSE_OBSERVATION_S = 1.0
 
 
 # Calibration-only free-gap yaw selection.  ADR-0016 §2 makes the production
@@ -1529,7 +1545,16 @@ def main() -> int:
                     "observed_positions_m": preclose.get("observed_positions_m"),
                 }
             if close.get("succeeded"):
-                deadline = time.monotonic() + 0.35
+                # The ADR-0013 broker needs 0.100 s of *simultaneous* bilateral
+                # same-entity contact.  A 0.35 s observation window cannot
+                # deliver that reliably when the second pad engages late in the
+                # close: measured small-offset failures sat at 0.075 s and
+                # 0.097 s of overlap (the latter missing the threshold by 3 ms)
+                # while successes recorded 0.28-0.76 s, i.e. the window end was
+                # truncating the evidence rather than the physics failing.
+                # Observing sustained contact for longer is strictly more
+                # evidence, never a relaxation of the predicate.
+                deadline = time.monotonic() + M1B_POST_CLOSE_OBSERVATION_S
                 while time.monotonic() < deadline:
                     rclpy.spin_once(client, timeout_sec=0.02)
         # Contact events only become attach evidence after a successfully
