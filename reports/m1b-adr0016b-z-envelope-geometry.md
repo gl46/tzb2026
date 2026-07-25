@@ -33,10 +33,22 @@ The reported envelope moving *opposite* to the continuous contact-window metric
 (Z passing-window median 352 ms → 799 ms, replayed over all 162 trials with
 162/162 verdict reproduction) is the clearest available evidence that the
 measurement protocol, not the hardware, is the binding constraint — though that
-comparison carries the same confound. Strengthening the protocol — more
-repetitions, or separating ADR-0016 §3 descent-corridor admission from grasp
-tolerance as §3 already requires — is an ADR-level decision and is not taken
-here.
+comparison carries the same confound. Raising per-trial reliability needs no ADR
+and is the cheap lever; changing the repetition count or the closure rule is an
+ADR-level decision and is not taken here. The full arithmetic, and why the
+reliability lever beats the repetition lever by an order of magnitude in cost,
+is in `reports/m1b-adr0016b-closure-reproducibility.md`.
+
+> **Correction.** An earlier version of this paragraph described separating
+> descent-corridor admission from grasp tolerance as something "§3 already
+> requires." That is withdrawn as imprecise. §3 is a *scene-generation* gate —
+> collision-free IK for the pregrasp and final-contact poses, empty scene and
+> populated scene, recorded separately, per spawn point, failing closed on
+> either. It says nothing about how the tolerance campaign scores a trial, and
+> the campaign deliberately offsets the target by up to ±20 mm away from the
+> pre-scanned spawn point, so an offset pose was never in §3's scope.
+> Excluding pre-close failures from the tolerance denominator would be a **new**
+> protocol decision, not the application of an existing requirement.
 
 The immediate reliability defect found and fixed: a **+1 mm hand-chain bias
 measured on the pre-ADR-0016 hand** was still being applied against a measured
