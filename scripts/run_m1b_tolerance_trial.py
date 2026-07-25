@@ -175,6 +175,11 @@ M1B_NORMAL_CLOSE_DURATION_S = 0.8
 # bilateral-overlap requirement even when the second pad engages late in the
 # close; 0.35 s was measured truncating real grasps at 0.075-0.097 s overlap.
 M1B_POST_CLOSE_OBSERVATION_S = 1.0
+# The DetachableJoint state is one-shot, so the observer must be subscribed
+# before the attach is published.  0.40 s was measured losing the transition on
+# an otherwise fully successful grasp; allow a longer settle and one retry.
+M1B_ATTACH_SUBSCRIBE_SETTLE_S = 1.0
+M1B_ATTACH_OBSERVE_ATTEMPTS = 2
 
 
 # Calibration-only free-gap yaw selection.  ADR-0016 §2 makes the production
@@ -1074,43 +1079,60 @@ def m1b_calibration_target_height_scan(
 
 
 def attach_and_observe(topic: str, state_topic: str) -> dict[str, object]:
-    """Subscribe before publish so the one-shot DetachableJoint state is evidence."""
-    monitor = subprocess.Popen(["gz", "topic", "-e", "-t", state_topic], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+    """Subscribe before publish so the one-shot DetachableJoint state is evidence.
+
+    The state is a single Gazebo-transport publication, so the monitor's
+    subscription must be established before the attach is issued or the
+    transition is missed entirely.  A measured zero-offset trial recorded a
+    fully successful grasp (broker ``bilateral_same_entity_contact`` on
+    cylinder_01 with a 0.948 s overlap, motion gate passed) whose attach was
+    sent but whose ``state_lines`` came back empty -- the subscription had not
+    finished attaching within the previous 0.40 s settle.  The settle is
+    therefore lengthened and a single bounded retry added.  The evidence
+    contract is unchanged: success still requires an *observed* "attached"
+    transition, never a blind publish.
+    """
     lines: list[str] = []
-    try:
-        # DetachableJoint state is a one-shot Gazebo transport publication;
-        # establish the monitor subscription before issuing attach so success
-        # requires an observed state transition rather than a blind publish.
-        time.sleep(0.40)
-        command = subprocess.run(
-            # DetachableJoint consumes an Empty request.  Supplying an
-            # invented field can make Gazebo accept a publish command without
-            # delivering the state transition, so the calibration path must
-            # use the same wire payload as the production attach primitive.
-            ["gz", "topic", "-t", topic, "-m", "gz.msgs.Empty", "-p", ""],
-            check=False, capture_output=True, text=True, timeout=3.0,
-        )
-        deadline = time.monotonic() + 2.0
-        while time.monotonic() < deadline and monitor.stdout is not None:
-            ready, _, _ = select.select([monitor.stdout], [], [], 0.05)
-            if not ready:
-                continue
-            line = monitor.stdout.readline()
-            if not line:
-                break
-            lines.append(line.rstrip())
-            if "attached" in line:
-                break
-    finally:
-        monitor.terminate()
+    command = None
+    attempts_used = 0
+    for _ in range(M1B_ATTACH_OBSERVE_ATTEMPTS):
+        attempts_used += 1
+        monitor = subprocess.Popen(["gz", "topic", "-e", "-t", state_topic], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
         try:
-            monitor.wait(timeout=1.0)
-        except subprocess.TimeoutExpired:
-            monitor.kill()
-            monitor.wait(timeout=1.0)
+            time.sleep(M1B_ATTACH_SUBSCRIBE_SETTLE_S)
+            command = subprocess.run(
+                # DetachableJoint consumes an Empty request.  Supplying an
+                # invented field can make Gazebo accept a publish command
+                # without delivering the state transition, so the calibration
+                # path must use the same wire payload as the production attach
+                # primitive.
+                ["gz", "topic", "-t", topic, "-m", "gz.msgs.Empty", "-p", ""],
+                check=False, capture_output=True, text=True, timeout=3.0,
+            )
+            deadline = time.monotonic() + 2.0
+            while time.monotonic() < deadline and monitor.stdout is not None:
+                ready, _, _ = select.select([monitor.stdout], [], [], 0.05)
+                if not ready:
+                    continue
+                line = monitor.stdout.readline()
+                if not line:
+                    break
+                lines.append(line.rstrip())
+                if "attached" in line:
+                    break
+        finally:
+            monitor.terminate()
+            try:
+                monitor.wait(timeout=1.0)
+            except subprocess.TimeoutExpired:
+                monitor.kill()
+                monitor.wait(timeout=1.0)
+        if any("attached" in line for line in lines):
+            break
     return {
-        "sent": command.returncode == 0, "topic": topic,
-        "command_stdout": command.stdout.strip(), "command_stderr": command.stderr.strip(),
+        "sent": command is not None and command.returncode == 0, "topic": topic,
+        "observe_attempts": attempts_used,
+        "command_stdout": command.stdout.strip() if command else "", "command_stderr": command.stderr.strip() if command else "",
         "state_topic": state_topic, "state_confirmed": any("attached" in line for line in lines),
         "state_lines": lines,
     }
