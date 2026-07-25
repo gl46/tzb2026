@@ -680,6 +680,33 @@ def test_m1b_contact_window_accepts_bounded_stamp_jitter_but_not_stale_contacts(
     assert broker_from_window(stale)[0].grasp_success is False
 
 
+def test_m1b_descent_step_probe_is_diagnostic_and_cannot_alter_admission() -> None:
+    """The step probe answers a question; it must never become a gate.
+
+    Re-walking a failing descent at a finer step is only legitimate as a
+    diagnostic.  If it could relax scene admission it would be a gate
+    relaxation dressed as a measurement, so this pins that it executes no
+    motion, writes its own schema, and leaves the production step constant and
+    the joint-jump guard untouched.
+    """
+    source = (Path(__file__).parents[2] / "scripts/scan_m1b_orientation_feasibility.py").read_text()
+    assert "SCAN_MAX_STEP_M = 0.005" in source
+    assert "SCAN_MAX_JOINT_STEP_RAD = 0.35" in source
+    assert "PROBE_STEP_SIZES_M = (0.005, 0.0025, 0.00125)" in source
+    assert "max_step_m: float = SCAN_MAX_STEP_M" in source
+    assert "steps = max(2, math.ceil(M1B_TOP_PRECONTACT_STANDOFF_M / max_step_m))" in source
+    assert '"schema_version": "M1BDescentStepProbeV1"' in source
+    assert '"provenance": "DIAGNOSTIC_ONLY_NO_EXECUTED_MOTION"' in source
+    # The probe must not touch the admission verdict or its status strings.
+    probe_body = source[source.index("def run_descent_step_probe"):source.index("def main()")]
+    assert "ORIENTATION_FEASIBILITY_VERIFIED" not in probe_body
+    assert "scene_admission" not in probe_body
+    assert "client.execute" not in probe_body and "move_hand_cartesian" not in probe_body
+    # A scoped target-touch exception must still be restored.
+    assert "set_target_touch_exception(False" in probe_body
+    assert "target_touch_exception_restored" in probe_body
+
+
 def test_m1b_contact_window_records_its_own_span_on_pass_and_on_near_miss() -> None:
     """The broker's numbers must reach the evidence, not be re-derived offline.
 

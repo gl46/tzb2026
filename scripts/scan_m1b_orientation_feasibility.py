@@ -45,7 +45,7 @@ SCAN_MAX_JOINT_STEP_RAD = 0.35
 
 def descent_corridor(
     client: CalibrationClient, center: list[float], *, yaw_rad: float,
-    contact_height_m: float,
+    contact_height_m: float, max_step_m: float = SCAN_MAX_STEP_M,
 ) -> dict[str, object]:
     """Walk the straight open-jaw descent with seeded collision-aware IK.
 
@@ -54,6 +54,12 @@ def descent_corridor(
     every yaw candidate jumps 0.38--0.46 rad within one 5 mm step, although
     both endpoints solve.  This is the same no-motion walk the production
     descent executes, so a scene point that fails here fails the trial.
+
+    ``max_step_m`` is a parameter rather than the module constant so the same
+    walk can be re-run at a finer resolution.  A branch fold is discrete and
+    step-size dependent; a genuinely infeasible pose is not.  Re-walking a
+    failing corridor at 2.5 and 1.25 mm therefore distinguishes the two without
+    executing any motion and without touching the production primitive.
     """
     pregrasp = _m1b_top_pose(
         center, hand_z_offset_m=contact_height_m + M1B_TOP_PRECONTACT_STANDOFF_M,
@@ -62,7 +68,7 @@ def descent_corridor(
     seed = client.ik(pregrasp, avoid_collisions=True, hand_positions=SCAN_OPEN_HAND_M)
     if seed is None:
         return {"complete": False, "stage": "pregrasp_ik", "ik_error": client.last_ik_error}
-    steps = max(2, math.ceil(M1B_TOP_PRECONTACT_STANDOFF_M / SCAN_MAX_STEP_M))
+    steps = max(2, math.ceil(M1B_TOP_PRECONTACT_STANDOFF_M / max_step_m))
     for index in range(1, steps + 1):
         offset = contact_height_m + M1B_TOP_PRECONTACT_STANDOFF_M * (1.0 - index / steps)
         pose = _m1b_top_pose(
@@ -128,6 +134,61 @@ def cylinder_descent_corridors(
     }
 
 
+def descent_step_probe(
+    client: CalibrationClient, labels: list[dict[str, object]], identifier: str,
+    center: list[float], *, offset_m: list[float], step_sizes_m: tuple[float, ...],
+) -> dict[str, object]:
+    """Re-walk one offset pose's descent at several step resolutions.
+
+    Answers a single question with no motion: when the production descent
+    aborts on CARTESIAN_JOINT_JUMP_REJECTED, is the solver crossing a discrete
+    IK branch that a finer step would stay on, or is the pose simply outside
+    the arm's reach there?  Every measured near-band abort had all three yaw
+    candidates exhausted, which is what a real boundary looks like, so this is
+    a genuine test and not a formality.
+    """
+    offset_center = [value + delta for value, delta in zip(center, offset_m)]
+    free_gap = m1b_calibration_free_gap_yaw(labels, identifier)
+    ranked = sorted(
+        [c for c in free_gap["candidates"] if c["min_clearance_m"] >= M1B_FREE_GAP_MIN_CLEARANCE_M],
+        key=lambda c: -float(c["min_clearance_m"]),
+    )
+    yaw_candidates: list[float] = []
+    for candidate in ranked[:2]:
+        for flip in (0.0, math.pi):
+            value = (float(candidate["yaw_rad"]) + flip) % (2.0 * math.pi)
+            if value not in yaw_candidates:
+                yaw_candidates.append(value)
+    by_step: dict[str, object] = {}
+    for step_m in step_sizes_m:
+        attempts = []
+        for yaw_value in yaw_candidates:
+            walk = descent_corridor(
+                client, offset_center, yaw_rad=yaw_value,
+                contact_height_m=M1B_TOP_CONTACT_CENTERLINE_Z_M, max_step_m=step_m,
+            )
+            attempts.append({"yaw_rad": yaw_value, **walk})
+            if walk["complete"]:
+                break
+        by_step[f"{step_m*1000:.2f}mm"] = {
+            "any_yaw_complete": any(a["complete"] for a in attempts),
+            "attempts": attempts,
+        }
+    coarse = by_step.get(f"{step_sizes_m[0]*1000:.2f}mm", {})
+    finest = by_step.get(f"{step_sizes_m[-1]*1000:.2f}mm", {})
+    return {
+        "identifier": identifier,
+        "spawn_center_world_m": list(center),
+        "offset_m": list(offset_m),
+        "offset_center_world_m": offset_center,
+        "contact_height_m": M1B_TOP_CONTACT_CENTERLINE_Z_M,
+        "by_step": by_step,
+        "recovered_by_finer_step": bool(
+            not coarse.get("any_yaw_complete") and finest.get("any_yaw_complete")
+        ),
+    }
+
+
 def pose_results(client: CalibrationClient, center: list[float], *, collision_aware: bool) -> dict[str, object]:
     """Return pregrasp/final IK and, when collision-aware, home-corridor plans."""
     entries: dict[str, object] = {}
@@ -159,13 +220,89 @@ def passed(entries: dict[str, object], *, require_corridor: bool) -> bool:
     )
 
 
+PROBE_STEP_SIZES_M = (0.005, 0.0025, 0.00125)
+
+
+def run_descent_step_probe(args, labels: list[dict[str, object]]) -> int:
+    """Diagnostic entry point: no motion, no gate, no acceptance consequence."""
+    centers = {
+        str(label["actual_sim_entity_id"]): list(label["position_3d_world"])
+        for label in labels
+    }
+    requests = []
+    for spec in args.probe_entity:
+        entity, axis, offset_mm = spec.split(":")
+        if entity not in centers:
+            raise SystemExit(f"UNKNOWN_PROBE_ENTITY:{entity}")
+        if axis not in "xyz":
+            raise SystemExit(f"UNKNOWN_PROBE_AXIS:{axis}")
+        offset = [0.0, 0.0, 0.0]
+        offset["xyz".index(axis)] = float(offset_mm) / 1000.0
+        requests.append((entity, axis, offset))
+    if not requests:
+        raise SystemExit("NO_PROBE_ENTITY_SUPPLIED")
+    rclpy.init()
+    client = CalibrationClient()
+    try:
+        ready = client.wait_calibration_ready() and client.apply_scene()
+        populated = apply_calibration_cylinder_scene(client, labels) if ready else False
+        if not populated:
+            raise SystemExit("PROBE_SCENE_UNAVAILABLE")
+        results = []
+        for entity, axis, offset in requests:
+            exception = client.set_target_touch_exception(True, target_id=entity)
+            probe = (
+                descent_step_probe(
+                    client, labels, entity, centers[entity],
+                    offset_m=offset, step_sizes_m=PROBE_STEP_SIZES_M,
+                )
+                if exception else {"error": "TARGET_TOUCH_EXCEPTION_NOT_SCOPED"}
+            )
+            restored = client.set_target_touch_exception(False, target_id=entity) if exception else False
+            results.append({**probe, "axis": axis, "target_touch_exception_restored": restored})
+        payload = {
+            "schema_version": "M1BDescentStepProbeV1",
+            "provenance": "DIAGNOSTIC_ONLY_NO_EXECUTED_MOTION",
+            "question": (
+                "Do the measured near-band CARTESIAN_JOINT_JUMP_REJECTED aborts survive a "
+                "finer descent step, or are they a discrete IK branch fold that a finer step "
+                "stays on?"
+            ),
+            "step_sizes_m": list(PROBE_STEP_SIZES_M),
+            "max_joint_step_rad": SCAN_MAX_JOINT_STEP_RAD,
+            "scene_supervision": str(args.scene_supervision),
+            "results": results,
+            "recovered_count": sum(1 for r in results if r.get("recovered_by_finer_step")),
+            "online_truth_access": False,
+        }
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        args.output.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+        print(json.dumps({
+            "recovered": payload["recovered_count"], "probed": len(results),
+        }))
+        return 0
+    finally:
+        client.destroy_node()
+        rclpy.shutdown()
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--scene-supervision", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument(
+        "--descent-step-probe", action="store_true",
+        help="diagnostic only: re-walk the measured near-band aborts at finer step sizes",
+    )
+    parser.add_argument(
+        "--probe-entity", action="append", default=[],
+        help="with --descent-step-probe: ENTITY:AXIS:OFFSET_MM, e.g. cylinder_01:z:+5",
+    )
     args = parser.parse_args()
     data = json.loads(args.scene_supervision.read_text())
     labels = list(data["simulator_supervision"]["objects"])
+    if args.descent_step_probe:
+        return run_descent_step_probe(args, labels)
     points = [
         (str(label["actual_sim_entity_id"]), list(label["position_3d_world"]), True)
         for label in labels
