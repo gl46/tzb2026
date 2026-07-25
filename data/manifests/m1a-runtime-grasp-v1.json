@@ -2,7 +2,7 @@
   "schema_version": "m1a-runtime-grasp-v1",
   "run_id": "m1a-adr0016b-head-24f8af8",
   "baseline_commit": "22ce578",
-  "working_revision_or_diff_hash": "24f8af81a02cbb51597df3a4cfe140b34dc78cf5+fc5d358b3df231ad395b95bfa4e1d29e67920cf39857accda6ab05bc36d730ed",
+  "working_revision_or_diff_hash": "ef79315f00187bf32b0f2d716f01504ae88db572+714f55a026271ab3b1134743ca011c26e52de2103fca85f2dd9edffcd7fc447f",
   "episode_ids": [
     "m1a-20260717-s4-b1-final-r1-episode-01",
     "m1a-20260717-s4-b1-final-r1-episode-02",
@@ -39,7 +39,7 @@
     "reports/m1a-m0-smoke.json": "76e4f2aeb2ce595bf99780ccea9fdafe710ddda45811221788961c168c601f21",
     "reports/m1a-home-self-collision.json": "6494f629b476770ed90862bef234789a06787f43d5b49e89c2cc3b1aec135537",
     "reports/m1a-contact-calibration.json": "76df9f1c91b834c7688fd8cd62f3b309d7d3cb9a1089966ac1249b6e789c4f6d",
-    "reports/m1a-motion-execution.json": "c1bc93ef51afec0e5339406f157cf79718c4f82290a594816e14fd6784a142a8",
+    "reports/m1a-motion-execution.json": "98c3ed195606e84ecc47629e43c17f7b46d1788c765235b7a118ce7a35edb970",
     "reports/m1a-friction-trials.json": "c258d92620c9db3a4079ea4cd11618df5fdf7d8005aa752d8d76cf836f8bddd4",
     "reports/m1a-contact-gate.json": "7c116d54ddf3f083649bc7ccdba50a6e737a4a8a0c894e676573a6c719d09d2d",
     "reports/m1a-b1-oracle.json": "c2aaa4b4eb3ebf7b08718b584f70e555640e08a72c5746933612b74edc6e9e18",

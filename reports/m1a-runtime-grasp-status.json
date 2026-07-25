@@ -7,13 +7,13 @@
   "baseline_origin_match": false,
   "m0_tag_status": "M0_TAG_MISSING_NONBLOCKING",
   "started_at": "2026-07-25T18:20:58Z",
-  "completed_at": "2026-07-25T18:31:51.577305+00:00",
+  "completed_at": "2026-07-25T18:41:00.084277+00:00",
   "deadline": "2026-07-18T23:59:00+08:00",
   "status": "PARTIAL",
   "m0_reproducible": false,
   "m0_baseline_pytest_passed": 24,
   "m1a_current_pytest_passed": 0,
-  "m1a_current_pytest_failed": 1,
+  "m1a_current_pytest_failed": 0,
   "current_model_home_status": "HOME_SELF_COLLISION_VERIFIED",
   "current_model_urdf_sha256": "6678ff409d60f074283805879f53edaa939ead34f97a5a961ee67f6229b44ba8",
   "current_sdf_generator_sha256": "29673676845c5ef5d974337cf4f681ac1f519eeeb9537fa84286212d67ddc2a5",
@@ -21,7 +21,7 @@
   "contact_telemetry_status": "CONTACT_TELEMETRY_CALIBRATED",
   "hand_actuation_status": "HAND_MIMIC_Q2_MASTER_NOT_VERIFIED",
   "hand_actuation_controls_verified": false,
-  "hand_actuation_runtime_urdf_sha256": null,
+  "hand_actuation_runtime_urdf_sha256": "2a8f3b1edf9cea769a7e5f952f74c29dd4bc18e257bd32d72b43a68b4f864478",
   "hand_actuation_evidence_model_match": false,
   "hand_mimic_physical_audit_status": "HAND_MIMIC_PHYSICAL_CONSTRAINT_VERIFIED",
   "bullet_capability_audit_status": "M1A_BULLET_CAPABILITY_VERIFIED",
@@ -72,19 +72,12 @@
     "FRICTION_TRIALS_BLOCKED_REVALIDATION_REQUIRED"
   ],
   "changed_files": [
-    "reports/m1a-contact-calibration.json",
-    "reports/m1a-friction-trials.json",
-    "reports/m1a-friction-trials.md",
-    "reports/m1a-home-self-collision.json",
-    "reports/m1a-home-self-collision.md",
-    "reports/m1a-m0-smoke.json",
-    "reports/m1a-motion-execution.json",
-    "reports/m1a-motion-execution.md",
-    "reports/m1a-preflight.json",
-    "reports/m1a-preflight.md"
+    "reports/hardware-local.json",
+    "reports/hardware-remote-node2.json",
+    "reports/m1a-bullet-capability-audit.md"
   ],
   "next_command": "M1A execution gates are complete; review the final audit and preserve the raw logs.",
-  "code_revision": "24f8af81a02cbb51597df3a4cfe140b34dc78cf5",
+  "code_revision": "ef79315f00187bf32b0f2d716f01504ae88db572",
   "working_tree_dirty": true,
-  "working_diff_sha256": "fc5d358b3df231ad395b95bfa4e1d29e67920cf39857accda6ab05bc36d730ed"
+  "working_diff_sha256": "714f55a026271ab3b1134743ca011c26e52de2103fca85f2dd9edffcd7fc447f"
 }
