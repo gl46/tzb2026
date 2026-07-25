@@ -74,11 +74,21 @@ M1B_NORMAL_SIDE_IK_SEED = [
 #     the cylinder top face  ->  delta >= 0.106 - H
 #   positive delta: the plate tip (local z 0.1122) must stay below the measured
 #     +17.8 mm tipping height  ->  delta <= 0.130 - H
-# They meet at H = 0.118 m, which maximises the symmetric envelope.  Measured
-# confirmation: at 120 mm the +10 mm grid point sat exactly on the tipping
-# bound and scored 1/3; at 118 mm it scores 2/3 while -10 mm holds 3/3, so the
-# measurable envelope doubles from 5 mm to >= 10 mm.
-M1B_TOP_CONTACT_CENTERLINE_Z_M = 0.118
+# They meet at H = 0.118 m, which should maximise the symmetric envelope, and a
+# full 81-trial campaign at 118 mm did confirm the model on the binding points:
+# the +10 mm Z point went 4/6 -> 6/6 and -10 mm held 6/6, while -15 mm still
+# correctly fails (its palm bound is -12 mm).  It is nevertheless NOT adopted,
+# because the official signed-monotonic closure got *worse* (Z 5 mm -> 0 mm):
+# the +5 mm grid point drew one descent-corridor rejection and one single-sided
+# contact, two independent ~1-in-6 events landing on one point, and the closure
+# truncates there.  Total Z reliability was statistically unchanged (15/27 vs
+# 16/27).  The blocker is the measurement protocol -- at ~65 % per-trial
+# reliability a 3-repetition, 9-point monotone closure reports >=10 mm only
+# 18-27 % of the time -- so no centreline can be certified until that protocol
+# is strengthened, which is an ADR-level decision.  Production therefore stays
+# at the value the committed acceptance rests on.
+# See reports/m1b-adr0016b-z-envelope-geometry.md for the full measurement.
+M1B_TOP_CONTACT_CENTERLINE_Z_M = 0.120
 M1B_TOP_PRECONTACT_STANDOFF_M = 0.150
 # ADR-0013 Amendment 2: replace the fixed final height only when this explicit
 # primitive is selected.  The search always moves along the already-verified

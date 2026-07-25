@@ -1,0 +1,44 @@
+{
+  "schema_version": "M1BCentrelineCandidateCampaignEvidenceV1",
+  "status": "CANDIDATE_REJECTED_BY_OFFICIAL_CLOSURE",
+  "candidate": {"contact_centreline_m": 0.118, "rationale": "reports/m1b-adr0016b-z-envelope-geometry.md"},
+  "production_value_retained_m": 0.120,
+  "trial_count": 81,
+  "source_summary": "node2:/tmp/m1b-campaign-v2/m1b-tolerance-envelope.json",
+  "source_summary_sha256": "3d86d6a84107d28f5495d9160ebcf67af8006e405c86881362d1049dcb016d9b",
+  "reliability_fixes_active": [
+    "M1B_NORMAL_HAND_Y_CENTERLINE_BIAS_M = 0.0 (stale pre-ADR-0016 hand-chain bias retired)",
+    "M1B_POST_CLOSE_OBSERVATION_S = 1.0 (was 0.35, truncating real grasps)",
+    "M1B_ATTACH_SUBSCRIBE_SETTLE_S = 1.0 + one bounded retry (one-shot state race)",
+    "hand action result wait scaled with trajectory duration (was fixed 5.0 s)",
+    "M1B_GZ_POSE_QUERY_ATTEMPTS = 4 (transport CLI drops replies under shared GPU)"
+  ],
+  "measured_envelope_m": {"x": 0.015, "y": 0.015, "z": 0.0},
+  "committed_h120_envelope_m": {"x": 0.015, "y": 0.015, "z": 0.005},
+  "z_axis_per_point": {
+    "comment": "successes out of 3 repetitions; H120 is the committed 81-trial campaign, H118 is this one",
+    "-0.020": {"h120": 0, "h118": 0},
+    "-0.015": {"h120": 0, "h118": 0},
+    "-0.010": {"h120": 3, "h118": 3},
+    "-0.005": {"h120": 3, "h118": 2},
+    "0.000": {"h120": 2, "h118": 3},
+    "+0.005": {"h120": 2, "h118": 1},
+    "+0.010": {"h120": 1, "h118": 3},
+    "+0.015": {"h120": 3, "h118": 2},
+    "+0.020": {"h120": 1, "h118": 2}
+  },
+  "z_axis_by_band": {
+    "pm5mm": {"h120": "5/6", "h118": "3/6"},
+    "pm10mm": {"h120": "4/6", "h118": "6/6"},
+    "pm15mm": {"h120": "3/6", "h118": "2/6"},
+    "total": {"h120": "15/27 = 56%", "h118": "16/27 = 59%"}
+  },
+  "geometric_model_confirmed": {
+    "binding_negative_bound": "-15 mm still fails 0/3 at H=118 (its palm bound is -12 mm)",
+    "binding_positive_bound": "+10 mm went 4/6 to 6/6, the predicted effect of moving the tipping bound from +10 mm to +12 mm",
+    "adjacent": "-10 mm held 6/6 despite its palm clearance tightening from +4 mm to +2 mm"
+  },
+  "why_rejected": "The official signed-monotonic closure got worse on Z (5 mm -> 0 mm) because the +5 mm grid point drew one descent-corridor rejection and one single-sided contact -- two independent, roughly 1-in-6 events landing on the same point -- and the closure truncates at the first failing magnitude. Total Z reliability was statistically unchanged (15/27 vs 16/27). Adopting 118 mm would therefore trade the committed acceptance basis for a noise draw.",
+  "protocol_finding": "At the measured ~65 % per-trial reliability a 3-repetition, 9-point signed-monotonic closure reports an envelope of >=10 mm only 18-27 % of the time. The reported number moved opposite to a demonstrated physical improvement, so the measurement protocol -- not the hardware -- is the limiting instrument. Strengthening it (more repetitions, or separating ADR-0016 section 3 descent-corridor admission from grasp tolerance as that section already requires) is an ADR-level decision and is not taken here.",
+  "truth_boundary": "Simulator truth supplied only the calibration-only target initialization. Contact, broker, and attach evidence came from the production path."
+}
