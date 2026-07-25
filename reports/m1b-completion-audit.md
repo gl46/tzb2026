@@ -62,6 +62,23 @@ run (`m1a-adr0016b-regression-20260723-0510`) and records
 `BLOCKED_DIRTY_OR_MOVED_BASELINE`. Committing the set as-is would pair a
 `BLOCKED` preflight with `VERIFIED` downstream gates. The re-run replaces both.
 
+**Third and strongest reason, found by hashing node2's workspace against HEAD.**
+Of the 34 tracked files under `robot_ws/`, 33 match HEAD and exactly one does
+not: `robot_ws/src/xh_sim/worlds/m1a_contact_calibration.sdf`, which is the S0
+stage's own world. node2's copy hashes to commit `0709cc1` (2026-07-17) and
+carries the **pre-ADR-0016 fixture** — a 30 mm oracle post and a full-width
+60 × 55 mm cube shelf. HEAD carries `d9938ad` (2026-07-20, "clear inline hand
+calibration support collision"), which narrows them to a 10 mm post and a
+25 × 10 mm centre-only support *specifically* so the ADR-0016 vertical pads stop
+colliding with the fixture during a legitimate bilateral sidewall calibration.
+
+So the stale `CONTACT_TELEMETRY_CALIBRATED` 13/13 was measured against the wrong
+fixture geometry: node2 never received that deploy. The URDF reached it by some
+targeted copy (it hashes correctly to the ADR-0016b hand), but no full deploy
+happened after `0709cc1`. Cascade step 2 is therefore not merely stale, it was
+measured on a fixture the repository had already corrected. The re-run deploys
+HEAD first and verifies both hashes before starting.
+
 Serialization is forced, not chosen: the M1A remote stages launch their own
 Gazebo on the same host, and `run_contact_calibration.sh` aborts on
 `M1A_REMOTE_SIM_ALREADY_RUNNING`.
