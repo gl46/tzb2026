@@ -1,6 +1,6 @@
 # M1B completion audit
 
-Audited at `8556779`. Hand model: ADR-0016 §4 franka-copy fallback, URDF
+Audited at `8556779`; completed and re-audited at `0ff7518`. Hand model: ADR-0016 §4 franka-copy fallback, URDF
 SHA-256 `6678ff409d60f07428380587…`.
 
 M1B is governed by **two** lists, and they are not the same list:
@@ -20,73 +20,57 @@ summary. Where a document quoted a SHA-256, the hash was recomputed.
 | 2 | After reset broadcast, all N `grasp_state` observed `detached` | **PASS as amended** | Superseded by Amendment 1 (human-approved 2026-07-19), which replaced message-receipt with a physical non-coupling check because the Gazebo plugin publishes only on transition. `m1b-reset-physical-noncoupling.json` (`2ad8967f…`): `RESET_PHYSICAL_NONCOUPLING_VERIFIED`, EE displacement 24.28 mm against a 20 mm minimum |
 | 3 | One-cylinder physical round-trip | **PASS** | `m1b-adr0013-current-geometry-attached-roundtrip.json`, SHA-256 `30c103a0…` — recomputed, matches the value quoted in `m1b-adr0016b-acceptance-status-20260724.md` |
 | 4 | Wrong-object drill | **PASS** | `m1b-adr0013-current-geometry-wrong-object-drill.json`, SHA-256 `62e45bca…` — recomputed, matches |
-| 5 | M1A cube regression still passes | **OPEN — S1 blocked at HEAD** | re-run executed 2026-07-26 at `24f8af8`; S0 passes 13/13 on the corrected fixture but S1's anti-teleport gate cannot be satisfied, so S3 never ran. See "The two open items" |
+| 5 | M1A cube regression still passes | **PASS** | re-run at HEAD 2026-07-26: bullet audit 5/5, home verified, S0 13/13 on the corrected fixture, S1 `VERIFIED_MOVEIT_EXECUTION` 10/10 with anti-teleport 10/10, S3 `CONTACT_GATED_CONSTRAINT_VERIFIED` 8/10 with release 8/8 |
 | 6 | Unit tests: broker field-absence, reset fail-closed, per-class width clamp | **PASS** | `test_m1b_broker_selects_only_same_entity_and_hides_it_from_public_feedback`, `test_post_grasp_identity_routes_wrong_object_without_entity_leak`, `test_m1b_reset_requires_every_generated_detachable_state`, `test_m1b_amendment_reset_gate_is_physical_and_fails_closed_on_missing_pose`, `test_m1b_width_window_is_perception_derived_and_clamped`; suite 126 passed |
 
 ## ADR-0016 revalidation cascade (nine steps)
 
 | # | step | verdict | note |
 |---|---|---|---|
-| 1 | Home self-collision gate on the new model | **OPEN** | evidence exists and is `HOME_SELF_COLLISION_VERIFIED` with a matching URDF hash, but is uncommitted and predates a code change — refreshed by the item-5 re-run |
-| 2 | S0 13-condition contact calibration | **OPEN** | `CONTACT_TELEMETRY_CALIBRATED` 13/13, same staleness — this is the stage whose client actually changed |
-| 3 | S1 ten-trial MoveIt execution gate | **OPEN** | `VERIFIED_MOVEIT_EXECUTION` 10/10, same staleness |
+| 1 | Home self-collision gate on the new model | **PASS** | `HOME_SELF_COLLISION_VERIFIED` at HEAD |
+| 2 | S0 13-condition contact calibration | **PASS** | `CONTACT_TELEMETRY_CALIBRATED` 13/13 at HEAD, and for the first time on the `d9938ad` corrected fixture |
+| 3 | S1 ten-trial MoveIt execution gate | **PASS** | `VERIFIED_MOVEIT_EXECUTION` 10/10, `anti_teleport_verified_trials` 10 |
 | 4 | Orientation-feasibility pre-scan over current scenes | **PASS** | `m1b-adr0016b-orientation-prescan3-5017.json` (`b678b2f5…`). Scene-level verdict is `FAIL_CLOSED`, which is the gate working: cylinders 03/06/07 have no empty-scene pregrasp IK. Per-spawn-point records for slots 1/2/4 each carry `passed: true`, and the campaign worklist uses exactly those three |
 | 5 | One zero-offset real grasp | **PASS** | 17/18 with the reliability fixes active (three confirmation runs 9/9 plus a campaign's own 8/9) |
-| 6 | 81-point envelope, nonzero per-axis required | **OPEN — campaign v3 in flight** | committed value 15/15/5 mm (`m1b-adr0016b-tolerance-envelope.json`, `0bfb34e0…`) was measured *before* the five reliability fixes; v3 re-measures the shipped configuration |
-| 7 | Perception p90 gate: per-axis p90 ≤ 0.6 × envelope | **PASS (conditional on step 6)** | recomputed independently from `…-current-geometry-perception-metrics.json` (`bfe89ead…`, held-out test split, 272 matched instances, 30 scenes, zero exclusions) → `GO`, agreeing with `…-current-geometry-reachability-gate.json` (`e38301e2…`) |
+| 6 | 81-point envelope, nonzero per-axis required | **PASS** | campaign v3 measured the shipped configuration for the first time: **15/15/5 mm**, agreeing with the committed envelope on all three axes (`m1b-adr0016b-tolerance-envelope-v3.json`, summary SHA-256 `909d88ec…`) |
+| 7 | Perception p90 gate: per-axis p90 ≤ 0.6 × envelope | **PASS** | recomputed independently from `…-current-geometry-perception-metrics.json` (`bfe89ead…`, held-out test split, 272 matched instances, 30 scenes, zero exclusions) → `GO`, agreeing with `…-current-geometry-reachability-gate.json` (`e38301e2…`) |
 | 8 | ADR-0013 acceptance 3 and 4 | **PASS** | items 3–4 above |
-| 9 | M1A cube regression under the new hand | **OPEN** | same re-run as ADR-0013 item 5 |
+| 9 | M1A cube regression under the new hand | **PASS** | same re-run as ADR-0013 item 5 |
 
-## The two open items
+## How the two open items were closed
 
-### Items 1, 2, 3, 5, 9 — one M1A re-run closes all of them
+Both remaining items were closed on 2026-07-26. Neither closed the way I first
+expected, and the corrections are recorded here rather than quietly dropped.
 
-The M1A evidence on disk is **uncommitted and stale, not failing.** It reports
-bullet audit 5/5 gates, home verified, S0 13/13, S1 10/10, and the contact-gated
-grasp `CONTACT_GATED_CONSTRAINT_VERIFIED` at 9/10 (the single rejection was the
-gate itself firing on `BILATERAL_CONTACT_INVALID` + `INVALID_SIM_TIMESTAMPS`,
-i.e. fail-closed, not a silent pass). All five reports carry the ADR-0016b URDF
-hash.
+### Step 6 — campaign v3
 
-It is stale because it ran 2026-07-24 02:40 and `scripts/m1a_contact_calibration_client.py`
-changed at 2026-07-25 10:05 (`e9ad5b8`, scaling the hand action-result wait with
-the commanded trajectory). `run_contact_calibration.sh` and
-`run_m1a_bullet_capability_audit.sh` use that module directly, and
-`m1a_contact_gated_trial_client.py` imports `CalibrationClient` from it — so
-three of the five stages exercised code that has since changed. The change only
-makes the client wait longer, so the expected outcome is no worse; expected is
-not measured, and stale evidence must not be committed as current.
+v3 measured the shipped configuration for the first time: the 120 mm contact
+centreline **with** all five reliability fixes. No prior campaign measured that
+combination — the previously committed 15/15/5 predates the fixes, and every
+fix-validation run executed while the centreline constant was 118 mm.
 
-Also note the working tree's `m1a-preflight.md` is from a *different, earlier*
-run (`m1a-adr0016b-regression-20260723-0510`) and records
-`BLOCKED_DIRTY_OR_MOVED_BASELINE`. Committing the set as-is would pair a
-`BLOCKED` preflight with `VERIFIED` downstream gates. The re-run replaces both.
+It returned **15/15/5 mm**, agreeing with the committed envelope on all three
+axes, at 51/81 = 63 % overall. The gate recomputed against it is `GO` with
+per-axis margins of 6.70 / 4.21 / 0.92 mm. The acceptance basis is now a
+measurement of what ships rather than an inherited one.
 
-**Third and strongest reason, found by hashing node2's workspace against HEAD.**
-Of the 34 tracked files under `robot_ws/`, 33 match HEAD and exactly one does
-not: `robot_ws/src/xh_sim/worlds/m1a_contact_calibration.sdf`, which is the S0
-stage's own world. node2's copy hashes to commit `0709cc1` (2026-07-17) and
-carries the **pre-ADR-0016 fixture** — a 30 mm oracle post and a full-width
-60 × 55 mm cube shelf. HEAD carries `d9938ad` (2026-07-20, "clear inline hand
-calibration support collision"), which narrows them to a 10 mm post and a
-25 × 10 mm centre-only support *specifically* so the ADR-0016 vertical pads stop
-colliding with the fixture during a legitimate bilateral sidewall calibration.
+**This is a favourable draw, not proof the reliability problem is solved.** At
+the measured near-band reliability the closure reports Z ≥ 5 mm only 41–67 % of
+the time (`m1b-adr0016b-closure-reproducibility.md`). That was written down
+before the result was known, and it stands unchanged now that the result is
+known.
 
-So the stale `CONTACT_TELEMETRY_CALIBRATED` 13/13 was measured against the wrong
-fixture geometry: node2 never received that deploy. The URDF reached it by some
-targeted copy (it hashes correctly to the ADR-0016b hand), but no full deploy
-happened after `0709cc1`. Cascade step 2 is therefore not merely stale, it was
-measured on a fixture the repository had already corrected. The re-run deploys
-HEAD first and verifies both hashes before starting.
+v3 also supplied the missing 2×2 cell and partially de-confounded the centreline
+question that had to be withdrawn: at z = +10 mm the five fixes changed nothing
+at a fixed centreline (1/3 → 1/3) while the 118 mm centreline gave 3/3 — the
+direction the geometric model predicted. Pooled, 2/6 vs 3/3, Fisher one-sided
+p ≈ 0.08: suggestive, not conclusive. The 118 mm revert is **not** reopened; it
+rested on the official closure, which still scores it worse.
 
-Serialization is forced, not chosen: the M1A remote stages launch their own
-Gazebo on the same host, and `run_contact_calibration.sh` aborts on
-`M1A_REMOTE_SIM_ALREADY_RUNNING`.
+### Items 1, 2, 3, 5, 9 — the M1A re-run
 
-### Re-run outcome (2026-07-26, HEAD `24f8af8`)
-
-Executed from a clean detached worktree against a freshly deployed,
-hash-verified node2 (URDF `6678ff40…`, calibration world `d163dd0b…`).
+Re-run from a clean detached worktree against a freshly deployed, hash-verified
+node2 (URDF `6678ff40…`, calibration world `d163dd0b…`).
 
 | stage | verdict |
 |---|---|
@@ -94,64 +78,100 @@ hash-verified node2 (URDF `6678ff40…`, calibration world `d163dd0b…`).
 | m0 smoke | `PARTIAL_CONTROL_AND_PERCEPTION_VERIFIED` |
 | ADR-0009 bullet capability audit | `M1A_BULLET_CAPABILITY_VERIFIED`, 5/5 gates |
 | cascade 1 — home self-collision | `HOME_SELF_COLLISION_VERIFIED` |
-| **cascade 2 — S0 contact calibration** | **`CONTACT_TELEMETRY_CALIBRATED` 13/13**, first run on the corrected fixture |
-| **cascade 3 — S1 MoveIt execution** | **BLOCKED**: `PARTIAL_EXECUTION_VERIFIED`, 0/10, `anti_teleport_verified_trials = 0` |
-| S2 friction | blocked — "requires … verified S1 evidence" |
-| **cascade 9 / item 5 — S3 contact-gated grasp** | **never ran**, blocked behind S1 |
+| cascade 2 — S0 contact calibration | `CONTACT_TELEMETRY_CALIBRATED` 13/13, first run on the corrected fixture |
+| cascade 3 — S1 MoveIt execution | `VERIFIED_MOVEIT_EXECUTION` 10/10, anti-teleport 10/10 |
+| S2 friction | `FRICTIONAL_GRASP_NOT_VERIFIED` (4/5 threshold unmet) |
+| cascade 9 / item 5 — S3 contact-gated grasp | `CONTACT_GATED_CONSTRAINT_VERIFIED` 8/10, release 8/8 |
 
-Two ordering facts worth recording, both of which cost a cycle to find:
+S2 not meeting its threshold is not a regression: the committed baseline had it
+at `FRICTION_TRIALS_BLOCKED_REVALIDATION_REQUIRED`, and
+`FRICTIONAL_GRASP_NOT_VERIFIED` is one of the two states S3's own prerequisite
+check accepts. S3 is the acceptance-relevant gate and it is met.
 
-1. **ADR-0009 makes the bullet capability audit a prerequisite for S0**, and
-   `run_m1a_validation.sh` does not include it. Run it first, or S0 returns
-   `CONTACT_TELEMETRY_BLOCKED_BULLET_CAPABILITY_AUDIT` and everything downstream
-   cascades. Because S0 reads the audit from disk while the preflight demands a
-   clean tree, the audit's report has to be committed before the validation run.
-2. **`reports/m1a-contact-gate.*` is not evidence of this run.** Today's run
-   never wrote it; the committed copy is `m1a-20260717-s4-b1-final-r1` against
-   URDF `84b0d2dc…`, the pre-fallback hand. Any verdict table that iterates a
-   fixed file list will silently present it as current. It was nearly reported
-   that way here.
+### Why node2's fixture mattered
 
-### The S1 blocker, precisely
+Hashing all 34 tracked `robot_ws/` files against HEAD found exactly one
+difference, and it was the S0 stage's own world:
+`robot_ws/src/xh_sim/worlds/m1a_contact_calibration.sdf`. node2's copy hashed to
+`0709cc1` (2026-07-17) and carried the **pre-ADR-0016 fixture** — a 30 mm oracle
+post and a full-width 60 × 55 mm shelf. HEAD carries `d9938ad` (2026-07-20),
+which narrows them to a 10 mm post and a 25 × 10 mm centre-only support
+*specifically* so the ADR-0016 vertical pads stop colliding with the fixture
+during a bilateral sidewall calibration. The URDF had reached node2 by some
+targeted copy, but no full deploy happened after `0709cc1`, so the earlier
+S0 13/13 was measured on a fixture the repository had already corrected.
 
-The motion is clean: controller `SUCCEEDED`, post-controller converged, max
-final joint error 3.2 × 10⁻⁶ rad, EE position error 6.5 × 10⁻⁷ m, tracking error
-0, and the sampled positions plainly move from home to the planned target.
+### Three corrections
 
-What fails is only the timestamps. Every `/joint_states` message carries
-`header.stamp = 0.0`, so `joint_state_distinct_timestamp_count` is **1** across
-all 30 segments despite 81–174 samples each, and the anti-teleport gate — which
-exists to prove motion was simulated over time rather than teleported — cannot
-be satisfied.
+1. **The S1 zero-stamp failure was transient.** Commit `deaf8a5` said it was
+   "reproduced on a standalone re-run, so it is not the transient class." That
+   was honest against two consecutive reproductions and is **withdrawn**: a
+   third run on a quieter host returned 10/10 with real sim stamps
+   (12.68 → 16.36 s; 160/117/87 distinct per segment). Both failures fell within
+   minutes of the 81-trial campaign ending. A runtime diagnostic had already
+   shown nothing was structurally wrong — `/clock` published, `use_sim_time`
+   true on `/controller_manager`, `/joint_state_broadcaster`, `/move_group` and
+   `/robot_state_publisher`, sim clock advancing, and a subscription mimicking
+   the client exactly receiving 490 samples with 490 distinct stamps — which is
+   why re-running was the right move rather than patching.
 
-The 2026-07-24 run of the same gate recorded **233 distinct stamps advancing
-11.89 → 14.21 s**. So sim-clock delivery to the gz-hosted `ros2_control` node has
-regressed. It is not the hand, not the fixture, and not the deploy: all 34
-tracked `robot_ws/` files except the calibration world already matched HEAD on
-node2 before deployment, and both launch files were among the matching ones.
-It is also not the transient class seen twice elsewhere today — a standalone
-re-run reproduced it exactly.
+2. **`reports/m1a-contact-gate.*` was nearly reported as a current pass.** A
+   verdict table that iterates a fixed file list will happily print the
+   committed `m1a-20260717-s4-b1-final-r1` record against URDF `84b0d2dc…` — the
+   pre-fallback hand — as though it were today's result.
 
-Contact timestamps are unaffected (S0's 13/13 windows and the whole v3 campaign
-depend on them), because those arrive through the `ros_gz_bridge` contact path
-rather than the controller's node clock. That narrows the fault to `/clock`
-reaching `gz_ros2_control`, and it is the next thing to investigate.
+3. **ADR-0009 makes the bullet capability audit a prerequisite for S0**, and
+   `run_m1a_validation.sh` does not include it. Because S0 reads the audit from
+   disk while the preflight demands a clean tree, the audit has to be committed
+   before the validation run.
 
-### Step 6 — what v3 can and cannot settle
+### One real defect found and fixed
 
-v3 measures the shipped configuration (120 mm centreline **with** the five
-fixes), which had never been measured: every fix-validation run executed while
-the centreline constant was 118 mm.
+S3's first complete run was 7/10 against a ≥8/10 threshold. Two of the three
+failures were `RELEASE_PLACEMENT_FAILURE` → `HAND_CONTROLLER_NOT_SUCCEEDED` with
+`controller_result_succeeded: true` and `error_code: 0` — the controller met its
+own 1 mm tolerance while `command_hand` judged a snapshot taken after a fixed
+`for _ in range(3): spin_once(0.02)`. The same artifact had already appeared in
+the bullet audit (`max_position_error_m` 0.00713 m, mimic tracking error
+1.1 × 10⁻⁸ m, next read 0.039999 m of a 0.04 m command).
 
-It must be read against `m1b-adr0016b-closure-reproducibility.md`. The gate needs
-Z ≥ 3.467 mm, the grid is 5 mm, so Z = 5 mm is the smallest passing value — zero
-slack — and at the measured near-band reliability the closure reports Z ≥ 5 mm
-only 41–67 % of the time. **A v3 result of Z = 0 is not a regression and Z = 5 mm
-is not a fix.** Whatever it returns, the acceptance basis is a number with
-sub-two-thirds reproducibility, and that is the honest headline for M1B.
+Fixed by counting joint-state *deliveries* and requiring three fresh ones after
+the result, polling to a 2 s deadline. The 1 mm contract and its 0.1 mm sampling
+slack are unchanged, so a hand that genuinely stops short still fails. That class
+went from 2 of 10 episodes to **0**.
+
+## Status
+
+**All six ADR-0013 acceptance items and all nine ADR-0016 cascade steps pass at
+`0ff7518`.** Every row was checked against its evidence file and every quoted
+SHA-256 was recomputed.
+
+The honest qualifier on that verdict: the Z axis of the envelope has zero grid
+slack against the perception gate, and the closure that produces it reproduces
+41–67 % of the time at the measured reliability. M1B is accepted on its own
+stated criteria; it is not accepted on a measurement that would survive
+repetition with high confidence, and the cheapest route to the latter is
+per-trial reliability rather than more repetitions.
 
 ## Not blocking, carried forward
 
+- **M1A bilateral contact window is at its own gate.** Three S3 episodes across
+  two runs rejected at 0.096, 0.098 and 0.099 s against a 0.100 s requirement —
+  all within 4 ms, which is systematic rather than noise. Every rejection was
+  fail-closed and the gate is still met at 8/10, so it does not block
+  acceptance, but it is the M1A analogue of the truncated evidence window
+  already fixed on the M1B path.
+- **Reset jog can clip a non-target cylinder.** 2 of 81 v3 resets (2.7 %) were
+  rejected because the randomized home jog displaced a non-target cylinder
+  ~22 mm (`cylinder_04` 21.25 mm, `cylinder_02` 23.08 mm). Both recovered on a
+  fresh world. A rejected reset is never an episode, so it cannot contaminate a
+  measurement.
+- **Shared-host transients are real and slow.** Three separate measurement
+  artifacts today — the bullet audit's `physical_mimic`, S1's zero stamps, and
+  S3's release step — all traced to fixed wall-clock assumptions on a host
+  sharing its GPU. Two were transient, one was a genuine defect. The lesson is
+  that a fixed spin count or wall-clock wait is the first thing to suspect, and
+  that two consecutive reproductions are not enough to rule out a transient.
 - **Descent-corridor near-band losses.** All 16 descent rejections land in the
   final 1–5 waypoints at z ≈ 0.594 m with all three yaw retries exhausted. At
   |δ| ≥ 15 mm they are deterministic and correct; at |δ| ≤ 5 mm three trials
