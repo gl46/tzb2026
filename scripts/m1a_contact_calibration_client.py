@@ -75,6 +75,12 @@ CALIBRATION_FIXTURE_XYZ = [0.17, 0.12, 0.59]
 CALIBRATION_FIXTURE_SIZE_M = [0.01, 0.01, 0.28]
 CONTACT_RETREAT_HEIGHT_M = 0.220
 HAND_POST_GOAL_OBSERVATION_SLACK_M = 0.0001
+# Hand action-client waits.  The result wait must scale with the commanded
+# trajectory rather than assume a wall-clock bound: this simulator shares its
+# GPU, so a 1.2 s close can take materially longer in wall-clock time.
+HAND_GOAL_ACCEPT_TIMEOUT_S = 5.0
+HAND_RESULT_TIMEOUT_FLOOR_S = 15.0
+HAND_RESULT_TIMEOUT_MARGIN_S = 15.0
 # The nominal side-contact pose placed the finger pad exactly tangent to
 # the cube's west face.  The full S0 run recorded 0.30--0.94 mm FK / Gazebo
 # AABB gaps for otherwise executed right and bilateral trials, so the fixture
@@ -388,12 +394,19 @@ class CalibrationClient(EvidenceClient):
             for name in HAND_JOINTS
         ]
         sent = self.hand_client.send_goal_async(goal)
-        rclpy.spin_until_future_complete(self, sent, timeout_sec=3.0)
+        rclpy.spin_until_future_complete(self, sent, timeout_sec=HAND_GOAL_ACCEPT_TIMEOUT_S)
         handle = sent.result()
         if handle is None or not handle.accepted:
             return {"accepted": False, "succeeded": False, "goal_uuid": None}
         result_future = handle.get_result_async()
-        rclpy.spin_until_future_complete(self, result_future, timeout_sec=5.0)
+        # Scale the result wait with the commanded trajectory, exactly as the
+        # arm path does.  A fixed 5 s wait is a wall-clock assumption, and this
+        # simulator shares its GPU: a measured campaign trial reported
+        # NO_ACTION_RESULT with the fingers still mid-travel at 0.0220 m of a
+        # 0.017 m command, i.e. the client abandoned a trajectory that was
+        # still executing and a live grasp was recorded as a close failure.
+        result_timeout_s = min(60.0, max(HAND_RESULT_TIMEOUT_FLOOR_S, duration_s + HAND_RESULT_TIMEOUT_MARGIN_S))
+        rclpy.spin_until_future_complete(self, result_future, timeout_sec=result_timeout_s)
         wrapped = result_future.result()
         controller_succeeded = bool(
             wrapped and wrapped.result.error_code == FollowJointTrajectory.Result.SUCCESSFUL

@@ -180,6 +180,9 @@ M1B_POST_CLOSE_OBSERVATION_S = 1.0
 # an otherwise fully successful grasp; allow a longer settle and one retry.
 M1B_ATTACH_SUBSCRIBE_SETTLE_S = 1.0
 M1B_ATTACH_OBSERVE_ATTEMPTS = 2
+# The Gazebo transport CLI drops replies under a shared GPU workload; a single
+# miss must not abort a valid trial.
+M1B_GZ_POSE_QUERY_ATTEMPTS = 4
 
 
 # Calibration-only free-gap yaw selection.  ADR-0016 §2 makes the production
@@ -254,16 +257,31 @@ def m1b_calibration_free_gap_yaw(
 
 
 def calibration_live_model_center(entity_name: str) -> list[float]:
-    """Read post-settle simulator truth for calibration initialization only."""
-    command = subprocess.run(
-        ["timeout", "2", "gz", "model", "-m", entity_name, "-p"],
-        check=False, capture_output=True, text=True, timeout=4.0,
-    )
-    match = re.search(
-        r"- Pose \[ XYZ \(m\) \] \[ RPY \(rad\) \]:\s*"
-        r"\[\s*([-+0-9.eE]+)\s+([-+0-9.eE]+)\s+([-+0-9.eE]+)\s*\]",
-        command.stdout,
-    )
+    """Read post-settle simulator truth for calibration initialization only.
+
+    The Gazebo transport CLI intermittently returns nothing under a shared
+    physics/render workload, and a single miss here aborts an otherwise valid
+    trial, so retry a bounded number of times before declaring the pose
+    unavailable.  This reads evaluator-only supervision; retrying changes no
+    online policy input.
+    """
+    for _ in range(M1B_GZ_POSE_QUERY_ATTEMPTS):
+        try:
+            command = subprocess.run(
+                ["timeout", "2", "gz", "model", "-m", entity_name, "-p"],
+                check=False, capture_output=True, text=True, timeout=4.0,
+            )
+        except subprocess.TimeoutExpired:
+            continue
+        match = re.search(
+            r"- Pose \[ XYZ \(m\) \] \[ RPY \(rad\) \]:\s*"
+            r"\[\s*([-+0-9.eE]+)\s+([-+0-9.eE]+)\s+([-+0-9.eE]+)\s*\]",
+            command.stdout,
+        )
+        if match is not None:
+            break
+    else:
+        match = None
     if match is None:
         raise RuntimeError(f"CALIBRATION_SUPERVISION_POSE_UNAVAILABLE:{entity_name}")
     return [float(value) for value in match.groups()]
