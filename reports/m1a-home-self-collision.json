@@ -1,10 +1,10 @@
 {
-  "run_id": "m1a-adr0014-home-20260719",
+  "run_id": "m1a-adr0016b-head-24f8af8",
   "status": "HOME_SELF_COLLISION_VERIFIED",
   "reason": "MoveIt reports the approved home state as collision-free.",
-  "started_at_unix_s": 1784444386.3852758,
-  "local_gazebo_urdf_sha256": "49ffca858e22842b70b7c24ba4ae59e8163e9e50db7f26ff172d817a17e7b207",
-  "remote_gazebo_urdf_sha256": "49ffca858e22842b70b7c24ba4ae59e8163e9e50db7f26ff172d817a17e7b207",
+  "started_at_unix_s": 1785003707.463271,
+  "local_gazebo_urdf_sha256": "6678ff409d60f074283805879f53edaa939ead34f97a5a961ee67f6229b44ba8",
+  "remote_gazebo_urdf_sha256": "6678ff409d60f074283805879f53edaa939ead34f97a5a961ee67f6229b44ba8",
   "model_match": true,
   "runtime": {
     "status": "HOME_SELF_COLLISION_VERIFIED",
@@ -24,9 +24,9 @@
       0.02
     ],
     "contacts": [],
-    "duration_s": 1.3832972049713135,
+    "duration_s": 1.3378801345825195,
     "method": "MOVEIT_CHECK_STATE_VALIDITY_NO_MOTION_COMMAND"
   },
-  "raw_log": "logs/m1a-adr0014-home-20260719-home-self-collision.log",
+  "raw_log": "logs/m1a-adr0016b-head-24f8af8-home-self-collision.log",
   "next_gate": "S0_ONLY_IF_HOME_SELF_COLLISION_VERIFIED_AND_MODEL_MATCH"
 }

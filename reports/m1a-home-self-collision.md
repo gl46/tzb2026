@@ -2,7 +2,7 @@
 
 - Status: `HOME_SELF_COLLISION_VERIFIED`
 - MoveIt reports the approved home state as collision-free.
-- Same URDF SHA-256: `49ffca858e22842b70b7c24ba4ae59e8163e9e50db7f26ff172d817a17e7b207` / `49ffca858e22842b70b7c24ba4ae59e8163e9e50db7f26ff172d817a17e7b207`
+- Same URDF SHA-256: `6678ff409d60f074283805879f53edaa939ead34f97a5a961ee67f6229b44ba8` / `6678ff409d60f074283805879f53edaa939ead34f97a5a961ee67f6229b44ba8`
 - Method: MoveIt `check_state_validity`, with no motion command.
 - Changed files: no source files; this is runtime evidence for the approved URDF/SRDF.
 - Tests: same-URDF hash comparison and `panda_arm` state-validity query at the SRDF home posture.

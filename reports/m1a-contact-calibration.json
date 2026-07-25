@@ -1,5 +1,5 @@
 {
-  "run_id": "m1a-20260717-s0-isolated-final-r1",
+  "run_id": "m1a-adr0016b-head-24f8af8",
   "status": "CONTACT_TELEMETRY_CALIBRATED",
   "reason": "13/13 independently reset approved conditions passed.",
   "trials": [
@@ -46,9 +46,9 @@
         "source": "gz model runtime oracle (object_red_cube)"
       },
       "target_hand_pose": [
-        0.027000000000000024,
-        0.16,
-        0.81,
+        0.17,
+        0.1305,
+        0.8562,
         1.0,
         0.0,
         0.0,
@@ -61,13 +61,13 @@
       "motion": {
         "ik_solved": true,
         "ik_solution": [
-          0.715778877127028,
-          -0.3359679090189994,
-          -0.3165481012923427,
-          -2.6112469546059662,
-          -0.13638279043976242,
-          2.28620420717752,
-          1.291030182833347
+          0.7385016456802863,
+          -0.009543414083784976,
+          -0.491593352181471,
+          -2.1457297228684458,
+          -0.005338781272041896,
+          2.1373099112154144,
+          1.0351907165093732
         ],
         "ik_seed_source": "current_joint_state",
         "ik_link": "panda_hand",
@@ -75,21 +75,49 @@
         "planned": true,
         "executed": true,
         "converged": false,
-        "goal_uuid": "17492c3fb4684f9e82acaf521600f6de",
-        "joint_state_samples": 612,
-        "controller_state_samples": 612,
-        "post_controller_settle_s": 3.0001139640808105
+        "goal_uuid": "00d825b870cf4aedb196f043284c92ea",
+        "joint_state_samples": 570,
+        "controller_state_samples": 570,
+        "post_controller_settle_s": 3.0002901554107666,
+        "expected_final_joints": [
+          0.738497406617042,
+          -0.00939293258964137,
+          -0.49205643448429837,
+          -2.146340630783494,
+          -0.005620505211855569,
+          2.1377128023088137,
+          1.03540579667654
+        ],
+        "observed_final_joints": [
+          0.7384967803955078,
+          -0.009396874345839024,
+          -0.49258124828338623,
+          -2.1463372707366943,
+          -0.018070794641971588,
+          2.135671854019165,
+          1.0354421138763428
+        ],
+        "per_joint_final_error_rad": [
+          6.262215341834576e-07,
+          3.941756197653468e-06,
+          0.0005248137990878643,
+          3.360046799461003e-06,
+          0.012450289430116019,
+          0.0020409482896486253,
+          3.6317199802793354e-05
+        ],
+        "max_final_joint_error_rad": 0.012450289430116019
       },
       "retreat": {
         "ik_solved": true,
         "ik_solution": [
-          0.8038603891572018,
-          -0.7950128696328181,
-          -0.2052908715031987,
-          -2.515191625545123,
-          -0.14790497569099753,
-          1.7290714755329173,
-          1.4679438556249742
+          0.75501046907616,
+          -0.09442482627681495,
+          -0.4882814344115209,
+          -1.9231445630982054,
+          -0.045890790462617875,
+          1.8394303263481502,
+          1.0661618480448523
         ],
         "ik_seed_source": "current_joint_state",
         "ik_link": "panda_hand",
@@ -97,14 +125,42 @@
         "planned": true,
         "executed": true,
         "converged": true,
-        "goal_uuid": "36382809d14547df8c46cc88556a0043",
-        "joint_state_samples": 223,
-        "controller_state_samples": 223,
-        "post_controller_settle_s": 0.001382589340209961
+        "goal_uuid": "3e4c521908ee4cbfaa203ac6b53b353e",
+        "joint_state_samples": 182,
+        "controller_state_samples": 183,
+        "post_controller_settle_s": 0.001405477523803711,
+        "expected_final_joints": [
+          0.7547612834721167,
+          -0.09427771027279125,
+          -0.4886889046908941,
+          -1.9236712223936339,
+          -0.0449341258454445,
+          1.8390035355197993,
+          1.0669210235442876
+        ],
+        "observed_final_joints": [
+          0.7547613978385925,
+          -0.0942777693271637,
+          -0.4886910021305084,
+          -1.9236717224121094,
+          -0.044934142380952835,
+          1.8390038013458252,
+          1.0669214725494385
+        ],
+        "per_joint_final_error_rad": [
+          1.1436647584517345e-07,
+          5.905437244768663e-08,
+          2.0974396143236262e-06,
+          5.000184755132864e-07,
+          1.6535508337578442e-08,
+          2.65826025858118e-07,
+          4.49005150837678e-07
+        ],
+        "max_final_joint_error_rad": 2.0974396143236262e-06
       },
       "retreat_hand_pose": [
-        -0.07499999999999998,
-        0.16,
+        0.17,
+        0.1305,
         0.975,
         1.0,
         0.0,
@@ -121,7 +177,7 @@
         "controller_result_succeeded": true,
         "controller_result_error_code": 0,
         "controller_result_error_string": "SYMMETRIC_MIMIC_COMMAND_FORWARDED",
-        "goal_uuid": "7698e01a2abf47a7b8ce70a3559e4557",
+        "goal_uuid": "2a69cfba90eb4ff481d92fdf3802da0e",
         "observed_positions_m": [
           0.040000006556510925,
           0.040000006556510925
@@ -134,11 +190,11 @@
         "controller_state_sample_count": 145,
         "controller_target_reference_seen": true,
         "controller_terminal_state": {
-          "timestamp_s": 15.38,
+          "timestamp_s": 14.63,
           "physical_joint": "panda_finger_joint2",
-          "physical_reference_m": 0.04000000008195639,
+          "physical_reference_m": 0.04,
           "physical_feedback_m": 0.040000006556510925,
-          "physical_error_m": -6.4745545383382286e-09,
+          "physical_error_m": -6.5565109244603015e-09,
           "physical_output_m": 0.04
         },
         "adapter_decisions": [
@@ -149,7 +205,7 @@
             "physical_master_joint": "panda_finger_joint2",
             "physical_target_m": 0.04,
             "reason": "SYMMETRIC_MIMIC_COMMAND",
-            "timestamp_monotonic_s": 1849441.209710923
+            "timestamp_monotonic_s": 2616488.658106048
           }
         ]
       },
@@ -169,80 +225,80 @@
       "pad_evidence": {
         "left": {
           "link_pose": [
-            0.049517635078196384,
-            0.11201032823976084,
-            0.7782217830250816,
-            0.9911548318745831,
-            0.002959561285225282,
-            0.10793954875854231,
-            0.07715175994407467
+            0.17024674112270122,
+            0.08863657187724124,
+            0.7977773435012745,
+            0.9999806274423421,
+            0.002819574664580892,
+            0.0002945381294458566,
+            0.005541478685427971
           ],
           "pad_center_world": [
-            0.10811847045549253,
-            0.11336166139444534,
-            0.7910325594179505
+            0.1702854070966097,
+            0.08443879231124385,
+            0.7709222294322977
           ],
-          "aabb_separation_m": 0.0
+          "aabb_separation_m": 0.00016120768875614588
         },
         "right": {
           "link_pose": [
-            0.050380743071341494,
-            0.1910577493098742,
-            0.7659353887054453,
-            0.9911548318745831,
-            0.002959561285225282,
-            0.10793954875854231,
-            0.07715175994407467
+            0.16979531288382724,
+            0.16873084067259606,
+            0.7968894776528759,
+            0.9999806274423421,
+            0.002819574664580892,
+            0.0002945381294458566,
+            0.005541478685427971
           ],
           "pad_center_world": [
-            0.10898157844863765,
-            0.1924090824645587,
-            0.7787461650983142
+            0.16979001980703481,
+            0.17233245804199662,
+            0.7699479052357401
           ],
-          "aabb_separation_m": 0.03840908246455871
+          "aabb_separation_m": 0.016932458041996626
         },
-        "minimum_pad_cube_aabb_separation_m": 0.0,
+        "minimum_pad_cube_aabb_separation_m": 0.00016120768875614588,
         "gazebo_link_pose_evidence": {
           "left": {
             "link_pose_world_xyz_rpy": [
-              0.049091,
-              0.113058,
-              0.77803,
-              2.99763,
-              -0.215654,
-              0.01166
+              0.170337,
+              0.088637,
+              0.797824,
+              3.13045,
+              -0.001091,
+              0.005763
             ],
             "pad_center_world": [
-              0.10769721521659831,
-              0.11374137943946015,
-              0.7908691795114596
+              0.17039049969743492,
+              0.08443774951204894,
+              0.7709691413498075
             ],
-            "aabb_separation_m": 0.0
+            "aabb_separation_m": 0.00016225048795105723
           },
           "right": {
             "link_pose_world_xyz_rpy": [
-              0.050677,
-              0.193383,
-              0.767512,
-              3.00898,
-              -0.215858,
-              0.003296
+              0.169947,
+              0.168734,
+              0.796969,
+              3.13045,
+              -0.001532,
+              0.005834
             ],
             "pad_center_world": [
-              0.10928426060687818,
-              0.19357617023046986,
-              0.7803631357248892
+              0.1699672716601763,
+              0.17233420624541299,
+              0.7700272460843716
             ],
-            "aabb_separation_m": 0.03957617023046986
+            "aabb_separation_m": 0.01693420624541299
           }
         },
-        "gazebo_minimum_pad_cube_aabb_separation_m": 0.0
+        "gazebo_minimum_pad_cube_aabb_separation_m": 0.00016225048795105723
       },
       "contacts": {
         "target_model": "object_red_cube",
         "left_target": true,
         "right_target": false,
-        "target_cube_events": 2183,
+        "target_cube_events": 200,
         "left_table": false,
         "right_table": false,
         "cube_table": false,
@@ -275,17 +331,17 @@
           ]
         },
         "event_counts": {
-          "left": 2279,
+          "left": 199,
           "right": 0,
-          "cube": 2278,
-          "cube_bilateral": 4734,
-          "cube_environment": 4733
+          "cube": 200,
+          "cube_bilateral": 199,
+          "cube_environment": 199
         },
         "topic_rate_evidence": {
           "left": {
-            "unique_timestamp_samples": 2180,
-            "duration_s": 3.8979999999999997,
-            "observed_rate_hz": 559.0046177526938
+            "unique_timestamp_samples": 199,
+            "duration_s": 0.4450000000000003,
+            "observed_rate_hz": 444.9438202247188
           },
           "right": {
             "unique_timestamp_samples": 0,
@@ -293,22 +349,22 @@
             "observed_rate_hz": 0.0
           },
           "cube": {
-            "unique_timestamp_samples": 2183,
-            "duration_s": 3.896000000000001,
-            "observed_rate_hz": 560.0616016427103
+            "unique_timestamp_samples": 200,
+            "duration_s": 0.4460000000000015,
+            "observed_rate_hz": 446.1883408071734
           },
           "cube_bilateral": {
-            "unique_timestamp_samples": 4734,
-            "duration_s": 7.401000000000002,
-            "observed_rate_hz": 639.5081745710038
+            "unique_timestamp_samples": 199,
+            "duration_s": 0.4430000000000014,
+            "observed_rate_hz": 446.95259593679316
           },
           "cube_environment": {
-            "unique_timestamp_samples": 4679,
-            "duration_s": 7.400999999999998,
-            "observed_rate_hz": 632.0767463856238
+            "unique_timestamp_samples": 199,
+            "duration_s": 0.4430000000000014,
+            "observed_rate_hz": 446.95259593679316
           }
         },
-        "left_target_unique_samples": 2180,
+        "left_target_unique_samples": 199,
         "right_target_unique_samples": 0,
         "bilateral_overlap_s": 0.0
       },
@@ -361,9 +417,9 @@
         "source": "gz model runtime oracle (object_red_cube)"
       },
       "target_hand_pose": [
-        0.027000000000000024,
-        0.16,
-        0.81,
+        0.17,
+        0.1305,
+        0.8562,
         1.0,
         0.0,
         0.0,
@@ -376,13 +432,13 @@
       "motion": {
         "ik_solved": true,
         "ik_solution": [
-          0.7157788777462346,
-          -0.3359679090837836,
-          -0.31654810191483673,
-          -2.611246954598436,
-          -0.13638279072268,
-          2.2862042071495114,
-          1.2910301830496622
+          0.7385016447049819,
+          -0.009543414078804649,
+          -0.49159335120856357,
+          -2.145729722868459,
+          -0.005338781259555204,
+          2.137309911215466,
+          1.0351907165002303
         ],
         "ik_seed_source": "current_joint_state",
         "ik_link": "panda_hand",
@@ -390,21 +446,49 @@
         "planned": true,
         "executed": true,
         "converged": false,
-        "goal_uuid": "0045507a2a434517bd2b3f5bd6d8d536",
-        "joint_state_samples": 612,
-        "controller_state_samples": 612,
-        "post_controller_settle_s": 3.000387191772461
+        "goal_uuid": "603ce380443744e590c9159402faa61f",
+        "joint_state_samples": 566,
+        "controller_state_samples": 565,
+        "post_controller_settle_s": 3.000473737716675,
+        "expected_final_joints": [
+          0.7385160370902412,
+          -0.010530116433895202,
+          -0.4921592565029446,
+          -2.1460963948148244,
+          -0.005629045045535845,
+          2.136809093144045,
+          1.0342224748547413
+        ],
+        "observed_final_joints": [
+          0.7385153770446777,
+          -0.01053409930318594,
+          -0.49268004298210144,
+          -2.1460931301116943,
+          -0.017557092010974884,
+          2.134894371032715,
+          1.0342588424682617
+        ],
+        "per_joint_final_error_rad": [
+          6.600455634275804e-07,
+          3.982869290737948e-06,
+          0.0005207864791568206,
+          3.2647031300570006e-06,
+          0.011928046965439039,
+          0.0019147221113300361,
+          3.636761352043827e-05
+        ],
+        "max_final_joint_error_rad": 0.011928046965439039
       },
       "retreat": {
         "ik_solved": true,
         "ik_solution": [
-          0.8039109583750165,
-          -0.795020110045529,
-          -0.20532776010843784,
-          -2.515190525689379,
-          -0.14793230866610396,
-          1.7290663875890366,
-          1.4679727407443823
+          0.754865209551408,
+          -0.09441752955193508,
+          -0.48814322163609797,
+          -1.9231446582237905,
+          -0.04587532056111653,
+          1.8394309538178184,
+          1.066150102937894
         ],
         "ik_seed_source": "current_joint_state",
         "ik_link": "panda_hand",
@@ -412,14 +496,42 @@
         "planned": true,
         "executed": true,
         "converged": true,
-        "goal_uuid": "5aaa5bb602644c05971818d2833a7377",
-        "joint_state_samples": 223,
-        "controller_state_samples": 223,
-        "post_controller_settle_s": 0.0009400844573974609
+        "goal_uuid": "e136737ee8aa44f38da19f7814c10157",
+        "joint_state_samples": 125,
+        "controller_state_samples": 125,
+        "post_controller_settle_s": 0.0011920928955078125,
+        "expected_final_joints": [
+          0.7555322279570355,
+          -0.09349503092902589,
+          -0.48736902160549544,
+          -1.923475730972895,
+          -0.0464819218771327,
+          1.8385052196303422,
+          1.0663755540645885
+        ],
+        "observed_final_joints": [
+          0.7555320262908936,
+          -0.09349507093429565,
+          -0.48737096786499023,
+          -1.9234752655029297,
+          -0.04648192971944809,
+          1.8385047912597656,
+          1.0663753747940063
+        ],
+        "per_joint_final_error_rad": [
+          2.0166614189687238e-07,
+          4.000526976355445e-08,
+          1.9462594947894374e-06,
+          4.6546996523844086e-07,
+          7.842315387363019e-09,
+          4.2837057656619493e-07,
+          1.792705821568319e-07
+        ],
+        "max_final_joint_error_rad": 1.9462594947894374e-06
       },
       "retreat_hand_pose": [
-        -0.07499999999999998,
-        0.16,
+        0.17,
+        0.1305,
         0.975,
         1.0,
         0.0,
@@ -436,7 +548,7 @@
         "controller_result_succeeded": true,
         "controller_result_error_code": 0,
         "controller_result_error_string": "SYMMETRIC_MIMIC_COMMAND_FORWARDED",
-        "goal_uuid": "282730d3d4664b008020f72a2fbdb435",
+        "goal_uuid": "e1cab4226f5d43689cc4372699d7b4fa",
         "observed_positions_m": [
           0.040000006556510925,
           0.040000006556510925
@@ -446,14 +558,14 @@
         "max_position_error_m": 6.5565109244603015e-09,
         "mimic_tracking_error_m": 0.0,
         "physical_controller_state_topic": "/panda_hand_physical_controller/controller_state",
-        "controller_state_sample_count": 143,
+        "controller_state_sample_count": 150,
         "controller_target_reference_seen": true,
         "controller_terminal_state": {
-          "timestamp_s": 15.51,
+          "timestamp_s": 14.82,
           "physical_joint": "panda_finger_joint2",
-          "physical_reference_m": 0.04,
+          "physical_reference_m": 0.04000000008195639,
           "physical_feedback_m": 0.040000006556510925,
-          "physical_error_m": -6.5565109244603015e-09,
+          "physical_error_m": -6.4745545383382286e-09,
           "physical_output_m": 0.04
         },
         "adapter_decisions": [
@@ -464,7 +576,7 @@
             "physical_master_joint": "panda_finger_joint2",
             "physical_target_m": 0.04,
             "reason": "SYMMETRIC_MIMIC_COMMAND",
-            "timestamp_monotonic_s": 1849477.119098062
+            "timestamp_monotonic_s": 2616524.019248894
           }
         ]
       },
@@ -484,80 +596,80 @@
       "pad_evidence": {
         "left": {
           "link_pose": [
-            0.04947868054518078,
-            0.11263023129827807,
-            0.77818255533031,
-            0.9911910170619478,
-            0.0027521651185053756,
-            0.10804574860840674,
-            0.07654351370632946
+            0.17021180499005154,
+            0.08861456371884124,
+            0.7983130654180058,
+            0.9999821333103619,
+            0.003226640576217394,
+            0.00039833694014302105,
+            0.005016291292523206
           ],
           "pad_center_world": [
-            0.1080769055605579,
-            0.1139500060081723,
-            0.7910085531379799
+            0.1702592576899834,
+            0.08444503869793624,
+            0.7714535641318443
           ],
-          "aabb_separation_m": 0.0
+          "aabb_separation_m": 0.00015496130206375802
         },
         "right": {
           "link_pose": [
-            0.050365478838894424,
-            0.19169458155083172,
-            0.7659954383340516,
-            0.9911910170619478,
-            0.0027521651185053756,
-            0.10804574860840674,
-            0.07654351370632946
+            0.16969522843528517,
+            0.16870856660454484,
+            0.7975092669989245,
+            0.9999821333103619,
+            0.003226640576217394,
+            0.00039833694014302105,
+            0.005016291292523206
           ],
           "pad_center_world": [
-            0.10896370385427157,
-            0.19301435626072594,
-            0.7788214361417215
+            0.1696923776130748,
+            0.1723384866231911,
+            0.770571492916216
           ],
-          "aabb_separation_m": 0.03901435626072594
+          "aabb_separation_m": 0.0169384866231911
         },
-        "minimum_pad_cube_aabb_separation_m": 0.0,
+        "minimum_pad_cube_aabb_separation_m": 0.00015496130206375802,
         "gazebo_link_pose_evidence": {
           "left": {
             "link_pose_world_xyz_rpy": [
-              0.049092,
-              0.113598,
-              0.778003,
-              2.9979,
-              -0.215898,
-              0.01188
+              0.170314,
+              0.088615,
+              0.798366,
+              3.1315,
+              -0.001367,
+              0.006586
             ],
             "pad_center_world": [
-              0.10769492917156492,
-              0.11429423555312873,
-              0.7908564800177658
+              0.1703781877250905,
+              0.08444404313524127,
+              0.7715067558042251
             ],
-            "aabb_separation_m": 0.0
+            "aabb_separation_m": 0.00015595686475872172
           },
           "right": {
             "link_pose_world_xyz_rpy": [
-              0.050667,
-              0.193849,
-              0.767451,
-              3.00838,
-              -0.216096,
-              0.004084
+              0.16985,
+              0.168713,
+              0.797592,
+              3.13154,
+              -0.001749,
+              0.006619
             ],
             "pad_center_world": [
-              0.10927102998820319,
-              0.19408834018912943,
-              0.7803160839645782
+              0.1698730904713127,
+              0.17234262345913304,
+              0.7706541957024139
             ],
-            "aabb_separation_m": 0.040088340189129434
+            "aabb_separation_m": 0.01694262345913304
           }
         },
-        "gazebo_minimum_pad_cube_aabb_separation_m": 0.0
+        "gazebo_minimum_pad_cube_aabb_separation_m": 0.00015595686475872172
       },
       "contacts": {
         "target_model": "object_red_cube",
         "left_target": true,
         "right_target": false,
-        "target_cube_events": 2018,
+        "target_cube_events": 240,
         "left_table": false,
         "right_table": false,
         "cube_table": false,
@@ -590,17 +702,17 @@
           ]
         },
         "event_counts": {
-          "left": 2108,
+          "left": 240,
           "right": 0,
-          "cube": 2108,
-          "cube_bilateral": 4590,
-          "cube_environment": 4588
+          "cube": 240,
+          "cube_bilateral": 240,
+          "cube_environment": 240
         },
         "topic_rate_evidence": {
           "left": {
-            "unique_timestamp_samples": 2016,
-            "duration_s": 3.8949999999999996,
-            "observed_rate_hz": 517.3299101412067
+            "unique_timestamp_samples": 240,
+            "duration_s": 0.4480000000000004,
+            "observed_rate_hz": 533.4821428571424
           },
           "right": {
             "unique_timestamp_samples": 0,
@@ -608,22 +720,22 @@
             "observed_rate_hz": 0.0
           },
           "cube": {
-            "unique_timestamp_samples": 2018,
-            "duration_s": 3.8949999999999996,
-            "observed_rate_hz": 517.8433889602054
+            "unique_timestamp_samples": 240,
+            "duration_s": 0.4480000000000004,
+            "observed_rate_hz": 533.4821428571424
           },
           "cube_bilateral": {
-            "unique_timestamp_samples": 4590,
-            "duration_s": 7.408999999999999,
-            "observed_rate_hz": 619.3818329059253
+            "unique_timestamp_samples": 240,
+            "duration_s": 0.4480000000000004,
+            "observed_rate_hz": 533.4821428571424
           },
           "cube_environment": {
-            "unique_timestamp_samples": 4536,
-            "duration_s": 7.406000000000001,
-            "observed_rate_hz": 612.3413448555225
+            "unique_timestamp_samples": 240,
+            "duration_s": 0.4480000000000004,
+            "observed_rate_hz": 533.4821428571424
           }
         },
-        "left_target_unique_samples": 2016,
+        "left_target_unique_samples": 240,
         "right_target_unique_samples": 0,
         "bilateral_overlap_s": 0.0
       },
@@ -676,9 +788,9 @@
         "source": "gz model runtime oracle (object_red_cube)"
       },
       "target_hand_pose": [
-        0.027000000000000024,
-        0.16,
-        0.81,
+        0.17,
+        0.1305,
+        0.8562,
         1.0,
         0.0,
         0.0,
@@ -691,13 +803,13 @@
       "motion": {
         "ik_solved": true,
         "ik_solution": [
-          0.7157788774588353,
-          -0.3359679090537143,
-          -0.31654810162591157,
-          -2.6112469546019312,
-          -0.1363827905913662,
-          2.2862042071625117,
-          1.2910301829492614
+          0.7385016462513994,
+          -0.009543414086701717,
+          -0.4915933527511801,
+          -2.1457297228684378,
+          -0.005338781279353989,
+          2.1373099112153837,
+          1.0351907165147272
         ],
         "ik_seed_source": "current_joint_state",
         "ik_link": "panda_hand",
@@ -705,21 +817,49 @@
         "planned": true,
         "executed": true,
         "converged": false,
-        "goal_uuid": "1c700b50cf1b46699d8b94668c24e2f4",
-        "joint_state_samples": 612,
-        "controller_state_samples": 612,
-        "post_controller_settle_s": 3.000396966934204
+        "goal_uuid": "19c31f37f44946c9845ca792dfc20da4",
+        "joint_state_samples": 565,
+        "controller_state_samples": 565,
+        "post_controller_settle_s": 3.0005600452423096,
+        "expected_final_joints": [
+          0.7380228631258758,
+          -0.010485392093791089,
+          -0.49100559685083806,
+          -2.1462283538177336,
+          -0.004523052977705938,
+          2.1366838447923624,
+          1.0353743695559816
+        ],
+        "observed_final_joints": [
+          0.7380222082138062,
+          -0.010489055886864662,
+          -0.49152448773384094,
+          -2.146225690841675,
+          -0.019989755004644394,
+          2.13297963142395,
+          1.0354106426239014
+        ],
+        "per_joint_final_error_rad": [
+          6.549120696863753e-07,
+          3.663793073573063e-06,
+          0.0005188908830028871,
+          2.6629760587759677e-06,
+          0.015466702026938456,
+          0.0037042133684122014,
+          3.6273067919756485e-05
+        ],
+        "max_final_joint_error_rad": 0.015466702026938456
       },
       "retreat": {
         "ik_solved": true,
         "ik_solution": [
-          0.8012784177773237,
-          -0.7946450257208254,
-          -0.20340695940503786,
-          -2.515247515124859,
-          -0.14650964680111375,
-          1.7293299412932346,
-          1.4664693810805203
+          0.7539359667919141,
+          -0.09437127804201277,
+          -0.487258942247682,
+          -1.9231456130364282,
+          -0.04577653068748601,
+          1.8394350397271102,
+          1.0660750332180131
         ],
         "ik_seed_source": "current_joint_state",
         "ik_link": "panda_hand",
@@ -727,14 +867,42 @@
         "planned": true,
         "executed": true,
         "converged": true,
-        "goal_uuid": "0132f50e1a7f44f3817e59942f5a0c30",
-        "joint_state_samples": 222,
-        "controller_state_samples": 222,
-        "post_controller_settle_s": 0.0014400482177734375
+        "goal_uuid": "f2bebd4362f84b21b058e1d37acafb2d",
+        "joint_state_samples": 173,
+        "controller_state_samples": 174,
+        "post_controller_settle_s": 0.0017600059509277344,
+        "expected_final_joints": [
+          0.7533102135880414,
+          -0.09487350120399327,
+          -0.4865363630860455,
+          -1.9237049527129462,
+          -0.04479751278299205,
+          1.8385934563759714,
+          1.0651809719129186
+        ],
+        "observed_final_joints": [
+          0.7533103227615356,
+          -0.09487351775169373,
+          -0.4865383207798004,
+          -1.923704981803894,
+          -0.04479750618338585,
+          1.8385937213897705,
+          1.0651804208755493
+        ],
+        "per_joint_final_error_rad": [
+          1.091734942448852e-07,
+          1.654770045989018e-08,
+          1.9576937549392603e-06,
+          2.9090947872845163e-08,
+          6.599606201806996e-09,
+          2.650137991278001e-07,
+          5.510373692896309e-07
+        ],
+        "max_final_joint_error_rad": 1.9576937549392603e-06
       },
       "retreat_hand_pose": [
-        -0.07499999999999998,
-        0.16,
+        0.17,
+        0.1305,
         0.975,
         1.0,
         0.0,
@@ -751,7 +919,7 @@
         "controller_result_succeeded": true,
         "controller_result_error_code": 0,
         "controller_result_error_string": "SYMMETRIC_MIMIC_COMMAND_FORWARDED",
-        "goal_uuid": "d97cf2e3e900439390a6143cd608d793",
+        "goal_uuid": "39748688237f458fa6bdb70e3cddbb6e",
         "observed_positions_m": [
           0.040000006556510925,
           0.040000006556510925
@@ -761,10 +929,10 @@
         "max_position_error_m": 6.5565109244603015e-09,
         "mimic_tracking_error_m": 0.0,
         "physical_controller_state_topic": "/panda_hand_physical_controller/controller_state",
-        "controller_state_sample_count": 151,
+        "controller_state_sample_count": 149,
         "controller_target_reference_seen": true,
         "controller_terminal_state": {
-          "timestamp_s": 15.77,
+          "timestamp_s": 14.03,
           "physical_joint": "panda_finger_joint2",
           "physical_reference_m": 0.04,
           "physical_feedback_m": 0.040000006556510925,
@@ -779,7 +947,7 @@
             "physical_master_joint": "panda_finger_joint2",
             "physical_target_m": 0.04,
             "reason": "SYMMETRIC_MIMIC_COMMAND",
-            "timestamp_monotonic_s": 1849513.046131869
+            "timestamp_monotonic_s": 2616558.693925907
           }
         ]
       },
@@ -799,80 +967,80 @@
       "pad_evidence": {
         "left": {
           "link_pose": [
-            0.049083622878392685,
-            0.11273081023030536,
-            0.7780508638071256,
-            0.9913689938840173,
-            0.0019339088226254075,
-            0.10804925504350232,
-            0.0742235572214182
+            0.1698559505575868,
+            0.08865121684128795,
+            0.798163154770988,
+            0.9999736302869365,
+            0.0036191992364877925,
+            -0.00039253009938074174,
+            0.006283792467350091
           ],
           "pad_center_world": [
-            0.10768221709613787,
-            0.11392325230728967,
-            0.7908876405675541
+            0.16986430477963207,
+            0.08441349145089708,
+            0.7713142886175988
           ],
-          "aabb_separation_m": 0.0
+          "aabb_separation_m": 0.0001865085491029178
         },
         "right": {
           "link_pose": [
-            0.05006004979368403,
-            0.19184985717895855,
-            0.7662439960790735,
-            0.9913689938840173,
-            0.0019339088226254075,
-            0.10804925504350232,
-            0.0742235572214182
+            0.16927578383425335,
+            0.16874157091814654,
+            0.7971567607040118,
+            0.9999736302869365,
+            0.0036191992364877925,
+            -0.00039253009938074174,
+            0.006283792467350091
           ],
           "pad_center_world": [
-            0.10865864401142922,
-            0.19304229925594285,
-            0.779080772839502
+            0.16922764155841863,
+            0.17230302520720184,
+            0.7702098921351364
           ],
-          "aabb_separation_m": 0.03904229925594285
+          "aabb_separation_m": 0.01690302520720184
         },
-        "minimum_pad_cube_aabb_separation_m": 0.0,
+        "minimum_pad_cube_aabb_separation_m": 0.0001865085491029178,
         "gazebo_link_pose_evidence": {
           "left": {
             "link_pose_world_xyz_rpy": [
-              0.048605,
-              0.113854,
-              0.77784,
-              3.00488,
-              -0.216077,
-              0.008409
+              0.169915,
+              0.088651,
+              0.798194,
+              3.12898,
+              0.00048,
+              0.00732
             ],
             "pad_center_world": [
-              0.10720769115083797,
-              0.11434680164548736,
-              0.7907039704764004
+              0.16993314190180428,
+              0.0844120580454601,
+              0.7713453307224093
             ],
-            "aabb_separation_m": 0.0
+            "aabb_separation_m": 0.0001879419545398886
           },
           "right": {
             "link_pose_world_xyz_rpy": [
-              0.050172,
-              0.194497,
-              0.76792,
-              3.01847,
-              -0.217179,
-              -8.7e-05
+              0.169363,
+              0.168742,
+              0.797201,
+              3.12896,
+              0.000256,
+              0.007374
             ],
             "pad_center_world": [
-              0.10876255124830841,
-              0.19449190262202853,
-              0.7808485451012898
+              0.16932985141166737,
+              0.1723017318179377,
+              0.7702538812197769
             ],
-            "aabb_separation_m": 0.040491902622028536
+            "aabb_separation_m": 0.016901731817937707
           }
         },
-        "gazebo_minimum_pad_cube_aabb_separation_m": 0.0
+        "gazebo_minimum_pad_cube_aabb_separation_m": 0.0001879419545398886
       },
       "contacts": {
         "target_model": "object_red_cube",
         "left_target": true,
         "right_target": false,
-        "target_cube_events": 2168,
+        "target_cube_events": 205,
         "left_table": false,
         "right_table": false,
         "cube_table": false,
@@ -905,17 +1073,17 @@
           ]
         },
         "event_counts": {
-          "left": 2258,
+          "left": 204,
           "right": 0,
-          "cube": 2257,
-          "cube_bilateral": 4791,
-          "cube_environment": 4791
+          "cube": 205,
+          "cube_bilateral": 205,
+          "cube_environment": 205
         },
         "topic_rate_evidence": {
           "left": {
-            "unique_timestamp_samples": 2164,
-            "duration_s": 3.892999999999997,
-            "observed_rate_hz": 555.6126380683281
+            "unique_timestamp_samples": 204,
+            "duration_s": 0.44399999999999906,
+            "observed_rate_hz": 457.20720720720817
           },
           "right": {
             "unique_timestamp_samples": 0,
@@ -923,22 +1091,22 @@
             "observed_rate_hz": 0.0
           },
           "cube": {
-            "unique_timestamp_samples": 2168,
-            "duration_s": 3.8909999999999982,
-            "observed_rate_hz": 556.9262400411208
+            "unique_timestamp_samples": 205,
+            "duration_s": 0.4469999999999992,
+            "observed_rate_hz": 456.37583892617533
           },
           "cube_bilateral": {
-            "unique_timestamp_samples": 4791,
-            "duration_s": 7.460000000000001,
-            "observed_rate_hz": 642.0911528150133
+            "unique_timestamp_samples": 205,
+            "duration_s": 0.4469999999999992,
+            "observed_rate_hz": 456.37583892617533
           },
           "cube_environment": {
-            "unique_timestamp_samples": 4719,
-            "duration_s": 7.460000000000001,
-            "observed_rate_hz": 632.4396782841823
+            "unique_timestamp_samples": 205,
+            "duration_s": 0.4469999999999992,
+            "observed_rate_hz": 456.37583892617533
           }
         },
-        "left_target_unique_samples": 2164,
+        "left_target_unique_samples": 204,
         "right_target_unique_samples": 0,
         "bilateral_overlap_s": 0.0
       },
@@ -991,9 +1159,9 @@
         "source": "gz model runtime oracle (object_red_cube)"
       },
       "target_hand_pose": [
-        0.027000000000000024,
-        0.07999999999999999,
-        0.81,
+        0.17,
+        0.1095,
+        0.8562,
         1.0,
         0.0,
         0.0,
@@ -1006,13 +1174,13 @@
       "motion": {
         "ik_solved": true,
         "ik_solution": [
-          0.6198360799458092,
-          -0.4335157761205276,
-          -0.4184043607292173,
-          -2.6793136864610188,
-          -0.2242529024250433,
-          2.266673794947322,
-          1.1668812949379317
+          0.7323441859364387,
+          -0.025453923983239406,
+          -0.5219810284123284,
+          -2.162228256533109,
+          -0.01506688681405507,
+          2.140111228744902,
+          1.0040236559527478
         ],
         "ik_seed_source": "current_joint_state",
         "ik_link": "panda_hand",
@@ -1020,21 +1188,49 @@
         "planned": true,
         "executed": true,
         "converged": false,
-        "goal_uuid": "0efffc9a4ab04f5991893d60df9ce320",
-        "joint_state_samples": 627,
-        "controller_state_samples": 627,
-        "post_controller_settle_s": 3.000432252883911
+        "goal_uuid": "5993c337b1c14c28ac79f5dc1d3abab7",
+        "joint_state_samples": 566,
+        "controller_state_samples": 566,
+        "post_controller_settle_s": 3.0002124309539795,
+        "expected_final_joints": [
+          0.731730377800471,
+          -0.02579561848586502,
+          -0.5224781196362799,
+          -2.161787229193561,
+          -0.014600751834665462,
+          2.1408294964539185,
+          1.0030931501536182
+        ],
+        "observed_final_joints": [
+          0.7317302227020264,
+          -0.10142210125923157,
+          -0.5224205255508423,
+          -2.1617863178253174,
+          -0.014599885791540146,
+          2.1405205726623535,
+          0.9798255562782288
+        ],
+        "per_joint_final_error_rad": [
+          1.5509844464300926e-07,
+          0.07562648277336655,
+          5.759408543759559e-05,
+          9.113682435391013e-07,
+          8.660431253162265e-07,
+          0.0003089237915649967,
+          0.02326759387538946
+        ],
+        "max_final_joint_error_rad": 0.07562648277336655
       },
       "retreat": {
         "ik_solved": true,
         "ik_solution": [
-          0.5859950345678457,
-          -0.9111490611426828,
-          -0.21214064827843257,
-          -2.574908895012264,
-          -0.16804882524880843,
-          1.673315305166857,
-          1.2575179437368835
+          0.7381145620964652,
+          -0.11209801868478546,
+          -0.505207009456543,
+          -1.9395288649071696,
+          -0.05620735756775092,
+          1.840931935517816,
+          1.035981927540683
         ],
         "ik_seed_source": "current_joint_state",
         "ik_link": "panda_hand",
@@ -1042,14 +1238,42 @@
         "planned": true,
         "executed": true,
         "converged": true,
-        "goal_uuid": "921f3ce9403f465382aacfc7bd2a430d",
-        "joint_state_samples": 223,
-        "controller_state_samples": 223,
-        "post_controller_settle_s": 0.0009720325469970703
+        "goal_uuid": "61b5bb6039774c62a978d9e748700f8b",
+        "joint_state_samples": 123,
+        "controller_state_samples": 123,
+        "post_controller_settle_s": 0.0010421276092529297,
+        "expected_final_joints": [
+          0.7382612283382749,
+          -0.11180531857059116,
+          -0.5047668660846107,
+          -1.9402916321117187,
+          -0.056910691115555426,
+          1.8410021458722186,
+          1.0353714577062696
+        ],
+        "observed_final_joints": [
+          0.7382609248161316,
+          -0.11180537939071655,
+          -0.5047690272331238,
+          -1.9402917623519897,
+          -0.05691070482134819,
+          1.8410018682479858,
+          1.0353715419769287
+        ],
+        "per_joint_final_error_rad": [
+          3.035221433078661e-07,
+          6.082012539432302e-08,
+          2.1611485130357266e-06,
+          1.302402710123829e-07,
+          1.3705792764606706e-08,
+          2.7762423271404657e-07,
+          8.427065911753573e-08
+        ],
+        "max_final_joint_error_rad": 2.1611485130357266e-06
       },
       "retreat_hand_pose": [
-        -0.07499999999999998,
-        0.07999999999999999,
+        0.17,
+        0.1095,
         0.975,
         1.0,
         0.0,
@@ -1066,7 +1290,7 @@
         "controller_result_succeeded": true,
         "controller_result_error_code": 0,
         "controller_result_error_string": "SYMMETRIC_MIMIC_COMMAND_FORWARDED",
-        "goal_uuid": "96d99779a4264bd09eb734cc87b91b0b",
+        "goal_uuid": "fe0beb96f3eb4d86b2bde3587b75947c",
         "observed_positions_m": [
           0.040000006556510925,
           0.040000006556510925
@@ -1076,10 +1300,10 @@
         "max_position_error_m": 6.5565109244603015e-09,
         "mimic_tracking_error_m": 0.0,
         "physical_controller_state_topic": "/panda_hand_physical_controller/controller_state",
-        "controller_state_sample_count": 145,
+        "controller_state_sample_count": 157,
         "controller_target_reference_seen": true,
         "controller_terminal_state": {
-          "timestamp_s": 16.43,
+          "timestamp_s": 14.65,
           "physical_joint": "panda_finger_joint2",
           "physical_reference_m": 0.04,
           "physical_feedback_m": 0.040000006556510925,
@@ -1094,7 +1318,7 @@
             "physical_master_joint": "panda_finger_joint2",
             "physical_target_m": 0.04,
             "reason": "SYMMETRIC_MIMIC_COMMAND",
-            "timestamp_monotonic_s": 1849549.915692463
+            "timestamp_monotonic_s": 2616593.73371618
           }
         ]
       },
@@ -1114,80 +1338,80 @@
       "pad_evidence": {
         "left": {
           "link_pose": [
-            0.04591290423761148,
-            0.06907249784679068,
-            0.7810039590821751,
-            0.9963639541328344,
-            0.03019658392234252,
-            0.0730272829658459,
-            -0.03184420146322297
+            0.16917591681581368,
+            0.07314445569692929,
+            0.8311518805124983,
+            0.999217099507362,
+            0.009348916264148592,
+            0.0288789111157831,
+            -0.02537310208758651
           ],
           "pad_center_world": [
-            0.10516352610905713,
-            0.07240385291644183,
-            0.7898507597042573
+            0.17079420378811172,
+            0.07062868848092546,
+            0.8041357360320183
           ],
-          "aabb_separation_m": 0.013596147083558163
+          "aabb_separation_m": 0.013971311519074534
         },
         "right": {
           "link_pose": [
-            0.04357969688608522,
-            0.10492650334091211,
-            0.7831291978397761,
-            0.9963639541328344,
-            0.03019658392234252,
-            0.0730272829658459,
-            -0.03184420146322297
+            0.16779371586357344,
+            0.14164417912157623,
+            0.8345933047330542,
+            0.999217099507362,
+            0.009348916264148592,
+            0.0288789111157831,
+            -0.02537310208758651
           ],
           "pad_center_world": [
-            0.10283031875753088,
-            0.10825785841056326,
-            0.7919759984618583
+            0.16925484306084596,
+            0.14691700523947257,
+            0.8079684589674198
           ],
-          "aabb_separation_m": 0.0
+          "aabb_separation_m": 0.0010684589674197498
         },
-        "minimum_pad_cube_aabb_separation_m": 0.0,
+        "minimum_pad_cube_aabb_separation_m": 0.0010684589674197498,
         "gazebo_link_pose_evidence": {
           "left": {
             "link_pose_world_xyz_rpy": [
-              0.045943,
-              0.069078,
-              0.780993,
-              -3.08184,
-              -0.148113,
-              0.056161
+              0.169117,
+              0.073114,
+              0.831114,
+              -3.09119,
+              -0.058179,
+              0.014547
             ],
             "pad_center_world": [
-              0.1051925172699846,
-              0.07240901494736317,
-              0.789847323389974
+              0.17072734951511992,
+              0.07059736882839268,
+              0.8040974616950053
             ],
-            "aabb_separation_m": 0.013590985052636825
+            "aabb_separation_m": 0.014002631171607313
           },
           "right": {
             "link_pose_world_xyz_rpy": [
-              0.043628,
-              0.10497,
-              0.783114,
-              -3.08182,
-              -0.148203,
-              0.056157
+              0.167878,
+              0.141725,
+              0.834567,
+              -3.09126,
+              -0.058236,
+              0.015699
             ],
             "pad_center_world": [
-              0.10287673472071378,
-              0.1083007332083938,
-              0.7919736642311652
+              0.16934767688039817,
+              0.14699715891758536,
+              0.807942492676578
             ],
-            "aabb_separation_m": 0.0
+            "aabb_separation_m": 0.0010424926765780218
           }
         },
-        "gazebo_minimum_pad_cube_aabb_separation_m": 0.0
+        "gazebo_minimum_pad_cube_aabb_separation_m": 0.0010424926765780218
       },
       "contacts": {
         "target_model": "object_red_cube",
         "left_target": false,
         "right_target": true,
-        "target_cube_events": 2232,
+        "target_cube_events": 213,
         "left_table": false,
         "right_table": false,
         "cube_table": false,
@@ -1221,10 +1445,10 @@
         },
         "event_counts": {
           "left": 0,
-          "right": 2340,
-          "cube": 2340,
-          "cube_bilateral": 4921,
-          "cube_environment": 4920
+          "right": 213,
+          "cube": 213,
+          "cube_bilateral": 213,
+          "cube_environment": 213
         },
         "topic_rate_evidence": {
           "left": {
@@ -1233,28 +1457,28 @@
             "observed_rate_hz": 0.0
           },
           "right": {
-            "unique_timestamp_samples": 2232,
-            "duration_s": 3.919999999999998,
-            "observed_rate_hz": 569.1326530612248
+            "unique_timestamp_samples": 213,
+            "duration_s": 0.44899999999999807,
+            "observed_rate_hz": 472.16035634744077
           },
           "cube": {
-            "unique_timestamp_samples": 2232,
-            "duration_s": 3.919999999999998,
-            "observed_rate_hz": 569.1326530612248
+            "unique_timestamp_samples": 213,
+            "duration_s": 0.44899999999999807,
+            "observed_rate_hz": 472.16035634744077
           },
           "cube_bilateral": {
-            "unique_timestamp_samples": 4921,
-            "duration_s": 7.545999999999999,
-            "observed_rate_hz": 652.0010601643255
+            "unique_timestamp_samples": 213,
+            "duration_s": 0.4469999999999992,
+            "observed_rate_hz": 474.27293064877045
           },
           "cube_environment": {
-            "unique_timestamp_samples": 4826,
-            "duration_s": 7.547000000000001,
-            "observed_rate_hz": 639.3268848549092
+            "unique_timestamp_samples": 213,
+            "duration_s": 0.4469999999999992,
+            "observed_rate_hz": 474.27293064877045
           }
         },
         "left_target_unique_samples": 0,
-        "right_target_unique_samples": 2232,
+        "right_target_unique_samples": 213,
         "bilateral_overlap_s": 0.0
       },
       "passed": true,
@@ -1306,9 +1530,9 @@
         "source": "gz model runtime oracle (object_red_cube)"
       },
       "target_hand_pose": [
-        0.027000000000000024,
-        0.07999999999999999,
-        0.81,
+        0.17,
+        0.1095,
+        0.8562,
         1.0,
         0.0,
         0.0,
@@ -1321,13 +1545,13 @@
       "motion": {
         "ik_solved": true,
         "ik_solution": [
-          0.619836076282062,
-          -0.43351577546476794,
-          -0.4184043570156138,
-          -2.679313686555092,
-          -0.22425290026572106,
-          2.266673795307952,
-          1.166881293276064
+          0.7323441854629179,
+          -0.025453923976318907,
+          -0.52198102794188,
+          -2.162228256533157,
+          -0.015066886797637026,
+          2.1401112287450936,
+          1.0040236559406734
         ],
         "ik_seed_source": "current_joint_state",
         "ik_link": "panda_hand",
@@ -1335,21 +1559,49 @@
         "planned": true,
         "executed": true,
         "converged": false,
-        "goal_uuid": "eaefac97133f414d8939433ee0c56739",
-        "joint_state_samples": 627,
-        "controller_state_samples": 627,
-        "post_controller_settle_s": 3.000295639038086
+        "goal_uuid": "a5dbfbd69e3e4b2ca315f2e06531a455",
+        "joint_state_samples": 567,
+        "controller_state_samples": 567,
+        "post_controller_settle_s": 3.0005593299865723,
+        "expected_final_joints": [
+          0.7320476154831683,
+          -0.026007288797097284,
+          -0.5223916262562471,
+          -2.162669623924654,
+          -0.01545890988185657,
+          2.1393395060818996,
+          1.004668995925586
+        ],
+        "observed_final_joints": [
+          0.7320477366447449,
+          -0.1039167046546936,
+          -0.522344172000885,
+          -2.1626698970794678,
+          -0.01545832958072424,
+          2.1351892948150635,
+          0.9469802379608154
+        ],
+        "per_joint_final_error_rad": [
+          1.211615765495111e-07,
+          0.07790941585759632,
+          4.7454255362122666e-05,
+          2.731548138790174e-07,
+          5.803011323309015e-07,
+          0.0041502112668361235,
+          0.057688757964770465
+        ],
+        "max_final_joint_error_rad": 0.07790941585759632
       },
       "retreat": {
         "ik_solved": true,
         "ik_solution": [
-          0.5862082575656815,
-          -0.9111838420237347,
-          -0.21228657411861732,
-          -2.5749030916131685,
-          -0.1681678702590783,
-          1.673288135577588,
-          1.2576529553049172
+          0.7365450487119651,
+          -0.11200166496097944,
+          -0.5037272991521464,
+          -1.9395312416132429,
+          -0.0560088908331821,
+          1.8409420590460972,
+          1.0358300204031041
         ],
         "ik_seed_source": "current_joint_state",
         "ik_link": "panda_hand",
@@ -1357,14 +1609,42 @@
         "planned": true,
         "executed": true,
         "converged": true,
-        "goal_uuid": "0689ab9023b84d12b2f795be8a77b002",
-        "joint_state_samples": 222,
-        "controller_state_samples": 222,
-        "post_controller_settle_s": 0.0010945796966552734
+        "goal_uuid": "deb6dba17f33467d9eb7e1d4d62bc61e",
+        "joint_state_samples": 122,
+        "controller_state_samples": 122,
+        "post_controller_settle_s": 0.001085042953491211,
+        "expected_final_joints": [
+          0.7369436132364481,
+          -0.11291221682190797,
+          -0.5043787248285667,
+          -1.9386959148079979,
+          -0.05664394476352057,
+          1.8405650025205427,
+          1.0359380521789066
+        ],
+        "observed_final_joints": [
+          0.7369436621665955,
+          -0.11291224509477615,
+          -0.5043808817863464,
+          -1.9386963844299316,
+          -0.05664395913481712,
+          1.8405649662017822,
+          1.0359381437301636
+        ],
+        "per_joint_final_error_rad": [
+          4.893014737827883e-08,
+          2.827286818551933e-08,
+          2.1569577797198036e-06,
+          4.6962193378519146e-07,
+          1.43712965555709e-08,
+          3.6318760443521114e-08,
+          9.155125701987288e-08
+        ],
+        "max_final_joint_error_rad": 2.1569577797198036e-06
       },
       "retreat_hand_pose": [
-        -0.07499999999999998,
-        0.07999999999999999,
+        0.17,
+        0.1095,
         0.975,
         1.0,
         0.0,
@@ -1381,7 +1661,7 @@
         "controller_result_succeeded": true,
         "controller_result_error_code": 0,
         "controller_result_error_string": "SYMMETRIC_MIMIC_COMMAND_FORWARDED",
-        "goal_uuid": "1773928e75314ec099384af75f3986ce",
+        "goal_uuid": "32e36d15e3534debb3f1d3b5fa2d1b4a",
         "observed_positions_m": [
           0.040000006556510925,
           0.040000006556510925
@@ -1391,14 +1671,14 @@
         "max_position_error_m": 6.5565109244603015e-09,
         "mimic_tracking_error_m": 0.0,
         "physical_controller_state_topic": "/panda_hand_physical_controller/controller_state",
-        "controller_state_sample_count": 144,
+        "controller_state_sample_count": 165,
         "controller_target_reference_seen": true,
         "controller_terminal_state": {
-          "timestamp_s": 15.01,
+          "timestamp_s": 15.44,
           "physical_joint": "panda_finger_joint2",
-          "physical_reference_m": 0.04000000008195639,
+          "physical_reference_m": 0.04,
           "physical_feedback_m": 0.040000006556510925,
-          "physical_error_m": -6.4745545383382286e-09,
+          "physical_error_m": -6.5565109244603015e-09,
           "physical_output_m": 0.04
         },
         "adapter_decisions": [
@@ -1409,7 +1689,7 @@
             "physical_master_joint": "panda_finger_joint2",
             "physical_target_m": 0.04,
             "reason": "SYMMETRIC_MIMIC_COMMAND",
-            "timestamp_monotonic_s": 1849590.136270609
+            "timestamp_monotonic_s": 2616638.013529747
           }
         ]
       },
@@ -1429,80 +1709,80 @@
       "pad_evidence": {
         "left": {
           "link_pose": [
-            0.045746124874707486,
-            0.0689268470148128,
-            0.7810364202722646,
-            0.9964001803498151,
-            0.029820936838665633,
-            0.07266920016432983,
-            -0.03188384657466417
+            0.16904123816421265,
+            0.07685814309983177,
+            0.8316382948529272,
+            0.9989202265684809,
+            0.028323250381242258,
+            0.02729922205899825,
+            -0.02471693579693279
           ],
           "pad_center_world": [
-            0.10500571276353239,
-            0.07221444060067327,
-            0.7898394295112037
+            0.1706966328909286,
+            0.0743390991402323,
+            0.8046247040914537
           ],
-          "aabb_separation_m": 0.013785559399326727
+          "aabb_separation_m": 0.010260900859767691
         },
         "right": {
           "link_pose": [
-            0.043426858020578066,
-            0.10499281631568036,
-            0.7831798405648489,
-            0.9964001803498151,
-            0.029820936838665633,
-            0.07266920016432983,
-            -0.03188384657466417
+            0.1655116300579806,
+            0.137609711478849,
+            0.8345525271682867,
+            0.9989202265684809,
+            0.028323250381242258,
+            0.02729922205899825,
+            -0.02471693579693279
           ],
           "pad_center_world": [
-            0.10268644590940297,
-            0.10828040990154082,
-            0.791982849803788
+            0.16671513302010854,
+            0.1428686226377829,
+            0.8079120422995274
           ],
-          "aabb_separation_m": 0.0
+          "aabb_separation_m": 0.0010120422995273937
         },
-        "minimum_pad_cube_aabb_separation_m": 0.0,
+        "minimum_pad_cube_aabb_separation_m": 0.0010120422995273937,
         "gazebo_link_pose_evidence": {
           "left": {
             "link_pose_world_xyz_rpy": [
-              0.045718,
-              0.068895,
-              0.781041,
-              -3.08175,
-              -0.14711,
-              0.055542
+              0.169041,
+              0.076859,
+              0.831638,
+              -3.09367,
+              -0.055968,
+              0.055351
             ],
             "pad_center_world": [
-              0.1049784052032611,
-              0.0721898302118253,
-              0.7898357978385263
+              0.1706963794371792,
+              0.07433982555947642,
+              0.8046244204693792
             ],
-            "aabb_separation_m": 0.01381016978817469
+            "aabb_separation_m": 0.010260174440523573
           },
           "right": {
             "link_pose_world_xyz_rpy": [
-              0.043368,
-              0.105036,
-              0.783191,
-              -3.08178,
-              -0.147018,
-              0.055622
+              0.165511,
+              0.137622,
+              0.834552,
+              -3.09367,
+              -0.055967,
+              0.055351
             ],
             "pad_center_world": [
-              0.10262894904651221,
-              0.10833561600147727,
-              0.7919803374238038
+              0.166714461150811,
+              0.1428807809988862,
+              0.8079114875487681
             ],
-            "aabb_separation_m": 0.0
+            "aabb_separation_m": 0.0010114875487680641
           }
         },
-        "gazebo_minimum_pad_cube_aabb_separation_m": 0.0
+        "gazebo_minimum_pad_cube_aabb_separation_m": 0.0010114875487680641
       },
       "contacts": {
         "target_model": "object_red_cube",
         "left_target": false,
         "right_target": true,
-        "target_cube_events": 2203,
+        "target_cube_events": 206,
         "left_table": false,
         "right_table": false,
         "cube_table": false,
@@ -1536,10 +1816,10 @@
         },
         "event_counts": {
           "left": 0,
-          "right": 2300,
-          "cube": 2300,
-          "cube_bilateral": 4807,
-          "cube_environment": 4806
+          "right": 206,
+          "cube": 206,
+          "cube_bilateral": 206,
+          "cube_environment": 205
         },
         "topic_rate_evidence": {
           "left": {
@@ -1548,28 +1828,28 @@
             "observed_rate_hz": 0.0
           },
           "right": {
-            "unique_timestamp_samples": 2209,
-            "duration_s": 3.9220000000000006,
-            "observed_rate_hz": 562.9780724120346
+            "unique_timestamp_samples": 206,
+            "duration_s": 0.4499999999999993,
+            "observed_rate_hz": 455.5555555555563
           },
           "cube": {
-            "unique_timestamp_samples": 2203,
-            "duration_s": 3.9220000000000006,
-            "observed_rate_hz": 561.4482406935236
+            "unique_timestamp_samples": 206,
+            "duration_s": 0.4499999999999993,
+            "observed_rate_hz": 455.5555555555563
           },
           "cube_bilateral": {
-            "unique_timestamp_samples": 4807,
-            "duration_s": 7.561999999999998,
-            "observed_rate_hz": 635.5461518116903
+            "unique_timestamp_samples": 206,
+            "duration_s": 0.4499999999999993,
+            "observed_rate_hz": 455.5555555555563
           },
           "cube_environment": {
-            "unique_timestamp_samples": 4731,
-            "duration_s": 7.562000000000001,
-            "observed_rate_hz": 625.4959005554085
+            "unique_timestamp_samples": 205,
+            "duration_s": 0.4469999999999992,
+            "observed_rate_hz": 456.37583892617533
           }
         },
         "left_target_unique_samples": 0,
-        "right_target_unique_samples": 2209,
+        "right_target_unique_samples": 206,
         "bilateral_overlap_s": 0.0
       },
       "passed": true,
@@ -1621,9 +1901,9 @@
         "source": "gz model runtime oracle (object_red_cube)"
       },
       "target_hand_pose": [
-        0.027000000000000024,
-        0.07999999999999999,
-        0.81,
+        0.17,
+        0.1095,
+        0.8562,
         1.0,
         0.0,
         0.0,
@@ -1636,13 +1916,13 @@
       "motion": {
         "ik_solved": true,
         "ik_solution": [
-          0.6198360805085976,
-          -0.4335157762212593,
-          -0.418404361299664,
-          -2.679313686446568,
-          -0.2242529027567371,
-          2.2666737948919256,
-          1.1668812951932113
+          0.7323441858631824,
+          -0.025453923982168652,
+          -0.5219810283395476,
+          -2.162228256533116,
+          -0.01506688681151504,
+          2.140111228744931,
+          1.0040236559508797
         ],
         "ik_seed_source": "current_joint_state",
         "ik_link": "panda_hand",
@@ -1650,21 +1930,49 @@
         "planned": true,
         "executed": true,
         "converged": false,
-        "goal_uuid": "884d4de4700547138a3d12528254899a",
-        "joint_state_samples": 627,
-        "controller_state_samples": 627,
-        "post_controller_settle_s": 3.000364065170288
+        "goal_uuid": "2e0755830b8445d2a8aca3ea8b2b8c3b",
+        "joint_state_samples": 566,
+        "controller_state_samples": 566,
+        "post_controller_settle_s": 3.0002853870391846,
+        "expected_final_joints": [
+          0.7318446426531565,
+          -0.02569151870819845,
+          -0.5227717781585656,
+          -2.1615861921084187,
+          -0.016025924007871846,
+          2.140991901111755,
+          1.0043861618082468
+        ],
+        "observed_final_joints": [
+          0.7318438291549683,
+          -0.10123287886381149,
+          -0.5227329730987549,
+          -2.1615915298461914,
+          -0.016021020710468292,
+          2.140960693359375,
+          0.9780112504959106
+        ],
+        "per_joint_final_error_rad": [
+          8.134981882568226e-07,
+          0.07554136015561304,
+          3.880505981068705e-05,
+          5.337737772670437e-06,
+          4.903297403553719e-06,
+          3.120775238008022e-05,
+          0.026374911312336158
+        ],
+        "max_final_joint_error_rad": 0.07554136015561304
       },
       "retreat": {
         "ik_solved": true,
         "ik_solution": [
-          0.585834180842071,
-          -0.9111228396427765,
-          -0.21203055813651694,
-          -2.5749132702306943,
-          -0.1679590196191854,
-          1.673335788104914,
-          1.2574160947760953
+          0.7375846563353153,
+          -0.11206544676093833,
+          -0.5047074371393505,
+          -1.939529674002586,
+          -0.05614031178061546,
+          1.8409353611594221,
+          1.0359306095312717
         ],
         "ik_seed_source": "current_joint_state",
         "ik_link": "panda_hand",
@@ -1672,14 +1980,42 @@
         "planned": true,
         "executed": true,
         "converged": true,
-        "goal_uuid": "7ffa5489630842eabeae3c3dbaa16e09",
-        "joint_state_samples": 216,
-        "controller_state_samples": 216,
-        "post_controller_settle_s": 0.0010590553283691406
+        "goal_uuid": "2663af9c9bc8419eac15bdb1bcbcb59f",
+        "joint_state_samples": 122,
+        "controller_state_samples": 122,
+        "post_controller_settle_s": 0.0017764568328857422,
+        "expected_final_joints": [
+          0.7379239284669931,
+          -0.11297833646877185,
+          -0.504297399900734,
+          -1.9403474360263553,
+          -0.055533273054516614,
+          1.841266991397754,
+          1.0353532025660757
+        ],
+        "observed_final_joints": [
+          0.7379240989685059,
+          -0.11297836154699326,
+          -0.504299521446228,
+          -1.9403469562530518,
+          -0.05553325638175011,
+          1.8412672281265259,
+          1.0353528261184692
+        ],
+        "per_joint_final_error_rad": [
+          1.705015127972942e-07,
+          2.5078221402297096e-08,
+          2.121545494060406e-06,
+          4.797733035299956e-07,
+          1.667276650768601e-08,
+          2.3672877191849295e-07,
+          3.764476064205269e-07
+        ],
+        "max_final_joint_error_rad": 2.121545494060406e-06
       },
       "retreat_hand_pose": [
-        -0.07499999999999998,
-        0.07999999999999999,
+        0.17,
+        0.1095,
         0.975,
         1.0,
         0.0,
@@ -1696,7 +2032,7 @@
         "controller_result_succeeded": true,
         "controller_result_error_code": 0,
         "controller_result_error_string": "SYMMETRIC_MIMIC_COMMAND_FORWARDED",
-        "goal_uuid": "d8a5e6614f1947c59e06e147db822a96",
+        "goal_uuid": "efe60e779cac41a19cfa16da36cac245",
         "observed_positions_m": [
           0.040000006556510925,
           0.040000006556510925
@@ -1706,14 +2042,14 @@
         "max_position_error_m": 6.5565109244603015e-09,
         "mimic_tracking_error_m": 0.0,
         "physical_controller_state_topic": "/panda_hand_physical_controller/controller_state",
-        "controller_state_sample_count": 146,
+        "controller_state_sample_count": 157,
         "controller_target_reference_seen": true,
         "controller_terminal_state": {
-          "timestamp_s": 16.9,
+          "timestamp_s": 15.28,
           "physical_joint": "panda_finger_joint2",
-          "physical_reference_m": 0.04000000008195639,
+          "physical_reference_m": 0.04,
           "physical_feedback_m": 0.040000006556510925,
-          "physical_error_m": -6.4745545383382286e-09,
+          "physical_error_m": -6.5565109244603015e-09,
           "physical_output_m": 0.04
         },
         "adapter_decisions": [
@@ -1724,7 +2060,7 @@
             "physical_master_joint": "panda_finger_joint2",
             "physical_target_m": 0.04,
             "reason": "SYMMETRIC_MIMIC_COMMAND",
-            "timestamp_monotonic_s": 1849631.850435883
+            "timestamp_monotonic_s": 2616682.627790832
           }
         ]
       },
@@ -1744,80 +2080,80 @@
       "pad_evidence": {
         "left": {
           "link_pose": [
-            0.0458663159046041,
-            0.06881546701156882,
-            0.7810262397124473,
-            0.9963919880161948,
-            0.029896376197348654,
-            0.07274987399840896,
-            -0.03188524330497352
+            0.1695693011439478,
+            0.07352346893893041,
+            0.8312961720888093,
+            0.9991808301098168,
+            0.012971965688127819,
+            0.02930915211751399,
+            -0.02470567646100321
           ],
           "pad_center_world": [
-            0.10512395540742196,
-            0.07211173048527812,
-            0.7898391170896704
+            0.17123434639299667,
+            0.07097807354612008,
+            0.804285644759398
           ],
-          "aabb_separation_m": 0.013888269514721871
+          "aabb_separation_m": 0.013621926453879912
         },
         "right": {
           "link_pose": [
-            0.04353037850666135,
-            0.10505255075038913,
-            0.7831793572351607,
-            0.9963919880161948,
-            0.029896376197348654,
-            0.07274987399840896,
-            -0.03188524330497352
+            0.16772396375225557,
+            0.14083819991352114,
+            0.83457347730429,
+            0.9991808301098168,
+            0.012971965688127819,
+            0.02930915211751399,
+            -0.02470567646100321
           ],
           "pad_center_world": [
-            0.10278801800947922,
-            0.10834881422409844,
-            0.7919922346123838
+            0.16917551610807033,
+            0.14608065770015674,
+            0.8079421117344647
           ],
-          "aabb_separation_m": 0.0
+          "aabb_separation_m": 0.0010421117344647235
         },
-        "minimum_pad_cube_aabb_separation_m": 0.0,
+        "minimum_pad_cube_aabb_separation_m": 0.0010421117344647235,
         "gazebo_link_pose_evidence": {
           "left": {
             "link_pose_world_xyz_rpy": [
-              0.045867,
-              0.068805,
-              0.781024,
-              -3.08172,
-              -0.14741,
-              0.055569
+              0.169625,
+              0.073482,
+              0.831294,
+              -3.09298,
+              -0.059318,
+              0.026128
             ],
             "pad_center_world": [
-              0.10512467918780717,
-              0.07210128355323547,
-              0.7898366030213323
+              0.17129613972609373,
+              0.0709365624765307,
+              0.8042838530209481
             ],
-            "aabb_separation_m": 0.01389871644676452
+            "aabb_separation_m": 0.013663437523469296
           },
           "right": {
             "link_pose_world_xyz_rpy": [
-              0.043528,
-              0.105092,
-              0.783178,
-              -3.08172,
-              -0.147407,
-              0.055569
+              0.167627,
+              0.14099,
+              0.834569,
+              -3.09305,
+              -0.059369,
+              0.027274
             ],
             "pad_center_world": [
-              0.10278570558454124,
-              0.10838828502158729,
-              0.7919904249734275
+              0.1690675646759568,
+              0.14623192518487024,
+              0.807936932979759
             ],
-            "aabb_separation_m": 0.0
+            "aabb_separation_m": 0.0010369329797589866
           }
         },
-        "gazebo_minimum_pad_cube_aabb_separation_m": 0.0
+        "gazebo_minimum_pad_cube_aabb_separation_m": 0.0010369329797589866
       },
       "contacts": {
         "target_model": "object_red_cube",
         "left_target": false,
         "right_target": true,
-        "target_cube_events": 2179,
+        "target_cube_events": 248,
         "left_table": false,
         "right_table": false,
         "cube_table": false,
@@ -1851,10 +2187,10 @@
         },
         "event_counts": {
           "left": 0,
-          "right": 2284,
-          "cube": 2284,
-          "cube_bilateral": 4740,
-          "cube_environment": 4739
+          "right": 248,
+          "cube": 248,
+          "cube_bilateral": 248,
+          "cube_environment": 249
         },
         "topic_rate_evidence": {
           "left": {
@@ -1863,28 +2199,28 @@
             "observed_rate_hz": 0.0
           },
           "right": {
-            "unique_timestamp_samples": 2179,
-            "duration_s": 3.9220000000000006,
-            "observed_rate_hz": 555.3289138194798
+            "unique_timestamp_samples": 248,
+            "duration_s": 0.45000000000000284,
+            "observed_rate_hz": 548.8888888888854
           },
           "cube": {
-            "unique_timestamp_samples": 2179,
-            "duration_s": 3.9220000000000006,
-            "observed_rate_hz": 555.3289138194798
+            "unique_timestamp_samples": 248,
+            "duration_s": 0.4490000000000016,
+            "observed_rate_hz": 550.1113585746083
           },
           "cube_bilateral": {
-            "unique_timestamp_samples": 4740,
-            "duration_s": 7.554,
-            "observed_rate_hz": 627.3497484776277
+            "unique_timestamp_samples": 248,
+            "duration_s": 0.44700000000000273,
+            "observed_rate_hz": 552.5727069351196
           },
           "cube_environment": {
-            "unique_timestamp_samples": 4675,
-            "duration_s": 7.552,
-            "observed_rate_hz": 618.9088983050848
+            "unique_timestamp_samples": 249,
+            "duration_s": 0.4499999999999993,
+            "observed_rate_hz": 551.111111111112
           }
         },
         "left_target_unique_samples": 0,
-        "right_target_unique_samples": 2179,
+        "right_target_unique_samples": 248,
         "bilateral_overlap_s": 0.0
       },
       "passed": true,
@@ -1911,34 +2247,34 @@
       "calibration_finger_target_inset_m": 0.002,
       "cube_pose": {
         "xyz": [
-          0.170001,
-          -0.12,
+          0.169999,
+          -0.119999,
           0.755
         ],
         "rpy": [
-          1e-06,
-          5e-06,
+          -3.9e-05,
+          -2.7e-05,
           0.0
         ],
         "source": "gz model runtime oracle (object_red_cube_bilateral)"
       },
       "cube_pose_after_action": {
         "xyz": [
-          0.169479,
-          -0.120267,
-          0.757635
+          0.169984,
+          -0.11986,
+          0.755012
         ],
         "rpy": [
-          8.9e-05,
-          -0.112645,
-          -0.002652
+          -0.000883,
+          -0.000599,
+          -2e-06
         ],
         "source": "gz model runtime oracle (object_red_cube_bilateral)"
       },
       "target_hand_pose": [
-        0.025001000000000023,
-        -0.12,
-        0.81,
+        0.169999,
+        -0.119999,
+        0.8782,
         1.0,
         0.0,
         0.0,
@@ -1947,13 +2283,13 @@
       "precontact_motion": {
         "ik_solved": true,
         "ik_solution": [
-          0.8090774580422547,
-          -0.7844016166765106,
-          -1.0880370548963147,
-          -2.6071196047146956,
-          -0.7719387070268293,
-          2.0286843104339773,
-          1.0674241414879797
+          1.290611306813955,
+          -0.4743254334573694,
+          -1.3327433595402542,
+          -2.007656051158168,
+          -0.4804564102112021,
+          1.853338603010315,
+          0.915799610924024
         ],
         "ik_seed_source": "bilateral_validated_seed",
         "ik_link": "panda_hand",
@@ -1961,10 +2297,38 @@
         "planned": true,
         "executed": true,
         "converged": true,
-        "goal_uuid": "8d0b013e32f241aa9410ace1d50b28cf",
-        "joint_state_samples": 381,
-        "controller_state_samples": 381,
-        "post_controller_settle_s": 0.0010178089141845703
+        "goal_uuid": "0a401096caab4a0d97de30509ed09232",
+        "joint_state_samples": 457,
+        "controller_state_samples": 457,
+        "post_controller_settle_s": 0.001199483871459961,
+        "expected_final_joints": [
+          1.2899123359941318,
+          -0.47475103050247436,
+          -1.332556370499209,
+          -2.008467702159386,
+          -0.4814490144002888,
+          1.8536466331103887,
+          0.916024749975234
+        ],
+        "observed_final_joints": [
+          1.2899125814437866,
+          -0.4747510850429535,
+          -1.3325566053390503,
+          -2.00846791267395,
+          -0.48144906759262085,
+          1.8536465167999268,
+          0.9160246253013611
+        ],
+        "per_joint_final_error_rad": [
+          2.4544965482320436e-07,
+          5.454047913300286e-08,
+          2.3483984135097558e-07,
+          2.1051456400300594e-07,
+          5.319233203904261e-08,
+          1.1631046192839278e-07,
+          1.2467387289216703e-07
+        ],
+        "max_final_joint_error_rad": 2.4544965482320436e-07
       },
       "precontact_hand_command": {
         "accepted": true,
@@ -1972,25 +2336,25 @@
         "controller_result_succeeded": true,
         "controller_result_error_code": 0,
         "controller_result_error_string": "SYMMETRIC_MIMIC_COMMAND_FORWARDED",
-        "goal_uuid": "5038202c03f2469db52d70167feae494",
+        "goal_uuid": "6ff186d4eb884e2a9bd2c1023a24818f",
         "observed_positions_m": [
-          0.034077998250722885,
-          0.03403870016336441
+          0.040000006556510925,
+          0.040000006556510925
         ],
         "goal_tolerance_m": 0.001,
         "post_goal_observation_slack_m": 0.0001,
-        "max_position_error_m": 7.799825072288269e-05,
-        "mimic_tracking_error_m": 3.929808735847473e-05,
+        "max_position_error_m": 6.5565109244603015e-09,
+        "mimic_tracking_error_m": 0.0,
         "physical_controller_state_topic": "/panda_hand_physical_controller/controller_state",
-        "controller_state_sample_count": 146,
-        "controller_target_reference_seen": false,
+        "controller_state_sample_count": 159,
+        "controller_target_reference_seen": true,
         "controller_terminal_state": {
-          "timestamp_s": 19.75,
+          "timestamp_s": 20.14,
           "physical_joint": "panda_finger_joint2",
-          "physical_reference_m": 0.03407499998882413,
-          "physical_feedback_m": 0.03407496586441994,
-          "physical_error_m": 3.412440419126028e-08,
-          "physical_output_m": 0.034
+          "physical_reference_m": 0.04,
+          "physical_feedback_m": 0.040000006556510925,
+          "physical_error_m": -6.5565109244603015e-09,
+          "physical_output_m": 0.04
         },
         "adapter_decisions": [
           {
@@ -1998,48 +2362,48 @@
             "physical_action": "/panda_hand_physical_controller/follow_joint_trajectory",
             "physical_command_emitted": true,
             "physical_master_joint": "panda_finger_joint2",
-            "physical_target_m": 0.034,
+            "physical_target_m": 0.04,
             "reason": "SYMMETRIC_MIMIC_COMMAND",
-            "timestamp_monotonic_s": 1849676.934240646
+            "timestamp_monotonic_s": 2616732.051629445
           }
         ]
       },
       "cube_pose_after_precontact": {
         "xyz": [
-          0.171269,
-          -0.119679,
-          0.755459
+          0.169999,
+          -0.119999,
+          0.755
         ],
         "rpy": [
-          -0.006479,
-          0.012141,
-          1.9e-05
+          -2.5e-05,
+          -1.8e-05,
+          0.0
         ],
         "source": "gz model runtime oracle (object_red_cube_bilateral)"
       },
       "cube_pose_before_close": {
         "xyz": [
-          0.169549,
-          -0.120283,
-          0.758357
+          0.169999,
+          -0.119999,
+          0.755
         ],
         "rpy": [
-          0.00221,
-          -0.11377,
-          -0.002572
+          -1.8e-05,
+          -1.6e-05,
+          0.0
         ],
         "source": "gz model runtime oracle (object_red_cube_bilateral)"
       },
       "motion": {
         "ik_solved": true,
         "ik_solution": [
-          0.8129120178897569,
-          -0.7821394626009645,
-          -1.0905619670197975,
-          -2.6044134865166364,
-          -0.7714499917552041,
-          2.029596765205346,
-          1.0675609487715676
+          1.3425940501141451,
+          -0.4664145573756118,
+          -1.431896429186503,
+          -2.0966820806742086,
+          -0.5059823059001424,
+          1.9763340656069122,
+          0.927667232803796
         ],
         "ik_seed_source": "current_joint_state",
         "ik_link": "panda_hand",
@@ -2047,21 +2411,49 @@
         "planned": true,
         "executed": true,
         "converged": true,
-        "goal_uuid": "bec708a68f154349aa3f4e279a041914",
-        "joint_state_samples": 24,
-        "controller_state_samples": 24,
-        "post_controller_settle_s": 0.0009989738464355469
+        "goal_uuid": "fc2c1c1237944de59961fff9fc84b68f",
+        "joint_state_samples": 93,
+        "controller_state_samples": 93,
+        "post_controller_settle_s": 0.0009720325469970703,
+        "expected_final_joints": [
+          1.3425834315615794,
+          -0.4656539766417277,
+          -1.4309741110161904,
+          -2.095964105376266,
+          -0.506425374438469,
+          1.9757674455531888,
+          0.9279927561173966
+        ],
+        "observed_final_joints": [
+          1.3425829410552979,
+          -0.4656539857387543,
+          -1.4309747219085693,
+          -2.0959651470184326,
+          -0.5064252018928528,
+          1.975766897201538,
+          0.9279926419258118
+        ],
+        "per_joint_final_error_rad": [
+          4.905062815918626e-07,
+          9.097026576476708e-09,
+          6.108923789049925e-07,
+          1.0416421667436282e-06,
+          1.7254561623936127e-07,
+          5.48351650753176e-07,
+          1.1419158485459491e-07
+        ],
+        "max_final_joint_error_rad": 1.0416421667436282e-06
       },
       "retreat": {
         "ik_solved": true,
         "ik_solution": [
-          0.5504616940647321,
-          -1.106211807329098,
-          -0.6133311302482347,
-          -2.510895096284187,
-          -0.5419700823976336,
-          1.501481390020347,
-          0.9886771552463242
+          1.2548517099124201,
+          -0.4428953761700139,
+          -1.2715152475283733,
+          -1.9128102305612036,
+          -0.4297282548601984,
+          1.755844797145744,
+          0.8826593371823238
         ],
         "ik_seed_source": "current_joint_state",
         "ik_link": "panda_hand",
@@ -2069,14 +2461,42 @@
         "planned": true,
         "executed": true,
         "converged": true,
-        "goal_uuid": "ee81fddaa7a64dbdbc1340905b51f15a",
-        "joint_state_samples": 203,
-        "controller_state_samples": 203,
-        "post_controller_settle_s": 0.0009369850158691406
+        "goal_uuid": "4dc3a86f840646dbbd8ee5c4aac67d85",
+        "joint_state_samples": 158,
+        "controller_state_samples": 159,
+        "post_controller_settle_s": 0.0009334087371826172,
+        "expected_final_joints": [
+          1.2540232424567277,
+          -0.4426390439821005,
+          -1.2717204205337231,
+          -1.912072800630375,
+          -0.4303734802435397,
+          1.7564990320994343,
+          0.8818749188150087
+        ],
+        "observed_final_joints": [
+          1.2540229558944702,
+          -0.44263899326324463,
+          -1.2717207670211792,
+          -1.9120724201202393,
+          -0.43037348985671997,
+          1.756499171257019,
+          0.8818750977516174
+        ],
+        "per_joint_final_error_rad": [
+          2.8656225747880626e-07,
+          5.071885589291725e-08,
+          3.464874560599185e-07,
+          3.805101358445029e-07,
+          9.613180251832887e-09,
+          1.391575847886628e-07,
+          1.7893660875234474e-07
+        ],
+        "max_final_joint_error_rad": 3.805101358445029e-07
       },
       "retreat_hand_pose": [
-        -0.07499899999999998,
-        -0.12,
+        0.169999,
+        -0.119999,
         0.975,
         1.0,
         0.0,
@@ -2085,33 +2505,33 @@
       ],
       "hand_command": {
         "positions_m": [
-          0.01,
-          0.01
+          0.027,
+          0.027
         ],
         "accepted": true,
         "succeeded": false,
         "controller_result_succeeded": false,
-        "controller_result_error_code": null,
-        "controller_result_error_string": "NO_ACTION_RESULT",
-        "goal_uuid": "8c4ef3ccf99e4b2486c615955e044ba7",
+        "controller_result_error_code": -1,
+        "controller_result_error_string": "PHYSICAL_HAND_GOAL_TIMEOUT",
+        "goal_uuid": "454f61bc66c54a4bb1a85da8b6074aa9",
         "observed_positions_m": [
-          0.03399968892335892,
-          0.03400437533855438
+          0.03149140998721123,
+          0.031504157930612564
         ],
         "goal_tolerance_m": 0.001,
         "post_goal_observation_slack_m": 0.0001,
-        "max_position_error_m": 0.02400437533855438,
-        "mimic_tracking_error_m": 4.686415195465088e-06,
+        "max_position_error_m": 0.004504157930612564,
+        "mimic_tracking_error_m": 1.274794340133667e-05,
         "physical_controller_state_topic": "/panda_hand_physical_controller/controller_state",
-        "controller_state_sample_count": 562,
+        "controller_state_sample_count": 1061,
         "controller_target_reference_seen": true,
         "controller_terminal_state": {
-          "timestamp_s": 25.63,
+          "timestamp_s": 31.69,
           "physical_joint": "panda_finger_joint2",
-          "physical_reference_m": 0.01,
-          "physical_feedback_m": 0.03400437533855438,
-          "physical_error_m": -0.02400437533855438,
-          "physical_output_m": 0.01
+          "physical_reference_m": 0.027,
+          "physical_feedback_m": 0.031504157930612564,
+          "physical_error_m": -0.004504157930612564,
+          "physical_output_m": 0.027
         },
         "adapter_decisions": [
           {
@@ -2119,13 +2539,20 @@
             "physical_action": "/panda_hand_physical_controller/follow_joint_trajectory",
             "physical_command_emitted": true,
             "physical_master_joint": "panda_finger_joint2",
-            "physical_target_m": 0.01,
+            "physical_target_m": 0.027,
             "reason": "SYMMETRIC_MIMIC_COMMAND",
-            "timestamp_monotonic_s": 1849678.719773226
+            "timestamp_monotonic_s": 2616734.656705899
+          },
+          {
+            "outcome": "REJECTED",
+            "physical_action": "/panda_hand_physical_controller/follow_joint_trajectory",
+            "physical_command_emitted": false,
+            "reason": "PHYSICAL_HAND_GOAL_TIMEOUT",
+            "timestamp_monotonic_s": 2616744.676302609
           }
         ]
       },
-      "bilateral_steady_gripper_width_m": 0.0680040642619133,
+      "bilateral_steady_gripper_width_m": 0.06299556791782379,
       "hand_command_semantics": "SYMMETRIC_MIMIC_CLOSE",
       "calibration_only_allowed_collision_pairs": [
         [
@@ -2141,71 +2568,71 @@
       "pad_evidence": {
         "left": {
           "link_pose": [
-            0.025386689213358966,
-            -0.15416574189233667,
-            0.7552809524563571,
-            0.9999997866062672,
-            -0.00018223705298363828,
-            0.0006200326131940581,
-            -9.558574826896576e-05
+            0.17018205194862757,
+            -0.1512806115584771,
+            0.8203133231634735,
+            0.9999997356618276,
+            0.00017137501576922168,
+            0.00018379231297272863,
+            0.0006822955843791274
           ],
           "pad_center_world": [
-            0.08538663909526478,
-            -0.15418761744598186,
-            0.7553553542637512
+            0.17019328200984485,
+            -0.15521731349645887,
+            0.7934186721760148
           ],
-          "aabb_separation_m": 0.00018761744598186358
+          "aabb_separation_m": 0.0
         },
         "right": {
           "link_pose": [
-            0.02541146857270432,
-            -0.08615700442573809,
-            0.7552939691558154,
-            0.9999997866062672,
-            -0.00018223705298363828,
-            0.0006200326131940581,
-            -9.558574826896576e-05
+            0.1701604700878435,
+            -0.08826778341050366,
+            0.8202273323827989,
+            0.9999997356618276,
+            0.00017137501576922168,
+            0.00018379231297272863,
+            0.0006822955843791274
           ],
           "pad_center_world": [
-            0.08541141845461013,
-            -0.0861788799793833,
-            0.7553683709632095
+            0.17016902865577213,
+            -0.08440449306887333,
+            0.7933220370956778
           ],
-          "aabb_separation_m": 0.0
+          "aabb_separation_m": 0.00019450693112665896
         },
         "minimum_pad_cube_aabb_separation_m": 0.0,
         "gazebo_link_pose_evidence": {
           "left": {
             "link_pose_world_xyz_rpy": [
-              0.025387,
-              -0.154161,
-              0.755281,
-              -3.1414,
-              -0.00124,
-              -0.000365
+              0.170181,
+              -0.151276,
+              0.820313,
+              3.14023,
+              -0.000364,
+              0.000343
             ],
             "pad_center_world": [
-              0.08538694987525902,
-              -0.154182899982677,
-              0.7553553999809337
+              0.17019213992721843,
+              -0.15521264815999025,
+              0.7934183411033627
             ],
-            "aabb_separation_m": 0.00018289998267700946
+            "aabb_separation_m": 0.0
           },
           "right": {
             "link_pose_world_xyz_rpy": [
-              0.025412,
-              -0.086157,
-              0.755294,
-              -3.1414,
-              -0.00124,
-              -0.000365
+              0.17016,
+              -0.088268,
+              0.820227,
+              3.14023,
+              -0.000367,
+              0.000343
             ],
             "pad_center_world": [
-              0.08541194987525902,
-              -0.08617889998267701,
-              0.7553683999809337
+              0.17016854911445733,
+              -0.084404655831424,
+              0.7933217124388575
             ],
-            "aabb_separation_m": 0.0
+            "aabb_separation_m": 0.00019434416857599945
           }
         },
         "gazebo_minimum_pad_cube_aabb_separation_m": 0.0
@@ -2214,7 +2641,7 @@
         "target_model": "object_red_cube_bilateral",
         "left_target": true,
         "right_target": true,
-        "target_cube_events": 5491,
+        "target_cube_events": 176,
         "left_table": false,
         "right_table": false,
         "cube_table": false,
@@ -2244,10 +2671,6 @@
             ],
             [
               "object_red_cube_bilateral::link::collision",
-              "work_table_bilateral_backstop::backstop_link::collision"
-            ],
-            [
-              "object_red_cube_bilateral::link::collision",
               "work_table_bilateral_support::support_link::collision"
             ]
           ],
@@ -2259,22 +2682,22 @@
           ]
         },
         "event_counts": {
-          "left": 3350,
-          "right": 3471,
+          "left": 175,
+          "right": 176,
           "cube": 0,
-          "cube_bilateral": 10399,
-          "cube_environment": 5491
+          "cube_bilateral": 528,
+          "cube_environment": 176
         },
         "topic_rate_evidence": {
           "left": {
-            "unique_timestamp_samples": 2788,
-            "duration_s": 8.103000000000002,
-            "observed_rate_hz": 343.94668641243976
+            "unique_timestamp_samples": 175,
+            "duration_s": 0.44099999999999895,
+            "observed_rate_hz": 394.55782312925265
           },
           "right": {
-            "unique_timestamp_samples": 2852,
-            "duration_s": 8.29,
-            "observed_rate_hz": 343.90832328106154
+            "unique_timestamp_samples": 176,
+            "duration_s": 0.44399999999999906,
+            "observed_rate_hz": 394.144144144145
           },
           "cube": {
             "unique_timestamp_samples": 0,
@@ -2282,19 +2705,19 @@
             "observed_rate_hz": 0.0
           },
           "cube_bilateral": {
-            "unique_timestamp_samples": 5491,
-            "duration_s": 11.133,
-            "observed_rate_hz": 493.12853678253845
+            "unique_timestamp_samples": 176,
+            "duration_s": 0.44399999999999906,
+            "observed_rate_hz": 394.144144144145
           },
           "cube_environment": {
-            "unique_timestamp_samples": 5446,
-            "duration_s": 11.132,
-            "observed_rate_hz": 489.1304347826087
+            "unique_timestamp_samples": 176,
+            "duration_s": 0.4430000000000014,
+            "observed_rate_hz": 395.0338600451455
           }
         },
-        "left_target_unique_samples": 2788,
-        "right_target_unique_samples": 2852,
-        "bilateral_overlap_s": 8.103000000000002
+        "left_target_unique_samples": 175,
+        "right_target_unique_samples": 176,
+        "bilateral_overlap_s": 0.44099999999999895
       },
       "passed": true,
       "isolation": {
@@ -2320,34 +2743,34 @@
       "calibration_finger_target_inset_m": 0.002,
       "cube_pose": {
         "xyz": [
-          0.170001,
-          -0.12,
+          0.169999,
+          -0.119999,
           0.755
         ],
         "rpy": [
-          1e-06,
-          5e-06,
+          -3.9e-05,
+          -2.7e-05,
           0.0
         ],
         "source": "gz model runtime oracle (object_red_cube_bilateral)"
       },
       "cube_pose_after_action": {
         "xyz": [
-          0.169006,
-          -0.119402,
-          0.758043
+          0.170164,
+          -0.119698,
+          0.75501
         ],
         "rpy": [
-          -0.000458,
-          -0.130608,
-          0.003159
+          0.000712,
+          -0.000515,
+          -0.001021
         ],
         "source": "gz model runtime oracle (object_red_cube_bilateral)"
       },
       "target_hand_pose": [
-        0.025001000000000023,
-        -0.12,
-        0.81,
+        0.169999,
+        -0.119999,
+        0.8782,
         1.0,
         0.0,
         0.0,
@@ -2356,13 +2779,13 @@
       "precontact_motion": {
         "ik_solved": true,
         "ik_solution": [
-          0.8090774580422547,
-          -0.7844016166765106,
-          -1.0880370548963147,
-          -2.6071196047146956,
-          -0.7719387070268293,
-          2.0286843104339773,
-          1.0674241414879797
+          1.290611306813955,
+          -0.4743254334573694,
+          -1.3327433595402542,
+          -2.007656051158168,
+          -0.4804564102112021,
+          1.853338603010315,
+          0.915799610924024
         ],
         "ik_seed_source": "bilateral_validated_seed",
         "ik_link": "panda_hand",
@@ -2370,10 +2793,38 @@
         "planned": true,
         "executed": true,
         "converged": true,
-        "goal_uuid": "ddc360ba94974a3ab728c362c07abd1a",
-        "joint_state_samples": 379,
-        "controller_state_samples": 379,
-        "post_controller_settle_s": 0.001178741455078125
+        "goal_uuid": "9d82fec2deaa4adfb553a8dacb291288",
+        "joint_state_samples": 460,
+        "controller_state_samples": 460,
+        "post_controller_settle_s": 0.0016803741455078125,
+        "expected_final_joints": [
+          1.2897419141176525,
+          -0.4741486761915557,
+          -1.332730789613575,
+          -2.0086295493424013,
+          -0.4800169872345108,
+          1.8540467407371917,
+          0.9159557311703003
+        ],
+        "observed_final_joints": [
+          1.289742350578308,
+          -0.474148690700531,
+          -1.3327314853668213,
+          -2.008629560470581,
+          -0.48001694679260254,
+          1.8540462255477905,
+          0.9159559011459351
+        ],
+        "per_joint_final_error_rad": [
+          4.3646065561731007e-07,
+          1.4508975298976878e-08,
+          6.957532463491845e-07,
+          1.1128179711050734e-08,
+          4.0441908266686255e-08,
+          5.151894011401481e-07,
+          1.6997563478948763e-07
+        ],
+        "max_final_joint_error_rad": 6.957532463491845e-07
       },
       "precontact_hand_command": {
         "accepted": true,
@@ -2381,25 +2832,25 @@
         "controller_result_succeeded": true,
         "controller_result_error_code": 0,
         "controller_result_error_string": "SYMMETRIC_MIMIC_COMMAND_FORWARDED",
-        "goal_uuid": "781c7fa279f9410b8780a382d329e29c",
+        "goal_uuid": "5ccc203c19bc463086d0a11c2cd713b5",
         "observed_positions_m": [
-          0.034068576991558075,
-          0.03406898304820061
+          0.04000000283122063,
+          0.040000006556510925
         ],
         "goal_tolerance_m": 0.001,
         "post_goal_observation_slack_m": 0.0001,
-        "max_position_error_m": 6.898304820060486e-05,
-        "mimic_tracking_error_m": 4.0605664253234863e-07,
+        "max_position_error_m": 6.5565109244603015e-09,
+        "mimic_tracking_error_m": 3.725290298461914e-09,
         "physical_controller_state_topic": "/panda_hand_physical_controller/controller_state",
-        "controller_state_sample_count": 146,
-        "controller_target_reference_seen": false,
+        "controller_state_sample_count": 154,
+        "controller_target_reference_seen": true,
         "controller_terminal_state": {
-          "timestamp_s": 19.019,
+          "timestamp_s": 20.27,
           "physical_joint": "panda_finger_joint2",
-          "physical_reference_m": 0.03407499998882413,
-          "physical_feedback_m": 0.03406898304820061,
-          "physical_error_m": 6.016940623521094e-06,
-          "physical_output_m": 0.034
+          "physical_reference_m": 0.04,
+          "physical_feedback_m": 0.040000006556510925,
+          "physical_error_m": -6.5565109244603015e-09,
+          "physical_output_m": 0.04
         },
         "adapter_decisions": [
           {
@@ -2407,48 +2858,48 @@
             "physical_action": "/panda_hand_physical_controller/follow_joint_trajectory",
             "physical_command_emitted": true,
             "physical_master_joint": "panda_finger_joint2",
-            "physical_target_m": 0.034,
+            "physical_target_m": 0.04,
             "reason": "SYMMETRIC_MIMIC_COMMAND",
-            "timestamp_monotonic_s": 1849717.04836737
+            "timestamp_monotonic_s": 2616778.145558948
           }
         ]
       },
       "cube_pose_after_precontact": {
         "xyz": [
-          0.171285,
-          -0.119728,
-          0.75537
+          0.169999,
+          -0.119999,
+          0.755
         ],
         "rpy": [
-          -0.00633,
-          0.00878,
-          2.8e-05
+          -2.5e-05,
+          -1.8e-05,
+          0.0
         ],
         "source": "gz model runtime oracle (object_red_cube_bilateral)"
       },
       "cube_pose_before_close": {
         "xyz": [
-          0.169007,
-          -0.119393,
-          0.758022
+          0.169999,
+          -0.119999,
+          0.755
         ],
         "rpy": [
-          -5.6e-05,
-          -0.131402,
-          0.003105
+          -1.8e-05,
+          -1.6e-05,
+          0.0
         ],
         "source": "gz model runtime oracle (object_red_cube_bilateral)"
       },
       "motion": {
         "ik_solved": true,
         "ik_solution": [
-          0.8127876478644677,
-          -0.7819875725271611,
-          -1.0904614449618535,
-          -2.6044383257963055,
-          -0.7713104204042117,
-          2.0297127670817368,
-          1.0674602518684508
+          1.3422759301010165,
+          -0.46551731436903604,
+          -1.4318933030169265,
+          -2.096765481670036,
+          -0.5050887732222193,
+          1.9767304454788999,
+          0.9270363427809811
         ],
         "ik_seed_source": "current_joint_state",
         "ik_link": "panda_hand",
@@ -2456,21 +2907,49 @@
         "planned": true,
         "executed": true,
         "converged": true,
-        "goal_uuid": "a8c37a99b6e24256a1f917c9a3ec9a05",
-        "joint_state_samples": 22,
-        "controller_state_samples": 22,
-        "post_controller_settle_s": 0.0010294914245605469
+        "goal_uuid": "ad56e7d06e7c42b7ae82f74b6994f8ec",
+        "joint_state_samples": 92,
+        "controller_state_samples": 92,
+        "post_controller_settle_s": 0.001163482666015625,
+        "expected_final_joints": [
+          1.3427507143816557,
+          -0.4656047990598624,
+          -1.4319018944113324,
+          -2.0964464745676357,
+          -0.50414915224728,
+          1.9757720905154446,
+          0.9278679065592027
+        ],
+        "observed_final_joints": [
+          1.3427512645721436,
+          -0.465604692697525,
+          -1.4319026470184326,
+          -2.0964462757110596,
+          -0.5041490793228149,
+          1.9757720232009888,
+          0.9278678894042969
+        ],
+        "per_joint_final_error_rad": [
+          5.501904878357777e-07,
+          1.0636233738203771e-07,
+          7.526071001962009e-07,
+          1.9885657609464147e-07,
+          7.292446502216166e-08,
+          6.731445578722628e-08,
+          1.7154905829208644e-08
+        ],
+        "max_final_joint_error_rad": 7.526071001962009e-07
       },
       "retreat": {
         "ik_solved": true,
         "ik_solution": [
-          0.550427188511079,
-          -1.1061910848176566,
-          -0.6133161047946942,
-          -2.510898390829723,
-          -0.5419502349885097,
-          1.5014991281542052,
-          0.9886524517464833
+          1.254078831244182,
+          -0.44188146351961927,
+          -1.2712936305821003,
+          -1.91289452784559,
+          -0.42875137200589536,
+          1.756241784288102,
+          0.8819413281165291
         ],
         "ik_seed_source": "current_joint_state",
         "ik_link": "panda_hand",
@@ -2478,14 +2957,42 @@
         "planned": true,
         "executed": true,
         "converged": true,
-        "goal_uuid": "73c403f096df4199b1609f9c67b52d17",
-        "joint_state_samples": 210,
-        "controller_state_samples": 211,
-        "post_controller_settle_s": 0.0011069774627685547
+        "goal_uuid": "4a9acdc7fa8748209c9cd9800300914d",
+        "joint_state_samples": 216,
+        "controller_state_samples": 217,
+        "post_controller_settle_s": 0.002029895782470703,
+        "expected_final_joints": [
+          1.2535611745961162,
+          -0.4410269159407778,
+          -1.2719009647935688,
+          -1.9126886739754514,
+          -0.42898595147776664,
+          1.7571606187578486,
+          0.8826155781911914
+        ],
+        "observed_final_joints": [
+          1.2535616159439087,
+          -0.44102704524993896,
+          -1.2719014883041382,
+          -1.9126884937286377,
+          -0.42898598313331604,
+          1.757161021232605,
+          0.8826154470443726
+        ],
+        "per_joint_final_error_rad": [
+          4.4134779253468537e-07,
+          1.2930916115649893e-07,
+          5.235105693390807e-07,
+          1.8024681369688267e-07,
+          3.165554940398607e-08,
+          4.024747564113085e-07,
+          1.3114681884918156e-07
+        ],
+        "max_final_joint_error_rad": 5.235105693390807e-07
       },
       "retreat_hand_pose": [
-        -0.07499899999999998,
-        -0.12,
+        0.169999,
+        -0.119999,
         0.975,
         1.0,
         0.0,
@@ -2494,33 +3001,33 @@
       ],
       "hand_command": {
         "positions_m": [
-          0.01,
-          0.01
+          0.027,
+          0.027
         ],
         "accepted": true,
         "succeeded": false,
         "controller_result_succeeded": false,
-        "controller_result_error_code": null,
-        "controller_result_error_string": "NO_ACTION_RESULT",
-        "goal_uuid": "50f9f3f5e8e441b38da6340a8aa57fc8",
+        "controller_result_error_code": -1,
+        "controller_result_error_string": "PHYSICAL_HAND_GOAL_TIMEOUT",
+        "goal_uuid": "eaa36e1cee244affae3f1f757e176143",
         "observed_positions_m": [
-          0.03400430083274841,
-          0.03399980813264847
+          0.031502146273851395,
+          0.031501997262239456
         ],
         "goal_tolerance_m": 0.001,
         "post_goal_observation_slack_m": 0.0001,
-        "max_position_error_m": 0.02400430083274841,
-        "mimic_tracking_error_m": 4.492700099945068e-06,
+        "max_position_error_m": 0.004502146273851395,
+        "mimic_tracking_error_m": 1.4901161193847656e-07,
         "physical_controller_state_topic": "/panda_hand_physical_controller/controller_state",
-        "controller_state_sample_count": 566,
+        "controller_state_sample_count": 1069,
         "controller_target_reference_seen": true,
         "controller_terminal_state": {
-          "timestamp_s": 24.92,
+          "timestamp_s": 31.9,
           "physical_joint": "panda_finger_joint2",
-          "physical_reference_m": 0.01,
-          "physical_feedback_m": 0.03399980813264847,
-          "physical_error_m": -0.023999808132648466,
-          "physical_output_m": 0.01
+          "physical_reference_m": 0.027,
+          "physical_feedback_m": 0.031501997262239456,
+          "physical_error_m": -0.0045019972622394565,
+          "physical_output_m": 0.027
         },
         "adapter_decisions": [
           {
@@ -2528,13 +3035,20 @@
             "physical_action": "/panda_hand_physical_controller/follow_joint_trajectory",
             "physical_command_emitted": true,
             "physical_master_joint": "panda_finger_joint2",
-            "physical_target_m": 0.01,
+            "physical_target_m": 0.027,
             "reason": "SYMMETRIC_MIMIC_COMMAND",
-            "timestamp_monotonic_s": 1849718.856025101
+            "timestamp_monotonic_s": 2616780.690564481
+          },
+          {
+            "outcome": "REJECTED",
+            "physical_action": "/panda_hand_physical_controller/follow_joint_trajectory",
+            "physical_command_emitted": false,
+            "reason": "PHYSICAL_HAND_GOAL_TIMEOUT",
+            "timestamp_monotonic_s": 2616790.710268259
           }
         ]
       },
-      "bilateral_steady_gripper_width_m": 0.06800410896539688,
+      "bilateral_steady_gripper_width_m": 0.06300414353609085,
       "hand_command_semantics": "SYMMETRIC_MIMIC_CLOSE",
       "calibration_only_allowed_collision_pairs": [
         [
@@ -2550,71 +3064,71 @@
       "pad_evidence": {
         "left": {
           "link_pose": [
-            0.025137952625213473,
-            -0.1536316662191627,
-            0.755101820472734,
-            0.9999996720288512,
-            0.0006336728008152785,
-            0.0004734497034553494,
-            0.00017391477767118087
+            0.1699284614942036,
+            -0.151248717948889,
+            0.8198216430122208,
+            0.9999997517777258,
+            -0.0004385073326311307,
+            -0.0003878826060143252,
+            -0.0003920496015332402
           ],
           "pad_center_world": [
-            0.08513787754171265,
-            -0.15355561562721604,
-            0.7551586211939075
+            0.16990418112180894,
+            -0.1551276138360199,
+            0.7929186027163674
           ],
           "aabb_separation_m": 0.0
         },
         "right": {
           "link_pose": [
-            0.02505177916287498,
-            -0.08562763088157184,
-            0.7550781258425763,
-            0.9999996720288512,
-            0.0006336728008152785,
-            0.0004734497034553494,
-            0.00017391477767118087
+            0.1699837378115788,
+            -0.08824278144375708,
+            0.8198710245054515,
+            0.9999997517777258,
+            -0.0004385073326311307,
+            -0.0003878826060143252,
+            -0.0003920496015332402
           ],
           "pad_center_world": [
-            0.08505170407937415,
-            -0.08555158028962519,
-            0.7551349265637498
+            0.169966300524155,
+            -0.08432168272835647,
+            0.7929740975284697
           ],
-          "aabb_separation_m": 0.0004484197103748061
+          "aabb_separation_m": 0.00027731727164352626
         },
         "minimum_pad_cube_aabb_separation_m": 0.0,
         "gazebo_link_pose_evidence": {
           "left": {
             "link_pose_world_xyz_rpy": [
-              0.025138,
-              -0.153631,
-              0.755102,
-              3.14124,
-              -0.000946,
-              0.001267
+              0.169929,
+              -0.151248,
+              0.819822,
+              -3.14081,
+              0.000773,
+              -0.000877
             ],
             "pad_center_world": [
-              0.08513792499387998,
-              -0.15355498005435475,
-              0.7551587599915341
+              0.16990480212226886,
+              -0.155126925696279,
+              0.7929189639277375
             ],
             "aabb_separation_m": 0.0
           },
           "right": {
             "link_pose_world_xyz_rpy": [
-              0.025052,
-              -0.085628,
-              0.755078,
-              3.14124,
-              -0.000947,
-              0.001268
+              0.169984,
+              -0.088243,
+              0.819871,
+              -3.14081,
+              0.000772,
+              -0.000877
             ],
             "pad_center_world": [
-              0.0850519248610401,
-              -0.08555192005450181,
-              0.7551348199915072
+              0.1699666743351467,
+              -0.0843219311125399,
+              0.7929740686025128
             ],
-            "aabb_separation_m": 0.00044807994549818375
+            "aabb_separation_m": 0.00027706888746009684
           }
         },
         "gazebo_minimum_pad_cube_aabb_separation_m": 0.0
@@ -2623,7 +3137,7 @@
         "target_model": "object_red_cube_bilateral",
         "left_target": true,
         "right_target": true,
-        "target_cube_events": 5175,
+        "target_cube_events": 193,
         "left_table": false,
         "right_table": false,
         "cube_table": false,
@@ -2650,14 +3164,6 @@
             [
               "object_red_cube_bilateral::link::collision",
               "panda_controller::panda_rightfinger::panda_rightfinger_fixed_joint_lump__collision_collision"
-            ],
-            [
-              "object_red_cube_bilateral::link::collision",
-              "work_table_bilateral_backstop::backstop_link::collision"
-            ],
-            [
-              "object_red_cube_bilateral::link::collision",
-              "work_table_bilateral_support::support_link::collision"
             ]
           ],
           "cube_environment": [
@@ -2668,22 +3174,22 @@
           ]
         },
         "event_counts": {
-          "left": 3107,
-          "right": 3234,
+          "left": 192,
+          "right": 193,
           "cube": 0,
-          "cube_bilateral": 9773,
-          "cube_environment": 5175
+          "cube_bilateral": 386,
+          "cube_environment": 193
         },
         "topic_rate_evidence": {
           "left": {
-            "unique_timestamp_samples": 2549,
-            "duration_s": 8.100999999999999,
-            "observed_rate_hz": 314.5290704851253
+            "unique_timestamp_samples": 192,
+            "duration_s": 0.4280000000000008,
+            "observed_rate_hz": 446.2616822429898
           },
           "right": {
-            "unique_timestamp_samples": 2721,
-            "duration_s": 8.299,
-            "observed_rate_hz": 327.7503313652247
+            "unique_timestamp_samples": 193,
+            "duration_s": 0.4299999999999997,
+            "observed_rate_hz": 446.511627906977
           },
           "cube": {
             "unique_timestamp_samples": 0,
@@ -2691,19 +3197,19 @@
             "observed_rate_hz": 0.0
           },
           "cube_bilateral": {
-            "unique_timestamp_samples": 5175,
-            "duration_s": 11.147000000000002,
-            "observed_rate_hz": 464.1607607428007
+            "unique_timestamp_samples": 193,
+            "duration_s": 0.4299999999999997,
+            "observed_rate_hz": 446.511627906977
           },
           "cube_environment": {
-            "unique_timestamp_samples": 5135,
-            "duration_s": 11.147999999999998,
-            "observed_rate_hz": 460.53103695730186
+            "unique_timestamp_samples": 193,
+            "duration_s": 0.4299999999999997,
+            "observed_rate_hz": 446.511627906977
           }
         },
-        "left_target_unique_samples": 2549,
-        "right_target_unique_samples": 2721,
-        "bilateral_overlap_s": 8.100999999999999
+        "left_target_unique_samples": 192,
+        "right_target_unique_samples": 193,
+        "bilateral_overlap_s": 0.4280000000000008
       },
       "passed": true,
       "isolation": {
@@ -2729,34 +3235,34 @@
       "calibration_finger_target_inset_m": 0.002,
       "cube_pose": {
         "xyz": [
-          0.170001,
-          -0.12,
+          0.169999,
+          -0.119999,
           0.755
         ],
         "rpy": [
-          1e-06,
-          5e-06,
+          -3.9e-05,
+          -2.7e-05,
           0.0
         ],
         "source": "gz model runtime oracle (object_red_cube_bilateral)"
       },
       "cube_pose_after_action": {
         "xyz": [
-          0.169369,
-          -0.12039,
-          0.757622
+          0.169996,
+          -0.120189,
+          0.754978
         ],
         "rpy": [
-          0.000515,
-          -0.11109,
-          -0.00092
+          0.000887,
+          0.000213,
+          -1.5e-05
         ],
         "source": "gz model runtime oracle (object_red_cube_bilateral)"
       },
       "target_hand_pose": [
-        0.025001000000000023,
-        -0.12,
-        0.81,
+        0.169999,
+        -0.119999,
+        0.8782,
         1.0,
         0.0,
         0.0,
@@ -2765,13 +3271,13 @@
       "precontact_motion": {
         "ik_solved": true,
         "ik_solution": [
-          0.8090774580422547,
-          -0.7844016166765106,
-          -1.0880370548963147,
-          -2.6071196047146956,
-          -0.7719387070268293,
-          2.0286843104339773,
-          1.0674241414879797
+          1.290611306813955,
+          -0.4743254334573694,
+          -1.3327433595402542,
+          -2.007656051158168,
+          -0.4804564102112021,
+          1.853338603010315,
+          0.915799610924024
         ],
         "ik_seed_source": "bilateral_validated_seed",
         "ik_link": "panda_hand",
@@ -2779,10 +3285,38 @@
         "planned": true,
         "executed": true,
         "converged": true,
-        "goal_uuid": "66e5d81ff23040bbbb8b2b5fa63b6dd5",
-        "joint_state_samples": 380,
-        "controller_state_samples": 381,
-        "post_controller_settle_s": 0.0010440349578857422
+        "goal_uuid": "3cb602c9ac30477cb6c9d04d7ffb2861",
+        "joint_state_samples": 437,
+        "controller_state_samples": 437,
+        "post_controller_settle_s": 0.0018706321716308594,
+        "expected_final_joints": [
+          1.290213626947198,
+          -0.4737664424042277,
+          -1.3325033009216567,
+          -2.0073225584926164,
+          -0.4809525728916455,
+          1.852494627081703,
+          0.9161811223063169
+        ],
+        "observed_final_joints": [
+          1.2902134656906128,
+          -0.47376641631126404,
+          -1.3325031995773315,
+          -2.007322311401367,
+          -0.480952650308609,
+          1.8524945974349976,
+          0.9161812663078308
+        ],
+        "per_joint_final_error_rad": [
+          1.612565851960568e-07,
+          2.6092963678614467e-08,
+          1.0134432515407354e-07,
+          2.470912492391619e-07,
+          7.741696350649363e-08,
+          2.9646705534958073e-08,
+          1.4400151393534344e-07
+        ],
+        "max_final_joint_error_rad": 2.470912492391619e-07
       },
       "precontact_hand_command": {
         "accepted": true,
@@ -2790,25 +3324,25 @@
         "controller_result_succeeded": true,
         "controller_result_error_code": 0,
         "controller_result_error_string": "SYMMETRIC_MIMIC_COMMAND_FORWARDED",
-        "goal_uuid": "af45e6dd8fc14308b90d2e6b1ade9094",
+        "goal_uuid": "67fb1c9fed0e4261aa911f6cdf11ed5c",
         "observed_positions_m": [
-          0.0340721569955349,
-          0.03407501056790352
+          0.040000006556510925,
+          0.040000006556510925
         ],
         "goal_tolerance_m": 0.001,
         "post_goal_observation_slack_m": 0.0001,
-        "max_position_error_m": 7.501056790351623e-05,
-        "mimic_tracking_error_m": 2.853572368621826e-06,
+        "max_position_error_m": 6.5565109244603015e-09,
+        "mimic_tracking_error_m": 0.0,
         "physical_controller_state_topic": "/panda_hand_physical_controller/controller_state",
-        "controller_state_sample_count": 150,
-        "controller_target_reference_seen": false,
+        "controller_state_sample_count": 147,
+        "controller_target_reference_seen": true,
         "controller_terminal_state": {
-          "timestamp_s": 18.58,
+          "timestamp_s": 19.6,
           "physical_joint": "panda_finger_joint2",
-          "physical_reference_m": 0.03407500008195639,
-          "physical_feedback_m": 0.03407501056790352,
-          "physical_error_m": -1.048594713143336e-08,
-          "physical_output_m": 0.034
+          "physical_reference_m": 0.04,
+          "physical_feedback_m": 0.040000006556510925,
+          "physical_error_m": -6.5565109244603015e-09,
+          "physical_output_m": 0.04
         },
         "adapter_decisions": [
           {
@@ -2816,48 +3350,48 @@
             "physical_action": "/panda_hand_physical_controller/follow_joint_trajectory",
             "physical_command_emitted": true,
             "physical_master_joint": "panda_finger_joint2",
-            "physical_target_m": 0.034,
+            "physical_target_m": 0.04,
             "reason": "SYMMETRIC_MIMIC_COMMAND",
-            "timestamp_monotonic_s": 1849755.900991535
+            "timestamp_monotonic_s": 2616824.092770314
           }
         ]
       },
       "cube_pose_after_precontact": {
         "xyz": [
-          0.171137,
-          -0.119685,
-          0.755565
+          0.169999,
+          -0.119999,
+          0.755
         ],
         "rpy": [
-          -0.00645,
-          0.016413,
-          2.3e-05
+          -2.5e-05,
+          -1.8e-05,
+          0.0
         ],
         "source": "gz model runtime oracle (object_red_cube_bilateral)"
       },
       "cube_pose_before_close": {
         "xyz": [
-          0.169386,
-          -0.120375,
-          0.758885
+          0.169999,
+          -0.119999,
+          0.755
         ],
         "rpy": [
-          0.002371,
-          -0.111954,
-          -0.000809
+          -1.6e-05,
+          -1.6e-05,
+          0.0
         ],
         "source": "gz model runtime oracle (object_red_cube_bilateral)"
       },
       "motion": {
         "ik_solved": true,
         "ik_solution": [
-          0.8126484698303795,
-          -0.7818078909078545,
-          -1.0903584056979867,
-          -2.604455897225471,
-          -0.7711465110632989,
-          2.029842562647402,
-          1.0673326773220042
+          1.342507971880328,
+          -0.46617162732143597,
+          -1.4318956607741826,
+          -2.0967046699484495,
+          -0.505740423633366,
+          1.976441447627165,
+          0.9274964613032706
         ],
         "ik_seed_source": "current_joint_state",
         "ik_link": "panda_hand",
@@ -2865,21 +3399,49 @@
         "planned": true,
         "executed": true,
         "converged": true,
-        "goal_uuid": "608a58885d1a4cf4b374cfc85da6c18b",
-        "joint_state_samples": 22,
-        "controller_state_samples": 22,
-        "post_controller_settle_s": 0.0009963512420654297
+        "goal_uuid": "4da941b8cc54420282db1a628d47b2ff",
+        "joint_state_samples": 92,
+        "controller_state_samples": 92,
+        "post_controller_settle_s": 0.0009508132934570312,
+        "expected_final_joints": [
+          1.3428192093449869,
+          -0.46638501099698887,
+          -1.4328246578959338,
+          -2.0967533923832384,
+          -0.5052824677062436,
+          1.9766971532449988,
+          0.9271604018028072
+        ],
+        "observed_final_joints": [
+          1.342819333076477,
+          -0.46638500690460205,
+          -1.432824969291687,
+          -2.0967531204223633,
+          -0.5052823424339294,
+          1.976697564125061,
+          0.9271604418754578
+        ],
+        "per_joint_final_error_rad": [
+          1.2373149016475793e-07,
+          4.0923868183107e-09,
+          3.1139575318306356e-07,
+          2.719608751533542e-07,
+          1.2527231418868467e-07,
+          4.1088006219602846e-07,
+          4.007265053118658e-08
+        ],
+        "max_final_joint_error_rad": 4.1088006219602846e-07
       },
       "retreat": {
         "ik_solved": true,
         "ik_solution": [
-          0.5498566124333681,
-          -1.105848548280269,
-          -0.6130675224667824,
-          -2.5109528487465615,
-          -0.5416220297579385,
-          1.501792307744723,
-          0.988243988564322
+          1.2540180513078465,
+          -0.4418020852835232,
+          -1.271275994872775,
+          -1.912901167276905,
+          -0.42867491733373064,
+          1.7562728541978712,
+          0.8818851500052896
         ],
         "ik_seed_source": "current_joint_state",
         "ik_link": "panda_hand",
@@ -2887,14 +3449,42 @@
         "planned": true,
         "executed": true,
         "converged": true,
-        "goal_uuid": "11a22b79227e4cd6b72e01b14acf4693",
-        "joint_state_samples": 203,
-        "controller_state_samples": 203,
-        "post_controller_settle_s": 0.0011036396026611328
+        "goal_uuid": "899fbeb20c634c4c8630440c09c90a22",
+        "joint_state_samples": 266,
+        "controller_state_samples": 267,
+        "post_controller_settle_s": 0.001314401626586914,
+        "expected_final_joints": [
+          1.2531152524889566,
+          -0.4416532444915117,
+          -1.2718996309732162,
+          -1.9129678552128682,
+          -0.42963585459531206,
+          1.7572308993610628,
+          0.8821768818569307
+        ],
+        "observed_final_joints": [
+          1.2531148195266724,
+          -0.4416533410549164,
+          -1.2719001770019531,
+          -1.912967562675476,
+          -0.4296358525753021,
+          1.7572314739227295,
+          0.8821769952774048
+        ],
+        "per_joint_final_error_rad": [
+          4.329622842469405e-07,
+          9.656340466124291e-08,
+          5.460287368919126e-07,
+          2.9253739208812135e-07,
+          2.020009937098166e-09,
+          5.745616666885667e-07,
+          1.1342047412377099e-07
+        ],
+        "max_final_joint_error_rad": 5.745616666885667e-07
       },
       "retreat_hand_pose": [
-        -0.07499899999999998,
-        -0.12,
+        0.169999,
+        -0.119999,
         0.975,
         1.0,
         0.0,
@@ -2903,33 +3493,33 @@
       ],
       "hand_command": {
         "positions_m": [
-          0.01,
-          0.01
+          0.027,
+          0.027
         ],
         "accepted": true,
         "succeeded": false,
         "controller_result_succeeded": false,
-        "controller_result_error_code": null,
-        "controller_result_error_string": "NO_ACTION_RESULT",
-        "goal_uuid": "2e0dc7489b954f0eadb8b6302262837b",
+        "controller_result_error_code": -1,
+        "controller_result_error_string": "PHYSICAL_HAND_GOAL_TIMEOUT",
+        "goal_uuid": "f35db000e68b4cc297d1f91af9aef937",
         "observed_positions_m": [
-          0.03400043025612831,
-          0.03399946913123131
+          0.03150305151939392,
+          0.03147175908088684
         ],
         "goal_tolerance_m": 0.001,
         "post_goal_observation_slack_m": 0.0001,
-        "max_position_error_m": 0.02400043025612831,
-        "mimic_tracking_error_m": 9.611248970031738e-07,
+        "max_position_error_m": 0.004503051519393921,
+        "mimic_tracking_error_m": 3.129243850708008e-05,
         "physical_controller_state_topic": "/panda_hand_physical_controller/controller_state",
-        "controller_state_sample_count": 566,
+        "controller_state_sample_count": 1065,
         "controller_target_reference_seen": true,
         "controller_terminal_state": {
-          "timestamp_s": 24.48,
+          "timestamp_s": 31.19,
           "physical_joint": "panda_finger_joint2",
-          "physical_reference_m": 0.01,
-          "physical_feedback_m": 0.03399946913123131,
-          "physical_error_m": -0.023999469131231306,
-          "physical_output_m": 0.01
+          "physical_reference_m": 0.027,
+          "physical_feedback_m": 0.03147175908088684,
+          "physical_error_m": -0.004471759080886841,
+          "physical_output_m": 0.027
         },
         "adapter_decisions": [
           {
@@ -2937,13 +3527,13 @@
             "physical_action": "/panda_hand_physical_controller/follow_joint_trajectory",
             "physical_command_emitted": true,
             "physical_master_joint": "panda_finger_joint2",
-            "physical_target_m": 0.01,
+            "physical_target_m": 0.027,
             "reason": "SYMMETRIC_MIMIC_COMMAND",
-            "timestamp_monotonic_s": 1849757.704456915
+            "timestamp_monotonic_s": 2616826.650615769
           }
         ]
       },
-      "bilateral_steady_gripper_width_m": 0.06799989938735962,
+      "bilateral_steady_gripper_width_m": 0.06297481060028076,
       "hand_command_semantics": "SYMMETRIC_MIMIC_CLOSE",
       "calibration_only_allowed_collision_pairs": [
         [
@@ -2959,35 +3549,35 @@
       "pad_evidence": {
         "left": {
           "link_pose": [
-            0.025203572517433336,
-            -0.15435131687557527,
-            0.7554020159057044,
-            0.9999996887790721,
-            -4.9444321076730385e-05,
-            0.0007478806983142914,
-            -0.0002463158119855381
+            0.1699610601089102,
+            -0.15171664490844486,
+            0.8195550477510043,
+            0.9999999082694007,
+            -0.00016959307343959634,
+            -0.00010620797632541306,
+            -0.0003787073347975638
           ],
           "pad_center_world": [
-            0.08520350510499976,
-            -0.1543572722980389,
-            0.7554917601001012
+            0.16995402643609336,
+            -0.1555962681436365,
+            0.7926521022973851
           ],
-          "aabb_separation_m": 0.00035727229803889093
+          "aabb_separation_m": 0.0001972681436365059
         },
         "right": {
           "link_pose": [
-            0.025210271676549153,
-            -0.08635348988257371,
-            0.7554355188083555,
-            0.9999996887790721,
-            -4.9444321076730385e-05,
-            0.0007478806983142914,
-            -0.0002463158119855381
+            0.16998242731015914,
+            -0.08873609669748476,
+            0.8196027478853403,
+            0.9999999082694007,
+            -0.00016959307343959634,
+            -0.00010620797632541306,
+            -0.0003787073347975638
           ],
           "pad_center_world": [
-            0.08521020426411557,
-            -0.08635944530503732,
-            0.7555252630027522
+            0.16997803991650443,
+            -0.08481572261870088,
+            0.7927057099846126
           ],
           "aabb_separation_m": 0.0
         },
@@ -2995,33 +3585,33 @@
         "gazebo_link_pose_evidence": {
           "left": {
             "link_pose_world_xyz_rpy": [
-              0.025204,
-              -0.154353,
-              0.755402,
-              -3.1411,
-              -0.001496,
-              -0.000101
+              0.169961,
+              -0.151717,
+              0.819555,
+              -3.14084,
+              0.000212,
+              -0.000339
             ],
             "pad_center_world": [
-              0.08520393255350286,
-              -0.1543590599932085,
-              0.7554917599665193
+              0.16995398134361417,
+              -0.1555967503593036,
+              0.7926520728750951
             ],
-            "aabb_separation_m": 0.00035905999320851034
+            "aabb_separation_m": 0.0001977503593035973
           },
           "right": {
             "link_pose_world_xyz_rpy": [
-              0.02521,
-              -0.086353,
-              0.755436,
-              -3.1411,
-              -0.001496,
-              -0.0001
+              0.169982,
+              -0.088736,
+              0.819603,
+              -3.14084,
+              0.000212,
+              -0.000339
             ],
             "pad_center_world": [
-              0.08520993255953285,
-              -0.08635899999327595,
-              0.7555257599665193
+              0.16997762678740233,
+              -0.08481575301721814,
+              0.7927059435724092
             ],
             "aabb_separation_m": 0.0
           }
@@ -3032,7 +3622,7 @@
         "target_model": "object_red_cube_bilateral",
         "left_target": true,
         "right_target": true,
-        "target_cube_events": 5132,
+        "target_cube_events": 182,
         "left_table": false,
         "right_table": false,
         "cube_table": false,
@@ -3062,10 +3652,6 @@
             ],
             [
               "object_red_cube_bilateral::link::collision",
-              "work_table_bilateral_backstop::backstop_link::collision"
-            ],
-            [
-              "object_red_cube_bilateral::link::collision",
               "work_table_bilateral_support::support_link::collision"
             ]
           ],
@@ -3077,22 +3663,22 @@
           ]
         },
         "event_counts": {
-          "left": 3128,
-          "right": 3254,
+          "left": 182,
+          "right": 182,
           "cube": 0,
-          "cube_bilateral": 9518,
-          "cube_environment": 5132
+          "cube_bilateral": 546,
+          "cube_environment": 181
         },
         "topic_rate_evidence": {
           "left": {
-            "unique_timestamp_samples": 2540,
-            "duration_s": 8.158000000000001,
-            "observed_rate_hz": 311.22824221622943
+            "unique_timestamp_samples": 182,
+            "duration_s": 0.4400000000000013,
+            "observed_rate_hz": 411.3636363636352
           },
           "right": {
-            "unique_timestamp_samples": 2619,
-            "duration_s": 8.346,
-            "observed_rate_hz": 313.6832015336688
+            "unique_timestamp_samples": 182,
+            "duration_s": 0.4400000000000013,
+            "observed_rate_hz": 411.3636363636352
           },
           "cube": {
             "unique_timestamp_samples": 0,
@@ -3100,19 +3686,19 @@
             "observed_rate_hz": 0.0
           },
           "cube_bilateral": {
-            "unique_timestamp_samples": 5132,
-            "duration_s": 11.193999999999999,
-            "observed_rate_hz": 458.3705556548151
+            "unique_timestamp_samples": 182,
+            "duration_s": 0.4400000000000013,
+            "observed_rate_hz": 411.3636363636352
           },
           "cube_environment": {
-            "unique_timestamp_samples": 5088,
-            "duration_s": 11.194999999999999,
-            "observed_rate_hz": 454.3992853952658
+            "unique_timestamp_samples": 181,
+            "duration_s": 0.43799999999999883,
+            "observed_rate_hz": 410.95890410959015
           }
         },
-        "left_target_unique_samples": 2540,
-        "right_target_unique_samples": 2619,
-        "bilateral_overlap_s": 8.158000000000001
+        "left_target_unique_samples": 182,
+        "right_target_unique_samples": 182,
+        "bilateral_overlap_s": 0.43900000000000006
       },
       "passed": true,
       "isolation": {
@@ -3162,74 +3748,74 @@
       "pad_evidence": {
         "left": {
           "link_pose": [
-            -0.03432439252143399,
-            -0.028229671770379303,
-            1.2147246668888887,
-            0.9238795750160582,
-            0.38268328051365075,
-            -0.00010755404126859665,
-            -0.00016160317598648362
+            -0.03432714173560653,
+            -0.028228382541987437,
+            1.211323440877879,
+            0.9238795855182583,
+            0.38268325241980133,
+            -0.0001115578532529582,
+            -0.000165332571558637
           ],
           "pad_center_world": [
-            0.008102026908258661,
-            0.014196722303353965,
-            1.2147201639910794
+            -0.031578375449737725,
+            -0.030980178833323692,
+            1.1844219185961073
           ],
-          "aabb_separation_m": 0.4302809247391093
+          "aabb_separation_m": 0.42832651511627556
         },
         "right": {
           "link_pose": [
-            -0.09089292166343743,
-            0.028338894413885592,
-            1.2147551406549872,
-            0.9238795750160582,
-            0.38268328051365075,
-            -0.00010755404126859665,
-            -0.00016160317598648362
+            -0.09089566719770703,
+            0.028340186887529074,
+            1.2113547110765726,
+            0.9238795855182583,
+            0.38268325241980133,
+            -0.0001115578532529582,
+            -0.000165332571558637
           ],
           "pad_center_world": [
-            -0.04846650223374478,
-            0.07076528848761886,
-            1.214750637757178
+            -0.09366233124034354,
+            0.031103825211520497,
+            1.1844562376386738
           ],
-          "aabb_separation_m": 0.4383417597744338
+          "aabb_separation_m": 0.44437439473252566
         },
-        "minimum_pad_cube_aabb_separation_m": 0.4302809247391093,
+        "minimum_pad_cube_aabb_separation_m": 0.42832651511627556,
         "gazebo_link_pose_evidence": {
           "left": {
             "link_pose_world_xyz_rpy": [
-              -0.034324,
-              -0.02823,
-              1.21472,
-              -3.14121,
-              7.5e-05,
+              -0.034327,
+              -0.028228,
+              1.21132,
+              -3.1412,
+              7.9e-05,
               0.785398
             ],
             "pad_center_world": [
-              0.008102413684234623,
-              0.014196399819501406,
-              1.2147155000000043
+              -0.03157825570507461,
+              -0.030979750709785536,
+              1.1844184708086638
             ],
-            "aabb_separation_m": 0.43027638701226106
+            "aabb_separation_m": 0.42832331432445775
           },
           "right": {
             "link_pose_world_xyz_rpy": [
-              -0.090893,
-              0.028339,
-              1.21476,
-              -3.14121,
-              7.5e-05,
+              -0.090896,
+              0.02834,
+              1.21135,
+              -3.1412,
+              7.9e-05,
               0.785398
             ],
             "pad_center_world": [
-              -0.04846658631576538,
-              0.0707653998195014,
-              1.2147555000000043
+              -0.09366268710085929,
+              0.03110368283058772,
+              1.184451533506576
             ],
-            "aabb_separation_m": 0.43834640980130873
+            "aabb_separation_m": 0.4443705977997893
           }
         },
-        "gazebo_minimum_pad_cube_aabb_separation_m": 0.43027638701226106
+        "gazebo_minimum_pad_cube_aabb_separation_m": 0.42832331432445775
       },
       "contacts": {
         "target_model": "object_red_cube",
@@ -3261,8 +3847,8 @@
           "left": 0,
           "right": 0,
           "cube": 0,
-          "cube_bilateral": 280,
-          "cube_environment": 281
+          "cube_bilateral": 262,
+          "cube_environment": 261
         },
         "topic_rate_evidence": {
           "left": {
@@ -3281,14 +3867,14 @@
             "observed_rate_hz": 0.0
           },
           "cube_bilateral": {
-            "unique_timestamp_samples": 280,
-            "duration_s": 0.44700000000000095,
-            "observed_rate_hz": 624.1610738255021
+            "unique_timestamp_samples": 262,
+            "duration_s": 0.4499999999999993,
+            "observed_rate_hz": 580.0000000000009
           },
           "cube_environment": {
-            "unique_timestamp_samples": 277,
-            "duration_s": 0.4499999999999993,
-            "observed_rate_hz": 613.3333333333343
+            "unique_timestamp_samples": 261,
+            "duration_s": 0.4480000000000004,
+            "observed_rate_hz": 580.3571428571423
           }
         },
         "left_target_unique_samples": 0,
@@ -3343,74 +3929,74 @@
       "pad_evidence": {
         "left": {
           "link_pose": [
-            -0.0343243926850728,
-            -0.028229674796739733,
-            1.2147246668106524,
-            0.9238795761249542,
-            0.38268327783614603,
-            -0.00010755351048853108,
-            -0.00016160445657138972
+            -0.034327141334036124,
+            -0.028228375115911735,
+            1.2113234410705056,
+            0.9238795827969014,
+            0.38268325899072286,
+            -0.00011155916019099612,
+            -0.0001653294184219303
           ],
           "pad_center_world": [
-            0.008102026990546254,
-            0.014196719031079462,
-            1.214720164030429
+            -0.03157837500902274,
+            -0.030980171551725787,
+            1.1844219188075125
           ],
-          "aabb_separation_m": 0.4302809253086204
+          "aabb_separation_m": 0.42832651316684794
         },
         "right": {
           "link_pose": [
-            -0.09089292149917412,
-            0.028338891715342596,
-            1.2147551407335313,
-            0.9238795761249542,
-            0.38268327783614603,
-            -0.00010755351048853108,
-            -0.00016160445657138972
+            -0.09089566760085006,
+            0.028340193509105344,
+            1.2113547108831684,
+            0.9238795827969014,
+            0.38268325899072286,
+            -0.00011155916019099612,
+            -0.0001653294184219303
           ],
           "pad_center_world": [
-            -0.048466501823555067,
-            0.07076528554316179,
-            1.214750637953308
+            -0.09366233168280154,
+            0.03110383161018029,
+            1.18445623742641
           ],
-          "aabb_separation_m": 0.4383417599385677
+          "aabb_separation_m": 0.4443743940090522
         },
-        "minimum_pad_cube_aabb_separation_m": 0.4302809253086204,
+        "minimum_pad_cube_aabb_separation_m": 0.42832651316684794,
         "gazebo_link_pose_evidence": {
           "left": {
             "link_pose_world_xyz_rpy": [
-              -0.034324,
-              -0.02823,
-              1.21472,
-              -3.14121,
-              7.5e-05,
+              -0.034327,
+              -0.028228,
+              1.21132,
+              -3.1412,
+              7.9e-05,
               0.785398
             ],
             "pad_center_world": [
-              0.008102413684234623,
-              0.014196399819501406,
-              1.2147155000000043
+              -0.03157825570507461,
+              -0.030979750709785536,
+              1.1844184708086638
             ],
-            "aabb_separation_m": 0.43027638701226106
+            "aabb_separation_m": 0.42832331432445775
           },
           "right": {
             "link_pose_world_xyz_rpy": [
-              -0.090893,
-              0.028339,
-              1.21476,
-              -3.14121,
-              7.5e-05,
+              -0.090896,
+              0.02834,
+              1.21135,
+              -3.1412,
+              7.9e-05,
               0.785398
             ],
             "pad_center_world": [
-              -0.04846658631576538,
-              0.0707653998195014,
-              1.2147555000000043
+              -0.09366268710085929,
+              0.03110368283058772,
+              1.184451533506576
             ],
-            "aabb_separation_m": 0.43834640980130873
+            "aabb_separation_m": 0.4443705977997893
           }
         },
-        "gazebo_minimum_pad_cube_aabb_separation_m": 0.43027638701226106
+        "gazebo_minimum_pad_cube_aabb_separation_m": 0.42832331432445775
       },
       "contacts": {
         "target_model": "object_red_cube",
@@ -3442,8 +4028,8 @@
           "left": 0,
           "right": 0,
           "cube": 0,
-          "cube_bilateral": 286,
-          "cube_environment": 286
+          "cube_bilateral": 283,
+          "cube_environment": 284
         },
         "topic_rate_evidence": {
           "left": {
@@ -3462,14 +4048,14 @@
             "observed_rate_hz": 0.0
           },
           "cube_bilateral": {
-            "unique_timestamp_samples": 286,
+            "unique_timestamp_samples": 283,
             "duration_s": 0.4480000000000004,
-            "observed_rate_hz": 636.1607142857138
+            "observed_rate_hz": 629.4642857142852
           },
           "cube_environment": {
-            "unique_timestamp_samples": 283,
-            "duration_s": 0.44899999999999984,
-            "observed_rate_hz": 628.062360801782
+            "unique_timestamp_samples": 284,
+            "duration_s": 0.4499999999999993,
+            "observed_rate_hz": 628.8888888888899
           }
         },
         "left_target_unique_samples": 0,
@@ -3498,32 +4084,199 @@
         ],
         "source": "gz model runtime oracle (object_red_cube)"
       },
-      "motion": {
+      "precontact_motion": {
         "ik_solved": true,
         "ik_solution": [
-          -0.0764383479665277,
-          1.242187789210632,
-          -1.028585397368508,
-          -2.887928740875384,
-          2.3857766197963266,
-          0.47722480462737027,
-          1.1124527376919875
+          -0.14878018547667862,
+          -1.44536635056926,
+          -1.6602175090730764,
+          -2.9946355142959806,
+          -1.6408378787129345,
+          1.7079525161996245,
+          0.48885451530259677
         ],
         "ik_seed_source": "current_joint_state",
         "ik_link": "panda_hand",
-        "plan_attempts": 2,
+        "plan_attempts": 1,
         "planned": true,
         "executed": true,
+        "converged": true,
+        "goal_uuid": "b1843a728eb545e588f06027dc49dae9",
+        "joint_state_samples": 499,
+        "controller_state_samples": 500,
+        "post_controller_settle_s": 0.001516580581665039,
+        "expected_final_joints": [
+          -0.14807043904558495,
+          -1.4447655481993786,
+          -1.659859832356555,
+          -2.9941390369723964,
+          -1.6399682279313144,
+          1.7081556669157691,
+          0.4898073078134527
+        ],
+        "observed_final_joints": [
+          -0.14806967973709106,
+          -1.4447603225708008,
+          -1.65985107421875,
+          -2.9941296577453613,
+          -1.639959454536438,
+          1.7081518173217773,
+          0.4898046851158142
+        ],
+        "per_joint_final_error_rad": [
+          7.593084938861683e-07,
+          5.2256285778540246e-06,
+          8.758137804987243e-06,
+          9.379227035033466e-06,
+          8.773394876371299e-06,
+          3.849593991800404e-06,
+          2.6226976385101963e-06
+        ],
+        "max_final_joint_error_rad": 9.379227035033466e-06
+      },
+      "motion": {
+        "planned": true,
+        "cartesian": true,
+        "fraction": 1.0,
+        "planning_method": "SEEDED_PER_WAYPOINT_COLLISION_AWARE_IK",
+        "ik_seed_source": "current_joint_state",
+        "max_step_m": 0.005,
+        "duration_s": 3.0,
+        "point_count": 22,
+        "executed": true,
         "converged": false,
-        "goal_uuid": "dab9f1ac2bda44cfb69e0e3b9d72fe5b",
-        "joint_state_samples": 1107,
-        "controller_state_samples": 1107,
-        "post_controller_settle_s": 3.0002825260162354
+        "goal_uuid": "599d47b55bbe44f49ee7f284454112ff",
+        "joint_state_samples": 605,
+        "controller_state_samples": 605,
+        "post_controller_settle_s": 3.00030779838562,
+        "expected_final_joints": [
+          -0.007061612277330995,
+          -1.4223284198907338,
+          -2.0611892919613,
+          -2.8856756022893046,
+          -2.013090505129747,
+          1.834867218933739,
+          0.544903275572755
+        ],
+        "observed_final_joints": [
+          -0.0070578125305473804,
+          -1.4223284721374512,
+          -2.0068161487579346,
+          -2.8856770992279053,
+          -1.9593732357025146,
+          1.8191848993301392,
+          0.5474974513053894
+        ],
+        "per_joint_final_error_rad": [
+          3.7997467836146243e-06,
+          5.224671739689768e-08,
+          0.054373143203365615,
+          1.4969386006313812e-06,
+          0.05371726942723232,
+          0.01568231960359978,
+          0.0025941757326344295
+        ],
+        "max_final_joint_error_rad": 0.054373143203365615
       },
       "retreat": {
-        "planned": false,
-        "executed": false,
-        "plan_attempts": 2
+        "planned": true,
+        "plan_attempts": 1,
+        "executed": true,
+        "converged": true,
+        "goal_uuid": "d3aa673160cb4c7d8ee51ae4f76e3dff",
+        "joint_state_samples": 538,
+        "controller_state_samples": 538,
+        "post_controller_settle_s": 0.0018622875213623047
+      },
+      "table_precontact_hand_pose": [
+        -0.25,
+        -0.25,
+        0.65,
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "table_contact_hand_pose": [
+        -0.25,
+        -0.25,
+        0.55,
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "table_contact_pad_evidence": {
+        "left": {
+          "link_pose": [
+            -0.2491129625068987,
+            -0.2929012074506039,
+            0.5037978722102958,
+            0.999990343708252,
+            -0.0040968906930090665,
+            -0.001575844911196168,
+            -0.00021139942596753905
+          ],
+          "pad_center_world": [
+            -0.24922965358660049,
+            -0.29678935566726466,
+            0.4768964096731549
+          ],
+          "aabb_separation_m": 0.5864080080752129
+        },
+        "right": {
+          "link_pose": [
+            -0.24852014595442326,
+            -0.22055925735980872,
+            0.5038275249178856,
+            0.999990343708252,
+            -0.0040968906930090665,
+            -0.001575844911196168,
+            -0.00021139942596753905
+          ],
+          "pad_center_world": [
+            -0.24857292095959188,
+            -0.21664766811203734,
+            0.47692925946534115
+          ],
+          "aabb_separation_m": 0.5372599223741241
+        },
+        "minimum_pad_cube_aabb_separation_m": 0.5372599223741241,
+        "gazebo_link_pose_evidence": {
+          "left": {
+            "link_pose_world_xyz_rpy": [
+              -0.249117,
+              -0.292604,
+              0.503799,
+              -3.14118,
+              0.003202,
+              -0.008161
+            ],
+            "pad_center_world": [
+              -0.24923487288490442,
+              -0.2964920668124028,
+              0.476897530849686
+            ],
+            "aabb_separation_m": 0.5862176840603168
+          },
+          "right": {
+            "link_pose_world_xyz_rpy": [
+              -0.24855,
+              -0.220594,
+              0.503829,
+              -3.14118,
+              0.003324,
+              -0.008079
+            ],
+            "pad_center_world": [
+              -0.2486078097268036,
+              -0.21668230525316418,
+              0.4769307602389475
+            ],
+            "aabb_separation_m": 0.5373035886223189
+          }
+        },
+        "gazebo_minimum_pad_cube_aabb_separation_m": 0.5373035886223189
       },
       "calibration_only_allowed_collision_pairs": [
         [
@@ -3538,74 +4291,446 @@
       "pad_evidence": {
         "left": {
           "link_pose": [
-            -0.22299580879769537,
-            -0.10945607006843802,
-            0.593589277064235,
-            0.12741411250174084,
-            0.6811183533484184,
-            0.3640549453068203,
-            0.6223402843019089
+            -0.10522030022079157,
+            0.06265272720142509,
+            1.3058187005834683,
+            0.8531179820019028,
+            0.5124912612853884,
+            0.09088255387029313,
+            0.03581588046001648
           ],
           "pad_center_world": [
-            -0.23457079453414492,
-            -0.07185405222872222,
-            0.5482890788352793
+            -0.09667658751079951,
+            0.06167333000229204,
+            1.2800337097117334
           ],
-          "aabb_separation_m": 0.3924393216205264
+          "aabb_separation_m": 0.5270898918362112
         },
         "right": {
           "link_pose": [
-            -0.20312301310967357,
-            -0.1593903713703169,
-            0.547062818077307,
-            0.12741411250174084,
-            0.6811183533484184,
-            0.3640549453068203,
-            0.6223402843019089
+            -0.166989915632257,
+            0.0962547479331833,
+            1.294839832902308,
+            0.8531179820019028,
+            0.5124912612853884,
+            0.09088255387029313,
+            0.03581588046001648
           ],
           "pad_center_world": [
-            -0.21469799884612312,
-            -0.12178835353060109,
-            0.5017626198483512
+            -0.16521598628446782,
+            0.09895804163913283,
+            1.2678515877239267
           ],
-          "aabb_separation_m": 0.4211948881082359
+          "aabb_separation_m": 0.5498236432345195
         },
-        "minimum_pad_cube_aabb_separation_m": 0.3924393216205264,
+        "minimum_pad_cube_aabb_separation_m": 0.5270898918362112,
         "gazebo_link_pose_evidence": {
           "left": {
             "link_pose_world_xyz_rpy": [
-              -0.223018,
-              -0.109231,
-              0.593979,
-              1.50869,
-              0.855124,
-              1.8681
+              -0.10522,
+              0.062653,
+              1.30582,
+              2.98561,
+              -0.118634,
+              1.09119
             ],
             "pad_center_world": [
-              -0.23455044175831116,
-              -0.07159056230359961,
-              0.5486998631142934
+              -0.09667639555784967,
+              0.06167364376721573,
+              1.2800349716985733
             ],
-            "aabb_separation_m": 0.39214506881876343
+            "aabb_separation_m": 0.5270909268024271
           },
           "right": {
             "link_pose_world_xyz_rpy": [
-              -0.202524,
-              -0.159925,
-              0.546989,
-              1.50491,
-              0.853804,
-              1.86487
+              -0.16699,
+              0.096255,
+              1.29484,
+              2.98561,
+              -0.118634,
+              1.09119
             ],
             "pad_center_world": [
-              -0.21395211734386313,
-              -0.12219033910847688,
-              0.5017618676414627
+              -0.1652161838123458,
+              0.09895833689147286,
+              1.2678517517096122
             ],
-            "aabb_separation_m": 0.4208635719475445
+            "aabb_separation_m": 0.5498238883889965
           }
         },
-        "gazebo_minimum_pad_cube_aabb_separation_m": 0.39214506881876343
+        "gazebo_minimum_pad_cube_aabb_separation_m": 0.5270909268024271
+      },
+      "contacts": {
+        "target_model": "object_red_cube",
+        "left_target": false,
+        "right_target": false,
+        "target_cube_events": 0,
+        "left_table": true,
+        "right_table": true,
+        "cube_table": false,
+        "cube_environment_table": true,
+        "raw_pairs": {
+          "left": [
+            [
+              "panda_controller::panda_leftfinger::panda_leftfinger_fixed_joint_lump__collision_collision",
+              "work_table::table_link::collision"
+            ]
+          ],
+          "right": [
+            [
+              "panda_controller::panda_rightfinger::panda_rightfinger_fixed_joint_lump__collision_collision",
+              "work_table::table_link::collision"
+            ]
+          ],
+          "cube": [],
+          "cube_bilateral": [
+            [
+              "object_red_cube_bilateral::link::collision",
+              "work_table_bilateral_support::support_link::collision"
+            ]
+          ],
+          "cube_environment": [
+            [
+              "object_red_cube_environment::link::collision",
+              "work_table::table_link::collision"
+            ]
+          ]
+        },
+        "event_counts": {
+          "left": 230,
+          "right": 230,
+          "cube": 0,
+          "cube_bilateral": 230,
+          "cube_environment": 231
+        },
+        "topic_rate_evidence": {
+          "left": {
+            "unique_timestamp_samples": 230,
+            "duration_s": 0.4480000000000004,
+            "observed_rate_hz": 511.1607142857138
+          },
+          "right": {
+            "unique_timestamp_samples": 230,
+            "duration_s": 0.44700000000000273,
+            "observed_rate_hz": 512.304250559281
+          },
+          "cube": {
+            "unique_timestamp_samples": 0,
+            "duration_s": 0.0,
+            "observed_rate_hz": 0.0
+          },
+          "cube_bilateral": {
+            "unique_timestamp_samples": 230,
+            "duration_s": 0.44700000000000273,
+            "observed_rate_hz": 512.304250559281
+          },
+          "cube_environment": {
+            "unique_timestamp_samples": 231,
+            "duration_s": 0.4499999999999993,
+            "observed_rate_hz": 511.11111111111194
+          }
+        },
+        "left_target_unique_samples": 0,
+        "right_target_unique_samples": 0,
+        "bilateral_overlap_s": 0.0
+      },
+      "passed": true,
+      "isolation": {
+        "fresh_simulation_session": true,
+        "label": "table_1"
+      }
+    },
+    {
+      "label": "table_2",
+      "expected": "finger_table",
+      "cube_pose": {
+        "xyz": [
+          0.17,
+          0.12,
+          0.755
+        ],
+        "rpy": [
+          0.0,
+          -0.0,
+          0.0
+        ],
+        "source": "gz model runtime oracle (object_red_cube)"
+      },
+      "precontact_motion": {
+        "ik_solved": true,
+        "ik_solution": [
+          -0.1487801851853718,
+          -1.4453663475410428,
+          -1.6602175083896817,
+          -2.994635514251515,
+          -1.6408378775797572,
+          1.707952519098131,
+          0.4888545154805216
+        ],
+        "ik_seed_source": "current_joint_state",
+        "ik_link": "panda_hand",
+        "plan_attempts": 1,
+        "planned": true,
+        "executed": true,
+        "converged": true,
+        "goal_uuid": "eae742cb39cc4682862d27cde3f2525b",
+        "joint_state_samples": 510,
+        "controller_state_samples": 510,
+        "post_controller_settle_s": 0.0014214515686035156,
+        "expected_final_joints": [
+          -0.1480371504682106,
+          -1.4448698081015026,
+          -1.6604034821601326,
+          -2.9941093800450673,
+          -1.6403295303138692,
+          1.7078004456398284,
+          0.48862564314174606
+        ],
+        "observed_final_joints": [
+          -0.14803721010684967,
+          -1.4448693990707397,
+          -1.6604033708572388,
+          -2.9941089153289795,
+          -1.6403299570083618,
+          1.7078008651733398,
+          0.48862549662590027
+        ],
+        "per_joint_final_error_rad": [
+          5.963863908275968e-08,
+          4.090307628157319e-07,
+          1.1130289379046587e-07,
+          4.647160878334944e-07,
+          4.2669449262788817e-07,
+          4.1953351148649176e-07,
+          1.4651584578917465e-07
+        ],
+        "max_final_joint_error_rad": 4.647160878334944e-07
+      },
+      "motion": {
+        "planned": true,
+        "cartesian": true,
+        "fraction": 1.0,
+        "planning_method": "SEEDED_PER_WAYPOINT_COLLISION_AWARE_IK",
+        "ik_seed_source": "current_joint_state",
+        "max_step_m": 0.005,
+        "duration_s": 3.0,
+        "point_count": 21,
+        "executed": true,
+        "converged": false,
+        "goal_uuid": "9cc5c9cdaeb64cef8115f367386ac6d3",
+        "joint_state_samples": 605,
+        "controller_state_samples": 605,
+        "post_controller_settle_s": 3.0004618167877197,
+        "expected_final_joints": [
+          -0.007214976627634386,
+          -1.4225945073888018,
+          -2.0612233667036763,
+          -2.885700493474592,
+          -2.013194299232618,
+          1.83460548972759,
+          0.5447936711619024
+        ],
+        "observed_final_joints": [
+          -0.007215055171400309,
+          -1.4225949048995972,
+          -2.0060243606567383,
+          -2.885700225830078,
+          -1.9640663862228394,
+          1.819804310798645,
+          0.5440137982368469
+        ],
+        "per_joint_final_error_rad": [
+          7.85437659226243e-08,
+          3.975107953912982e-07,
+          0.05519900604693806,
+          2.676445136629013e-07,
+          0.04912791300977881,
+          0.014801178928945058,
+          0.0007798729250554359
+        ],
+        "max_final_joint_error_rad": 0.05519900604693806
+      },
+      "retreat": {
+        "planned": true,
+        "plan_attempts": 1,
+        "executed": true,
+        "converged": true,
+        "goal_uuid": "34d4bcc116ea44388a4518efd234931f",
+        "joint_state_samples": 540,
+        "controller_state_samples": 540,
+        "post_controller_settle_s": 0.0013680458068847656
+      },
+      "table_precontact_hand_pose": [
+        -0.25,
+        -0.25,
+        0.65,
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "table_contact_hand_pose": [
+        -0.25,
+        -0.25,
+        0.55,
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "table_contact_pad_evidence": {
+        "left": {
+          "link_pose": [
+            -0.24893960927297107,
+            -0.2975903596594314,
+            0.5042977194406604,
+            0.9999939643262461,
+            -0.0018098470540053033,
+            -0.0016520531472571914,
+            0.002463023572365237
+          ],
+          "pad_center_world": [
+            -0.2490428140031417,
+            -0.3016226357999505,
+            0.4774174274424273
+          ],
+          "aabb_separation_m": 0.5892415787551943
+        },
+        "right": {
+          "link_pose": [
+            -0.2486507443578014,
+            -0.21760786344589966,
+            0.5039032386116032,
+            0.9999939643262461,
+            -0.0018098470540053033,
+            -0.0016520531472571914,
+            0.002463023572365237
+          ],
+          "pad_center_world": [
+            -0.24872577912145363,
+            -0.2138402853221098,
+            0.4769844770341201
+          ],
+          "aabb_separation_m": 0.535776848522331
+        },
+        "minimum_pad_cube_aabb_separation_m": 0.535776848522331,
+        "gazebo_link_pose_evidence": {
+          "left": {
+            "link_pose_world_xyz_rpy": [
+              -0.24894,
+              -0.29759,
+              0.504298,
+              3.13666,
+              0.003295,
+              -0.003628
+            ],
+            "pad_center_world": [
+              -0.24904320067899383,
+              -0.30162229252401807,
+              0.4774177104438847
+            ],
+            "aabb_separation_m": 0.5892414970526816
+          },
+          "right": {
+            "link_pose_world_xyz_rpy": [
+              -0.248651,
+              -0.217608,
+              0.503903,
+              3.13666,
+              0.003295,
+              -0.003628
+            ],
+            "pad_center_world": [
+              -0.24872602945788871,
+              -0.21384043828768823,
+              0.4769842361107652
+            ],
+            "aabb_separation_m": 0.5357772144638275
+          }
+        },
+        "gazebo_minimum_pad_cube_aabb_separation_m": 0.5357772144638275
+      },
+      "calibration_only_allowed_collision_pairs": [
+        [
+          "panda_leftfinger",
+          "work_table"
+        ],
+        [
+          "panda_rightfinger",
+          "work_table"
+        ]
+      ],
+      "pad_evidence": {
+        "left": {
+          "link_pose": [
+            -0.10219884244557317,
+            0.06153337684420421,
+            1.3070997684804544,
+            0.8521633483710379,
+            0.5138582744553023,
+            0.09203413945586195,
+            0.036014145019690184
+          ],
+          "pad_center_world": [
+            -0.093594079888719,
+            0.0605963043831212,
+            1.2813335123196763
+          ],
+          "aabb_separation_m": 0.526963228599049
+        },
+        "right": {
+          "link_pose": [
+            -0.17173111894725854,
+            0.09907780781938619,
+            1.2946225762752088,
+            0.8521633483710379,
+            0.5138582744553023,
+            0.09203413945586195,
+            0.036014145019690184
+          ],
+          "pad_center_world": [
+            -0.16990575223808912,
+            0.10180131677836737,
+            1.2676397940738233
+          ],
+          "aabb_separation_m": 0.5522173664770297
+        },
+        "minimum_pad_cube_aabb_separation_m": 0.526963228599049,
+        "gazebo_link_pose_evidence": {
+          "left": {
+            "link_pose_world_xyz_rpy": [
+              -0.102199,
+              0.061533,
+              1.3071,
+              2.98384,
+              -0.120133,
+              1.09476
+            ],
+            "pad_center_world": [
+              -0.09359418455786152,
+              0.060595926293097846,
+              1.28133376154588
+            ],
+            "aabb_separation_m": 0.5269635155095798
+          },
+          "right": {
+            "link_pose_world_xyz_rpy": [
+              -0.171731,
+              0.099078,
+              1.29462,
+              2.98384,
+              -0.120133,
+              1.09476
+            ],
+            "pad_center_world": [
+              -0.16990558444865472,
+              0.10180149496961712,
+              1.2676372196907848
+            ],
+            "aabb_separation_m": 0.5522151260622272
+          }
+        },
+        "gazebo_minimum_pad_cube_aabb_separation_m": 0.5269635155095798
       },
       "contacts": {
         "target_model": "object_red_cube",
@@ -3640,10 +4765,10 @@
         },
         "event_counts": {
           "left": 0,
-          "right": 274,
+          "right": 265,
           "cube": 0,
-          "cube_bilateral": 274,
-          "cube_environment": 274
+          "cube_bilateral": 265,
+          "cube_environment": 265
         },
         "topic_rate_evidence": {
           "left": {
@@ -3652,9 +4777,9 @@
             "observed_rate_hz": 0.0
           },
           "right": {
-            "unique_timestamp_samples": 271,
-            "duration_s": 0.4480000000000004,
-            "observed_rate_hz": 602.6785714285709
+            "unique_timestamp_samples": 265,
+            "duration_s": 0.4469999999999992,
+            "observed_rate_hz": 590.6040268456387
           },
           "cube": {
             "unique_timestamp_samples": 0,
@@ -3662,219 +4787,14 @@
             "observed_rate_hz": 0.0
           },
           "cube_bilateral": {
-            "unique_timestamp_samples": 274,
-            "duration_s": 0.4480000000000004,
-            "observed_rate_hz": 609.3749999999994
+            "unique_timestamp_samples": 265,
+            "duration_s": 0.4460000000000015,
+            "observed_rate_hz": 591.9282511210743
           },
           "cube_environment": {
-            "unique_timestamp_samples": 270,
-            "duration_s": 0.4490000000000016,
-            "observed_rate_hz": 599.1091314031158
-          }
-        },
-        "left_target_unique_samples": 0,
-        "right_target_unique_samples": 0,
-        "bilateral_overlap_s": 0.0
-      },
-      "passed": true,
-      "isolation": {
-        "fresh_simulation_session": true,
-        "label": "table_1"
-      }
-    },
-    {
-      "label": "table_2",
-      "expected": "finger_table",
-      "cube_pose": {
-        "xyz": [
-          0.17,
-          0.12,
-          0.755
-        ],
-        "rpy": [
-          0.0,
-          -0.0,
-          0.0
-        ],
-        "source": "gz model runtime oracle (object_red_cube)"
-      },
-      "motion": {
-        "ik_solved": true,
-        "ik_solution": [
-          -0.08451023426145235,
-          -1.3549329384861146,
-          -2.2049695627677894,
-          -2.927458610749214,
-          0.2980568799061363,
-          2.713489182100174,
-          1.4282233675858118
-        ],
-        "ik_seed_source": "current_joint_state",
-        "ik_link": "panda_hand",
-        "plan_attempts": 1,
-        "planned": true,
-        "executed": true,
-        "converged": false,
-        "goal_uuid": "2ed601da5b7a42d9b8e2e1796292e8a7",
-        "joint_state_samples": 902,
-        "controller_state_samples": 902,
-        "post_controller_settle_s": 3.000181198120117
-      },
-      "retreat": {
-        "planned": true,
-        "plan_attempts": 1,
-        "executed": true,
-        "converged": true,
-        "goal_uuid": "e1f8cc710dee4a549cba830f14d87d40",
-        "joint_state_samples": 573,
-        "controller_state_samples": 573,
-        "post_controller_settle_s": 0.001065969467163086
-      },
-      "calibration_only_allowed_collision_pairs": [
-        [
-          "panda_leftfinger",
-          "work_table"
-        ],
-        [
-          "panda_rightfinger",
-          "work_table"
-        ]
-      ],
-      "pad_evidence": {
-        "left": {
-          "link_pose": [
-            -0.10212358288760746,
-            0.06101384757774056,
-            1.3100768895970838,
-            0.8529077132900849,
-            0.5127306909034878,
-            0.09145738529994397,
-            0.03593352042324752
-          ],
-          "pad_center_world": [
-            -0.07467444865403991,
-            0.11388564920990113,
-            1.3172265484698589
-          ],
-          "aabb_separation_m": 0.5437017700333191
-        },
-        "right": {
-          "link_pose": [
-            -0.1715676475118079,
-            0.09874439599316642,
-            1.2976703368821594,
-            0.8529077132900849,
-            0.5127306909034878,
-            0.09145738529994397,
-            0.03593352042324752
-          ],
-          "pad_center_world": [
-            -0.14411851327824032,
-            0.151616197625327,
-            1.3048199957549345
-          ],
-          "aabb_separation_m": 0.5566586667066434
-        },
-        "minimum_pad_cube_aabb_separation_m": 0.5437017700333191,
-        "gazebo_link_pose_evidence": {
-          "left": {
-            "link_pose_world_xyz_rpy": [
-              -0.102124,
-              0.061014,
-              1.31008,
-              2.98476,
-              -0.119445,
-              1.09193
-            ],
-            "pad_center_world": [
-              -0.07467458371730866,
-              0.11388565358787628,
-              1.3172296708052278
-            ],
-            "aabb_separation_m": 0.5437047943513155
-          },
-          "right": {
-            "link_pose_world_xyz_rpy": [
-              -0.171568,
-              0.098744,
-              1.29767,
-              2.98476,
-              -0.119445,
-              1.09193
-            ],
-            "pad_center_world": [
-              -0.14411858371730865,
-              0.15161565358787626,
-              1.304819670805228
-            ],
-            "aabb_separation_m": 0.5566583995508828
-          }
-        },
-        "gazebo_minimum_pad_cube_aabb_separation_m": 0.5437047943513155
-      },
-      "contacts": {
-        "target_model": "object_red_cube",
-        "left_target": false,
-        "right_target": false,
-        "target_cube_events": 0,
-        "left_table": true,
-        "right_table": false,
-        "cube_table": false,
-        "cube_environment_table": true,
-        "raw_pairs": {
-          "left": [
-            [
-              "panda_controller::panda_leftfinger::panda_leftfinger_fixed_joint_lump__collision_collision",
-              "work_table::table_link::collision"
-            ]
-          ],
-          "right": [],
-          "cube": [],
-          "cube_bilateral": [
-            [
-              "object_red_cube_bilateral::link::collision",
-              "work_table_bilateral_support::support_link::collision"
-            ]
-          ],
-          "cube_environment": [
-            [
-              "object_red_cube_environment::link::collision",
-              "work_table::table_link::collision"
-            ]
-          ]
-        },
-        "event_counts": {
-          "left": 304,
-          "right": 0,
-          "cube": 0,
-          "cube_bilateral": 305,
-          "cube_environment": 304
-        },
-        "topic_rate_evidence": {
-          "left": {
-            "unique_timestamp_samples": 301,
-            "duration_s": 0.4480000000000004,
-            "observed_rate_hz": 669.6428571428565
-          },
-          "right": {
-            "unique_timestamp_samples": 0,
-            "duration_s": 0.0,
-            "observed_rate_hz": 0.0
-          },
-          "cube": {
-            "unique_timestamp_samples": 0,
-            "duration_s": 0.0,
-            "observed_rate_hz": 0.0
-          },
-          "cube_bilateral": {
-            "unique_timestamp_samples": 305,
-            "duration_s": 0.4499999999999993,
-            "observed_rate_hz": 675.5555555555566
-          },
-          "cube_environment": {
-            "unique_timestamp_samples": 297,
-            "duration_s": 0.4480000000000004,
-            "observed_rate_hz": 660.7142857142851
+            "unique_timestamp_samples": 265,
+            "duration_s": 0.44599999999999795,
+            "observed_rate_hz": 591.9282511210789
           }
         },
         "left_target_unique_samples": 0,
@@ -3897,7 +4817,7 @@
   "calibration_trials_completed": 13,
   "use_sim_time": true,
   "listener_scope": "PER_TRIAL_FULL_ACTION_WINDOW",
-  "local_gazebo_urdf_sha256": "84b0d2dc67dea0071a696e4e09211d0ff44d9694e57d7b2a3aa8978f37e5081c",
-  "remote_gazebo_urdf_sha256": "84b0d2dc67dea0071a696e4e09211d0ff44d9694e57d7b2a3aa8978f37e5081c",
+  "local_gazebo_urdf_sha256": "6678ff409d60f074283805879f53edaa939ead34f97a5a961ee67f6229b44ba8",
+  "remote_gazebo_urdf_sha256": "6678ff409d60f074283805879f53edaa939ead34f97a5a961ee67f6229b44ba8",
   "model_match": true
 }
