@@ -20,7 +20,7 @@ summary. Where a document quoted a SHA-256, the hash was recomputed.
 | 2 | After reset broadcast, all N `grasp_state` observed `detached` | **PASS as amended** | Superseded by Amendment 1 (human-approved 2026-07-19), which replaced message-receipt with a physical non-coupling check because the Gazebo plugin publishes only on transition. `m1b-reset-physical-noncoupling.json` (`2ad8967f…`): `RESET_PHYSICAL_NONCOUPLING_VERIFIED`, EE displacement 24.28 mm against a 20 mm minimum |
 | 3 | One-cylinder physical round-trip | **PASS** | `m1b-adr0013-current-geometry-attached-roundtrip.json`, SHA-256 `30c103a0…` — recomputed, matches the value quoted in `m1b-adr0016b-acceptance-status-20260724.md` |
 | 4 | Wrong-object drill | **PASS** | `m1b-adr0013-current-geometry-wrong-object-drill.json`, SHA-256 `62e45bca…` — recomputed, matches |
-| 5 | M1A cube regression still passes | **OPEN — re-run required** | see below |
+| 5 | M1A cube regression still passes | **OPEN — S1 blocked at HEAD** | re-run executed 2026-07-26 at `24f8af8`; S0 passes 13/13 on the corrected fixture but S1's anti-teleport gate cannot be satisfied, so S3 never ran. See "The two open items" |
 | 6 | Unit tests: broker field-absence, reset fail-closed, per-class width clamp | **PASS** | `test_m1b_broker_selects_only_same_entity_and_hides_it_from_public_feedback`, `test_post_grasp_identity_routes_wrong_object_without_entity_leak`, `test_m1b_reset_requires_every_generated_detachable_state`, `test_m1b_amendment_reset_gate_is_physical_and_fails_closed_on_missing_pose`, `test_m1b_width_window_is_perception_derived_and_clamped`; suite 126 passed |
 
 ## ADR-0016 revalidation cascade (nine steps)
@@ -82,6 +82,60 @@ HEAD first and verifies both hashes before starting.
 Serialization is forced, not chosen: the M1A remote stages launch their own
 Gazebo on the same host, and `run_contact_calibration.sh` aborts on
 `M1A_REMOTE_SIM_ALREADY_RUNNING`.
+
+### Re-run outcome (2026-07-26, HEAD `24f8af8`)
+
+Executed from a clean detached worktree against a freshly deployed,
+hash-verified node2 (URDF `6678ff40…`, calibration world `d163dd0b…`).
+
+| stage | verdict |
+|---|---|
+| preflight | `can_start = true`, no blockers |
+| m0 smoke | `PARTIAL_CONTROL_AND_PERCEPTION_VERIFIED` |
+| ADR-0009 bullet capability audit | `M1A_BULLET_CAPABILITY_VERIFIED`, 5/5 gates |
+| cascade 1 — home self-collision | `HOME_SELF_COLLISION_VERIFIED` |
+| **cascade 2 — S0 contact calibration** | **`CONTACT_TELEMETRY_CALIBRATED` 13/13**, first run on the corrected fixture |
+| **cascade 3 — S1 MoveIt execution** | **BLOCKED**: `PARTIAL_EXECUTION_VERIFIED`, 0/10, `anti_teleport_verified_trials = 0` |
+| S2 friction | blocked — "requires … verified S1 evidence" |
+| **cascade 9 / item 5 — S3 contact-gated grasp** | **never ran**, blocked behind S1 |
+
+Two ordering facts worth recording, both of which cost a cycle to find:
+
+1. **ADR-0009 makes the bullet capability audit a prerequisite for S0**, and
+   `run_m1a_validation.sh` does not include it. Run it first, or S0 returns
+   `CONTACT_TELEMETRY_BLOCKED_BULLET_CAPABILITY_AUDIT` and everything downstream
+   cascades. Because S0 reads the audit from disk while the preflight demands a
+   clean tree, the audit's report has to be committed before the validation run.
+2. **`reports/m1a-contact-gate.*` is not evidence of this run.** Today's run
+   never wrote it; the committed copy is `m1a-20260717-s4-b1-final-r1` against
+   URDF `84b0d2dc…`, the pre-fallback hand. Any verdict table that iterates a
+   fixed file list will silently present it as current. It was nearly reported
+   that way here.
+
+### The S1 blocker, precisely
+
+The motion is clean: controller `SUCCEEDED`, post-controller converged, max
+final joint error 3.2 × 10⁻⁶ rad, EE position error 6.5 × 10⁻⁷ m, tracking error
+0, and the sampled positions plainly move from home to the planned target.
+
+What fails is only the timestamps. Every `/joint_states` message carries
+`header.stamp = 0.0`, so `joint_state_distinct_timestamp_count` is **1** across
+all 30 segments despite 81–174 samples each, and the anti-teleport gate — which
+exists to prove motion was simulated over time rather than teleported — cannot
+be satisfied.
+
+The 2026-07-24 run of the same gate recorded **233 distinct stamps advancing
+11.89 → 14.21 s**. So sim-clock delivery to the gz-hosted `ros2_control` node has
+regressed. It is not the hand, not the fixture, and not the deploy: all 34
+tracked `robot_ws/` files except the calibration world already matched HEAD on
+node2 before deployment, and both launch files were among the matching ones.
+It is also not the transient class seen twice elsewhere today — a standalone
+re-run reproduced it exactly.
+
+Contact timestamps are unaffected (S0's 13/13 windows and the whole v3 campaign
+depend on them), because those arrive through the `ros_gz_bridge` contact path
+rather than the controller's node clock. That narrows the fault to `/clock`
+reaching `gz_ros2_control`, and it is the next thing to investigate.
 
 ### Step 6 — what v3 can and cannot settle
 
