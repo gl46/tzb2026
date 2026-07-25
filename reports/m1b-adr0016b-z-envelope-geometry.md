@@ -1,24 +1,42 @@
 # M1B Z-envelope: two hard geometric bounds, and a noise-dominated measurement
 
-Status: **model confirmed; candidate centreline NOT adopted; the protocol is the
-limiting instrument.** An 81-trial campaign at the derived optimum (118 mm) with
-five reliability fixes active confirmed the geometric model on every binding
-point — the +10 mm Z grid point went 4/6 → **6/6**, exactly the predicted effect
-of moving the tipping bound, while −15 mm still correctly fails and −10 mm held
-6/6. But the *official* signed-monotonic closure got **worse** on Z (5 mm → 0 mm),
-because the +5 mm point drew one descent-corridor rejection and one single-sided
-contact — two independent ~1-in-6 events on one grid point — and the closure
-truncates there. Total Z reliability was statistically unchanged (15/27 → 16/27).
-**The production centreline is therefore reverted to 120 mm**, the value the
-committed acceptance rests on: adopting 118 mm on a model the official metric
-scores worse would trade a certified GO for a noise draw. Evidence:
-`reports/m1b-adr0016b-centreline-118-campaign.json`.
+Status: **candidate centreline NOT adopted; the model is untested by this
+experiment; the protocol is the limiting instrument.**
 
-The reported envelope moving *opposite* to a demonstrated physical improvement is
-the clearest available evidence that the measurement protocol, not the hardware,
-is the binding constraint. Strengthening it — more repetitions, or separating
-ADR-0016 §3 descent-corridor admission from grasp tolerance as §3 already
-requires — is an ADR-level decision and is not taken here.
+> **Correction (supersedes the previous header of this file).** The previous
+> version of this section claimed the 81-trial campaign at 118 mm "confirmed the
+> geometric model on every binding point," citing the +10 mm Z grid point going
+> 4/6 → 6/6. **That claim is withdrawn.** The two campaigns differ in six
+> variables, not one: the centreline *and* all five reliability fixes. The H120
+> raw evidence records `calibration_hand_y_centerline_bias_m = 0.001` (fixes
+> absent); the H118 campaign records `0.0` (fixes active). The fixes alone can
+> produce a 4/6 → 6/6 move, so no per-band difference between the two runs is
+> attributable to the 2 mm centreline change. Worse, *every* run that validated
+> the five fixes executed while the constant was 118 mm (set 07:43, reverted
+> 13:23), so the shipped configuration — 120 mm with the fixes — had never been
+> measured. Campaign v3 supplies that missing cell. Detail:
+> `reports/m1b-adr0016b-centreline-118-campaign.json` → `confounded_comparison`.
+
+What survives the correction, and why the revert still stands: the *official*
+signed-monotonic closure got **worse** on Z (5 mm → 0 mm) at 118 mm, because the
++5 mm point drew one descent-corridor rejection and one single-sided contact —
+two independent ~1-in-6 events on one grid point — and the closure truncates
+there. Total Z reliability was statistically unchanged (15/27 → 16/27).
+**The production centreline is therefore reverted to 120 mm**, the value the
+committed acceptance rests on: adopting 118 mm against the project's own metric,
+on a physical justification this experiment did not isolate, would trade a
+certified GO for a noise draw. One model prediction does survive as a
+consistency check — −15 mm still fails 0/3, and a geometric interference bound
+cannot be lifted by a reliability fix.
+
+The reported envelope moving *opposite* to the continuous contact-window metric
+(Z passing-window median 352 ms → 799 ms, replayed over all 162 trials with
+162/162 verdict reproduction) is the clearest available evidence that the
+measurement protocol, not the hardware, is the binding constraint — though that
+comparison carries the same confound. Strengthening the protocol — more
+repetitions, or separating ADR-0016 §3 descent-corridor admission from grasp
+tolerance as §3 already requires — is an ADR-level decision and is not taken
+here.
 
 The immediate reliability defect found and fixed: a **+1 mm hand-chain bias
 measured on the pre-ADR-0016 hand** was still being applied against a measured

@@ -75,10 +75,13 @@ M1B_NORMAL_SIDE_IK_SEED = [
 #   positive delta: the plate tip (local z 0.1122) must stay below the measured
 #     +17.8 mm tipping height  ->  delta <= 0.130 - H
 # They meet at H = 0.118 m, which should maximise the symmetric envelope, and a
-# full 81-trial campaign at 118 mm did confirm the model on the binding points:
-# the +10 mm Z point went 4/6 -> 6/6 and -10 mm held 6/6, while -15 mm still
-# correctly fails (its palm bound is -12 mm).  It is nevertheless NOT adopted,
-# because the official signed-monotonic closure got *worse* (Z 5 mm -> 0 mm):
+# full 81-trial campaign at 118 mm moved the binding points in the predicted
+# direction -- the +10 mm Z point went 4/6 -> 6/6, -10 mm held 6/6, and -15 mm
+# still correctly fails (its palm bound is -12 mm) -- but that campaign is NOT
+# a test of the centreline: it also carried all five reliability fixes, which
+# the 120 mm baseline did not, and the fixes alone can move a point 4/6 -> 6/6.
+# The candidate is NOT adopted, because the official signed-monotonic closure
+# got *worse* (Z 5 mm -> 0 mm):
 # the +5 mm grid point drew one descent-corridor rejection and one single-sided
 # contact, two independent ~1-in-6 events landing on one point, and the closure
 # truncates there.  Total Z reliability was statistically unchanged (15/27 vs

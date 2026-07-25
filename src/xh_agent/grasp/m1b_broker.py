@@ -45,12 +45,26 @@ class M1BContactBroker:
         right_entities: set[str],
         bilateral_overlap_s: float,
         consecutive_samples: int,
-    ) -> tuple[M1BGraspFeedbackV1, dict[str, str | bool | None]]:
+    ) -> tuple[M1BGraspFeedbackV1, dict[str, str | bool | float | int | None]]:
+        # Echo the two decision inputs on every branch.  They used to be
+        # consumed here and discarded, so a rejected trial recorded only that
+        # the window was "incomplete" and a reader had to re-derive the span
+        # from the raw samples offline.  Re-deriving it invites the wrong
+        # metric: max(first)..min(last) across the two fingers is an upper
+        # bound on this broker's run, not the run itself.  Recording the
+        # broker's own numbers removes that step.
+        decision = {
+            "bilateral_overlap_s": bilateral_overlap_s,
+            "consecutive_samples": consecutive_samples,
+            "required_bilateral_overlap_s": 0.100,
+            "required_consecutive_samples": 3,
+        }
         if bilateral_overlap_s < 0.100 or consecutive_samples < 3:
             return M1BGraspFeedbackV1(False, "bilateral_contact_window_incomplete", True), {
                 "actual_sim_entity_id": None,
                 "attach_topic": None,
                 "same_entity_contact": False,
+                **decision,
             }
         common = sorted(left_entities & right_entities)
         if len(common) != 1 or not common[0].startswith("cylinder_"):
@@ -58,10 +72,12 @@ class M1BContactBroker:
                 "actual_sim_entity_id": None,
                 "attach_topic": None,
                 "same_entity_contact": False,
+                **decision,
             }
         entity = common[0]
         return M1BGraspFeedbackV1(True, "bilateral_same_entity_contact", True), {
             "actual_sim_entity_id": entity,
             "attach_topic": f"/xh/m1b/{entity}/attach",
             "same_entity_contact": True,
+            **decision,
         }

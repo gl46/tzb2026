@@ -56,9 +56,12 @@ calibration_top_contact_height_m="${M1B_TOLERANCE_TOP_CONTACT_HEIGHT_M:-}"
 top_contact_height_args=()
 if [[ -n "$calibration_top_contact_height_m" ]]; then
   # Millimetre resolution inside the same bounded [0.10, 0.14] m range: the
-  # measured Z-envelope optimum balances the palm-vs-cylinder-top descent limit
+  # Z-envelope model balances the palm-vs-cylinder-top descent limit
   # (delta >= 106 mm - H) against the contact-height tipping limit
-  # (delta <= 130 mm - H), which meet at H = 118 mm rather than on a 10 mm grid.
+  # (delta <= 130 mm - H), and those meet off a 10 mm grid.  The resolution is
+  # what lets a candidate be *tested*; no candidate is certified by it.  See
+  # reports/m1b-adr0016b-centreline-118-campaign.json for why 118 mm was
+  # measured and then rejected, and production stays at 120 mm.
   if ! [[ "$calibration_top_contact_height_m" =~ ^0\.1[0-4]$|^0\.1[0-3][0-9]$ ]]; then
     echo "INVALID_TOP_CONTACT_HEIGHT_M:$calibration_top_contact_height_m" >&2
     exit 2

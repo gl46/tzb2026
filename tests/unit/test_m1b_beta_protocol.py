@@ -680,6 +680,59 @@ def test_m1b_contact_window_accepts_bounded_stamp_jitter_but_not_stale_contacts(
     assert broker_from_window(stale)[0].grasp_success is False
 
 
+def test_m1b_contact_window_records_its_own_span_on_pass_and_on_near_miss() -> None:
+    """The broker's numbers must reach the evidence, not be re-derived offline.
+
+    A rejected window used to record nothing but "incomplete", so a 97 ms
+    near miss and a finger that never touched the object were
+    indistinguishable.  Re-deriving the span from the raw samples invites the
+    wrong metric (max(first)..min(last) across fingers overstates the run), so
+    the broker states its own measurement on every branch.  These fields are
+    diagnostic: the accept/reject decision is unchanged.
+    """
+    passing = [
+        M1BContactSampleV1(time, finger, ((f"panda_{finger}finger::collision", "cylinder_02::link::collision"),))
+        for time in (1.0, 1.05, 1.10, 1.15)
+        for finger in ("left", "right")
+    ]
+    feedback, internal = broker_from_window(passing)
+    assert feedback.grasp_success is True
+    assert internal["bilateral_overlap_s"] == pytest.approx(0.150)
+    assert internal["consecutive_samples"] == 4
+    assert internal["required_bilateral_overlap_s"] == 0.100
+    assert internal["required_consecutive_samples"] == 3
+    assert internal["candidate_entities"] == ["cylinder_02"]
+    assert internal["left_right_pairing_window_s"] == 0.050
+    assert internal["max_consecutive_sample_gap_s"] == 0.060
+
+    # 97 ms of continuous bilateral contact: a genuine grasp that the window
+    # end truncated, not an absence of contact.  It must still be rejected.
+    near_miss = [
+        M1BContactSampleV1(time, finger, ((f"panda_{finger}finger::collision", "cylinder_02::link::collision"),))
+        for time in (1.000, 1.050, 1.097)
+        for finger in ("left", "right")
+    ]
+    rejected, near_internal = broker_from_window(near_miss)
+    assert rejected.grasp_success is False
+    assert rejected.tactile_state == "bilateral_contact_window_incomplete"
+    assert near_internal["bilateral_overlap_s"] == 0.0
+    assert near_internal["observed_best_bilateral_overlap_s"] == pytest.approx(0.097)
+    assert near_internal["observed_best_consecutive_samples"] == 3
+    assert near_internal["paired_bilateral_sample_count"] == 3
+
+
+def test_m1b_contact_window_reports_which_finger_was_missing() -> None:
+    single_sided = [
+        M1BContactSampleV1(time, "left", (("panda_leftfinger::collision", "cylinder_02::link::collision"),))
+        for time in (1.0, 1.05, 1.10)
+    ]
+    feedback, internal = broker_from_window(single_sided)
+    assert feedback.grasp_success is False
+    assert internal["per_finger_sample_count"] == {"left": 3, "right": 0}
+    assert internal["observed_best_bilateral_overlap_s"] == 0.0
+    assert internal["candidate_entities"] == []
+
+
 def test_m1b_s0_style_tolerance_gate_requires_repeated_trials_and_margin() -> None:
     trials = [
         OffsetTrialV1(axis, offset, success)

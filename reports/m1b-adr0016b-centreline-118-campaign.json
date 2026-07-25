@@ -33,12 +33,29 @@
     "pm15mm": {"h120": "3/6", "h118": "2/6"},
     "total": {"h120": "15/27 = 56%", "h118": "16/27 = 59%"}
   },
-  "geometric_model_confirmed": {
-    "binding_negative_bound": "-15 mm still fails 0/3 at H=118 (its palm bound is -12 mm)",
-    "binding_positive_bound": "+10 mm went 4/6 to 6/6, the predicted effect of moving the tipping bound from +10 mm to +12 mm",
+  "geometric_model_observations": {
+    "CORRECTION": "An earlier revision of this file titled this block 'geometric_model_confirmed' and attributed the per-band changes below to the 2 mm centreline move. That attribution is withdrawn: it is not supported by these two campaigns. See confounded_comparison.",
+    "binding_negative_bound": "-15 mm still fails 0/3 at H=118 (its palm bound is -12 mm). A geometric interference bound cannot be lifted by a reliability fix, so this remains a valid consistency check on the model.",
+    "binding_positive_bound": "+10 mm went 4/6 to 6/6. Consistent with moving the tipping bound from +10 mm to +12 mm, but NOT attributable to it -- the five reliability fixes were simultaneously active in this campaign and absent from the H120 baseline.",
     "adjacent": "-10 mm held 6/6 despite its palm clearance tightening from +4 mm to +2 mm"
   },
+  "confounded_comparison": {
+    "problem": "The committed H120 campaign and this H118 campaign differ in six things, not one: the contact centreline AND all five reliability fixes. The H120 raw evidence records calibration_hand_y_centerline_bias_m = 0.001 (stale bias present, fixes absent); this campaign records 0.0. No per-band difference between the two runs can therefore be assigned to the centreline.",
+    "consequence": "Both directions of the earlier reasoning are affected. The candidate was rejected on the official closure (Z 5 mm -> 0 mm), which stands on its own as a decision rule, but the physical justification offered for the candidate was not isolated by this experiment.",
+    "resolving_experiment": "Campaign v3 = H120 WITH the five fixes supplies the missing cell of the 2x2. v3 vs this campaign isolates the centreline at equal fix level; v3 vs the committed H120 campaign isolates the fixes at equal centreline.",
+    "second_reason_v3_is_required": "Every run that validated the five reliability fixes -- /tmp/m1b-bias0-check (6/9), /tmp/m1b-win1-check (7/9), /tmp/m1b-zero-a (y 3/3), /tmp/m1b-zero-b (z 3/3), /tmp/m1b-final-campaign (x zero-offset 3/3) -- executed while the centreline constant was 0.118 (set 07:43, reverted 13:23 local). The shipped configuration, H=120 with the fixes active, had never been measured at the time this file was first written."
+  },
+  "continuous_window_metric": {
+    "method": "The broker's own contact-window span, recomputed over the recorded post_close_contact_samples of all 162 trials of both campaigns with src/xh_agent/grasp/m1b_contact_window.py. Verdict reproduction was 162/162 against the run-time recorded outcome, so the replay is faithful.",
+    "requirement_s": 0.100,
+    "h120_committed_passing_windows": {"n": 53, "min_s": 0.128, "median_s": 0.453, "max_s": 1.188},
+    "h118_v2_passing_windows": {"n": 51, "min_s": 0.153, "median_s": 0.803, "max_s": 1.324},
+    "z_axis_passing_median_s": {"h120": 0.352, "h118": 0.799},
+    "zero_offset_subset": {"h120": "7/9, median 0.293 s", "h118": "8/9, median 0.774 s"},
+    "reading": "Every passing grasp in both campaigns cleared the 100 ms requirement, and the worst case improved from 128 ms to 153 ms. On this continuous measure the later configuration is far better (Z median 2.3x), while the binary signed-monotonic closure scored it worse. This is the same protocol-resolution finding as below, now visible on a per-trial rather than a per-campaign basis -- but it too is confounded between the centreline and the fixes.",
+    "dominant_residual_failure_mode": "Of the 30 failing trials in this campaign, 26 had one finger report no contact at all and only 2 registered any paired bilateral contact (longest observed runs 80 ms and 56 ms). After the fixes the residual failure is single-sided contact, not a truncated observation window."
+  },
   "why_rejected": "The official signed-monotonic closure got worse on Z (5 mm -> 0 mm) because the +5 mm grid point drew one descent-corridor rejection and one single-sided contact -- two independent, roughly 1-in-6 events landing on the same point -- and the closure truncates at the first failing magnitude. Total Z reliability was statistically unchanged (15/27 vs 16/27). Adopting 118 mm would therefore trade the committed acceptance basis for a noise draw.",
-  "protocol_finding": "At the measured ~65 % per-trial reliability a 3-repetition, 9-point signed-monotonic closure reports an envelope of >=10 mm only 18-27 % of the time. The reported number moved opposite to a demonstrated physical improvement, so the measurement protocol -- not the hardware -- is the limiting instrument. Strengthening it (more repetitions, or separating ADR-0016 section 3 descent-corridor admission from grasp tolerance as that section already requires) is an ADR-level decision and is not taken here.",
+  "protocol_finding": "At the measured ~65 % per-trial reliability a 3-repetition, 9-point signed-monotonic closure reports an envelope of >=10 mm only 18-27 % of the time. The reported number moved opposite to a measured improvement on the continuous window metric, so the measurement protocol -- not the hardware -- is the limiting instrument. Strengthening it (more repetitions, or separating ADR-0016 section 3 descent-corridor admission from grasp tolerance as that section already requires) is an ADR-level decision and is not taken here.",
   "truth_boundary": "Simulator truth supplied only the calibration-only target initialization. Contact, broker, and attach evidence came from the production path."
 }
