@@ -81,6 +81,11 @@ HAND_POST_GOAL_OBSERVATION_SLACK_M = 0.0001
 HAND_GOAL_ACCEPT_TIMEOUT_S = 5.0
 HAND_RESULT_TIMEOUT_FLOOR_S = 15.0
 HAND_RESULT_TIMEOUT_MARGIN_S = 15.0
+# Post-goal observation: require this many joint-state deliveries after the
+# action result before judging position error, bounded by a deadline.  These
+# make the snapshot current; they do not widen the 1 mm goal tolerance.
+HAND_POST_GOAL_FRESH_SAMPLES = 3
+HAND_POST_GOAL_SETTLE_TIMEOUT_S = 2.0
 # The nominal side-contact pose placed the finger pad exactly tangent to
 # the cube's west face.  The full S0 run recorded 0.30--0.94 mm FK / Gazebo
 # AABB gaps for otherwise executed right and bilateral trials, so the fixture
@@ -209,6 +214,7 @@ class CalibrationClient(EvidenceClient):
     def __init__(self) -> None:
         super().__init__()
         self.latest_hand: dict[str, float] = {}
+        self.hand_state_seq = 0
         self.ik_client = self.create_client(GetPositionIK, "/compute_ik")
         self.last_ik_error: dict | None = None
         self.hand_client = ActionClient(
@@ -242,6 +248,10 @@ class CalibrationClient(EvidenceClient):
         positions = dict(zip(message.name, message.position))
         if all(name in positions for name in HAND_JOINTS):
             self.latest_hand = {name: float(positions[name]) for name in HAND_JOINTS}
+            # Counts deliveries, not spins.  command_hand needs to know its
+            # post-goal snapshot actually post-dates the action result rather
+            # than assuming a fixed number of spins was long enough.
+            self.hand_state_seq += 1
 
     def on_contact(self, channel: str, message: Contacts) -> None:
         stamp = message.header.stamp.sec + message.header.stamp.nanosec * 1e-9
@@ -411,13 +421,39 @@ class CalibrationClient(EvidenceClient):
         controller_succeeded = bool(
             wrapped and wrapped.result.error_code == FollowJointTrajectory.Result.SUCCESSFUL
         )
-        for _ in range(3):
-            rclpy.spin_once(self, timeout_sec=0.02)
+        # The post-goal snapshot must post-date the action result.  A fixed
+        # three spins is a wall-clock assumption of exactly the kind already
+        # removed from the result wait above, one step further down, and it
+        # misreports staleness as a physical failure: the ADR-0009 bullet audit
+        # recorded max_position_error_m 0.00713 m with the controller returning
+        # SUCCEEDED against its own 1 mm tolerance, mimic tracking error
+        # 1.1e-08 m, and the very next read of the same joints at 0.039999 m of
+        # a 0.04 m command.  Two S3 release steps failed the same way.
+        #
+        # Wait for genuinely fresh deliveries instead, bounded.  The 1 mm
+        # action contract and its 0.1 mm sampling slack are unchanged: if the
+        # fingers really are short when the deadline expires, this still fails.
+        seq_at_result = self.hand_state_seq
+        settle_deadline = time.monotonic() + HAND_POST_GOAL_SETTLE_TIMEOUT_S
         actual = [self.latest_hand.get(name, math.nan) for name in HAND_JOINTS]
-        max_position_error_m = max(
-            (abs(expected - observed) for expected, observed in zip(positions, actual)),
-            default=math.inf,
-        )
+        max_position_error_m = math.inf
+        while time.monotonic() < settle_deadline:
+            rclpy.spin_once(self, timeout_sec=0.02)
+            if self.hand_state_seq - seq_at_result < HAND_POST_GOAL_FRESH_SAMPLES:
+                continue
+            actual = [self.latest_hand.get(name, math.nan) for name in HAND_JOINTS]
+            max_position_error_m = max(
+                (abs(expected - observed) for expected, observed in zip(positions, actual)),
+                default=math.inf,
+            )
+            if max_position_error_m <= goal_tolerance_m + HAND_POST_GOAL_OBSERVATION_SLACK_M:
+                break
+        if math.isinf(max_position_error_m):
+            actual = [self.latest_hand.get(name, math.nan) for name in HAND_JOINTS]
+            max_position_error_m = max(
+                (abs(expected - observed) for expected, observed in zip(positions, actual)),
+                default=math.inf,
+            )
         controller_samples = self.hand_controller_samples[controller_start:]
         target_reference_seen = any(
             abs(sample["physical_reference_m"] - positions[HAND_JOINTS.index(PHYSICAL_HAND_JOINT)]) <= 1e-9

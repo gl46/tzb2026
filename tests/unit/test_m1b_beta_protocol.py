@@ -680,6 +680,33 @@ def test_m1b_contact_window_accepts_bounded_stamp_jitter_but_not_stale_contacts(
     assert broker_from_window(stale)[0].grasp_success is False
 
 
+def test_m1a_hand_post_goal_observation_waits_for_fresh_state_without_relaxing_tolerance() -> None:
+    """A stale snapshot must not be reported as a physical hand failure.
+
+    The ADR-0009 bullet audit recorded max_position_error_m 0.00713 m while the
+    controller returned SUCCEEDED against its own 1 mm tolerance, mimic tracking
+    error was 1.1e-08 m, and the next read of the same joints was 0.039999 m of
+    a 0.04 m command.  Two S3 release steps failed identically.  The cause was a
+    fixed three-spin post-goal wait, so this pins the replacement as a
+    *measurement* fix: the snapshot must post-date the result, while the 1 mm
+    action contract and its 0.1 mm sampling slack stay exactly as they were.
+    """
+    source = (Path(__file__).parents[2] / "scripts/m1a_contact_calibration_client.py").read_text()
+    # The contract itself is untouched.
+    assert "HAND_POST_GOAL_OBSERVATION_SLACK_M = 0.0001" in source
+    assert "max_position_error_m <= goal_tolerance_m + HAND_POST_GOAL_OBSERVATION_SLACK_M" in source
+    assert "mimic_tracking_error_m <= goal_tolerance_m + HAND_POST_GOAL_OBSERVATION_SLACK_M" in source
+    # The fixed-spin assumption is gone, replaced by counted fresh deliveries.
+    assert "for _ in range(3):\n            rclpy.spin_once" not in source
+    assert "HAND_POST_GOAL_FRESH_SAMPLES = 3" in source
+    assert "HAND_POST_GOAL_SETTLE_TIMEOUT_S = 2.0" in source
+    assert "self.hand_state_seq += 1" in source
+    assert "self.hand_state_seq - seq_at_result < HAND_POST_GOAL_FRESH_SAMPLES" in source
+    # Bounded: a genuinely short hand must still fail rather than spin forever.
+    assert "settle_deadline = time.monotonic() + HAND_POST_GOAL_SETTLE_TIMEOUT_S" in source
+    assert "while time.monotonic() < settle_deadline:" in source
+
+
 def test_m1b_descent_step_probe_is_diagnostic_and_cannot_alter_admission() -> None:
     """The step probe answers a question; it must never become a gate.
 
