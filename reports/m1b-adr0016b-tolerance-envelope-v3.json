@@ -1,0 +1,271 @@
+{
+  "schema_version": "M1BADR0016ToleranceEnvelopeEvidenceV3",
+  "status": "COMPLETE_CALIBRATION_ONLY",
+  "measures": "the shipped configuration -- 120 mm contact centreline WITH all five reliability fixes. No prior campaign measured this combination: the committed 15/15/5 predates the fixes, and every fix-validation run executed while the centreline constant was 118 mm.",
+  "trial_count": 81,
+  "source_summary": "node2:/tmp/m1b-campaign-v3/m1b-tolerance-envelope.json",
+  "source_summary_sha256": "909d88ec82b4a823e190b56fbe0ffae01edefde21a6779414160d0549f80dc36",
+  "worklist": "/tmp/m1b-adr0016b-worklist.json (scene 5017, slots 1/2/4) -- byte-identical to the committed campaign and to v2, so the three are comparable",
+  "success_predicate": "bilateral_same_entity_contact_and_observed_attach",
+  "point_pass_rule": "at_least_2_of_3",
+  "monotonic_closure": "both_signed_offsets_and_all_smaller_magnitudes_pass",
+  "tolerance_envelope_m": {
+    "x": 0.015,
+    "y": 0.015,
+    "z": 0.005
+  },
+  "committed_envelope_m": {
+    "x": 0.015,
+    "y": 0.015,
+    "z": 0.005
+  },
+  "envelope_agrees_with_committed": true,
+  "overall_successes": "51/81 = 63%",
+  "per_campaign_overall": {
+    "h120_prefix": "53/81 = 65%",
+    "h118_v2": "51/81 = 63%",
+    "h120_v3": "51/81 = 63%"
+  },
+  "point_results": {
+    "x:-0.020": {
+      "axis": "x",
+      "offset_m": -0.02,
+      "successes": 1,
+      "attempts": 3,
+      "pass": false
+    },
+    "x:-0.015": {
+      "axis": "x",
+      "offset_m": -0.015,
+      "successes": 2,
+      "attempts": 3,
+      "pass": true
+    },
+    "x:-0.010": {
+      "axis": "x",
+      "offset_m": -0.01,
+      "successes": 3,
+      "attempts": 3,
+      "pass": true
+    },
+    "x:-0.005": {
+      "axis": "x",
+      "offset_m": -0.005,
+      "successes": 3,
+      "attempts": 3,
+      "pass": true
+    },
+    "x:+0.000": {
+      "axis": "x",
+      "offset_m": 0.0,
+      "successes": 2,
+      "attempts": 3,
+      "pass": true
+    },
+    "x:+0.005": {
+      "axis": "x",
+      "offset_m": 0.005,
+      "successes": 2,
+      "attempts": 3,
+      "pass": true
+    },
+    "x:+0.010": {
+      "axis": "x",
+      "offset_m": 0.01,
+      "successes": 2,
+      "attempts": 3,
+      "pass": true
+    },
+    "x:+0.015": {
+      "axis": "x",
+      "offset_m": 0.015,
+      "successes": 2,
+      "attempts": 3,
+      "pass": true
+    },
+    "x:+0.020": {
+      "axis": "x",
+      "offset_m": 0.02,
+      "successes": 3,
+      "attempts": 3,
+      "pass": true
+    },
+    "y:-0.020": {
+      "axis": "y",
+      "offset_m": -0.02,
+      "successes": 1,
+      "attempts": 3,
+      "pass": false
+    },
+    "y:-0.015": {
+      "axis": "y",
+      "offset_m": -0.015,
+      "successes": 2,
+      "attempts": 3,
+      "pass": true
+    },
+    "y:-0.010": {
+      "axis": "y",
+      "offset_m": -0.01,
+      "successes": 2,
+      "attempts": 3,
+      "pass": true
+    },
+    "y:-0.005": {
+      "axis": "y",
+      "offset_m": -0.005,
+      "successes": 2,
+      "attempts": 3,
+      "pass": true
+    },
+    "y:+0.000": {
+      "axis": "y",
+      "offset_m": 0.0,
+      "successes": 2,
+      "attempts": 3,
+      "pass": true
+    },
+    "y:+0.005": {
+      "axis": "y",
+      "offset_m": 0.005,
+      "successes": 3,
+      "attempts": 3,
+      "pass": true
+    },
+    "y:+0.010": {
+      "axis": "y",
+      "offset_m": 0.01,
+      "successes": 3,
+      "attempts": 3,
+      "pass": true
+    },
+    "y:+0.015": {
+      "axis": "y",
+      "offset_m": 0.015,
+      "successes": 2,
+      "attempts": 3,
+      "pass": true
+    },
+    "y:+0.020": {
+      "axis": "y",
+      "offset_m": 0.02,
+      "successes": 0,
+      "attempts": 3,
+      "pass": false
+    },
+    "z:-0.020": {
+      "axis": "z",
+      "offset_m": -0.02,
+      "successes": 0,
+      "attempts": 3,
+      "pass": false
+    },
+    "z:-0.015": {
+      "axis": "z",
+      "offset_m": -0.015,
+      "successes": 0,
+      "attempts": 3,
+      "pass": false
+    },
+    "z:-0.010": {
+      "axis": "z",
+      "offset_m": -0.01,
+      "successes": 3,
+      "attempts": 3,
+      "pass": true
+    },
+    "z:-0.005": {
+      "axis": "z",
+      "offset_m": -0.005,
+      "successes": 3,
+      "attempts": 3,
+      "pass": true
+    },
+    "z:+0.000": {
+      "axis": "z",
+      "offset_m": 0.0,
+      "successes": 2,
+      "attempts": 3,
+      "pass": true
+    },
+    "z:+0.005": {
+      "axis": "z",
+      "offset_m": 0.005,
+      "successes": 2,
+      "attempts": 3,
+      "pass": true
+    },
+    "z:+0.010": {
+      "axis": "z",
+      "offset_m": 0.01,
+      "successes": 1,
+      "attempts": 3,
+      "pass": false
+    },
+    "z:+0.015": {
+      "axis": "z",
+      "offset_m": 0.015,
+      "successes": 3,
+      "attempts": 3,
+      "pass": true
+    },
+    "z:+0.020": {
+      "axis": "z",
+      "offset_m": 0.02,
+      "successes": 0,
+      "attempts": 3,
+      "pass": false
+    }
+  },
+  "gate": "reports/m1b-adr0016b-v3-reachability-gate.json -- GO, per-axis margin 6.70 / 4.21 / 0.92 mm",
+  "deconfounding": {
+    "why_it_matters": "The earlier H120-vs-H118 comparison could not separate the centreline from the five reliability fixes, because the two campaigns differed in both. v3 supplies the missing cell of the 2x2: 120 mm WITH the fixes.",
+    "z_plus_10mm": {
+      "h120_no_fixes": "1/3",
+      "h120_with_fixes_v3": "1/3",
+      "h118_with_fixes": "3/3"
+    },
+    "reading": "At +10 mm the five fixes changed nothing at a fixed centreline (1/3 -> 1/3); the 118 mm centreline is what moved it to 3/3. That is the direction the geometric model predicted (tipping bound moving from +10 mm to +12 mm). Pooled it is 2/6 vs 3/3, Fisher one-sided p ~ 0.08 -- suggestive, not conclusive, n is small.",
+    "other_model_predictions_held": "-15 mm failed 0/3 in all three campaigns (palm bound -12 mm); -10 mm passed 3/3 in all three.",
+    "decision_unchanged": "The 118 mm revert is NOT reopened. It rested on the official closure scoring the candidate worse, and it still does. What changes is that the physical model now has partially de-confounded support rather than confounded support."
+  },
+  "z_axis_three_campaign_comparison": {
+    "comment": "successes out of 3 repetitions",
+    "h120_no_fixes": {
+      "-0.020": 0,
+      "-0.015": 0,
+      "-0.010": 3,
+      "-0.005": 3,
+      "0.000": 2,
+      "+0.005": 2,
+      "+0.010": 1,
+      "+0.015": 3,
+      "+0.020": 1
+    },
+    "h118_with_fixes": {
+      "-0.020": 0,
+      "-0.015": 0,
+      "-0.010": 3,
+      "-0.005": 2,
+      "0.000": 3,
+      "+0.005": 1,
+      "+0.010": 3,
+      "+0.015": 2,
+      "+0.020": 2
+    },
+    "h120_with_fixes_v3": {
+      "-0.020": 0,
+      "-0.015": 0,
+      "-0.010": 3,
+      "-0.005": 3,
+      "+0.000": 2,
+      "+0.005": 2,
+      "+0.010": 1,
+      "+0.015": 3,
+      "+0.020": 0
+    }
+  },
+  "reproducibility_caveat": "Per reports/m1b-adr0016b-closure-reproducibility.md, at the measured near-band reliability this closure reports Z >= 5 mm only 41-67 % of the time. This result is therefore a favourable draw on the deciding axis, not evidence that the reliability problem is solved. It is nonetheless the first measurement of the configuration that actually ships, so it is the proper acceptance basis.",
+  "reset_infrastructure_note": "Two of 81 resets (2.7 %) were rejected by the Amendment 1 physical non-coupling check because the randomized home jog knocked a NON-TARGET cylinder ~22 mm (cylinder_04 21.25 mm at index 58; cylinder_02 23.08 mm at index 74). Both recovered on a fresh world at attempt 2 with zero objects over threshold. A rejected reset is never an episode, so this cannot contaminate the measurement; it is a reset-infrastructure robustness note.",
+  "truth_boundary": "settled simulator truth was calibration-only initialization; raw contact/broker/attach evidence is production-path evidence."
+}
