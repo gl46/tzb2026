@@ -126,18 +126,64 @@ Two distinct readings, and the data separates them:
    *execute* a 0.6 rad jump in one 5 mm step — that would whip the hand — but
    aborting the whole trial is not the only correct response.
 
-**Proposed fix, not implemented here:** on a joint-jump rejection, bisect that
-waypoint's step (5 → 2.5 → 1.25 mm) and retry, re-seeding from the last verified
-solution; fail closed only if the jump persists at the finest step. This
-preserves the guard's safety property exactly — no large jump is ever executed —
-while not discarding trials that are geometrically fine. Expected effect: three
-near-band trials recovered, near-band p 78 % → ~83 %, and P(reports Z ≥ 5 mm)
-from ~0.67 to ~0.79.
+### The existing recovery fired and was exhausted
 
-It is **not** implemented in this change because it modifies the production
-motion primitive and therefore starts its own revalidation cascade, and because
-campaign v3 was already measuring the shipped configuration when the diagnosis
-landed. Sequencing it is the next decision.
+**All 16 of these failures had `calibration_yaw_retry_attempts == 3`** — every
+available free-gap yaw candidate was tried and every one hit the same wall. The
+retry is not broken: 18 of the 104 successes needed it (16 at one retry, one at
+two, one at three). So yaw choice is not the remaining lever.
+
+The §3 corridor pre-scan shows the same mechanism at the un-offset spawn point:
+for `cylinder_01`, yaw 1.5708 rad fails with `stage: joint_jump`,
+`max_observed_joint_step_rad = 0.431` at `failed_hand_z_offset_m = 0.125`, and
+yaw 4.712 rad then completes — so the record's verdict is `passed: true`. With
+an offset applied, all yaws fail instead. The wall moves with the offset.
+
+### Candidate fix, and the evidence against it
+
+**Candidate:** on a joint-jump rejection, bisect that waypoint's step
+(5 → 2.5 → 1.25 mm) and retry, re-seeding from the last verified solution; fail
+closed only if the jump persists at the finest step. This would preserve the
+guard's safety property exactly — no large jump is ever executed.
+
+**Evidence for:** at |δ| ≤ 5 mm the solver returns a *valid solution on another
+branch* (a 0.41–0.60 rad jump), whereas at |δ| ≥ 15 mm it returns no solution at
+all (`code -31`). A discrete branch flip is step-size dependent; an absent
+solution is not.
+
+**Evidence against:** all three yaw candidates fail identically, which is what a
+genuine kinematic boundary looks like rather than a seeding artifact. If the
+boundary is real, bisection will simply discover it at finer resolution and the
+recovery rate will be zero.
+
+So the effect is **a hypothesis with an unproven success rate**, not a
+projection. It is worth one bounded offline probe — replay the three near-band
+poses through IK at 2.5 and 1.25 mm steps and count how many stay on branch —
+before touching the production primitive at all. That probe needs no campaign.
+
+It is **not** implemented here: it modifies the production motion primitive and
+starts its own revalidation cascade, and campaign v3 was already measuring the
+shipped configuration when the diagnosis landed.
+
+## Why the campaign runs on a scene whose §3 gate says `FAIL_CLOSED`
+
+Worth stating explicitly, because it reads alarming out of context. Both
+pre-scan records for scene 5017 carry
+`status: ORIENTATION_FEASIBILITY_REJECTED` and `scene_admission: FAIL_CLOSED`.
+That is the verdict on the **scene as a whole**, and it is correct: cylinders
+03, 06 and 07 have no empty-scene pregrasp IK at all. §3 requires scene
+generation to fail closed on exactly that, and it did.
+
+The per-spawn-point records are separate, as §3 requires. Slots 1, 2 and 4 each
+carry `passed: true` in the corridor-extended pre-scan, with the descent
+corridor complete at both candidate contact heights. The campaign worklist uses
+precisely those three slots — slot 3, the one with the −31 pregrasp IK, was
+replaced. So the campaign runs only on admitted spawn points, and the scene-level
+`FAIL_CLOSED` is the gate working rather than a bypassed check.
+
+One caveat that follows from the correction above: §3 admits the *spawn point*.
+The tolerance campaign then offsets the target by up to ±20 mm away from it, and
+those offset poses were never in §3's scope.
 
 ## Truth boundary
 
