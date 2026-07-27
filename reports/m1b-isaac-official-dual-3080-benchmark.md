@@ -2,7 +2,7 @@
 
 Date: 2026-07-27 (Asia/Shanghai)
 
-Status: **PASS**
+Status: **DATASET PIPELINE PASS; NATIVE ISAAC CONTACT/ATTACH GATE NO-GO**
 
 ## Scope
 
@@ -17,6 +17,19 @@ Status: **PASS**
 - Sensor frames per worker: 300
 - Privileged labels: offline dataset supervision only, not policy input
 
+## Asset authenticity boundary
+
+- Every Isaac robot visual, collision, articulation, joint, and finger shape is
+  composed from NVIDIA's official Franka Panda USD. There is no locally
+  authored or simplified robot geometry in the Isaac stage.
+- The selected official variants are `Gripper=AlternateFinger` and
+  `Mesh=Performance`, matching NVIDIA's Isaac Sim 6 Franka controller example.
+- `panda_controlled.urdf` is used only as a hash-bound control/base-pose
+  contract. It is never referenced as Isaac visual or collision geometry.
+- The cylinders, work table, incoming-zone markings, and partition bin are
+  task-scene geometry generated from the accepted M1B SDF. They are not robot
+  substitutes and must remain dimensionally tied to the task contract.
+
 The source M1B SDF and control-contract URDF remained hash-bound. The primary
 dataset camera was rotated 180 degrees around the target, per review, and is
 explicitly marked as a dataset view rather than a policy input.
@@ -24,6 +37,52 @@ explicitly marked as a dataset view rather than a policy input.
 The legacy `panda_controlled.urdf` is verified only as the accepted M1B
 control-contract reference. It is not referenced into the Isaac stage and
 contributes no visual or collision geometry to this benchmark.
+
+## Native physics-stage audit
+
+A render-free physical USDC was exported from generated scene seed 3000:
+
+- Stage: `/var/tmp/m1b-isaac-clean-physics-usdc-20260728/output/m1b_physics_scene.usdc`
+- SHA-256: `5e2e3f179c237e4bd40f922ac9835746b3798db7bd98226a697fab4bcd9eb11b`
+- Size: 12 MiB
+- Official robot base pose: `(-0.35, 0.0, 0.45)` metres, parsed from the
+  hash-bound production URDF
+- Dynamic objects: 11 cylinders at 0.045 kg each
+- Task collision primitives: 13
+- Render products in the physical stage: none
+- Local simplified robot geometry: false
+
+The official hand exposes two PhysX collision shapes on each finger and the
+probe created eleven object filters per finger. The physical scene therefore
+does not silently omit official finger collisions.
+
+## Native contact/attach probe
+
+The calibration-only probe used the NVIDIA Franka example's documented
+0.0-metre closed command, 60 Hz physics, and the unchanged ADR-0013 broker
+requirement: at least three samples and at least 100 ms of bilateral contact
+with the same entity.
+
+Measured result: **CONTACT_GATE_REJECTED**.
+
+- The arm reached the 105 mm contact-centreline pose with 0.092 mm final
+  Cartesian error.
+- After 240 close steps, the two official finger joints stopped at
+  15.466/15.827 mm while the 30 mm cylinder moved about 1.22 mm laterally.
+- The experimental ContactSensor, RigidPrim tensor contact view, PhysX event
+  subscription, and per-step full contact report all returned zero
+  finger-object contact frames.
+- `/physics/disableContactProcessing` was false throughout.
+- No fixed joint was authored, so no object was attached or lifted.
+
+This is intentionally fail-closed. Finger displacement or object motion is
+diagnostic evidence, not a substitute for bilateral same-entity contact.
+
+Remote evidence:
+
+- Root: `/var/tmp/m1b-isaac-official-close-probe-retry12-20260728`
+- Probe SHA-256:
+  `815aefce5bf778fda56d9796828ac1df918557665fd9b12108786aed1058a2bf`
 
 ## Measured results
 
@@ -100,7 +159,7 @@ uv run --isolated --with 'pytest>=8,<9' --with 'pydantic>=2.7,<3' \
   pytest -q tests/unit/test_isaac_m1b_scene.py tests/unit/test_m1b_beta_protocol.py
 ```
 
-Result: `64 passed in 4.59s`.
+Current result: `67 passed in 5.29s`.
 
 ```text
 .venv/bin/ruff check src/xh_agent/data/isaac_m1b.py \
@@ -112,7 +171,13 @@ Result: `All checks passed!`
 
 ## Blockers
 
-None for the requested 100-frame dual-GPU benchmark.
+None for the requested 100-frame dual-GPU sensor benchmark.
+
+The native Isaac grasp/attach adapter is not accepted yet: the official
+AlternateFinger drive physically stalls near the cylinder, but Isaac emits no
+contact pair that can satisfy the unchanged broker. Dataset generation can
+continue for sensor-throughput work, but no Isaac closed-loop grasp success may
+be claimed until this is independently resolved.
 
 The generated dataset is a throughput/format validation set, not yet a
 diverse training corpus: scene randomization, calibrated sensor noise,
@@ -123,6 +188,6 @@ next data-engineering step.
 
 ```text
 ssh root@labserver \
-  'jq "{status,robot_asset,output_counts,sensor_frames_per_s,semantic_pixel_counts}" \
-  /var/tmp/m1b-isaac-official-dual-workers-retry4-20260727/worker0/output/metrics.json'
+  'jq "{status,official_robot,physics_prim_diagnostics,gripper_close_settling,contact_feedback}" \
+  /var/tmp/m1b-isaac-official-close-probe-retry12-20260728/output/actuation-probe.json'
 ```

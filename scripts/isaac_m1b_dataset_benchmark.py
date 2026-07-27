@@ -14,13 +14,20 @@ from typing import Any
 
 from xh_agent.data.isaac_m1b import (
     CameraSpec,
+    CollisionPrimitive,
     LinkVisuals,
+    M1B_URDF_SHA256,
     M1BIsaacScene,
     Pose,
     SceneModel,
     VisualPrimitive,
+    load_m1b_isaac_generated_scene,
     load_m1b_isaac_scene,
+    load_robot_base_pose,
     resolve_official_franka_asset,
+    scene_collision_primitive_count,
+    sha256_file,
+    validate_m1b_physics_contract,
     verify_source_hashes,
 )
 
@@ -28,6 +35,7 @@ from xh_agent.data.isaac_m1b import (
 def parse_args() -> tuple[argparse.Namespace, list[str]]:
     parser = argparse.ArgumentParser(description="Generate and benchmark M1B Isaac RGB-D labels.")
     parser.add_argument("--sdf", required=True)
+    parser.add_argument("--supervision")
     parser.add_argument("--urdf", required=True)
     parser.add_argument("--output", required=True)
     parser.add_argument("--worker-id", type=int, required=True)
@@ -50,8 +58,24 @@ def parse_args() -> tuple[argparse.Namespace, list[str]]:
 
 
 ARGS, _UNKNOWN = parse_args()
-SOURCE_HASHES = verify_source_hashes(ARGS.sdf, ARGS.urdf)
-SCENE = load_m1b_isaac_scene(ARGS.sdf)
+if ARGS.supervision:
+    SCENE = load_m1b_isaac_generated_scene(ARGS.sdf, ARGS.supervision)
+    observed_urdf_hash = sha256_file(ARGS.urdf)
+    if observed_urdf_hash != M1B_URDF_SHA256:
+        raise ValueError(
+            f"M1B Isaac URDF source hash mismatch: "
+            f"{observed_urdf_hash} != {M1B_URDF_SHA256}"
+        )
+    SOURCE_HASHES = {
+        Path(ARGS.sdf).name: SCENE.source_sdf_sha256,
+        Path(ARGS.supervision).name: SCENE.source_supervision_sha256,
+        "panda_controlled.urdf": observed_urdf_hash,
+    }
+else:
+    SOURCE_HASHES = verify_source_hashes(ARGS.sdf, ARGS.urdf)
+    SCENE = load_m1b_isaac_scene(ARGS.sdf)
+ROBOT_BASE_POSE = load_robot_base_pose(ARGS.urdf)
+PHYSICS_CONTRACT = validate_m1b_physics_contract(SCENE)
 if any(camera.resolution != (640, 480) for camera in SCENE.cameras):
     raise RuntimeError("M1B Isaac benchmark requires the accepted 640x480 camera contract")
 
@@ -169,6 +193,30 @@ def _create_visual(
     return geometry.GetPrim()
 
 
+def _create_collision(
+    stage: Usd.Stage,
+    path: str,
+    collision: CollisionPrimitive,
+) -> Usd.Prim:
+    if collision.shape == "box":
+        assert collision.size is not None
+        geometry = UsdGeom.Cube.Define(stage, path)
+        geometry.CreateSizeAttr(1.0)
+        geometry.AddScaleOp().Set(Gf.Vec3f(*collision.size))
+    elif collision.shape == "cylinder":
+        assert collision.radius is not None and collision.length is not None
+        geometry = UsdGeom.Cylinder.Define(stage, path)
+        geometry.CreateAxisAttr("Z")
+        geometry.CreateRadiusAttr(collision.radius)
+        geometry.CreateHeightAttr(collision.length)
+    else:
+        raise ValueError(f"unsupported collision shape: {collision.shape}")
+    _apply_pose(geometry, collision.pose)
+    geometry.MakeInvisible()
+    UsdPhysics.CollisionAPI.Apply(geometry.GetPrim())
+    return geometry.GetPrim()
+
+
 def _create_link(
     stage: Usd.Stage,
     model_path: str,
@@ -178,8 +226,17 @@ def _create_link(
     link_path = f"{model_path}/{link.name}"
     link_xform = UsdGeom.Xform.Define(stage, link_path)
     _apply_pose(link_xform, link.pose)
+    if link.mass_kg is not None:
+        mass_api = UsdPhysics.MassAPI.Apply(link_xform.GetPrim())
+        mass_api.CreateMassAttr(link.mass_kg)
     for visual in link.visuals:
         _create_visual(stage, f"{link_path}/{visual.name}", visual, semantic_class)
+    for collision in link.collisions:
+        _create_collision(
+            stage,
+            f"{link_path}/Collision_{collision.name}",
+            collision,
+        )
 
 
 def _create_model(stage: Usd.Stage, model: SceneModel) -> None:
@@ -189,10 +246,49 @@ def _create_model(stage: Usd.Stage, model: SceneModel) -> None:
     _apply_semantics(model_xform.GetPrim(), model.semantic_class)
     for link in model.links:
         _create_link(stage, model_path, link, model.semantic_class)
+        if not model.static:
+            link_prim = stage.GetPrimAtPath(f"{model_path}/{link.name}")
+            UsdPhysics.RigidBodyAPI.Apply(link_prim)
 
 
-def _create_robot(stage: Usd.Stage, robot_usd: str) -> int:
+def _validate_stage_physics(stage: Usd.Stage) -> dict[str, list[str]]:
+    collision_paths: list[str] = []
+    rigid_body_paths: list[str] = []
+    mass_paths: list[str] = []
+    for model in SCENE.models:
+        for link in model.links:
+            link_path = f"/World/M1B/{model.name}/{link.name}"
+            link_prim = stage.GetPrimAtPath(link_path)
+            if not model.static:
+                if not link_prim.HasAPI(UsdPhysics.RigidBodyAPI):
+                    raise RuntimeError(f"missing rigid-body API on {link_path}")
+                rigid_body_paths.append(link_path)
+            if link.mass_kg is not None:
+                if not link_prim.HasAPI(UsdPhysics.MassAPI):
+                    raise RuntimeError(f"missing mass API on {link_path}")
+                mass_paths.append(link_path)
+            for collision in link.collisions:
+                collision_path = f"{link_path}/Collision_{collision.name}"
+                collision_prim = stage.GetPrimAtPath(collision_path)
+                if not collision_prim.HasAPI(UsdPhysics.CollisionAPI):
+                    raise RuntimeError(f"missing collision API on {collision_path}")
+                collision_paths.append(collision_path)
+    if len(collision_paths) != int(PHYSICS_CONTRACT["collision_primitive_count"]):
+        raise RuntimeError("stage collision count does not match the SDF physics contract")
+    return {
+        "collision_paths": collision_paths,
+        "rigid_body_paths": rigid_body_paths,
+        "mass_paths": mass_paths,
+    }
+
+
+def _create_robot(
+    stage: Usd.Stage,
+    robot_usd: str,
+    base_pose: Pose,
+) -> tuple[int, dict[str, str]]:
     robot_xform = UsdGeom.Xform.Define(stage, "/World/Robot")
+    _apply_pose(robot_xform, base_pose)
     if not robot_xform.GetPrim().GetReferences().AddReference(robot_usd):
         raise RuntimeError(f"failed to reference robot USD: {robot_usd}")
     stage.Load(robot_xform.GetPath())
@@ -201,12 +297,28 @@ def _create_robot(stage: Usd.Stage, robot_usd: str) -> int:
     robot_prim = stage.GetPrimAtPath("/World/Robot")
     if not robot_prim.IsValid():
         raise RuntimeError("robot reference did not create /World/Robot")
+    variants = {
+        "Gripper": "AlternateFinger",
+        "Mesh": "Performance",
+    }
+    for set_name, selection in variants.items():
+        variant_set = robot_prim.GetVariantSets().GetVariantSet(set_name)
+        if not variant_set.IsValid() or selection not in variant_set.GetVariantNames():
+            raise RuntimeError(
+                f"official Franka asset is missing variant {set_name}={selection}"
+            )
+        if not variant_set.SetVariantSelection(selection):
+            raise RuntimeError(
+                f"failed to select official Franka variant {set_name}={selection}"
+            )
+    for _ in range(3):
+        simulation_app.update()
     _apply_semantics(robot_prim, "panda_robot")
     geometry_count = 0
     for prim in Usd.PrimRange(robot_prim):
         if prim.IsA(UsdGeom.Gprim):
             geometry_count += 1
-    return geometry_count
+    return geometry_count, variants
 
 
 def _create_cameras(scene: M1BIsaacScene) -> tuple[list[Any], list[Any]]:
@@ -396,6 +508,7 @@ def main() -> int:
 
     omni.usd.get_context().new_stage()
     stage = omni.usd.get_context().get_stage()
+    UsdGeom.SetStageMetersPerUnit(stage, 1.0)
     world = UsdGeom.Xform.Define(stage, "/World")
     stage.SetDefaultPrim(world.GetPrim())
     UsdPhysics.Scene.Define(stage, "/World/PhysicsScene")
@@ -405,7 +518,15 @@ def main() -> int:
     UsdGeom.Xform.Define(stage, "/World/M1B")
     for model in SCENE.models:
         _create_model(stage, model)
-    robot_geometry_prim_count = _create_robot(stage, robot_asset_uri)
+    stage_physics = _validate_stage_physics(stage)
+    robot_geometry_prim_count, robot_variants = _create_robot(
+        stage,
+        robot_asset_uri,
+        ROBOT_BASE_POSE,
+    )
+    physics_stage_path = output / "m1b_physics_scene.usdc"
+    if not stage.Export(str(physics_stage_path)):
+        raise RuntimeError(f"failed to export clean physics stage: {physics_stage_path}")
     _, render_products = _create_cameras(SCENE)
     annotators = _create_annotators(SCENE.cameras, render_products)
 
@@ -536,8 +657,19 @@ def main() -> int:
             "provenance": "NVIDIA_ISAAC_SIM_6_OFFICIAL_FRANKA_PANDA_USD",
             "local_simplified_robot_used": False,
             "directly_traversable_geometry_prim_count": robot_geometry_prim_count,
+            "variants": robot_variants,
+            "base_pose": _json_ready(ROBOT_BASE_POSE.__dict__),
+            "base_pose_source": "HASH_BOUND_PRODUCTION_URDF_WORLD_TO_PANDA",
         },
         "source_scene_id": "IndustrialCylinderBenchmarkV1",
+        "source_collision_primitive_count": scene_collision_primitive_count(SCENE.models),
+        "physics_contract": _json_ready(PHYSICS_CONTRACT),
+        "stage_physics": stage_physics,
+        "clean_physics_stage": {
+            "filename": physics_stage_path.name,
+            "sha256": sha256_file(physics_stage_path),
+            "contains_render_products": False,
+        },
         "privileged_truth_use": "OFFLINE_DATASET_LABEL_ONLY_NOT_POLICY_INPUT",
         "action_protocol": {
             "frame": "PANDA_JOINT_ORDER_BY_NAME",

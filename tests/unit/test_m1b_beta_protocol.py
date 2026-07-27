@@ -29,7 +29,17 @@ SCRIPTS = Path(__file__).parents[2] / "scripts"
 if str(SCRIPTS) not in sys.path:
     sys.path.insert(0, str(SCRIPTS))
 from audit_m1b_center_reachability import percentile90, perceived_diameter_m  # noqa: E402
-from generate_industrial_scenes import BIN_DROP_TARGET_Z_M, CYLINDER_HALF_LENGTH_M, ROBOT_BASE_KEEP_OUT_RADIUS_M, ROBOT_BASE_XY, SPAWN_CLEARANCE_M, TABLE_TOP_Z, bin_cell_targets, render  # noqa: E402
+from generate_industrial_scenes import (  # noqa: E402
+    BIN_CENTER_XY,
+    BIN_DROP_TARGET_Z_M,
+    CYLINDER_HALF_LENGTH_M,
+    ROBOT_BASE_KEEP_OUT_RADIUS_M,
+    ROBOT_BASE_XY,
+    SPAWN_CLEARANCE_M,
+    TABLE_TOP_Z,
+    bin_cell_targets,
+    render,
+)
 from summarize_m1b_tolerance_campaign import summarize  # noqa: E402
 from m1b_wrong_object_drill import carried_track_from_vacancy, vacated_tracks_from_post_frames  # noqa: E402
 from xh_agent.perception.interfaces import BBoxV1, PerceptionResultV1  # noqa: E402
@@ -521,7 +531,8 @@ def test_m1b_adr_0014_scene_geometry_and_bin_layout_are_consistent() -> None:
     assert "<radius>0.025</radius>" not in template
     assert "<length>0.09</length>" not in template
     assert "<mass>0.06</mass>" not in template
-    assert "<pose>0.20 0 0.45 0 0 1.57079632679</pose>" in template
+    assert BIN_CENTER_XY == (0.20, 0.15)
+    assert "<pose>0.20 0.15 0.45 0 0 1.57079632679</pose>" in template
     assert len(bin_cell_targets()) == 6
     assert all(target[2] == BIN_DROP_TARGET_Z_M for target in bin_cell_targets())
     assert min(target[1] for target in bin_cell_targets()) == pytest.approx(0.01)
@@ -868,7 +879,8 @@ def test_m1b_tolerance_summary_requires_all_trials_and_applies_signed_monotonic_
     worklist_path = tmp_path / "worklist.json"
     subprocess.run([sys.executable, "scripts/plan_m1b_tolerance_calibration.py", "--config", "configs/m1b_normal_tolerance_calibration.json", "--output", str(worklist_path)], cwd=root, check=True)
     worklist = json.loads(worklist_path.read_text())
-    raw = tmp_path / "raw"; raw.mkdir()
+    raw = tmp_path / "raw"
+    raw.mkdir()
     for index, trial in enumerate(worklist["trials"]):
         success = not (trial["axis"] == "y" and trial["offset_m"] == 0.015)
         record = {"provenance": "CALIBRATION_ONLY_INITIALIZATION", "trial": trial, "baseline_perception_free": True, "bilateral_same_entity_contact": success, "attach": {"state_confirmed": success}}

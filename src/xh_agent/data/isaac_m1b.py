@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import json
 import math
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
@@ -8,7 +9,7 @@ from pathlib import Path
 from typing import Iterable
 
 
-M1B_SDF_SHA256 = "6193afa73331afa7409ab42256a716a47bd686b3ecd55098e60e7687bc6058bd"
+M1B_SDF_SHA256 = "1eea1b34b832d858ba9a4adec775018e807061b54cb1afff19d710d848ad926d"
 M1B_URDF_SHA256 = "6678ff409d60f074283805879f53edaa939ead34f97a5a961ee67f6229b44ba8"
 OFFICIAL_ISAAC_FRANKA_RELATIVE_USD = (
     "Isaac/Robots/FrankaRobotics/FrankaPanda/franka.usd"
@@ -33,10 +34,22 @@ class VisualPrimitive:
 
 
 @dataclass(frozen=True)
+class CollisionPrimitive:
+    name: str
+    shape: str
+    pose: Pose
+    size: tuple[float, float, float] | None
+    radius: float | None
+    length: float | None
+
+
+@dataclass(frozen=True)
 class LinkVisuals:
     name: str
     pose: Pose
     visuals: tuple[VisualPrimitive, ...]
+    collisions: tuple[CollisionPrimitive, ...]
+    mass_kg: float | None
 
 
 @dataclass(frozen=True)
@@ -44,6 +57,7 @@ class SceneModel:
     name: str
     pose: Pose
     semantic_class: str
+    static: bool
     links: tuple[LinkVisuals, ...]
 
 
@@ -61,10 +75,16 @@ class M1BIsaacScene:
     models: tuple[SceneModel, ...]
     cameras: tuple[CameraSpec, ...]
     source_sdf_sha256: str
+    source_supervision_sha256: str | None = None
+    scene_seed: int | None = None
 
     @property
     def cylinder_count(self) -> int:
         return sum(model.semantic_class == "industrial_cylinder" for model in self.models)
+
+    @property
+    def dynamic_models(self) -> tuple[SceneModel, ...]:
+        return tuple(model for model in self.models if not model.static)
 
 
 def sha256_file(path: str | Path) -> str:
@@ -96,6 +116,30 @@ def resolve_official_franka_asset(assets_root: str) -> str:
     return f"{root.rstrip('/')}/{OFFICIAL_ISAAC_FRANKA_RELATIVE_USD}"
 
 
+def load_robot_base_pose(urdf_path: str | Path) -> Pose:
+    root = ET.parse(urdf_path).getroot()
+    joint = root.find("./joint[@name='world_to_panda']")
+    if joint is None or joint.get("type") != "fixed":
+        raise ValueError("expected fixed world_to_panda joint")
+    parent = joint.find("parent")
+    child = joint.find("child")
+    if (
+        parent is None
+        or parent.get("link") != "world"
+        or child is None
+        or child.get("link") != "panda_link0"
+    ):
+        raise ValueError("world_to_panda must connect world to panda_link0")
+    origin = joint.find("origin")
+    if origin is None:
+        raise ValueError("world_to_panda has no origin")
+    xyz = tuple(float(value) for value in origin.get("xyz", "").split())
+    rpy = tuple(float(value) for value in origin.get("rpy", "0 0 0").split())
+    if len(xyz) != 3 or len(rpy) != 3:
+        raise ValueError("world_to_panda origin must contain xyz and rpy triples")
+    return Pose(xyz=xyz, rpy=rpy)
+
+
 def parse_pose(text: str | None) -> Pose:
     values = [float(value) for value in (text or "0 0 0 0 0 0").split()]
     if len(values) != 6:
@@ -111,26 +155,38 @@ def _parse_color(visual: ET.Element) -> tuple[float, float, float, float]:
     return values
 
 
-def _parse_visual(visual: ET.Element) -> VisualPrimitive:
-    geometry = visual.find("geometry")
+def _parse_geometry(
+    element: ET.Element,
+) -> tuple[
+    str,
+    tuple[float, float, float] | None,
+    float | None,
+    float | None,
+]:
+    geometry = element.find("geometry")
     if geometry is None:
-        raise ValueError(f"visual {visual.get('name')} has no geometry")
+        raise ValueError(f"geometry element {element.get('name')} has no geometry")
     box = geometry.find("box")
     cylinder = geometry.find("cylinder")
     if box is not None:
         size = tuple(float(value) for value in box.findtext("size", default="").split())
         if len(size) != 3:
-            raise ValueError(f"box visual {visual.get('name')} has invalid size {size}")
+            raise ValueError(f"box {element.get('name')} has invalid size {size}")
         shape, radius, length = "box", None, None
     elif cylinder is not None:
         size = None
         radius = float(cylinder.findtext("radius", default="nan"))
         length = float(cylinder.findtext("length", default="nan"))
         if not math.isfinite(radius) or not math.isfinite(length):
-            raise ValueError(f"cylinder visual {visual.get('name')} has invalid dimensions")
+            raise ValueError(f"cylinder {element.get('name')} has invalid dimensions")
         shape = "cylinder"
     else:
-        raise ValueError(f"unsupported visual geometry in {visual.get('name')}")
+        raise ValueError(f"unsupported geometry in {element.get('name')}")
+    return shape, size, radius, length
+
+
+def _parse_visual(visual: ET.Element) -> VisualPrimitive:
+    shape, size, radius, length = _parse_geometry(visual)
     return VisualPrimitive(
         name=visual.get("name", "visual"),
         shape=shape,
@@ -140,6 +196,28 @@ def _parse_visual(visual: ET.Element) -> VisualPrimitive:
         length=length,
         color_rgba=_parse_color(visual),
     )
+
+
+def _parse_collision(collision: ET.Element) -> CollisionPrimitive:
+    shape, size, radius, length = _parse_geometry(collision)
+    return CollisionPrimitive(
+        name=collision.get("name", "collision"),
+        shape=shape,
+        pose=parse_pose(collision.findtext("pose")),
+        size=size,
+        radius=radius,
+        length=length,
+    )
+
+
+def _parse_mass(link: ET.Element) -> float | None:
+    text = link.findtext("./inertial/mass")
+    if text is None:
+        return None
+    mass_kg = float(text)
+    if not math.isfinite(mass_kg) or mass_kg <= 0:
+        raise ValueError(f"link {link.get('name')} has invalid mass {mass_kg}")
+    return mass_kg
 
 
 def _semantic_class(model_name: str) -> str | None:
@@ -164,21 +242,28 @@ def _parse_models(world: ET.Element) -> tuple[SceneModel, ...]:
         links: list[LinkVisuals] = []
         for link in model.findall("link"):
             visuals = tuple(_parse_visual(visual) for visual in link.findall("visual"))
-            if visuals:
+            collisions = tuple(
+                _parse_collision(collision) for collision in link.findall("collision")
+            )
+            if visuals or collisions:
                 links.append(
                     LinkVisuals(
                         name=link.get("name", "link"),
                         pose=parse_pose(link.findtext("pose")),
                         visuals=visuals,
+                        collisions=collisions,
+                        mass_kg=_parse_mass(link),
                     )
                 )
         if not links:
-            raise ValueError(f"M1B model {name} has no supported visual geometry")
+            raise ValueError(f"M1B model {name} has no supported geometry")
         models.append(
             SceneModel(
                 name=name,
                 pose=parse_pose(model.findtext("pose")),
                 semantic_class=semantic_class,
+                static=model.findtext("static", default="false").strip().lower()
+                in {"1", "true"},
                 links=tuple(links),
             )
         )
@@ -243,8 +328,108 @@ def load_m1b_isaac_scene(sdf_path: str | Path) -> M1BIsaacScene:
         )
     if scene.cylinder_count != 6:
         raise ValueError(f"expected six M1B cylinders, got {scene.cylinder_count}")
+    validate_m1b_physics_contract(scene)
+    return scene
+
+
+def load_m1b_isaac_generated_scene(
+    sdf_path: str | Path,
+    supervision_path: str | Path,
+) -> M1BIsaacScene:
+    sdf = Path(sdf_path)
+    supervision = Path(supervision_path)
+    root = ET.parse(sdf).getroot()
+    world = root.find("world")
+    if world is None or world.get("name") != "industrial_cylinder_v1":
+        raise ValueError("expected the industrial_cylinder_v1 SDF world")
+    payload = json.loads(supervision.read_text(encoding="utf-8"))
+    if payload.get("scene_id") != "IndustrialCylinderBenchmarkV1":
+        raise ValueError("generated M1B supervision has the wrong scene_id")
+    simulator_supervision = payload.get("simulator_supervision")
+    if not isinstance(simulator_supervision, dict):
+        raise ValueError("generated M1B supervision has no simulator_supervision")
+    if simulator_supervision.get("training_and_evaluation_only") is not True:
+        raise ValueError("generated M1B supervision must be evaluation-only")
+    objects = simulator_supervision.get("objects")
+    if not isinstance(objects, list):
+        raise ValueError("generated M1B supervision objects must be a list")
+    expected_names = tuple(str(item.get("actual_sim_entity_id", "")) for item in objects)
+    if not 6 <= len(expected_names) <= 12:
+        raise ValueError(f"generated M1B scene must contain 6..12 objects, got {len(expected_names)}")
+    if expected_names != tuple(f"cylinder_{index:02d}" for index in range(1, len(expected_names) + 1)):
+        raise ValueError(f"generated M1B object IDs are not canonical: {expected_names}")
+    models = _parse_models(world)
+    actual_names = tuple(
+        model.name for model in models if model.semantic_class == "industrial_cylinder"
+    )
+    if actual_names != expected_names:
+        raise ValueError(
+            "generated M1B SDF/supervision object mismatch: "
+            f"sdf={actual_names}, supervision={expected_names}"
+        )
+    scene = M1BIsaacScene(
+        models=models,
+        cameras=_parse_cameras(world),
+        source_sdf_sha256=sha256_file(sdf),
+        source_supervision_sha256=sha256_file(supervision),
+        scene_seed=int(payload["seed"]),
+    )
+    validate_m1b_physics_contract(scene)
+    partition_bin = next(
+        (model for model in scene.models if model.name == "blue_partition_bin"),
+        None,
+    )
+    if partition_bin is None or partition_bin.pose.xyz[:2] != (0.2, 0.15):
+        raise ValueError(
+            "generated M1B partition bin must match the ADR-0016 center (0.20, 0.15)"
+        )
     return scene
 
 
 def scene_primitive_count(models: Iterable[SceneModel]) -> int:
     return sum(len(link.visuals) for model in models for link in model.links)
+
+
+def scene_collision_primitive_count(models: Iterable[SceneModel]) -> int:
+    return sum(len(link.collisions) for model in models for link in model.links)
+
+
+def validate_m1b_physics_contract(scene: M1BIsaacScene) -> dict[str, object]:
+    dynamic_names = tuple(model.name for model in scene.dynamic_models)
+    cylinder_names = tuple(
+        model.name
+        for model in scene.models
+        if model.semantic_class == "industrial_cylinder"
+    )
+    if dynamic_names != cylinder_names:
+        raise ValueError(
+            "only the six industrial cylinders may be dynamic: "
+            f"dynamic={dynamic_names}, cylinders={cylinder_names}"
+        )
+    cylinder_masses: dict[str, float] = {}
+    for model in scene.dynamic_models:
+        if len(model.links) != 1:
+            raise ValueError(f"dynamic model {model.name} must have exactly one link")
+        link = model.links[0]
+        if len(link.collisions) != 1:
+            raise ValueError(f"dynamic model {model.name} must have one collision")
+        if link.mass_kg is None:
+            raise ValueError(f"dynamic model {model.name} has no mass")
+        cylinder_masses[model.name] = link.mass_kg
+    static_collision_names = tuple(
+        model.name
+        for model in scene.models
+        if model.static and any(link.collisions for link in model.links)
+    )
+    if static_collision_names != ("industrial_work_table", "blue_partition_bin"):
+        raise ValueError(
+            "unexpected static collision models: "
+            f"{static_collision_names}"
+        )
+    return {
+        "dynamic_model_names": dynamic_names,
+        "dynamic_model_count": len(dynamic_names),
+        "static_collision_model_names": static_collision_names,
+        "collision_primitive_count": scene_collision_primitive_count(scene.models),
+        "cylinder_masses_kg": cylinder_masses,
+    }
