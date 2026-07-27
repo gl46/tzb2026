@@ -22,6 +22,7 @@ from xh_agent.grasp.reset import M1BResetVerificationV1, validate_reset_records
 from xh_agent.recovery.manager import recovery_for
 from xh_agent.runtime.m1b_camera_calibration import M1BStaticCameraCalibrationV1
 from xh_agent.runtime.m1b_center_correction import M1BPublicGeometryXYCorrectionV1, M1BTableSupportedCylinderCenterV1
+from xh_agent.runtime.hand_observation import hand_endpoint_observation_succeeded
 from xh_agent.task_compiler.deterministic import DeterministicTaskCompiler
 
 SCRIPTS = Path(__file__).parents[2] / "scripts"
@@ -694,17 +695,46 @@ def test_m1a_hand_post_goal_observation_waits_for_fresh_state_without_relaxing_t
     source = (Path(__file__).parents[2] / "scripts/m1a_contact_calibration_client.py").read_text()
     # The contract itself is untouched.
     assert "HAND_POST_GOAL_OBSERVATION_SLACK_M = 0.0001" in source
-    assert "max_position_error_m <= goal_tolerance_m + HAND_POST_GOAL_OBSERVATION_SLACK_M" in source
-    assert "mimic_tracking_error_m <= goal_tolerance_m + HAND_POST_GOAL_OBSERVATION_SLACK_M" in source
+    assert "goal_tolerance_m=goal_tolerance_m" in source
+    assert "observation_slack_m=HAND_POST_GOAL_OBSERVATION_SLACK_M" in source
     # The fixed-spin assumption is gone, replaced by counted fresh deliveries.
     assert "for _ in range(3):\n            rclpy.spin_once" not in source
     assert "HAND_POST_GOAL_FRESH_SAMPLES = 3" in source
     assert "HAND_POST_GOAL_SETTLE_TIMEOUT_S = 2.0" in source
     assert "self.hand_state_seq += 1" in source
     assert "self.hand_state_seq - seq_at_result < HAND_POST_GOAL_FRESH_SAMPLES" in source
+    assert "fresh_sample_count = max(0, self.hand_state_seq - seq_at_result)" in source
     # Bounded: a genuinely short hand must still fail rather than spin forever.
     assert "settle_deadline = time.monotonic() + HAND_POST_GOAL_SETTLE_TIMEOUT_S" in source
     assert "while time.monotonic() < settle_deadline:" in source
+
+
+@pytest.mark.parametrize(
+    "controller_succeeded,fresh_sample_count,position_error_m,mimic_error_m,expected",
+    [
+        (True, 2, 0.0, 0.0, False),
+        (True, 3, 0.0011, 0.0011, True),
+        (True, 3, 0.0011001, 0.0, False),
+        (True, 3, 0.0, 0.0011001, False),
+        (False, 3, 0.0, 0.0, False),
+    ],
+)
+def test_m1a_hand_endpoint_evidence_requires_fresh_samples_and_original_tolerance(
+    controller_succeeded: bool,
+    fresh_sample_count: int,
+    position_error_m: float,
+    mimic_error_m: float,
+    expected: bool,
+) -> None:
+    assert hand_endpoint_observation_succeeded(
+        controller_succeeded=controller_succeeded,
+        fresh_sample_count=fresh_sample_count,
+        required_fresh_samples=3,
+        max_position_error_m=position_error_m,
+        mimic_tracking_error_m=mimic_error_m,
+        goal_tolerance_m=0.001,
+        observation_slack_m=0.0001,
+    ) is expected
 
 
 def test_m1b_descent_step_probe_is_diagnostic_and_cannot_alter_admission() -> None:

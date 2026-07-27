@@ -31,6 +31,7 @@ if str(PROJECT_ROOT / "src") not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
 from xh_agent.grasp.orientation_families import gripper_frame_corridor  # noqa: E402
+from xh_agent.runtime.hand_observation import hand_endpoint_observation_succeeded  # noqa: E402
 
 from m1a_moveit_execution_client import EvidenceClient, JOINTS, TARGETS, set_allowed_pair  # noqa: E402
 
@@ -454,6 +455,7 @@ class CalibrationClient(EvidenceClient):
                 (abs(expected - observed) for expected, observed in zip(positions, actual)),
                 default=math.inf,
             )
+        fresh_sample_count = max(0, self.hand_state_seq - seq_at_result)
         controller_samples = self.hand_controller_samples[controller_start:]
         target_reference_seen = any(
             abs(sample["physical_reference_m"] - positions[HAND_JOINTS.index(PHYSICAL_HAND_JOINT)]) <= 1e-9
@@ -466,10 +468,14 @@ class CalibrationClient(EvidenceClient):
             # completion; joint-state delivery can lag that instant by one
             # simulation tick.  Preserve the 1 mm action contract while
             # allowing a bounded 0.1 mm observation-sampling slack.
-            "succeeded": bool(
-                controller_succeeded
-                and max_position_error_m <= goal_tolerance_m + HAND_POST_GOAL_OBSERVATION_SLACK_M
-                and mimic_tracking_error_m <= goal_tolerance_m + HAND_POST_GOAL_OBSERVATION_SLACK_M
+            "succeeded": hand_endpoint_observation_succeeded(
+                controller_succeeded=controller_succeeded,
+                fresh_sample_count=fresh_sample_count,
+                required_fresh_samples=HAND_POST_GOAL_FRESH_SAMPLES,
+                max_position_error_m=max_position_error_m,
+                mimic_tracking_error_m=mimic_tracking_error_m,
+                goal_tolerance_m=goal_tolerance_m,
+                observation_slack_m=HAND_POST_GOAL_OBSERVATION_SLACK_M,
             ),
             "controller_result_succeeded": controller_succeeded,
             "controller_result_error_code": (
@@ -482,6 +488,8 @@ class CalibrationClient(EvidenceClient):
             "observed_positions_m": actual,
             "goal_tolerance_m": goal_tolerance_m,
             "post_goal_observation_slack_m": HAND_POST_GOAL_OBSERVATION_SLACK_M,
+            "post_goal_fresh_sample_count": fresh_sample_count,
+            "post_goal_required_fresh_samples": HAND_POST_GOAL_FRESH_SAMPLES,
             "max_position_error_m": max_position_error_m,
             "mimic_tracking_error_m": mimic_tracking_error_m,
             "physical_controller_state_topic": PHYSICAL_HAND_CONTROLLER,
