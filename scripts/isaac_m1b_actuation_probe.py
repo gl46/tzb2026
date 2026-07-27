@@ -48,6 +48,14 @@ def parse_args() -> tuple[argparse.Namespace, list[str]]:
         default=240,
         help="60 Hz settling window for the official Franka gripper drive.",
     )
+    parser.add_argument(
+        "--free-close-diagnostic",
+        action="store_true",
+        help=(
+            "Require one 0.18-0.30 m centreline offset so the official "
+            "fingertips close entirely above the target; never an attach trial."
+        ),
+    )
     return parser.parse_known_args()
 
 
@@ -65,7 +73,15 @@ if TARGET_MODEL is None:
 CONTACT_CENTERLINES_M = tuple(
     float(value) for value in ARGS.contact_centerlines_m.split(",")
 )
-if (
+if ARGS.free_close_diagnostic:
+    if (
+        len(CONTACT_CENTERLINES_M) != 1
+        or not 0.18 <= CONTACT_CENTERLINES_M[0] <= 0.30
+    ):
+        raise ValueError(
+            "free-close diagnostic requires one centreline in [0.18, 0.30] m"
+        )
+elif (
     not CONTACT_CENTERLINES_M
     or any(not 0.06 <= value <= 0.15 for value in CONTACT_CENTERLINES_M)
     or any(
@@ -73,17 +89,19 @@ if (
         for earlier, later in zip(CONTACT_CENTERLINES_M, CONTACT_CENTERLINES_M[1:])
     )
 ):
-    raise ValueError("contact centreline scan must be strictly descending in [0.06, 0.15] m")
+    raise ValueError(
+        "contact centreline scan must be strictly descending in [0.06, 0.15] m"
+    )
 if not 90 <= ARGS.gripper_close_steps <= 360:
     raise ValueError("gripper close settling window must be in [90, 360] steps")
 CONTACT_FILTERS = tuple(
     (
         model.name,
-        f"/World/M1B/{model.name}/{link.name}/Collision_{collision.name}",
+        f"/World/M1B/{model.name}/{link.name}",
     )
     for model in SCENE.dynamic_models
     for link in model.links
-    for collision in link.collisions
+    if link.collisions
 )
 if not CONTACT_FILTERS:
     raise ValueError("M1B actuation probe requires dynamic collision filters")
@@ -155,6 +173,7 @@ RIGHT_FINGER_PATH = "/World/Robot/panda_rightfinger"
 ATTACH_JOINT_PATH = "/World/M1B/ActuationInternal/grasp_fixed_joint"
 DOWNWARD_WXYZ = np.asarray([0.0, 1.0, 0.0, 0.0], dtype=np.float32)
 OFFICIAL_FRANKA_CLOSED_POSITION_M = 0.0
+OFFICIAL_FRANKA_ACTUATED_FINGER_DOF_INDEX = 7
 
 
 class _PhysxContactCollector:
@@ -289,7 +308,15 @@ def _step_gripper(
     )
     target = np.asarray([position_m, position_m], dtype=np.float32)
     for _ in range(steps):
-        robot.set_gripper_position(target)
+        # The official USD drives panda_finger_joint1 and authors
+        # panda_finger_joint2 as a zero-effort PhysxMimicJoint.  Sending a
+        # target to both tensor DOFs makes the mimic solver rebound around
+        # 15.5 mm in free space.  Command only the driven joint and let the
+        # official mimic constraint produce the symmetric second motion.
+        robot.set_dof_position_targets(
+            target[:1].reshape(1, 1),
+            dof_indices=[OFFICIAL_FRANKA_ACTUATED_FINGER_DOF_INDEX],
+        )
         simulation_app.update()
         if contact_collector is not None:
             contact_cursor, new_events = contact_collector.events_after(
@@ -307,6 +334,10 @@ def _step_gripper(
                 SimulationManager.get_num_physics_steps()
                 * SimulationManager.get_physics_dt()
             )
+            gripper_positions = _array_or_list(robot.get_dof_positions())[0][-2:]
+            gripper_velocities = _array_or_list(robot.get_dof_velocities())[0][
+                -2:
+            ]
             for finger, finger_path in (
                 ("left", LEFT_FINGER_PATH),
                 ("right", RIGHT_FINGER_PATH),
@@ -330,18 +361,13 @@ def _step_gripper(
                         }
                     )
                 )
-                samples.append(
-                    M1BContactSampleV1(
-                        timestamp_s=float(timestamp_s),
-                        finger=finger,
-                        collision_pairs=collision_pairs,
-                    )
-                )
                 physx_contact_frames.append(
                     {
                         "finger": finger,
                         "time_s": float(timestamp_s),
                         "physics_step": SimulationManager.get_num_physics_steps(),
+                        "gripper_positions_m": gripper_positions,
+                        "gripper_velocities_mps": gripper_velocities,
                         "collision_pairs": [
                             list(pair) for pair in collision_pairs
                         ],
@@ -364,10 +390,21 @@ def _step_gripper(
                         dt=SimulationManager.get_physics_dt()
                     )[4]
                 )
+                force_norms = [
+                    float(
+                        np.linalg.norm(
+                            np.asarray(
+                                contact_force_matrix[0][index],
+                                dtype=float,
+                            )
+                        )
+                    )
+                    for index in range(len(CONTACT_FILTERS))
+                ]
                 active_filter_indices = [
                     index
                     for index, count in enumerate(pair_counts[0])
-                    if int(count) > 0
+                    if int(count) > 0 and force_norms[index] > 0.0
                 ]
                 collision_pairs = tuple(
                     (
@@ -376,14 +413,13 @@ def _step_gripper(
                     )
                     for index in active_filter_indices
                 )
-                if contact_collector is None:
-                    samples.append(
-                        M1BContactSampleV1(
-                            timestamp_s=float(timestamp_s),
-                            finger=finger,
-                            collision_pairs=collision_pairs,
-                        )
+                samples.append(
+                    M1BContactSampleV1(
+                        timestamp_s=float(timestamp_s),
+                        finger=finger,
+                        collision_pairs=collision_pairs,
                     )
+                )
                 tensor_contact_frames.append(
                     {
                         "finger": finger,
@@ -403,14 +439,7 @@ def _step_gripper(
                             if int(count) > 0
                         },
                         "contact_force_norms_n": {
-                            CONTACT_FILTERS[index][0]: float(
-                                np.linalg.norm(
-                                    np.asarray(
-                                        contact_force_matrix[0][index],
-                                        dtype=float,
-                                    )
-                                )
-                            )
+                            CONTACT_FILTERS[index][0]: force_norms[index]
                             for index in active_filter_indices
                         },
                     }
@@ -508,13 +537,43 @@ def _robot_snapshot(
 ) -> dict[str, object]:
     positions = robot.get_dof_positions()
     lower_limits, upper_limits = robot.get_dof_limits()
+    stiffnesses, dampings = robot.get_dof_gains()
+    (
+        static_frictions,
+        dynamic_frictions,
+        viscous_frictions,
+    ) = robot.get_dof_friction_properties()
+    (
+        speed_effort_gradients,
+        maximum_actuator_velocities,
+        velocity_dependent_resistances,
+    ) = robot.get_dof_drive_model_properties()
     return {
         "dof_positions": _array_or_list(positions),
+        "dof_velocities": _array_or_list(robot.get_dof_velocities()),
         "dof_position_targets": _array_or_list(robot.get_dof_position_targets()),
         "dof_efforts": _array_or_list(robot.get_dof_efforts()),
+        "dof_projected_joint_forces": _array_or_list(
+            robot.get_dof_projected_joint_forces()
+        ),
         "dof_lower_limits": _array_or_list(lower_limits),
         "dof_upper_limits": _array_or_list(upper_limits),
         "dof_max_efforts": _array_or_list(robot.get_dof_max_efforts()),
+        "dof_max_velocities": _array_or_list(robot.get_dof_max_velocities()),
+        "dof_stiffnesses": _array_or_list(stiffnesses),
+        "dof_dampings": _array_or_list(dampings),
+        "dof_static_friction_efforts": _array_or_list(static_frictions),
+        "dof_dynamic_friction_efforts": _array_or_list(dynamic_frictions),
+        "dof_viscous_friction_coefficients": _array_or_list(
+            viscous_frictions
+        ),
+        "dof_speed_effort_gradients": _array_or_list(speed_effort_gradients),
+        "dof_maximum_actuator_velocities": _array_or_list(
+            maximum_actuator_velocities
+        ),
+        "dof_velocity_dependent_resistances": _array_or_list(
+            velocity_dependent_resistances
+        ),
         "hand_pose_world_wxyz": _live_pose(hand_prim),
         "left_finger_pose_world_wxyz": _live_pose(left_finger_prim),
         "right_finger_pose_world_wxyz": _live_pose(right_finger_prim),
@@ -531,17 +590,80 @@ def _physics_prim_diagnostics(stage: Usd.Stage, path: str) -> dict[str, object]:
     prim = stage.GetPrimAtPath(path)
     if not prim.IsValid():
         return {"valid": False}
+    self_collisions = prim.GetAttribute(
+        "physxArticulation:enabledSelfCollisions"
+    )
     return {
         "valid": True,
         "instanceable": prim.IsInstanceable(),
         "instance_proxy": prim.IsInstanceProxy(),
         "rigid_body_api": prim.HasAPI(UsdPhysics.RigidBodyAPI),
         "contact_report_api": prim.HasAPI(PhysxSchema.PhysxContactReportAPI),
+        "enabled_self_collisions": (
+            self_collisions.Get() if self_collisions.IsValid() else None
+        ),
         "collision_prim_paths": [
             str(descendant.GetPath())
             for descendant in Usd.PrimRange(prim, Usd.TraverseInstanceProxies())
             if descendant.HasAPI(UsdPhysics.CollisionAPI)
         ],
+    }
+
+
+def _joint_prim_diagnostics(stage: Usd.Stage, path: str) -> dict[str, object]:
+    prim = stage.GetPrimAtPath(path)
+    if not prim.IsValid():
+        return {"valid": False}
+    selected_attributes: dict[str, object] = {}
+    for attribute in prim.GetAttributes():
+        name = attribute.GetName()
+        if any(
+            token in name.lower()
+            for token in (
+                "mimic",
+                "drive",
+                "friction",
+                "limit",
+                "gear",
+                "target",
+            )
+        ):
+            value = attribute.Get()
+            selected_attributes[name] = (
+                value
+                if value is None
+                or isinstance(value, (bool, float, int, str))
+                else str(value)
+            )
+    return {
+        "valid": True,
+        "applied_schemas": list(prim.GetAppliedSchemas()),
+        "attributes": selected_attributes,
+    }
+
+
+def _enable_contact_reporting_on_colliders(
+    stage: Usd.Stage,
+    root_paths: tuple[str, ...],
+) -> dict[str, object]:
+    applied_paths: list[str] = []
+    skipped_instance_proxy_paths: list[str] = []
+    for root_path in root_paths:
+        root = stage.GetPrimAtPath(root_path)
+        if not root.IsValid():
+            continue
+        for prim in Usd.PrimRange(root, Usd.TraverseInstanceProxies()):
+            if not prim.HasAPI(UsdPhysics.CollisionAPI):
+                continue
+            if prim.IsInstanceProxy():
+                skipped_instance_proxy_paths.append(str(prim.GetPath()))
+                continue
+            report = PhysxSchema.PhysxContactReportAPI.Apply(prim)
+            report.CreateThresholdAttr().Set(0.0)
+            applied_paths.append(str(prim.GetPath()))
+    return {
+        "applied_paths": applied_paths,
+        "skipped_instance_proxy_paths": skipped_instance_proxy_paths,
     }
 
 
@@ -626,6 +748,10 @@ def main() -> int:
         stage.GetPrimAtPath("/World/Robot")
     )
     articulation_contact_report.CreateThresholdAttr().Set(0.0)
+    collider_contact_reporting = _enable_contact_reporting_on_colliders(
+        stage,
+        (LEFT_FINGER_PATH, RIGHT_FINGER_PATH, target_object_path),
+    )
     contact_collector = _PhysxContactCollector()
 
     # NVIDIA's contact-sensor fixture yields one Kit update after authoring
@@ -826,9 +952,19 @@ def main() -> int:
                 "broker_internal": attempt_internal,
                 "sample_count": len(samples),
                 "contact_source": (
-                    "NVIDIA_PHYSX_SUBSCRIBE_CONTACT_REPORT_EVENTS"
+                    "NVIDIA_ISAAC_SIM_6_RIGIDPRIM_TENSOR_CONTACT_VIEW"
                 ),
                 "physx_contact_diagnostics": physx_contact_diagnostics,
+                "gripper_state_trace": [
+                    {
+                        "time_s": frame["time_s"],
+                        "physics_step": frame["physics_step"],
+                        "positions_m": frame["gripper_positions_m"],
+                        "velocities_mps": frame["gripper_velocities_mps"],
+                    }
+                    for frame_index, frame in enumerate(physx_contact_frames)
+                    if frame["finger"] == "left" and frame_index % 20 == 0
+                ],
                 "tensor_contact_diagnostics": tensor_contact_diagnostics,
                 "sensor_diagnostics": sensor_diagnostics,
                 "nonempty_contact_frame_count": len(nonempty_frames),
@@ -854,6 +990,7 @@ def main() -> int:
         "schema_version": "IsaacM1BActuationProbeV1",
         "status": "CONTACT_GATE_REJECTED",
         "scope": "CALIBRATION_ONLY_INITIALIZATION",
+        "free_close_diagnostic": ARGS.free_close_diagnostic,
         "not_policy_rollout": True,
         "official_robot": {
             "asset": "Isaac/Robots/FrankaRobotics/FrankaPanda/franka.usd",
@@ -887,9 +1024,10 @@ def main() -> int:
             "duration_s": ARGS.gripper_close_steps / ACTION_PROTOCOL["frequency_hz"],
             "position_target_m": OFFICIAL_FRANKA_CLOSED_POSITION_M,
             "source": (
-                "NVIDIA_ISAAC_SIM_6_FRANKA_CLASS_"
-                "gripper_closed_position_AND_close_gripper"
+                "NVIDIA_OFFICIAL_USD_DRIVEN_PANDA_FINGER_JOINT1_"
+                "PLUS_PHYSX_MIMIC_JOINT2"
             ),
+            "actuated_dof_index": OFFICIAL_FRANKA_ACTUATED_FINGER_DOF_INDEX,
         },
         "physx_contact_processing": {
             "setting": DISABLE_CONTACT_PROCESSING_SETTING,
@@ -898,6 +1036,7 @@ def main() -> int:
                 DISABLE_CONTACT_PROCESSING_SETTING
             ),
             "required_for_raw_contact_evidence": True,
+            "collider_contact_reporting": collider_contact_reporting,
         },
         "physics_prim_diagnostics": {
             "robot_articulation": _physics_prim_diagnostics(
@@ -915,6 +1054,17 @@ def main() -> int:
             },
             "target_object": _physics_prim_diagnostics(stage, target_object_path),
         },
+        "finger_joint_diagnostics": {
+            name: _joint_prim_diagnostics(
+                stage,
+                str(
+                    robot.dof_paths[0][
+                        int(_array_or_list(robot.get_dof_indices(name))[0])
+                    ]
+                ),
+            )
+            for name in ("panda_finger_joint1", "panda_finger_joint2")
+        },
         "phases": phases,
         "contact_attempts": contact_attempts,
         "selected_contact_centerline_m": (
@@ -925,6 +1075,39 @@ def main() -> int:
         "contact_feedback": feedback.__dict__,
         "broker_internal": broker_internal,
     }
+    if ARGS.free_close_diagnostic:
+        final_finger_positions = contact_attempts[-1]["post_close_snapshot"][
+            "dof_positions"
+        ][0][-2:]
+        free_close_pass = bool(
+            max(abs(float(value)) for value in final_finger_positions) <= 0.002
+            and not feedback.grasp_success
+        )
+        evidence.update(
+            {
+                "status": (
+                    "FREE_CLOSE_DIAGNOSTIC_PASS"
+                    if free_close_pass
+                    else "FREE_CLOSE_DIAGNOSTIC_REJECTED"
+                ),
+                "free_close_result": {
+                    "final_finger_positions_m": final_finger_positions,
+                    "maximum_closed_position_m": 0.002,
+                    "cylinder_contact_observed": feedback.grasp_success,
+                    "passed": free_close_pass,
+                },
+            }
+        )
+        (output / "actuation-probe.json").write_text(
+            json.dumps(evidence, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        print(
+            "M1B_ISAAC_FREE_CLOSE_DIAGNOSTIC "
+            + json.dumps(evidence["free_close_result"], sort_keys=True),
+            flush=True,
+        )
+        return 0 if free_close_pass else 1
     if not feedback.grasp_success:
         (output / "actuation-probe.json").write_text(
             json.dumps(evidence, indent=2, sort_keys=True) + "\n",

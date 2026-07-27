@@ -2,7 +2,7 @@
 
 Date: 2026-07-27 (Asia/Shanghai)
 
-Status: **DATASET PIPELINE PASS; NATIVE ISAAC CONTACT/ATTACH GATE NO-GO**
+Status: **DATASET PIPELINE PASS; NATIVE ISAAC CONTACT/ATTACH PASS**
 
 ## Scope
 
@@ -58,31 +58,37 @@ does not silently omit official finger collisions.
 
 ## Native contact/attach probe
 
-The calibration-only probe used the NVIDIA Franka example's documented
-0.0-metre closed command, 60 Hz physics, and the unchanged ADR-0013 broker
-requirement: at least three samples and at least 100 ms of bilateral contact
-with the same entity.
+The calibration-only probe used the official USD's driven
+`panda_finger_joint1` plus its authored PhysX mimic joint, a 0.0-metre closed
+target, 60 Hz physics, and the unchanged ADR-0013 broker requirement: at least
+three samples and at least 100 ms of bilateral contact with the same entity.
 
-Measured result: **CONTACT_GATE_REJECTED**.
+Measured result: **PASS**, reproduced after removing zero-force filter pairs.
 
-- The arm reached the 105 mm contact-centreline pose with 0.092 mm final
-  Cartesian error.
-- After 240 close steps, the two official finger joints stopped at
-  15.466/15.827 mm while the 30 mm cylinder moved about 1.22 mm laterally.
-- The experimental ContactSensor, RigidPrim tensor contact view, PhysX event
-  subscription, and per-step full contact report all returned zero
-  finger-object contact frames.
-- `/physics/disableContactProcessing` was false throughout.
-- No fixed joint was authored, so no object was attached or lifted.
-
-This is intentionally fail-closed. Finger displacement or object motion is
-diagnostic evidence, not a substitute for bilateral same-entity contact.
+- A 200 mm free-close control reached approximately
+  `0.00000013/0.0 m` with no cylinder contact. This proves the official drive
+  and mimic topology close correctly when the fingertips are clear.
+- At the 105 mm contact centreline, the official fingers stopped at
+  `15.466/15.827 mm` around the 30 mm cylinder.
+- The correct dynamic-object filter is the rigid-body prim
+  `/World/M1B/cylinder_XX/link`. The earlier collision-prim filter was valid
+  for NVIDIA's static-ground example but returned no dynamic-object forces.
+- Strictly positive tensor contact force was observed for `cylinder_01` in
+  230 left-finger and 227 right-finger frames. Zero-force pair-count artifacts
+  were excluded.
+- The existing broker measured 227 paired bilateral samples over
+  3.7667 seconds and selected only `cylinder_01`.
+- The fixed joint attached `cylinder_01`; the object lifted 164.727 mm with
+  1.072 mm hand/object follow error.
+- After joint removal and opening, detached object motion during retreat was
+  0.0 mm, below the unchanged 10 mm non-coupling limit.
 
 Remote evidence:
 
-- Root: `/var/tmp/m1b-isaac-official-close-probe-retry12-20260728`
+- Root:
+  `/var/tmp/m1b-isaac-body-filter-positive-force-repro-20260728`
 - Probe SHA-256:
-  `815aefce5bf778fda56d9796828ac1df918557665fd9b12108786aed1058a2bf`
+  `a3bd1c87769898f6769c8d20a7afa0abdedf7cb67da956284dd89accf38843f7`
 
 ## Measured results
 
@@ -149,6 +155,11 @@ Remote evidence:
 5. The final setup serialized Kit/asset initialization with READY files and
    released both 100-frame loops through one START barrier. This preserved
    fully concurrent measured capture while avoiding initialization races.
+6. Expanding every official USD instance made the finger collision prims
+   editable but crashed Isaac 6.0.1 while creating the RTX SyntheticData
+   graph. The exported physical layer was tested independently, then this
+   route was discarded because rigid-body tensor filters work without
+   de-instancing.
 
 ## Verification commands
 
@@ -159,7 +170,7 @@ uv run --isolated --with 'pytest>=8,<9' --with 'pydantic>=2.7,<3' \
   pytest -q tests/unit/test_isaac_m1b_scene.py tests/unit/test_m1b_beta_protocol.py
 ```
 
-Current result: `67 passed in 5.29s`.
+Current result: `67 passed in 5.09s`.
 
 ```text
 .venv/bin/ruff check src/xh_agent/data/isaac_m1b.py \
@@ -173,11 +184,10 @@ Result: `All checks passed!`
 
 None for the requested 100-frame dual-GPU sensor benchmark.
 
-The native Isaac grasp/attach adapter is not accepted yet: the official
-AlternateFinger drive physically stalls near the cylinder, but Isaac emits no
-contact pair that can satisfy the unchanged broker. Dataset generation can
-continue for sensor-throughput work, but no Isaac closed-loop grasp success may
-be claimed until this is independently resolved.
+The single calibration-only Isaac grasp/attach/detach path now passes. Full
+M1B migration still requires reset/repetition gates, public RGB-D-driven target
+selection, the Student world-model protocol boundary, and end-to-end held-out
+rollouts. This report does not claim those gates yet.
 
 The generated dataset is a throughput/format validation set, not yet a
 diverse training corpus: scene randomization, calibrated sensor noise,
@@ -188,6 +198,6 @@ next data-engineering step.
 
 ```text
 ssh root@labserver \
-  'jq "{status,official_robot,physics_prim_diagnostics,gripper_close_settling,contact_feedback}" \
-  /var/tmp/m1b-isaac-official-close-probe-retry12-20260728/output/actuation-probe.json'
+  'jq "{status,contact_feedback,attached_follow,detached_noncoupling}" \
+  /var/tmp/m1b-isaac-body-filter-positive-force-repro-20260728/output/actuation-probe.json'
 ```
