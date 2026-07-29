@@ -1,203 +1,331 @@
-# M1B Isaac Sim official Franka dual-RTX-3080 benchmark
+# M1B migration to Isaac Sim 6.0.1
 
-Date: 2026-07-27 (Asia/Shanghai)
+Date: 2026-07-29 (Asia/Shanghai)
 
-Status: **DATASET PIPELINE PASS; NATIVE ISAAC CONTACT/ATTACH PASS**
+Status: **MIGRATION PASS, with dynamic-visibility limitations retained**
 
-## Scope
+This report closes the requested M1B Isaac migration scope: official robot
+assets, source-bound task geometry, native contact/attach/reset, a complete
+Isaac tolerance envelope, dual-RTX real-frame dataset generation,
+Teacher-free transition assembly, and an independent static RGB-D perception
+gate. It does not replace the already-accepted Gazebo M1B-beta evidence, and it
+does not claim that the current public detector has production-grade recall in
+long dynamic sequences.
 
-- Isaac Sim image: `nvcr.io/nvidia/isaac-sim:6.0.1`
-- Robot asset: NVIDIA Isaac Sim 6 official Franka Panda USD:
-  `Isaac/Robots/FrankaRobotics/FrankaPanda/franka.usd`
-- Local simplified robot used for rendering: **false**
-- Workers: one independent Isaac process per physical RTX 3080
-- Cameras per worker: 3 at 640x480
-- Modalities: RGB, distance-to-camera depth, semantic segmentation, instance segmentation
-- Capture steps per worker: 100
-- Sensor frames per worker: 300
-- Privileged labels: offline dataset supervision only, not policy input
+The machine-readable summary is
+`reports/m1b-isaac-migration-evidence.json`.
 
-## Asset authenticity boundary
+## Result summary
 
-- Every Isaac robot visual, collision, articulation, joint, and finger shape is
-  composed from NVIDIA's official Franka Panda USD. There is no locally
-  authored or simplified robot geometry in the Isaac stage.
-- The selected official variants are `Gripper=AlternateFinger` and
-  `Mesh=Performance`, matching NVIDIA's Isaac Sim 6 Franka controller example.
-- `panda_controlled.urdf` is used only as a hash-bound control/base-pose
-  contract. It is never referenced as Isaac visual or collision geometry.
-- The cylinders, work table, incoming-zone markings, and partition bin are
-  task-scene geometry generated from the accepted M1B SDF. They are not robot
-  substitutes and must remain dimensionally tied to the task contract.
+| Gate | Result | Measured evidence |
+|---|---|---|
+| Official robot asset | **PASS** | Isaac 6 official Franka Panda USD; `Gripper=Default`, `Mesh=Performance`; local simplified robot `false` |
+| Physics-stage translation | **PASS** | source-bound 30 mm cylinders, table and bin; clean stage SHA-256 `4ead233e…facfa23a` |
+| Native contact/attach/release | **PASS** | 3/3 fresh stages across upright and inverted cylinders |
+| Same-process physical reset | **PASS** | hand jog 28.393 mm, all objects 0 mm, attachment absent |
+| 81-trial tolerance campaign | **PASS** | 81/81 valid; X/Y/Z envelope = 10/15/10 mm |
+| Dual RTX 3080 dataset benchmark | **PASS** | 2 workers × 100 steps × 4 cameras = 800 sensor frames; 12.62695 sensor-frames/s |
+| Teacher-free transition protocol | **PASS** | `TeacherResponse` non-null = 0; policy segmentation URI non-null = 0 |
+| Independent static RGB-D gate | **GO** | p90 X/Y/Z = 5.381/2.162/3.802 mm versus 6/9/6 mm limits |
+| Dynamic five-scene diagnostic | **NO_GO retained** | 8.931/21.420/13.124 mm; unsupported tilted cylinders roll during the sequence |
+| Local verification | **PASS** | scoped Ruff, `git diff --check`, 163 tests, `validate_project` |
 
-The source M1B SDF and control-contract URDF remained hash-bound. The primary
-dataset camera was rotated 180 degrees around the target, per review, and is
-explicitly marked as a dataset view rather than a policy input.
+## Official-asset boundary
 
-The legacy `panda_controlled.urdf` is verified only as the accepted M1B
-control-contract reference. It is not referenced into the Isaac stage and
-contributes no visual or collision geometry to this benchmark.
+- Isaac image: `nvcr.io/nvidia/isaac-sim:6.0.1`.
+- Robot:
+  `Isaac/Robots/FrankaRobotics/FrankaPanda/franka.usd`.
+- Provenance:
+  `NVIDIA_ISAAC_SIM_6_OFFICIAL_FRANKA_PANDA_USD`.
+- Selected official variants:
+  `Gripper=Default`, `Mesh=Performance`.
+- Every Isaac robot visual, collision, articulation, joint and finger shape is
+  composed from NVIDIA's official USD. No locally authored or simplified
+  robot geometry is referenced into the stage.
+- `panda_controlled.urdf` is only the hash-bound action/base-pose contract. It
+  does not provide Isaac visual or collision geometry.
+- Task cylinders, table, incoming markings and partition bin remain tied to
+  the accepted M1B SDF. Cylinder radius is 15 mm and length is 80 mm.
 
-## Native physics-stage audit
+The clean render-free physics stage is:
 
-A render-free physical USDC was exported from generated scene seed 3000:
+- `/var/tmp/m1b-isaac-production-parity-stage-build-20260729/output/m1b_physics_scene.usdc`
+- SHA-256
+  `4ead233e4e9b4f84b64eee262f4bb91931590409c2bb737ea7ee37a4facfa23a`
+- size 9,974,959 bytes
+- official robot base pose `(-0.35, 0.0, 0.45)` m
+- local simplified robot geometry `false`
+- render products in this physical layer: none
 
-- Stage: `/var/tmp/m1b-isaac-clean-physics-usdc-20260728/output/m1b_physics_scene.usdc`
-- SHA-256: `5e2e3f179c237e4bd40f922ac9835746b3798db7bd98226a697fab4bcd9eb11b`
-- Size: 12 MiB
-- Official robot base pose: `(-0.35, 0.0, 0.45)` metres, parsed from the
-  hash-bound production URDF
-- Dynamic objects: 11 cylinders at 0.045 kg each
-- Task collision primitives: 13
-- Render products in the physical stage: none
-- Local simplified robot geometry: false
+## Native contact, attach and reset
 
-The official hand exposes two PhysX collision shapes on each finger and the
-probe created eleven object filters per finger. The physical scene therefore
-does not silently omit official finger collisions.
+The native probe uses the official USD's driven
+`panda_finger_joint1`, authored PhysX mimic, official finger collisions, and
+the unchanged ADR-0013 broker rule: at least three samples and at least
+100 ms of bilateral contact with the same entity.
 
-## Native contact/attach probe
+Three fresh-stage runs passed:
 
-The calibration-only probe used the official USD's driven
-`panda_finger_joint1` plus its authored PhysX mimic joint, a 0.0-metre closed
-target, 60 Hz physics, and the unchanged ADR-0013 broker requirement: at least
-three samples and at least 100 ms of bilateral contact with the same entity.
+1. `cylinder_01`: 227 paired bilateral samples over 3.7667 s,
+   164.727 mm lift, 1.072 mm hand/object follow error.
+2. Upright `cylinder_04`: 229 samples over 3.8 s, 163.443 mm lift,
+   1.928 mm follow error, 0.00003 mm detached motion.
+3. Inverted `cylinder_02`: 178 samples over 2.95 s, 166.917 mm lift,
+   1.137 mm follow error, 0.004773 mm detached motion.
 
-Measured result: **PASS**, reproduced after removing zero-force filter pairs.
+Evidence SHA-256 values are respectively:
 
-- A 200 mm free-close control reached approximately
-  `0.00000013/0.0 m` with no cylinder contact. This proves the official drive
-  and mimic topology close correctly when the fingertips are clear.
-- At the 105 mm contact centreline, the official fingers stopped at
-  `15.466/15.827 mm` around the 30 mm cylinder.
-- The correct dynamic-object filter is the rigid-body prim
-  `/World/M1B/cylinder_XX/link`. The earlier collision-prim filter was valid
-  for NVIDIA's static-ground example but returned no dynamic-object forces.
-- Strictly positive tensor contact force was observed for `cylinder_01` in
-  230 left-finger and 227 right-finger frames. Zero-force pair-count artifacts
-  were excluded.
-- The existing broker measured 227 paired bilateral samples over
-  3.7667 seconds and selected only `cylinder_01`.
-- The fixed joint attached `cylinder_01`; the object lifted 164.727 mm with
-  1.072 mm hand/object follow error.
-- After joint removal and opening, detached object motion during retreat was
-  0.0 mm, below the unchanged 10 mm non-coupling limit.
+- `a3bd1c87769898f6769c8d20a7afa0abdedf7cb67da956284dd89accf38843f7`
+- `005dee57dba9a3487728ee89859d3ee12c707f8181127809cc149f44c65390b2`
+- `f696f715994c133cdbaf52933ccbd90113dc33c0ce9df7d140eb72d2db37f508`
 
-Remote evidence:
+The production-parity same-process reset also passed. After the required
+settling window, maximum quiet displacement was 0.001947 mm; the production
+IK jog moved the hand 28.393 mm while every object moved 0 mm. The attachment
+prim was absent before and after the jog. Evidence:
 
-- Root:
-  `/var/tmp/m1b-isaac-body-filter-positive-force-repro-20260728`
-- Probe SHA-256:
-  `a3bd1c87769898f6769c8d20a7afa0abdedf7cb67da956284dd89accf38843f7`
+- `/var/tmp/m1b-isaac-production-parity-cylinder_04-reset-h-20260729/actuation-probe.json`
+- SHA-256
+  `bc08bbf74b94af727dd11f082098c236949bd38c890f365bc9a904e70e981df1`
 
-## Measured results
+## Complete tolerance envelope
+
+The official `Default` hand completed the immutable 81-trial,
+calibration-only campaign:
+
+- evidence:
+  `/var/tmp/m1b-isaac-tolerance-production-parity-r3-20260729/m1b-isaac-tolerance-envelope.json`
+- status: `COMPLETE_CALIBRATION_ONLY`
+- valid/expected trials: 81/81
+- envelope X/Y/Z: `0.010 / 0.015 / 0.010 m`
+- envelope SHA-256:
+  `25e3c99f01de176e5d646a01d03b23a8717f6966ebd685c33003447274b4b9ff`
+- worklist SHA-256:
+  `3bd0bf6427fc797ea8a4fd829a9972bcd37db31b2efc3dbe11df2837b5d9f904`
+- local simplified robot used: `false`
+
+## Dual RTX 3080 real-frame benchmark
+
+The final throughput run serialized Kit initialization and then released both
+workers through a shared START barrier. Each worker used one physical RTX
+3080, 100 capture steps and four 640×480 cameras. Every camera wrote RGB,
+metric distance-to-image-plane depth, semantic segmentation and instance
+segmentation.
 
 | Metric | GPU 0 / worker 0 | GPU 1 / worker 1 |
 |---|---:|---:|
-| Status | PASS | PASS |
-| Benchmark wall time | 48.816983 s | 48.748803 s |
-| Sensor frames | 300 | 300 |
-| Sensor frames/s | 6.145402 | 6.153997 |
-| Capture-step p50 | 0.148195 s | 0.149466 s |
-| Capture-step p90 | 0.156246 s | 0.156300 s |
-| Readback/write p50 | 0.336570 s | 0.334096 s |
-| Readback/write p90 | 0.348132 s | 0.344586 s |
-| Peak VRAM | 2200 MiB | 2062 MiB |
-| Mean VRAM | 2150.29 MiB | 2010.96 MiB |
-| Peak GPU utilization | 59% | 61% |
-| P90 GPU utilization | 56% | 57% |
-| Mean GPU utilization | 18.77% | 22.02% |
-| Peak power | 103.11 W | 103.07 W |
-| Output bytes before metrics | 426,039,864 | 426,092,654 |
-| Official Franka semantic pixels | 5,482,171 | 5,466,039 |
+| Sensor frames | 400 | 400 |
+| Benchmark wall time | 63.356548 s | 62.848260 s |
+| Sensor frames/s | 6.313475 | 6.364536 |
+| Peak VRAM | 2635 MiB | 2495 MiB |
+| Peak GPU utilization | 67% | 67% |
+| Peak power | 102.97 W | 123.36 W |
 
-Combined concurrent result:
+Combined:
 
-- 600 sensor frames in 48.816983 seconds
-- 12.290805 sensor frames/s
-- 852,132,518 output bytes before metrics (about 812.66 MiB)
-- RGB 600, depth 600, semantic 600, instance 600, label JSON 12
+- 800 sensor frames in 63.356548 s
+- 12.626950524 sensor frames/s
+- summary:
+  `/var/tmp/m1b-isaac-dual100-final-20260729/dual-benchmark-summary.json`
+- summary SHA-256:
+  `bf5250308399f719125eb92de2afd9842b522b1fc7e787cc5f39985fb4da55b0`
+- worker metric SHA-256:
+  `15af08286dbb525b63965409890969b7b3d26fec28ba33111594bb40510281d1`
+  and
+  `3d6961c30e60e0e721fce123865eb244e4260f576bee2b010d50dc01a0a1c41e`
 
-The relatively low mean GPU utilization and the 0.334-0.337 second median
-readback/write time show that PNG encoding, NumPy depth writes, and host
-readback dominate this small benchmark more than RTX rendering.
+The low mean utilization is not evidence that RTX was unused. Peak
+utilization was 67% on both GPUs, while PNG encoding, depth-array writes and
+host readback dominate this small four-camera workload.
 
-## Runtime validation
+## Dataset and action protocol
 
-- Official Panda DOF indices were exactly 0 through 8:
-  seven revolute arm joints and two translational finger joints.
-- The action protocol was explicit: named Panda joint frame, arm radians,
-  finger metres, dimension 9, 30 Hz, no normalization.
-- Both workers passed exact file-count checks, finite-depth checks, label
-  presence checks, and nonzero rendered-pixel checks for both
-  `industrial_cylinder` and `panda_robot`.
-- Both GPUs returned to idle after completion: 171 MiB / 32 MiB and 0% use.
+Every capture writes physically separate streams:
 
-Remote evidence:
+- `runtime_frames.jsonl`: public policy RGB-D calibration/URIs, measured
+  nine-DOF Franka state, end-effector pose, gripper state and commanded action.
+- `supervision_frames.jsonl`: offline-only simulator object poses and labels.
 
-- Root:
-  `/var/tmp/m1b-isaac-official-dual-workers-retry4-20260727`
-- Worker 0 metrics SHA-256:
-  `82c44824c4f2460946933b8d0fef2c3c234935222e33740406c3be5182874487`
-- Worker 1 metrics SHA-256:
-  `c816e00b957de9add0890d61deba809cbb67742c4fd10e1e19c056300be688b3`
+`scripts/build_isaac_m1b_transitions.py` runs public RGB-D perception before
+the offline supervision join. Its `ObservationV0` contains neither simulator
+entity IDs nor semantic/instance label images. `TeacherResponse` is always
+null.
 
-## Failures retained
+The action protocol is explicit:
 
-1. The first preflight used the image's default streaming entrypoint instead
-   of `/isaac-sim/python.sh`; it was stopped and produced no data.
-2. The next preflight failed closed because the output mount was not writable.
-3. The original geometry traversal check reported zero because the official
-   USD uses instances/payloads. It was replaced with stronger runtime gates:
-   exact articulation DOFs plus actual semantic pixels.
-4. Simultaneously starting two Kit processes caused a Kit crash or partial
-   extension imports. IPC and network changes alone were insufficient.
-5. The final setup serialized Kit/asset initialization with READY files and
-   released both 100-frame loops through one START barrier. This preserved
-   fully concurrent measured capture while avoiding initialization races.
-6. Expanding every official USD instance made the finger collision prims
-   editable but crashed Isaac 6.0.1 while creating the RTX SyntheticData
-   graph. The exported physical layer was tested independently, then this
-   route was discarded because rigid-body tensor filters work without
-   de-instancing.
+- frame: Panda joint order by name
+- dimensions: 9
+- units: arm radians and finger metres
+- frequency: 30 Hz
+- normalization: identity/none
+- action source in this benchmark: deterministic dataset excitation, not a
+  learned policy
 
-## Verification commands
+The Student path therefore remains Teacher-independent and never receives
+privileged simulator truth at test time.
+
+## Independent static perception gate
+
+The original ADR work item specifies a static RGB-D audit. A first dynamic
+five-scene run exposed that the generated 31° tilted cylinders are not static:
+they roll to horizontal and can eventually leave the finite table. That
+diagnostic is retained below.
+
+For the actual static audit, the benchmark:
+
+1. exports the unmodified production physics stage;
+2. marks only cylinder rigid bodies kinematic by their public stage paths;
+3. never reads supervision coordinates to perform the freeze;
+4. labels the capture `CALIBRATION_ONLY_STATIC_PERCEPTION`;
+5. sets `training_eligible=false`;
+6. requires the evaluator to fail closed unless all inputs carry that mode.
+
+Five new, previously unseen test scenes were used:
+4057, 4058, 4059, 4077 and 4078. They contain 41 distinct cylinders and all
+three source orientation classes. Across five frames per scene, every object
+had exactly 0 m displacement.
+
+Evidence:
+
+- capture root:
+  `/var/tmp/m1b-isaac-static-audit-heldout5-v1-20260729`
+- gate:
+  `/var/tmp/m1b-isaac-perception-gate-static-heldout5-v1-20260729/m1b-isaac-public-perception-gate.json`
+- gate SHA-256:
+  `15e7c2ad043aa363efbcc902718bd8aafa58aedcb1716d514bd9a453c86bd456`
+
+Measured result:
+
+| Axis | Median absolute error | p90 absolute error | `0.6 ×` envelope limit | Result |
+|---|---:|---:|---:|---|
+| X | 2.039 mm | 5.381 mm | 6 mm | PASS |
+| Y | 0.969 mm | 2.162 mm | 9 mm | PASS |
+| Z | 1.291 mm | 3.802 mm | 6 mm | PASS |
+
+Overall status: **GO**.
+
+The evaluator matched 65 public detections against 205 truth instances over
+25 frames. Matched precision was 71.43%, truth recall 31.71%, and global
+leftmost-target accuracy 60%. Those are recorded limitations, not hidden by
+the p90 pass. The accepted gate compares localization error on matched public
+detections to the measured grasp envelope; it is not a detector-recall gate.
+
+## Retained failures and limitations
+
+1. **Dynamic five-scene perception diagnostic: NO_GO.** On scenes
+   4017/4018/4019/4037/4038, p90 X/Y/Z was
+   8.931/21.420/13.124 mm against 6/9/6 mm. The vertical classes separately
+   passed; failures were dominated by tilted objects rolling during frames
+   1–4 and becoming occluded or end-on. Evidence SHA-256:
+   `db6f67971fa3386e00cd3cd0308e5cac388351c6a10e3a98724092f48dd0ec1c`.
+2. **Source tilted pose is physically unsupported.** A 32 s natural-gravity
+   audit measured `cylinder_03` total displacement 76.336 m after it left the
+   finite table; final 0.5 s displacement was 9.129 m. Gravity, velocities and
+   sleep threshold were not modified. This is a source-scene modeling issue,
+   not an official-hand or GPU failure. Changing the physical scene requires
+   a human ADR; no hidden support was added.
+3. **Visibility remains weak.** Static matched truth recall is 31.71% and
+   leftmost selection is 60%. A production corpus should improve camera
+   coverage and the public detector before treating every generated frame as
+   a task-success sample.
+4. **One Isaac 6.0.1 cold start segfaulted** while creating the SyntheticData
+   graph. It wrote no metrics and was excluded. A fresh output on the other GPU
+   passed, and all subsequent held-out captures passed.
+5. **Full-repository Ruff is polluted by unrelated pre-existing artifacts.**
+   `ruff check .` reports 95 errors in Teacher snapshots, QRM artifacts and old
+   diagnostic scripts that were present before this migration. The scoped
+   migration files pass Ruff. These unrelated files were not modified.
+
+None of these failures is converted into a relaxed threshold. The dynamic
+diagnostic remains NO_GO, while the separately specified static calibration
+gate is the one that legitimately returns GO.
+
+## Teacher and truth boundary
+
+- Nano remains `CANDIDATE`.
+- BWM remains `CANDIDATE_LICENSE_PENDING`.
+- Super remains `PARKED`.
+- No Teacher was loaded, replaced, upgraded or called.
+- Teacher kill-rule events: **none**, because no Teacher participated.
+- Simulator truth is stored only in the offline supervision stream.
+- Semantic and instance segmentation are dataset labels, never policy input.
+
+## Changed files
+
+- `src/xh_agent/data/isaac_m1b.py`
+- `src/xh_agent/data/isaac_m1b_episode.py`
+- `src/xh_agent/grasp/free_gap.py`
+- `scripts/isaac_m1b_dataset_benchmark.py`
+- `scripts/isaac_m1b_actuation_probe.py`
+- `scripts/run_isaac_m1b_tolerance_campaign.py`
+- `scripts/run_isaac_m1b_dual_benchmark.py`
+- `scripts/build_isaac_m1b_transitions.py`
+- `scripts/evaluate_isaac_m1b_perception_gate.py`
+- `tests/unit/test_isaac_m1b_scene.py`
+- `pyproject.toml`
+- `uv.lock`
+- this report and `reports/m1b-isaac-migration-evidence.json`
+
+Unrelated dirty hardware probes, Teacher/QRM artifacts and the challenge PDF
+were preserved and are not part of this migration.
+
+## Verification
 
 ```text
-uv run --isolated --with 'pytest>=8,<9' --with 'pydantic>=2.7,<3' \
-  --with 'PyYAML>=6,<7' --with 'jsonschema>=4,<5' \
-  --with 'numpy>=1.26,<3' --with 'eval-type-backport>=0.2' \
-  pytest -q tests/unit/test_isaac_m1b_scene.py tests/unit/test_m1b_beta_protocol.py
-```
-
-Current result: `67 passed in 5.09s`.
-
-```text
-.venv/bin/ruff check src/xh_agent/data/isaac_m1b.py \
+uv run ruff check \
+  src/xh_agent/data/isaac_m1b.py \
+  src/xh_agent/data/isaac_m1b_episode.py \
+  src/xh_agent/grasp/free_gap.py \
   scripts/isaac_m1b_dataset_benchmark.py \
+  scripts/isaac_m1b_actuation_probe.py \
+  scripts/run_isaac_m1b_tolerance_campaign.py \
+  scripts/run_isaac_m1b_dual_benchmark.py \
+  scripts/build_isaac_m1b_transitions.py \
+  scripts/evaluate_isaac_m1b_perception_gate.py \
   tests/unit/test_isaac_m1b_scene.py
 ```
 
 Result: `All checks passed!`
 
+```text
+git diff --check
+```
+
+Result: PASS.
+
+```text
+uv run pytest -q
+```
+
+Result: `163 passed in 18.60s`.
+
+```text
+uv run python scripts/validate_project.py
+```
+
+Result:
+`{"status":"PASS","schemas":9,"root_import":"CPU_ONLY"}`.
+
 ## Blockers
 
-None for the requested 100-frame dual-GPU sensor benchmark.
-
-The single calibration-only Isaac grasp/attach/detach path now passes. Full
-M1B migration still requires reset/repetition gates, public RGB-D-driven target
-selection, the Student world-model protocol boundary, and end-to-end held-out
-rollouts. This report does not claim those gates yet.
-
-The generated dataset is a throughput/format validation set, not yet a
-diverse training corpus: scene randomization, calibrated sensor noise,
-lighting/material domains, and train/validation split generation remain the
-next data-engineering step.
+There is no blocker for using the official Isaac adapter or generating
+Teacher-free dynamic training data. There is one explicit blocker to claiming
+robust dynamic tilted-object tracking: the unsupported source tilted pose and
+low public-detector recall. A physical scene correction needs a human ADR;
+detector/camera improvements do not authorize privileged truth input.
 
 ## Next command
 
+Generate a larger dynamic corpus into a new immutable output root, while
+keeping the static calibration outputs excluded from training:
+
 ```text
-ssh root@labserver \
-  'jq "{status,contact_feedback,attached_follow,detached_noncoupling}" \
-  /var/tmp/m1b-isaac-body-filter-positive-force-repro-20260728/output/actuation-probe.json'
+ssh root@labserver '
+  cd /var/tmp/m1b-isaac-damped-project-20260729 &&
+  python3 scripts/generate_industrial_scenes.py \
+    --template robot_ws/src/xh_sim/worlds/industrial_cylinder_v1.sdf \
+    --output-dir /var/tmp/m1b-isaac-training-scenes-v1 \
+    --count 150 \
+    --seed-start 5000
+'
 ```

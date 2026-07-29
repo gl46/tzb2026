@@ -14,6 +14,12 @@ M1B_URDF_SHA256 = "6678ff409d60f074283805879f53edaa939ead34f97a5a961ee67f6229b44
 OFFICIAL_ISAAC_FRANKA_RELATIVE_USD = (
     "Isaac/Robots/FrankaRobotics/FrankaPanda/franka.usd"
 )
+SDF_DEFAULT_SURFACE_FRICTION = 1.0
+SDF_DEFAULT_SURFACE_RESTITUTION = 0.0
+# The accepted Gazebo path uses gz-physics' Bullet-Featherstone backend.
+# Bullet's btMultiBody sleeps when squared motion stays below this threshold;
+# PhysX's default is materially lower, so port the source-engine value.
+BULLET_FEATHERSTONE_SLEEP_THRESHOLD = 0.05
 
 
 @dataclass(frozen=True)
@@ -50,6 +56,8 @@ class LinkVisuals:
     visuals: tuple[VisualPrimitive, ...]
     collisions: tuple[CollisionPrimitive, ...]
     mass_kg: float | None
+    linear_velocity_decay: float | None
+    angular_velocity_decay: float | None
 
 
 @dataclass(frozen=True)
@@ -67,6 +75,8 @@ class CameraSpec:
     position: tuple[float, float, float]
     look_at: tuple[float, float, float]
     resolution: tuple[int, int]
+    horizontal_fov_rad: float
+    clipping_range_m: tuple[float, float]
     provenance: str
 
 
@@ -138,6 +148,48 @@ def load_robot_base_pose(urdf_path: str | Path) -> Pose:
     if len(xyz) != 3 or len(rpy) != 3:
         raise ValueError("world_to_panda origin must contain xyz and rpy triples")
     return Pose(xyz=xyz, rpy=rpy)
+
+
+def load_m1b_gripper_effort_limit(urdf_path: str | Path) -> float:
+    """Return the production gripper leader's effort limit in newtons.
+
+    Gazebo drives ``panda_finger_joint2`` and structurally mimics it from
+    joint1.  NVIDIA's official Isaac Franka drives joint1 and makes joint2 its
+    mimic.  Validate the source relationship here so the simulator adapter
+    transfers the symmetric aperture contract without guessing a mapping.
+    """
+
+    root = ET.parse(urdf_path).getroot()
+    leader = root.find("./joint[@name='panda_finger_joint2']")
+    follower = root.find("./joint[@name='panda_finger_joint1']")
+    if (
+        leader is None
+        or follower is None
+        or leader.get("type") != "prismatic"
+        or follower.get("type") != "prismatic"
+    ):
+        raise ValueError("expected the two production prismatic finger joints")
+    leader_limit = leader.find("limit")
+    follower_limit = follower.find("limit")
+    mimic = follower.find("mimic")
+    if (
+        leader_limit is None
+        or follower_limit is None
+        or mimic is None
+        or mimic.get("joint") != "panda_finger_joint2"
+        or float(mimic.get("multiplier", "nan")) != 1.0
+        or float(mimic.get("offset", "nan")) != 0.0
+    ):
+        raise ValueError("production finger mimic contract is invalid")
+    leader_effort = float(leader_limit.get("effort", "nan"))
+    follower_effort = float(follower_limit.get("effort", "nan"))
+    if (
+        not math.isfinite(leader_effort)
+        or leader_effort <= 0.0
+        or not math.isclose(follower_effort, leader_effort, abs_tol=1e-12)
+    ):
+        raise ValueError("production finger effort limits are invalid")
+    return leader_effort
 
 
 def parse_pose(text: str | None) -> Pose:
@@ -220,6 +272,18 @@ def _parse_mass(link: ET.Element) -> float | None:
     return mass_kg
 
 
+def _parse_velocity_decay(link: ET.Element, field: str) -> float | None:
+    text = link.findtext(f"./velocity_decay/{field}")
+    if text is None:
+        return None
+    value = float(text)
+    if not math.isfinite(value) or value < 0:
+        raise ValueError(
+            f"link {link.get('name')} has invalid {field} velocity decay {value}"
+        )
+    return value
+
+
 def _semantic_class(model_name: str) -> str | None:
     if model_name == "industrial_work_table":
         return "work_table"
@@ -253,6 +317,8 @@ def _parse_models(world: ET.Element) -> tuple[SceneModel, ...]:
                         visuals=visuals,
                         collisions=collisions,
                         mass_kg=_parse_mass(link),
+                        linear_velocity_decay=_parse_velocity_decay(link, "linear"),
+                        angular_velocity_decay=_parse_velocity_decay(link, "angular"),
                     )
                 )
         if not links:
@@ -282,13 +348,39 @@ def _parse_cameras(world: ET.Element) -> tuple[CameraSpec, ...]:
         int(sensor.findtext("width", default="0")),
         int(sensor.findtext("height", default="0")),
     )
+    camera = fixture.find("./sensor[@name='front_rgbd']/camera")
+    if camera is None:
+        raise ValueError("M1B source SDF has no front_rgbd camera contract")
+    horizontal_fov_rad = float(camera.findtext("horizontal_fov", default="nan"))
+    clipping_range_m = (
+        float(camera.findtext("./clip/near", default="nan")),
+        float(camera.findtext("./clip/far", default="nan")),
+    )
+    if (
+        not math.isfinite(horizontal_fov_rad)
+        or not 0 < horizontal_fov_rad < math.pi
+        or not all(math.isfinite(value) for value in clipping_range_m)
+        or not 0 < clipping_range_m[0] < clipping_range_m[1]
+    ):
+        raise ValueError("M1B source SDF has invalid camera optics")
     look_at = (-0.05, 0.0, 0.55)
     return (
+        CameraSpec(
+            name="policy_rgbd",
+            position=source_pose.xyz,
+            look_at=look_at,
+            resolution=resolution,
+            horizontal_fov_rad=horizontal_fov_rad,
+            clipping_range_m=clipping_range_m,
+            provenance="M1B_SOURCE_FIXED_PUBLIC_POLICY_RGBD_INPUT",
+        ),
         CameraSpec(
             name="front_rgbd",
             position=(-source_pose.xyz[0], -source_pose.xyz[1], source_pose.xyz[2]),
             look_at=look_at,
             resolution=resolution,
+            horizontal_fov_rad=horizontal_fov_rad,
+            clipping_range_m=clipping_range_m,
             provenance=(
                 "M1B_SOURCE_FIXTURE_ROTATED_180_DEG_ABOUT_TARGET_PER_REVIEW_"
                 "DATASET_VIEW_NOT_POLICY_INPUT"
@@ -299,6 +391,8 @@ def _parse_cameras(world: ET.Element) -> tuple[CameraSpec, ...]:
             position=(-0.05, 0.0, 1.70),
             look_at=(-0.05, 0.0, 0.45),
             resolution=resolution,
+            horizontal_fov_rad=horizontal_fov_rad,
+            clipping_range_m=clipping_range_m,
             provenance="ISAAC_DATASET_AUXILIARY_NOT_POLICY_INPUT",
         ),
         CameraSpec(
@@ -306,6 +400,8 @@ def _parse_cameras(world: ET.Element) -> tuple[CameraSpec, ...]:
             position=(0.65, -0.75, 1.05),
             look_at=look_at,
             resolution=resolution,
+            horizontal_fov_rad=horizontal_fov_rad,
+            clipping_range_m=clipping_range_m,
             provenance="ISAAC_DATASET_AUXILIARY_NOT_POLICY_INPUT",
         ),
     )
@@ -407,6 +503,7 @@ def validate_m1b_physics_contract(scene: M1BIsaacScene) -> dict[str, object]:
             f"dynamic={dynamic_names}, cylinders={cylinder_names}"
         )
     cylinder_masses: dict[str, float] = {}
+    cylinder_velocity_decay: dict[str, dict[str, float | None]] = {}
     for model in scene.dynamic_models:
         if len(model.links) != 1:
             raise ValueError(f"dynamic model {model.name} must have exactly one link")
@@ -415,7 +512,17 @@ def validate_m1b_physics_contract(scene: M1BIsaacScene) -> dict[str, object]:
             raise ValueError(f"dynamic model {model.name} must have one collision")
         if link.mass_kg is None:
             raise ValueError(f"dynamic model {model.name} has no mass")
+        if (link.linear_velocity_decay is None) != (
+            link.angular_velocity_decay is None
+        ):
+            raise ValueError(
+                f"dynamic model {model.name} has a partial velocity-decay contract"
+            )
         cylinder_masses[model.name] = link.mass_kg
+        cylinder_velocity_decay[model.name] = {
+            "linear": link.linear_velocity_decay,
+            "angular": link.angular_velocity_decay,
+        }
     static_collision_names = tuple(
         model.name
         for model in scene.models
@@ -432,4 +539,17 @@ def validate_m1b_physics_contract(scene: M1BIsaacScene) -> dict[str, object]:
         "static_collision_model_names": static_collision_names,
         "collision_primitive_count": scene_collision_primitive_count(scene.models),
         "cylinder_masses_kg": cylinder_masses,
+        "cylinder_velocity_decay": cylinder_velocity_decay,
+        "sdf_default_surface": {
+            "static_friction": SDF_DEFAULT_SURFACE_FRICTION,
+            "dynamic_friction": SDF_DEFAULT_SURFACE_FRICTION,
+            "restitution": SDF_DEFAULT_SURFACE_RESTITUTION,
+        },
+        "source_engine_sleep_threshold": {
+            "value": BULLET_FEATHERSTONE_SLEEP_THRESHOLD,
+            "source": (
+                "gz-physics/bullet-featherstone btMultiBody "
+                "INITIAL_SLEEP_EPSILON"
+            ),
+        },
     }

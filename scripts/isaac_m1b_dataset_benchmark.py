@@ -13,12 +13,15 @@ from pathlib import Path
 from typing import Any
 
 from xh_agent.data.isaac_m1b import (
+    BULLET_FEATHERSTONE_SLEEP_THRESHOLD,
     CameraSpec,
     CollisionPrimitive,
     LinkVisuals,
     M1B_URDF_SHA256,
     M1BIsaacScene,
     Pose,
+    SDF_DEFAULT_SURFACE_FRICTION,
+    SDF_DEFAULT_SURFACE_RESTITUTION,
     SceneModel,
     VisualPrimitive,
     load_m1b_isaac_generated_scene,
@@ -40,8 +43,23 @@ def parse_args() -> tuple[argparse.Namespace, list[str]]:
     parser.add_argument("--output", required=True)
     parser.add_argument("--worker-id", type=int, required=True)
     parser.add_argument("--physical-gpu-index", type=int, required=True)
+    parser.add_argument(
+        "--gripper-variant",
+        choices=("AlternateFinger", "Default"),
+        default="Default",
+        help="Explicit NVIDIA official Franka gripper variant.",
+    )
     parser.add_argument("--frames", type=int, default=100)
     parser.add_argument("--warmup-frames", type=int, default=5)
+    parser.add_argument(
+        "--static-perception-audit",
+        action="store_true",
+        help=(
+            "Freeze only industrial-cylinder rigid bodies after exporting the "
+            "unaltered physics stage. This is calibration-only static "
+            "perception evidence and is not Student-training data."
+        ),
+    )
     parser.add_argument("--ready-file")
     parser.add_argument("--start-file")
     parser.add_argument("--barrier-timeout-s", type=float, default=600.0)
@@ -103,7 +121,7 @@ from isaacsim.core.experimental.prims import Articulation
 from isaacsim.core.simulation_manager import SimulationManager
 from isaacsim.storage.native import get_assets_root_path
 from PIL import Image
-from pxr import Gf, Sdf, Semantics, Usd, UsdGeom, UsdPhysics, UsdShade
+from pxr import Gf, PhysxSchema, Sdf, Semantics, Usd, UsdGeom, UsdPhysics, UsdShade
 
 
 HOME_JOINTS = {
@@ -117,7 +135,16 @@ HOME_JOINTS = {
     "panda_finger_joint2": 0.02,
     "panda_finger_joint1": 0.02,
 }
-ANNOTATORS = ("rgb", "distance_to_camera", "semantic_segmentation", "instance_segmentation")
+ANNOTATORS = (
+    "rgb",
+    "distance_to_image_plane",
+    "semantic_segmentation",
+    "instance_segmentation",
+)
+PANDA_DOF_NAMES = tuple(
+    [f"panda_joint{index}" for index in range(1, 8)]
+    + ["panda_finger_joint1", "panda_finger_joint2"]
+)
 
 
 def _json_ready(value: Any) -> Any:
@@ -197,6 +224,7 @@ def _create_collision(
     stage: Usd.Stage,
     path: str,
     collision: CollisionPrimitive,
+    physics_material: UsdShade.Material,
 ) -> Usd.Prim:
     if collision.shape == "box":
         assert collision.size is not None
@@ -214,6 +242,11 @@ def _create_collision(
     _apply_pose(geometry, collision.pose)
     geometry.MakeInvisible()
     UsdPhysics.CollisionAPI.Apply(geometry.GetPrim())
+    UsdShade.MaterialBindingAPI.Apply(geometry.GetPrim()).Bind(
+        physics_material,
+        UsdShade.Tokens.weakerThanDescendants,
+        "physics",
+    )
     return geometry.GetPrim()
 
 
@@ -222,6 +255,7 @@ def _create_link(
     model_path: str,
     link: LinkVisuals,
     semantic_class: str,
+    physics_material: UsdShade.Material,
 ) -> None:
     link_path = f"{model_path}/{link.name}"
     link_xform = UsdGeom.Xform.Define(stage, link_path)
@@ -236,25 +270,79 @@ def _create_link(
             stage,
             f"{link_path}/Collision_{collision.name}",
             collision,
+            physics_material,
         )
 
 
-def _create_model(stage: Usd.Stage, model: SceneModel) -> None:
+def _create_model(
+    stage: Usd.Stage,
+    model: SceneModel,
+    physics_material: UsdShade.Material,
+) -> None:
     model_path = f"/World/M1B/{model.name}"
     model_xform = UsdGeom.Xform.Define(stage, model_path)
     _apply_pose(model_xform, model.pose)
     _apply_semantics(model_xform.GetPrim(), model.semantic_class)
     for link in model.links:
-        _create_link(stage, model_path, link, model.semantic_class)
+        _create_link(
+            stage,
+            model_path,
+            link,
+            model.semantic_class,
+            physics_material,
+        )
         if not model.static:
             link_prim = stage.GetPrimAtPath(f"{model_path}/{link.name}")
             UsdPhysics.RigidBodyAPI.Apply(link_prim)
+            physx_rigid_body = PhysxSchema.PhysxRigidBodyAPI.Apply(link_prim)
+            physx_rigid_body.CreateSleepThresholdAttr().Set(
+                BULLET_FEATHERSTONE_SLEEP_THRESHOLD
+            )
+            if (link.linear_velocity_decay is None) != (
+                link.angular_velocity_decay is None
+            ):
+                raise RuntimeError(
+                    f"dynamic link {model.name}/{link.name} has a partial "
+                    "SDF velocity-decay contract"
+                )
+            if link.linear_velocity_decay is not None:
+                assert link.angular_velocity_decay is not None
+                physx_rigid_body.CreateLinearDampingAttr().Set(
+                    link.linear_velocity_decay
+                )
+                physx_rigid_body.CreateAngularDampingAttr().Set(
+                    link.angular_velocity_decay
+                )
 
 
-def _validate_stage_physics(stage: Usd.Stage) -> dict[str, list[str]]:
+def _create_sdf_default_physics_material(
+    stage: Usd.Stage,
+) -> UsdShade.Material:
+    """Port SDFormat's default rigid-contact surface coefficients explicitly."""
+
+    material = UsdShade.Material.Define(
+        stage,
+        "/World/M1B/SDFDefaultPhysicsMaterial",
+    )
+    physics_material = UsdPhysics.MaterialAPI.Apply(material.GetPrim())
+    physics_material.CreateStaticFrictionAttr().Set(
+        SDF_DEFAULT_SURFACE_FRICTION
+    )
+    physics_material.CreateDynamicFrictionAttr().Set(
+        SDF_DEFAULT_SURFACE_FRICTION
+    )
+    physics_material.CreateRestitutionAttr().Set(
+        SDF_DEFAULT_SURFACE_RESTITUTION
+    )
+    return material
+
+
+def _validate_stage_physics(stage: Usd.Stage) -> dict[str, object]:
     collision_paths: list[str] = []
     rigid_body_paths: list[str] = []
     mass_paths: list[str] = []
+    rigid_body_damping: dict[str, dict[str, float]] = {}
+    rigid_body_sleep_thresholds: dict[str, float] = {}
     for model in SCENE.models:
         for link in model.links:
             link_path = f"/World/M1B/{model.name}/{link.name}"
@@ -263,6 +351,48 @@ def _validate_stage_physics(stage: Usd.Stage) -> dict[str, list[str]]:
                 if not link_prim.HasAPI(UsdPhysics.RigidBodyAPI):
                     raise RuntimeError(f"missing rigid-body API on {link_path}")
                 rigid_body_paths.append(link_path)
+                physx_rigid_body = PhysxSchema.PhysxRigidBodyAPI(link_prim)
+                sleep_threshold = float(
+                    physx_rigid_body.GetSleepThresholdAttr().Get()
+                )
+                expected_sleep_threshold = float(
+                    PHYSICS_CONTRACT["source_engine_sleep_threshold"]["value"]
+                )
+                if not math.isclose(
+                    sleep_threshold,
+                    expected_sleep_threshold,
+                    abs_tol=1e-9,
+                ):
+                    raise RuntimeError(
+                        f"PhysX sleep threshold mismatch on {link_path}: "
+                        f"{sleep_threshold}"
+                    )
+                rigid_body_sleep_thresholds[link_path] = sleep_threshold
+                if link.linear_velocity_decay is not None:
+                    assert link.angular_velocity_decay is not None
+                    linear_damping = float(
+                        physx_rigid_body.GetLinearDampingAttr().Get()
+                    )
+                    angular_damping = float(
+                        physx_rigid_body.GetAngularDampingAttr().Get()
+                    )
+                    if not math.isclose(
+                        linear_damping,
+                        link.linear_velocity_decay,
+                        abs_tol=1e-9,
+                    ) or not math.isclose(
+                        angular_damping,
+                        link.angular_velocity_decay,
+                        abs_tol=1e-9,
+                    ):
+                        raise RuntimeError(
+                            f"PhysX damping mismatch on {link_path}: "
+                            f"{linear_damping}/{angular_damping}"
+                        )
+                    rigid_body_damping[link_path] = {
+                        "linear": linear_damping,
+                        "angular": angular_damping,
+                    }
             if link.mass_kg is not None:
                 if not link_prim.HasAPI(UsdPhysics.MassAPI):
                     raise RuntimeError(f"missing mass API on {link_path}")
@@ -275,17 +405,67 @@ def _validate_stage_physics(stage: Usd.Stage) -> dict[str, list[str]]:
                 collision_paths.append(collision_path)
     if len(collision_paths) != int(PHYSICS_CONTRACT["collision_primitive_count"]):
         raise RuntimeError("stage collision count does not match the SDF physics contract")
+    material_prim = stage.GetPrimAtPath("/World/M1B/SDFDefaultPhysicsMaterial")
+    material_api = UsdPhysics.MaterialAPI(material_prim)
+    sdf_default_surface = {
+        "static_friction": float(material_api.GetStaticFrictionAttr().Get()),
+        "dynamic_friction": float(material_api.GetDynamicFrictionAttr().Get()),
+        "restitution": float(material_api.GetRestitutionAttr().Get()),
+    }
+    if sdf_default_surface != PHYSICS_CONTRACT["sdf_default_surface"]:
+        raise RuntimeError(
+            "stage physics material does not match the SDF default surface"
+        )
     return {
         "collision_paths": collision_paths,
         "rigid_body_paths": rigid_body_paths,
         "mass_paths": mass_paths,
+        "rigid_body_damping": rigid_body_damping,
+        "rigid_body_sleep_thresholds": rigid_body_sleep_thresholds,
+        "sdf_default_surface": sdf_default_surface,
     }
+
+
+def _freeze_cylinders_for_static_perception_audit(
+    stage: Usd.Stage,
+) -> list[str]:
+    """Make source poses kinematic for an explicitly offline static audit.
+
+    The production-equivalent physics stage is exported before this function
+    runs. No simulator truth is read and the resulting capture is marked
+    ineligible for Student training.
+    """
+
+    frozen_paths: list[str] = []
+    for model in SCENE.models:
+        if model.semantic_class != "industrial_cylinder":
+            continue
+        if model.static:
+            raise RuntimeError(
+                f"static-perception audit expected dynamic cylinder {model.name}"
+            )
+        for link in model.links:
+            link_path = f"/World/M1B/{model.name}/{link.name}"
+            prim = stage.GetPrimAtPath(link_path)
+            if not prim.HasAPI(UsdPhysics.RigidBodyAPI):
+                raise RuntimeError(
+                    f"static-perception audit cannot freeze {link_path}"
+                )
+            rigid_body = UsdPhysics.RigidBodyAPI(prim)
+            rigid_body.CreateKinematicEnabledAttr().Set(True)
+            frozen_paths.append(link_path)
+    if len(frozen_paths) != SCENE.cylinder_count:
+        raise RuntimeError(
+            "static-perception audit did not freeze exactly one body per cylinder"
+        )
+    return frozen_paths
 
 
 def _create_robot(
     stage: Usd.Stage,
     robot_usd: str,
     base_pose: Pose,
+    gripper_variant: str,
 ) -> tuple[int, dict[str, str]]:
     robot_xform = UsdGeom.Xform.Define(stage, "/World/Robot")
     _apply_pose(robot_xform, base_pose)
@@ -297,8 +477,16 @@ def _create_robot(
     robot_prim = stage.GetPrimAtPath("/World/Robot")
     if not robot_prim.IsValid():
         raise RuntimeError("robot reference did not create /World/Robot")
+    available_variants = {
+        set_name: list(
+            robot_prim.GetVariantSets()
+            .GetVariantSet(set_name)
+            .GetVariantNames()
+        )
+        for set_name in ("Gripper", "Mesh")
+    }
     variants = {
-        "Gripper": "AlternateFinger",
+        "Gripper": gripper_variant,
         "Mesh": "Performance",
     }
     for set_name, selection in variants.items():
@@ -311,6 +499,16 @@ def _create_robot(
             raise RuntimeError(
                 f"failed to select official Franka variant {set_name}={selection}"
             )
+    robot_prim.SetCustomDataByKey(
+        "xhM1BOfficialAssetContract",
+        {
+            "asset": "Isaac/Robots/FrankaRobotics/FrankaPanda/franka.usd",
+            "provenance": "NVIDIA_ISAAC_SIM_6_OFFICIAL_FRANKA_PANDA_USD",
+            "variants": variants,
+            "available_variants": available_variants,
+            "local_simplified_robot_used": False,
+        },
+    )
     for _ in range(3):
         simulation_app.update()
     _apply_semantics(robot_prim, "panda_robot")
@@ -340,15 +538,50 @@ def _create_cameras(scene: M1BIsaacScene) -> tuple[list[Any], list[Any]]:
     return cameras, render_products
 
 
+def _configure_camera_optics(
+    stage: Usd.Stage,
+    camera_specs: tuple[CameraSpec, ...],
+) -> None:
+    for camera_spec in camera_specs:
+        matches = [
+            prim
+            for prim in stage.Traverse()
+            if prim.IsA(UsdGeom.Camera) and prim.GetName() == camera_spec.name
+        ]
+        if len(matches) != 1:
+            raise RuntimeError(
+                f"expected one USD camera named {camera_spec.name}, got "
+                f"{[str(prim.GetPath()) for prim in matches]}"
+            )
+        camera = UsdGeom.Camera(matches[0])
+        horizontal_aperture_mm = float(camera.GetHorizontalApertureAttr().Get())
+        if horizontal_aperture_mm <= 0:
+            raise RuntimeError("Isaac camera horizontal aperture is invalid")
+        width, height = camera_spec.resolution
+        vertical_aperture_mm = horizontal_aperture_mm * height / width
+        focal_length_mm = horizontal_aperture_mm / (
+            2.0 * math.tan(camera_spec.horizontal_fov_rad / 2.0)
+        )
+        camera.GetVerticalApertureAttr().Set(vertical_aperture_mm)
+        camera.GetFocalLengthAttr().Set(focal_length_mm)
+        camera.GetHorizontalApertureOffsetAttr().Set(0.0)
+        camera.GetVerticalApertureOffsetAttr().Set(0.0)
+        camera.GetClippingRangeAttr().Set(Gf.Vec2f(*camera_spec.clipping_range_m))
+
+
 def _create_annotators(
     cameras: tuple[CameraSpec, ...],
     render_products: list[Any],
 ) -> dict[str, dict[str, Any]]:
     result: dict[str, dict[str, Any]] = {}
-    for camera_spec, render_product in zip(cameras, render_products, strict=True):
+    if len(cameras) != len(render_products):
+        raise RuntimeError("camera/render-product count mismatch")
+    for camera_spec, render_product in zip(cameras, render_products):
         camera_annotators = {
             "rgb": rep.AnnotatorRegistry.get_annotator("rgb"),
-            "distance_to_camera": rep.AnnotatorRegistry.get_annotator("distance_to_camera"),
+            "distance_to_image_plane": rep.AnnotatorRegistry.get_annotator(
+                "distance_to_image_plane"
+            ),
             "semantic_segmentation": rep.AnnotatorRegistry.get_annotator(
                 "semantic_segmentation", init_params={"colorize": True}
             ),
@@ -466,6 +699,121 @@ def _target_positions(
     return target
 
 
+def _numpy_values(values: Any) -> np.ndarray:
+    array = values.numpy() if hasattr(values, "numpy") else np.asarray(values)
+    return np.asarray(array, dtype=float).reshape(-1)
+
+
+def _world_pose_xyzw(stage: Usd.Stage, prim_path: str) -> list[float]:
+    prim = stage.GetPrimAtPath(prim_path)
+    if not prim.IsValid():
+        raise RuntimeError(f"missing pose prim: {prim_path}")
+    transform = UsdGeom.XformCache().GetLocalToWorldTransform(prim)
+    translation = transform.ExtractTranslation()
+    quaternion = transform.ExtractRotationQuat()
+    imaginary = quaternion.GetImaginary()
+    return [
+        float(translation[0]),
+        float(translation[1]),
+        float(translation[2]),
+        float(imaginary[0]),
+        float(imaginary[1]),
+        float(imaginary[2]),
+        float(quaternion.GetReal()),
+    ]
+
+
+def _policy_camera_calibration(
+    stage: Usd.Stage,
+    camera_spec: CameraSpec,
+) -> dict[str, Any]:
+    matches = [
+        prim
+        for prim in stage.Traverse()
+        if prim.IsA(UsdGeom.Camera) and prim.GetName() == camera_spec.name
+    ]
+    if len(matches) != 1:
+        raise RuntimeError(
+            f"expected one USD camera named {camera_spec.name}, got "
+            f"{[str(prim.GetPath()) for prim in matches]}"
+        )
+    prim = matches[0]
+    camera = UsdGeom.Camera(prim)
+    focal_length_mm = float(camera.GetFocalLengthAttr().Get())
+    horizontal_aperture_mm = float(camera.GetHorizontalApertureAttr().Get())
+    vertical_aperture_mm = float(camera.GetVerticalApertureAttr().Get())
+    horizontal_offset_mm = float(camera.GetHorizontalApertureOffsetAttr().Get())
+    vertical_offset_mm = float(camera.GetVerticalApertureOffsetAttr().Get())
+    width, height = camera_spec.resolution
+    if min(
+        focal_length_mm,
+        horizontal_aperture_mm,
+        vertical_aperture_mm,
+        width,
+        height,
+    ) <= 0:
+        raise RuntimeError("official Isaac camera has invalid calibrated aperture")
+    fx = width * focal_length_mm / horizontal_aperture_mm
+    fy = height * focal_length_mm / vertical_aperture_mm
+    cx = width / 2.0 + width * horizontal_offset_mm / horizontal_aperture_mm
+    cy = height / 2.0 - height * vertical_offset_mm / vertical_aperture_mm
+
+    # USD cameras look along local -Z with local +Y up.  Public RGB-D uses the
+    # conventional optical frame +X right, +Y down, +Z forward.  TransformDir
+    # avoids depending on USD's internal row-vector matrix storage.
+    transform = UsdGeom.XformCache().GetLocalToWorldTransform(prim)
+    origin = transform.Transform(Gf.Vec3d(0.0, 0.0, 0.0))
+    optical_x = transform.TransformDir(Gf.Vec3d(1.0, 0.0, 0.0)).GetNormalized()
+    optical_y = transform.TransformDir(Gf.Vec3d(0.0, -1.0, 0.0)).GetNormalized()
+    optical_z = transform.TransformDir(Gf.Vec3d(0.0, 0.0, -1.0)).GetNormalized()
+    camera_to_world_optical = [
+        float(optical_x[0]),
+        float(optical_y[0]),
+        float(optical_z[0]),
+        float(origin[0]),
+        float(optical_x[1]),
+        float(optical_y[1]),
+        float(optical_z[1]),
+        float(origin[1]),
+        float(optical_x[2]),
+        float(optical_y[2]),
+        float(optical_z[2]),
+        float(origin[2]),
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+    ]
+    return {
+        "name": camera_spec.name,
+        "prim_path": str(prim.GetPath()),
+        "rgb_uri_prefix": f"dataset://{camera_spec.name}/rgb/",
+        "depth_uri_prefix": f"dataset://{camera_spec.name}/depth/",
+        "camera_intrinsics": [fx, 0.0, cx, 0.0, fy, cy, 0.0, 0.0, 1.0],
+        "camera_to_world_optical": camera_to_world_optical,
+        "depth_semantics": "METRIC_DISTANCE_TO_IMAGE_PLANE",
+        "usd_camera_parameters_mm": {
+            "focal_length": focal_length_mm,
+            "horizontal_aperture": horizontal_aperture_mm,
+            "vertical_aperture": vertical_aperture_mm,
+            "horizontal_aperture_offset": horizontal_offset_mm,
+            "vertical_aperture_offset": vertical_offset_mm,
+        },
+    }
+
+
+def _gripper_state(dof_positions: np.ndarray, dof_indices: dict[str, int]) -> str:
+    width = sum(
+        abs(float(dof_positions[dof_indices[name]]))
+        for name in ("panda_finger_joint1", "panda_finger_joint2")
+    )
+    if width >= 0.03:
+        return "open"
+    if width <= 0.005:
+        return "closed"
+    return "partially_open"
+
+
 def _wait_at_start_barrier() -> float:
     if ARGS.ready_file is None:
         return 0.0
@@ -516,19 +864,34 @@ def main() -> int:
     rep.functional.create.dome_light(intensity=1000, parent="/World", name="DomeLight")
 
     UsdGeom.Xform.Define(stage, "/World/M1B")
+    physics_material = _create_sdf_default_physics_material(stage)
     for model in SCENE.models:
-        _create_model(stage, model)
+        _create_model(stage, model, physics_material)
     stage_physics = _validate_stage_physics(stage)
     robot_geometry_prim_count, robot_variants = _create_robot(
         stage,
         robot_asset_uri,
         ROBOT_BASE_POSE,
+        ARGS.gripper_variant,
     )
     physics_stage_path = output / "m1b_physics_scene.usdc"
     if not stage.Export(str(physics_stage_path)):
         raise RuntimeError(f"failed to export clean physics stage: {physics_stage_path}")
+    static_audit_frozen_paths = (
+        _freeze_cylinders_for_static_perception_audit(stage)
+        if ARGS.static_perception_audit
+        else []
+    )
     _, render_products = _create_cameras(SCENE)
+    _configure_camera_optics(stage, SCENE.cameras)
     annotators = _create_annotators(SCENE.cameras, render_products)
+    policy_camera_spec = next(
+        camera for camera in SCENE.cameras if camera.name == "policy_rgbd"
+    )
+    policy_camera_calibration = _policy_camera_calibration(
+        stage,
+        policy_camera_spec,
+    )
 
     robot, home, dof_indices = _configure_articulation()
     SimulationManager.initialize_physics()
@@ -555,11 +918,20 @@ def main() -> int:
     finite_depth_samples = 0
     label_classes: set[str] = set()
     semantic_pixel_counts: dict[str, int] = {}
+    runtime_frames_path = output / "runtime_frames.jsonl"
+    supervision_frames_path = output / "supervision_frames.jsonl"
+    runtime_stream = runtime_frames_path.open("w", encoding="utf-8")
+    supervision_stream = supervision_frames_path.open("w", encoding="utf-8")
+    episode_id = f"isaac-m1b-worker-{ARGS.worker_id}"
     benchmark_start = time.perf_counter()
     for frame in range(ARGS.frames):
-        robot.set_dof_position_targets(
-            _target_positions(home, dof_indices, frame + ARGS.warmup_frames, ARGS.worker_id)
+        action_target = _target_positions(
+            home,
+            dof_indices,
+            frame + ARGS.warmup_frames,
+            ARGS.worker_id,
         )
+        robot.set_dof_position_targets(action_target)
         capture_start = time.perf_counter()
         rep.orchestrator.step(rt_subframes=1, delta_time=1.0 / 30.0, pause_timeline=False)
         capture_times.append(time.perf_counter() - capture_start)
@@ -570,7 +942,7 @@ def main() -> int:
             camera_annotators = annotators[camera.name]
             rgb, _ = _annotator_array_and_info(camera_annotators["rgb"].get_data())
             depth, _ = _annotator_array_and_info(
-                camera_annotators["distance_to_camera"].get_data()
+                camera_annotators["distance_to_image_plane"].get_data()
             )
             semantic, semantic_info = _annotator_array_and_info(
                 camera_annotators["semantic_segmentation"].get_data()
@@ -606,8 +978,83 @@ def main() -> int:
                     label_classes.update(
                         str(value) for value in _json_ready(info).values()
                     )
+
+        timestamp_ns = int(
+            round(omni.timeline.get_timeline_interface().get_current_time() * 1e9)
+        )
+        dof_positions = _numpy_values(robot.get_dof_positions())
+        dof_velocities = _numpy_values(robot.get_dof_velocities())
+        if len(dof_positions) != len(PANDA_DOF_NAMES) or len(dof_velocities) != len(
+            PANDA_DOF_NAMES
+        ):
+            raise RuntimeError("official Franka runtime state is not nine-dimensional")
+        stem = f"{frame:06d}"
+        runtime_record = {
+            "schema_version": "IsaacM1BRuntimeFrameV1",
+            "episode_id": episode_id,
+            "step_id": frame,
+            "timestamp_ns": timestamp_ns,
+            "policy_camera": {
+                "schema_version": "IsaacM1BPolicyCameraFrameV1",
+                "name": "policy_rgbd",
+                "rgb_uri": f"dataset://policy_rgbd/rgb/{stem}.png",
+                "depth_uri": f"dataset://policy_rgbd/depth/{stem}.npy",
+                "camera_intrinsics": policy_camera_calibration["camera_intrinsics"],
+                "camera_to_world_optical": policy_camera_calibration[
+                    "camera_to_world_optical"
+                ],
+                "depth_semantics": "METRIC_DISTANCE_TO_IMAGE_PLANE",
+            },
+            "joint_names": list(PANDA_DOF_NAMES),
+            "joint_position": dof_positions.tolist(),
+            "joint_velocity": dof_velocities.tolist(),
+            "end_effector_pose_world_xyzw": _world_pose_xyzw(
+                stage,
+                "/World/Robot/panda_hand",
+            ),
+            "gripper_state": _gripper_state(dof_positions, dof_indices),
+            "action_target_joint_position": action_target,
+            "action_frequency_hz": 30.0,
+            "action_normalization": "identity",
+        }
+        simulator_poses = {
+            model.name: _world_pose_xyzw(
+                stage,
+                f"/World/M1B/{model.name}/{model.links[0].name}",
+            )
+            for model in SCENE.dynamic_models
+        }
+        supervision_record = {
+            "schema_version": "IsaacM1BSupervisionFrameV1",
+            "training_and_evaluation_only": True,
+            "episode_id": episode_id,
+            "step_id": frame,
+            "timestamp_ns": timestamp_ns,
+            "perfect_object_poses_world_xyzw": simulator_poses,
+            "contacts": [],
+            "collisions": [],
+            "grasp_states": {},
+            "slip_events": [],
+            "task_success": False,
+            "physical_parameters": {
+                "industrial_cylinder_mass_kg": float(
+                    SCENE.dynamic_models[0].links[0].mass_kg or 0.0
+                ),
+                "industrial_cylinder_count": float(SCENE.cylinder_count),
+                "static_perception_audit_kinematic_freeze": float(
+                    ARGS.static_perception_audit
+                ),
+            },
+            "failure_injection": {},
+            "simulator": "Isaac Sim",
+            "simulator_version": "6.0.1",
+        }
+        runtime_stream.write(json.dumps(runtime_record, sort_keys=True) + "\n")
+        supervision_stream.write(json.dumps(supervision_record, sort_keys=True) + "\n")
         readback_write_times.append(time.perf_counter() - write_start)
 
+    runtime_stream.close()
+    supervision_stream.close()
     rep.orchestrator.wait_until_complete()
     benchmark_wall_s = time.perf_counter() - benchmark_start
     output_counts = _count_outputs(output, SCENE.cameras)
@@ -642,6 +1089,12 @@ def main() -> int:
     )
     metrics = {
         "status": "PASS",
+        "dataset_benchmark_source_sha256": sha256_file(__file__),
+        "capture_mode": (
+            "CALIBRATION_ONLY_STATIC_PERCEPTION"
+            if ARGS.static_perception_audit
+            else "DYNAMIC_STUDENT_DATASET"
+        ),
         "worker_id": ARGS.worker_id,
         "physical_gpu_index": ARGS.physical_gpu_index,
         "renderer": "RaytracedLighting",
@@ -651,6 +1104,7 @@ def main() -> int:
         "camera_count": len(SCENE.cameras),
         "cameras": [_json_ready(camera.__dict__) for camera in SCENE.cameras],
         "annotators": list(ANNOTATORS),
+        "policy_camera_calibration": policy_camera_calibration,
         "source_hashes": SOURCE_HASHES,
         "robot_asset": {
             "uri": robot_asset_uri,
@@ -671,6 +1125,30 @@ def main() -> int:
             "contains_render_products": False,
         },
         "privileged_truth_use": "OFFLINE_DATASET_LABEL_ONLY_NOT_POLICY_INPUT",
+        "static_perception_audit": {
+            "enabled": ARGS.static_perception_audit,
+            "frozen_rigid_body_paths": static_audit_frozen_paths,
+            "clean_physics_stage_exported_before_freeze": True,
+            "simulator_truth_read_for_freeze": False,
+            "student_training_eligible": not ARGS.static_perception_audit,
+            "scope": (
+                "CALIBRATION_ONLY_STATIC_PERCEPTION_NOT_CONTROL_OR_TRAINING"
+                if ARGS.static_perception_audit
+                else "NOT_APPLICABLE"
+            ),
+        },
+        "student_dataset_protocol": {
+            "runtime_frames": runtime_frames_path.name,
+            "runtime_frames_sha256": sha256_file(runtime_frames_path),
+            "supervision_frames": supervision_frames_path.name,
+            "supervision_frames_sha256": sha256_file(supervision_frames_path),
+            "streams_physically_separate": True,
+            "policy_camera": "policy_rgbd",
+            "policy_segmentation_input": False,
+            "teacher_required": False,
+            "training_eligible": not ARGS.static_perception_audit,
+            "offline_transition_builder": "scripts/build_isaac_m1b_transitions.py",
+        },
         "action_protocol": {
             "frame": "PANDA_JOINT_ORDER_BY_NAME",
             "units": "radian_arm_metre_finger",
