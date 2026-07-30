@@ -1,0 +1,71 @@
+{
+  "crash_restart_count_in_accepted_runs": 0,
+  "dual": {
+    "concurrent_capture_wall_s": 64.84967128001153,
+    "gpu_indices": [
+      0,
+      1
+    ],
+    "gpu_summary": {
+      "0": {
+        "memory_used_mib_mean": 2014.560975609756,
+        "memory_used_mib_peak": 2635.0,
+        "power_draw_w_mean": 40.49687804878049,
+        "power_draw_w_peak": 104.06,
+        "sample_count": 615,
+        "utilization_gpu_percent_mean": 3.4455284552845526,
+        "utilization_gpu_percent_peak": 100.0
+      },
+      "1": {
+        "memory_used_mib_mean": 667.0162601626016,
+        "memory_used_mib_peak": 2496.0,
+        "power_draw_w_mean": 43.060113821138216,
+        "power_draw_w_peak": 126.53,
+        "sample_count": 615,
+        "utilization_gpu_percent_mean": 2.8552845528455286,
+        "utilization_gpu_percent_peak": 67.0
+      }
+    },
+    "sensor_frames": 800,
+    "sensor_frames_per_s_capture_only": 12.336222901511949,
+    "startup_protocol": "SERIALIZED_KIT_INITIALIZATION_THEN_SHARED_START_BARRIER",
+    "total_runner_wall_s": 340.02650504998746,
+    "valid_short_episodes": 198,
+    "valid_short_episodes_per_hour_end_to_end": 2096.3071684520914
+  },
+  "dual_capture_faster_than_each_single": true,
+  "invalid_episode_ratio": 0.0,
+  "limitations": [
+    "benchmark duration is shorter than the requested 30-minute soak",
+    "100-episode memory-growth measurement was not completed",
+    "CPU, RAM, and NVMe utilization are not sampled by the current runner"
+  ],
+  "schema_version": "M2AIsaacWorkerBenchmarkV1",
+  "selection": "DUAL_INDEPENDENT_WORKERS",
+  "single_gpu0": {
+    "app_elapsed_s": 163.92821759797516,
+    "average_short_episode_bytes": 5809548.636363637,
+    "capture_wall_s": 61.15657179898699,
+    "frames": 100,
+    "output_bytes": 575145315,
+    "physical_gpu_index": 0,
+    "sensor_frames": 400,
+    "sensor_frames_per_s_capture_only": 6.540588987145052,
+    "valid_short_episodes": 99,
+    "valid_short_episodes_per_hour_end_to_end": 2174.1223397795443
+  },
+  "single_gpu1": {
+    "app_elapsed_s": 165.1446958099841,
+    "average_short_episode_bytes": 5847368.818181818,
+    "capture_wall_s": 60.876468911010306,
+    "frames": 100,
+    "output_bytes": 578889513,
+    "physical_gpu_index": 1,
+    "sensor_frames": 400,
+    "sensor_frames_per_s_capture_only": 6.570683338823793,
+    "valid_short_episodes": 99,
+    "valid_short_episodes_per_hour_end_to_end": 2158.1074599578706
+  },
+  "status": "PASS_WITH_LIMITATIONS",
+  "worker_strategy": "ONE_ISAAC_PROCESS_PER_PHYSICAL_GPU"
+}
