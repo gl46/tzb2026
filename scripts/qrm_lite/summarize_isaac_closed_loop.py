@@ -78,6 +78,7 @@ def main() -> int:
         "limitations": [
             "This smoke proves live checkpoint inference, validation rejection, and B0 execution.",
             "It does not claim learned residual actuation or task-success improvement.",
+            "The live checkpoint is structured Q2 coarse+MLP (backbone_dim=0), not the Qwen LoRA adapter.",
         ],
     }
     args.report_json.parent.mkdir(parents=True, exist_ok=True)
@@ -98,6 +99,9 @@ def main() -> int:
                 "Every learned residual was rejected before execution because "
                 "no official camera-residual-to-joint mapping exists; the "
                 "validated B0 excitation executed instead.",
+                "",
+                "Limitation: the live checkpoint is structured Q2 coarse+MLP "
+                "(`backbone_dim=0`), not the Qwen LoRA adapter.",
                 "",
             ]
         )

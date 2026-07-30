@@ -1,0 +1,50 @@
+{
+  "accuracy_deltas": {
+    "mean": 0.0,
+    "per_seed": {
+      "20260731": 0.0,
+      "20260732": 0.0
+    }
+  },
+  "flow_status": "DISABLED",
+  "limitations": [
+    "Each paired run uses one epoch, at most 120 train samples, and 50 held-out test samples.",
+    "Two seeds on one 550-episode Pilot dataset cannot establish deployment benefit.",
+    "Physical EMPTY_GRASP, RELEASE_FAILURE, and WRONG_OBJECT cases are absent.",
+    "FailureContext did not improve held-out accuracy for every seed."
+  ],
+  "macro_f1_deltas": {
+    "mean": 0.0,
+    "per_seed": {
+      "20260731": 0.0,
+      "20260732": 0.0
+    }
+  },
+  "oracle_policy_inputs": false,
+  "pairs": [
+    {
+      "accuracy_delta": 0.0,
+      "macro_f1_delta": 0.0,
+      "off_accuracy": 0.7,
+      "off_macro_f1": 0.4117647058823529,
+      "off_report": "reports/m2a-s4-qwen-off-seed-20260731.json",
+      "on_accuracy": 0.7,
+      "on_macro_f1": 0.4117647058823529,
+      "on_report": "reports/m2a-s4-qwen-on-seed-20260731.json",
+      "seed": 20260731
+    },
+    {
+      "accuracy_delta": 0.0,
+      "macro_f1_delta": 0.0,
+      "off_accuracy": 0.74,
+      "off_macro_f1": 0.42528735632183906,
+      "off_report": "reports/m2a-s4-qwen-off-seed-20260732.json",
+      "on_accuracy": 0.74,
+      "on_macro_f1": 0.42528735632183906,
+      "on_report": "reports/m2a-s4-qwen-on-seed-20260732.json",
+      "seed": 20260732
+    }
+  ],
+  "schema_version": "M2AQwenFailureContextAblationV1",
+  "status": "PASS_WITH_LIMITATIONS"
+}

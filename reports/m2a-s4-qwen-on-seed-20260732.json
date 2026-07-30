@@ -1,0 +1,315 @@
+{
+  "adapter_out": "/home/gl/xh-data/isaac-industrial/isaac-industrial-v1-pilot/artifacts/qwen/on-seed-20260732",
+  "backbone_trainable_parameters": 1572864,
+  "backbone_update_l2": 1.4806016856651985,
+  "classifier_trainable_parameters": 5122,
+  "classifier_update_l2": 0.08747762897211545,
+  "epochs": 1,
+  "eval_accuracy": 0.74,
+  "eval_metrics": {
+    "accuracy": 0.74,
+    "ece_10bin": 0.2592017781734467,
+    "failure_recovery_skill_accuracy": 1.0,
+    "macro_f1": 0.42528735632183906,
+    "per_class": {
+      "APPROACH": {
+        "f1": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "support": 13
+      },
+      "REOBSERVE": {
+        "f1": 0.8505747126436781,
+        "precision": 0.74,
+        "recall": 1.0,
+        "support": 37
+      }
+    },
+    "wrong_object_recovery_accuracy": null
+  },
+  "eval_predictions": [
+    {
+      "confidence": 0.9992675185203552,
+      "predicted": "REOBSERVE",
+      "truth": "REOBSERVE"
+    },
+    {
+      "confidence": 0.9992389678955078,
+      "predicted": "REOBSERVE",
+      "truth": "REOBSERVE"
+    },
+    {
+      "confidence": 0.999301552772522,
+      "predicted": "REOBSERVE",
+      "truth": "REOBSERVE"
+    },
+    {
+      "confidence": 0.999284565448761,
+      "predicted": "REOBSERVE",
+      "truth": "REOBSERVE"
+    },
+    {
+      "confidence": 0.9992337226867676,
+      "predicted": "REOBSERVE",
+      "truth": "REOBSERVE"
+    },
+    {
+      "confidence": 0.999247670173645,
+      "predicted": "REOBSERVE",
+      "truth": "REOBSERVE"
+    },
+    {
+      "confidence": 0.9993311166763306,
+      "predicted": "REOBSERVE",
+      "truth": "REOBSERVE"
+    },
+    {
+      "confidence": 0.9993263483047485,
+      "predicted": "REOBSERVE",
+      "truth": "REOBSERVE"
+    },
+    {
+      "confidence": 0.9988571405410767,
+      "predicted": "REOBSERVE",
+      "truth": "APPROACH"
+    },
+    {
+      "confidence": 0.9992662072181702,
+      "predicted": "REOBSERVE",
+      "truth": "REOBSERVE"
+    },
+    {
+      "confidence": 0.9990338087081909,
+      "predicted": "REOBSERVE",
+      "truth": "APPROACH"
+    },
+    {
+      "confidence": 0.9992425441741943,
+      "predicted": "REOBSERVE",
+      "truth": "REOBSERVE"
+    },
+    {
+      "confidence": 0.9993107318878174,
+      "predicted": "REOBSERVE",
+      "truth": "REOBSERVE"
+    },
+    {
+      "confidence": 0.9989966750144958,
+      "predicted": "REOBSERVE",
+      "truth": "APPROACH"
+    },
+    {
+      "confidence": 0.9989247918128967,
+      "predicted": "REOBSERVE",
+      "truth": "APPROACH"
+    },
+    {
+      "confidence": 0.998847246170044,
+      "predicted": "REOBSERVE",
+      "truth": "APPROACH"
+    },
+    {
+      "confidence": 0.9992879033088684,
+      "predicted": "REOBSERVE",
+      "truth": "REOBSERVE"
+    },
+    {
+      "confidence": 0.9992802739143372,
+      "predicted": "REOBSERVE",
+      "truth": "REOBSERVE"
+    },
+    {
+      "confidence": 0.9993374943733215,
+      "predicted": "REOBSERVE",
+      "truth": "REOBSERVE"
+    },
+    {
+      "confidence": 0.9992916584014893,
+      "predicted": "REOBSERVE",
+      "truth": "REOBSERVE"
+    },
+    {
+      "confidence": 0.9992997646331787,
+      "predicted": "REOBSERVE",
+      "truth": "REOBSERVE"
+    },
+    {
+      "confidence": 0.9993177652359009,
+      "predicted": "REOBSERVE",
+      "truth": "REOBSERVE"
+    },
+    {
+      "confidence": 0.9990041851997375,
+      "predicted": "REOBSERVE",
+      "truth": "APPROACH"
+    },
+    {
+      "confidence": 0.9992495179176331,
+      "predicted": "REOBSERVE",
+      "truth": "REOBSERVE"
+    },
+    {
+      "confidence": 0.9992296695709229,
+      "predicted": "REOBSERVE",
+      "truth": "REOBSERVE"
+    },
+    {
+      "confidence": 0.9993032217025757,
+      "predicted": "REOBSERVE",
+      "truth": "REOBSERVE"
+    },
+    {
+      "confidence": 0.9990000128746033,
+      "predicted": "REOBSERVE",
+      "truth": "APPROACH"
+    },
+    {
+      "confidence": 0.9993390440940857,
+      "predicted": "REOBSERVE",
+      "truth": "REOBSERVE"
+    },
+    {
+      "confidence": 0.9992727637290955,
+      "predicted": "REOBSERVE",
+      "truth": "REOBSERVE"
+    },
+    {
+      "confidence": 0.9992976188659668,
+      "predicted": "REOBSERVE",
+      "truth": "REOBSERVE"
+    },
+    {
+      "confidence": 0.9992460012435913,
+      "predicted": "REOBSERVE",
+      "truth": "REOBSERVE"
+    },
+    {
+      "confidence": 0.9993174076080322,
+      "predicted": "REOBSERVE",
+      "truth": "REOBSERVE"
+    },
+    {
+      "confidence": 0.9990276098251343,
+      "predicted": "REOBSERVE",
+      "truth": "APPROACH"
+    },
+    {
+      "confidence": 0.9989468455314636,
+      "predicted": "REOBSERVE",
+      "truth": "APPROACH"
+    },
+    {
+      "confidence": 0.9988411068916321,
+      "predicted": "REOBSERVE",
+      "truth": "APPROACH"
+    },
+    {
+      "confidence": 0.9993201494216919,
+      "predicted": "REOBSERVE",
+      "truth": "REOBSERVE"
+    },
+    {
+      "confidence": 0.9992653727531433,
+      "predicted": "REOBSERVE",
+      "truth": "REOBSERVE"
+    },
+    {
+      "confidence": 0.9993384480476379,
+      "predicted": "REOBSERVE",
+      "truth": "REOBSERVE"
+    },
+    {
+      "confidence": 0.9992801547050476,
+      "predicted": "REOBSERVE",
+      "truth": "REOBSERVE"
+    },
+    {
+      "confidence": 0.9989903569221497,
+      "predicted": "REOBSERVE",
+      "truth": "APPROACH"
+    },
+    {
+      "confidence": 0.999337375164032,
+      "predicted": "REOBSERVE",
+      "truth": "REOBSERVE"
+    },
+    {
+      "confidence": 0.998953104019165,
+      "predicted": "REOBSERVE",
+      "truth": "APPROACH"
+    },
+    {
+      "confidence": 0.9989377856254578,
+      "predicted": "REOBSERVE",
+      "truth": "APPROACH"
+    },
+    {
+      "confidence": 0.9993093013763428,
+      "predicted": "REOBSERVE",
+      "truth": "REOBSERVE"
+    },
+    {
+      "confidence": 0.9992961883544922,
+      "predicted": "REOBSERVE",
+      "truth": "REOBSERVE"
+    },
+    {
+      "confidence": 0.9993150234222412,
+      "predicted": "REOBSERVE",
+      "truth": "REOBSERVE"
+    },
+    {
+      "confidence": 0.9992996454238892,
+      "predicted": "REOBSERVE",
+      "truth": "REOBSERVE"
+    },
+    {
+      "confidence": 0.9992383718490601,
+      "predicted": "REOBSERVE",
+      "truth": "REOBSERVE"
+    },
+    {
+      "confidence": 0.9992890357971191,
+      "predicted": "REOBSERVE",
+      "truth": "REOBSERVE"
+    },
+    {
+      "confidence": 0.9993181228637695,
+      "predicted": "REOBSERVE",
+      "truth": "REOBSERVE"
+    }
+  ],
+  "eval_split": "test",
+  "failure_context": "on",
+  "flow_status": "DISABLED",
+  "head_label_count": 2,
+  "history": [
+    {
+      "epoch": 0,
+      "mean_loss": 0.8543351046750861,
+      "train_accuracy": 0.8666666666666667
+    }
+  ],
+  "labels": [
+    "APPROACH",
+    "REOBSERVE"
+  ],
+  "limitations": [],
+  "max_gradient_l2": 98.85110507079968,
+  "model_id": "/home/gl/xh-202607-qrm-lite/hf-cache/manual/Qwen3.5-4B",
+  "n_eval": 50,
+  "n_train": 120,
+  "observed_label_count": 2,
+  "observed_labels": [
+    "APPROACH",
+    "REOBSERVE"
+  ],
+  "optimizer_steps": 120,
+  "oracle_policy_inputs": false,
+  "peak_vram_mb": 33896.54541015625,
+  "revision": "",
+  "schema_version": "Qwen35LoRACoarseBetaTrainV1",
+  "seed": 20260732,
+  "status": "PASS",
+  "wall_seconds": 293.8470723628998
+}

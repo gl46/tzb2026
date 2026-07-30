@@ -184,6 +184,7 @@ def main() -> int:
     dataset = json_if(dataset_manifest_path)
     contract = json_if(PROJECT / "reports" / "m2a-s1-data-contract.json")
     benchmark = json_if(PROJECT / "reports" / "m2a-s2-worker-benchmark.json")
+    pilot = json_if(PROJECT / "reports" / "m2a-s3-pilot-dataset.json")
     training = json_if(PROJECT / "reports" / "m2a-s4-qrm-beta-train.json")
     offline = json_if(PROJECT / "reports" / "m2a-s4-qrm-beta-offline.json")
     qwen_ablation = json_if(PROJECT / "reports" / "m2a-s4-qwen-ablation.json")
@@ -210,8 +211,22 @@ def main() -> int:
         limitations.extend(contract["limitations"])
     if benchmark and benchmark.get("limitations"):
         limitations.extend(benchmark["limitations"])
+    if pilot and pilot.get("limitations"):
+        limitations.extend(pilot["limitations"])
     if qwen_ablation and qwen_ablation.get("limitations"):
         limitations.extend(qwen_ablation["limitations"])
+    q2_training = (
+        training.get("models", {}).get("Q2_COARSE_MLP_FAILURE_CONTEXT")
+        if training
+        else None
+    )
+    if (
+        q2_training
+        and q2_training.get("mlp", {}).get("beats_zero_residual") is False
+    ):
+        limitations.append(
+            "structured Q2 residual did not beat the zero-residual baseline"
+        )
     if closed and closed.get("fallback_rate") == 1.0:
         limitations.append("all learned action mappings rejected; B0 fallback rate is 1.0")
     complete = bool(
@@ -330,13 +345,15 @@ def main() -> int:
                 f"accuracy deltas="
                 f"`{qwen_ablation.get('accuracy_deltas') if qwen_ablation else None}`",
                 f"- held-out FailureContext deltas: `{fc_delta}`",
-                f"- Q2 MLP held-out residual metrics: `{mlp_residual}`",
+                "- Q2 MLP held-out value: not established; residual metrics="
+                f"`{mlp_residual}`",
                 f"- Isaac closed-loop scene episodes: "
                 f"{status['closed_loop_episodes']}",
                 f"- B0 fallback: "
                 f"{closed.get('fallback_count') if closed else None}/"
                 f"{closed.get('applied_live_decisions') if closed else None}",
-                f"- shadow Isaac: `{status['shadow_isaac_status']}`",
+                f"- shadow Isaac online suitability: not evaluated; "
+                f"`{status['shadow_isaac_status']}`",
                 f"- model verdict: **{model_verdict}**",
                 "- expand to 5k–10k now: no; collect physical failure/recovery "
                 "coverage first",
