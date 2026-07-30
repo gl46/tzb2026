@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 import subprocess
+import time
 from pathlib import Path
 
 
@@ -19,6 +20,8 @@ def main() -> int:
     parser.add_argument("--worker-id", required=True, type=int)
     parser.add_argument("--gpu", required=True, type=int)
     parser.add_argument("--frames", type=int, default=12)
+    parser.add_argument("--warmup-frames", type=int, default=5)
+    parser.add_argument("--timeout-s", type=float, default=900.0)
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
     for relative in (args.sdf, args.supervision, "panda_controlled.urdf"):
@@ -41,14 +44,44 @@ def main() -> int:
         "--worker-id", str(args.worker_id),
         "--physical-gpu-index", str(args.gpu),
         "--frames", str(args.frames),
+        "--warmup-frames", str(args.warmup_frames),
+        "--ready-file", "/workspace/output/control/worker.READY",
+        "--start-file", "/workspace/output/control/START",
+        "--barrier-timeout-s", str(args.timeout_s),
     ]
     if args.dry_run:
         print(json.dumps({"worker_id": args.worker_id, "gpu": args.gpu, "command": command}))
         return 0
     args.output.mkdir(parents=True, exist_ok=False)
-    return subprocess.run(command, check=False).returncode
+    ready = args.output / "control" / "worker.READY"
+    start = args.output / "control" / "START"
+    process = subprocess.Popen(command)
+    deadline = time.monotonic() + args.timeout_s
+    try:
+        while not ready.is_file():
+            returncode = process.poll()
+            if returncode is not None:
+                return returncode
+            if time.monotonic() >= deadline:
+                process.terminate()
+                try:
+                    process.wait(timeout=10)
+                except subprocess.TimeoutExpired:
+                    process.kill()
+                    process.wait()
+                return 124
+            time.sleep(0.25)
+        start.touch()
+        return process.wait()
+    except KeyboardInterrupt:
+        process.terminate()
+        try:
+            process.wait(timeout=10)
+        except subprocess.TimeoutExpired:
+            process.kill()
+            process.wait()
+        raise
 
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

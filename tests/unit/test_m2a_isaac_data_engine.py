@@ -289,6 +289,16 @@ def test_campaign_accepts_hash_valid_swapped_worker_assignment(
     assert prior_worker_order_swapped(run_root, expected)
 
 
+def test_single_worker_uses_the_validated_start_barrier() -> None:
+    source = (
+        Path(__file__).parents[2] / "scripts" / "isaac" / "launch_worker.py"
+    ).read_text()
+    assert '"--ready-file", "/workspace/output/control/worker.READY"' in source
+    assert '"--start-file", "/workspace/output/control/START"' in source
+    assert "while not ready.is_file():" in source
+    assert "start.touch()" in source
+
+
 def test_qwen_metrics_retain_absent_class_as_zero_f1() -> None:
     metrics = classification_metrics(
         ["REOBSERVE", "REOBSERVE"],
