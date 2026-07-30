@@ -1,0 +1,38 @@
+{
+  "schema_version": "M2APilotDatasetReportV1",
+  "status": "PASS_WITH_LIMITATIONS",
+  "dataset_version": "isaac-industrial-v1-pilot",
+  "campaign_status": "PASS",
+  "scene_seeds_requested": 50,
+  "scene_seeds_completed": 50,
+  "worker_pairs": 25,
+  "worker_mapping_counts": {
+    "standard": 17,
+    "swapped": 8
+  },
+  "infrastructure_attempts_quarantined": 15,
+  "episodes_quarantined": 0,
+  "episodes_valid": 550,
+  "split_counts": {
+    "train": 418,
+    "val": 66,
+    "test": 66
+  },
+  "failure_type_counts": {
+    "NONE": 96,
+    "TRACKING_LOST": 454
+  },
+  "failure_or_recovery_fraction": 0.8254545454545454,
+  "ready_shards": 11,
+  "validated_ready_shards": 11,
+  "dataset_manifest_hash": "9843968cdbff17b6b4a291e30907f2c5dc855838ad3e4be7095a4bb8783449bc",
+  "manifest_file_sha256": "bef52bcfb84d6ecdb8e94c079a35a3a311f3ef24d00d8ca36e46c78db5680ebd",
+  "capture_code_revision": "f007bd490d7cf7ba11d032af94fb2799e9d62e16",
+  "capture_source_sha256": "93b7c01223e0720b91b89ea606171f9ff4506e62ce39c9f33f4783e19620d065",
+  "oracle_leakage_detected": false,
+  "teacher_soft_labels": "ABSENT",
+  "limitations": [
+    "The adjacent-frame Pilot does not physically exercise EMPTY_GRASP, WRONG_OBJECT, or RELEASE_FAILURE.",
+    "Fifteen failed Isaac/Hydra startup attempts were retained as infrastructure quarantine and are not counted as failed episodes."
+  ]
+}

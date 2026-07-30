@@ -1,0 +1,137 @@
+{
+  "code_revision": "f007bd490d7cf7ba11d032af94fb2799e9d62e16",
+  "config_hash": "93d5cf8c5196b55b13f6673f2c6048d4a02a412ea2f5982c03a7fad7a9257404",
+  "dataset_manifest_hash": "9843968cdbff17b6b4a291e30907f2c5dc855838ad3e4be7095a4bb8783449bc",
+  "dataset_version": "isaac-industrial-v1-pilot",
+  "episodes_quarantined": 0,
+  "episodes_valid": 550,
+  "failure_or_recovery_episodes": 454,
+  "failure_or_recovery_fraction": 0.8254545454545454,
+  "scene_seeds": [
+    3100,
+    3101,
+    3102,
+    3103,
+    3104,
+    3105,
+    3106,
+    3107,
+    3108,
+    3109,
+    3110,
+    3111,
+    3112,
+    3113,
+    3114,
+    3115,
+    3116,
+    3117,
+    3118,
+    3119,
+    3120,
+    3121,
+    3122,
+    3123,
+    3124,
+    3125,
+    3126,
+    3127,
+    3128,
+    3129,
+    3130,
+    3131,
+    3132,
+    3133,
+    3134,
+    3135,
+    3136,
+    3137,
+    3138,
+    3139,
+    3140,
+    3141,
+    3142,
+    3143,
+    3144,
+    3145,
+    3146,
+    3147,
+    3148,
+    3149
+  ],
+  "schema_version": "IsaacIndustrialDatasetManifestV1",
+  "shards": [
+    {
+      "episode_count": 50,
+      "manifest_content_hash": "13173b6b1940ef4e5872a320c96e09c7d98b77cdec880c9ad8b061154f4b7d73",
+      "shard_id": "shard-00000",
+      "state": "READY"
+    },
+    {
+      "episode_count": 50,
+      "manifest_content_hash": "f71fecffd266178e303234f4ca9aa28f46adcedc77382560ea502f5df776c1ac",
+      "shard_id": "shard-00001",
+      "state": "READY"
+    },
+    {
+      "episode_count": 50,
+      "manifest_content_hash": "4c96496da919c9cbb1f71eb318dee5eb6c116b7d48468b9a2725a65699256885",
+      "shard_id": "shard-00002",
+      "state": "READY"
+    },
+    {
+      "episode_count": 50,
+      "manifest_content_hash": "200a1d822796cef050be51bf7ec66a1eaef30ba42ace874e90ebb88340b84058",
+      "shard_id": "shard-00003",
+      "state": "READY"
+    },
+    {
+      "episode_count": 50,
+      "manifest_content_hash": "6a85f340a8e92d564f0d4934e3c12001441d3c9f401083bc33059990ce1c6141",
+      "shard_id": "shard-00004",
+      "state": "READY"
+    },
+    {
+      "episode_count": 50,
+      "manifest_content_hash": "b0d9864ed14f048712398e53c9fd58fbb2a9d2953713a645cb1be59493c2c1a4",
+      "shard_id": "shard-00005",
+      "state": "READY"
+    },
+    {
+      "episode_count": 50,
+      "manifest_content_hash": "676bd3d2a3a0483270058eab01ab35ca15318293ca30020ae62cf18f69a23b53",
+      "shard_id": "shard-00006",
+      "state": "READY"
+    },
+    {
+      "episode_count": 50,
+      "manifest_content_hash": "bbe5a92ce135b09e0dcc9fa626a5d714471cd5ac589190501be3284737953dac",
+      "shard_id": "shard-00007",
+      "state": "READY"
+    },
+    {
+      "episode_count": 50,
+      "manifest_content_hash": "a044d9448c93a028c20a449e1e05809802b3f630a179c17ba329158f039d607b",
+      "shard_id": "shard-00008",
+      "state": "READY"
+    },
+    {
+      "episode_count": 50,
+      "manifest_content_hash": "6cc31dcbe64f4ddb6ed1421988a7c49dd9248550c368dfe330b99c8dbd3e67c6",
+      "shard_id": "shard-00009",
+      "state": "READY"
+    },
+    {
+      "episode_count": 50,
+      "manifest_content_hash": "e341804a96664573f7036c71b8cf82c2d9894b1d99d621334cff27dfab364e25",
+      "shard_id": "shard-00010",
+      "state": "READY"
+    }
+  ],
+  "split_counts": {
+    "test": 66,
+    "train": 418,
+    "val": 66
+  },
+  "status": "READY"
+}

@@ -1,0 +1,30 @@
+{
+  "dataset_root": "/workspace/data/isaac-industrial-v1-pilot",
+  "distinct_scene_seeds": 50,
+  "episodes_checked": 550,
+  "errors": [],
+  "failure_types": {
+    "NONE": 96,
+    "TRACKING_LOST": 454
+  },
+  "limitations": [
+    "pilot adjacent-frame corpus does not physically exercise: EMPTY_GRASP, RELEASE_FAILURE, WRONG_OBJECT"
+  ],
+  "oracle_leakage_detected": false,
+  "protocol": {
+    "camera_optical_axes": "+X right, +Y down, +Z forward",
+    "depth": "meter distance-to-image-plane",
+    "executed_action": "9D named joint target @30Hz",
+    "length": "meter",
+    "qrm_residual": "10D camera optical @5Hz",
+    "quaternion_runtime": "xyzw",
+    "time": "second/timestamp_ns"
+  },
+  "schema_version": "M2AIsaacDataContractReportV1",
+  "split_counts": {
+    "test": 6,
+    "train": 38,
+    "val": 6
+  },
+  "status": "ISAAC_DATA_CONTRACT_VERIFIED_WITH_LIMITATIONS"
+}
