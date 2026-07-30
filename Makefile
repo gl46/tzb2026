@@ -52,6 +52,6 @@ qrm-beta-eval:
 qrm-beta-closed-loop:
 	bash scripts/qrm_lite/run_isaac_closed_loop_eval.sh
 shadow-isaac:
-	$(PYTHON) scripts/isaac/run_shadow_rollout_pilot.py
+	@echo "NOT_RUN: optional P1 shadow Isaac is intentionally not implemented in M2A P0"
 m2a-status:
 	$(PYTHON) scripts/m2a_status.py
