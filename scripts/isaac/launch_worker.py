@@ -53,6 +53,7 @@ def main() -> int:
         print(json.dumps({"worker_id": args.worker_id, "gpu": args.gpu, "command": command}))
         return 0
     args.output.mkdir(parents=True, exist_ok=False)
+    args.output.chmod(0o777)
     ready = args.output / "control" / "worker.READY"
     start = args.output / "control" / "START"
     process = subprocess.Popen(command)

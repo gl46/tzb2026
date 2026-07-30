@@ -297,6 +297,7 @@ def test_single_worker_uses_the_validated_start_barrier() -> None:
     assert '"--start-file", "/workspace/output/control/START"' in source
     assert "while not ready.is_file():" in source
     assert "start.touch()" in source
+    assert "args.output.chmod(0o777)" in source
 
 
 def test_worker_benchmark_retries_and_quarantines_infrastructure_failures() -> None:
