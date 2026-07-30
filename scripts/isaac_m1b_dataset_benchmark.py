@@ -63,6 +63,16 @@ def parse_args() -> tuple[argparse.Namespace, list[str]]:
     parser.add_argument("--ready-file")
     parser.add_argument("--start-file")
     parser.add_argument("--barrier-timeout-s", type=float, default=600.0)
+    parser.add_argument("--qrm-checkpoint")
+    parser.add_argument(
+        "--qrm-model-id",
+        choices=(
+            "Q0_COARSE_ONLY",
+            "Q1_COARSE_MLP_RESIDUAL",
+            "Q2_COARSE_MLP_FAILURE_CONTEXT",
+        ),
+        default="Q2_COARSE_MLP_FAILURE_CONTEXT",
+    )
     args, unknown = parser.parse_known_args()
     if args.frames <= 0:
         parser.error("--frames must be positive")
@@ -145,6 +155,22 @@ PANDA_DOF_NAMES = tuple(
     [f"panda_joint{index}" for index in range(1, 8)]
     + ["panda_finger_joint1", "panda_finger_joint2"]
 )
+
+
+def _load_qrm_checkpoint(path: str, expected_model_id: str):
+    from xh_agent.policy.qrm_lite.models_q012 import build_formal_model
+
+    payload = np.load(path)
+    observed_model_id = str(payload["model_id"])
+    if observed_model_id != expected_model_id:
+        raise ValueError(
+            f"QRM checkpoint model mismatch: {observed_model_id} != {expected_model_id}"
+        )
+    model = build_formal_model(observed_model_id)
+    for name in ("w1", "b1", "w2", "b2"):
+        setattr(model.coarse, name, np.asarray(payload[f"coarse_{name}"]))
+        setattr(model.mlp, name, np.asarray(payload[f"mlp_{name}"]))
+    return model
 
 
 def _json_ready(value: Any) -> Any:
@@ -892,6 +918,17 @@ def main() -> int:
         stage,
         policy_camera_spec,
     )
+    qrm_model = (
+        _load_qrm_checkpoint(ARGS.qrm_checkpoint, ARGS.qrm_model_id)
+        if ARGS.qrm_checkpoint
+        else None
+    )
+    if qrm_model is not None:
+        from xh_agent.perception.geometric_rgbd import GeometricRGBDBaseline
+
+        qrm_public_perception = GeometricRGBDBaseline()
+    else:
+        qrm_public_perception = None
 
     robot, home, dof_indices = _configure_articulation()
     SimulationManager.initialize_physics()
@@ -923,6 +960,7 @@ def main() -> int:
     runtime_stream = runtime_frames_path.open("w", encoding="utf-8")
     supervision_stream = supervision_frames_path.open("w", encoding="utf-8")
     episode_id = f"isaac-m1b-worker-{ARGS.worker_id}"
+    qrm_decisions: list[dict[str, object]] = []
     benchmark_start = time.perf_counter()
     for frame in range(ARGS.frames):
         action_target = _target_positions(
@@ -937,6 +975,8 @@ def main() -> int:
         capture_times.append(time.perf_counter() - capture_start)
 
         write_start = time.perf_counter()
+        policy_rgb = None
+        policy_depth = None
         for camera in SCENE.cameras:
             camera_root = output / camera.name
             camera_annotators = annotators[camera.name]
@@ -955,6 +995,9 @@ def main() -> int:
                     f"{camera.name} frame {frame} shape mismatch: rgb={rgb.shape}, depth={depth.shape}"
                 )
             finite_depth_samples += int(np.isfinite(depth).sum())
+            if camera.name == "policy_rgbd":
+                policy_rgb = rgb[:, :, :3].copy()
+                policy_depth = depth.copy()
             for semantic_class, pixels in _semantic_pixel_counts(
                 semantic, semantic_info
             ).items():
@@ -1051,6 +1094,126 @@ def main() -> int:
         }
         runtime_stream.write(json.dumps(runtime_record, sort_keys=True) + "\n")
         supervision_stream.write(json.dumps(supervision_record, sort_keys=True) + "\n")
+        if qrm_model is not None:
+            if (
+                policy_rgb is None
+                or policy_depth is None
+                or qrm_public_perception is None
+            ):
+                raise RuntimeError("QRM closed-loop smoke lacks public RGB-D")
+            from xh_agent.perception.interfaces import PerceptionInputV1
+            from xh_agent.policy.qrm_lite.contracts import (
+                FailureContextV1,
+                FailureType,
+                PerceptionTrackV1,
+                QRMObservationV1,
+            )
+            from xh_agent.policy.qrm_lite.transforms import (
+                build_identity_action_chunk,
+            )
+
+            public_results = qrm_public_perception.infer(
+                PerceptionInputV1(
+                    frame_id="policy_rgbd",
+                    timestamp_ns=timestamp_ns,
+                    rgb_uri=runtime_record["policy_camera"]["rgb_uri"],
+                    depth_uri=runtime_record["policy_camera"]["depth_uri"],
+                    camera_intrinsics=policy_camera_calibration[
+                        "camera_intrinsics"
+                    ],
+                    camera_frame="policy_rgbd_optical",
+                ),
+                policy_depth,
+                policy_rgb,
+            )
+            public_missing = not public_results
+            observation = QRMObservationV1(
+                episode_id=f"{episode_id}-qrm-{frame:06d}",
+                step_id=frame,
+                timestamp_ns=timestamp_ns,
+                instruction=(
+                    "Choose a safe coarse skill for the publicly observed "
+                    "industrial cylinder scene."
+                ),
+                rgb_uri=runtime_record["policy_camera"]["rgb_uri"],
+                depth_uri=runtime_record["policy_camera"]["depth_uri"],
+                camera_frame="policy_rgbd_optical",
+                camera_intrinsics=policy_camera_calibration[
+                    "camera_intrinsics"
+                ],
+                joint_position=dof_positions.tolist(),
+                joint_velocity=dof_velocities.tolist(),
+                gripper_state={
+                    "open": 0.0,
+                    "partially_open": 0.5,
+                    "closed": 1.0,
+                }[runtime_record["gripper_state"]],
+                current_skill_stage=(
+                    "REOBSERVE" if public_missing else "APPROACH"
+                ),
+                perception_tracks=[
+                    PerceptionTrackV1(
+                        track_id=result.track_id,
+                        category=result.category,
+                        confidence=result.confidence,
+                        pose_xyzquat=[
+                            *result.position_3d,
+                            0.0,
+                            0.0,
+                            0.0,
+                            1.0,
+                        ],
+                    )
+                    for result in public_results
+                ],
+                failure_context=FailureContextV1(
+                    last_skill="OBSERVE",
+                    expected_predicates=["public_track_observed"],
+                    observed_predicates=(
+                        [] if public_missing else ["public_track_observed"]
+                    ),
+                    predicate_residual=(
+                        ["missing:public_track_observed"]
+                        if public_missing
+                        else []
+                    ),
+                    failure_type=(
+                        FailureType.TRACKING_LOST
+                        if public_missing
+                        else FailureType.NONE
+                    ),
+                    retry_count=0,
+                ),
+            )
+            nominal = build_identity_action_chunk(4)
+            decision_output = qrm_model.predict(
+                observation,
+                nominal=nominal if qrm_model.uses_residual else None,
+                moveit_accept_fn=lambda _: (
+                    False,
+                    "UNVERIFIED_CAMERA_RESIDUAL_TO_JOINT_MAPPING",
+                ),
+            )
+            qrm_decisions.append(
+                {
+                    "step_id": frame,
+                    "model_id": qrm_model.model_id.value,
+                    "public_track_count": len(public_results),
+                    "failure_context": observation.failure_context.model_dump(
+                        mode="json"
+                    ),
+                    "coarse_skill": decision_output.coarse.skill_type,
+                    "used_failure_context": decision_output.used_failure_context,
+                    "residual_proposed": decision_output.residual is not None,
+                    "mapping_validation": (
+                        "REJECTED_NO_OFFICIAL_EVIDENCE"
+                    ),
+                    "fallback": "B0_DATASET_EXCITATION",
+                    "applies_to_step": (
+                        frame + 1 if frame + 1 < ARGS.frames else None
+                    ),
+                }
+            )
         readback_write_times.append(time.perf_counter() - write_start)
 
     runtime_stream.close()
@@ -1178,6 +1341,21 @@ def main() -> int:
         "semantic_pixel_counts": semantic_pixel_counts,
         "output_counts": output_counts,
         "output_bytes_before_metrics": _tree_bytes(output),
+        "qrm_closed_loop_smoke": {
+            "enabled": qrm_model is not None,
+            "checkpoint": ARGS.qrm_checkpoint,
+            "model_id": (
+                ARGS.qrm_model_id if qrm_model is not None else None
+            ),
+            "decisions": qrm_decisions,
+            "decision_count": len(qrm_decisions),
+            "fallback_count": len(qrm_decisions),
+            "fallback_rate": 1.0 if qrm_decisions else None,
+            "model_action_mapping": (
+                "REJECTED_NO_OFFICIAL_EVIDENCE"
+            ),
+            "b0_executed_after_rejection": bool(qrm_decisions),
+        },
         "app_elapsed_s": time.perf_counter() - APP_START,
     }
     with (output / "metrics.json").open("w", encoding="utf-8") as stream:

@@ -42,6 +42,16 @@ def valid_prior(run_root: Path, expected: list[Path]) -> bool:
     )
 
 
+def quarantine_failed_run(run_root: Path, *, attempt: int) -> Path:
+    quarantine_root = run_root.parent / "quarantine"
+    quarantine_root.mkdir(parents=True, exist_ok=True)
+    destination = quarantine_root / f"{run_root.name}-attempt-{attempt:02d}"
+    if destination.exists():
+        raise RuntimeError(f"quarantine destination already exists: {destination}")
+    run_root.replace(destination)
+    return destination
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--project-root", required=True, type=Path)
@@ -53,6 +63,7 @@ def main() -> int:
     parser.add_argument("--frames-per-scene", type=int, default=12)
     parser.add_argument("--warmup-frames", type=int, default=5)
     parser.add_argument("--max-runs", type=int)
+    parser.add_argument("--max-infrastructure-attempts", type=int, default=2)
     parser.add_argument("--timeout-s", type=float, default=900.0)
     args = parser.parse_args()
     if args.scene_count < 2 or args.scene_count % 2:
@@ -82,46 +93,53 @@ def main() -> int:
         if missing:
             raise FileNotFoundError(f"missing generated scene files: {missing}")
         resumed = valid_prior(run_root, files)
+        quarantined: list[str] = []
         if not resumed:
-            if run_root.exists():
+            for attempt in range(1, args.max_infrastructure_attempts + 1):
+                if run_root.exists():
+                    quarantined.append(
+                        str(quarantine_failed_run(run_root, attempt=attempt))
+                    )
+                command = [
+                    sys.executable,
+                    str(args.project_root / "scripts" / "run_isaac_m1b_dual_benchmark.py"),
+                    "--project-root",
+                    str(args.project_root),
+                    "--source-root",
+                    str(args.source_root),
+                    "--output",
+                    str(run_root),
+                    "--frames",
+                    str(args.frames_per_scene),
+                    "--warmup-frames",
+                    str(args.warmup_frames),
+                    "--timeout-s",
+                    str(args.timeout_s),
+                    "--container-prefix",
+                    f"m2a-{seed0}-{seed1}-a{attempt}",
+                    "--worker-sdf",
+                    files[0].name,
+                    "--worker-sdf",
+                    files[2].name,
+                    "--worker-supervision",
+                    files[1].name,
+                    "--worker-supervision",
+                    files[3].name,
+                ]
+                completed = subprocess.run(command, check=False)
+                if completed.returncode == 0 and valid_prior(run_root, files):
+                    break
+            else:
                 raise RuntimeError(
-                    f"existing run is not a hash-valid PASS; quarantine manually: {run_root}"
+                    f"dual worker exhausted infrastructure retries for seeds {seed0}/{seed1}"
                 )
-            command = [
-                sys.executable,
-                str(args.project_root / "scripts" / "run_isaac_m1b_dual_benchmark.py"),
-                "--project-root",
-                str(args.project_root),
-                "--source-root",
-                str(args.source_root),
-                "--output",
-                str(run_root),
-                "--frames",
-                str(args.frames_per_scene),
-                "--warmup-frames",
-                str(args.warmup_frames),
-                "--timeout-s",
-                str(args.timeout_s),
-                "--container-prefix",
-                f"m2a-{seed0}-{seed1}",
-                "--worker-sdf",
-                files[0].name,
-                "--worker-sdf",
-                files[2].name,
-                "--worker-supervision",
-                files[1].name,
-                "--worker-supervision",
-                files[3].name,
-            ]
-            completed = subprocess.run(command, check=False)
-            if completed.returncode != 0:
-                raise RuntimeError(f"dual worker run failed for seeds {seed0}/{seed1}")
         records.append(
             {
                 "pair_index": pair_index,
                 "seeds": [seed0, seed1],
                 "run_root": str(run_root),
                 "resumed": resumed,
+                "quarantined_attempts": quarantined,
                 "status": "PASS",
             }
         )

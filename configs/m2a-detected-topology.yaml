@@ -1,0 +1,57 @@
+schema_version: M2ATopologyAuditV1
+status: PASS
+feature_branch: codex/m2a-isaac-data-qrm-beta
+head: f007bd490d7cf7ba11d032af94fb2799e9d62e16
+origin_main: 0709cc19b66e52e8043eb26babb9a6f3e8ca9a72
+m1b_baseline_commit: '5984298'
+qrm_alpha_tag_commit: 0287d23e586f5d977c71257aeca4accacecadbe8
+isaac:
+  host: root@labserver
+  project_root: /var/tmp/m2a-isaac-project-20260731
+  data_root: /var/tmp/xh-data/isaac-industrial
+  gpus:
+  - index: 0
+    name: NVIDIA GeForce RTX 3080
+    vram_total_mib: 10240
+    vram_free_mib: 9733
+    driver_version: '595.84'
+  - index: 1
+    name: NVIDIA GeForce RTX 3080
+    vram_total_mib: 10240
+    vram_free_mib: 9859
+    driver_version: '595.84'
+  isaac_version: 6.0.1
+  image: nvcr.io/nvidia/isaac-sim:6.0.1
+  scene_entrypoint: scripts/isaac_m1b_dataset_benchmark.py
+  camera_render_products:
+  - policy_rgbd
+  - overview
+  - bin_closeup
+  - wrist_like
+  annotators:
+  - rgb
+  - distance_to_image_plane
+  - semantic_segmentation
+  - instance_segmentation
+  episode_writer: IsaacIndustrialEpisodeV1 / READY shard
+  available_disk_kib: 412846740
+train:
+  host: node2
+  project_root: /home/gl/xh-202607-qrm-lite
+  data_root: /home/gl/xh-data/isaac-industrial
+  gpus:
+  - index: 0
+    name: NVIDIA A100-SXM4-80GB
+    vram_total_mib: 81920
+    vram_free_mib: 80085
+    driver_version: 595.71.05
+  environment: .venv-qrm-lite
+  available_disk_kib: 4467669820
+action_protocol:
+  executed: 9D named Panda joints, radians/metres, 30 Hz, identity normalization
+  qrm_residual: 10D camera optical, m/r6d/normalized gripper, 5 Hz
+teacher_states:
+  Nano: CANDIDATE
+  BWM: CANDIDATE_LICENSE_PENDING
+  Super: PARKED
+  kill_rule_events: []

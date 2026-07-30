@@ -46,10 +46,9 @@ isaac-validate:
 isaac-sync:
 	bash scripts/isaac/sync_ready_shards.sh
 qrm-beta-train:
-	$(PYTHON) scripts/qrm_lite/train_coarse_beta.py --dataset "$${QRM_BETA_DATASET}"
-	$(PYTHON) scripts/qrm_lite/train_mlp_beta.py --dataset "$${QRM_BETA_DATASET}"
+	$(PYTHON) scripts/qrm_lite/train_q012.py --dataset "$${QRM_BETA_DATASET}" --models Q0,Q1,Q2 --out-dir artifacts/qrm_lite/m2a-beta --report reports/m2a-s4-qrm-beta-train.md --report-json reports/m2a-s4-qrm-beta-train.json
 qrm-beta-eval:
-	$(PYTHON) scripts/qrm_lite/eval_beta_offline.py --dataset "$${QRM_BETA_DATASET}"
+	$(PYTHON) scripts/qrm_lite/eval_beta_offline.py --dataset "$${QRM_BETA_DATASET}" --train-report reports/m2a-s4-qrm-beta-train.json
 qrm-beta-closed-loop:
 	bash scripts/qrm_lite/run_isaac_closed_loop_eval.sh
 shadow-isaac:

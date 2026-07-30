@@ -1,0 +1,73 @@
+{
+  "action_protocol": {
+    "executed": "9D named Panda joints, radians/metres, 30 Hz, identity normalization",
+    "qrm_residual": "10D camera optical, m/r6d/normalized gripper, 5 Hz"
+  },
+  "feature_branch": "codex/m2a-isaac-data-qrm-beta",
+  "head": "f007bd490d7cf7ba11d032af94fb2799e9d62e16",
+  "isaac": {
+    "annotators": [
+      "rgb",
+      "distance_to_image_plane",
+      "semantic_segmentation",
+      "instance_segmentation"
+    ],
+    "available_disk_kib": 412846740,
+    "camera_render_products": [
+      "policy_rgbd",
+      "overview",
+      "bin_closeup",
+      "wrist_like"
+    ],
+    "data_root": "/var/tmp/xh-data/isaac-industrial",
+    "episode_writer": "IsaacIndustrialEpisodeV1 / READY shard",
+    "gpus": [
+      {
+        "driver_version": "595.84",
+        "index": 0,
+        "name": "NVIDIA GeForce RTX 3080",
+        "vram_free_mib": 9733,
+        "vram_total_mib": 10240
+      },
+      {
+        "driver_version": "595.84",
+        "index": 1,
+        "name": "NVIDIA GeForce RTX 3080",
+        "vram_free_mib": 9859,
+        "vram_total_mib": 10240
+      }
+    ],
+    "host": "root@labserver",
+    "image": "nvcr.io/nvidia/isaac-sim:6.0.1",
+    "isaac_version": "6.0.1",
+    "project_root": "/var/tmp/m2a-isaac-project-20260731",
+    "scene_entrypoint": "scripts/isaac_m1b_dataset_benchmark.py"
+  },
+  "m1b_baseline_commit": "5984298",
+  "origin_main": "0709cc19b66e52e8043eb26babb9a6f3e8ca9a72",
+  "qrm_alpha_tag_commit": "0287d23e586f5d977c71257aeca4accacecadbe8",
+  "schema_version": "M2ATopologyAuditV1",
+  "status": "PASS",
+  "teacher_states": {
+    "BWM": "CANDIDATE_LICENSE_PENDING",
+    "Nano": "CANDIDATE",
+    "Super": "PARKED",
+    "kill_rule_events": []
+  },
+  "train": {
+    "available_disk_kib": 4467669820,
+    "data_root": "/home/gl/xh-data/isaac-industrial",
+    "environment": ".venv-qrm-lite",
+    "gpus": [
+      {
+        "driver_version": "595.71.05",
+        "index": 0,
+        "name": "NVIDIA A100-SXM4-80GB",
+        "vram_free_mib": 80085,
+        "vram_total_mib": 81920
+      }
+    ],
+    "host": "node2",
+    "project_root": "/home/gl/xh-202607-qrm-lite"
+  }
+}

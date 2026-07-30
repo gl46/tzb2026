@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import json
+from argparse import Namespace
+from pathlib import Path
 
 import numpy as np
 import pytest
@@ -14,6 +16,7 @@ from xh_agent.data_engine.isaac.contract import (
     validate_episode,
 )
 from xh_agent.policy.qrm_lite.residual_safety import ResidualSafetyFilter
+from run_isaac_m1b_dual_benchmark import _worker_command
 
 
 def _action(width: int = 10) -> dict:
@@ -147,3 +150,28 @@ def test_nonfinite_model_output_is_rejected() -> None:
             np.full((4, 10), np.nan),
         )
 
+
+def test_closed_loop_worker_mounts_checkpoint_read_only() -> None:
+    args = Namespace(
+        worker_sdf=["scene-1.sdf", "scene-2.sdf"],
+        worker_supervision=["scene-1.json", "scene-2.json"],
+        container_prefix="test",
+        project_root=Path("/project"),
+        source_root=Path("/source"),
+        image="isaac:6",
+        frames=6,
+        warmup_frames=1,
+        timeout_s=10.0,
+        qrm_checkpoint=Path("/checkpoints/Q2.npz"),
+        qrm_model_id="Q2_COARSE_MLP_FAILURE_CONTEXT",
+    )
+    command = _worker_command(
+        args,
+        worker_id=0,
+        gpu_index=0,
+        worker_output=Path("/output"),
+        control=Path("/control"),
+    )
+    assert "/checkpoints:/workspace/qrm:ro" in command
+    assert "--qrm-checkpoint" in command
+    assert "/workspace/qrm/Q2.npz" in command

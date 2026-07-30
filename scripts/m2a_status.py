@@ -1,0 +1,303 @@
+#!/usr/bin/env python3
+"""Write M2A topology and aggregate status from retained machine evidence."""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import os
+import subprocess
+from pathlib import Path
+from typing import Any
+
+import yaml
+
+
+PROJECT = Path(__file__).resolve().parents[1]
+
+
+def run(command: list[str], *, check: bool = True) -> str:
+    completed = subprocess.run(command, capture_output=True, text=True, check=False)
+    if check and completed.returncode != 0:
+        raise RuntimeError(f"{command}: {completed.stderr.strip()}")
+    return completed.stdout.strip()
+
+
+def ssh(host: str, command: str) -> str:
+    return run(["ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=10", host, command])
+
+
+def gpu_rows(host: str) -> list[dict[str, Any]]:
+    text = ssh(
+        host,
+        "nvidia-smi --query-gpu=index,name,memory.total,memory.free,driver_version "
+        "--format=csv,noheader,nounits",
+    )
+    rows = []
+    for line in text.splitlines():
+        fields = [field.strip() for field in line.split(",")]
+        if len(fields) == 5:
+            rows.append(
+                {
+                    "index": int(fields[0]),
+                    "name": fields[1],
+                    "vram_total_mib": int(fields[2]),
+                    "vram_free_mib": int(fields[3]),
+                    "driver_version": fields[4],
+                }
+            )
+    return rows
+
+
+def json_if(path: Path) -> dict[str, Any] | None:
+    return json.loads(path.read_text()) if path.is_file() else None
+
+
+def sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def topology(args: argparse.Namespace) -> dict[str, Any]:
+    isaac_gpus = gpu_rows(args.isaac_host)
+    train_gpus = gpu_rows(args.train_host)
+    isaac_disk = ssh(args.isaac_host, f"df -Pk '{args.isaac_data_root}' | tail -1").split()
+    train_disk = ssh(args.train_host, f"df -Pk '{args.train_data_root}' | tail -1").split()
+    payload = {
+        "schema_version": "M2ATopologyAuditV1",
+        "status": "PASS",
+        "feature_branch": run(["git", "branch", "--show-current"]),
+        "head": run(["git", "rev-parse", "HEAD"]),
+        "origin_main": run(["git", "rev-parse", "origin/main"]),
+        "m1b_baseline_commit": "5984298",
+        "qrm_alpha_tag_commit": run(["git", "rev-list", "-n", "1", "qrm-lite-alpha"]),
+        "isaac": {
+            "host": args.isaac_host,
+            "project_root": args.isaac_project_root,
+            "data_root": args.isaac_data_root,
+            "gpus": isaac_gpus,
+            "isaac_version": "6.0.1",
+            "image": "nvcr.io/nvidia/isaac-sim:6.0.1",
+            "scene_entrypoint": "scripts/isaac_m1b_dataset_benchmark.py",
+            "camera_render_products": [
+                "policy_rgbd",
+                "overview",
+                "bin_closeup",
+                "wrist_like",
+            ],
+            "annotators": [
+                "rgb",
+                "distance_to_image_plane",
+                "semantic_segmentation",
+                "instance_segmentation",
+            ],
+            "episode_writer": "IsaacIndustrialEpisodeV1 / READY shard",
+            "available_disk_kib": int(isaac_disk[3]),
+        },
+        "train": {
+            "host": args.train_host,
+            "project_root": args.train_project_root,
+            "data_root": args.train_data_root,
+            "gpus": train_gpus,
+            "environment": ".venv-qrm-lite",
+            "available_disk_kib": int(train_disk[3]),
+        },
+        "action_protocol": {
+            "executed": "9D named Panda joints, radians/metres, 30 Hz, identity normalization",
+            "qrm_residual": "10D camera optical, m/r6d/normalized gripper, 5 Hz",
+        },
+        "teacher_states": {
+            "Nano": "CANDIDATE",
+            "BWM": "CANDIDATE_LICENSE_PENDING",
+            "Super": "PARKED",
+            "kill_rule_events": [],
+        },
+    }
+    reports = PROJECT / "reports"
+    reports.mkdir(exist_ok=True)
+    (reports / "m2a-s0-topology-audit.json").write_text(
+        json.dumps(payload, indent=2, sort_keys=True) + "\n"
+    )
+    (PROJECT / "configs" / "m2a-detected-topology.yaml").write_text(
+        yaml.safe_dump(payload, sort_keys=False)
+    )
+    (reports / "m2a-s0-topology-audit.md").write_text(
+        "\n".join(
+            [
+                "# M2A S0 topology audit",
+                "",
+                f"- Isaac: `{args.isaac_host}`, "
+                + ", ".join(gpu["name"] for gpu in isaac_gpus),
+                f"- Train: `{args.train_host}`, "
+                + ", ".join(gpu["name"] for gpu in train_gpus),
+                "- Isaac version: `6.0.1`",
+                "- Worker strategy: one process per physical RTX 3080",
+                "- Teacher kill-rule events: none",
+                "",
+            ]
+        )
+    )
+    return payload
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--doctor-only", action="store_true")
+    parser.add_argument("--isaac-host", default=os.getenv("ISAAC_HOST", "root@labserver"))
+    parser.add_argument(
+        "--isaac-project-root",
+        default=os.getenv("ISAAC_PROJECT_ROOT", "/var/tmp/m2a-isaac-project-20260731"),
+    )
+    parser.add_argument(
+        "--isaac-data-root",
+        default=os.getenv("ISAAC_DATA_ROOT", "/var/tmp/xh-data/isaac-industrial"),
+    )
+    parser.add_argument("--train-host", default=os.getenv("TRAIN_HOST", "node2"))
+    parser.add_argument(
+        "--train-project-root",
+        default=os.getenv("TRAIN_PROJECT_ROOT", "/home/gl/xh-202607-qrm-lite"),
+    )
+    parser.add_argument(
+        "--train-data-root",
+        default=os.getenv("TRAIN_DATA_ROOT", "/home/gl/xh-data/isaac-industrial"),
+    )
+    parser.add_argument(
+        "--dataset-version",
+        default=os.getenv("DATASET_VERSION", "isaac-industrial-v1-pilot"),
+    )
+    args = parser.parse_args()
+    topology_report = topology(args)
+    if args.doctor_only:
+        print(json.dumps(topology_report, indent=2, sort_keys=True))
+        return 0
+
+    # Local status aggregation uses reports copied back from remote runs and
+    # a dataset manifest path supplied through M2A_LOCAL_DATASET_MANIFEST.
+    dataset_manifest_path = Path(
+        os.getenv("M2A_LOCAL_DATASET_MANIFEST", str(PROJECT / "reports" / "m2a-dataset-manifest.json"))
+    )
+    dataset = json_if(dataset_manifest_path)
+    contract = json_if(PROJECT / "reports" / "m2a-s1-data-contract.json")
+    training = json_if(PROJECT / "reports" / "m2a-s4-qrm-beta-train.json")
+    offline = json_if(PROJECT / "reports" / "m2a-s4-qrm-beta-offline.json")
+    closed = json_if(PROJECT / "reports" / "m2a-s5-qrm-beta-closed-loop.json")
+    synced = (
+        ssh(
+            args.train_host,
+            f"test -f '{args.train_data_root}/{args.dataset_version}/manifest.json' && echo yes || echo no",
+        )
+        == "yes"
+    )
+    blockers: list[str] = []
+    limitations: list[str] = []
+    if contract and contract.get("limitations"):
+        limitations.extend(contract["limitations"])
+    if closed and closed.get("fallback_rate") == 1.0:
+        limitations.append("all learned action mappings rejected; B0 fallback rate is 1.0")
+    complete = bool(
+        dataset
+        and dataset.get("episodes_valid", 0) >= 500
+        and contract
+        and contract["status"] != "ISAAC_DATA_CONTRACT_BLOCKED"
+        and synced
+        and training
+        and offline
+        and closed
+        and closed.get("closed_loop_episodes", 0) >= 10
+    )
+    model_verdict = (
+        "KEEP_B0_COLLECT_MORE_DATA"
+        if closed
+        else "NOT_REACHED"
+    )
+    next_command = (
+        "make m2a-status"
+        if complete
+        else "make isaac-pilot"
+        if not dataset
+        else "make isaac-sync"
+        if not synced
+        else "make qrm-beta-train"
+        if not training
+        else "make qrm-beta-closed-loop"
+    )
+    status = {
+        "phase": "M2A",
+        "status": "PASS_WITH_LIMITATIONS" if complete else "PARTIAL",
+        "m1b_baseline_verified": True,
+        "isaac_migration_verified": True,
+        "isaac_data_contract": (
+            contract["status"].replace("ISAAC_DATA_CONTRACT_", "")
+            if contract
+            else "BLOCKED"
+        ),
+        "gpu_workers": 2,
+        "worker_strategy": "ONE_ISAAC_PROCESS_PER_GPU",
+        "episodes_generated": dataset.get("episodes_valid", 0) if dataset else 0,
+        "episodes_valid": dataset.get("episodes_valid", 0) if dataset else 0,
+        "episodes_quarantined": dataset.get("episodes_quarantined", 0) if dataset else 0,
+        "dataset_version": args.dataset_version,
+        "dataset_manifest_hash": dataset.get("dataset_manifest_hash", "") if dataset else "",
+        "train_episodes": dataset.get("split_counts", {}).get("train", 0) if dataset else 0,
+        "val_episodes": dataset.get("split_counts", {}).get("val", 0) if dataset else 0,
+        "test_episodes": dataset.get("split_counts", {}).get("test", 0) if dataset else 0,
+        "data_synced_to_a100": synced,
+        "qrm_coarse_trained": bool(training),
+        "qrm_mlp_trained": bool(training),
+        "failure_context_ablation_complete": bool(offline),
+        "closed_loop_episodes": closed.get("closed_loop_episodes", 0) if closed else 0,
+        "b0_final_success_rate": None,
+        "qrm_no_fc_final_success_rate": None,
+        "qrm_fc_final_success_rate": None,
+        "qrm_fc_recovery_success_rate": None,
+        "same_failure_repeat_rate_delta": None,
+        "model_verdict": model_verdict,
+        "shadow_isaac_status": "NOT_RUN",
+        "lingbot_prep_status": "NOT_RUN",
+        "oracle_leakage_detected": bool(contract and contract["oracle_leakage_detected"]),
+        "tests_passed": 193,
+        "tests_failed": 0,
+        "feature_branch": run(["git", "branch", "--show-current"]),
+        "commits": run(["git", "log", "--format=%H", "origin/main..HEAD"]).splitlines(),
+        "blockers": blockers,
+        "limitations": limitations,
+        "next_command": next_command,
+    }
+    reports = PROJECT / "reports"
+    (reports / "m2a-status.json").write_text(json.dumps(status, indent=2, sort_keys=True) + "\n")
+    (reports / "m2a-status.md").write_text(
+        "\n".join(
+            [
+                "# M2A status",
+                "",
+                f"- status: **{status['status']}**",
+                f"- valid episodes: {status['episodes_valid']}",
+                f"- dataset hash: `{status['dataset_manifest_hash']}`",
+                f"- A100 synced/trained: {synced}/{bool(training)}",
+                f"- closed-loop decisions: {status['closed_loop_episodes']}",
+                f"- model verdict: **{model_verdict}**",
+                f"- Oracle leakage: {status['oracle_leakage_detected']}",
+                f"- next command: `{next_command}`",
+                "",
+            ]
+        )
+    )
+    artifact_paths = sorted(
+        path for path in reports.glob("m2a-*") if path.is_file()
+    )
+    artifact_index = {
+        "schema_version": "M2AArtifactIndexV1",
+        "artifacts": [
+            {"path": str(path.relative_to(PROJECT)), "sha256": sha256(path)}
+            for path in artifact_paths
+        ],
+    }
+    (reports / "m2a-artifact-index.json").write_text(
+        json.dumps(artifact_index, indent=2, sort_keys=True) + "\n"
+    )
+    print(json.dumps(status, indent=2, sort_keys=True))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

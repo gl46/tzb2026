@@ -10,3 +10,11 @@
 | Q7 robot only as executor | broker and perception boundary | `ADR-0011`, `docs/architecture/m1b-alpha-perception.md` |
 | Q8 cylinders, pose, bin cells, transport reserve | IndustrialCylinderBenchmarkV1 | `configs/scenes/industrial_cylinder_v1.yaml` |
 | Q9 independent modules/submission | scripts and package APIs | Alpha interfaces supplied; Beta CLIs pending |
+# M2A evidence extension (2026-07-31)
+
+| Competition requirement | M2A evidence |
+| --- | --- |
+| Q1/Q2 virtual industrial data and perception generalization | `isaac-industrial-v1-pilot` dataset card, scene-level held-out split, RGB-D/mask hashes |
+| Q3 re-perceive, reflect, re-decide | public RGB-D transitions, predicate residual, `FailureContextV1`, live checkpoint decision log |
+| Q4 failure correction | `REOBSERVE` supervision, held-out FailureContext ablation, B0 fallback evidence |
+| Q9 code/model/data/simulator/video/report | `docs/m2a-runbook.md`, M2A artifact index and reproducibility report |

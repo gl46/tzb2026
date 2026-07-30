@@ -46,7 +46,7 @@ def _worker_command(
 ) -> list[str]:
     sdf_name = args.worker_sdf[worker_id]
     supervision_name = args.worker_supervision[worker_id]
-    return [
+    command = [
         "docker",
         "run",
         "--rm",
@@ -97,6 +97,21 @@ def _worker_command(
         "--barrier-timeout-s",
         str(args.timeout_s),
     ]
+    if args.qrm_checkpoint is not None:
+        mount_index = command.index("-w")
+        command[mount_index:mount_index] = [
+            "-v",
+            f"{args.qrm_checkpoint.parent}:/workspace/qrm:ro",
+        ]
+        command.extend(
+            [
+                "--qrm-checkpoint",
+                f"/workspace/qrm/{args.qrm_checkpoint.name}",
+                "--qrm-model-id",
+                args.qrm_model_id,
+            ]
+        )
+    return command
 
 
 def parse_smi_csv(text: str) -> list[dict[str, float | int]]:
@@ -302,6 +317,16 @@ def main() -> int:
     parser.add_argument("--timeout-s", type=float, default=900.0)
     parser.add_argument("--image", default="nvcr.io/nvidia/isaac-sim:6.0.1")
     parser.add_argument("--container-prefix", default="m1b-isaac-dual-final")
+    parser.add_argument("--qrm-checkpoint", type=Path)
+    parser.add_argument(
+        "--qrm-model-id",
+        default="Q2_COARSE_MLP_FAILURE_CONTEXT",
+        choices=(
+            "Q0_COARSE_ONLY",
+            "Q1_COARSE_MLP_RESIDUAL",
+            "Q2_COARSE_MLP_FAILURE_CONTEXT",
+        ),
+    )
     parser.add_argument(
         "--worker-sdf",
         action="append",
@@ -335,6 +360,8 @@ def main() -> int:
     for required in (args.project_root, args.source_root):
         if not required.is_dir():
             parser.error(f"required directory does not exist: {required}")
+    if args.qrm_checkpoint is not None and not args.qrm_checkpoint.is_file():
+        parser.error(f"QRM checkpoint does not exist: {args.qrm_checkpoint}")
     dataset_benchmark_path = (
         args.project_root / "scripts" / "isaac_m1b_dataset_benchmark.py"
     )
@@ -441,6 +468,19 @@ def main() -> int:
             }
             for worker_id in range(2)
         ],
+        "qrm_closed_loop_smoke": {
+            "enabled": args.qrm_checkpoint is not None,
+            "checkpoint": (
+                str(args.qrm_checkpoint)
+                if args.qrm_checkpoint is not None
+                else None
+            ),
+            "model_id": (
+                args.qrm_model_id
+                if args.qrm_checkpoint is not None
+                else None
+            ),
+        },
         "workers": [
             {
                 "worker_id": worker_id,
