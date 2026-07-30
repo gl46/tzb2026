@@ -78,6 +78,7 @@ def main() -> int:
     parser.add_argument("--epochs", type=int, default=1)
     parser.add_argument("--max-train", type=int, default=120)
     parser.add_argument("--max-eval", type=int, default=50)
+    parser.add_argument("--eval-split", choices=("val", "test"), default="test")
     parser.add_argument("--seed", type=int, default=20260731)
     parser.add_argument("--lr", type=float, default=1e-4)
     parser.add_argument("--adapter-out", required=True, type=Path)
@@ -93,12 +94,16 @@ def main() -> int:
     torch.manual_seed(args.seed)
     samples = load_samples(args.dataset)
     train = [sample for sample in samples if sample.split == "train"]
-    evaluation = [sample for sample in samples if sample.split in {"val", "test"}]
+    evaluation = [sample for sample in samples if sample.split == args.eval_split]
     random.Random(args.seed).shuffle(train)
     random.Random(args.seed).shuffle(evaluation)
     train = train[: args.max_train]
     evaluation = evaluation[: args.max_eval]
-    labels = sorted({sample.coarse_intent.skill_type for sample in samples})
+    labels = ["APPROACH", "REOBSERVE"]
+    observed_labels = sorted({sample.coarse_intent.skill_type for sample in samples})
+    unsupported_labels = sorted(set(observed_labels) - set(labels))
+    if unsupported_labels:
+        raise SystemExit(f"unsupported real Pilot coarse labels: {unsupported_labels}")
     label_to_id = {label: index for index, label in enumerate(labels)}
     if not train or not evaluation:
         raise SystemExit("train/eval split is empty")
@@ -243,7 +248,7 @@ def main() -> int:
     ) ** 0.5
     limitations = []
     status = "PASS"
-    if len(labels) < 2:
+    if len(observed_labels) < 2:
         status = "PASS_WITH_LIMITATIONS_SINGLE_CLASS"
         limitations.append(
             "real Pilot coarse labels contain one class; accuracy is degenerate "
@@ -261,8 +266,11 @@ def main() -> int:
         "epochs": args.epochs,
         "n_train": len(train),
         "n_eval": len(evaluation),
+        "eval_split": args.eval_split,
         "labels": labels,
-        "label_count": len(labels),
+        "head_label_count": len(labels),
+        "observed_labels": observed_labels,
+        "observed_label_count": len(observed_labels),
         "history": history,
         "eval_accuracy": accuracy,
         "eval_predictions": [
