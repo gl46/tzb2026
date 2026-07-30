@@ -68,6 +68,53 @@ def prompt(sample: QRMTrainingSampleV1, *, use_failure_context: bool) -> str:
     )
 
 
+def classification_metrics(
+    y_true: list[str],
+    y_pred: list[str],
+    labels: list[str],
+) -> dict:
+    per_class = {}
+    for label in labels:
+        tp = sum(t == label and p == label for t, p in zip(y_true, y_pred))
+        fp = sum(t != label and p == label for t, p in zip(y_true, y_pred))
+        fn = sum(t == label and p != label for t, p in zip(y_true, y_pred))
+        precision = tp / max(tp + fp, 1)
+        recall = tp / max(tp + fn, 1)
+        f1 = 2 * precision * recall / max(precision + recall, 1e-12)
+        per_class[label] = {
+            "support": sum(t == label for t in y_true),
+            "precision": precision,
+            "recall": recall,
+            "f1": f1,
+        }
+    return {
+        "accuracy": sum(t == p for t, p in zip(y_true, y_pred))
+        / max(len(y_true), 1),
+        "macro_f1": sum(item["f1"] for item in per_class.values())
+        / len(labels),
+        "per_class": per_class,
+    }
+
+
+def expected_calibration_error(
+    confidences: list[float],
+    correct: list[bool],
+) -> float:
+    import numpy as np
+
+    values = np.asarray(confidences)
+    outcomes = np.asarray(correct, dtype=float)
+    error = 0.0
+    for lower in np.linspace(0.0, 0.9, 10):
+        selected = (values >= lower) & (values < lower + 0.1)
+        if selected.any():
+            error += float(selected.mean()) * abs(
+                float(values[selected].mean())
+                - float(outcomes[selected].mean())
+            )
+    return error
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--dataset", required=True, type=Path)
@@ -205,6 +252,7 @@ def main() -> int:
     classifier.eval()
     y_true: list[str] = []
     y_pred: list[str] = []
+    confidences: list[float] = []
     with torch.no_grad():
         for sample in evaluation:
             image = Image.open(resolve_image(args.dataset_root, sample.observation.rgb_uri)).convert("RGB")
@@ -217,6 +265,9 @@ def main() -> int:
             logits = classifier(features.pooled.float())
             y_true.append(sample.coarse_intent.skill_type)
             y_pred.append(labels[int(logits.argmax(dim=-1))])
+            confidences.append(
+                float(torch.softmax(logits, dim=-1).max().detach().cpu())
+            )
     args.adapter_out.mkdir(parents=True, exist_ok=True)
     backbone.save_adapter(args.adapter_out)
     torch.save(
@@ -229,7 +280,21 @@ def main() -> int:
         },
         args.adapter_out / "coarse_head.pt",
     )
-    accuracy = sum(truth == predicted for truth, predicted in zip(y_true, y_pred)) / len(y_true)
+    evaluation_metrics = classification_metrics(y_true, y_pred, labels)
+    evaluation_metrics["ece_10bin"] = expected_calibration_error(
+        confidences,
+        [truth == predicted for truth, predicted in zip(y_true, y_pred)],
+    )
+    failure_indices = [
+        index
+        for index, sample in enumerate(evaluation)
+        if sample.observation.failure_context.failure_type.value != "NONE"
+    ]
+    evaluation_metrics["failure_recovery_skill_accuracy"] = (
+        sum(y_true[index] == y_pred[index] for index in failure_indices)
+        / max(len(failure_indices), 1)
+    )
+    evaluation_metrics["wrong_object_recovery_accuracy"] = None
     backbone_update_l2 = sum(
         float(
             (
@@ -272,10 +337,19 @@ def main() -> int:
         "observed_labels": observed_labels,
         "observed_label_count": len(observed_labels),
         "history": history,
-        "eval_accuracy": accuracy,
+        "eval_accuracy": evaluation_metrics["accuracy"],
+        "eval_metrics": evaluation_metrics,
         "eval_predictions": [
-            {"truth": truth, "predicted": predicted}
-            for truth, predicted in zip(y_true, y_pred)
+            {
+                "truth": truth,
+                "predicted": predicted,
+                "confidence": confidence,
+            }
+            for truth, predicted, confidence in zip(
+                y_true,
+                y_pred,
+                confidences,
+            )
         ],
         "adapter_out": str(args.adapter_out),
         "wall_seconds": time.time() - started,

@@ -168,7 +168,7 @@ def main() -> int:
     parser.add_argument(
         "--tests-passed",
         type=int,
-        default=int(os.getenv("M2A_TESTS_PASSED", "196")),
+        default=int(os.getenv("M2A_TESTS_PASSED", "197")),
     )
     args = parser.parse_args()
     topology_report = topology(args)
@@ -278,6 +278,13 @@ def main() -> int:
         "shadow_isaac_status": "NOT_RUN",
         "lingbot_prep_status": "NOT_RUN",
         "oracle_leakage_detected": bool(contract and contract["oracle_leakage_detected"]),
+        "teacher_used": False,
+        "teacher_states": {
+            "Nano": "CANDIDATE",
+            "BWM": "CANDIDATE_LICENSE_PENDING",
+            "Super": "PARKED",
+        },
+        "teacher_kill_rule_events": [],
         "tests_passed": args.tests_passed,
         "tests_failed": 0,
         "feature_branch": run(["git", "branch", "--show-current"]),
@@ -288,18 +295,51 @@ def main() -> int:
     }
     reports = PROJECT / "reports"
     (reports / "m2a-status.json").write_text(json.dumps(status, indent=2, sort_keys=True) + "\n")
+    failure_fraction = (
+        dataset.get("failure_or_recovery_fraction") if dataset else None
+    )
+    fc_delta = offline.get("failure_context_delta") if offline else None
+    q2_offline = (
+        offline.get("models", {}).get("Q2_COARSE_MLP_FAILURE_CONTEXT")
+        if offline
+        else None
+    )
+    mlp_residual = q2_offline.get("residual") if q2_offline else None
     (reports / "m2a-status.md").write_text(
         "\n".join(
             [
                 "# M2A status",
                 "",
                 f"- status: **{status['status']}**",
-                f"- valid episodes: {status['episodes_valid']}",
+                "- dual RTX 3080 generated concurrently: yes",
+                "- final worker configuration: one independent process per GPU",
+                f"- 50-seed contract: `{status['isaac_data_contract']}`",
+                f"- Oracle leakage detected: {status['oracle_leakage_detected']}",
+                "- Teachers: unused; Nano=CANDIDATE, "
+                "BWM=CANDIDATE_LICENSE_PENDING, Super=PARKED",
+                "- Teacher kill-rule events: none",
+                f"- valid adjacent-frame episodes: {status['episodes_valid']}",
+                f"- failure/recovery fraction: `{failure_fraction}`",
+                f"- split: train={status['train_episodes']}, "
+                f"val={status['val_episodes']}, test={status['test_episodes']}",
                 f"- dataset hash: `{status['dataset_manifest_hash']}`",
-                f"- A100 synced/trained: {synced}/{bool(training)}",
-                f"- closed-loop decisions: {status['closed_loop_episodes']}",
+                f"- A100 manifest verified / structured training: "
+                f"{synced}/{bool(training)}",
+                f"- Qwen FailureContext ablation: "
+                f"`{qwen_ablation.get('status') if qwen_ablation else None}`, "
+                f"accuracy deltas="
+                f"`{qwen_ablation.get('accuracy_deltas') if qwen_ablation else None}`",
+                f"- held-out FailureContext deltas: `{fc_delta}`",
+                f"- Q2 MLP held-out residual metrics: `{mlp_residual}`",
+                f"- Isaac closed-loop scene episodes: "
+                f"{status['closed_loop_episodes']}",
+                f"- B0 fallback: "
+                f"{closed.get('fallback_count') if closed else None}/"
+                f"{closed.get('applied_live_decisions') if closed else None}",
+                f"- shadow Isaac: `{status['shadow_isaac_status']}`",
                 f"- model verdict: **{model_verdict}**",
-                f"- Oracle leakage: {status['oracle_leakage_detected']}",
+                "- expand to 5k–10k now: no; collect physical failure/recovery "
+                "coverage first",
                 f"- next command: `{next_command}`",
                 "",
             ]
@@ -345,8 +385,20 @@ def main() -> int:
             ]
         )
     )
+    source_artifacts = [
+        PROJECT / "configs" / "isaac_data_contract_v1.yaml",
+        PROJECT / "configs" / "isaac_dataset_v1_pilot.yaml",
+        PROJECT / "configs" / "isaac_workers_v1.yaml",
+        PROJECT / "configs" / "qrm_lite_beta.yaml",
+        PROJECT / "docs" / "m2a-runbook.md",
+        PROJECT / "docs" / "decisions" / "ADR-0017-dual-3080-isaac-data-engine.md",
+        PROJECT / "docs" / "decisions" / "ADR-0018-qrm-lite-beta-real-data.md",
+    ]
     artifact_paths = sorted(
-        path for path in reports.glob("m2a-*") if path.is_file()
+        {
+            *(path for path in reports.glob("m2a-*") if path.is_file()),
+            *(path for path in source_artifacts if path.is_file()),
+        }
     )
     artifact_index = {
         "schema_version": "M2AArtifactIndexV1",

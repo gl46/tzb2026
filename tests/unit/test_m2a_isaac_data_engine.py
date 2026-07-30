@@ -8,6 +8,7 @@ import numpy as np
 import pytest
 
 from qrm_lite.summarize_isaac_closed_loop import main as summarize_closed_loop
+from qrm_lite.train_qwen_coarse_beta import classification_metrics
 from isaac.run_pilot_campaign import quarantine_failed_run
 from xh_agent.data_engine.isaac.contract import (
     ShardState,
@@ -249,3 +250,15 @@ def test_campaign_resume_never_overwrites_prior_quarantine(tmp_path: Path) -> No
     assert resumed.name.endswith("attempt-03")
     assert first.is_dir()
     assert resumed.is_dir()
+
+
+def test_qwen_metrics_retain_absent_class_as_zero_f1() -> None:
+    metrics = classification_metrics(
+        ["REOBSERVE", "REOBSERVE"],
+        ["REOBSERVE", "REOBSERVE"],
+        ["APPROACH", "REOBSERVE"],
+    )
+    assert metrics["accuracy"] == 1.0
+    assert metrics["per_class"]["APPROACH"]["support"] == 0
+    assert metrics["per_class"]["APPROACH"]["f1"] == 0.0
+    assert metrics["macro_f1"] == 0.5
