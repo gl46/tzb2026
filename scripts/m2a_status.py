@@ -168,7 +168,7 @@ def main() -> int:
     parser.add_argument(
         "--tests-passed",
         type=int,
-        default=int(os.getenv("M2A_TESTS_PASSED", "197")),
+        default=int(os.getenv("M2A_TESTS_PASSED", "198")),
     )
     args = parser.parse_args()
     topology_report = topology(args)

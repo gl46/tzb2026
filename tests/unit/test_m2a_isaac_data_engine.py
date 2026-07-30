@@ -9,7 +9,12 @@ import pytest
 
 from qrm_lite.summarize_isaac_closed_loop import main as summarize_closed_loop
 from qrm_lite.train_qwen_coarse_beta import classification_metrics
-from isaac.run_pilot_campaign import quarantine_failed_run, sha256, valid_prior
+from isaac.run_pilot_campaign import (
+    prior_worker_order_swapped,
+    quarantine_failed_run,
+    sha256,
+    valid_prior,
+)
 from xh_agent.data_engine.isaac.contract import (
     ShardState,
     audit_policy_projection,
@@ -281,6 +286,7 @@ def test_campaign_accepts_hash_valid_swapped_worker_assignment(
         )
     )
     assert valid_prior(run_root, expected)
+    assert prior_worker_order_swapped(run_root, expected)
 
 
 def test_qwen_metrics_retain_absent_class_as_zero_f1() -> None:

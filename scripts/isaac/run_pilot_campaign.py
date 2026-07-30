@@ -42,6 +42,15 @@ def valid_prior(run_root: Path, expected: list[Path]) -> bool:
     )
 
 
+def prior_worker_order_swapped(
+    run_root: Path,
+    expected: list[Path],
+) -> bool:
+    summary = json.loads((run_root / "dual-benchmark-summary.json").read_text())
+    sources = summary["worker_sources"]
+    return sources[0]["sdf_sha256"] == sha256(expected[2])
+
+
 def quarantine_failed_run(run_root: Path, *, attempt: int) -> Path:
     quarantine_root = run_root.parent / "quarantine"
     quarantine_root.mkdir(parents=True, exist_ok=True)
@@ -157,7 +166,11 @@ def main() -> int:
                 "seeds": [seed0, seed1],
                 "run_root": str(run_root),
                 "resumed": resumed,
-                "worker_order_swapped": args.swap_worker_order,
+                "worker_order_swapped": (
+                    prior_worker_order_swapped(run_root, files)
+                    if resumed
+                    else args.swap_worker_order
+                ),
                 "quarantined_attempts": quarantined,
                 "status": "PASS",
             }
