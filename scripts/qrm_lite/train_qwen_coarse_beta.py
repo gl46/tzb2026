@@ -121,11 +121,22 @@ def main() -> int:
         for parameter in backbone._model.parameters()
         if parameter.requires_grad
     ] + list(classifier.parameters())
+    backbone_parameters = [
+        parameter
+        for parameter in backbone._model.parameters()
+        if parameter.requires_grad
+    ]
+    initial_backbone = [parameter.detach().cpu().clone() for parameter in backbone_parameters]
+    initial_classifier = [
+        parameter.detach().cpu().clone() for parameter in classifier.parameters()
+    ]
     optimizer = torch.optim.AdamW(parameters, lr=args.lr)
     loss_function = torch.nn.CrossEntropyLoss()
     use_fc = args.failure_context == "on"
     started = time.time()
     history: list[dict] = []
+    max_gradient_l2 = 0.0
+    optimizer_steps = 0
     backbone._model.train()
     classifier.train()
     for epoch in range(args.epochs):
@@ -154,8 +165,15 @@ def main() -> int:
             )
             loss = loss_function(logits, target)
             loss.backward()
+            gradient_l2 = sum(
+                float(parameter.grad.detach().float().pow(2).sum().cpu())
+                for parameter in parameters
+                if parameter.grad is not None
+            ) ** 0.5
+            max_gradient_l2 = max(max_gradient_l2, gradient_l2)
             torch.nn.utils.clip_grad_norm_(parameters, 1.0)
             optimizer.step()
+            optimizer_steps += 1
             loss_total += float(loss.detach().cpu())
             correct += int(int(logits.argmax(dim=-1)) == int(target[0]))
             if index % 10 == 0:
@@ -207,9 +225,35 @@ def main() -> int:
         args.adapter_out / "coarse_head.pt",
     )
     accuracy = sum(truth == predicted for truth, predicted in zip(y_true, y_pred)) / len(y_true)
+    backbone_update_l2 = sum(
+        float(
+            (
+                parameter.detach().cpu().float() - initial.float()
+            ).pow(2).sum()
+        )
+        for parameter, initial in zip(backbone_parameters, initial_backbone)
+    ) ** 0.5
+    classifier_update_l2 = sum(
+        float(
+            (
+                parameter.detach().cpu().float() - initial.float()
+            ).pow(2).sum()
+        )
+        for parameter, initial in zip(classifier.parameters(), initial_classifier)
+    ) ** 0.5
+    limitations = []
+    status = "PASS"
+    if len(labels) < 2:
+        status = "PASS_WITH_LIMITATIONS_SINGLE_CLASS"
+        limitations.append(
+            "real Pilot coarse labels contain one class; accuracy is degenerate "
+            "and cannot establish FailureContext value"
+        )
+    if max_gradient_l2 == 0.0:
+        limitations.append("training objective produced zero gradient")
     report = {
         "schema_version": "Qwen35LoRACoarseBetaTrainV1",
-        "status": "PASS",
+        "status": status,
         "model_id": args.model_id,
         "revision": args.revision,
         "failure_context": args.failure_context,
@@ -218,6 +262,7 @@ def main() -> int:
         "n_train": len(train),
         "n_eval": len(evaluation),
         "labels": labels,
+        "label_count": len(labels),
         "history": history,
         "eval_accuracy": accuracy,
         "eval_predictions": [
@@ -231,6 +276,17 @@ def main() -> int:
             if torch.cuda.is_available()
             else None
         ),
+        "optimizer_steps": optimizer_steps,
+        "max_gradient_l2": max_gradient_l2,
+        "backbone_trainable_parameters": sum(
+            parameter.numel() for parameter in backbone_parameters
+        ),
+        "classifier_trainable_parameters": sum(
+            parameter.numel() for parameter in classifier.parameters()
+        ),
+        "backbone_update_l2": backbone_update_l2,
+        "classifier_update_l2": classifier_update_l2,
+        "limitations": limitations,
         "oracle_policy_inputs": False,
         "flow_status": "DISABLED",
     }

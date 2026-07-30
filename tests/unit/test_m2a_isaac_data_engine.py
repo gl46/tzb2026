@@ -7,6 +7,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
+from qrm_lite.summarize_isaac_closed_loop import main as summarize_closed_loop
 from xh_agent.data_engine.isaac.contract import (
     ShardState,
     audit_policy_projection,
@@ -175,3 +176,63 @@ def test_closed_loop_worker_mounts_checkpoint_read_only() -> None:
     assert "/checkpoints:/workspace/qrm:ro" in command
     assert "--qrm-checkpoint" in command
     assert "/workspace/qrm/Q2.npz" in command
+
+
+def test_closed_loop_summary_counts_scene_episodes_not_decisions(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    run_roots = [tmp_path / "run-a", tmp_path / "run-b"]
+    for run_root in run_roots:
+        run_root.mkdir()
+        (run_root / "dual-benchmark-summary.json").write_text(
+            json.dumps(
+                {
+                    "status": "PASS",
+                    "qrm_closed_loop_smoke": {
+                        "model_id": "Q2_COARSE_MLP_FAILURE_CONTEXT"
+                    },
+                }
+            )
+        )
+        for worker_id in range(2):
+            output = run_root / f"worker{worker_id}" / "output"
+            output.mkdir(parents=True)
+            decisions = [
+                {
+                    "applies_to_step": 1,
+                    "coarse_skill": "REOBSERVE",
+                    "used_failure_context": True,
+                    "residual_proposed": True,
+                },
+                {
+                    "applies_to_step": None,
+                    "coarse_skill": "REOBSERVE",
+                    "used_failure_context": True,
+                    "residual_proposed": True,
+                },
+            ]
+            (output / "metrics.json").write_text(
+                json.dumps({"qrm_closed_loop_smoke": {"decisions": decisions}})
+            )
+    report_json = tmp_path / "report.json"
+    report_md = tmp_path / "report.md"
+    monkeypatch.setattr(
+        "sys.argv",
+        [
+            "summarize_isaac_closed_loop.py",
+            "--run-root",
+            str(run_roots[0]),
+            "--run-root",
+            str(run_roots[1]),
+            "--report-json",
+            str(report_json),
+            "--report-md",
+            str(report_md),
+        ],
+    )
+    assert summarize_closed_loop() == 0
+    report = json.loads(report_json.read_text())
+    assert report["closed_loop_episodes"] == 4
+    assert report["applied_live_decisions"] == 4
+    assert report["live_qrm_decisions"] == 8

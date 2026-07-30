@@ -11,34 +11,50 @@ from pathlib import Path
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--run-root", required=True, type=Path)
+    parser.add_argument(
+        "--run-root",
+        required=True,
+        type=Path,
+        action="append",
+        help="repeat once for each two-scene dual-worker run",
+    )
     parser.add_argument("--report-json", required=True, type=Path)
     parser.add_argument("--report-md", required=True, type=Path)
     args = parser.parse_args()
-    summary = json.loads(
-        (args.run_root / "dual-benchmark-summary.json").read_text()
-    )
+    summaries = [
+        json.loads((run_root / "dual-benchmark-summary.json").read_text())
+        for run_root in args.run_root
+    ]
+    if any(summary.get("status") != "PASS" for summary in summaries):
+        raise SystemExit("at least one closed-loop Isaac run is not PASS")
+    model_ids = {
+        summary["qrm_closed_loop_smoke"]["model_id"] for summary in summaries
+    }
+    if len(model_ids) != 1:
+        raise SystemExit(f"closed-loop runs use different models: {model_ids}")
     decisions = []
-    for worker_id in range(2):
-        metrics = json.loads(
-            (
-                args.run_root
-                / f"worker{worker_id}"
-                / "output"
-                / "metrics.json"
-            ).read_text()
-        )
-        decisions.extend(metrics["qrm_closed_loop_smoke"]["decisions"])
+    for run_root in args.run_root:
+        for worker_id in range(2):
+            metrics = json.loads(
+                (
+                    run_root
+                    / f"worker{worker_id}"
+                    / "output"
+                    / "metrics.json"
+                ).read_text()
+            )
+            decisions.extend(metrics["qrm_closed_loop_smoke"]["decisions"])
     applied = [
         decision for decision in decisions if decision["applies_to_step"] is not None
     ]
     report = {
         "schema_version": "M2AQRMIsaacClosedLoopV1",
         "status": "PASS_WITH_B0_FALLBACK",
-        "run_root": str(args.run_root),
-        "model_id": summary["qrm_closed_loop_smoke"]["model_id"],
-        "closed_loop_episodes": len(applied),
+        "run_roots": [str(path) for path in args.run_root],
+        "model_id": next(iter(model_ids)),
+        "closed_loop_episodes": len(args.run_root) * 2,
         "live_qrm_decisions": len(decisions),
+        "applied_live_decisions": len(applied),
         "coarse_skill_histogram": dict(
             Counter(decision["coarse_skill"] for decision in applied)
         ),
@@ -72,6 +88,7 @@ def main() -> int:
                 "# M2A S5 QRM Beta Isaac closed-loop",
                 "",
                 "- status: **PASS_WITH_B0_FALLBACK**",
+                f"- scene episodes: {len(args.run_root) * 2}",
                 f"- applied live decisions: {len(applied)}",
                 "- action mapping: `REJECTED_NO_OFFICIAL_EVIDENCE`",
                 f"- B0 fallback: {len(applied)}/{len(applied)}",
@@ -91,4 +108,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

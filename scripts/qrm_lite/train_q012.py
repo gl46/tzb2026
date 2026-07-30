@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 from pathlib import Path
 
@@ -11,7 +12,7 @@ import numpy as np
 
 from xh_agent.policy.qrm_lite.coarse_policy import encode_coarse_intent
 from xh_agent.policy.qrm_lite.context import build_context_vector
-from xh_agent.policy.qrm_lite.contracts import FailureContextV1, FailureType, QRMTrainingSampleV1
+from xh_agent.policy.qrm_lite.contracts import FailureContextV1, QRMTrainingSampleV1
 from xh_agent.policy.qrm_lite.metrics_beta1 import macro_f1, residual_errors, skill_accuracy, zero_residual_baseline
 from xh_agent.policy.qrm_lite.models_q012 import FormalModelId, FormalPolicy, build_formal_model
 
@@ -28,6 +29,14 @@ def load_samples(path: Path, split: str | None = None, limit: int | None = None)
         if limit and len(rows) >= limit:
             break
     return rows
+
+
+def sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
 def _ctx_matrix(model: FormalPolicy, samples: list[QRMTrainingSampleV1]) -> np.ndarray:
@@ -141,21 +150,45 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--epochs-coarse", type=int, default=300)
     p.add_argument("--epochs-mlp", type=int, default=400)
     p.add_argument("--lr", type=float, default=0.1)
+    p.add_argument("--seed", type=int, default=20260731)
     p.add_argument("--out-dir", default="artifacts/qrm_lite/beta1")
     p.add_argument("--report", default="reports/qrm-lite-beta1-q012-train.md")
     p.add_argument("--report-json", default="reports/qrm-lite-beta1-q012-train.json")
     args = p.parse_args(argv)
 
-    train = load_samples(Path(args.dataset), split="train")
-    val = load_samples(Path(args.dataset), split="val") or load_samples(Path(args.dataset), split="test")
+    np.random.seed(args.seed)
+    dataset_path = Path(args.dataset)
+    all_samples = load_samples(dataset_path)
+    train = [sample for sample in all_samples if sample.split == "train"]
+    val = [sample for sample in all_samples if sample.split == "val"] or [
+        sample for sample in all_samples if sample.split == "test"
+    ]
     if not train:
         # fallback: all
-        train = load_samples(Path(args.dataset))
+        train = all_samples
         val = train[: max(1, len(train) // 5)]
 
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
-    report: dict = {"dataset": args.dataset, "n_train": len(train), "n_val": len(val), "models": {}}
+    manifest_hashes = sorted(
+        {
+            str(sample.provenance.get("dataset_manifest_hash", ""))
+            for sample in all_samples
+        }
+    )
+    report: dict = {
+        "schema_version": "QRMLiteBetaQ012TrainV2",
+        "status": "PASS",
+        "dataset": args.dataset,
+        "dataset_sha256": sha256_file(dataset_path),
+        "dataset_manifest_hashes": manifest_hashes,
+        "seed": args.seed,
+        "n_samples": len(all_samples),
+        "n_train": len(train),
+        "n_val": len(val),
+        "synthetic_samples": sum(sample.synthetic for sample in all_samples),
+        "models": {},
+    }
 
     wanted = [m.strip().upper() for m in args.models.split(",") if m.strip()]
     id_map = {
