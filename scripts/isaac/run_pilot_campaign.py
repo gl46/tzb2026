@@ -67,11 +67,11 @@ def main() -> int:
     parser.add_argument("--frames-per-scene", type=int, default=12)
     parser.add_argument("--warmup-frames", type=int, default=5)
     parser.add_argument("--max-runs", type=int)
-    parser.add_argument("--max-infrastructure-attempts", type=int, default=4)
+    parser.add_argument("--max-infrastructure-attempts", type=int, default=6)
     parser.add_argument(
         "--infrastructure-settle-s",
         type=float,
-        default=30.0,
+        default=120.0,
         help="wait before each Isaac launch so the prior driver/container teardown settles",
     )
     parser.add_argument("--timeout-s", type=float, default=900.0)

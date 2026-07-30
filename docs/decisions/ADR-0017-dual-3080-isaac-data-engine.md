@@ -40,6 +40,8 @@ File names and public track IDs are audited for entity leakage.
 - Dataset version: `isaac-industrial-v1-pilot`.
 - Default data root is outside Git.
 - A cold-start failure may be retried only if it produced no hash-valid output.
+- Retried Isaac launches use a measured 120-second driver/container settle
+  window; failed pre-READY attempts are retained and never overwritten.
 - Throughput reports retain crash/restart counts and do not discard semantic
   failures.
 
@@ -48,4 +50,3 @@ File names and public track IDs are audited for entity leakage.
 No Teacher participates. Nano remains `CANDIDATE`, BWM remains
 `CANDIDATE_LICENSE_PENDING`, and Super remains `PARKED`. Teacher kill-rule
 events for this ADR: **none**, because no Teacher is loaded or called.
-
