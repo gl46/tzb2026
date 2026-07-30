@@ -7,8 +7,10 @@ set -euo pipefail
 FRAMES="${ISAAC_BENCHMARK_FRAMES:-100}"
 SEED0="${ISAAC_BENCHMARK_SEED0:-3100}"
 SEED1="${ISAAC_BENCHMARK_SEED1:-3101}"
+SETTLE_S="${ISAAC_BENCHMARK_SETTLE_S:-30}"
 OUT="${ISAAC_DATA_ROOT}/benchmarks/m2a-$(date +%Y%m%d-%H%M%S)"
 
+sleep "$SETTLE_S"
 python3 "${ISAAC_PROJECT_ROOT}/scripts/isaac/launch_worker.py" \
   --project-root "$ISAAC_PROJECT_ROOT" \
   --source-root "$ISAAC_SOURCE_ROOT" \
@@ -19,6 +21,7 @@ python3 "${ISAAC_PROJECT_ROOT}/scripts/isaac/launch_worker.py" \
   --gpu 0 \
   --frames "$FRAMES"
 
+sleep "$SETTLE_S"
 python3 "${ISAAC_PROJECT_ROOT}/scripts/isaac/launch_worker.py" \
   --project-root "$ISAAC_PROJECT_ROOT" \
   --source-root "$ISAAC_SOURCE_ROOT" \
@@ -29,6 +32,7 @@ python3 "${ISAAC_PROJECT_ROOT}/scripts/isaac/launch_worker.py" \
   --gpu 1 \
   --frames "$FRAMES"
 
+sleep "$SETTLE_S"
 python3 "${ISAAC_PROJECT_ROOT}/scripts/run_isaac_m1b_dual_benchmark.py" \
   --project-root "$ISAAC_PROJECT_ROOT" \
   --source-root "$ISAAC_SOURCE_ROOT" \

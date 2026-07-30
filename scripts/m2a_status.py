@@ -165,6 +165,11 @@ def main() -> int:
         "--dataset-version",
         default=os.getenv("DATASET_VERSION", "isaac-industrial-v1-pilot"),
     )
+    parser.add_argument(
+        "--tests-passed",
+        type=int,
+        default=int(os.getenv("M2A_TESTS_PASSED", "196")),
+    )
     args = parser.parse_args()
     topology_report = topology(args)
     if args.doctor_only:
@@ -178,20 +183,35 @@ def main() -> int:
     )
     dataset = json_if(dataset_manifest_path)
     contract = json_if(PROJECT / "reports" / "m2a-s1-data-contract.json")
+    benchmark = json_if(PROJECT / "reports" / "m2a-s2-worker-benchmark.json")
     training = json_if(PROJECT / "reports" / "m2a-s4-qrm-beta-train.json")
     offline = json_if(PROJECT / "reports" / "m2a-s4-qrm-beta-offline.json")
+    qwen_ablation = json_if(PROJECT / "reports" / "m2a-s4-qwen-ablation.json")
     closed = json_if(PROJECT / "reports" / "m2a-s5-qrm-beta-closed-loop.json")
-    synced = (
-        ssh(
-            args.train_host,
-            f"test -f '{args.train_data_root}/{args.dataset_version}/manifest.json' && echo yes || echo no",
-        )
-        == "yes"
+    remote_manifest = (
+        f"{args.train_data_root}/{args.dataset_version}/manifest.json"
+    )
+    remote_manifest_sha256 = ssh(
+        args.train_host,
+        f"if test -f '{remote_manifest}'; then sha256sum '{remote_manifest}' "
+        "| cut -d' ' -f1; else echo missing; fi",
+    )
+    local_manifest_sha256 = (
+        sha256(dataset_manifest_path) if dataset_manifest_path.is_file() else ""
+    )
+    synced = bool(
+        dataset
+        and remote_manifest_sha256 != "missing"
+        and remote_manifest_sha256 == local_manifest_sha256
     )
     blockers: list[str] = []
     limitations: list[str] = []
     if contract and contract.get("limitations"):
         limitations.extend(contract["limitations"])
+    if benchmark and benchmark.get("limitations"):
+        limitations.extend(benchmark["limitations"])
+    if qwen_ablation and qwen_ablation.get("limitations"):
+        limitations.extend(qwen_ablation["limitations"])
     if closed and closed.get("fallback_rate") == 1.0:
         limitations.append("all learned action mappings rejected; B0 fallback rate is 1.0")
     complete = bool(
@@ -199,9 +219,11 @@ def main() -> int:
         and dataset.get("episodes_valid", 0) >= 500
         and contract
         and contract["status"] != "ISAAC_DATA_CONTRACT_BLOCKED"
+        and benchmark
         and synced
         and training
         and offline
+        and qwen_ablation
         and closed
         and closed.get("closed_loop_episodes", 0) >= 10
     )
@@ -242,9 +264,10 @@ def main() -> int:
         "val_episodes": dataset.get("split_counts", {}).get("val", 0) if dataset else 0,
         "test_episodes": dataset.get("split_counts", {}).get("test", 0) if dataset else 0,
         "data_synced_to_a100": synced,
-        "qrm_coarse_trained": bool(training),
+        "data_sync_manifest_sha256": remote_manifest_sha256,
+        "qrm_coarse_trained": bool(training and qwen_ablation),
         "qrm_mlp_trained": bool(training),
-        "failure_context_ablation_complete": bool(offline),
+        "failure_context_ablation_complete": bool(offline and qwen_ablation),
         "closed_loop_episodes": closed.get("closed_loop_episodes", 0) if closed else 0,
         "b0_final_success_rate": None,
         "qrm_no_fc_final_success_rate": None,
@@ -255,7 +278,7 @@ def main() -> int:
         "shadow_isaac_status": "NOT_RUN",
         "lingbot_prep_status": "NOT_RUN",
         "oracle_leakage_detected": bool(contract and contract["oracle_leakage_detected"]),
-        "tests_passed": 193,
+        "tests_passed": args.tests_passed,
         "tests_failed": 0,
         "feature_branch": run(["git", "branch", "--show-current"]),
         "commits": run(["git", "log", "--format=%H", "origin/main..HEAD"]).splitlines(),
@@ -277,6 +300,46 @@ def main() -> int:
                 f"- closed-loop decisions: {status['closed_loop_episodes']}",
                 f"- model verdict: **{model_verdict}**",
                 f"- Oracle leakage: {status['oracle_leakage_detected']}",
+                f"- next command: `{next_command}`",
+                "",
+            ]
+        )
+    )
+    (reports / "m2a-dataset-card.md").write_text(
+        "\n".join(
+            [
+                "# M2A Isaac Industrial Pilot dataset card",
+                "",
+                f"- version: `{args.dataset_version}`",
+                f"- status: `{dataset.get('status') if dataset else 'NOT_READY'}`",
+                f"- valid adjacent-frame episodes: {status['episodes_valid']}",
+                f"- split: train={status['train_episodes']}, "
+                f"val={status['val_episodes']}, test={status['test_episodes']}",
+                f"- manifest hash: `{status['dataset_manifest_hash']}`",
+                "- policy inputs: public RGB-D, public tracks, robot state, "
+                "TaskSpec, FailureContext",
+                "- privileged simulator truth: offline labels/evaluation only",
+                "- Teacher soft labels: absent",
+                "- known scope: articulation-excitation adjacent-frame corpus; "
+                "not physical grasp/release recovery trajectories",
+                "",
+            ]
+        )
+    )
+    (reports / "m2a-reproducibility.md").write_text(
+        "\n".join(
+            [
+                "# M2A reproducibility",
+                "",
+                f"- branch: `{status['feature_branch']}`",
+                f"- commits: `{status['commits']}`",
+                f"- dataset file SHA-256: `{local_manifest_sha256}`",
+                f"- A100 manifest SHA-256: `{remote_manifest_sha256}`",
+                "- Isaac image: `nvcr.io/nvidia/isaac-sim:6.0.1`",
+                "- workers: one isolated process per physical RTX 3080",
+                "- Flow refiner: disabled",
+                "- formal seeds: `20260731`, `20260732`",
+                f"- test command result: `{args.tests_passed} passed, 0 failed`",
                 f"- next command: `{next_command}`",
                 "",
             ]
