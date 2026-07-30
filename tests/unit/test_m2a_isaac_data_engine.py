@@ -8,6 +8,7 @@ import numpy as np
 import pytest
 
 from qrm_lite.summarize_isaac_closed_loop import main as summarize_closed_loop
+from isaac.run_pilot_campaign import quarantine_failed_run
 from xh_agent.data_engine.isaac.contract import (
     ShardState,
     audit_policy_projection,
@@ -236,3 +237,15 @@ def test_closed_loop_summary_counts_scene_episodes_not_decisions(
     assert report["closed_loop_episodes"] == 4
     assert report["applied_live_decisions"] == 4
     assert report["live_qrm_decisions"] == 8
+
+
+def test_campaign_resume_never_overwrites_prior_quarantine(tmp_path: Path) -> None:
+    run_root = tmp_path / "seeds-3110-3111"
+    run_root.mkdir()
+    first = quarantine_failed_run(run_root, attempt=2)
+    assert first.name.endswith("attempt-02")
+    run_root.mkdir()
+    resumed = quarantine_failed_run(run_root, attempt=2)
+    assert resumed.name.endswith("attempt-03")
+    assert first.is_dir()
+    assert resumed.is_dir()

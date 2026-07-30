@@ -45,9 +45,13 @@ def valid_prior(run_root: Path, expected: list[Path]) -> bool:
 def quarantine_failed_run(run_root: Path, *, attempt: int) -> Path:
     quarantine_root = run_root.parent / "quarantine"
     quarantine_root.mkdir(parents=True, exist_ok=True)
-    destination = quarantine_root / f"{run_root.name}-attempt-{attempt:02d}"
-    if destination.exists():
-        raise RuntimeError(f"quarantine destination already exists: {destination}")
+    attempt_number = attempt
+    destination = quarantine_root / f"{run_root.name}-attempt-{attempt_number:02d}"
+    while destination.exists():
+        attempt_number += 1
+        destination = quarantine_root / (
+            f"{run_root.name}-attempt-{attempt_number:02d}"
+        )
     run_root.replace(destination)
     return destination
 
@@ -63,7 +67,13 @@ def main() -> int:
     parser.add_argument("--frames-per-scene", type=int, default=12)
     parser.add_argument("--warmup-frames", type=int, default=5)
     parser.add_argument("--max-runs", type=int)
-    parser.add_argument("--max-infrastructure-attempts", type=int, default=2)
+    parser.add_argument("--max-infrastructure-attempts", type=int, default=4)
+    parser.add_argument(
+        "--infrastructure-settle-s",
+        type=float,
+        default=30.0,
+        help="wait before each Isaac launch so the prior driver/container teardown settles",
+    )
     parser.add_argument("--timeout-s", type=float, default=900.0)
     args = parser.parse_args()
     if args.scene_count < 2 or args.scene_count % 2:
@@ -100,6 +110,8 @@ def main() -> int:
                     quarantined.append(
                         str(quarantine_failed_run(run_root, attempt=attempt))
                     )
+                if args.infrastructure_settle_s > 0:
+                    time.sleep(args.infrastructure_settle_s)
                 command = [
                     sys.executable,
                     str(args.project_root / "scripts" / "run_isaac_m1b_dual_benchmark.py"),
