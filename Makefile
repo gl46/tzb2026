@@ -1,7 +1,7 @@
 PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,python3)
 export PYTHONPATH := src
 
-.PHONY: doctor test validate sim-smoke constrained-pick-place empty-grasp-failures record-constrained-episode moveit-plan-smoke baseline teacher-audit bakeoff-prepare m0-report m0-audit status
+.PHONY: doctor test validate sim-smoke constrained-pick-place empty-grasp-failures record-constrained-episode moveit-plan-smoke baseline teacher-audit bakeoff-prepare m0-report m0-audit status m2a-doctor isaac-contract isaac-benchmark isaac-pilot isaac-validate isaac-sync qrm-beta-train qrm-beta-eval qrm-beta-closed-loop shadow-isaac m2a-status
 doctor:
 	$(PYTHON) -m xh_agent.diagnostics.doctor --local --output reports/hardware-local.json
 	$(PYTHON) -m xh_agent.diagnostics.doctor --remote node2 --user gl --output reports/hardware-remote-node2.json
@@ -33,3 +33,26 @@ m0-audit:
 	$(PYTHON) scripts/audit_m0_completion.py
 status:
 	$(PYTHON) scripts/status.py
+m2a-doctor:
+	$(PYTHON) scripts/m2a_status.py --doctor-only
+isaac-contract:
+	bash scripts/isaac/run_contract_suite.sh
+isaac-benchmark:
+	bash scripts/isaac/benchmark_workers.sh
+isaac-pilot:
+	bash scripts/isaac/generate_pilot_dataset.sh
+isaac-validate:
+	for shard in "$${ISAAC_DATA_ROOT}/$${DATASET_VERSION:-isaac-industrial-v1-pilot}/shards/"*.READY; do $(PYTHON) scripts/isaac/validate_shard.py "$$shard"; done
+isaac-sync:
+	bash scripts/isaac/sync_ready_shards.sh
+qrm-beta-train:
+	$(PYTHON) scripts/qrm_lite/train_coarse_beta.py --dataset "$${QRM_BETA_DATASET}"
+	$(PYTHON) scripts/qrm_lite/train_mlp_beta.py --dataset "$${QRM_BETA_DATASET}"
+qrm-beta-eval:
+	$(PYTHON) scripts/qrm_lite/eval_beta_offline.py --dataset "$${QRM_BETA_DATASET}"
+qrm-beta-closed-loop:
+	bash scripts/qrm_lite/run_isaac_closed_loop_eval.sh
+shadow-isaac:
+	$(PYTHON) scripts/isaac/run_shadow_rollout_pilot.py
+m2a-status:
+	$(PYTHON) scripts/m2a_status.py

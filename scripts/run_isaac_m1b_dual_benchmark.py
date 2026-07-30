@@ -44,6 +44,8 @@ def _worker_command(
     worker_output: Path,
     control: Path,
 ) -> list[str]:
+    sdf_name = args.worker_sdf[worker_id]
+    supervision_name = args.worker_supervision[worker_id]
     return [
         "docker",
         "run",
@@ -73,9 +75,9 @@ def _worker_command(
         args.image,
         "scripts/isaac_m1b_dataset_benchmark.py",
         "--sdf",
-        "/workspace/source/scene-3000.sdf",
+        f"/workspace/source/{sdf_name}",
         "--supervision",
-        "/workspace/source/scene-3000.supervision.json",
+        f"/workspace/source/{supervision_name}",
         "--urdf",
         "/workspace/source/panda_controlled.urdf",
         "--output",
@@ -300,7 +302,34 @@ def main() -> int:
     parser.add_argument("--timeout-s", type=float, default=900.0)
     parser.add_argument("--image", default="nvcr.io/nvidia/isaac-sim:6.0.1")
     parser.add_argument("--container-prefix", default="m1b-isaac-dual-final")
+    parser.add_argument(
+        "--worker-sdf",
+        action="append",
+        default=[],
+        help="source-root-relative SDF; pass exactly twice in worker order",
+    )
+    parser.add_argument(
+        "--worker-supervision",
+        action="append",
+        default=[],
+        help="source-root-relative supervision JSON; pass exactly twice",
+    )
     args = parser.parse_args()
+    if not args.worker_sdf:
+        args.worker_sdf = ["scene-3000.sdf", "scene-3000.sdf"]
+    if not args.worker_supervision:
+        args.worker_supervision = [
+            "scene-3000.supervision.json",
+            "scene-3000.supervision.json",
+        ]
+    if len(args.worker_sdf) != 2 or len(args.worker_supervision) != 2:
+        parser.error("--worker-sdf and --worker-supervision require exactly two values")
+    for relative in [*args.worker_sdf, *args.worker_supervision]:
+        path = Path(relative)
+        if path.is_absolute() or ".." in path.parts:
+            parser.error(f"worker source path must stay under source root: {relative}")
+        if not (args.source_root / path).is_file():
+            parser.error(f"worker source does not exist: {args.source_root / path}")
     if args.frames <= 0 or args.warmup_frames < 1 or args.timeout_s <= 0:
         parser.error("frame counts and timeout are invalid")
     for required in (args.project_root, args.source_root):
@@ -400,6 +429,18 @@ def main() -> int:
         "dataset_benchmark_source_sha256": dataset_benchmark_sha256,
         "dual_runner_source_sha256": dual_runner_sha256,
         "gpu_indices": list(args.gpu_indices),
+        "worker_sources": [
+            {
+                "worker_id": worker_id,
+                "sdf": args.worker_sdf[worker_id],
+                "supervision": args.worker_supervision[worker_id],
+                "sdf_sha256": _sha256(args.source_root / args.worker_sdf[worker_id]),
+                "supervision_sha256": _sha256(
+                    args.source_root / args.worker_supervision[worker_id]
+                ),
+            }
+            for worker_id in range(2)
+        ],
         "workers": [
             {
                 "worker_id": worker_id,

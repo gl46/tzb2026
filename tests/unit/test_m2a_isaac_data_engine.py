@@ -1,0 +1,149 @@
+from __future__ import annotations
+
+import json
+
+import numpy as np
+import pytest
+
+from xh_agent.data_engine.isaac.contract import (
+    ShardState,
+    audit_policy_projection,
+    canonical_json_sha256,
+    stable_split,
+    transition_shard_state,
+    validate_episode,
+)
+from xh_agent.policy.qrm_lite.residual_safety import ResidualSafetyFilter
+
+
+def _action(width: int = 10) -> dict:
+    return {
+        "coordinate_frame": "camera_optical",
+        "units": "m_rad_norm",
+        "frequency_hz": 5.0,
+        "chunk_length": 1,
+        "dimension_names": [f"d{i}" for i in range(width)],
+        "normalization_revision": "test-v1",
+        "values": [[0.0] * width],
+    }
+
+
+def _episode() -> dict:
+    observation = {
+        "episode_id": "isaac-s3100-w0-t000000",
+        "step_id": 0,
+        "timestamp_ns": 1,
+        "rgb_uri": "dataset://shard-00000.READY/media/e/rgb.png",
+        "depth_uri": "dataset://shard-00000.READY/media/e/depth.npy",
+        "object_tracks": [{"object_id": "track-000", "pose": [0.0] * 7}],
+    }
+    after = json.loads(json.dumps(observation))
+    after["step_id"] = 1
+    after["timestamp_ns"] = 2
+    split, kind = stable_split(3100)
+    return {
+        "schema_version": "IsaacIndustrialEpisodeV1",
+        "dataset_version": "isaac-industrial-v1-pilot",
+        "episode_id": observation["episode_id"],
+        "scene_seed": 3100,
+        "scene_group_id": "isaac-scene-3100",
+        "split": split,
+        "split_kind": kind,
+        "worker_id": 0,
+        "code_revision": "a" * 40,
+        "isaac_version": "6.0.1",
+        "scene_asset_revision": "b" * 64,
+        "config_hash": "c" * 64,
+        "observation_before": observation,
+        "observation_after": after,
+        "task_spec": {"target_object_id": "track-000"},
+        "robot_state": {},
+        "skill_history": [],
+        "failure_context": {"failure_type": "NONE"},
+        "nominal_skill": "APPROACH",
+        "nominal_action": _action(),
+        "executed_action": _action(9),
+        "residual_action": _action(),
+        "expected_predicates": [],
+        "observed_predicates": [],
+        "recovery_sequence": [],
+        "result": {},
+        "simulator_supervision": {
+            "training_and_evaluation_only": True,
+            "perfect_object_poses": {"cylinder_01": [0.0] * 7},
+        },
+        "provenance": {},
+    }
+
+
+def test_supervision_entity_truth_is_not_scanned_as_policy_input() -> None:
+    assert validate_episode(_episode()) == []
+
+
+@pytest.mark.parametrize(
+    ("key", "value"),
+    [
+        ("prim_path", "/World/M1B/cylinder_01"),
+        ("entity_name", "cylinder_01"),
+        ("success_oracle", True),
+    ],
+)
+def test_oracle_policy_keys_are_rejected(key: str, value: object) -> None:
+    assert audit_policy_projection({"observation": {key: value}})
+
+
+def test_entity_truth_encoded_in_track_id_is_rejected() -> None:
+    assert audit_policy_projection({"track_id": "/World/M1B/cylinder_07"})
+
+
+def test_public_track_id_is_accepted() -> None:
+    assert audit_policy_projection({"track_id": "track-42"}) == []
+
+
+def test_shard_state_machine_is_fail_closed() -> None:
+    assert transition_shard_state("WRITING", "VALIDATING") is ShardState.VALIDATING
+    assert transition_shard_state("VALIDATING", "READY") is ShardState.READY
+    with pytest.raises(ValueError):
+        transition_shard_state("WRITING", "READY")
+    with pytest.raises(ValueError):
+        transition_shard_state("READY", "WRITING")
+
+
+def test_scene_seed_split_is_stable_and_group_level() -> None:
+    assert stable_split(3100) == stable_split(3100)
+    assert stable_split(3114)[0] == "val"
+    assert stable_split(3117)[0] == "test"
+
+
+def test_action_nan_is_rejected() -> None:
+    episode = _episode()
+    episode["residual_action"]["values"][0][0] = float("nan")
+    assert "residual_action contains NaN/Inf" in validate_episode(episode)
+
+
+def test_manifest_hash_is_order_independent() -> None:
+    assert canonical_json_sha256({"a": 1, "b": 2}) == canonical_json_sha256(
+        {"b": 2, "a": 1}
+    )
+
+
+def test_mlp_residual_is_clipped_and_moveit_rejection_falls_back() -> None:
+    nominal = np.zeros((4, 10))
+    raw = np.ones((4, 10))
+    result = ResidualSafetyFilter().combine_and_filter(
+        nominal,
+        raw,
+        moveit_accept_fn=lambda _: (False, "collision"),
+    )
+    assert result.outcome == "fallback_to_nominal"
+    assert np.array_equal(result.final_candidate, nominal)
+    assert np.max(np.abs(result.residual_clipped[:, :3])) <= 0.03
+
+
+def test_nonfinite_model_output_is_rejected() -> None:
+    with pytest.raises(ValueError, match="NaN/Inf"):
+        ResidualSafetyFilter().combine_and_filter(
+            np.zeros((4, 10)),
+            np.full((4, 10), np.nan),
+        )
+

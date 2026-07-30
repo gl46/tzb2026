@@ -1,0 +1,46 @@
+schema_version: IsaacDataContractV1
+length_unit: meter
+time_unit: second
+timestamp_unit: nanosecond
+world_frame:
+  handedness: right
+camera_optical_frame:
+  handedness: right
+  axes: {x: right, y: down, z: forward}
+transform_storage: row_major_4x4_column_vector_application
+quaternion_order:
+  runtime_pose: xyzw
+  qrm_pose: wxyz
+depth:
+  unit: meter
+  semantics: METRIC_DISTANCE_TO_IMAGE_PLANE
+  invalid: [NaN, Inf, non_positive]
+gripper:
+  runtime: categorical_open_closed_partially_open
+  qrm_normalized: {open: 0.0, partially_open: 0.5, closed: 1.0}
+executed_joint_action:
+  coordinate_frame: PANDA_DOF_ORDER_BY_NAME
+  units: radian_arm_metre_finger
+  dimension: 9
+  frequency_hz: 30.0
+  normalization_revision: isaac-m1b-joint-identity-v1
+qrm_residual_action:
+  coordinate_frame: camera_optical
+  representation: delta_ee_cam_r6d_gripper
+  units: m_rad_norm
+  dimension: 10
+  frequency_hz: 5.0
+  normalization_revision: qrm-lite-beta-real-isaac-v1
+public_policy_forbidden:
+  - prim_path
+  - entity_name
+  - rigid_body_name
+  - perfect_object_pose
+  - perfect_contact_identity
+  - perfect_bin_occupancy
+  - constraint_internal_id
+  - success_oracle
+  - failure_oracle
+simulator_supervision_training_only: true
+teacher_required: false
+

@@ -1,0 +1,14 @@
+schema_version: IsaacDatasetPilotConfigV1
+dataset_version: isaac-industrial-v1-pilot
+scene_seed_start: 3100
+contract_scene_count: 50
+frames_per_scene: 12
+episodes_target: 550
+minimum_valid_episodes: 500
+shard_size_episodes: 50
+split: {train: 0.70, val: 0.15, test: 0.15}
+split_unit: scene_seed
+failure_context_source: public_perception_predicate_residual
+flow_refiner_enabled: false
+raw_camera_storage: policy_rgbd_only_in_ready_shards
+

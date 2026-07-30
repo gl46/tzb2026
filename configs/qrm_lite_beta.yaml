@@ -1,0 +1,22 @@
+schema_version: QRMLiteBetaConfigV1
+dataset_version: isaac-industrial-v1-pilot
+base_model: Qwen/Qwen3.5-4B
+base_revision: 851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a
+flow_refiner_enabled: false
+formal_models:
+  - QRM-Coarse-NoFC
+  - QRM-Coarse-FC
+  - QRM-MLP-NoFC
+  - QRM-MLP-FC
+failure_context_ablation:
+  same_split: true
+  same_seed: true
+  same_training_budget: true
+residual:
+  frame: camera_optical
+  max_translation_m_per_axis: 0.03
+  max_rotation_deg: 15
+  max_gripper_delta_m: 0.01
+online:
+  safety_chain: [schema_validation, residual_clip, transform_validation, ik, collision, B0_fallback]
+

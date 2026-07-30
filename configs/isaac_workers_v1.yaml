@@ -1,0 +1,20 @@
+schema_version: IsaacWorkersV1
+strategy: ONE_ISAAC_PROCESS_PER_GPU
+startup_protocol: SERIALIZED_KIT_INITIALIZATION_THEN_SHARED_START_BARRIER
+workers:
+  - worker_id: 0
+    gpu_id: 0
+    seed_parity: even_campaign_index
+    scene_profile: normal_and_perception_randomization
+  - worker_id: 1
+    gpu_id: 1
+    seed_parity: odd_campaign_index
+    scene_profile: failure_boundary_and_occlusion
+shard_size_episodes: 50
+camera: policy_rgbd
+annotators: [rgb, distance_to_image_plane, semantic_segmentation, instance_segmentation]
+render_quality: RaytracedLighting
+restart_policy:
+  max_infrastructure_attempts: 2
+  resume_if_hash_valid: true
+
