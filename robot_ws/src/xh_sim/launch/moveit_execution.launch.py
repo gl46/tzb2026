@@ -20,6 +20,7 @@ def generate_launch_description():
     share = Path(get_package_share_directory("xh_sim"))
     default_world = share / "worlds" / "p0_pick_place.sdf"
     world_file = LaunchConfiguration("world_file")
+    world_name = LaunchConfiguration("world_name")
     calibration_mode = LaunchConfiguration("calibration_mode")
     moveit_config = (
         MoveItConfigsBuilder("xh_panda_controlled", package_name="xh_sim")
@@ -38,6 +39,11 @@ def generate_launch_description():
             description="Absolute SDF world path forwarded to the Gazebo launch.",
         ),
         DeclareLaunchArgument(
+            "world_name",
+            default_value="xh_p0_pick_place",
+            description="Gazebo world name used when spawning the controller-backed Panda.",
+        ),
+        DeclareLaunchArgument(
             "calibration_mode",
             default_value="false",
             description="Forward S0's detachable-joint exclusion to the Gazebo robot spawn.",
@@ -45,7 +51,8 @@ def generate_launch_description():
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(str(share / "launch" / "simulation.launch.py")),
             launch_arguments={
-                "headless": "true", "world_file": world_file, "calibration_mode": calibration_mode,
+                "headless": "true", "world_file": world_file, "world_name": world_name,
+                "calibration_mode": calibration_mode,
             }.items(),
         ),
         Node(

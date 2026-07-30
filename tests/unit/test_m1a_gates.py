@@ -5,13 +5,18 @@ import hashlib
 import importlib.util
 import json
 from pathlib import Path
+import subprocess
 import sys
 import xml.etree.ElementTree as ET
 
 import yaml
 import pytest
 
-from xh_agent.grasp.contact_gate import ContactGateInput, evaluate_contact_gate
+from xh_agent.grasp.contact_gate import (
+    ContactGateInput,
+    evaluate_contact_gate,
+    symmetric_contact_stall_goal_tolerance_m,
+)
 from xh_agent.grasp.contact_telemetry import ContactEvent, bilateral_contact_window
 from xh_agent.grasp.failure_attribution import FailureClass, attribute_failure
 from xh_agent.grasp.orientation_families import (
@@ -122,6 +127,22 @@ def test_contact_gate_rejects_each_critical_missing_condition() -> None:
         assert reason in reasons
 
 
+def test_contact_stall_tolerance_is_bounded_and_requires_valid_finger_positions() -> None:
+    # ADR-0016b franka-copy geometry: q=27 mm command, q=31.5 mm cube
+    # surface.  The 3 mm measured engine allowance and 1 mm contract admit a
+    # physical stall but cannot turn an arbitrary finger position into PASS.
+    assert symmetric_contact_stall_goal_tolerance_m(
+        command_per_finger_m=0.027, contact_surface_per_finger_m=0.0315,
+    ) == pytest.approx(0.0085)
+    assert symmetric_contact_stall_goal_tolerance_m(
+        command_per_finger_m=0.033, contact_surface_per_finger_m=0.0315,
+    ) == pytest.approx(0.0025)
+    with pytest.raises(ValueError):
+        symmetric_contact_stall_goal_tolerance_m(
+            command_per_finger_m=0.027, contact_surface_per_finger_m=0.041,
+        )
+
+
 def test_continuity_rejects_teleport_short_series_and_nonmonotonic_time() -> None:
     jumped = samples(jump=0.2)
     result = check_joint_continuity(
@@ -217,11 +238,23 @@ def test_m1a_protocol_files_define_fail_closed_sensor_and_execution_gates() -> N
 
 
 def test_m1a_manifest_report_hashes_are_verifiable() -> None:
+    """Verify the immutable historical tree, not mutable current run outputs.
+
+    The manifest names the 2026-07-17 runtime evidence.  Later revalidation
+    runners intentionally write current evidence to the same report paths in
+    the working tree, so hashing the working copy would incorrectly mutate the
+    historical claim merely by executing a new experiment.
+    """
+
     root = Path(__file__).parents[2]
     manifest = json.loads((root / "data/manifests/m1a-runtime-grasp-v1.json").read_text())
     assert manifest["schema_version"] == "m1a-runtime-grasp-v1"
     for relative_path, expected_hash in manifest["file_hashes"].items():
-        actual_hash = hashlib.sha256((root / relative_path).read_bytes()).hexdigest()
+        result = subprocess.run(
+            ["git", "show", f"HEAD:{relative_path}"],
+            cwd=root, check=True, capture_output=True,
+        )
+        actual_hash = hashlib.sha256(result.stdout).hexdigest()
         assert actual_hash == expected_hash
 
 
@@ -281,9 +314,13 @@ def test_m1a_moveit_configuration_preserves_controlled_joint_names_limits_and_un
     assert "calibration_mode" in simulation_launch
     assert "gz-sim-detachable-joint-system" in source_urdf.read_text()
     assert "<position_proportional_gain>1.0</position_proportional_gain>" in source_urdf.read_text()
-    # Finger pair, static grasp target and dynamic target-equivalent/table
-    # control each have their own explicit Gazebo contact bridge.
-    assert simulation_launch.count("ros_gz_interfaces/msg/Contacts[gz.msgs.Contacts") == 5
+    # The five M1A bridges remain unchanged.  ADR-0013 adds the two private
+    # M1B finger streams plus an internally generated set of cylinder-side
+    # contact bridges; neither replaces an M1A supervision topic.
+    assert simulation_launch.count("ros_gz_interfaces/msg/Contacts[gz.msgs.Contacts") == 8
+    assert "/xh/actuation_internal/m1b/panda_leftfinger_contacts" in simulation_launch
+    assert "/xh/actuation_internal/m1b/panda_rightfinger_contacts" in simulation_launch
+    assert "cylinder_{index:02d}_contacts" in simulation_launch
     assert '"/xh/supervision/panda_leftfinger_contacts"' in simulation_launch
     assert '"/xh/supervision/panda_rightfinger_contacts"' in simulation_launch
     assert "dynamic_pose/info" in simulation_launch
@@ -313,6 +350,9 @@ def test_m1a_execution_client_uses_moveit_plan_execute_fk_and_no_pose_write() ->
     assert '"/panda_arm_controller/controller_state"' in source
     assert '"q_des"' in source and '"q_act"' in source
     assert "max_tracking_error <= 0.05" in source
+    assert 'b["timestamp_s"] >= a["timestamp_s"]' in source
+    assert "joint_state_distinct_timestamp_count" in source
+    assert "distinct_sample_timestamps >= 20" in source
     assert "current_acm()" in source
     assert 'set_allowed_pair(matrix, "panda_link0", "work_table", True)' in source
     assert "post_controller_converged" in source
@@ -320,6 +360,10 @@ def test_m1a_execution_client_uses_moveit_plan_execute_fk_and_no_pose_write() ->
     assert "planned_by_name" in source
     assert "PLANNED_JOINT_SET_MISMATCH" in source
     assert "set_pose" not in source and "set_joint" not in source
+    s1_runner = (root / "scripts/run_moveit_execution_gate.sh").read_text()
+    assert "M1A_S1_CONTROLLER_ACTION_READY" in s1_runner
+    assert "'/panda_arm_controller/follow_joint_trajectory'" in s1_runner
+    assert "M1A_S1_CONTROLLER_ACTION_UNAVAILABLE" in s1_runner
 
 
 def test_m1a_contact_calibration_uses_oracle_geometry_hand_control_and_per_trial_windows() -> None:
@@ -338,8 +382,18 @@ def test_m1a_contact_calibration_uses_oracle_geometry_hand_control_and_per_trial
     assert "FREE_DYNAMIC_SELF_CENTERING" in client
     assert "target_cube_events" in client
     assert "BILATERAL_PRECONTACT_CLEARANCE_M = 0.001" in client
+    assert "BILATERAL_PRECONTACT_VERTICAL_STANDOFF_M = 0.050" in client
+    assert "TABLE_TOUCH_PRECONTACT_STANDOFF_M = 0.100" in client
+    assert "def table_touch_precontact_pose" in client
+    assert "TABLE_PRECONTACT_OR_EXCEPTION_UNAVAILABLE" in client
+    assert "client.move_hand_cartesian(table_touch_pose" in client
+    assert "BILATERAL_PRECONTACT_FINGER_M = 0.040" in client
+    assert "BILATERAL_CONTACT_VERTICAL_OFFSET_M = 0.020" in client
     assert "BILATERAL_FINAL_FINGER_INSET_M = 0.0" in client
     assert "BILATERAL_STEADY_WIDTH_RANGE_M = (0.045, 0.070)" in client
+    assert "TABLE_TOUCH_HAND_Z_M = 0.550" in client
+    assert "pose.orientation.x = 1.0" in client
+    assert "table_contact_pad_evidence" in client
     assert "bilateral_steady_gripper_width_m" in client
     assert 'precontact_motion.get("converged") is True' in client
     assert "def calibration_bilateral_branch_seed()" in client
@@ -373,9 +427,10 @@ def test_m1a_contact_calibration_uses_oracle_geometry_hand_control_and_per_trial
     assert "controller_target_reference_seen" in client
     assert "set_target_touch_exception" in client
     assert "target_touch_exception_restored" in client
-    assert '"left", 0.040, [0.040, 0.040]' in client
-    assert '"right", -0.040, [0.040, 0.040]' in client
-    assert '"bilateral", 0.0, [0.010, 0.010]' in client
+    assert '"left", 0.0105, [0.040, 0.040]' in client
+    assert '"right", -0.0105, [0.040, 0.040]' in client
+    assert '"bilateral", 0.0, [0.027, 0.027]' in client
+    assert "begin the evidence window only" in client
     assert "POSE_INDUCED_FIXED_SYMMETRIC_APERTURE" in client
     assert "SYMMETRIC_MIMIC_CLOSE" in client
     assert "calibration_retreat_pose" in client
@@ -383,8 +438,8 @@ def test_m1a_contact_calibration_uses_oracle_geometry_hand_control_and_per_trial
     assert "pose-induced, fixed-aperture" in client
     assert "M1A_CALIBRATION_SCOPE" in client
     assert "M1A_CALIBRATION_LABEL" in client and "M1A_CALIBRATION_LABEL" in runner
-    assert "FINGER_LENGTH_M = 0.12" in client and "FINGER_ROOT_Z_M = 0.055" in client
-    assert "Runtime-oracle side contact pose" in client
+    assert "FINGER_LENGTH_M = 0.1122" in client and "FINGER_ROOT_Z_M = 0.1032" in client
+    assert "Runtime-oracle inline-pad contact pose" in client
     assert "pose_vector(target_pose)" in client and "pose_vector(retreat_pose)" in client
     isolated_runner = (root / "scripts/run_isolated_contact_calibration.sh").read_text()
     aggregator = (root / "scripts/aggregate_isolated_contact_calibration.py").read_text()
@@ -501,20 +556,22 @@ def test_production_table_orientation_family_keeps_tip_clearance_and_height_guar
         table_top_z_m=protocol["table_top_z_m"],
         fingertip_table_clearance_m=protocol["fingertip_table_clearance_m"],
     )
-    # Local finger X points down, and the physical link's distal endpoint is
+    # Inline local finger +Z points down, and the physical link's distal endpoint is
     # exactly the configured 10 mm above the table rather than inside it.
-    assert quaternion_rotate(candidate.orientation_xyzw, (1.0, 0.0, 0.0)) == pytest.approx((0.0, 0.0, -1.0))
+    assert quaternion_rotate(candidate.orientation_xyzw, (0.0, 0.0, 1.0)) == pytest.approx((0.0, 0.0, -1.0))
     assert protocol["pregrasp_standoff_m"] == pytest.approx(0.10)
     fingertip = tuple(
         hand + offset
         for hand, offset in zip(
             candidate.position_xyz_m,
-            quaternion_rotate(candidate.orientation_xyzw, (0.12, 0.0, 0.055)),
+            quaternion_rotate(candidate.orientation_xyzw, (0.0, 0.0, 0.1122)),
         )
     )
     assert fingertip[2] == pytest.approx(0.460)
     assert candidate.fingertip_lowest_z_m == pytest.approx(0.460)
-    assert candidate.target_center_gripper_frame_m == pytest.approx((0.105, 0.0, 0.055))
+    # The 50 mm cube's centre lies in the measured contact plate span
+    # (hand-frame +Z 58.4..112.2 mm), not on the old local-X board line.
+    assert candidate.target_center_gripper_frame_m == pytest.approx((0.0, 0.0, 0.0972))
     side = protocol["candidates"][-1]
     assert candidate_is_eligible(cube, side, table_top_z_m=0.45) == (
         False,
@@ -524,17 +581,17 @@ def test_production_table_orientation_family_keeps_tip_clearance_and_height_guar
 
 def test_grasp_corridor_is_in_panda_hand_frame_not_a_world_vertical_heuristic() -> None:
     identity = gripper_frame_corridor(
-        [0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 1.0], [0.06, 0.0, 0.055]
+        [0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 1.0], [0.0, 0.0, 0.0853]
     )
     assert identity["coordinate_frame"] == "panda_hand"
     assert identity["target_in_grasp_corridor"] is True
     rotated_quaternion = [0.0, 2**-0.5, 0.0, 2**-0.5]
-    rotated_cube = quaternion_rotate(rotated_quaternion, (0.06, 0.0, 0.055))
+    rotated_cube = quaternion_rotate(rotated_quaternion, (0.0, 0.0, 0.0853))
     rotated = gripper_frame_corridor([0.0, 0.0, 0.0], rotated_quaternion, rotated_cube)
     assert rotated["target_in_grasp_corridor"] is True
     selected_cross_section = gripper_frame_corridor(
-        [0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 1.0], [0.105, 0.0, 0.055],
-        finger_center_line_anchor_m=[0.105, 0.0, 0.055],
+        [0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 1.0], [0.0, 0.0, 0.0972],
+        finger_center_line_anchor_m=[0.0, 0.0, 0.0972],
     )
     assert selected_cross_section["target_in_grasp_corridor"] is True
     source = (Path(__file__).parents[2] / "scripts/m1a_contact_gated_trial_client.py").read_text()
@@ -552,11 +609,15 @@ def test_m1a_s3_attach_is_runtime_gated_and_transport_keeps_a_carried_collision_
     assert "M1A_S3_UNKNOWN_PREFERRED_CANDIDATE" in runner
     assert '"preferred_candidate_id": data["preferred_candidate_id"]' in runner
     assert "M1A_S3_CLOSE_COMMAND_PER_FINGER_M must be within [0.0, 0.04]" in runner
-    assert 'CLOSE_COMMAND_PER_FINGER_M="${M1A_S3_CLOSE_COMMAND_PER_FINGER_M:-0.033}"' in runner
+    # ADR-0016b: re-tuned from 0.033 to 0.027 for the franka pad geometry
+    # (0.033 left the 6.5 mm-proud pads ~1.5 mm short of the 50 mm cube).
+    assert 'CLOSE_COMMAND_PER_FINGER_M="${M1A_S3_CLOSE_COMMAND_PER_FINGER_M:-0.027}"' in runner
     assert "calibration_mode:=false" in remote_runner
     assert "M1A_S3_LAUNCH_URDF_SHA256" in remote_runner
     assert "install/xh_sim/share/xh_sim/urdf/panda_controlled.urdf" in remote_runner
     assert "evaluate_contact_gate" in source
+    assert "symmetric_contact_stall_goal_tolerance_m" in source
+    assert '"close_controller_target_reference_seen": close.get("controller_target_reference_seen")' in source
     assert 'constraint_command(DETACH_TOPIC, "detached")' in source
     main = source[source.index("def main()") :]
     assert main.index('constraint_command(DETACH_TOPIC, "detached")') < main.index("cube = runtime_cube_pose()")
@@ -644,6 +705,8 @@ def test_adr_0008_adapter_is_fail_closed_and_keeps_one_physical_master() -> None
     assert "HAND_MIMIC_PHYSICAL_CONSTRAINT_VERIFIED" in physical_audit
     assert "GATE1:" in bullet_audit and "GATE2:" in bullet_audit and "GATE3:" in bullet_audit
     assert "GATE4:" in bullet_audit and "GATE5:" in bullet_audit
+    assert 'contacts.get("target_cube_events", 0) > 0' in bullet_audit
+    assert 'event_counts", {}).get("cube", 0) > 0' not in bullet_audit
     assert 'invoke("/xh/p0/red_cube/detach","detached")' in bullet_audit
     assert "attached_relative_drift_m" in bullet_audit
     assert "detached_relative_change_m" in bullet_audit
@@ -654,6 +717,7 @@ def test_adr_0008_adapter_is_fail_closed_and_keeps_one_physical_master() -> None
     assert "</dev/null" in bullet_audit
     bullet_summary = (root / "scripts/summarize_m1a_bullet_capability_audit.py").read_text()
     assert "M1A_BULLET_CAPABILITY_BLOCKED" in bullet_summary
+    assert 'contacts.get("target_cube_events", 0) > 0' in bullet_summary
     assert "SetMimicConstraintFeature" in bullet_summary
     assert "bullet_plugin_interface_count" in bullet_summary
     assert "CONTACT_TELEMETRY_BLOCKED_BULLET_CAPABILITY_AUDIT" in s0_runner
@@ -705,6 +769,36 @@ def test_adr_0009_bullet_spawn_representation_is_gated_before_s0() -> None:
     assert 'python3 - "$marker" "$payload_file"' in bullet_audit
     assert 'required = ("initial_detach", "attach", "attached_follow", "detach", "detached_decoupled")' in bullet_audit
     assert "must explicitly detach and observe `detached` before it may attach" in urdf
+
+
+def test_m1b_detachable_whitelist_enumerates_every_generated_topic_contract() -> None:
+    root = Path(__file__).parents[2]
+    specification = importlib.util.spec_from_file_location(
+        "m1b_spawn_generator", root / "robot_ws/src/xh_sim/scripts/generate_panda_spawn_sdf.py"
+    )
+    assert specification is not None and specification.loader is not None
+    generator = importlib.util.module_from_spec(specification)
+    specification.loader.exec_module(generator)
+
+    names = ["cylinder_01", "cylinder_02"]
+    expected = generator.expected_detachable_plugin_contracts(names)
+    root_xml = ET.fromstring("""
+        <robot>
+          <gazebo>
+            <plugin filename="gz-sim-detachable-joint-system" name="gz::sim::systems::DetachableJoint">
+              <parent_link>panda_link7</parent_link><child_model>cylinder_01</child_model><child_link>link</child_link>
+              <detach_topic>/xh/m1b/cylinder_01/detach</detach_topic><attach_topic>/xh/m1b/cylinder_01/attach</attach_topic><output_topic>/xh/m1b/cylinder_01/grasp_state</output_topic>
+            </plugin>
+            <plugin filename="gz-sim-detachable-joint-system" name="gz::sim::systems::DetachableJoint">
+              <parent_link>panda_link7</parent_link><child_model>cylinder_02</child_model><child_link>link</child_link>
+              <detach_topic>/xh/m1b/cylinder_02/detach</detach_topic><attach_topic>/xh/m1b/cylinder_02/attach</attach_topic><output_topic>/xh/m1b/cylinder_02/grasp_state</output_topic>
+            </plugin>
+          </gazebo>
+        </robot>
+    """)
+    assert [generator.detachable_plugin_contract(item) for item in generator.detachable_plugins(root_xml)] == expected
+    assert expected[0]["attach_topic"] == "/xh/m1b/cylinder_01/attach"
+    assert expected[1]["output_topic"] == "/xh/m1b/cylinder_02/grasp_state"
 
 
 def test_m1a_s4_runs_a_fresh_oracle_batch_instead_of_relabelling_s1() -> None:
@@ -777,7 +871,10 @@ def test_adr_0006_fk_sampling_keeps_end_effector_and_protocol_invariants() -> No
     assert module.ARM_JOINTS == tuple(f"panda_joint{index}" for index in range(1, 8))
     assert 0 < scale < 1
     assert module.serial_translation_m(model) == pytest.approx(1.3192623327153459)
-    assert module.fixed_end_effector_extension_m(model) == pytest.approx(0.115)
+    # ADR-0016 §4 franka-copy fallback: finger roots at the official 0.0584 m
+    # and the first collision element is the full-length grasp plate whose
+    # centre sits at (0, +/-0.0039, 0.0269), giving 0.0584 + 0.02718 extension.
+    assert module.fixed_end_effector_extension_m(model) == pytest.approx(0.08558124353299532)
     report = module.sample_workspace(model, samples=100, seed=7, target_total_reach_m=0.85)
     candidate = report["candidate_definition"]
     assert candidate["scaled_transforms"] == [*module.ARM_JOINTS, "panda_joint8", module.HAND_JOINT]

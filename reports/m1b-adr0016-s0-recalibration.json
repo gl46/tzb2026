@@ -1,0 +1,17 @@
+{
+  "run_id": "m1a-adr0016-inline-s0-final-20260720-1220",
+  "status": "CONTACT_TELEMETRY_CALIBRATED",
+  "reason": "13/13 approved conditions passed; 9/9 finger-target positive windows passed; idle baselines passed 13/13.",
+  "calibration_initialization": "CALIBRATION_ONLY_INITIALIZATION_PER_LABEL",
+  "fresh_simulation_session_per_label": true,
+  "model_match": true,
+  "gazebo_urdf_sha256": "13f8c715948d602388b0024b38f0ab354359e5232f981596d854f866a5eee854",
+  "source_sha256": {
+    "contact_calibration_client": "1047d0c97c0e6301b586b9e324d16625e5ecca2756731256bd8355830887b480",
+    "isolated_campaign_runner": "a7f47fd712418697e1c8c84fa89b2579acea53f1fbf821dd89e12342e1dd9cb3",
+    "calibration_world": "c7fbb8ee27b90c1cc5facbefb5d83ff21c51c6e0aad159395f1cc98075dd760a"
+  },
+  "bilateral_overlap_s": [0.25400000000000134, 0.277000000000001, 0.2469999999999999],
+  "aggregate_evidence_sha256": "c7d1361fdcb23b8221e701e59ac68ac39b619aa01fa562a96b088677c0f362b8",
+  "raw_evidence": "13 per-label logs retained with the execution workspace; no simulator truth was introduced into the online policy path."
+}

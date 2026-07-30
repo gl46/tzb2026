@@ -16,5 +16,5 @@
     "detachable_round_trip": true,
     "cube_table_stability": true
   },
-  "raw_log": "logs/m1a-20260717-detachable-reset-roundtrip-r1-bullet-capability-audit.log"
+  "raw_log": "logs/m1a-inline-frame-20260723-2220-bullet-capability-audit.log"
 }

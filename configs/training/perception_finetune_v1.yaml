@@ -1,0 +1,7 @@
+seed: 20260717
+split_by: scene_seed
+splits: {train: 0.70, val: 0.15, test: 0.15}
+heldout_combination: reflective_metal_plus_camera_offset
+epochs: 1
+max_searches: 3
+model: GroundingDINO

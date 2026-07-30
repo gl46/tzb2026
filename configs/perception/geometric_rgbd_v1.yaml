@@ -1,0 +1,5 @@
+backend: geometric_rgbd_v1
+online_input: PerceptionInputV1
+table_depth_m: 1.0
+min_component_pixels: 12
+forbidden_online_fields: [actual_sim_entity_id, perfect_object_poses, task_success, contacts]

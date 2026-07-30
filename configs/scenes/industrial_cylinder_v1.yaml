@@ -1,0 +1,18 @@
+scene_id: IndustrialCylinderBenchmarkV1
+seed: 20260717
+robot: panda_contact_gated_constrained_grasp
+incoming_regions: [incoming_a, incoming_b]
+part_count: {min: 6, max: 12}
+orientation_states: [normal, inverted, tilted]
+bin: {rows: 2, columns: 3, name: blue_partition_bin}
+camera: {frame: camera_rgbd, rgbd_topic: /xh/camera/rgbd}
+randomization:
+  position_m: [-0.08, 0.08]
+  rpy_rad: [-0.35, 0.35]
+  material: [painted, matte_metal, reflective_metal]
+  background: [gray, blue_gray, beige]
+  light_intensity: [0.7, 1.3]
+  camera_offset_m: [-0.02, 0.02]
+  occluders: [none, divider, block]
+  depth_missing_rate: [0.0, 0.08]
+reserved_geometry: [second_table, bin_transport_path, stackable_bin_collision, second_arm_mount]

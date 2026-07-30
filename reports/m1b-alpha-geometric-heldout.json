@@ -1,0 +1,12 @@
+{
+  "backend": "geometric_rgbd_v1",
+  "split": "test",
+  "evaluated_scenes": 30,
+  "valid_output_rate": 1.0,
+  "median_absolute_track_count_error": 6.5,
+  "target_selection_accuracy": null,
+  "position_median_error_m": null,
+  "orientation_accuracy": null,
+  "truth_boundary": "Simulator supervision was read only by the offline evaluator.",
+  "interpretation": "The pipeline produced outputs for every test scene but substantially under-detected objects; no correspondence-dependent metric is claimed."
+}

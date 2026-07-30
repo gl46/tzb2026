@@ -1,0 +1,38 @@
+{
+  "schema_version": "M1BPerceptionReachabilityGateV1",
+  "status": "GO",
+  "reasons": [],
+  "tolerance_envelope_m": {
+    "x": 0.015,
+    "y": 0.015,
+    "z": 0.005
+  },
+  "tolerance_envelope_source": {
+    "campaign": "v3",
+    "measures": "the shipped configuration: 120 mm contact centreline WITH all five reliability fixes",
+    "node2_path": "/tmp/m1b-campaign-v3/m1b-tolerance-envelope.json",
+    "sha256": "909d88ec82b4a823e190b56fbe0ffae01edefde21a6779414160d0549f80dc36",
+    "trial_count": 81
+  },
+  "perception_axis_audit_m": {
+    "x": {
+      "median_m": 0.0010425143304539364,
+      "p90_m": 0.0022951731941297515
+    },
+    "y": {
+      "median_m": 0.0018553840649561393,
+      "p90_m": 0.00479301628996498
+    },
+    "z": {
+      "median_m": 0.0007514142345786401,
+      "p90_m": 0.002080399509135411
+    }
+  },
+  "criterion": "per_axis_p90_m <= 0.6 * measured_tolerance_m",
+  "per_axis_margin_m": {
+    "x": 0.006704826805870248,
+    "y": 0.00420698371003502,
+    "z": 0.000919600490864589
+  },
+  "truth_boundary": "tolerance truth is calibration_only; perception truth is offline_evaluation_only"
+}

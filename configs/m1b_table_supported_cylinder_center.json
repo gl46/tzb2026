@@ -1,0 +1,12 @@
+{
+  "schema_version": "M1BTableSupportedCylinderCenterV1",
+  "center_offset_above_support_m": 0.03915,
+  "support_world_z_bounds_m": [0.43, 0.47],
+  "source": {
+    "industrial_cylinder_radius_m": 0.015,
+    "industrial_cylinder_half_length_m": 0.04,
+    "orientation_support_range_m": [0.0383, 0.04],
+    "versioned_scene_generator": "scripts/generate_industrial_scenes.py"
+  },
+  "truth_boundary": "runtime support plane comes from public RGB-D; dimensions come from the versioned industrial-cylinder class contract"
+}

@@ -1,0 +1,59 @@
+{
+  "schema_version": "M1BInterferenceReportV1",
+  "status": "MEASURED_PHYSICAL_BLOCKER",
+  "configuration": "ADR-0014, 30 mm cylinder, 81-trial production-primitive tolerance campaign",
+  "source": {
+    "raw_trial_directory": "/tmp/m1b-tolerance-campaign-adr0014-physical-r2-20260719/raw",
+    "trial_count": 81,
+    "envelope_source_sha256": "b3006faf752d685dfc96ef3576d32c9039cb58383b2bf625178128dbc11eac5a"
+  },
+  "observations": {
+    "approach_executed": 75,
+    "approach_not_executed": 6,
+    "contact_descend_ik_solved": 5,
+    "contact_descend_ik_failed": 69,
+    "contact_descend_not_reached": 7,
+    "contact_descend_ik_error_codes": { "-31": 69 },
+    "close_succeeded": 5,
+    "bilateral_same_entity_contact": 0,
+    "attach_sent": 0,
+    "trials_with_any_contact_samples": 4,
+    "contact_sample_entities": {
+      "industrial_work_table": 1123,
+      "cylinder_09": 466
+    },
+    "contact_sample_finger_entity": {
+      "right:industrial_work_table": 732,
+      "left:industrial_work_table": 391,
+      "right:cylinder_09": 466
+    },
+    "target_entity_for_all_nonempty_contact_trials": "cylinder_07",
+    "target_contact_samples": 0
+  },
+  "finding": "The primary measured blocker is contact-descend terminal feasibility, not perception: 69/81 trials failed IK before close. Of the five descents that executed, observed contact was table interference or one-finger contact with a non-target cylinder; no bilateral target contact formed.",
+  "isolated_lateral_diagnostics": [
+    {
+      "mode": "target collision retained throughout lateral insertion",
+      "source": "/tmp/m1b-adr0014-lateral-insertion-diagnostic-20260719/raw/trial-000.json",
+      "observed": "A 60 degree candidate at 65 mm executed and converged at high-clear and low-clear. Its final lateral pose had an IK solution but failed MoveIt planning (5 attempts); no close or contact occurred."
+    },
+    {
+      "mode": "65 mm lateral insertion with target-touch exception limited to final insert",
+      "source": "/tmp/m1b-adr0014-lateral-target-contact-h065-diagnostic-20260719/raw/trial-000.json",
+      "observed": "The yaw-0 high-clear and low-clear stages executed and converged. The final lateral stage failed IK (-31), produced no contact, and the temporary target-touch exception was restored."
+    }
+  ],
+  "diagnostic_conclusion": "Neither retaining target collision nor allowing only the final target touch produced an executable terminal insertion. These diagnostics are calibration-only and do not alter the production primitive or acceptance state.",
+  "vertical_board_feasibility_probe": {
+    "source": "/tmp/m1b-adr0014-vertical-board-ik-diagnostic-20260719/raw/trial-000.json",
+    "candidate_count": 21,
+    "planned_candidate_count_from_reset_home": 0,
+    "conclusion": "The existing vertical-board orientation family also has no collision-checked plan from reset home for this target."
+  },
+  "inference_boundary": "The report does not identify a final corrective geometry or planner change. It establishes that any corrective action must first make a collision-safe terminal descend physically feasible and avoid table/non-target contact, then remeasure the full envelope.",
+  "prohibited_shortcuts": [
+    "Do not relax bilateral, attach, reset, or perception gate thresholds.",
+    "Do not use supervision as an online motion or contact input.",
+    "Do not run round-trip or WRONG_OBJECT acceptance while the reachability gate is NO_GO."
+  ]
+}

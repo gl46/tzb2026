@@ -1,0 +1,4 @@
+required_streams: [rgb, depth, camera_info, tf, joint_states, scene_manifest, perception]
+supervision_stream: simulator_supervision_separate_file
+preferred: rosbag2_plus_h264
+fallback: png_sequence_plus_manifest

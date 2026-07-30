@@ -16,7 +16,7 @@ from builtin_interfaces.msg import Duration
 from control_msgs.action import FollowJointTrajectory
 from control_msgs.msg import JointTolerance, JointTrajectoryControllerState
 from geometry_msgs.msg import Pose, PoseArray, PoseStamped
-from moveit_msgs.msg import AttachedCollisionObject, CollisionObject, PlanningScene, PlanningSceneComponents, RobotState
+from moveit_msgs.msg import AttachedCollisionObject, CollisionObject, PlanningScene, PlanningSceneComponents, RobotState, RobotTrajectory
 from moveit_msgs.srv import ApplyPlanningScene, GetPlanningScene, GetPositionIK
 from rclpy.action import ActionClient
 from ros_gz_interfaces.msg import Contacts
@@ -31,6 +31,7 @@ if str(PROJECT_ROOT / "src") not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
 from xh_agent.grasp.orientation_families import gripper_frame_corridor  # noqa: E402
+from xh_agent.runtime.hand_observation import hand_endpoint_observation_succeeded  # noqa: E402
 
 from m1a_moveit_execution_client import EvidenceClient, JOINTS, TARGETS, set_allowed_pair  # noqa: E402
 
@@ -51,16 +52,42 @@ CONTACT_TOPICS = {
     "cube_environment": "/xh/supervision/red_cube_environment_contacts",
 }
 CUBE_SIZE_M = 0.05
-PAD_SIZE_M = (0.12, 0.018, 0.035)
-FINGER_LENGTH_M = 0.12
-FINGER_ROOT_Z_M = 0.055
+# ADR-0016 pre-authorized fallback: the pads are now the primitive-approximated
+# copy of the official franka finger.stl.  The S0 AABB evidence tracks the
+# distal contact pad ("tapered_tip_collision"), whose face lies exactly on the
+# finger-link y=0 plane; the recessed proximal body is excluded because it sits
+# 2.5 mm behind that face and cannot make the S0 contact.
+PAD_SIZE_M = (0.021, 0.0208, 0.0538)
+# Signed per-side plate-box centres in each finger-link frame.  The grasp
+# element is a full-length plate (the proven old-hand contact element was a
+# plate; a 17.8 mm block measured zero bullet contact response even at
+# 4.5 mm modelled overlap).  Its face is modelled 6.5 mm proud of the link
+# y=0 plane (measured shallow-penetration dead-band compensation for free
+# dynamic targets); the public inner-gap mapping remains 2q - 0.006.
+PAD_CENTER_IN_FINGER_M = {
+    "left": (0.0, 0.0039, 0.0269),
+    "right": (0.0, -0.0039, 0.0269),
+}
+FINGER_LENGTH_M = 0.1122
+FINGER_ROOT_Z_M = 0.1032
 PLANNING_SCENE_WORLD_OBJECT_PADDING_M = 0.0
 CALIBRATION_CUBE_XYZ = [0.17, 0.12, 0.755]
 CALIBRATION_FIXTURE_XYZ = [0.17, 0.12, 0.59]
-CALIBRATION_FIXTURE_SIZE_M = [0.03, 0.03, 0.28]
+CALIBRATION_FIXTURE_SIZE_M = [0.01, 0.01, 0.28]
 CONTACT_RETREAT_HEIGHT_M = 0.220
 HAND_POST_GOAL_OBSERVATION_SLACK_M = 0.0001
-# The nominal side-contact pose placed the 12 cm finger pad exactly tangent to
+# Hand action-client waits.  The result wait must scale with the commanded
+# trajectory rather than assume a wall-clock bound: this simulator shares its
+# GPU, so a 1.2 s close can take materially longer in wall-clock time.
+HAND_GOAL_ACCEPT_TIMEOUT_S = 5.0
+HAND_RESULT_TIMEOUT_FLOOR_S = 15.0
+HAND_RESULT_TIMEOUT_MARGIN_S = 15.0
+# Post-goal observation: require this many joint-state deliveries after the
+# action result before judging position error, bounded by a deadline.  These
+# make the snapshot current; they do not widen the 1 mm goal tolerance.
+HAND_POST_GOAL_FRESH_SAMPLES = 3
+HAND_POST_GOAL_SETTLE_TIMEOUT_S = 2.0
+# The nominal side-contact pose placed the finger pad exactly tangent to
 # the cube's west face.  The full S0 run recorded 0.30--0.94 mm FK / Gazebo
 # AABB gaps for otherwise executed right and bilateral trials, so the fixture
 # needs a measured 2 mm finger-only overlap margin.  This is calibration-only:
@@ -71,8 +98,26 @@ CALIBRATION_FINGER_TARGET_INSET_M = 0.002
 # pre-close pose; the corresponding before/after poses are recorded below.
 BILATERAL_PRECONTACT_CLEARANCE_M = 0.001
 BILATERAL_FINAL_FINGER_INSET_M = 0.0
-BILATERAL_PRECONTACT_FINGER_M = 0.034
+# The 25 mm-per-finger final command closes to a 50 mm inner gap on the 50 mm
+# S0 cube.  Use the fully open 40 mm state for the vertical terminal descent
+# so neither pad clips a sidewall before closure.
+BILATERAL_PRECONTACT_FINGER_M = 0.040
+BILATERAL_PRECONTACT_VERTICAL_STANDOFF_M = 0.050
+# The franka-copy palm spans hand-frame x +/-0.0317, so at the bilateral pose
+# it overlaps the backstop column (x 0.1975..0.2075, top z 0.805) by 4 mm in
+# x.  The backstop is physical-only (not a planning-scene object), so a pose
+# whose palm bottom descends below its top stalls the arm on a sensorless
+# contact.  Palm bottom = cube_z + 0.1032 - inset + offset - 0.066; a 20 mm
+# offset keeps it at 0.8104 (5.4 mm above the backstop) while 16 mm of the
+# 17.8 mm pad still overlaps the cube sidewall.
+BILATERAL_CONTACT_VERTICAL_OFFSET_M = 0.020
 BILATERAL_STEADY_WIDTH_RANGE_M = (0.045, 0.070)
+# The public finger-contact topics observe both named collision elements.
+# With the table top at z=0.450 m, the franka-copy pad spans local +Z
+# 0.0944--0.1122 from the hand.  Rx(pi) maps that axis down, so a 0.550 m
+# hand origin presses the distal pad end into the tabletop.
+TABLE_TOUCH_HAND_Z_M = 0.550
+TABLE_TOUCH_PRECONTACT_STANDOFF_M = 0.100
 
 
 def calibration_bilateral_branch_seed() -> list[float]:
@@ -170,6 +215,7 @@ class CalibrationClient(EvidenceClient):
     def __init__(self) -> None:
         super().__init__()
         self.latest_hand: dict[str, float] = {}
+        self.hand_state_seq = 0
         self.ik_client = self.create_client(GetPositionIK, "/compute_ik")
         self.last_ik_error: dict | None = None
         self.hand_client = ActionClient(
@@ -203,6 +249,10 @@ class CalibrationClient(EvidenceClient):
         positions = dict(zip(message.name, message.position))
         if all(name in positions for name in HAND_JOINTS):
             self.latest_hand = {name: float(positions[name]) for name in HAND_JOINTS}
+            # Counts deliveries, not spins.  command_hand needs to know its
+            # post-goal snapshot actually post-dates the action result rather
+            # than assuming a fixed number of spins was long enough.
+            self.hand_state_seq += 1
 
     def on_contact(self, channel: str, message: Contacts) -> None:
         stamp = message.header.stamp.sec + message.header.stamp.nanosec * 1e-9
@@ -289,12 +339,13 @@ class CalibrationClient(EvidenceClient):
     def ik(
         self, pose: Pose, *, avoid_collisions: bool = True, timeout_s: float = 3.0,
         seed: list[float] | None = None, ik_link: str = "panda_hand",
+        hand_positions: list[float] | None = None,
     ) -> list[float] | None:
         positions = seed or [self.latest.get(name, math.nan) for name in JOINTS]
         if not all(math.isfinite(value) for value in positions):
             return None
-        hand_positions = [self.latest_hand.get(name, math.nan) for name in HAND_JOINTS]
-        if not all(math.isfinite(value) for value in hand_positions):
+        hand_values = hand_positions or [self.latest_hand.get(name, math.nan) for name in HAND_JOINTS]
+        if not all(math.isfinite(value) for value in hand_values):
             return None
         request = GetPositionIK.Request()
         ik = request.ik_request
@@ -305,7 +356,7 @@ class CalibrationClient(EvidenceClient):
         # default closed-finger state instead of the physical state it will
         # actually plan from.
         ik.robot_state = RobotState(
-            joint_state=JointState(name=JOINTS + HAND_JOINTS, position=positions + hand_positions)
+            joint_state=JointState(name=JOINTS + HAND_JOINTS, position=positions + hand_values)
         )
         ik.avoid_collisions = avoid_collisions
         ik.pose_stamped = PoseStamped()
@@ -354,23 +405,57 @@ class CalibrationClient(EvidenceClient):
             for name in HAND_JOINTS
         ]
         sent = self.hand_client.send_goal_async(goal)
-        rclpy.spin_until_future_complete(self, sent, timeout_sec=3.0)
+        rclpy.spin_until_future_complete(self, sent, timeout_sec=HAND_GOAL_ACCEPT_TIMEOUT_S)
         handle = sent.result()
         if handle is None or not handle.accepted:
             return {"accepted": False, "succeeded": False, "goal_uuid": None}
         result_future = handle.get_result_async()
-        rclpy.spin_until_future_complete(self, result_future, timeout_sec=5.0)
+        # Scale the result wait with the commanded trajectory, exactly as the
+        # arm path does.  A fixed 5 s wait is a wall-clock assumption, and this
+        # simulator shares its GPU: a measured campaign trial reported
+        # NO_ACTION_RESULT with the fingers still mid-travel at 0.0220 m of a
+        # 0.017 m command, i.e. the client abandoned a trajectory that was
+        # still executing and a live grasp was recorded as a close failure.
+        result_timeout_s = min(60.0, max(HAND_RESULT_TIMEOUT_FLOOR_S, duration_s + HAND_RESULT_TIMEOUT_MARGIN_S))
+        rclpy.spin_until_future_complete(self, result_future, timeout_sec=result_timeout_s)
         wrapped = result_future.result()
         controller_succeeded = bool(
             wrapped and wrapped.result.error_code == FollowJointTrajectory.Result.SUCCESSFUL
         )
-        for _ in range(3):
-            rclpy.spin_once(self, timeout_sec=0.02)
+        # The post-goal snapshot must post-date the action result.  A fixed
+        # three spins is a wall-clock assumption of exactly the kind already
+        # removed from the result wait above, one step further down, and it
+        # misreports staleness as a physical failure: the ADR-0009 bullet audit
+        # recorded max_position_error_m 0.00713 m with the controller returning
+        # SUCCEEDED against its own 1 mm tolerance, mimic tracking error
+        # 1.1e-08 m, and the very next read of the same joints at 0.039999 m of
+        # a 0.04 m command.  Two S3 release steps failed the same way.
+        #
+        # Wait for genuinely fresh deliveries instead, bounded.  The 1 mm
+        # action contract and its 0.1 mm sampling slack are unchanged: if the
+        # fingers really are short when the deadline expires, this still fails.
+        seq_at_result = self.hand_state_seq
+        settle_deadline = time.monotonic() + HAND_POST_GOAL_SETTLE_TIMEOUT_S
         actual = [self.latest_hand.get(name, math.nan) for name in HAND_JOINTS]
-        max_position_error_m = max(
-            (abs(expected - observed) for expected, observed in zip(positions, actual)),
-            default=math.inf,
-        )
+        max_position_error_m = math.inf
+        while time.monotonic() < settle_deadline:
+            rclpy.spin_once(self, timeout_sec=0.02)
+            if self.hand_state_seq - seq_at_result < HAND_POST_GOAL_FRESH_SAMPLES:
+                continue
+            actual = [self.latest_hand.get(name, math.nan) for name in HAND_JOINTS]
+            max_position_error_m = max(
+                (abs(expected - observed) for expected, observed in zip(positions, actual)),
+                default=math.inf,
+            )
+            if max_position_error_m <= goal_tolerance_m + HAND_POST_GOAL_OBSERVATION_SLACK_M:
+                break
+        if math.isinf(max_position_error_m):
+            actual = [self.latest_hand.get(name, math.nan) for name in HAND_JOINTS]
+            max_position_error_m = max(
+                (abs(expected - observed) for expected, observed in zip(positions, actual)),
+                default=math.inf,
+            )
+        fresh_sample_count = max(0, self.hand_state_seq - seq_at_result)
         controller_samples = self.hand_controller_samples[controller_start:]
         target_reference_seen = any(
             abs(sample["physical_reference_m"] - positions[HAND_JOINTS.index(PHYSICAL_HAND_JOINT)]) <= 1e-9
@@ -383,10 +468,14 @@ class CalibrationClient(EvidenceClient):
             # completion; joint-state delivery can lag that instant by one
             # simulation tick.  Preserve the 1 mm action contract while
             # allowing a bounded 0.1 mm observation-sampling slack.
-            "succeeded": bool(
-                controller_succeeded
-                and max_position_error_m <= goal_tolerance_m + HAND_POST_GOAL_OBSERVATION_SLACK_M
-                and mimic_tracking_error_m <= goal_tolerance_m + HAND_POST_GOAL_OBSERVATION_SLACK_M
+            "succeeded": hand_endpoint_observation_succeeded(
+                controller_succeeded=controller_succeeded,
+                fresh_sample_count=fresh_sample_count,
+                required_fresh_samples=HAND_POST_GOAL_FRESH_SAMPLES,
+                max_position_error_m=max_position_error_m,
+                mimic_tracking_error_m=mimic_tracking_error_m,
+                goal_tolerance_m=goal_tolerance_m,
+                observation_slack_m=HAND_POST_GOAL_OBSERVATION_SLACK_M,
             ),
             "controller_result_succeeded": controller_succeeded,
             "controller_result_error_code": (
@@ -399,6 +488,8 @@ class CalibrationClient(EvidenceClient):
             "observed_positions_m": actual,
             "goal_tolerance_m": goal_tolerance_m,
             "post_goal_observation_slack_m": HAND_POST_GOAL_OBSERVATION_SLACK_M,
+            "post_goal_fresh_sample_count": fresh_sample_count,
+            "post_goal_required_fresh_samples": HAND_POST_GOAL_FRESH_SAMPLES,
             "max_position_error_m": max_position_error_m,
             "mimic_tracking_error_m": mimic_tracking_error_m,
             "physical_controller_state_topic": PHYSICAL_HAND_CONTROLLER,
@@ -656,6 +747,8 @@ class CalibrationClient(EvidenceClient):
         executed, goal_uuid, samples, controller_samples, settle_s, converged = self.execute(
             trajectory, expected
         )
+        observed = [self.latest.get(name, math.nan) for name in JOINTS]
+        final_errors = [abs(actual - target) for actual, target in zip(observed, expected)]
         return {
             "ik_solved": True,
             "ik_solution": solution,
@@ -669,6 +762,105 @@ class CalibrationClient(EvidenceClient):
             "joint_state_samples": len(samples),
             "controller_state_samples": len(controller_samples),
             "post_controller_settle_s": settle_s,
+            "expected_final_joints": expected,
+            "observed_final_joints": observed,
+            "per_joint_final_error_rad": final_errors,
+            "max_final_joint_error_rad": max(final_errors),
+        }
+
+    def move_hand_cartesian(
+        self, pose: Pose, *, duration_s: float = 3.0, max_step_m: float = 0.005,
+        max_joint_step_rad: float = 0.35, ik_link: str = "panda_hand",
+        ik_seed: list[float] | None = None,
+    ) -> dict:
+        """Plan and execute a straight tool-frame segment to one pose.
+
+        The ADR-0016 final descent must stay a vertical tool-axis translation.
+        An OMPL joint-space plan may legally bow sideways between the same two
+        endpoints, and with the finger/target ACM exception enabled such a bow
+        was measured displacing the free calibration target by 10--18 mm
+        before the close (ADR-0016 campaign raws 000/027/044).  The MoveIt
+        cartesian service reports only a completed fraction with no failure
+        cause, so this client walks the segment itself: one collision-aware
+        IK per max_step_m, each seeded from the previous solution, recording
+        the exact failing waypoint and IK error, plus a per-step
+        joint-continuity guard that rejects IK branch jumps instead of
+        silently truncating the path.
+        """
+        positions = [self.latest.get(name, math.nan) for name in JOINTS]
+        hand_positions = [self.latest_hand.get(name, math.nan) for name in HAND_JOINTS]
+        if not all(math.isfinite(value) for value in positions + hand_positions):
+            return {"planned": False, "executed": False, "reason": "JOINT_STATE_UNAVAILABLE"}
+        start_pose = self.fk_link(ik_link, positions)
+        if start_pose is None:
+            return {"planned": False, "executed": False, "reason": "START_FK_UNAVAILABLE"}
+        target_xyz = [pose.position.x, pose.position.y, pose.position.z]
+        segment = [target - start for target, start in zip(target_xyz, start_pose[:3])]
+        length_m = math.sqrt(sum(value ** 2 for value in segment))
+        steps = max(2, math.ceil(length_m / max_step_m))
+        waypoints: list[list[float]] = []
+        # A staged Cartesian primitive may intentionally issue multiple short
+        # controller actions.  Preserve the verified branch across actions
+        # when the caller supplies its prior planned endpoint; otherwise a
+        # solver can select an unrelated valid branch at a waypoint boundary.
+        seed = list(ik_seed) if ik_seed is not None else positions
+        for index in range(1, steps + 1):
+            ratio = index / steps
+            waypoint = Pose()
+            waypoint.position.x = start_pose[0] + segment[0] * ratio
+            waypoint.position.y = start_pose[1] + segment[1] * ratio
+            waypoint.position.z = start_pose[2] + segment[2] * ratio
+            waypoint.orientation = pose.orientation
+            solution = self.ik(waypoint, seed=seed, ik_link=ik_link)
+            if solution is None:
+                return {
+                    "planned": False, "executed": False,
+                    "reason": "CARTESIAN_WAYPOINT_IK_REJECTED",
+                    "failed_waypoint_index": index, "waypoint_count": steps,
+                    "fraction": (index - 1) / steps,
+                    "failed_waypoint_z_m": waypoint.position.z,
+                    "ik_error": self.last_ik_error,
+                }
+            joint_step = max(abs(current - previous) for current, previous in zip(solution, seed))
+            if joint_step > max_joint_step_rad:
+                return {
+                    "planned": False, "executed": False,
+                    "reason": "CARTESIAN_JOINT_JUMP_REJECTED",
+                    "failed_waypoint_index": index, "waypoint_count": steps,
+                    "fraction": (index - 1) / steps,
+                    "max_observed_joint_step_rad": joint_step,
+                    "max_joint_step_rad": max_joint_step_rad,
+                }
+            waypoints.append(solution)
+            seed = solution
+        trajectory = RobotTrajectory()
+        trajectory.joint_trajectory.joint_names = list(JOINTS)
+        points = [JointTrajectoryPoint(positions=list(positions), time_from_start=Duration(sec=0, nanosec=0))]
+        for index, solution in enumerate(waypoints, start=1):
+            seconds = duration_s * index / steps
+            points.append(JointTrajectoryPoint(
+                positions=list(solution),
+                time_from_start=Duration(sec=int(seconds), nanosec=int((seconds - int(seconds)) * 1e9)),
+            ))
+        trajectory.joint_trajectory.points = points
+        expected = list(waypoints[-1])
+        executed, goal_uuid, samples, controller_samples, settle_s, converged = self.execute(
+            trajectory, expected
+        )
+        observed = [self.latest.get(name, math.nan) for name in JOINTS]
+        final_errors = [abs(actual - target) for actual, target in zip(observed, expected)]
+        return {
+            "planned": True, "cartesian": True, "fraction": 1.0,
+            "planning_method": "SEEDED_PER_WAYPOINT_COLLISION_AWARE_IK",
+            "ik_seed_source": "caller_previous_cartesian_endpoint" if ik_seed is not None else "current_joint_state",
+            "max_step_m": max_step_m, "duration_s": duration_s, "point_count": len(points),
+            "executed": executed, "converged": converged, "goal_uuid": goal_uuid,
+            "joint_state_samples": len(samples),
+            "controller_state_samples": len(controller_samples),
+            "post_controller_settle_s": settle_s,
+            "expected_final_joints": expected, "observed_final_joints": observed,
+            "per_joint_final_error_rad": final_errors,
+            "max_final_joint_error_rad": max(final_errors),
         }
 
     def move_joint_target(self, target: list[float]) -> dict:
@@ -706,7 +898,7 @@ class CalibrationClient(EvidenceClient):
             if pose is None:
                 output[side] = None
                 continue
-            translation = quaternion_rotate(pose[3:], (0.06, 0.0, 0.0))
+            translation = quaternion_rotate(pose[3:], PAD_CENTER_IN_FINGER_M[side])
             center = [pose[index] + translation[index] for index in range(3)]
             separation = aabb_separation(center, PAD_SIZE_M, cube_xyz, (CUBE_SIZE_M,) * 3)
             output[side] = {"link_pose": pose, "pad_center_world": center, "aabb_separation_m": separation}
@@ -725,7 +917,7 @@ class CalibrationClient(EvidenceClient):
             cr, sr = math.cos(roll / 2.0), math.sin(roll / 2.0)
             quaternion = [sr * cp * cy - cr * sp * sy, cr * sp * cy + sr * cp * sy,
                           cr * cp * sy - sr * sp * cy, cr * cp * cy + sr * sp * sy]
-            translation = quaternion_rotate(quaternion, (0.06, 0.0, 0.0))
+            translation = quaternion_rotate(quaternion, PAD_CENTER_IN_FINGER_M[side])
             center = [pose[index] + translation[index] for index in range(3)]
             separation = aabb_separation(center, PAD_SIZE_M, cube_xyz, (CUBE_SIZE_M,) * 3)
             simulator[side] = {
@@ -796,19 +988,23 @@ class CalibrationClient(EvidenceClient):
 def hand_pose(
     cube_xyz: list[float], *, y_offset: float = 0.0,
     finger_target_inset_m: float = CALIBRATION_FINGER_TARGET_INSET_M,
+    vertical_standoff_m: float = 0.0,
+    contact_vertical_offset_m: float = 0.0,
 ) -> Pose:
-    """Runtime-oracle side contact pose, derived from the hand/finger chain."""
+    """Runtime-oracle inline-pad contact pose, derived from ADR-0016 geometry."""
     pose = Pose()
-    # With RPY [pi, 0, 0], a finger runs along world +X from its hand frame and
-    # its centreline is 5.5 cm below the hand.  Align its tip with the cube's
-    # west face with a recorded 2 mm finger-only overlap margin.  The palm
-    # remains clear of the high calibration fixture and table.
-    pose.position.x = cube_xyz[0] - (
-        CUBE_SIZE_M / 2.0 + FINGER_LENGTH_M - finger_target_inset_m
-    )
+    # With RPY [pi, 0, 0], the inline main pad is vertical and centred 10 cm
+    # below the hand.  Its 8 cm height spans the cube's sidewall while its
+    # local +/-Y closure faces provide the individual/bilateral S0 contacts.
+    # The named-pad offset places the selected open finger 2 mm into that
+    # sidewall; no privileged online input is involved.
+    pose.position.x = cube_xyz[0]
     pose.position.y = cube_xyz[1] + y_offset
-    pose.position.z = cube_xyz[2] + FINGER_ROOT_Z_M
-    # RPY [pi, 0, 0] puts the finger centreline at the cube's centre height.
+    pose.position.z = (
+        cube_xyz[2] + FINGER_ROOT_Z_M - finger_target_inset_m
+        + vertical_standoff_m + contact_vertical_offset_m
+    )
+    # RPY [pi, 0, 0] directs local +Z (the inline tool/finger axis) downward.
     pose.orientation.x = 1.0
     pose.orientation.w = 0.0
     return pose
@@ -817,7 +1013,7 @@ def hand_pose(
 def calibration_retreat_pose(cube_xyz: list[float], *, y_offset: float) -> Pose:
     """Lift from the runtime target before restoring normal ACM checks."""
     pose = Pose()
-    pose.position.x = cube_xyz[0] - (CUBE_SIZE_M / 2.0 + FINGER_LENGTH_M + 0.10)
+    pose.position.x = cube_xyz[0]
     pose.position.y = cube_xyz[1] + y_offset
     pose.position.z = cube_xyz[2] + CONTACT_RETREAT_HEIGHT_M
     pose.orientation.x = 1.0
@@ -836,9 +1032,17 @@ def table_touch_pose(cube_xyz: list[float]) -> Pose:
     pose = Pose()
     pose.position.x = -0.25
     pose.position.y = -0.25
-    pose.position.z = 0.562
-    pose.orientation.y = math.sqrt(0.5)
-    pose.orientation.w = math.sqrt(0.5)
+    pose.position.z = TABLE_TOUCH_HAND_Z_M
+    pose.orientation.x = 1.0
+    pose.orientation.w = 0.0
+    return pose
+
+
+def table_touch_precontact_pose(cube_xyz: list[float]) -> Pose:
+    """Collision-free start for the S0 finger--table sensor condition."""
+
+    pose = table_touch_pose(cube_xyz)
+    pose.position.z += TABLE_TOUCH_PRECONTACT_STANDOFF_M
     return pose
 
 
@@ -921,15 +1125,17 @@ def main() -> int:
         trials.append({"label": "idle", "expected": "none", "contacts": classify_contacts(idle_events)})
 
         specifications = (
-            # ADR-0008 redefines left/right as pose-induced, fixed-aperture
-            # labelled contact.  Both fingers stay at the same 4 cm command;
-            # the runtime-oracle lateral approach, not an unavailable
-            # independent channel, selects the named pad.  No joint-angle seed
-            # is carried between conditions: every pose derives from the
-            # runtime cube geometry and starts IK from measured state.
-            [(f"left_{index}", "left", 0.040, [0.040, 0.040]) for index in range(1, 4)]
-            + [(f"right_{index}", "right", -0.040, [0.040, 0.040]) for index in range(1, 4)]
-            + [(f"bilateral_{index}", "bilateral", 0.0, [0.010, 0.010]) for index in range(1, 4)]
+            # The franka-copy pads keep ADR-0008's pose-induced, fixed-aperture
+            # labels; each collision face sits 6.5 mm proud of its finger-link
+            # y=0 plane.  Static S0 targets have no dead band, so the named-pad
+            # inset stays 2 mm of the modelled skin:
+            # |offset| = (q - 0.0065) - (cube_half - inset) = 0.0335 - 0.023.
+            # The free bilateral cube needs the measured dynamic-pair overlap:
+            # 27 mm per finger targets the skin 4.5 mm inside each sidewall
+            # while the achieved steady width stays inside the public window.
+            [(f"left_{index}", "left", 0.0105, [0.040, 0.040]) for index in range(1, 4)]
+            + [(f"right_{index}", "right", -0.0105, [0.040, 0.040]) for index in range(1, 4)]
+            + [(f"bilateral_{index}", "bilateral", 0.0, [0.027, 0.027]) for index in range(1, 4)]
         )
         scope = os.environ.get("M1A_CALIBRATION_SCOPE", "full")
         selected_label = os.environ.get("M1A_CALIBRATION_LABEL", "")
@@ -958,7 +1164,6 @@ def main() -> int:
             client.update_cube_scene(cube["xyz"], target_id=target_model)
             exception_set = client.set_target_touch_exception(True, target_id=target_model)
             target_pose = hand_pose(cube["xyz"], y_offset=y_offset)
-            start = {name: len(events) for name, events in client.contacts.items()}
             if expected in {"left", "right"}:
                 # Keep the symmetric aperture fixed across the entire named-pad
                 # contact window.  Motion causes the label; the following
@@ -976,10 +1181,13 @@ def main() -> int:
                 precontact_pose = hand_pose(
                     cube["xyz"], y_offset=y_offset,
                     finger_target_inset_m=-BILATERAL_PRECONTACT_CLEARANCE_M,
+                    vertical_standoff_m=BILATERAL_PRECONTACT_VERTICAL_STANDOFF_M,
+                    contact_vertical_offset_m=BILATERAL_CONTACT_VERTICAL_OFFSET_M,
                 )
                 target_pose = hand_pose(
                     cube["xyz"], y_offset=y_offset,
                     finger_target_inset_m=BILATERAL_FINAL_FINGER_INSET_M,
+                    contact_vertical_offset_m=BILATERAL_CONTACT_VERTICAL_OFFSET_M,
                 )
                 precontact_motion = client.move_hand_pose(
                     precontact_pose, ik_seed=calibration_bilateral_branch_seed()
@@ -1012,6 +1220,11 @@ def main() -> int:
                     "controller_result_error_string": "BILATERAL_CONTACT_POSE_NOT_CONVERGED",
                     "observed_positions_m": [],
                 }
+            # S0 labels a settled contact condition.  Do not include transient
+            # contacts while a non-selected pad crosses the target during the
+            # collision-checked arm trajectory; begin the evidence window only
+            # after the final pose and hand command have converged.
+            start = {name: len(events) for name, events in client.contacts.items()}
             client.contact_window(0.45)
             events = {name: client.contacts[name][start[name]:] for name in client.contacts}
             cube_after = runtime_bilateral_cube_pose() if expected == "bilateral" else runtime_cube_pose()
@@ -1094,13 +1307,23 @@ def main() -> int:
             if cube is None:
                 trials.append({"label": f"table_{index}", "expected": "finger_table", "reason": "RUNTIME_CUBE_POSE_UNAVAILABLE"})
                 continue
+            # Arrive above the table with ordinary collision checking, then
+            # make the only permitted finger--table interaction as a seeded,
+            # straight vertical descent. A direct OMPL path to the embedded
+            # endpoint can stall on a branch-dependent table collision before
+            # either finger reaches the sensor condition.
+            precontact = client.move_hand_pose(table_touch_precontact_pose(cube["xyz"]))
             exception_set = client.set_table_touch_exception(True)
-            motion = client.move_hand_pose(table_touch_pose(cube["xyz"])) if exception_set else {
-                "ik_solved": False, "planned": False, "executed": False
+            motion = client.move_hand_cartesian(table_touch_pose(cube["xyz"])) if (
+                exception_set and precontact.get("executed") and precontact.get("converged")
+            ) else {
+                "planned": False, "executed": False,
+                "reason": "TABLE_PRECONTACT_OR_EXCEPTION_UNAVAILABLE",
             }
             start = {name: len(events) for name, events in client.contacts.items()}
             client.contact_window(0.45)
             events = {name: client.contacts[name][start[name]:] for name in client.contacts}
+            table_contact_pad_evidence = client.pad_evidence(cube["xyz"])
             client.command_hand([0.04, 0.04])
             retreat = client.move_joint_target(TARGETS[0][1]) if exception_set else {
                 "planned": False, "executed": False
@@ -1108,7 +1331,10 @@ def main() -> int:
             trials.append(
                 {
                     "label": f"table_{index}", "expected": "finger_table",
-                    "cube_pose": cube, "motion": motion, "retreat": retreat,
+                    "cube_pose": cube, "precontact_motion": precontact, "motion": motion, "retreat": retreat,
+                    "table_precontact_hand_pose": pose_vector(table_touch_precontact_pose(cube["xyz"])),
+                    "table_contact_hand_pose": pose_vector(table_touch_pose(cube["xyz"])),
+                    "table_contact_pad_evidence": table_contact_pad_evidence,
                     "calibration_only_allowed_collision_pairs": [
                         ["panda_leftfinger", "work_table"],
                         ["panda_rightfinger", "work_table"],

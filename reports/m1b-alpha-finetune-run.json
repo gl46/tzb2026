@@ -1,0 +1,7 @@
+{
+  "backend": "GroundingDINO",
+  "mode": "frozen_backbone_detector_head",
+  "dataset": "data/manifests/m1b-alpha-dataset-v1.json",
+  "executed": false,
+  "status": "NOT_RUN_MODEL_NOT_INSTALLED"
+}

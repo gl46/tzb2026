@@ -1,0 +1,3007 @@
+{
+  "schema_version": "SceneManifestV1",
+  "samples": [
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1000,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1000/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1000/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1000/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 12,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1001,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1001/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1001/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1001/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 6,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1002,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1002/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1002/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1002/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 7,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1003,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1003/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1003/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1003/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 8,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1004,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1004/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1004/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1004/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 9,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1005,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1005/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1005/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1005/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 10,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1006,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1006/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1006/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1006/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 11,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1007,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1007/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1007/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1007/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 12,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1008,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1008/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1008/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1008/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 6,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1009,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1009/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1009/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1009/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 7,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1010,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1010/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1010/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1010/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 8,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1011,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1011/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1011/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1011/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 9,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1012,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1012/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1012/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1012/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 10,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1013,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1013/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1013/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1013/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 11,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1014,
+      "split": "val",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1014/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1014/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1014/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 12,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1015,
+      "split": "val",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1015/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1015/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1015/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 6,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1016,
+      "split": "val",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1016/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1016/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1016/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 7,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1017,
+      "split": "test",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1017/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1017/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1017/labels.json",
+      "randomization": {
+        "material": "reflective_metal",
+        "camera_offset_m": 0.02,
+        "part_count": 8,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1018,
+      "split": "test",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1018/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1018/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1018/labels.json",
+      "randomization": {
+        "material": "reflective_metal",
+        "camera_offset_m": 0.02,
+        "part_count": 9,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1019,
+      "split": "test",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1019/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1019/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1019/labels.json",
+      "randomization": {
+        "material": "reflective_metal",
+        "camera_offset_m": 0.02,
+        "part_count": 10,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1020,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1020/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1020/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1020/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 11,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1021,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1021/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1021/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1021/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 12,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1022,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1022/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1022/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1022/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 6,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1023,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1023/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1023/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1023/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 7,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1024,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1024/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1024/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1024/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 8,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1025,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1025/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1025/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1025/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 9,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1026,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1026/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1026/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1026/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 10,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1027,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1027/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1027/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1027/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 11,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1028,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1028/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1028/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1028/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 12,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1029,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1029/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1029/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1029/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 6,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1030,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1030/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1030/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1030/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 7,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1031,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1031/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1031/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1031/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 8,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1032,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1032/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1032/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1032/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 9,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1033,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1033/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1033/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1033/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 10,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1034,
+      "split": "val",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1034/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1034/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1034/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 11,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1035,
+      "split": "val",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1035/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1035/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1035/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 12,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1036,
+      "split": "val",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1036/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1036/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1036/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 6,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1037,
+      "split": "test",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1037/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1037/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1037/labels.json",
+      "randomization": {
+        "material": "reflective_metal",
+        "camera_offset_m": 0.02,
+        "part_count": 7,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1038,
+      "split": "test",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1038/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1038/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1038/labels.json",
+      "randomization": {
+        "material": "reflective_metal",
+        "camera_offset_m": 0.02,
+        "part_count": 8,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1039,
+      "split": "test",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1039/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1039/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1039/labels.json",
+      "randomization": {
+        "material": "reflective_metal",
+        "camera_offset_m": 0.02,
+        "part_count": 9,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1040,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1040/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1040/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1040/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 10,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1041,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1041/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1041/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1041/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 11,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1042,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1042/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1042/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1042/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 12,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1043,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1043/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1043/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1043/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 6,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1044,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1044/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1044/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1044/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 7,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1045,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1045/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1045/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1045/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 8,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1046,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1046/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1046/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1046/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 9,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1047,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1047/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1047/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1047/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 10,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1048,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1048/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1048/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1048/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 11,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1049,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1049/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1049/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1049/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 12,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1050,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1050/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1050/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1050/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 6,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1051,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1051/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1051/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1051/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 7,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1052,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1052/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1052/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1052/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 8,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1053,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1053/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1053/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1053/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 9,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1054,
+      "split": "val",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1054/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1054/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1054/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 10,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1055,
+      "split": "val",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1055/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1055/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1055/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 11,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1056,
+      "split": "val",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1056/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1056/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1056/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 12,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1057,
+      "split": "test",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1057/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1057/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1057/labels.json",
+      "randomization": {
+        "material": "reflective_metal",
+        "camera_offset_m": 0.02,
+        "part_count": 6,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1058,
+      "split": "test",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1058/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1058/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1058/labels.json",
+      "randomization": {
+        "material": "reflective_metal",
+        "camera_offset_m": 0.02,
+        "part_count": 7,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1059,
+      "split": "test",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1059/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1059/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1059/labels.json",
+      "randomization": {
+        "material": "reflective_metal",
+        "camera_offset_m": 0.02,
+        "part_count": 8,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1060,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1060/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1060/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1060/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 9,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1061,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1061/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1061/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1061/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 10,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1062,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1062/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1062/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1062/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 11,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1063,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1063/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1063/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1063/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 12,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1064,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1064/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1064/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1064/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 6,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1065,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1065/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1065/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1065/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 7,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1066,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1066/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1066/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1066/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 8,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1067,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1067/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1067/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1067/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 9,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1068,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1068/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1068/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1068/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 10,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1069,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1069/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1069/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1069/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 11,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1070,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1070/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1070/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1070/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 12,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1071,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1071/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1071/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1071/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 6,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1072,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1072/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1072/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1072/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 7,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1073,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1073/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1073/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1073/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 8,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1074,
+      "split": "val",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1074/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1074/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1074/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 9,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1075,
+      "split": "val",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1075/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1075/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1075/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 10,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1076,
+      "split": "val",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1076/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1076/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1076/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 11,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1077,
+      "split": "test",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1077/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1077/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1077/labels.json",
+      "randomization": {
+        "material": "reflective_metal",
+        "camera_offset_m": 0.02,
+        "part_count": 12,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1078,
+      "split": "test",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1078/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1078/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1078/labels.json",
+      "randomization": {
+        "material": "reflective_metal",
+        "camera_offset_m": 0.02,
+        "part_count": 6,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1079,
+      "split": "test",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1079/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1079/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1079/labels.json",
+      "randomization": {
+        "material": "reflective_metal",
+        "camera_offset_m": 0.02,
+        "part_count": 7,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1080,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1080/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1080/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1080/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 8,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1081,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1081/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1081/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1081/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 9,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1082,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1082/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1082/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1082/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 10,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1083,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1083/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1083/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1083/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 11,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1084,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1084/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1084/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1084/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 12,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1085,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1085/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1085/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1085/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 6,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1086,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1086/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1086/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1086/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 7,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1087,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1087/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1087/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1087/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 8,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1088,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1088/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1088/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1088/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 9,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1089,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1089/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1089/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1089/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 10,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1090,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1090/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1090/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1090/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 11,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1091,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1091/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1091/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1091/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 12,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1092,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1092/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1092/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1092/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 6,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1093,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1093/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1093/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1093/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 7,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1094,
+      "split": "val",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1094/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1094/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1094/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 8,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1095,
+      "split": "val",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1095/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1095/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1095/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 9,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1096,
+      "split": "val",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1096/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1096/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1096/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 10,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1097,
+      "split": "test",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1097/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1097/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1097/labels.json",
+      "randomization": {
+        "material": "reflective_metal",
+        "camera_offset_m": 0.02,
+        "part_count": 11,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1098,
+      "split": "test",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1098/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1098/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1098/labels.json",
+      "randomization": {
+        "material": "reflective_metal",
+        "camera_offset_m": 0.02,
+        "part_count": 12,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1099,
+      "split": "test",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1099/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1099/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1099/labels.json",
+      "randomization": {
+        "material": "reflective_metal",
+        "camera_offset_m": 0.02,
+        "part_count": 6,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1100,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1100/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1100/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1100/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 7,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1101,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1101/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1101/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1101/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 8,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1102,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1102/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1102/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1102/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 9,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1103,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1103/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1103/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1103/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 10,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1104,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1104/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1104/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1104/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 11,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1105,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1105/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1105/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1105/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 12,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1106,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1106/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1106/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1106/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 6,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1107,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1107/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1107/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1107/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 7,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1108,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1108/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1108/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1108/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 8,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1109,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1109/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1109/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1109/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 9,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1110,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1110/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1110/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1110/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 10,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1111,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1111/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1111/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1111/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 11,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1112,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1112/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1112/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1112/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 12,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1113,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1113/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1113/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1113/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 6,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1114,
+      "split": "val",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1114/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1114/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1114/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 7,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1115,
+      "split": "val",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1115/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1115/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1115/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 8,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1116,
+      "split": "val",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1116/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1116/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1116/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 9,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1117,
+      "split": "test",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1117/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1117/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1117/labels.json",
+      "randomization": {
+        "material": "reflective_metal",
+        "camera_offset_m": 0.02,
+        "part_count": 10,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1118,
+      "split": "test",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1118/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1118/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1118/labels.json",
+      "randomization": {
+        "material": "reflective_metal",
+        "camera_offset_m": 0.02,
+        "part_count": 11,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1119,
+      "split": "test",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1119/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1119/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1119/labels.json",
+      "randomization": {
+        "material": "reflective_metal",
+        "camera_offset_m": 0.02,
+        "part_count": 12,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1120,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1120/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1120/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1120/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 6,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1121,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1121/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1121/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1121/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 7,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1122,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1122/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1122/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1122/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 8,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1123,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1123/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1123/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1123/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 9,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1124,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1124/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1124/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1124/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 10,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1125,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1125/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1125/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1125/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 11,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1126,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1126/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1126/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1126/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 12,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1127,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1127/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1127/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1127/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 6,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1128,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1128/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1128/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1128/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 7,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1129,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1129/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1129/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1129/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 8,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1130,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1130/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1130/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1130/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 9,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1131,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1131/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1131/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1131/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 10,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1132,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1132/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1132/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1132/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 11,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1133,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1133/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1133/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1133/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 12,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1134,
+      "split": "val",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1134/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1134/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1134/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 6,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1135,
+      "split": "val",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1135/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1135/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1135/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 7,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1136,
+      "split": "val",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1136/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1136/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1136/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 8,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1137,
+      "split": "test",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1137/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1137/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1137/labels.json",
+      "randomization": {
+        "material": "reflective_metal",
+        "camera_offset_m": 0.02,
+        "part_count": 9,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1138,
+      "split": "test",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1138/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1138/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1138/labels.json",
+      "randomization": {
+        "material": "reflective_metal",
+        "camera_offset_m": 0.02,
+        "part_count": 10,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1139,
+      "split": "test",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1139/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1139/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1139/labels.json",
+      "randomization": {
+        "material": "reflective_metal",
+        "camera_offset_m": 0.02,
+        "part_count": 11,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1140,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1140/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1140/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1140/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 12,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1141,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1141/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1141/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1141/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 6,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1142,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1142/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1142/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1142/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 7,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1143,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1143/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1143/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1143/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 8,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1144,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1144/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1144/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1144/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 9,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1145,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1145/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1145/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1145/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 10,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1146,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1146/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1146/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1146/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 11,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1147,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1147/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1147/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1147/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 12,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1148,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1148/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1148/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1148/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 6,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1149,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1149/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1149/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1149/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 7,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1150,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1150/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1150/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1150/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 8,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1151,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1151/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1151/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1151/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 9,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1152,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1152/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1152/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1152/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 10,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1153,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1153/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1153/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1153/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 11,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1154,
+      "split": "val",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1154/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1154/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1154/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 12,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1155,
+      "split": "val",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1155/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1155/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1155/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 6,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1156,
+      "split": "val",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1156/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1156/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1156/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 7,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1157,
+      "split": "test",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1157/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1157/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1157/labels.json",
+      "randomization": {
+        "material": "reflective_metal",
+        "camera_offset_m": 0.02,
+        "part_count": 8,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1158,
+      "split": "test",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1158/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1158/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1158/labels.json",
+      "randomization": {
+        "material": "reflective_metal",
+        "camera_offset_m": 0.02,
+        "part_count": 9,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1159,
+      "split": "test",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1159/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1159/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1159/labels.json",
+      "randomization": {
+        "material": "reflective_metal",
+        "camera_offset_m": 0.02,
+        "part_count": 10,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1160,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1160/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1160/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1160/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 11,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1161,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1161/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1161/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1161/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 12,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1162,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1162/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1162/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1162/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 6,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1163,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1163/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1163/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1163/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 7,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1164,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1164/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1164/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1164/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 8,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1165,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1165/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1165/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1165/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 9,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1166,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1166/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1166/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1166/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 10,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1167,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1167/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1167/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1167/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 11,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1168,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1168/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1168/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1168/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 12,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1169,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1169/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1169/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1169/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 6,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1170,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1170/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1170/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1170/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 7,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1171,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1171/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1171/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1171/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 8,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1172,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1172/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1172/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1172/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 9,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1173,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1173/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1173/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1173/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 10,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1174,
+      "split": "val",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1174/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1174/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1174/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 11,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1175,
+      "split": "val",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1175/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1175/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1175/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 12,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1176,
+      "split": "val",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1176/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1176/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1176/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 6,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1177,
+      "split": "test",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1177/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1177/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1177/labels.json",
+      "randomization": {
+        "material": "reflective_metal",
+        "camera_offset_m": 0.02,
+        "part_count": 7,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1178,
+      "split": "test",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1178/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1178/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1178/labels.json",
+      "randomization": {
+        "material": "reflective_metal",
+        "camera_offset_m": 0.02,
+        "part_count": 8,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1179,
+      "split": "test",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1179/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1179/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1179/labels.json",
+      "randomization": {
+        "material": "reflective_metal",
+        "camera_offset_m": 0.02,
+        "part_count": 9,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1180,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1180/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1180/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1180/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 10,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1181,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1181/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1181/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1181/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 11,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1182,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1182/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1182/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1182/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 12,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1183,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1183/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1183/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1183/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 6,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1184,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1184/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1184/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1184/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 7,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1185,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1185/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1185/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1185/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 8,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1186,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1186/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1186/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1186/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 9,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1187,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1187/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1187/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1187/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 10,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1188,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1188/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1188/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1188/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 11,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1189,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1189/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1189/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1189/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 12,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1190,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1190/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1190/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1190/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 6,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1191,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1191/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1191/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1191/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 7,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1192,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1192/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1192/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1192/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 8,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1193,
+      "split": "train",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1193/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1193/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1193/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 9,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1194,
+      "split": "val",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1194/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1194/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1194/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 10,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1195,
+      "split": "val",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1195/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1195/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1195/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 11,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1196,
+      "split": "val",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1196/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1196/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1196/labels.json",
+      "randomization": {
+        "material": "matte_metal",
+        "camera_offset_m": 0.0,
+        "part_count": 12,
+        "orientation": "tilted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1197,
+      "split": "test",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1197/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1197/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1197/labels.json",
+      "randomization": {
+        "material": "reflective_metal",
+        "camera_offset_m": 0.02,
+        "part_count": 6,
+        "orientation": "normal"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1198,
+      "split": "test",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1198/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1198/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1198/labels.json",
+      "randomization": {
+        "material": "reflective_metal",
+        "camera_offset_m": 0.02,
+        "part_count": 7,
+        "orientation": "inverted"
+      }
+    },
+    {
+      "scene_id": "IndustrialCylinderBenchmarkV1",
+      "seed": 1199,
+      "split": "test",
+      "generator": "fixture",
+      "rgb": "data/generated/m1b_alpha_v1/1199/rgb.png",
+      "depth": "data/generated/m1b_alpha_v1/1199/depth.npy",
+      "labels": "data/generated/m1b_alpha_v1/1199/labels.json",
+      "randomization": {
+        "material": "reflective_metal",
+        "camera_offset_m": 0.02,
+        "part_count": 8,
+        "orientation": "tilted"
+      }
+    }
+  ],
+  "split_by": "scene_seed",
+  "heldout_combination": "reflective_metal_plus_camera_offset"
+}

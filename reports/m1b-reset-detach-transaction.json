@@ -1,0 +1,247 @@
+{
+  "schema_version": "M1BResetDetachEvidenceV1",
+  "status": "RESET_PHYSICAL_CHECK_REQUIRED",
+  "reasons": [],
+  "auxiliary_grasp_state_status": "INVALID_RESET",
+  "auxiliary_grasp_state_reasons": [
+    "DETACH_STATE_UNOBSERVED:cylinder_01",
+    "DETACH_STATE_UNOBSERVED:cylinder_02",
+    "DETACH_STATE_UNOBSERVED:cylinder_03",
+    "DETACH_STATE_UNOBSERVED:cylinder_04",
+    "DETACH_STATE_UNOBSERVED:cylinder_05",
+    "DETACH_STATE_UNOBSERVED:cylinder_06",
+    "DETACH_STATE_UNOBSERVED:cylinder_07",
+    "DETACH_STATE_UNOBSERVED:cylinder_08",
+    "DETACH_STATE_UNOBSERVED:cylinder_09",
+    "DETACH_STATE_UNOBSERVED:cylinder_10",
+    "DETACH_STATE_UNOBSERVED:cylinder_11",
+    "DETACH_STATE_UNOBSERVED:cylinder_12"
+  ],
+  "spawn_manifest": "data/generated/m1b_beta_contact_probe/panda/panda.manifest.json",
+  "objects": [
+    "cylinder_01",
+    "cylinder_02",
+    "cylinder_03",
+    "cylinder_04",
+    "cylinder_05",
+    "cylinder_06",
+    "cylinder_07",
+    "cylinder_08",
+    "cylinder_09",
+    "cylinder_10",
+    "cylinder_11",
+    "cylinder_12"
+  ],
+  "detach_processing_pulse": {
+    "controllers_active": false,
+    "unpause_returncode": 0,
+    "pause_returncode": 0,
+    "duration_s": 0.4
+  },
+  "records": [
+    {
+      "object_name": "cylinder_01",
+      "detach_topic": "/xh/m1b/cylinder_01/detach",
+      "grasp_state_topic": "/xh/m1b/cylinder_01/grasp_state",
+      "detached_observed": false,
+      "state_lines": [
+        "auxiliary_grasp_state_not_waited_per_amendment_1"
+      ]
+    },
+    {
+      "object_name": "cylinder_02",
+      "detach_topic": "/xh/m1b/cylinder_02/detach",
+      "grasp_state_topic": "/xh/m1b/cylinder_02/grasp_state",
+      "detached_observed": false,
+      "state_lines": [
+        "auxiliary_grasp_state_not_waited_per_amendment_1"
+      ]
+    },
+    {
+      "object_name": "cylinder_03",
+      "detach_topic": "/xh/m1b/cylinder_03/detach",
+      "grasp_state_topic": "/xh/m1b/cylinder_03/grasp_state",
+      "detached_observed": false,
+      "state_lines": [
+        "auxiliary_grasp_state_not_waited_per_amendment_1"
+      ]
+    },
+    {
+      "object_name": "cylinder_04",
+      "detach_topic": "/xh/m1b/cylinder_04/detach",
+      "grasp_state_topic": "/xh/m1b/cylinder_04/grasp_state",
+      "detached_observed": false,
+      "state_lines": [
+        "auxiliary_grasp_state_not_waited_per_amendment_1"
+      ]
+    },
+    {
+      "object_name": "cylinder_05",
+      "detach_topic": "/xh/m1b/cylinder_05/detach",
+      "grasp_state_topic": "/xh/m1b/cylinder_05/grasp_state",
+      "detached_observed": false,
+      "state_lines": [
+        "auxiliary_grasp_state_not_waited_per_amendment_1"
+      ]
+    },
+    {
+      "object_name": "cylinder_06",
+      "detach_topic": "/xh/m1b/cylinder_06/detach",
+      "grasp_state_topic": "/xh/m1b/cylinder_06/grasp_state",
+      "detached_observed": false,
+      "state_lines": [
+        "auxiliary_grasp_state_not_waited_per_amendment_1"
+      ]
+    },
+    {
+      "object_name": "cylinder_07",
+      "detach_topic": "/xh/m1b/cylinder_07/detach",
+      "grasp_state_topic": "/xh/m1b/cylinder_07/grasp_state",
+      "detached_observed": false,
+      "state_lines": [
+        "auxiliary_grasp_state_not_waited_per_amendment_1"
+      ]
+    },
+    {
+      "object_name": "cylinder_08",
+      "detach_topic": "/xh/m1b/cylinder_08/detach",
+      "grasp_state_topic": "/xh/m1b/cylinder_08/grasp_state",
+      "detached_observed": false,
+      "state_lines": [
+        "auxiliary_grasp_state_not_waited_per_amendment_1"
+      ]
+    },
+    {
+      "object_name": "cylinder_09",
+      "detach_topic": "/xh/m1b/cylinder_09/detach",
+      "grasp_state_topic": "/xh/m1b/cylinder_09/grasp_state",
+      "detached_observed": false,
+      "state_lines": [
+        "auxiliary_grasp_state_not_waited_per_amendment_1"
+      ]
+    },
+    {
+      "object_name": "cylinder_10",
+      "detach_topic": "/xh/m1b/cylinder_10/detach",
+      "grasp_state_topic": "/xh/m1b/cylinder_10/grasp_state",
+      "detached_observed": false,
+      "state_lines": [
+        "auxiliary_grasp_state_not_waited_per_amendment_1"
+      ]
+    },
+    {
+      "object_name": "cylinder_11",
+      "detach_topic": "/xh/m1b/cylinder_11/detach",
+      "grasp_state_topic": "/xh/m1b/cylinder_11/grasp_state",
+      "detached_observed": false,
+      "state_lines": [
+        "auxiliary_grasp_state_not_waited_per_amendment_1"
+      ]
+    },
+    {
+      "object_name": "cylinder_12",
+      "detach_topic": "/xh/m1b/cylinder_12/detach",
+      "grasp_state_topic": "/xh/m1b/cylinder_12/grasp_state",
+      "detached_observed": false,
+      "state_lines": [
+        "auxiliary_grasp_state_not_waited_per_amendment_1"
+      ]
+    }
+  ],
+  "world_resume": {
+    "attempted": true,
+    "returncode": 0,
+    "stdout": "data: true",
+    "stderr": "",
+    "resumed": true
+  },
+  "post_resume_detach_round": {
+    "cylinder_01": {
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "",
+      "published": true
+    },
+    "cylinder_02": {
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "",
+      "published": true
+    },
+    "cylinder_03": {
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "",
+      "published": true
+    },
+    "cylinder_04": {
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "",
+      "published": true
+    },
+    "cylinder_05": {
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "",
+      "published": true
+    },
+    "cylinder_06": {
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "",
+      "published": true
+    },
+    "cylinder_07": {
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "",
+      "published": true
+    },
+    "cylinder_08": {
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "",
+      "published": true
+    },
+    "cylinder_09": {
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "",
+      "published": true
+    },
+    "cylinder_10": {
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "",
+      "published": true
+    },
+    "cylinder_11": {
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "",
+      "published": true
+    },
+    "cylinder_12": {
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "",
+      "published": true
+    }
+  },
+  "controller_activation": {
+    "attempted": true,
+    "attempts": [
+      {
+        "attempt": 1,
+        "returncode": 0,
+        "stdout": "Successfully switched controllers!",
+        "stderr": "[INFO] [1784398650.485622769] [_ros2cli_1839346]: waiting for service /controller_manager/list_controllers to become available...\n[INFO] [1784398656.474729325] [_ros2cli_1839489]: waiting for service /controller_manager/switch_controller to become available..."
+      }
+    ],
+    "returncode": 0,
+    "stdout": "Successfully switched controllers!",
+    "stderr": "[INFO] [1784398650.485622769] [_ros2cli_1839346]: waiting for service /controller_manager/list_controllers to become available...\n[INFO] [1784398656.474729325] [_ros2cli_1839489]: waiting for service /controller_manager/switch_controller to become available...",
+    "activated": true
+  }
+}

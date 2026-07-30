@@ -1,0 +1,15 @@
+{
+  "schema_version": "M1BTerminalClearanceFullFixtureHeightScanV1",
+  "status": "NO_GO_NO_CONTACT_POSE_IK_AT_ANY_MEASURED_FIXTURE_LIFT",
+  "provenance": "CALIBRATION_ONLY_INITIALIZATION",
+  "source": "/tmp/m1b-adr0015-fullfixture-height-scan-20260719/raw/trial-000.json",
+  "source_sha256": "06e3a5ef0b13bb68be312a073aebcb41f4aa76b29b6077715084edb2057d6234",
+  "executed_physical_motion": false,
+  "reset_physical_noncoupling_verified": true,
+  "fixture_translation": "all supervised cylinder collision objects translated together per candidate",
+  "candidate_lifts_m": [0.0, 0.01, 0.02, 0.03, 0.04, 0.06, 0.08, 0.1],
+  "contact_ik_solved_lifts_m": [],
+  "contact_planned_lifts_m": [],
+  "precontact_ik_failed_lifts_m": [0.08],
+  "decision": "Static scene elevation cannot recover the terminal path under the current primitive. Do not run physical follow-up or the 81-trial campaign."
+}

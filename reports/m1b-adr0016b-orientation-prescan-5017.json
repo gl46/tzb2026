@@ -1,0 +1,1236 @@
+{
+  "schema_version": "M1BOrientationFeasibilityV1",
+  "status": "ORIENTATION_FEASIBILITY_REJECTED",
+  "scene_supervision": "/tmp/m1b-normal-height-scan/scenes/scene-5017.supervision.json",
+  "scene_admission": "FAIL_CLOSED",
+  "primitive": "ADR-0016_VERTICAL_TOOL_TOP_GRASP",
+  "executed_physical_motion": false,
+  "records": [
+    {
+      "id": "cylinder_01",
+      "center_world_m": [
+        -0.11,
+        -0.13,
+        0.4901
+      ],
+      "empty_scene_kinematic": {
+        "pregrasp": {
+          "pose_world_xyzw": [
+            -0.11,
+            -0.131,
+            0.7601,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": null
+        },
+        "final_contact": {
+          "pose_world_xyzw": [
+            -0.11,
+            -0.131,
+            0.6101,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": null
+        }
+      },
+      "populated_scene_corridor": {
+        "pregrasp": {
+          "pose_world_xyzw": [
+            -0.11,
+            -0.131,
+            0.7601,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": true
+        },
+        "final_contact": {
+          "pose_world_xyzw": [
+            -0.11,
+            -0.131,
+            0.6101,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": true
+        }
+      },
+      "target_touch_exception_scoped": true,
+      "target_touch_exception_restored": true,
+      "passed": true
+    },
+    {
+      "id": "cylinder_02",
+      "center_world_m": [
+        -0.53,
+        0.34,
+        0.4901
+      ],
+      "empty_scene_kinematic": {
+        "pregrasp": {
+          "pose_world_xyzw": [
+            -0.53,
+            0.339,
+            0.7601,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": null
+        },
+        "final_contact": {
+          "pose_world_xyzw": [
+            -0.53,
+            0.339,
+            0.6101,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": null
+        }
+      },
+      "populated_scene_corridor": {
+        "pregrasp": {
+          "pose_world_xyzw": [
+            -0.53,
+            0.339,
+            0.7601,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": true
+        },
+        "final_contact": {
+          "pose_world_xyzw": [
+            -0.53,
+            0.339,
+            0.6101,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": true
+        }
+      },
+      "target_touch_exception_scoped": true,
+      "target_touch_exception_restored": true,
+      "passed": true
+    },
+    {
+      "id": "cylinder_03",
+      "center_world_m": [
+        -0.25,
+        -0.2,
+        0.4901
+      ],
+      "empty_scene_kinematic": {
+        "pregrasp": {
+          "pose_world_xyzw": [
+            -0.25,
+            -0.201,
+            0.7601,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": false,
+          "ik_error": {
+            "code": -31,
+            "message": ""
+          },
+          "corridor_planned_from_home": null
+        },
+        "final_contact": {
+          "pose_world_xyzw": [
+            -0.25,
+            -0.201,
+            0.6101,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": null
+        }
+      },
+      "populated_scene_corridor": {
+        "pregrasp": {
+          "pose_world_xyzw": [
+            -0.25,
+            -0.201,
+            0.7601,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": false,
+          "ik_error": {
+            "code": -31,
+            "message": ""
+          },
+          "corridor_planned_from_home": false
+        },
+        "final_contact": {
+          "pose_world_xyzw": [
+            -0.25,
+            -0.201,
+            0.6101,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": true
+        }
+      },
+      "target_touch_exception_scoped": true,
+      "target_touch_exception_restored": true,
+      "passed": false
+    },
+    {
+      "id": "cylinder_04",
+      "center_world_m": [
+        -0.53,
+        0.27,
+        0.4901
+      ],
+      "empty_scene_kinematic": {
+        "pregrasp": {
+          "pose_world_xyzw": [
+            -0.53,
+            0.269,
+            0.7601,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": null
+        },
+        "final_contact": {
+          "pose_world_xyzw": [
+            -0.53,
+            0.269,
+            0.6101,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": null
+        }
+      },
+      "populated_scene_corridor": {
+        "pregrasp": {
+          "pose_world_xyzw": [
+            -0.53,
+            0.269,
+            0.7601,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": true
+        },
+        "final_contact": {
+          "pose_world_xyzw": [
+            -0.53,
+            0.269,
+            0.6101,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": true
+        }
+      },
+      "target_touch_exception_scoped": true,
+      "target_touch_exception_restored": true,
+      "passed": true
+    },
+    {
+      "id": "cylinder_05",
+      "center_world_m": [
+        -0.46,
+        -0.34,
+        0.4901
+      ],
+      "empty_scene_kinematic": {
+        "pregrasp": {
+          "pose_world_xyzw": [
+            -0.46,
+            -0.341,
+            0.7601,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": null
+        },
+        "final_contact": {
+          "pose_world_xyzw": [
+            -0.46,
+            -0.341,
+            0.6101,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": null
+        }
+      },
+      "populated_scene_corridor": {
+        "pregrasp": {
+          "pose_world_xyzw": [
+            -0.46,
+            -0.341,
+            0.7601,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": true
+        },
+        "final_contact": {
+          "pose_world_xyzw": [
+            -0.46,
+            -0.341,
+            0.6101,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": true
+        }
+      },
+      "target_touch_exception_scoped": true,
+      "target_touch_exception_restored": true,
+      "passed": true
+    },
+    {
+      "id": "cylinder_06",
+      "center_world_m": [
+        -0.25,
+        0.2,
+        0.4901
+      ],
+      "empty_scene_kinematic": {
+        "pregrasp": {
+          "pose_world_xyzw": [
+            -0.25,
+            0.199,
+            0.7601,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": false,
+          "ik_error": {
+            "code": -31,
+            "message": ""
+          },
+          "corridor_planned_from_home": null
+        },
+        "final_contact": {
+          "pose_world_xyzw": [
+            -0.25,
+            0.199,
+            0.6101,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": null
+        }
+      },
+      "populated_scene_corridor": {
+        "pregrasp": {
+          "pose_world_xyzw": [
+            -0.25,
+            0.199,
+            0.7601,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": false,
+          "ik_error": {
+            "code": -31,
+            "message": ""
+          },
+          "corridor_planned_from_home": false
+        },
+        "final_contact": {
+          "pose_world_xyzw": [
+            -0.25,
+            0.199,
+            0.6101,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": true
+        }
+      },
+      "target_touch_exception_scoped": true,
+      "target_touch_exception_restored": true,
+      "passed": false
+    },
+    {
+      "id": "cylinder_07",
+      "center_world_m": [
+        -0.53,
+        -0.13,
+        0.4901
+      ],
+      "empty_scene_kinematic": {
+        "pregrasp": {
+          "pose_world_xyzw": [
+            -0.53,
+            -0.131,
+            0.7601,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": false,
+          "ik_error": {
+            "code": -31,
+            "message": ""
+          },
+          "corridor_planned_from_home": null
+        },
+        "final_contact": {
+          "pose_world_xyzw": [
+            -0.53,
+            -0.131,
+            0.6101,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": null
+        }
+      },
+      "populated_scene_corridor": {
+        "pregrasp": {
+          "pose_world_xyzw": [
+            -0.53,
+            -0.131,
+            0.7601,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": false,
+          "ik_error": {
+            "code": -31,
+            "message": ""
+          },
+          "corridor_planned_from_home": false
+        },
+        "final_contact": {
+          "pose_world_xyzw": [
+            -0.53,
+            -0.131,
+            0.6101,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": true
+        }
+      },
+      "target_touch_exception_scoped": true,
+      "target_touch_exception_restored": true,
+      "passed": false
+    },
+    {
+      "id": "cylinder_08",
+      "center_world_m": [
+        -0.46,
+        0.34,
+        0.4901
+      ],
+      "empty_scene_kinematic": {
+        "pregrasp": {
+          "pose_world_xyzw": [
+            -0.46,
+            0.339,
+            0.7601,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": null
+        },
+        "final_contact": {
+          "pose_world_xyzw": [
+            -0.46,
+            0.339,
+            0.6101,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": null
+        }
+      },
+      "populated_scene_corridor": {
+        "pregrasp": {
+          "pose_world_xyzw": [
+            -0.46,
+            0.339,
+            0.7601,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": true
+        },
+        "final_contact": {
+          "pose_world_xyzw": [
+            -0.46,
+            0.339,
+            0.6101,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": true
+        }
+      },
+      "target_touch_exception_scoped": true,
+      "target_touch_exception_restored": true,
+      "passed": true
+    },
+    {
+      "id": "cylinder_09",
+      "center_world_m": [
+        -0.11,
+        -0.2,
+        0.4901
+      ],
+      "empty_scene_kinematic": {
+        "pregrasp": {
+          "pose_world_xyzw": [
+            -0.11,
+            -0.201,
+            0.7601,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": null
+        },
+        "final_contact": {
+          "pose_world_xyzw": [
+            -0.11,
+            -0.201,
+            0.6101,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": null
+        }
+      },
+      "populated_scene_corridor": {
+        "pregrasp": {
+          "pose_world_xyzw": [
+            -0.11,
+            -0.201,
+            0.7601,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": true
+        },
+        "final_contact": {
+          "pose_world_xyzw": [
+            -0.11,
+            -0.201,
+            0.6101,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": true
+        }
+      },
+      "target_touch_exception_scoped": true,
+      "target_touch_exception_restored": true,
+      "passed": true
+    },
+    {
+      "id": "cylinder_10",
+      "center_world_m": [
+        -0.46,
+        0.2,
+        0.4901
+      ],
+      "empty_scene_kinematic": {
+        "pregrasp": {
+          "pose_world_xyzw": [
+            -0.46,
+            0.199,
+            0.7601,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": null
+        },
+        "final_contact": {
+          "pose_world_xyzw": [
+            -0.46,
+            0.199,
+            0.6101,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": null
+        }
+      },
+      "populated_scene_corridor": {
+        "pregrasp": {
+          "pose_world_xyzw": [
+            -0.46,
+            0.199,
+            0.7601,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": true
+        },
+        "final_contact": {
+          "pose_world_xyzw": [
+            -0.46,
+            0.199,
+            0.6101,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": true
+        }
+      },
+      "target_touch_exception_scoped": true,
+      "target_touch_exception_restored": true,
+      "passed": true
+    },
+    {
+      "id": "cylinder_11",
+      "center_world_m": [
+        -0.46,
+        -0.2,
+        0.4901
+      ],
+      "empty_scene_kinematic": {
+        "pregrasp": {
+          "pose_world_xyzw": [
+            -0.46,
+            -0.201,
+            0.7601,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": null
+        },
+        "final_contact": {
+          "pose_world_xyzw": [
+            -0.46,
+            -0.201,
+            0.6101,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": null
+        }
+      },
+      "populated_scene_corridor": {
+        "pregrasp": {
+          "pose_world_xyzw": [
+            -0.46,
+            -0.201,
+            0.7601,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": true
+        },
+        "final_contact": {
+          "pose_world_xyzw": [
+            -0.46,
+            -0.201,
+            0.6101,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": true
+        }
+      },
+      "target_touch_exception_scoped": true,
+      "target_touch_exception_restored": true,
+      "passed": true
+    },
+    {
+      "id": "bin_cell_01",
+      "center_world_m": [
+        0.275,
+        0.009999999999999976,
+        0.56
+      ],
+      "empty_scene_kinematic": {
+        "pregrasp": {
+          "pose_world_xyzw": [
+            0.275,
+            0.008999999999999977,
+            0.8300000000000001,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": null
+        },
+        "final_contact": {
+          "pose_world_xyzw": [
+            0.275,
+            0.008999999999999977,
+            0.68,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": null
+        }
+      },
+      "populated_scene_corridor": {
+        "pregrasp": {
+          "pose_world_xyzw": [
+            0.275,
+            0.008999999999999977,
+            0.8300000000000001,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": true
+        },
+        "final_contact": {
+          "pose_world_xyzw": [
+            0.275,
+            0.008999999999999977,
+            0.68,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": true
+        }
+      },
+      "target_touch_exception_scoped": false,
+      "target_touch_exception_restored": true,
+      "passed": true
+    },
+    {
+      "id": "bin_cell_02",
+      "center_world_m": [
+        0.125,
+        0.009999999999999986,
+        0.56
+      ],
+      "empty_scene_kinematic": {
+        "pregrasp": {
+          "pose_world_xyzw": [
+            0.125,
+            0.008999999999999987,
+            0.8300000000000001,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": null
+        },
+        "final_contact": {
+          "pose_world_xyzw": [
+            0.125,
+            0.008999999999999987,
+            0.68,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": null
+        }
+      },
+      "populated_scene_corridor": {
+        "pregrasp": {
+          "pose_world_xyzw": [
+            0.125,
+            0.008999999999999987,
+            0.8300000000000001,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": true
+        },
+        "final_contact": {
+          "pose_world_xyzw": [
+            0.125,
+            0.008999999999999987,
+            0.68,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": true
+        }
+      },
+      "target_touch_exception_scoped": false,
+      "target_touch_exception_restored": true,
+      "passed": true
+    },
+    {
+      "id": "bin_cell_03",
+      "center_world_m": [
+        0.275,
+        0.15,
+        0.56
+      ],
+      "empty_scene_kinematic": {
+        "pregrasp": {
+          "pose_world_xyzw": [
+            0.275,
+            0.149,
+            0.8300000000000001,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": null
+        },
+        "final_contact": {
+          "pose_world_xyzw": [
+            0.275,
+            0.149,
+            0.68,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": null
+        }
+      },
+      "populated_scene_corridor": {
+        "pregrasp": {
+          "pose_world_xyzw": [
+            0.275,
+            0.149,
+            0.8300000000000001,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": true
+        },
+        "final_contact": {
+          "pose_world_xyzw": [
+            0.275,
+            0.149,
+            0.68,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": true
+        }
+      },
+      "target_touch_exception_scoped": false,
+      "target_touch_exception_restored": true,
+      "passed": true
+    },
+    {
+      "id": "bin_cell_04",
+      "center_world_m": [
+        0.125,
+        0.15,
+        0.56
+      ],
+      "empty_scene_kinematic": {
+        "pregrasp": {
+          "pose_world_xyzw": [
+            0.125,
+            0.149,
+            0.8300000000000001,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": null
+        },
+        "final_contact": {
+          "pose_world_xyzw": [
+            0.125,
+            0.149,
+            0.68,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": null
+        }
+      },
+      "populated_scene_corridor": {
+        "pregrasp": {
+          "pose_world_xyzw": [
+            0.125,
+            0.149,
+            0.8300000000000001,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": true
+        },
+        "final_contact": {
+          "pose_world_xyzw": [
+            0.125,
+            0.149,
+            0.68,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": true
+        }
+      },
+      "target_touch_exception_scoped": false,
+      "target_touch_exception_restored": true,
+      "passed": true
+    },
+    {
+      "id": "bin_cell_05",
+      "center_world_m": [
+        0.275,
+        0.29000000000000004,
+        0.56
+      ],
+      "empty_scene_kinematic": {
+        "pregrasp": {
+          "pose_world_xyzw": [
+            0.275,
+            0.28900000000000003,
+            0.8300000000000001,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": null
+        },
+        "final_contact": {
+          "pose_world_xyzw": [
+            0.275,
+            0.28900000000000003,
+            0.68,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": null
+        }
+      },
+      "populated_scene_corridor": {
+        "pregrasp": {
+          "pose_world_xyzw": [
+            0.275,
+            0.28900000000000003,
+            0.8300000000000001,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": true
+        },
+        "final_contact": {
+          "pose_world_xyzw": [
+            0.275,
+            0.28900000000000003,
+            0.68,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": true
+        }
+      },
+      "target_touch_exception_scoped": false,
+      "target_touch_exception_restored": true,
+      "passed": true
+    },
+    {
+      "id": "bin_cell_06",
+      "center_world_m": [
+        0.125,
+        0.29000000000000004,
+        0.56
+      ],
+      "empty_scene_kinematic": {
+        "pregrasp": {
+          "pose_world_xyzw": [
+            0.125,
+            0.28900000000000003,
+            0.8300000000000001,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": null
+        },
+        "final_contact": {
+          "pose_world_xyzw": [
+            0.125,
+            0.28900000000000003,
+            0.68,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": null
+        }
+      },
+      "populated_scene_corridor": {
+        "pregrasp": {
+          "pose_world_xyzw": [
+            0.125,
+            0.28900000000000003,
+            0.8300000000000001,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": true
+        },
+        "final_contact": {
+          "pose_world_xyzw": [
+            0.125,
+            0.28900000000000003,
+            0.68,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "ik_solved": true,
+          "ik_error": null,
+          "corridor_planned_from_home": true
+        }
+      },
+      "target_touch_exception_scoped": false,
+      "target_touch_exception_restored": true,
+      "passed": true
+    }
+  ],
+  "reason": "all spawn points and bin cells require empty-scene IK plus populated-scene collision-aware corridors"
+}

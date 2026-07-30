@@ -1,0 +1,291 @@
+#!/usr/bin/env python3
+"""Verify an already broker-attached M1B cylinder follows, detaches, and decouples.
+
+This is an acceptance/evaluation utility, not a control-stack component.  It
+reads Gazebo poses only after the broker has selected and attached the entity,
+and records them as simulator-supervision evidence.  No queried pose is fed
+back into grasp selection, planning, or attachment.
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import math
+import os
+import re
+import subprocess
+import sys
+from pathlib import Path
+
+import rclpy
+from geometry_msgs.msg import Pose
+from moveit_msgs.msg import AttachedCollisionObject, CollisionObject, PlanningScene
+from shape_msgs.msg import SolidPrimitive
+
+ROOT = Path(__file__).resolve().parents[1]
+for directory in (ROOT / "src", ROOT / "scripts"):
+    if str(directory) not in sys.path:
+        sys.path.insert(0, str(directory))
+
+from m1a_contact_calibration_client import CalibrationClient  # noqa: E402
+from m1a_contact_calibration_client import quaternion_rotate  # noqa: E402
+from m1b_reset_detach import detach_and_observe  # noqa: E402
+from m1a_moveit_execution_client import JOINTS, set_allowed_pair  # noqa: E402
+
+
+POSE_RE = re.compile(
+    r"Pose \[ XYZ \(m\) \] \[ RPY \(rad\) \]:\s*"
+    r"\[\s*([-+0-9.eE]+)\s+([-+0-9.eE]+)\s+([-+0-9.eE]+)\s*\]"
+    r"\s*\[\s*([-+0-9.eE]+)\s+([-+0-9.eE]+)\s+([-+0-9.eE]+)\s*\]"
+)
+
+# ADR-0014 current industrial-cylinder class.  This collision proxy mirrors
+# the broker-attached physical object only for MoveIt transport planning; it
+# must stay aligned with the geometry used by the p90 and tolerance gates.
+M1B_CYLINDER_LENGTH_M = 0.080
+M1B_CYLINDER_RADIUS_M = 0.015
+
+
+def gazebo_pose(model: str, *, link: str | None = None) -> list[float] | None:
+    # The Gazebo transport `gz model` CLI intermittently returns no pose under
+    # a shared physics/render workload (observed timing out at ~2 s).  A None
+    # here would corrupt every downstream follow/decouple metric, so retry a
+    # few times before treating the pose as genuinely unavailable.
+    for _ in range(5):
+        command = ["timeout", "2", "gz", "model", "-m", model]
+        command.extend(["-l", link] if link else ["-p"])
+        try:
+            result = subprocess.run(command, capture_output=True, text=True, check=False, timeout=4.0)
+        except subprocess.TimeoutExpired:
+            continue
+        matches = POSE_RE.findall(result.stdout)
+        # A link query prints the model-root pose first and the requested link
+        # pose later.  The final pose is therefore the requested link, while a
+        # model query contains only its model pose.
+        if matches:
+            return [float(value) for value in matches[-1]]
+    return None
+
+
+def distance(first: list[float] | None, second: list[float] | None) -> float | None:
+    if first is None or second is None:
+        return None
+    return math.dist(first, second)
+
+
+def rpy_quaternion(roll: float, pitch: float, yaw: float) -> list[float]:
+    cr, sr = math.cos(roll / 2), math.sin(roll / 2)
+    cp, sp = math.cos(pitch / 2), math.sin(pitch / 2)
+    cy, sy = math.cos(yaw / 2), math.sin(yaw / 2)
+    return [sr * cp * cy - cr * sp * sy, cr * sp * cy + sr * cp * sy, cr * cp * sy - sr * sp * cy, cr * cp * cy + sr * sp * sy]
+
+
+def xyz(pose: list[float] | None) -> list[float] | None:
+    return pose[:3] if pose is not None else None
+
+
+def relative(cylinder: list[float] | None, link: list[float] | None) -> list[float] | None:
+    if cylinder is None or link is None:
+        return None
+    quat = rpy_quaternion(*link[3:])
+    return quaternion_rotate([-quat[0], -quat[1], -quat[2], quat[3]], tuple(a - b for a, b in zip(cylinder[:3], link[:3])))
+
+
+def attach_cylinder_to_moveit(
+    client: CalibrationClient, carrier_collision_id: str, cylinder_world: list[float] | None,
+) -> dict[str, object]:
+    """Mirror the already-observed Gazebo attach in MoveIt for transport planning.
+
+    The physical grasp has already happened when this evaluator-side mirror is
+    created.  Preserve a small, explicit preflight record so a false return
+    cannot silently look like a transport failure (or prompt an unnecessary
+    re-grasp).
+    """
+    positions = [client.latest.get(name, math.nan) for name in JOINTS]
+    missing_or_nonfinite_joints = [name for name, value in zip(JOINTS, positions) if not math.isfinite(value)]
+    link = client.fk_link("panda_link7", positions) if not missing_or_nonfinite_joints else None
+    preflight: dict[str, object] = {
+        "joint_state_available": not missing_or_nonfinite_joints,
+        "joint_state_missing_or_nonfinite": missing_or_nonfinite_joints,
+        "fk_link": "panda_link7",
+        "fk_link_available": link is not None,
+        "cylinder_world_available": cylinder_world is not None,
+        "world_object_removed": False,
+        "attached_object_applied": False,
+    }
+    if link is None or cylinder_world is None:
+        preflight["status"] = "FK_OR_CYLINDER_POSE_UNAVAILABLE"
+        return preflight
+    remove_scene = PlanningScene(is_diff=True)
+    # The production planning scene contains only public-track collision IDs.
+    # The broker's actual Gazebo entity is deliberately unavailable to the
+    # production planner, so it must never be used as a planning-scene key.
+    remove = CollisionObject(id=carrier_collision_id)
+    remove.header.frame_id = "world"
+    remove.operation = CollisionObject.REMOVE
+    remove_scene.world.collision_objects = [remove]
+    if not client.apply_scene_diff(remove_scene):
+        preflight["status"] = "WORLD_OBJECT_REMOVE_REJECTED"
+        return preflight
+    preflight["world_object_removed"] = True
+    relative_xyz = quaternion_rotate(
+        [-link[3], -link[4], -link[5], link[6]],
+        tuple(value - origin for value, origin in zip(cylinder_world, link[:3])),
+    )
+    scene = PlanningScene(is_diff=True)
+    attached = AttachedCollisionObject()
+    attached.link_name = "panda_link7"
+    attached.touch_links = ["panda_link7", "panda_link8", "panda_hand", "panda_leftfinger", "panda_rightfinger"]
+    attached.object.id = carrier_collision_id
+    attached.object.header.frame_id = "panda_link7"
+    attached.object.primitives = [SolidPrimitive(type=SolidPrimitive.CYLINDER, dimensions=[M1B_CYLINDER_LENGTH_M, M1B_CYLINDER_RADIUS_M])]
+    pose = Pose()
+    pose.position.x, pose.position.y, pose.position.z = relative_xyz
+    pose.orientation.w = 1.0
+    attached.object.primitive_poses = [pose]
+    attached.object.operation = CollisionObject.ADD
+    scene.robot_state.is_diff = True
+    scene.robot_state.attached_collision_objects = [attached]
+    attached_object_applied = client.apply_scene_diff(scene)
+    preflight["attached_object_applied"] = attached_object_applied
+    preflight["status"] = "APPLIED" if attached_object_applied else "ATTACHED_OBJECT_REJECTED"
+    return preflight
+
+
+def remove_attached_cylinder_from_moveit(client: CalibrationClient, carrier_collision_id: str) -> bool:
+    scene = PlanningScene(is_diff=True)
+    attached = AttachedCollisionObject()
+    attached.object.id = carrier_collision_id
+    attached.object.operation = CollisionObject.REMOVE
+    scene.robot_state.is_diff = True
+    scene.robot_state.attached_collision_objects = [attached]
+    return client.apply_scene_diff(scene)
+
+
+def configure_transport_collision_exceptions(client: CalibrationClient, carrier_collision_id: str) -> bool:
+    """Permit only the physical grasp/initial-static contacts needed to transport."""
+    matrix = client.current_acm()
+    if matrix is None:
+        return False
+    for link in ("panda_link7", "panda_link8", "panda_hand", "panda_leftfinger", "panda_rightfinger", "work_table"):
+        set_allowed_pair(matrix, carrier_collision_id, link, True)
+    # Closed parallel fingers meet in this simplified Panda model.  It is a
+    # self-contact inherent in the physical grasp state, not a free-space
+    # collision exemption.
+    set_allowed_pair(matrix, "panda_leftfinger", "panda_rightfinger", True)
+    # Production scenes use public-track IDs only.  Do not recreate the old
+    # calibration-only cylinder/base exemptions under guessed public IDs: any
+    # real public proxy/base overlap must remain a fail-closed planning error.
+    return client.apply_scene_diff(PlanningScene(is_diff=True, allowed_collision_matrix=matrix))
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--entity", required=True, help="Actuation-internal entity selected by the broker")
+    parser.add_argument(
+        "--public-collision-id", required=True,
+        help="Public RGB-D planning-scene collision ID selected before the grasp",
+    )
+    parser.add_argument("--output", required=True, type=Path)
+    args = parser.parse_args()
+    if not re.fullmatch(r"cylinder_[0-9]{2}", args.entity):
+        raise SystemExit("entity must be a generated cylinder id")
+    if not re.fullmatch(r"m1b_public_track-[a-f0-9]{8}", args.public_collision_id):
+        raise SystemExit("public-collision-id must be a public RGB-D track collision id")
+
+    rclpy.init()
+    client = CalibrationClient()
+    try:
+        ready = client.wait_calibration_ready()
+        for _ in range(20):
+            rclpy.spin_once(client, timeout_sec=0.05)
+        current = [client.latest.get(name, math.nan) for name in JOINTS]
+        before_link = gazebo_pose("panda_controller", link="panda_link7")
+        before_cylinder = gazebo_pose(args.entity)
+        moveit_carried_object_preflight = (
+            attach_cylinder_to_moveit(client, args.public_collision_id, xyz(before_cylinder))
+            if ready
+            else {"status": "CALIBRATION_CLIENT_NOT_READY", "attached_object_applied": False}
+        )
+        moveit_carried_object_applied = bool(moveit_carried_object_preflight["attached_object_applied"])
+        transport_collision_exceptions_applied = (
+            configure_transport_collision_exceptions(client, args.public_collision_id)
+            if moveit_carried_object_applied else False
+        )
+        move_target = list(current)
+        # A small base-axis transport displacement gives the constraint a
+        # measurable follow test while remaining far inside Panda limits.
+        move_target[0] += 0.10
+        attached_move = client.move_joint_target(move_target) if transport_collision_exceptions_applied else {"executed": False}
+        after_link = gazebo_pose("panda_controller", link="panda_link7")
+        after_cylinder = gazebo_pose(args.entity)
+        link_motion = distance(xyz(before_link), xyz(after_link))
+        cylinder_motion = distance(xyz(before_cylinder), xyz(after_cylinder))
+        relative_drift = distance(relative(before_cylinder, before_link), relative(after_cylinder, after_link))
+        attached_follow = bool(
+            attached_move.get("executed")
+            and link_motion is not None and link_motion >= 0.01
+            and cylinder_motion is not None and cylinder_motion >= 0.01
+            and relative_drift is not None and relative_drift <= 0.01
+        )
+        detach = detach_and_observe(args.entity, 2.0) if attached_follow else None
+        detach_verified = bool(detach and detach.detached_observed)
+        moveit_carried_object_removed = (
+            remove_attached_cylinder_from_moveit(client, args.public_collision_id)
+            if detach_verified else False
+        )
+        # Release the jaws before the decouple move.  After detach the fingers
+        # are still physically clamped on the freed cylinder, which remains a
+        # planning-scene collision object; a collision-checked arm plan cannot
+        # then move without opening.  Opening is the physically honest release
+        # step, and it must precede the decouple test rather than assume the
+        # arm can retreat through the grasped body.
+        hand_released = client.command_hand([0.04, 0.04]).get("succeeded", False) if moveit_carried_object_removed else False
+        before_decouple_link = gazebo_pose("panda_controller", link="panda_link7")
+        before_decouple_cylinder = gazebo_pose(args.entity)
+        decouple_target = list(move_target)
+        decouple_target[0] -= 0.12
+        detached_move = client.move_joint_target(decouple_target) if detach_verified and moveit_carried_object_removed and hand_released else {"executed": False}
+        after_decouple_link = gazebo_pose("panda_controller", link="panda_link7")
+        after_decouple_cylinder = gazebo_pose(args.entity)
+        decouple_link_motion = distance(xyz(before_decouple_link), xyz(after_decouple_link))
+        decouple_relative_change = distance(
+            relative(before_decouple_cylinder, before_decouple_link),
+            relative(after_decouple_cylinder, after_decouple_link),
+        )
+        detached_decoupled = bool(
+            detached_move.get("executed")
+            and decouple_link_motion is not None and decouple_link_motion >= 0.01
+            and decouple_relative_change is not None and decouple_relative_change >= 0.01
+        )
+        payload = {
+            "schema_version": "M1BAttachedRoundTripEvidenceV1",
+            "provenance": "SUPERVISION_EVALUATION_ONLY",
+            "online_truth_access": False,
+            "entity_source": "actuation_internal_broker_attach_record",
+            "entity": args.entity,
+            "public_carrier_collision_id": args.public_collision_id,
+            "moveit_carried_object_preflight": moveit_carried_object_preflight,
+            "moveit_carried_object_applied": moveit_carried_object_applied,
+            "transport_collision_exceptions_applied": transport_collision_exceptions_applied,
+            "attached_move": attached_move,
+            "attached_follow": attached_follow,
+            "attached_follow_metrics": {"link_motion_m": link_motion, "cylinder_motion_m": cylinder_motion, "relative_drift_m": relative_drift},
+            "detach": None if detach is None else {"topic": detach.detach_topic, "state_topic": detach.grasp_state_topic, "detached_observed": detach.detached_observed, "state_lines": list(detach.state_lines)},
+            "moveit_carried_object_removed": moveit_carried_object_removed,
+            "hand_released_before_decouple": hand_released,
+            "detached_move": detached_move,
+            "detached_decoupled": detached_decoupled,
+            "detached_decouple_metrics": {"link_motion_m": decouple_link_motion, "relative_change_m": decouple_relative_change},
+        }
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        args.output.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+        print(json.dumps({"attached_follow": attached_follow, "detach_verified": detach_verified, "detached_decoupled": detached_decoupled}))
+        return 0 if attached_follow and detach_verified and detached_decoupled else 2
+    finally:
+        client.destroy_node()
+        rclpy.shutdown()
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -45,7 +45,7 @@ def main() -> int:
         "contact_topics": bool(
             contacts.get("left_target")
             and contacts.get("right_target")
-            and contacts.get("event_counts", {}).get("cube", 0) > 0
+            and contacts.get("target_cube_events", 0) > 0
         ),
         "detachable_round_trip": all(
             g4.get(key) is True

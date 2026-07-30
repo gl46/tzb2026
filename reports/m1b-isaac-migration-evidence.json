@@ -1,0 +1,130 @@
+{
+  "schema_version": "M1BIsaacMigrationEvidenceV1",
+  "date": "2026-07-29",
+  "status": "MIGRATION_PASS_WITH_RETAINED_DYNAMIC_LIMITATIONS",
+  "simulator": {
+    "name": "Isaac Sim",
+    "version": "6.0.1",
+    "image": "nvcr.io/nvidia/isaac-sim:6.0.1"
+  },
+  "robot_asset": {
+    "path": "Isaac/Robots/FrankaRobotics/FrankaPanda/franka.usd",
+    "provenance": "NVIDIA_ISAAC_SIM_6_OFFICIAL_FRANKA_PANDA_USD",
+    "variants": {
+      "Gripper": "Default",
+      "Mesh": "Performance"
+    },
+    "local_simplified_robot_used": false
+  },
+  "physics_stage": {
+    "path": "/var/tmp/m1b-isaac-production-parity-stage-build-20260729/output/m1b_physics_scene.usdc",
+    "sha256": "4ead233e4e9b4f84b64eee262f4bb91931590409c2bb737ea7ee37a4facfa23a"
+  },
+  "tolerance_campaign": {
+    "status": "COMPLETE_CALIBRATION_ONLY",
+    "trial_count_valid": 81,
+    "trial_count_expected": 81,
+    "tolerance_envelope_m": {
+      "x": 0.01,
+      "y": 0.015,
+      "z": 0.01
+    },
+    "evidence_path": "/var/tmp/m1b-isaac-tolerance-production-parity-r3-20260729/m1b-isaac-tolerance-envelope.json",
+    "sha256": "25e3c99f01de176e5d646a01d03b23a8717f6966ebd685c33003447274b4b9ff"
+  },
+  "dual_rtx3080_benchmark": {
+    "status": "PASS",
+    "workers": 2,
+    "capture_steps_per_worker": 100,
+    "cameras_per_worker": 4,
+    "combined_sensor_frames": 800,
+    "combined_sensor_frames_per_s": 12.626950524032988,
+    "gpu_memory_used_mib_peak": {
+      "0": 2635,
+      "1": 2495
+    },
+    "gpu_utilization_percent_peak": {
+      "0": 67,
+      "1": 67
+    },
+    "summary_path": "/var/tmp/m1b-isaac-dual100-final-20260729/dual-benchmark-summary.json",
+    "summary_sha256": "bf5250308399f719125eb92de2afd9842b522b1fc7e787cc5f39985fb4da55b0"
+  },
+  "static_perception_gate": {
+    "status": "GO",
+    "capture_mode": "CALIBRATION_ONLY_STATIC_PERCEPTION",
+    "student_training_eligible": false,
+    "scene_seeds": [
+      4057,
+      4058,
+      4059,
+      4077,
+      4078
+    ],
+    "distinct_scene_instances": 41,
+    "frames": 25,
+    "truth_instances": 205,
+    "matched_instances": 65,
+    "matched_truth_recall": 0.3170731707317073,
+    "matched_public_precision": 0.7142857142857143,
+    "global_leftmost_target_accuracy": 0.6,
+    "median_abs_error_world_xyz_m": {
+      "x": 0.002039356395550085,
+      "y": 0.0009694354764480106,
+      "z": 0.0012910094423479457
+    },
+    "p90_abs_error_world_xyz_m": {
+      "x": 0.005381129476051849,
+      "y": 0.0021615500284721256,
+      "z": 0.0038022805138596683
+    },
+    "p90_limits_m": {
+      "x": 0.006,
+      "y": 0.009,
+      "z": 0.006
+    },
+    "all_scene_max_object_motion_m": 0.0,
+    "evidence_path": "/var/tmp/m1b-isaac-perception-gate-static-heldout5-v1-20260729/m1b-isaac-public-perception-gate.json",
+    "sha256": "15e7c2ad043aa363efbcc902718bd8aafa58aedcb1716d514bd9a453c86bd456"
+  },
+  "dynamic_perception_diagnostic": {
+    "status": "NO_GO",
+    "scene_seeds": [
+      4017,
+      4018,
+      4019,
+      4037,
+      4038
+    ],
+    "p90_abs_error_world_xyz_m": {
+      "x": 0.008931239337677699,
+      "y": 0.021420315167645976,
+      "z": 0.013124426551091084
+    },
+    "evidence_path": "/var/tmp/m1b-isaac-perception-gate-heldout5-hybrid-v1-20260729/m1b-isaac-public-perception-gate.json",
+    "sha256": "db6f67971fa3386e00cd3cd0308e5cac388351c6a10e3a98724092f48dd0ec1c",
+    "root_cause": "unsupported tilted source pose rolls during the sequence and becomes occluded or end-on"
+  },
+  "truth_and_teacher_boundary": {
+    "runtime_and_supervision_streams_physically_separate": true,
+    "policy_segmentation_input": false,
+    "teacher_required": false,
+    "teacher_response_nonnull": 0,
+    "simulator_truth_policy_input": false,
+    "teacher_kill_rule_events": []
+  },
+  "verification": {
+    "scoped_ruff": "PASS",
+    "git_diff_check": "PASS",
+    "pytest": {
+      "status": "PASS",
+      "passed": 163,
+      "elapsed_s": 18.6
+    },
+    "validate_project": {
+      "status": "PASS",
+      "schemas": 9,
+      "root_import": "CPU_ONLY"
+    }
+  }
+}

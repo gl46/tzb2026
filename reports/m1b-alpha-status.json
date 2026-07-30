@@ -1,0 +1,60 @@
+{
+  "phase": "M1B_ALPHA",
+  "status": "PASS_M1B_ALPHA_WITH_LIMITATIONS",
+  "ready_for_m1b_beta": true,
+  "baseline_tag": "m1a-contact-gated-grasp",
+  "baseline_commit": "0709cc19b66e52e8043eb26babb9a6f3e8ca9a72",
+  "actual_head_at_start": "0709cc19b66e52e8043eb26babb9a6f3e8ca9a72",
+  "scene_runtime_verified": true,
+  "recording_verified": true,
+  "recording_evidence": "/home/gl/xh-202607-world-agent-codex-m1b/data/episodes/m1b-alpha-sync-tight-20260717/ (rosbag + 53 ms RGB/depth/camera/TF/joint snapshot)",
+  "live_geometric_perception_verified": true,
+  "dataset_samples": 200,
+  "dataset_split": {"train": 140, "val": 30, "test": 30},
+  "heldout_scenes": 30,
+  "perception_model": "geometric_rgbd_v1 + color_prototype_adapter_v1 (RGB-D fallback)",
+  "model_license": "GroundingDINO code Apache-2.0; dependencies installed but no weight downloaded after official endpoint timeout",
+  "pretrained_metrics": {
+    "color_similarity": 0.97,
+    "valid_output_rate": 0.9666666666666667,
+    "median_absolute_track_count_error": 6.0,
+    "matched_track_recall": 0.38996138996138996,
+    "leftmost_target_selection_accuracy": 0.4,
+    "position_median_error_m": 0.022397955627494106,
+    "orientation_accuracy": 0.3465346534653465
+  },
+  "finetuned_metrics": {
+    "backend": "color_prototype_adapter_v1",
+    "color_similarity": 0.95,
+    "valid_output_rate": 0.9666666666666667,
+    "median_absolute_track_count_error": 0.0,
+    "matched_track_recall": 0.915057915057915,
+    "leftmost_target_selection_accuracy": 0.9666666666666667,
+    "position_median_error_m": 0.021729317421256583,
+    "orientation_accuracy": 0.37130801687763715
+  },
+  "geometric_metrics": {
+    "valid_output_rate": 0.9666666666666667,
+    "median_absolute_track_count_error": 0.0,
+    "position_median_error_m": 0.021729317421256583
+  },
+  "fused_metrics": {
+    "components": ["color_prototype_v1", "geometric_rgbd_v1"],
+    "matched_track_recall": 0.915057915057915,
+    "leftmost_target_selection_accuracy": 0.9666666666666667
+  },
+  "oracle_leakage_detected": false,
+  "tests_passed": 68,
+  "tests_failed": 0,
+  "known_validation_failures": [
+    "repository-wide Python ruff reports three pre-existing violations in M1A scripts outside this goal",
+    "GroundingDINO-tiny weight download was not run because the official Hugging Face configuration endpoint timed out after 15 seconds"
+  ],
+  "limitations": [
+    "normal and inverted uniform cylinders remain visually ambiguous; held-out orientation accuracy is 0.3713",
+    "M1B-beta must use the calibrated RGB-D fallback and re-perceive after every action",
+    "DDS/sensor startup retries were required during collection; each accepted frame satisfied the 200 ms synchronization bound"
+  ],
+  "teacher_state": "Nano CANDIDATE; BWM CANDIDATE_LICENSE_PENDING; Super PARKED",
+  "next_command": "bash scripts/run_m1b_beta_validation.sh"
+}

@@ -22,7 +22,11 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT / "src") not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
-from xh_agent.grasp.contact_gate import ContactGateInput, evaluate_contact_gate  # noqa: E402
+from xh_agent.grasp.contact_gate import (  # noqa: E402
+    ContactGateInput,
+    evaluate_contact_gate,
+    symmetric_contact_stall_goal_tolerance_m,
+)
 from xh_agent.grasp.contact_telemetry import ContactEvent, bilateral_contact_window  # noqa: E402
 from xh_agent.grasp.release_gate import ReleaseEvidence, evaluate_release  # noqa: E402
 from m1a_contact_calibration_client import CalibrationClient, classify_contacts, runtime_cube_pose, runtime_link_pose  # noqa: E402
@@ -36,6 +40,12 @@ GRASP_STATE_TOPIC = "/xh/p0/red_cube/grasp_state"
 BIN_CENTER_XYZ_M = [0.217366447885, -0.249990627453, 0.45]
 BIN_HALF_INTERIOR_M = 0.12
 BIN_CUBE_CENTER_Z_RANGE_M = (0.474, 0.535)
+# The ADR-0016b franka-copy finger faces yield this public inner-gap mapping:
+# ``inner_gap = 2q - 0.013``.  A centred 50 mm cube therefore contacts each
+# finger at q=31.5 mm.  The close is deliberately commanded below that point
+# to form a force-bearing contact; see ``symmetric_contact_stall_goal_tolerance_m``.
+CUBE_WIDTH_M = 0.050
+FALLBACK_HAND_INNER_GAP_OFFSET_M = 0.013
 
 
 def distance(first: list[float] | None, second: list[float] | None) -> float | None:
@@ -51,6 +61,12 @@ def cube_in_bin(cube_xyz: list[float] | None) -> bool:
         and abs(cube_xyz[1] - BIN_CENTER_XYZ_M[1]) <= BIN_HALF_INTERIOR_M
         and BIN_CUBE_CENTER_Z_RANGE_M[0] <= cube_xyz[2] <= BIN_CUBE_CENTER_Z_RANGE_M[1]
     )
+
+
+def cube_contact_surface_per_finger_m(*, cube_width_m: float = CUBE_WIDTH_M) -> float:
+    """Map the known task-cube geometry to one finger's physical surface."""
+
+    return (cube_width_m + FALLBACK_HAND_INNER_GAP_OFFSET_M) / 2.0
 
 
 def constraint_command(topic: str, expected_state: str) -> dict:
@@ -268,8 +284,15 @@ def main() -> int:
         pre_close_dynamic = client.dynamic_cube_poses[-1] if client.dynamic_cube_poses else None
         close_started = time.monotonic()
         close_target_m = float(configuration.get("close_command_per_finger_m", 0.010))
+        close_contact_surface_m = cube_contact_surface_per_finger_m()
+        close_goal_tolerance_m = symmetric_contact_stall_goal_tolerance_m(
+            command_per_finger_m=close_target_m,
+            contact_surface_per_finger_m=close_contact_surface_m,
+        )
         approach_ready = bool(approach.get("executed") and approach.get("converged"))
-        close = client.command_hand([close_target_m, close_target_m]) if approach_ready else {
+        close = client.command_hand(
+            [close_target_m, close_target_m], goal_tolerance_m=close_goal_tolerance_m,
+        ) if approach_ready else {
             "accepted": False,
             "succeeded": False,
             "observed_positions_m": [],
@@ -334,7 +357,10 @@ def main() -> int:
             seconds_since_close_command=close_age,
             already_attached=False,
             prohibited_collision=finger_prohibited,
-            controller_aborted=not approach_ready or not bool(close.get("succeeded")),
+            controller_aborted=(
+                not approach_ready
+                or not bool(close.get("succeeded"))
+            ),
             valid_sim_timestamps=(
                 bool(timestamps)
                 and timestamps == sorted(timestamps)
@@ -356,6 +382,9 @@ def main() -> int:
                 "relative_speed": speed,
                 "close_command_started_monotonic_s": close_started,
                 "close_command_completed_monotonic_s": close_completed,
+                "close_contact_surface_per_finger_m": close_contact_surface_m,
+                "close_goal_tolerance_m": close_goal_tolerance_m,
+                "close_controller_target_reference_seen": close.get("controller_target_reference_seen"),
                 "seconds_since_close_command": close_age,
                 "prohibited_finger_contact": finger_prohibited,
                 "valid_sim_timestamps": gate_input.valid_sim_timestamps,

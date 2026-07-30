@@ -488,13 +488,77 @@ def verify_ros2_control_contract(urdf_root: ET.Element, sdf_model: ET.Element) -
     return {"verified": True, **source}
 
 
-def prepare_urdf(source: Path, package_share: Path, mode: str) -> ET.Element:
+def detachable_plugins(root: ET.Element) -> list[ET.Element]:
+    return [
+        plugin for gazebo in root.findall("gazebo") for plugin in gazebo.findall("plugin")
+        if plugin.attrib.get("name") == "gz::sim::systems::DetachableJoint"
+    ]
+
+
+def detachable_plugin_contract(plugin: ET.Element) -> dict[str, str]:
+    """Return the complete ADR-0013 allowlisted contract for one plugin."""
+    if plugin.attrib != {
+        "filename": "gz-sim-detachable-joint-system",
+        "name": "gz::sim::systems::DetachableJoint",
+    }:
+        raise ValueError(f"unexpected detachable plugin attributes: {plugin.attrib}")
+    fields = ("parent_link", "child_model", "child_link", "detach_topic", "attach_topic", "output_topic")
+    values = {field: text(plugin.find(field)) for field in fields}
+    if any(not value for value in values.values()):
+        raise ValueError(f"incomplete detachable plugin contract: {values}")
+    return values
+
+
+def expected_detachable_plugin_contracts(names: list[str]) -> list[dict[str, str]]:
+    return [
+        {
+            "parent_link": "panda_link7",
+            "child_model": name,
+            "child_link": "link",
+            "detach_topic": f"/xh/m1b/{name}/detach",
+            "attach_topic": f"/xh/m1b/{name}/attach",
+            "output_topic": f"/xh/m1b/{name}/grasp_state",
+        }
+        for name in names
+    ]
+
+
+def inject_per_object_detachables(urdf_root: ET.Element, scene_supervision: Path) -> list[str]:
+    """Replace the M1A cube constraint with ADR-0013's N object constraints."""
+    payload = json.loads(scene_supervision.read_text(encoding="utf-8"))
+    objects = payload.get("simulator_supervision", {}).get("objects", [])
+    names = [str(item.get("actual_sim_entity_id", "")) for item in objects]
+    if not names or any(not name.startswith("cylinder_") for name in names) or len(set(names)) != len(names):
+        raise ValueError("beta scene supervision must contain unique cylinder_* object names")
+    original = detachable_plugins(urdf_root)
+    if len(original) != 1:
+        raise ValueError(f"beta SDF expected one source detachable plugin, found {len(original)}")
+    owner = next(gazebo for gazebo in urdf_root.findall("gazebo") if original[0] in list(gazebo))
+    owner.remove(original[0])
+    for name in names:
+        plugin = ET.SubElement(owner, "plugin", {"filename": "gz-sim-detachable-joint-system", "name": "gz::sim::systems::DetachableJoint"})
+        ET.SubElement(plugin, "parent_link").text = "panda_link7"
+        ET.SubElement(plugin, "child_model").text = name
+        ET.SubElement(plugin, "child_link").text = "link"
+        ET.SubElement(plugin, "detach_topic").text = f"/xh/m1b/{name}/detach"
+        ET.SubElement(plugin, "attach_topic").text = f"/xh/m1b/{name}/attach"
+        ET.SubElement(plugin, "output_topic").text = f"/xh/m1b/{name}/grasp_state"
+    if [detachable_plugin_contract(plugin) for plugin in detachable_plugins(urdf_root)] != expected_detachable_plugin_contracts(names):
+        raise ValueError("beta prepared-URDF detachable plugin contract mismatch")
+    return names
+
+
+def prepare_urdf(source: Path, package_share: Path, mode: str, scene_supervision: Path | None = None) -> tuple[ET.Element, list[str]]:
     root = ET.fromstring(source.read_text(encoding="utf-8").replace("$(find xh_sim)", str(package_share)))
     if root.tag != "robot":
         raise ValueError("input must be a URDF robot")
     if mode == "calibration":
         remove_detachable_plugin(root)
-    return root
+    if mode == "beta":
+        if scene_supervision is None or not scene_supervision.is_file():
+            raise ValueError("beta SDF generation requires --scene-supervision")
+        return root, inject_per_object_detachables(root, scene_supervision)
+    return root, []
 
 
 def write_xml(path: Path, root: ET.Element, *, declaration: bool) -> None:
@@ -510,10 +574,11 @@ def generate(args: argparse.Namespace) -> dict:
     output_sdf = Path(args.output_sdf).resolve()
     output_urdf = Path(args.output_urdf).resolve()
     manifest_path = Path(args.manifest).resolve()
+    scene_supervision = Path(args.scene_supervision).resolve() if args.scene_supervision else None
     if not source.is_file() or not package_share.is_dir():
         raise ValueError("URDF and package share paths must exist")
     source_sha = sha256(source)
-    urdf_root = prepare_urdf(source, package_share, args.mode)
+    urdf_root, beta_objects = prepare_urdf(source, package_share, args.mode, scene_supervision)
     write_xml(output_urdf, urdf_root, declaration=True)
 
     with tempfile.TemporaryDirectory(prefix="xh-panda-sdf-") as temporary:
@@ -549,6 +614,21 @@ def generate(args: argparse.Namespace) -> dict:
     collision_evidence = verify_collisions(urdf_root, final_model)
     sensor_evidence = verify_sensors(urdf_root, final_model)
     plugin_evidence = verify_plugins(urdf_root, final_model)
+    detachable_whitelist: dict[str, object] | None = None
+    if args.mode == "beta":
+        generated_detachables = [item for item in final_model.findall("plugin") if item.attrib.get("name") == "gz::sim::systems::DetachableJoint"]
+        expected_detachables = expected_detachable_plugin_contracts(beta_objects)
+        actual_detachables = [detachable_plugin_contract(item) for item in generated_detachables]
+        if actual_detachables != expected_detachables:
+            raise ValueError(
+                "beta generated SDF detachable plugin contract mismatch: "
+                f"expected={expected_detachables}, actual={actual_detachables}"
+            )
+        detachable_whitelist = {
+            "replaces_source_detachable_plugin_count": 1,
+            "generated_detachable_plugin_count": len(actual_detachables),
+            "contracts": actual_detachables,
+        }
     mimic_evidence = verify_mimic(urdf_root, final_model)
     ros2_control_evidence = verify_ros2_control_contract(urdf_root, final_model)
     generated_ros2_control = child(final_model, "ros2_control")
@@ -565,20 +645,25 @@ def generate(args: argparse.Namespace) -> dict:
             "prepared_urdf_sha256": sha256(output_urdf),
             "generated_sdf_sha256": sha256(output_sdf),
             "generator_sha256": sha256(Path(__file__).resolve()),
+            **({"scene_supervision_sha256": sha256(scene_supervision)} if scene_supervision else {}),
         },
         "outputs": {"urdf": str(output_urdf), "sdf": str(output_sdf)},
         "whitelist_diff": {
             "verified": True,
             "only_delta": {
-                "path": f"model/joint[{MIMIC_FOLLOWER}]/axis/mimic",
-                "joint": MIMIC_MASTER,
-                "axis": "axis",
-                "multiplier": BULLET_SDF_MIMIC_MULTIPLIER,
-                "semantic_multiplier": SEMANTIC_MIMIC_MULTIPLIER,
-                "offset": 0.0,
-                "reference": 0.0,
+                "mimic_block": {
+                    "path": f"model/joint[{MIMIC_FOLLOWER}]/axis/mimic",
+                    "joint": MIMIC_MASTER,
+                    "axis": "axis",
+                    "multiplier": BULLET_SDF_MIMIC_MULTIPLIER,
+                    "semantic_multiplier": SEMANTIC_MIMIC_MULTIPLIER,
+                    "offset": 0.0,
+                    "reference": 0.0,
+                },
+                "per_object_detachable_joint_blocks": detachable_whitelist,
             },
         },
+        "per_object_detachables": {"count": len(beta_objects), "objects": beta_objects} if args.mode == "beta" else None,
         "mechanical_equivalence": {
             "joint_limits_and_units": joint_evidence,
             "zero_pose_transforms": transform_evidence,
@@ -598,7 +683,8 @@ def arguments() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--urdf", required=True)
     parser.add_argument("--package-share", required=True)
-    parser.add_argument("--mode", choices=("production", "calibration"), required=True)
+    parser.add_argument("--mode", choices=("production", "calibration", "beta"), required=True)
+    parser.add_argument("--scene-supervision")
     parser.add_argument("--output-sdf", required=True)
     parser.add_argument("--output-urdf", required=True)
     parser.add_argument("--manifest", required=True)

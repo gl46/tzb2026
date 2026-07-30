@@ -16,6 +16,7 @@ data/episodes/*
 !data/episodes/.gitkeep
 !data/episodes/p0-constrained-transfer.json
 !data/episodes/p0-empty-grasp-failures.jsonl
+data/generated/
 *.bag
 *.db3
 *.mcap

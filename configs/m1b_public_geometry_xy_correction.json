@@ -1,0 +1,36 @@
+{
+  "schema_version": "M1BPublicGeometryXYCorrectionV1",
+  "status": "FITTED_TRAINING_ONLY",
+  "fit_rule": "ridge_affine_signed_residual_over_public_rgbd_geometry",
+  "ridge": 1e-05,
+  "feature_order": [
+    "bias",
+    "surface_optical_x_m",
+    "surface_optical_y_m",
+    "surface_optical_z_m",
+    "perceived_diameter_m",
+    "public_orientation_is_tilted"
+  ],
+  "signed_residual_coefficients_world_xy": {
+    "x": [
+      -0.15096034428760752,
+      -0.010358331739523842,
+      0.11808077067777843,
+      0.11112803732342172,
+      0.22032293633712324,
+      0.0022502935175518855
+    ],
+    "y": [
+      -0.18966727845702255,
+      0.006097014545199595,
+      0.14915040566646276,
+      0.1435315647052604,
+      0.2088679925422088,
+      0.0008074114142815925
+    ]
+  },
+  "training_input": "/home/gl/xh-202607-world-agent-codex-m1b/reports/m1b-adr0016b-current-geometry-train-audit.json",
+  "training_input_sha256": "12741725fc942b849677e79d9e8497d60b103b60880e7eaa6aac2b685bb3f012",
+  "training_match_count": 1228,
+  "truth_boundary": "simulator supervision is training-only; runtime uses public RGB-D geometry and public orientation_state only"
+}

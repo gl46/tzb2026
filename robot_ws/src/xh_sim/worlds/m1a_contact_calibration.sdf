@@ -42,8 +42,11 @@
       <static>true</static>
       <link name="fixture_link">
         <pose>0.17 0.12 0.59 0 0 0</pose>
-        <collision name="collision"><geometry><box><size>0.03 0.03 0.28</size></box></geometry></collision>
-        <visual name="visual"><geometry><box><size>0.03 0.03 0.28</size></box></geometry><material><diffuse>0.45 0.45 0.45 1</diffuse></material></visual>
+        <!-- ADR-0016 inline pads extend 15 mm below a cube's lower face while
+             calibrating its sidewall.  A central 10 mm post supports the
+             static oracle target without becoming a finger collision. -->
+        <collision name="collision"><geometry><box><size>0.01 0.01 0.28</size></box></geometry></collision>
+        <visual name="visual"><geometry><box><size>0.01 0.01 0.28</size></box></geometry><material><diffuse>0.45 0.45 0.45 1</diffuse></material></visual>
       </link>
     </model>
 
@@ -89,8 +92,11 @@
       <static>true</static>
       <link name="support_link">
         <pose>0.17 -0.12 0.725 0 0 0</pose>
-        <collision name="collision"><geometry><box><size>0.06 0.055 0.01</size></box></geometry></collision>
-        <visual name="visual"><geometry><box><size>0.06 0.055 0.01</size></box></geometry><material><diffuse>0.15 0.15 0.15 1</diffuse></material></visual>
+        <!-- Keep dynamic-cube support beneath its centre only.  The former
+             full-width shelf is incompatible with ADR-0016's vertical pads
+             during a legitimate bilateral sidewall calibration. -->
+        <collision name="collision"><geometry><box><size>0.025 0.01 0.01</size></box></geometry></collision>
+        <visual name="visual"><geometry><box><size>0.025 0.01 0.01</size></box></geometry><material><diffuse>0.15 0.15 0.15 1</diffuse></material></visual>
       </link>
     </model>
     <model name="object_red_cube_bilateral">

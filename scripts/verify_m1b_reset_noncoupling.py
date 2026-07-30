@@ -1,0 +1,252 @@
+#!/usr/bin/env python3
+"""Amendment-1 reset verification via physical non-coupling evidence.
+
+Gazebo model poses in this file are evaluator-side supervision.  They are
+sampled only to validate reset and never enter perception, planning, or the
+online grasp policy.
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import math
+import re
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+import rclpy
+
+ROOT = Path(__file__).resolve().parents[1]
+for directory in (ROOT / "src", ROOT / "scripts"):
+    if str(directory) not in sys.path:
+        sys.path.insert(0, str(directory))
+
+from m1a_contact_calibration_client import CalibrationClient  # noqa: E402
+from m1a_moveit_execution_client import JOINTS  # noqa: E402
+from m1a_home_self_collision_client import HOME_ARM_POSITIONS  # noqa: E402
+from run_m1b_tolerance_trial import apply_calibration_cylinder_scene  # noqa: E402
+
+POSE_RE = re.compile(
+    r"Pose \[ XYZ \(m\) \] \[ RPY \(rad\) \]:\s*"
+    r"\[\s*([-+0-9.eE]+)\s+([-+0-9.eE]+)\s+([-+0-9.eE]+)\s*\]"
+)
+SETTLE_S = 2.0
+MAX_OBJECT_DISPLACEMENT_M = 0.001
+MIN_EE_DISPLACEMENT_M = 0.02
+MAX_HOME_JOINT_ERROR_RAD = 0.10
+# A Cartesian Z branch is at the Panda's local reach boundary in this fixture.
+# A 50 mrad negative panda_joint3 jog is collision-checked against all twelve
+# cylinders and moves the hand by more than the 20 mm reset minimum.
+HOME_JOG_JOINT_INDEX = 2
+HOME_JOG_DELTA_RAD = -0.05
+POSE_SNAPSHOT_ATTEMPTS = 3
+POSE_QUERY_TIMEOUT_S = 5
+
+
+def supervision_model_position(name: str) -> list[float] | None:
+    try:
+        result = subprocess.run(
+            ["timeout", str(POSE_QUERY_TIMEOUT_S), "gz", "model", "-m", name, "-p"],
+            check=False, capture_output=True, text=True, timeout=POSE_QUERY_TIMEOUT_S + 2.0,
+        )
+    except subprocess.TimeoutExpired:
+        # A supervision-query timeout is not evidence that the object stayed
+        # still.  Return a missing sample so the final physical-reset gate
+        # fails closed while still emitting a reviewable JSON record.
+        return None
+    match = POSE_RE.search(result.stdout)
+    return [float(value) for value in match.groups()] if match else None
+
+
+def positions(names: list[str]) -> tuple[dict[str, list[float] | None], int]:
+    # Each snapshot is taken only while the world is paused.  Sequential CLI
+    # reads are therefore one frozen observation and avoid transport-query
+    # loss observed when twelve independent `gz model` clients start together.
+    final: dict[str, list[float] | None] = {name: None for name in names}
+    for attempt in range(1, POSE_SNAPSHOT_ATTEMPTS + 1):
+        final = {name: supervision_model_position(name) for name in names}
+        # Never combine an object sampled in one CLI snapshot with objects
+        # sampled in another.  A complete attempt is one atomic evaluator-side
+        # before/after observation; incomplete attempts are discarded.
+        if all(sample is not None for sample in final.values()):
+            return final, attempt
+    return final, POSE_SNAPSHOT_ATTEMPTS
+
+
+def set_world_pause(world_name: str, paused: bool) -> dict[str, object]:
+    try:
+        result = subprocess.run(
+            [
+                "gz", "service", "--service", f"/world/{world_name}/control",
+                "--reqtype", "gz.msgs.WorldControl", "--reptype", "gz.msgs.Boolean",
+                "--timeout", "5000", "--req", f"pause: {'true' if paused else 'false'}",
+            ],
+            check=False, capture_output=True, text=True, timeout=7.0,
+        )
+    except subprocess.TimeoutExpired:
+        return {"paused": paused, "returncode": None, "stdout": "", "stderr": "timeout", "succeeded": False}
+    return {
+        "paused": paused,
+        "returncode": result.returncode,
+        "stdout": result.stdout.strip(),
+        "stderr": result.stderr.strip(),
+        "succeeded": result.returncode == 0 and "data: true" in result.stdout,
+    }
+
+
+def verify_live_home(client: CalibrationClient) -> dict[str, object]:
+    positions = [client.latest.get(name, math.nan) for name in JOINTS]
+    if not all(math.isfinite(value) for value in positions):
+        return {"verified": False, "reason": "JOINT_STATE_UNAVAILABLE"}
+    errors = [abs(actual - expected) for actual, expected in zip(positions, HOME_ARM_POSITIONS)]
+    return {
+        "verified": max(errors) <= MAX_HOME_JOINT_ERROR_RAD,
+        "observed_joint_positions_rad": positions,
+        "per_joint_error_rad": errors,
+        "maximum_joint_error_rad": max(errors),
+        "maximum_allowed_joint_error_rad": MAX_HOME_JOINT_ERROR_RAD,
+    }
+
+
+def move_to_home_neighborhood(client: CalibrationClient, initial: dict[str, object]) -> dict[str, object]:
+    """Recover the launch-time arm posture through the S1 MoveIt chain.
+
+    Gazebo can sag before its trajectory controller is active.  This is a
+    planned, collision-checked MoveIt execution to the already approved S1
+    home state, never a direct joint-state write.  The physical reset jog is
+    still performed only after a fresh live-home verification.
+    """
+    if initial.get("verified"):
+        return {"required": False, "executed": False, "home_after": initial}
+    move = client.move_joint_target(HOME_ARM_POSITIONS)
+    time.sleep(SETTLE_S)
+    home_after = verify_live_home(client)
+    return {
+        "required": True,
+        "target_arm_joint_positions_rad": HOME_ARM_POSITIONS,
+        "executed": bool(move.get("executed")),
+        "moveit_execution": move,
+        "home_after": home_after,
+    }
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--spawn-manifest", required=True, type=Path)
+    parser.add_argument("--scene-supervision", required=True, type=Path)
+    parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument("--world-name", default="industrial_cylinder_v1")
+    args = parser.parse_args()
+    manifest = json.loads(args.spawn_manifest.read_text(encoding="utf-8"))
+    supervision = json.loads(args.scene_supervision.read_text(encoding="utf-8"))
+    names = manifest.get("per_object_detachables", {}).get("objects", [])
+    if not names or any(not isinstance(name, str) or not name.startswith("cylinder_") for name in names):
+        raise SystemExit("spawn manifest lacks generated cylinder list")
+    labels = supervision.get("simulator_supervision", {}).get("objects", [])
+    observed_names = [str(label.get("actual_sim_entity_id")) for label in labels]
+    # The detachable-plugin manifest describes the complete actuator contract
+    # (twelve addressable cylinder topics), while each randomized scene may
+    # contain a strict subset of those cylinders.  Reset evidence must sample
+    # every cylinder *actually spawned in this scene*, not invent poses for
+    # absent whitelist members.  Still fail closed if supervision is empty,
+    # duplicated, malformed, or refers to an entity outside that contract.
+    if (
+        not observed_names
+        or any(name == "None" or not name.startswith("cylinder_") for name in observed_names)
+        or len(set(observed_names)) != len(observed_names)
+        or not set(observed_names).issubset(set(names))
+    ):
+        raise SystemExit("scene supervision object set is not a unique spawn-manifest subset")
+    rclpy.init()
+    client = CalibrationClient()
+    try:
+        ready = client.wait_calibration_ready()
+        for _ in range(20):
+            rclpy.spin_once(client, timeout_sec=0.05)
+        collision_scene_applied = apply_calibration_cylinder_scene(client, labels) if ready else False
+        initial_home = verify_live_home(client) if ready and collision_scene_applied else {"verified": False}
+        home_approach = (
+            move_to_home_neighborhood(client, initial_home)
+            if ready and collision_scene_applied
+            else {"required": False, "executed": False, "home_after": {"verified": False}}
+        )
+        home = home_approach["home_after"]
+        time.sleep(SETTLE_S)
+        before_pause = set_world_pause(args.world_name, True)
+        before, before_attempts = positions(observed_names)
+        before_joints = [client.latest.get(name, math.nan) for name in JOINTS]
+        before_fk = client.fk(before_joints) if all(math.isfinite(value) for value in before_joints) else None
+        live_home_positions = home.get("observed_joint_positions_rad")
+        jog_target = list(live_home_positions) if isinstance(live_home_positions, list) else []
+        if jog_target:
+            jog_target[HOME_JOG_JOINT_INDEX] += HOME_JOG_DELTA_RAD
+        before_unpause = set_world_pause(args.world_name, False)
+        jog = (
+            client.move_joint_target(jog_target)
+            if home.get("verified") and collision_scene_applied and before_unpause["succeeded"] and jog_target
+            else {"executed": False}
+        )
+        time.sleep(SETTLE_S)
+        after_pause = set_world_pause(args.world_name, True)
+        after, after_attempts = positions(observed_names)
+        after_joints = [client.latest.get(name, math.nan) for name in JOINTS]
+        after_fk = client.fk(after_joints) if all(math.isfinite(value) for value in after_joints) else None
+        displacements = {
+            name: (math.dist(before[name], after[name]) if before[name] is not None and after[name] is not None else None)
+            for name in observed_names
+        }
+        ee_displacement = math.dist(before_fk[:3], after_fk[:3]) if before_fk and after_fk else None
+        passed = bool(
+            collision_scene_applied and home.get("verified") and jog.get("executed")
+            and before_pause["succeeded"] and before_unpause["succeeded"] and after_pause["succeeded"]
+            and ee_displacement is not None and ee_displacement >= MIN_EE_DISPLACEMENT_M
+            and all(value is not None and value <= MAX_OBJECT_DISPLACEMENT_M for value in displacements.values())
+        )
+        payload = {
+            "schema_version": "M1BPhysicalNonCouplingResetEvidenceV1",
+            "provenance": "RESET_INFRASTRUCTURE_SUPERVISION_ONLY",
+            "online_truth_access": False,
+            "settle_window_s": SETTLE_S,
+            "pose_snapshot_max_attempts": POSE_SNAPSHOT_ATTEMPTS,
+            "pose_snapshot_attempts": {"before": before_attempts, "after": after_attempts},
+            "world_pause_controls": {
+                "before_snapshot": before_pause,
+                "before_jog": before_unpause,
+                "after_snapshot": after_pause,
+            },
+            "home_pose_source": "S1 HOME_ARM_POSITIONS verified against live joint state",
+            "home_approach": {
+                "method": "S1_MOVEIT_PLANNED_EXECUTION",
+                "collision_checked_against_planner_cylinder_scene": collision_scene_applied,
+                **home_approach,
+            },
+            "planner_cylinder_scene": {
+                "source": "RESET_INFRASTRUCTURE_SUPERVISION_ONLY",
+                "objects": observed_names,
+                "spawn_manifest_object_count": len(names),
+                "applied": collision_scene_applied,
+            },
+            "jog_joint_delta_rad": {JOINTS[HOME_JOG_JOINT_INDEX]: HOME_JOG_DELTA_RAD},
+            "minimum_ee_displacement_m": MIN_EE_DISPLACEMENT_M,
+            "maximum_object_displacement_m": MAX_OBJECT_DISPLACEMENT_M,
+            "home": home,
+            "jog": jog,
+            "ee_displacement_m": ee_displacement,
+            "object_positions_before_m": before,
+            "object_positions_after_m": after,
+            "object_displacements_m": displacements,
+            "status": "RESET_PHYSICAL_NONCOUPLING_VERIFIED" if passed else "INVALID_RESET",
+        }
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        args.output.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+        print(json.dumps({"status": payload["status"], "ee_displacement_m": ee_displacement}))
+        return 0 if passed else 2
+    finally:
+        client.destroy_node()
+        rclpy.shutdown()
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

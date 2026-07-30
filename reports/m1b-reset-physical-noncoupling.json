@@ -1,0 +1,260 @@
+{
+  "schema_version": "M1BPhysicalNonCouplingResetEvidenceV1",
+  "provenance": "RESET_INFRASTRUCTURE_SUPERVISION_ONLY",
+  "online_truth_access": false,
+  "settle_window_s": 2.0,
+  "pose_snapshot_max_attempts": 3,
+  "pose_snapshot_attempts": {
+    "before": 1,
+    "after": 1
+  },
+  "world_pause_controls": {
+    "before_snapshot": {
+      "paused": true,
+      "returncode": 0,
+      "stdout": "data: true",
+      "stderr": "",
+      "succeeded": true
+    },
+    "before_jog": {
+      "paused": false,
+      "returncode": 0,
+      "stdout": "data: true",
+      "stderr": "",
+      "succeeded": true
+    },
+    "after_snapshot": {
+      "paused": true,
+      "returncode": 0,
+      "stdout": "data: true",
+      "stderr": "",
+      "succeeded": true
+    }
+  },
+  "home_pose_source": "S1 HOME_ARM_POSITIONS verified against live joint state",
+  "home_approach": {
+    "method": "S1_MOVEIT_PLANNED_EXECUTION",
+    "collision_checked_against_planner_cylinder_scene": true,
+    "required": false,
+    "executed": false,
+    "home_after": {
+      "verified": true,
+      "observed_joint_positions_rad": [
+        0.0008368011331185699,
+        -0.49996525049209595,
+        -0.0007086178520694375,
+        -1.5005886554718018,
+        -0.0006228837301023304,
+        1.0004098415374756,
+        -0.00042162943282164633
+      ],
+      "per_joint_error_rad": [
+        0.0008368011331185699,
+        3.4749507904052734e-05,
+        0.0007086178520694375,
+        0.0005886554718017578,
+        0.0006228837301023304,
+        0.00040984153747558594,
+        0.00042162943282164633
+      ],
+      "maximum_joint_error_rad": 0.0008368011331185699,
+      "maximum_allowed_joint_error_rad": 0.1
+    }
+  },
+  "planner_cylinder_scene": {
+    "source": "RESET_INFRASTRUCTURE_SUPERVISION_ONLY",
+    "objects": [
+      "cylinder_01",
+      "cylinder_02",
+      "cylinder_03",
+      "cylinder_04",
+      "cylinder_05",
+      "cylinder_06",
+      "cylinder_07",
+      "cylinder_08",
+      "cylinder_09",
+      "cylinder_10",
+      "cylinder_11",
+      "cylinder_12"
+    ],
+    "applied": true
+  },
+  "jog_joint_delta_rad": {
+    "panda_joint3": -0.05
+  },
+  "minimum_ee_displacement_m": 0.02,
+  "maximum_object_displacement_m": 0.001,
+  "home": {
+    "verified": true,
+    "observed_joint_positions_rad": [
+      0.0008368011331185699,
+      -0.49996525049209595,
+      -0.0007086178520694375,
+      -1.5005886554718018,
+      -0.0006228837301023304,
+      1.0004098415374756,
+      -0.00042162943282164633
+    ],
+    "per_joint_error_rad": [
+      0.0008368011331185699,
+      3.4749507904052734e-05,
+      0.0007086178520694375,
+      0.0005886554718017578,
+      0.0006228837301023304,
+      0.00040984153747558594,
+      0.00042162943282164633
+    ],
+    "maximum_joint_error_rad": 0.0008368011331185699,
+    "maximum_allowed_joint_error_rad": 0.1
+  },
+  "jog": {
+    "planned": true,
+    "plan_attempts": 1,
+    "executed": true,
+    "converged": true,
+    "goal_uuid": "a324af2d0b5140e89af165b939ebf0d2",
+    "joint_state_samples": 214,
+    "controller_state_samples": 213,
+    "post_controller_settle_s": 0.02673196792602539
+  },
+  "ee_displacement_m": 0.02428334347473073,
+  "object_positions_before_m": {
+    "cylinder_01": [
+      -0.417139,
+      -0.289515,
+      0.495206
+    ],
+    "cylinder_02": [
+      -0.405219,
+      0.254869,
+      0.495239
+    ],
+    "cylinder_03": [
+      -0.242694,
+      -0.144888,
+      0.495214
+    ],
+    "cylinder_04": [
+      -0.138127,
+      0.239134,
+      0.495195
+    ],
+    "cylinder_05": [
+      -0.123235,
+      -0.104185,
+      0.495172
+    ],
+    "cylinder_06": [
+      -0.214833,
+      0.088231,
+      0.495311
+    ],
+    "cylinder_07": [
+      -0.100633,
+      -0.249807,
+      0.495207
+    ],
+    "cylinder_08": [
+      -0.368202,
+      0.142049,
+      0.495001
+    ],
+    "cylinder_09": [
+      -0.340946,
+      -0.144601,
+      0.495244
+    ],
+    "cylinder_10": [
+      -0.287878,
+      0.237326,
+      0.49506
+    ],
+    "cylinder_11": [
+      -0.286273,
+      -0.31441,
+      0.495193
+    ],
+    "cylinder_12": [
+      -0.224291,
+      0.179252,
+      0.495173
+    ]
+  },
+  "object_positions_after_m": {
+    "cylinder_01": [
+      -0.417356,
+      -0.288891,
+      0.495206
+    ],
+    "cylinder_02": [
+      -0.405465,
+      0.254159,
+      0.495219
+    ],
+    "cylinder_03": [
+      -0.242648,
+      -0.144321,
+      0.495145
+    ],
+    "cylinder_04": [
+      -0.138184,
+      0.239828,
+      0.495303
+    ],
+    "cylinder_05": [
+      -0.122677,
+      -0.104437,
+      0.495129
+    ],
+    "cylinder_06": [
+      -0.214704,
+      0.08857,
+      0.495307
+    ],
+    "cylinder_07": [
+      -0.101004,
+      -0.249888,
+      0.495183
+    ],
+    "cylinder_08": [
+      -0.368202,
+      0.142049,
+      0.495001
+    ],
+    "cylinder_09": [
+      -0.340561,
+      -0.145215,
+      0.495107
+    ],
+    "cylinder_10": [
+      -0.28781,
+      0.237413,
+      0.495005
+    ],
+    "cylinder_11": [
+      -0.285741,
+      -0.314157,
+      0.495198
+    ],
+    "cylinder_12": [
+      -0.224143,
+      0.180026,
+      0.495247
+    ]
+  },
+  "object_displacements_m": {
+    "cylinder_01": 0.0006606549780331838,
+    "cylinder_02": 0.0007516754618849772,
+    "cylinder_03": 0.0005730322853033494,
+    "cylinder_04": 0.0007046623304817704,
+    "cylinder_05": 0.0006137727592521565,
+    "cylinder_06": 0.00036273681919539425,
+    "cylinder_07": 0.000380497043352505,
+    "cylinder_08": 0.0,
+    "cylinder_09": 0.0007375567774754851,
+    "cylinder_10": 0.00012336125809996162,
+    "cylinder_11": 0.000589116287332117,
+    "cylinder_12": 0.0007914897346144121
+  },
+  "status": "RESET_PHYSICAL_NONCOUPLING_VERIFIED"
+}
