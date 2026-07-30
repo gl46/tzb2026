@@ -299,6 +299,18 @@ def test_single_worker_uses_the_validated_start_barrier() -> None:
     assert "start.touch()" in source
 
 
+def test_worker_benchmark_retries_and_quarantines_infrastructure_failures() -> None:
+    source = (
+        Path(__file__).parents[2] / "scripts" / "isaac" / "benchmark_workers.sh"
+    ).read_text()
+    assert 'MAX_ATTEMPTS="${ISAAC_BENCHMARK_MAX_ATTEMPTS:-6}"' in source
+    assert "quarantine_failed single" not in source
+    assert 'quarantine_failed "$label" "$attempt"' in source
+    assert "quarantine_failed dual" in source
+    assert "run_single single-gpu0" in source
+    assert "run_single single-gpu1" in source
+
+
 def test_qwen_metrics_retain_absent_class_as_zero_f1() -> None:
     metrics = classification_metrics(
         ["REOBSERVE", "REOBSERVE"],
