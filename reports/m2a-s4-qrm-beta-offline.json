@@ -1,0 +1,112 @@
+{
+  "dataset": "/home/gl/xh-data/isaac-industrial/isaac-industrial-v1-pilot/qrm/isaac-fc-on.jsonl",
+  "dataset_split": "test",
+  "failure_context_delta": {
+    "accuracy": 0.0,
+    "failure_recovery_skill_accuracy": 0.0,
+    "macro_f1": 0.0
+  },
+  "flow_status": "DISABLED",
+  "models": {
+    "Q0_COARSE_ONLY": {
+      "accuracy": 1.0,
+      "ece_10bin": 0.852237002271401,
+      "failure_recovery_skill_accuracy": 1.0,
+      "macro_f1": 1.0,
+      "n": 66,
+      "per_class": {
+        "APPROACH": {
+          "f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "support": 22
+        },
+        "REOBSERVE": {
+          "f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "support": 44
+        }
+      },
+      "prediction_histogram": {
+        "APPROACH": 22,
+        "REOBSERVE": 44
+      },
+      "wrong_object_recovery_accuracy": null
+    },
+    "Q1_COARSE_MLP_RESIDUAL": {
+      "accuracy": 1.0,
+      "ece_10bin": 0.852237002271401,
+      "failure_recovery_skill_accuracy": 1.0,
+      "macro_f1": 1.0,
+      "n": 66,
+      "per_class": {
+        "APPROACH": {
+          "f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "support": 22
+        },
+        "REOBSERVE": {
+          "f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "support": 44
+        }
+      },
+      "prediction_histogram": {
+        "APPROACH": 22,
+        "REOBSERVE": 44
+      },
+      "residual": {
+        "camera_translation_mae_m": 0.01113189385402793,
+        "collision_rejection_rate": null,
+        "gripper_mae": 0.013288424629657807,
+        "ik_acceptance_rate": null,
+        "mae": 0.011418013154593927,
+        "rmse": 0.019515604612845728,
+        "rotation_r6d_mae": 0.011249337559032943,
+        "saturation_rate": 0.8787878787878788
+      },
+      "wrong_object_recovery_accuracy": null
+    },
+    "Q2_COARSE_MLP_FAILURE_CONTEXT": {
+      "accuracy": 1.0,
+      "ece_10bin": 0.842085968813373,
+      "failure_recovery_skill_accuracy": 1.0,
+      "macro_f1": 1.0,
+      "n": 66,
+      "per_class": {
+        "APPROACH": {
+          "f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "support": 22
+        },
+        "REOBSERVE": {
+          "f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "support": 44
+        }
+      },
+      "prediction_histogram": {
+        "APPROACH": 22,
+        "REOBSERVE": 44
+      },
+      "residual": {
+        "camera_translation_mae_m": 0.009068316896299137,
+        "collision_rejection_rate": null,
+        "gripper_mae": 0.007878787181321302,
+        "ik_acceptance_rate": null,
+        "mae": 0.009757063918811055,
+        "rmse": 0.0152670270225824,
+        "rotation_r6d_mae": 0.010414483552981971,
+        "saturation_rate": 0.7575757575757576
+      },
+      "wrong_object_recovery_accuracy": null
+    }
+  },
+  "schema_version": "QRMLiteBetaOfflineEvalV1",
+  "status": "PASS"
+}
