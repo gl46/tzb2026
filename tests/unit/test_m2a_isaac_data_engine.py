@@ -9,7 +9,7 @@ import pytest
 
 from qrm_lite.summarize_isaac_closed_loop import main as summarize_closed_loop
 from qrm_lite.train_qwen_coarse_beta import classification_metrics
-from isaac.run_pilot_campaign import quarantine_failed_run
+from isaac.run_pilot_campaign import quarantine_failed_run, sha256, valid_prior
 from xh_agent.data_engine.isaac.contract import (
     ShardState,
     audit_policy_projection,
@@ -250,6 +250,37 @@ def test_campaign_resume_never_overwrites_prior_quarantine(tmp_path: Path) -> No
     assert resumed.name.endswith("attempt-03")
     assert first.is_dir()
     assert resumed.is_dir()
+
+
+def test_campaign_accepts_hash_valid_swapped_worker_assignment(
+    tmp_path: Path,
+) -> None:
+    expected = [tmp_path / f"source-{index}" for index in range(4)]
+    for index, path in enumerate(expected):
+        path.write_text(str(index))
+    run_root = tmp_path / "seeds-3122-3123"
+    for worker_id in range(2):
+        output = run_root / f"worker{worker_id}" / "output"
+        output.mkdir(parents=True)
+        (output / "metrics.json").write_text("{}")
+    (run_root / "dual-benchmark-summary.json").write_text(
+        json.dumps(
+            {
+                "status": "PASS",
+                "worker_sources": [
+                    {
+                        "sdf_sha256": sha256(expected[2]),
+                        "supervision_sha256": sha256(expected[3]),
+                    },
+                    {
+                        "sdf_sha256": sha256(expected[0]),
+                        "supervision_sha256": sha256(expected[1]),
+                    },
+                ],
+            }
+        )
+    )
+    assert valid_prior(run_root, expected)
 
 
 def test_qwen_metrics_retain_absent_class_as_zero_f1() -> None:

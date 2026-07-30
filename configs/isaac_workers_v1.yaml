@@ -11,6 +11,7 @@ workers:
     gpu_id: 1
     seed_parity: odd_campaign_index
     scene_profile: failure_boundary_and_occlusion
+assignment_policy: SOURCE_HASH_VERIFIED_WORKER_ORDER_MAY_SWAP
 shard_size_episodes: 50
 camera: policy_rgbd
 annotators: [rgb, distance_to_image_plane, semantic_segmentation, instance_segmentation]

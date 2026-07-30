@@ -35,10 +35,10 @@ def valid_prior(run_root: Path, expected: list[Path]) -> bool:
         summary.get("status") == "PASS"
         and len(sources) == 2
         and all((run_root / f"worker{i}" / "output" / "metrics.json").is_file() for i in range(2))
-        and [item.get("sdf_sha256") for item in sources]
-        == [sha256(expected[0]), sha256(expected[2])]
-        and [item.get("supervision_sha256") for item in sources]
-        == [sha256(expected[1]), sha256(expected[3])]
+        and sorted(item.get("sdf_sha256") for item in sources)
+        == sorted([sha256(expected[0]), sha256(expected[2])])
+        and sorted(item.get("supervision_sha256") for item in sources)
+        == sorted([sha256(expected[1]), sha256(expected[3])])
     )
 
 
@@ -73,6 +73,11 @@ def main() -> int:
         type=float,
         default=120.0,
         help="wait before each Isaac launch so the prior driver/container teardown settles",
+    )
+    parser.add_argument(
+        "--swap-worker-order",
+        action="store_true",
+        help="assign the odd seed to GPU0 and the even seed to GPU1",
     )
     parser.add_argument("--timeout-s", type=float, default=900.0)
     args = parser.parse_args()
@@ -128,15 +133,16 @@ def main() -> int:
                     "--timeout-s",
                     str(args.timeout_s),
                     "--container-prefix",
-                    f"m2a-{seed0}-{seed1}-a{attempt}",
+                    f"m2a-{seed0}-{seed1}-a{attempt}"
+                    + ("-swapped" if args.swap_worker_order else ""),
                     "--worker-sdf",
-                    files[0].name,
+                    files[2 if args.swap_worker_order else 0].name,
                     "--worker-sdf",
-                    files[2].name,
+                    files[0 if args.swap_worker_order else 2].name,
                     "--worker-supervision",
-                    files[1].name,
+                    files[3 if args.swap_worker_order else 1].name,
                     "--worker-supervision",
-                    files[3].name,
+                    files[1 if args.swap_worker_order else 3].name,
                 ]
                 completed = subprocess.run(command, check=False)
                 if completed.returncode == 0 and valid_prior(run_root, files):
@@ -151,6 +157,7 @@ def main() -> int:
                 "seeds": [seed0, seed1],
                 "run_root": str(run_root),
                 "resumed": resumed,
+                "worker_order_swapped": args.swap_worker_order,
                 "quarantined_attempts": quarantined,
                 "status": "PASS",
             }
