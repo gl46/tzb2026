@@ -17,8 +17,9 @@ boundary.
 1. `root@labserver` generates Isaac data on two physical RTX 3080 GPUs.
 2. One independent Isaac process owns each GPU. The GPUs are not treated as
    pooled memory.
-3. Kit initialization is serialized. Both workers enter a shared START barrier
-   before concurrent capture.
+3. Kit initialization is serialized, with a measured 60-second inter-worker
+   driver/Kit settle window. Both workers enter a shared START barrier before
+   concurrent capture.
 4. Every worker receives disjoint scene seeds and writes a distinct raw root.
 5. Raw frames remain local until Canonical episodes pass validation.
 6. Shards move only `WRITING -> VALIDATING -> READY -> SYNCED`; failures move

@@ -315,6 +315,12 @@ def main() -> int:
     parser.add_argument("--frames", type=int, default=100)
     parser.add_argument("--warmup-frames", type=int, default=5)
     parser.add_argument("--timeout-s", type=float, default=900.0)
+    parser.add_argument(
+        "--inter-worker-settle-s",
+        type=float,
+        default=60.0,
+        help="driver/Kit settle window after worker0 READY and before worker1 launch",
+    )
     parser.add_argument("--image", default="nvcr.io/nvidia/isaac-sim:6.0.1")
     parser.add_argument("--container-prefix", default="m1b-isaac-dual-final")
     parser.add_argument("--qrm-checkpoint", type=Path)
@@ -355,7 +361,12 @@ def main() -> int:
             parser.error(f"worker source path must stay under source root: {relative}")
         if not (args.source_root / path).is_file():
             parser.error(f"worker source does not exist: {args.source_root / path}")
-    if args.frames <= 0 or args.warmup_frames < 1 or args.timeout_s <= 0:
+    if (
+        args.frames <= 0
+        or args.warmup_frames < 1
+        or args.timeout_s <= 0
+        or args.inter_worker_settle_s < 0
+    ):
         parser.error("frame counts and timeout are invalid")
     for required in (args.project_root, args.source_root):
         if not required.is_dir():
@@ -402,6 +413,26 @@ def main() -> int:
                 started=started,
                 phase=f"worker{worker_id}_initialization",
             )
+            if (
+                worker_id < len(args.gpu_indices) - 1
+                and args.inter_worker_settle_s > 0
+            ):
+                settle_deadline = (
+                    time.monotonic() + args.inter_worker_settle_s
+                )
+                while time.monotonic() < settle_deadline:
+                    _sample_gpus(
+                        args.gpu_indices,
+                        samples,
+                        phase="inter_worker_settle",
+                        started=started,
+                    )
+                    time.sleep(
+                        min(
+                            0.5,
+                            max(settle_deadline - time.monotonic(), 0.0),
+                        )
+                    )
         (control / "START").touch()
         while any(process.poll() is None for process in processes):
             _sample_gpus(
@@ -516,6 +547,7 @@ def main() -> int:
         "startup_protocol": (
             "SERIALIZED_KIT_INITIALIZATION_THEN_SHARED_START_BARRIER"
         ),
+        "inter_worker_settle_s": args.inter_worker_settle_s,
     }
     summary_path = args.output / "dual-benchmark-summary.json"
     summary_path.write_text(
