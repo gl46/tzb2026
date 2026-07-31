@@ -8,30 +8,30 @@
     },
     "train": {
       "EMPTY_GRASP": 10,
-      "RELEASE_FAILURE": 13,
-      "WRONG_OBJECT": 7
+      "RELEASE_FAILURE": 15,
+      "WRONG_OBJECT": 9
     },
     "val": {
-      "EMPTY_GRASP": 1,
-      "RELEASE_FAILURE": 2,
-      "WRONG_OBJECT": 1
+      "EMPTY_GRASP": 2,
+      "RELEASE_FAILURE": 4,
+      "WRONG_OBJECT": 3
     }
   },
-  "dataset_sha256": "44fd8424d26d65daf7d1ef8685b197fbd02feb07658d4820e468235ce6fbcf85",
+  "dataset_sha256": "30829b6d339c6549c1b716ab93986de57cc2128361f9c084da6598d99cbb8872",
   "eval_coverage": false,
   "findings": [],
   "formal_training_ready": false,
   "limited_failure_coverage": false,
   "privileged_truth_policy_input": false,
-  "samples": 37,
+  "samples": 46,
   "schema_version": "M2BCoarseTrainingDataGateV1",
   "split_group_leakage": [],
   "status": "NOT_READY",
   "teacher_used": false,
   "total_failure_counts": {
-    "EMPTY_GRASP": 12,
-    "RELEASE_FAILURE": 16,
-    "WRONG_OBJECT": 9
+    "EMPTY_GRASP": 13,
+    "RELEASE_FAILURE": 20,
+    "WRONG_OBJECT": 13
   },
   "train_coverage": false
 }
