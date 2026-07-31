@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pytest
+
 from m2b.build_residual_pair_pilot import build_pairs
 from m2b.build_residual_pairs import build_pair
 
@@ -74,6 +76,12 @@ def test_scaled_residual_pair_requires_independent_physical_correction() -> None
     assert pair["physical_correction_evidence"][
         "independent_executions"
     ] is True
+    assert pair["physical_correction_evidence"][
+        "perturbed_physical_success"
+    ] is False
+    assert pair["physical_correction_evidence"][
+        "correction_outcome_advantage"
+    ] is True
     assert pair["teacher_used"] is False
 
 
@@ -101,3 +109,32 @@ def test_scaled_residual_pair_ids_follow_independent_perturbed_execution() -> No
         == second["physical_correction_evidence"]["corrected_evidence_sha256"]
         == "c" * 64
     )
+
+
+@pytest.mark.parametrize(
+    ("perturbed_path", "corrected_path", "perturbed_hash", "corrected_hash"),
+    [
+        ("/remote/same.json", "/remote/same.json", "b" * 64, "c" * 64),
+        (
+            "/remote/perturbed.json",
+            "/remote/corrected.json",
+            "b" * 64,
+            "b" * 64,
+        ),
+    ],
+)
+def test_scaled_residual_pair_rejects_reused_execution_evidence(
+    perturbed_path: str,
+    corrected_path: str,
+    perturbed_hash: str,
+    corrected_hash: str,
+) -> None:
+    with pytest.raises(ValueError, match="same evidence"):
+        build_pair(
+            _physical_execution([0.006, -0.002, 0.003], lifted=False),
+            _physical_execution([0.0, 0.0, 0.0], lifted=True),
+            perturbed_path=perturbed_path,
+            corrected_path=corrected_path,
+            perturbed_sha256=perturbed_hash,
+            corrected_sha256=corrected_hash,
+        )

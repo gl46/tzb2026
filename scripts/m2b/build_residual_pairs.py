@@ -66,6 +66,14 @@ def build_pair(
     perturbed_sha256: str,
     corrected_sha256: str,
 ) -> dict[str, Any]:
+    if perturbed_path == corrected_path:
+        raise ValueError(
+            "perturbed and corrected executions use the same evidence path"
+        )
+    if perturbed_sha256 == corrected_sha256:
+        raise ValueError(
+            "perturbed and corrected executions use the same evidence hash"
+        )
     if perturbed["scene_seed"] != corrected["scene_seed"]:
         raise ValueError("residual executions use different scene seeds")
     if perturbed["source_hashes"] != corrected["source_hashes"]:
@@ -109,6 +117,11 @@ def build_pair(
         and float(corrected_execution.get("object_lift_m", 0.0)) >= 0.05
         and float(corrected_execution.get("follow_error_m", 1.0)) <= 0.02
     )
+    perturbed_success = bool(
+        perturbed_execution.get("status") == "LIFTED"
+        and float(perturbed_execution.get("object_lift_m", 0.0)) >= 0.05
+        and float(perturbed_execution.get("follow_error_m", 1.0)) <= 0.02
+    )
     nominal = [*offset, *([0.0] * 6), 1.0]
     corrected_action = [0.0, 0.0, 0.0, *([0.0] * 6), 1.0]
     residual = [
@@ -135,10 +148,14 @@ def build_pair(
             "perturbed_evidence_path": perturbed_path,
             "perturbed_evidence_sha256": perturbed_sha256,
             "perturbed_execution_status": perturbed_execution["status"],
+            "perturbed_physical_success": perturbed_success,
             "corrected_evidence_path": corrected_path,
             "corrected_evidence_sha256": corrected_sha256,
             "corrected_object_lift_m": corrected_execution["object_lift_m"],
             "corrected_follow_error_m": corrected_execution["follow_error_m"],
+            "correction_outcome_advantage": (
+                correction_success and not perturbed_success
+            ),
             "public_target_estimate_delta_m": target_delta,
             "policy_input_simulator_truth": False,
         },
@@ -177,21 +194,26 @@ def main() -> int:
         raise SystemExit("no residual evidence pairs were supplied")
     pairs = []
     quarantine = []
+    seen_pair_ids: set[str] = set()
     for item in requested_pairs:
         perturbed_path, corrected_path = item.split(",", 1)
         try:
             perturbed_digest = remote_sha256(args.host, perturbed_path)
             corrected_digest = remote_sha256(args.host, corrected_path)
-            pairs.append(
-                build_pair(
-                    remote_json(args.host, perturbed_path),
-                    remote_json(args.host, corrected_path),
-                    perturbed_path=perturbed_path,
-                    corrected_path=corrected_path,
-                    perturbed_sha256=perturbed_digest,
-                    corrected_sha256=corrected_digest,
-                )
+            pair = build_pair(
+                remote_json(args.host, perturbed_path),
+                remote_json(args.host, corrected_path),
+                perturbed_path=perturbed_path,
+                corrected_path=corrected_path,
+                perturbed_sha256=perturbed_digest,
+                corrected_sha256=corrected_digest,
             )
+            if pair["pair_id"] in seen_pair_ids:
+                raise ValueError(
+                    f"duplicate residual pair ID: {pair['pair_id']}"
+                )
+            seen_pair_ids.add(pair["pair_id"])
+            pairs.append(pair)
         except (
             KeyError,
             RuntimeError,
@@ -217,19 +239,52 @@ def main() -> int:
         any(abs(value) > 1e-12 for value in pair["residual_target"])
         for pair in pairs
     ) / max(len(pairs), 1)
+    successful_correction_fraction = sum(
+        pair["correction_physically_successful"] for pair in pairs
+    ) / max(len(pairs), 1)
+    perturbed_success_fraction = sum(
+        pair["physical_correction_evidence"][
+            "perturbed_physical_success"
+        ]
+        for pair in pairs
+    ) / max(len(pairs), 1)
+    correction_outcome_advantage_fraction = sum(
+        pair["physical_correction_evidence"][
+            "correction_outcome_advantage"
+        ]
+        for pair in pairs
+    ) / max(len(pairs), 1)
     report = {
         "schema_version": "M2BResidualPairsReportV1",
         "status": (
             "PASS_INFORMATIVE_RESIDUAL_TARGETS"
-            if len(pairs) >= 50 and pair_nonzero_fraction >= 0.3
+            if len(pairs) >= 50
+            and pair_nonzero_fraction >= 0.3
+            and not quarantine
             else "IN_PROGRESS_RESIDUAL_PAIR_SCALE"
         ),
         "valid_pairs": len(pairs),
         "quarantined_pairs": len(quarantine),
+        "unique_pair_ids": len(seen_pair_ids),
+        "unique_perturbed_execution_hashes": len(
+            {
+                pair["physical_correction_evidence"][
+                    "perturbed_evidence_sha256"
+                ]
+                for pair in pairs
+            }
+        ),
         "unique_physical_correction_anchors": len(
             {pair["physical_correction_evidence"]["corrected_evidence_sha256"] for pair in pairs}
         ),
         "nonzero_pair_fraction": pair_nonzero_fraction,
+        "successful_correction_fraction": (
+            successful_correction_fraction
+        ),
+        "perturbed_success_fraction": perturbed_success_fraction,
+        "correction_outcome_advantage_fraction": (
+            correction_outcome_advantage_fraction
+        ),
         "all_targets_reconstructible": True,
         "training_only_privileged_label": True,
         "online_policy_truth_input": False,
