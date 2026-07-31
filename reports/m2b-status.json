@@ -1,7 +1,7 @@
 {
   "blockers": [
     "Dataset V2 has not met the limited-scale 50/class minimum",
-    "nondegenerate successful residual pairs are not packaged",
+    "at least 50 informative physical residual pairs are not packaged",
     "runtime mapping still requires Isaac IK/collision/safety dry-runs",
     "two-seed A100 NoFC/FC training has not run",
     "matched B0/QRM Isaac closed-loop evaluation has not run"

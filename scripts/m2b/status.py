@@ -59,8 +59,14 @@ def main() -> int:
         for failure in ("EMPTY_GRASP", "WRONG_OBJECT", "RELEASE_FAILURE")
     ):
         blockers.append("Dataset V2 has not met the limited-scale 50/class minimum")
-    if not residual or int(residual.get("valid_pairs", 0)) <= 0:
-        blockers.append("nondegenerate successful residual pairs are not packaged")
+    if (
+        not residual
+        or int(residual.get("valid_pairs", 0)) < 50
+        or residual.get("status") != "PASS_INFORMATIVE_RESIDUAL_TARGETS"
+    ):
+        blockers.append(
+            "at least 50 informative physical residual pairs are not packaged"
+        )
     if (
         not mapping_offline
         or mapping_offline.get("runtime_mapping_rate") is None

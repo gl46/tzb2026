@@ -58,3 +58,7 @@ def test_status_reports_missing_dataset_without_claiming_completion(
     assert payload["physical_runtime_receipts_complete_and_passing"] == 6
     assert payload["physical_runtime_post_execution_gate_rate"] == 1.0
     assert payload["prospective_runtime_planning_checks_complete"] is False
+    assert (
+        "at least 50 informative physical residual pairs are not packaged"
+        in payload["blockers"]
+    )
