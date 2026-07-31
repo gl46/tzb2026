@@ -1,0 +1,28 @@
+{
+  "backend": "PYTORCH_CUDA",
+  "cuda_device_name": "NVIDIA A100-SXM4-80GB",
+  "cuda_runtime": "13.0",
+  "final_masked_mse": 0.0005254499070967237,
+  "host": "gl@node2",
+  "initial_masked_mse": 0.020371373742818832,
+  "optimizer": "Adam",
+  "peak_memory_allocated_bytes": 17140224,
+  "privileged_truth_policy_input": false,
+  "run_at": "2026-08-01T03:55:51+08:00",
+  "sample_count": 4,
+  "sample_source": "IN_MEMORY_CONTRACT_FIXTURE_NOT_PHYSICAL_DATA",
+  "schema_version": "M2BA100ResidualCUDASmokeV1",
+  "status": "PASS_CUDA_BACKEND_SMOKE_NOT_FORMAL",
+  "teacher_used": false,
+  "torch_version": "2.13.0+cu130",
+  "train_residual_mlp_sha256": "442a66f33da45618bf512292619dd0b9186f671390ac67822c54889509256202",
+  "training": {
+    "batch_size": 4,
+    "epochs": 10,
+    "hidden": 32,
+    "learning_rate": 0.001,
+    "seed": 7
+  },
+  "unsupported_outputs_exact_zero": true,
+  "world_model_replaced": false
+}

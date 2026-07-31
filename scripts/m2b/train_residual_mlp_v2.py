@@ -314,6 +314,102 @@ def train_masked_mlp(
     return model, history
 
 
+def train_masked_mlp_torch(
+    train_samples: list[QRMTrainingSampleV1],
+    *,
+    use_failure_context: bool,
+    seed: int,
+    epochs: int,
+    learning_rate: float,
+    batch_size: int,
+    hidden: int,
+    device: str,
+) -> tuple[
+    MLPResidualRefiner,
+    list[dict[str, float | int]],
+    dict[str, Any],
+]:
+    try:
+        import torch
+    except ImportError as error:
+        raise RuntimeError("PyTorch is required for the CUDA backend") from error
+    if device != "cuda":
+        raise ValueError("torch backend currently supports only device='cuda'")
+    if not torch.cuda.is_available():
+        raise RuntimeError("CUDA was requested but torch.cuda.is_available() is false")
+    context, nominal, target, mask = sample_tensors(
+        train_samples, use_failure_context=use_failure_context
+    )
+    model = MLPResidualRefiner(
+        MLPRefinerConfig(
+            context_dim=context_dim(backbone_dim=0),
+            horizon=1,
+            action_dim=10,
+            hidden=hidden,
+            seed=seed,
+        )
+    )
+    model.w2[:, 3:] = 0.0
+    model.b2[3:] = 0.0
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    torch.cuda.reset_peak_memory_stats()
+    tensor_device = torch.device("cuda")
+    c = torch.as_tensor(context, dtype=torch.float32, device=tensor_device)
+    n = torch.as_tensor(nominal, dtype=torch.float32, device=tensor_device)
+    y = torch.as_tensor(target, dtype=torch.float32, device=tensor_device)
+    m = torch.as_tensor(mask, dtype=torch.float32, device=tensor_device)
+    x = torch.cat([c, n.reshape(len(train_samples), -1)], dim=-1)
+    parameters = [
+        torch.nn.Parameter(
+            torch.as_tensor(value, dtype=torch.float32, device=tensor_device)
+        )
+        for value in (model.w1, model.b1, model.w2, model.b2)
+    ]
+    w1, b1, w2, b2 = parameters
+    optimizer = torch.optim.Adam(parameters, lr=learning_rate)
+    generator = torch.Generator(device="cpu")
+    generator.manual_seed(seed)
+    history: list[dict[str, float | int]] = []
+    for epoch in range(epochs):
+        indices = torch.randperm(len(train_samples), generator=generator)
+        squared_error = 0.0
+        active_total = 0.0
+        for start in range(0, len(train_samples), batch_size):
+            batch = indices[start : start + batch_size].to(tensor_device)
+            hidden_state = torch.tanh(torch.clamp(x[batch] @ w1 + b1, -20.0, 20.0))
+            raw = (hidden_state @ w2 + b2).reshape(len(batch), 1, 10)
+            active = torch.sum(m[batch])
+            if float(active.item()) <= 0.0:
+                raise ValueError("training batch has no supervised values")
+            batch_squared_error = torch.sum(((raw - y[batch]) ** 2) * m[batch])
+            loss = batch_squared_error / active
+            optimizer.zero_grad(set_to_none=True)
+            loss.backward()
+            torch.nn.utils.clip_grad_norm_(parameters, max_norm=1.0)
+            optimizer.step()
+            squared_error += float(batch_squared_error.detach().item())
+            active_total += float(active.detach().item())
+        history.append(
+            {"epoch": epoch, "masked_mse": squared_error / active_total}
+        )
+    model.w1 = w1.detach().cpu().numpy().astype(np.float64)
+    model.b1 = b1.detach().cpu().numpy().astype(np.float64)
+    model.w2 = w2.detach().cpu().numpy().astype(np.float64)
+    model.b2 = b2.detach().cpu().numpy().astype(np.float64)
+    model.w2[:, 3:] = 0.0
+    model.b2[3:] = 0.0
+    device_metadata = {
+        "backend": "PYTORCH_CUDA",
+        "torch_version": torch.__version__,
+        "cuda_runtime": torch.version.cuda,
+        "cuda_device_name": torch.cuda.get_device_name(),
+        "peak_memory_allocated_bytes": int(torch.cuda.max_memory_allocated()),
+        "optimizer": "Adam",
+    }
+    return model, history, device_metadata
+
+
 def evaluate(
     model: MLPResidualRefiner,
     samples: list[QRMTrainingSampleV1],
@@ -354,6 +450,7 @@ def main() -> int:
     parser.add_argument("--learning-rate", type=float, default=0.1)
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--hidden", type=int, default=128)
+    parser.add_argument("--device", choices=("cpu", "cuda"), default="cpu")
     parser.add_argument("--checkpoint", required=True, type=Path)
     parser.add_argument("--report", required=True, type=Path)
     args = parser.parse_args()
@@ -370,15 +467,32 @@ def main() -> int:
     if not train_samples or not eval_samples:
         raise SystemExit("train and requested held-out split must both be non-empty")
     use_failure_context = args.failure_context == "on"
-    model, history = train_masked_mlp(
-        train_samples,
-        use_failure_context=use_failure_context,
-        seed=args.seed,
-        epochs=args.epochs,
-        learning_rate=args.learning_rate,
-        batch_size=args.batch_size,
-        hidden=args.hidden,
-    )
+    if args.device == "cuda":
+        model, history, device_metadata = train_masked_mlp_torch(
+            train_samples,
+            use_failure_context=use_failure_context,
+            seed=args.seed,
+            epochs=args.epochs,
+            learning_rate=args.learning_rate,
+            batch_size=args.batch_size,
+            hidden=args.hidden,
+            device=args.device,
+        )
+    else:
+        model, history = train_masked_mlp(
+            train_samples,
+            use_failure_context=use_failure_context,
+            seed=args.seed,
+            epochs=args.epochs,
+            learning_rate=args.learning_rate,
+            batch_size=args.batch_size,
+            hidden=args.hidden,
+        )
+        device_metadata = {
+            "backend": "NUMPY_CPU",
+            "numpy_version": np.__version__,
+            "optimizer": "MASKED_MINIBATCH_SGD",
+        }
     model_metrics, zero_metrics = evaluate(
         model, eval_samples, use_failure_context=use_failure_context
     )
@@ -433,6 +547,7 @@ def main() -> int:
             "initial_masked_mse": history[0]["masked_mse"],
             "final_masked_mse": history[-1]["masked_mse"],
             "history_tail": history[-5:],
+            "device": device_metadata,
         },
         "teacher_used": False,
         "simulator_hard_truth_training_label": True,

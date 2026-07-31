@@ -11,6 +11,7 @@ from m2b.train_residual_mlp_v2 import (
     train_masked_mlp,
     validate_samples,
 )
+from m2b.summarize_residual_mlp import summarize
 
 
 def _payload() -> dict:
@@ -192,3 +193,34 @@ def test_masked_trainer_uses_train_and_evaluates_heldout() -> None:
     assert np.all(model.forward(context, nominal)[..., 3:] == 0.0)
     assert history[-1]["masked_mse"] < history[0]["masked_mse"]
     assert model_metrics["mae"] < zero_metrics["mae"]
+
+
+def test_residual_summary_requires_two_formal_consistent_seeds() -> None:
+    def report(seed: int, beats_zero: bool) -> dict:
+        return {
+            "schema_version": "M2BMaskedResidualMLPReportV1",
+            "seed": seed,
+            "dataset_sha256": "a" * 64,
+            "eval_split": "val",
+            "failure_context": "on",
+            "teacher_used": False,
+            "privileged_truth_policy_input": False,
+            "validation": {"formal_evaluation_ready": True},
+            "beats_zero_residual": beats_zero,
+            "model_metrics": {
+                "mae": 0.001,
+                "rmse": 0.002,
+                "mean_l1_per_chunk": 0.003,
+            },
+            "zero_residual_baseline": {
+                "mae": 0.004,
+                "rmse": 0.005,
+                "mean_l1_per_chunk": 0.012,
+            },
+        }
+
+    passed = summarize([report(1, True), report(2, True)])
+    assert passed["mlp_residual_supported_offline"] is True
+    failed = summarize([report(1, True), report(2, False)])
+    assert failed["mlp_residual_supported_offline"] is False
+    assert failed["formal_two_seed_evaluation"] is True

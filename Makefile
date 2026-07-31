@@ -1,7 +1,7 @@
 PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,python3)
 export PYTHONPATH := src
 
-.PHONY: doctor test validate sim-smoke constrained-pick-place empty-grasp-failures record-constrained-episode moveit-plan-smoke baseline teacher-audit bakeoff-prepare m0-report m0-audit status m2a-doctor isaac-contract isaac-benchmark isaac-pilot isaac-validate isaac-sync qrm-beta-train qrm-beta-eval qrm-beta-closed-loop shadow-isaac lingbot-prep m2a-status m2b-audit m2b-export-schemas m2b-generate-failures m2b-pack-evidence-pilot m2b-dataset m2b-coarse-dataset m2b-coarse-gate m2b-residual-pilot m2b-residual-dataset m2b-residual-training-dataset m2b-map-validate m2b-status
+.PHONY: doctor test validate sim-smoke constrained-pick-place empty-grasp-failures record-constrained-episode moveit-plan-smoke baseline teacher-audit bakeoff-prepare m0-report m0-audit status m2a-doctor isaac-contract isaac-benchmark isaac-pilot isaac-validate isaac-sync qrm-beta-train qrm-beta-eval qrm-beta-closed-loop shadow-isaac lingbot-prep m2a-status m2b-audit m2b-export-schemas m2b-generate-failures m2b-generate-residuals m2b-pack-evidence-pilot m2b-dataset m2b-coarse-dataset m2b-coarse-gate m2b-residual-pilot m2b-residual-dataset m2b-residual-training-dataset m2b-train m2b-map-validate m2b-status
 doctor:
 	$(PYTHON) -m xh_agent.diagnostics.doctor --local --output reports/hardware-local.json
 	$(PYTHON) -m xh_agent.diagnostics.doctor --remote node2 --user gl --output reports/hardware-remote-node2.json
@@ -74,6 +74,8 @@ m2b-export-schemas:
 	$(PYTHON) scripts/m2b/export_failure_rich_schemas.py
 m2b-generate-failures:
 	bash scripts/m2b/run_remote_failure_batch.sh
+m2b-generate-residuals:
+	bash scripts/m2b/launch_residual_evidence_scale.sh
 m2b-pack-evidence-pilot:
 	@test -n "$${M2B_EMPTY_EVIDENCE}" -a -n "$${M2B_WRONG_EVIDENCE}" -a -n "$${M2B_RELEASE_EVIDENCE}" || (echo "M2B_EMPTY_EVIDENCE, M2B_WRONG_EVIDENCE, and M2B_RELEASE_EVIDENCE are required" >&2; exit 2)
 	$(PYTHON) scripts/m2b/build_failure_evidence_pilot.py \
@@ -120,6 +122,9 @@ m2b-residual-training-dataset:
 		--output artifacts/m2b/residual-training-v2.jsonl \
 		--quarantine artifacts/m2b/residual-training-v2-quarantine.jsonl \
 		--report reports/m2b-s3-residual-training-v2.json
+m2b-train:
+	bash scripts/m2b/run_a100_coarse_ablation.sh
+	bash scripts/m2b/run_a100_residual_mlp.sh
 m2b-map-validate:
 	$(PYTHON) scripts/m2b/validate_runtime_mapping_offline.py \
 		--dataset data/qrm_lite/manifests/real-v1.jsonl \
