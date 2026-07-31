@@ -1,12 +1,12 @@
 {
-  "coarse_failure_recovery_supervision_episodes": 3,
-  "episodes_generated": 3,
+  "coarse_failure_recovery_supervision_episodes": 11,
+  "episodes_generated": 11,
   "episodes_quarantined": 0,
-  "episodes_valid": 3,
+  "episodes_valid": 11,
   "failure_counts": {
-    "EMPTY_GRASP": 1,
-    "RELEASE_FAILURE": 1,
-    "WRONG_OBJECT": 1
+    "EMPTY_GRASP": 3,
+    "RELEASE_FAILURE": 4,
+    "WRONG_OBJECT": 4
   },
   "limitations": [
     "These episodes supervise FailureContext and coarse recovery skills, not model rollout attribution.",
@@ -15,22 +15,24 @@
   "limited_coverage_gate_passed": false,
   "model_rollout_episodes": 0,
   "output_path": "artifacts/m2b/dataset-v2.jsonl",
-  "output_sha256": "c9daa256e31bf541e4ff1c2b8fc3c0be6492f24b410a19346ce95f4f5588e5f1",
+  "output_sha256": "a0b467df14770803e7d8e56a0e2cc4d000a93109f2c3232c50cce5e9176c1f7c",
   "privileged_truth_policy_input": false,
   "quarantine_path": "artifacts/m2b/dataset-v2-quarantine.jsonl",
   "quarantine_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   "residual_training_eligible_episodes": 0,
   "schema_version": "M2BDatasetV2ReportV1",
   "split_counts": {
-    "train": 3
+    "test": 2,
+    "train": 5,
+    "val": 4
   },
   "split_group_leakage": [],
   "status": "IN_PROGRESS_DATASET_V2_LIMITED_CLASS_COVERAGE",
   "successful_recovery_counts": {
-    "EMPTY_GRASP": 1,
-    "RELEASE_FAILURE": 1,
-    "WRONG_OBJECT": 1
+    "EMPTY_GRASP": 3,
+    "RELEASE_FAILURE": 4,
+    "WRONG_OBJECT": 4
   },
   "teacher_used": false,
-  "unique_scene_groups": 2
+  "unique_scene_groups": 5
 }

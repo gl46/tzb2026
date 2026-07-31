@@ -1,0 +1,49 @@
+{
+  "dataset_sha256": "dc9c88f74737ac6f5eea079edcbbb527425fe65a175f9f71e6e6815351c87038",
+  "formal_ablation": false,
+  "host": "gl@node2",
+  "labels": [
+    "REOBSERVE",
+    "RETRY_RELEASE",
+    "SAFE_PLACE_NON_TARGET"
+  ],
+  "limitations": [
+    "Only 11 pilot samples were available: 5 train, 4 val, and 2 test.",
+    "This run validates the A100 data/model/optimizer path and cannot establish FailureContext value.",
+    "The formal two-seed matched-budget ablation remains blocked on failure-class coverage."
+  ],
+  "model": "/home/gl/xh-202607-qrm-lite/hf-cache/manual/Qwen3.5-4B",
+  "privileged_truth_policy_input": false,
+  "runs": [
+    {
+      "eval_accuracy": 0.25,
+      "failure_context": "off",
+      "max_gradient_l2": 72.95020257302969,
+      "n_eval": 4,
+      "n_train": 5,
+      "optimizer_steps": 5,
+      "peak_torch_allocated_vram_mb": 43109.18505859375,
+      "remote_report": "/home/gl/xh-data/qrm-m2b/pipeline-smoke-v1/off-report.json",
+      "remote_report_sha256": "3bc049f0563884fead58e7b8fcf729468eb4be956123c35bd9ec3ba358deb9da",
+      "wall_seconds": 18.52186870574951
+    },
+    {
+      "eval_accuracy": 0.25,
+      "failure_context": "on",
+      "max_gradient_l2": 73.1880713958216,
+      "n_eval": 4,
+      "n_train": 5,
+      "optimizer_steps": 5,
+      "peak_torch_allocated_vram_mb": 44075.78662109375,
+      "remote_report": "/home/gl/xh-data/qrm-m2b/pipeline-smoke-v1/on-report.json",
+      "remote_report_sha256": "00e93e33fcc84dce15bafa725f3a933ecd575244e40e14fa76c2bc2817f0f6b2",
+      "wall_seconds": 20.626469612121582
+    }
+  ],
+  "schema_version": "M2BA100CoarsePipelineSmokeV1",
+  "smoke_report_sha256": "218701cb1595c5c906bc453459597df03c0223c37ab4aa3ea2a44c7ebade3c17",
+  "status": "PASS_PIPELINE_SMOKE_NOT_FORMAL_ABLATION",
+  "teacher_kill_rule_events": [],
+  "teacher_used": false,
+  "training_script_sha256": "7e63b85ff1c88f6d90d46fcef8c16c112ea8e41b3ebdab77fea7a99542b1bb2a"
+}

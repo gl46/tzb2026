@@ -3,6 +3,8 @@ from __future__ import annotations
 import pytest
 
 from m2b.build_coarse_training_v2 import _source_relative, coarse_sample
+from m2b.summarize_coarse_ablation import summarize
+from m2b.validate_coarse_training_v2 import validate
 
 
 def _episode() -> dict:
@@ -28,6 +30,7 @@ def _episode() -> dict:
         "episode_id": "m2b-test-wrong-1",
         "injection_seed": 17,
         "split": "train",
+        "split_group": "scene-4025",
         "dataset_version": "isaac-industrial-v2-failure-rich",
         "observation_after": {
             "label": "after_physical_lift",
@@ -104,3 +107,50 @@ def test_coarse_v2_has_no_fabricated_continuous_action_target() -> None:
 def test_coarse_asset_uri_cannot_escape_evidence() -> None:
     with pytest.raises(ValueError, match="escapes evidence root"):
         _source_relative("dataset://../secret")
+
+
+def test_formal_training_gate_rejects_tiny_but_valid_dataset(tmp_path) -> None:
+    sample = coarse_sample(
+        _episode(),
+        rgb_uri="dataset://episodes/m2b-test/rgb/after.png",
+        depth_uri="dataset://episodes/m2b-test/depth/after.npy",
+    )
+    dataset = tmp_path / "coarse.jsonl"
+    dataset.write_text(sample.model_dump_json() + "\n")
+    report = validate(dataset)
+    assert report["status"] == "NOT_READY"
+    assert report["samples"] == 1
+    assert report["limited_failure_coverage"] is False
+    assert report["findings"] == []
+
+
+def test_ablation_summary_requires_matched_two_seed_improvement() -> None:
+    def training_report(seed: int, fc: str, accuracy: float, macro_f1: float):
+        return {
+            "status": "PASS",
+            "failure_context": fc,
+            "seed": seed,
+            "n_train": 120,
+            "n_eval": 30,
+            "eval_split": "val",
+            "labels": [
+                "REOBSERVE",
+                "RETRY_RELEASE",
+                "SAFE_PLACE_NON_TARGET",
+            ],
+            "eval_accuracy": accuracy,
+            "eval_metrics": {"macro_f1": macro_f1},
+        }
+
+    off = [
+        training_report(1, "off", 0.5, 0.4),
+        training_report(2, "off", 0.55, 0.45),
+    ]
+    on = [
+        training_report(1, "on", 0.6, 0.5),
+        training_report(2, "on", 0.65, 0.55),
+    ]
+    report = summarize(off, on, dataset_sha256="d" * 64)
+    assert report["failure_context_supported_offline"] is True
+    assert report["formal_ablation"] is True
+    assert len(report["pairs"]) == 2

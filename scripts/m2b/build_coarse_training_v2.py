@@ -109,6 +109,7 @@ def coarse_sample(
         simulator_supervision=episode["simulator_supervision"],
         provenance={
             "dataset_version": episode["dataset_version"],
+            "split_group": episode["split_group"],
             "evidence_sha256": episode["provenance"]["evidence_sha256"],
             "label_source": "EXECUTED_PUBLIC_RECOVERY_SEQUENCE",
             "continuous_action_target": "ABSENT_NOT_GUESSED",

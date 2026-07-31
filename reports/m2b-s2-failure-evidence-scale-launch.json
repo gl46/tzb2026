@@ -1,0 +1,35 @@
+{
+  "code_revision": "4627b65",
+  "output_root": "/var/tmp/xh-data/isaac-industrial/m2b/failure-evidence-scale-v1",
+  "privileged_truth_policy_input": false,
+  "remote_host": "root@labserver",
+  "scene_seed_end": 4149,
+  "scene_seed_start": 4000,
+  "scene_seeds_excluded_as_existing_pilots": [
+    4025,
+    4063,
+    4091,
+    4110
+  ],
+  "scene_seeds_queued": 146,
+  "schema_version": "M2BFailureEvidenceScaleLaunchV1",
+  "status": "RUNNING",
+  "teacher_kill_rule_events": [],
+  "teacher_used": false,
+  "workers": [
+    {
+      "gpu": 0,
+      "physical_gpu_process_count": 1,
+      "pid_at_launch": 2783859,
+      "scene_seeds_queued": 74,
+      "worker_id": 0
+    },
+    {
+      "gpu": 1,
+      "physical_gpu_process_count": 1,
+      "pid_at_launch": 2784865,
+      "scene_seeds_queued": 72,
+      "worker_id": 1
+    }
+  ]
+}

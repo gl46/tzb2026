@@ -1,7 +1,7 @@
 PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,python3)
 export PYTHONPATH := src
 
-.PHONY: doctor test validate sim-smoke constrained-pick-place empty-grasp-failures record-constrained-episode moveit-plan-smoke baseline teacher-audit bakeoff-prepare m0-report m0-audit status m2a-doctor isaac-contract isaac-benchmark isaac-pilot isaac-validate isaac-sync qrm-beta-train qrm-beta-eval qrm-beta-closed-loop shadow-isaac lingbot-prep m2a-status m2b-audit m2b-export-schemas m2b-generate-failures m2b-pack-evidence-pilot m2b-dataset m2b-coarse-dataset m2b-residual-pilot m2b-map-validate m2b-status
+.PHONY: doctor test validate sim-smoke constrained-pick-place empty-grasp-failures record-constrained-episode moveit-plan-smoke baseline teacher-audit bakeoff-prepare m0-report m0-audit status m2a-doctor isaac-contract isaac-benchmark isaac-pilot isaac-validate isaac-sync qrm-beta-train qrm-beta-eval qrm-beta-closed-loop shadow-isaac lingbot-prep m2a-status m2b-audit m2b-export-schemas m2b-generate-failures m2b-pack-evidence-pilot m2b-dataset m2b-coarse-dataset m2b-coarse-gate m2b-residual-pilot m2b-map-validate m2b-status
 doctor:
 	$(PYTHON) -m xh_agent.diagnostics.doctor --local --output reports/hardware-local.json
 	$(PYTHON) -m xh_agent.diagnostics.doctor --remote node2 --user gl --output reports/hardware-remote-node2.json
@@ -98,6 +98,10 @@ m2b-coarse-dataset:
 		--output artifacts/m2b/coarse-training-v2.jsonl \
 		--quarantine artifacts/m2b/coarse-training-v2-quarantine.jsonl \
 		--report reports/m2b-s2-coarse-training-v2.json
+m2b-coarse-gate:
+	$(PYTHON) scripts/m2b/validate_coarse_training_v2.py \
+		--dataset artifacts/m2b/coarse-training-v2.jsonl \
+		--report reports/m2b-s4-coarse-training-data-gate.json
 m2b-residual-pilot:
 	@test -n "$${M2B_WRONG_EVIDENCE}" || (echo "M2B_WRONG_EVIDENCE is required" >&2; exit 2)
 	$(PYTHON) scripts/m2b/build_residual_pair_pilot.py \
