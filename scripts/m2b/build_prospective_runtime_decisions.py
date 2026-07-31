@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 from pathlib import Path
 from typing import Any, Literal
 
@@ -18,7 +19,9 @@ from xh_agent.policy.qrm_lite.prospective_mapping import (
     M2BProspectiveRuntimeDecisionV1,
 )
 from xh_agent.policy.qrm_lite.skill_registry import (
+    RuntimeSkillMappingResultV1,
     RuntimeSkillRequestV1,
+    RuntimeSkillRegistryV1,
     load_registry,
     validate_runtime_mapping,
 )
@@ -67,6 +70,41 @@ def _verify_hash(
         )
 
 
+def validate_model_record(
+    model_record: dict[str, Any],
+    *,
+    registry: RuntimeSkillRegistryV1,
+    registry_sha256: str,
+) -> tuple[RuntimeSkillRequestV1, RuntimeSkillMappingResultV1]:
+    """Verify held-out inference provenance before any physical preflight."""
+    sample_id = str(model_record.get("sample_id"))
+    for payload_key, hash_key in (
+        ("model_input", "model_input_sha256"),
+        ("model_output", "model_output_sha256"),
+        ("request", "request_sha256"),
+        ("mapping", "mapping_result_sha256"),
+    ):
+        _verify_hash(
+            model_record,
+            payload_key=payload_key,
+            hash_key=hash_key,
+        )
+    if model_record.get("registry_sha256") != registry_sha256:
+        raise ValueError(f"{sample_id}: runtime registry hash mismatch")
+    if re.fullmatch(
+        r"[0-9a-f]{64}",
+        str(model_record.get("model_checkpoint_sha256", "")),
+    ) is None:
+        raise ValueError(f"{sample_id}: model checkpoint hash missing")
+    request = RuntimeSkillRequestV1.model_validate(model_record["request"])
+    structural = validate_runtime_mapping(request, registry)
+    if structural.model_dump(mode="json") != model_record["mapping"]:
+        raise ValueError(
+            f"{sample_id}: structural mapping is not reproducible"
+        )
+    return request, structural
+
+
 def build_records(
     model_records: list[dict[str, Any]],
     preflights: list[IsolatedIsaacPreflightManifestV1],
@@ -81,23 +119,11 @@ def build_records(
     records = []
     for model_record in model_records:
         sample_id = str(model_record["sample_id"])
-        for payload_key, hash_key in (
-            ("model_input", "model_input_sha256"),
-            ("model_output", "model_output_sha256"),
-            ("request", "request_sha256"),
-            ("mapping", "mapping_result_sha256"),
-        ):
-            _verify_hash(
-                model_record,
-                payload_key=payload_key,
-                hash_key=hash_key,
-            )
-        if model_record.get("registry_sha256") != registry_sha256:
-            raise ValueError(f"{sample_id}: runtime registry hash mismatch")
-        request = RuntimeSkillRequestV1.model_validate(
-            model_record["request"]
+        request, structural = validate_model_record(
+            model_record,
+            registry=registry,
+            registry_sha256=registry_sha256,
         )
-        structural = validate_runtime_mapping(request, registry)
         structural_payload = structural.model_dump(mode="json")
         structural_sha256 = canonical_sha256(structural_payload)
         if structural_payload != model_record["mapping"]:

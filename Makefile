@@ -1,7 +1,7 @@
 PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,python3)
-export PYTHONPATH := src
+export PYTHONPATH := src:scripts
 
-.PHONY: doctor test validate sim-smoke constrained-pick-place empty-grasp-failures record-constrained-episode moveit-plan-smoke baseline teacher-audit bakeoff-prepare m0-report m0-audit status m2a-doctor isaac-contract isaac-benchmark isaac-pilot isaac-validate isaac-sync qrm-beta-train qrm-beta-eval qrm-beta-closed-loop shadow-isaac lingbot-prep m2a-status m2b-audit m2b-export-schemas m2b-generate-failures m2b-generate-residuals m2b-pack-evidence-pilot m2b-dataset m2b-coarse-dataset m2b-coarse-gate m2b-residual-pilot m2b-residual-dataset m2b-residual-training-dataset m2b-physical-gates m2b-train m2b-map-validate m2b-status
+.PHONY: doctor test validate sim-smoke constrained-pick-place empty-grasp-failures record-constrained-episode moveit-plan-smoke baseline teacher-audit bakeoff-prepare m0-report m0-audit status m2a-doctor isaac-contract isaac-benchmark isaac-pilot isaac-validate isaac-sync qrm-beta-train qrm-beta-eval qrm-beta-closed-loop shadow-isaac lingbot-prep m2a-status m2b-audit m2b-export-schemas m2b-generate-failures m2b-generate-residuals m2b-pack-evidence-pilot m2b-dataset m2b-coarse-dataset m2b-coarse-gate m2b-residual-pilot m2b-residual-dataset m2b-residual-training-dataset m2b-physical-gates m2b-train m2b-map-validate m2b-run-prospective-preflights m2b-preflight-manifest m2b-map-prospective m2b-status
 doctor:
 	$(PYTHON) -m xh_agent.diagnostics.doctor --local --output reports/hardware-local.json
 	$(PYTHON) -m xh_agent.diagnostics.doctor --remote node2 --user gl --output reports/hardware-remote-node2.json
@@ -144,6 +144,15 @@ m2b-preflight-manifest:
 	$(PYTHON) scripts/m2b/build_isolated_preflight_manifest.py \
 		--plan "$${M2B_PREFLIGHT_PLAN}" \
 		--output artifacts/m2b/isolated-preflight-manifest.jsonl
+m2b-run-prospective-preflights:
+	@test -n "$${M2B_MODEL_RECORDS}" -a -n "$${M2B_PREFLIGHT_OUTPUT}" -a -n "$${M2B_PREFLIGHT_EVIDENCE_ROOT}" || (echo "M2B_MODEL_RECORDS, M2B_PREFLIGHT_OUTPUT, and M2B_PREFLIGHT_EVIDENCE_ROOT are required" >&2; exit 2)
+	$(PYTHON) scripts/m2b/run_prospective_preflight_batch.py \
+		--model-records "$${M2B_MODEL_RECORDS}" \
+		--dataset data/qrm_lite/manifests/isaac-industrial-v2-failure-rich.jsonl \
+		--registry configs/qrm_runtime_mapping.yaml \
+		--local-evidence-root "$${M2B_PREFLIGHT_EVIDENCE_ROOT}" \
+		--output "$${M2B_PREFLIGHT_OUTPUT}" \
+		$${M2B_PREFLIGHT_GPU:+--gpu "$${M2B_PREFLIGHT_GPU}"}
 m2b-map-prospective:
 	@test -n "$${M2B_MODEL_RECORDS}" -a -n "$${M2B_PREFLIGHT_MANIFEST}" || (echo "M2B_MODEL_RECORDS and M2B_PREFLIGHT_MANIFEST are required" >&2; exit 2)
 	$(PYTHON) scripts/m2b/build_prospective_runtime_decisions.py \
