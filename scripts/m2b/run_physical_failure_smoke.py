@@ -8,12 +8,58 @@ import hashlib
 import json
 import subprocess
 import time
+import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Any
 
 
 def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+PHYSICAL_SMOKE_SOURCE_SHA256 = sha256(Path(__file__))
+
+
+def same_color_entity_schedule(sdf: Path, primary: str) -> tuple[str, ...]:
+    """Return deterministic supervision-only alternatives for a retry.
+
+    Runtime actions never consume this schedule.  It avoids repeating an
+    identical physical injection when the public RGB-D selector sees a
+    different same-color object because the SDF max-X object is occluded.
+    """
+
+    root = ET.parse(sdf).getroot()
+    entries: dict[str, tuple[tuple[float, float, float], float]] = {}
+    for model in root.findall(".//world/model"):
+        name = model.get("name") or ""
+        diffuse = model.findtext(".//visual/material/diffuse")
+        pose = model.findtext("pose")
+        if not name.startswith("cylinder_") or diffuse is None or pose is None:
+            continue
+        rgb = tuple(float(value) for value in diffuse.split()[:3])
+        xyz = tuple(float(value) for value in pose.split()[:3])
+        if len(rgb) == 3 and len(xyz) == 3:
+            entries[name] = (rgb, xyz[0])
+    if primary not in entries:
+        raise ValueError(f"injection entity {primary!r} is absent from {sdf}")
+    primary_rgb = entries[primary][0]
+    alternatives = sorted(
+        (
+            (world_x, name)
+            for name, (rgb, world_x) in entries.items()
+            if name != primary
+            and all(abs(value - wanted) <= 1e-6 for value, wanted in zip(rgb, primary_rgb))
+        ),
+        reverse=True,
+    )
+    return (primary, *(name for _, name in alternatives))
+
+
+def scheduled_entity(sdf: Path, primary: str, attempt: int) -> str:
+    if attempt < 1:
+        raise ValueError("attempt must be positive")
+    schedule = same_color_entity_schedule(sdf, primary)
+    return schedule[min(attempt - 1, len(schedule) - 1)]
 
 
 def command(
@@ -24,16 +70,23 @@ def command(
     output: Path,
 ) -> list[str]:
     name = f"{args.container_prefix}-{failure.lower()}-a{attempt}"
+    scheduled_target = scheduled_entity(args.sdf, args.target_object, attempt)
+    scheduled_public_target = scheduled_entity(
+        args.sdf, args.public_target_object, attempt
+    )
     target_object = (
-        args.public_target_object
+        scheduled_public_target
         if args.capture_public_rgbd and failure != "WRONG_OBJECT"
-        else args.target_object
+        else scheduled_target
+    )
+    scheduled_wrong_task_target = scheduled_entity(
+        args.sdf, args.wrong_object_task_target, attempt
     )
     flags = {
         "EMPTY_GRASP": ["--m2b-inject-empty-grasp"],
         "WRONG_OBJECT": [
             "--m2b-task-target-object",
-            args.wrong_object_task_target,
+            scheduled_wrong_task_target,
         ],
         "RELEASE_FAILURE": [
             "--m2b-inject-release-failure",
@@ -202,6 +255,16 @@ def retained_attempt_record(
                 public_rgbd_required=public_rgbd_required,
             )
         ),
+        "configured_injection_entity": (
+            payload.get("target_object") if payload else None
+        ),
+        "configured_task_target_supervision_entity": (
+            (payload.get("m2b_wrong_object_injection") or {}).get(
+                "task_target_entity_id"
+            )
+            if payload
+            else None
+        ),
         "resumed_existing_attempt": True,
     }
 
@@ -334,6 +397,16 @@ def main() -> int:
                         public_rgbd_required=args.capture_public_rgbd,
                     )
                 ),
+                "configured_injection_entity": (
+                    payload.get("target_object") if payload else None
+                ),
+                "configured_task_target_supervision_entity": (
+                    (payload.get("m2b_wrong_object_injection") or {}).get(
+                        "task_target_entity_id"
+                    )
+                    if payload
+                    else None
+                ),
                 "resumed_existing_attempt": False,
             }
             results.append(record)
@@ -350,6 +423,7 @@ def main() -> int:
     }
     summary = {
         "schema_version": "M2BPhysicalFailureSmokeV1",
+        "physical_smoke_source_sha256": PHYSICAL_SMOKE_SOURCE_SHA256,
         "status": (
             "PASS"
             if accepted_failures == set(failures)

@@ -7,6 +7,8 @@ from m2b.run_physical_failure_smoke import (
     accepted,
     command,
     retained_attempt_record,
+    same_color_entity_schedule,
+    scheduled_entity,
 )
 
 
@@ -125,11 +127,27 @@ def test_restart_retains_hash_bound_accepted_attempt(tmp_path) -> None:
     assert record["accepted"] is True
     assert record["resumed_existing_attempt"] is True
     assert len(record["evidence_sha256"]) == 64
+    assert "configured_injection_entity" in record
 
 
 def test_wrong_recovery_forwards_explicit_bounded_training_offset(
     tmp_path,
 ) -> None:
+    source_root = tmp_path / "source"
+    source_root.mkdir()
+    (source_root / "scene.sdf").write_text(
+        """<sdf><world>
+        <model name="cylinder_04"><pose>-0.10 0 0 0 0 0</pose><link><visual>
+        <material><diffuse>0.8 0.6 0.1 1</diffuse></material>
+        </visual></link></model>
+        <model name="cylinder_05"><pose>-0.20 0 0 0 0 0</pose><link><visual>
+        <material><diffuse>0.8 0.6 0.1 1</diffuse></material>
+        </visual></link></model>
+        <model name="cylinder_07"><pose>-0.12 0 0 0 0 0</pose><link><visual>
+        <material><diffuse>0.8 0.1 0.1 1</diffuse></material>
+        </visual></link></model>
+        </world></sdf>"""
+    )
     args = SimpleNamespace(
         container_prefix="m2b-test",
         public_target_object="cylinder_04",
@@ -140,7 +158,7 @@ def test_wrong_recovery_forwards_explicit_bounded_training_offset(
         public_regrasp_offset_camera_xyz_m="0.006,-0.002,0.003",
         gpu=0,
         project_root=tmp_path / "project",
-        source_root=tmp_path / "source",
+        source_root=source_root,
         stage=tmp_path / "stage" / "scene.usdc",
         sdf=tmp_path / "source" / "scene.sdf",
         supervision=tmp_path / "source" / "scene.supervision.json",
@@ -157,3 +175,27 @@ def test_wrong_recovery_forwards_explicit_bounded_training_offset(
         invocation.index("--m2b-public-regrasp-offset-camera-xyz-m") + 1
     )
     assert invocation[offset_index] == "0.006,-0.002,0.003"
+
+
+def test_physical_retry_rotates_same_color_supervision_entity(tmp_path) -> None:
+    sdf = tmp_path / "scene.sdf"
+    sdf.write_text(
+        """<sdf><world>
+        <model name="cylinder_10"><pose>-0.10 0 0 0 0 0</pose><link><visual>
+        <material><diffuse>0.8 0.6 0.1 1</diffuse></material>
+        </visual></link></model>
+        <model name="cylinder_04"><pose>-0.25 0 0 0 0 0</pose><link><visual>
+        <material><diffuse>0.8 0.6 0.1 1</diffuse></material>
+        </visual></link></model>
+        <model name="cylinder_01"><pose>-0.30 0 0 0 0 0</pose><link><visual>
+        <material><diffuse>0.8 0.1 0.1 1</diffuse></material>
+        </visual></link></model>
+        </world></sdf>"""
+    )
+    assert same_color_entity_schedule(sdf, "cylinder_10") == (
+        "cylinder_10",
+        "cylinder_04",
+    )
+    assert scheduled_entity(sdf, "cylinder_10", 1) == "cylinder_10"
+    assert scheduled_entity(sdf, "cylinder_10", 2) == "cylinder_04"
+    assert scheduled_entity(sdf, "cylinder_10", 3) == "cylinder_04"
