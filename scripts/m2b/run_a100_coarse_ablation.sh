@@ -43,7 +43,8 @@ for seed in "${seeds[@]}"; do
       --registry configs/qrm_runtime_mapping.yaml \
       --split "${eval_split}" \
       --output "${output_root}/${seed}-${failure_context}-heldout.jsonl" \
-      --report "${output_root}/${seed}-${failure_context}-heldout-report.json"
+      --report "${output_root}/${seed}-${failure_context}-heldout-report.json" \
+      || test $? -eq 2
   done
 done
 
