@@ -1,7 +1,7 @@
 schema_version: M2ATopologyAuditV1
 status: PASS
 feature_branch: codex/m2a-isaac-data-qrm-beta
-head: f007bd490d7cf7ba11d032af94fb2799e9d62e16
+head: 078153dc34ccfedab7562f77e6096256ff1dfc12
 origin_main: 0709cc19b66e52e8043eb26babb9a6f3e8ca9a72
 m1b_baseline_commit: '5984298'
 qrm_alpha_tag_commit: 0287d23e586f5d977c71257aeca4accacecadbe8
@@ -34,10 +34,10 @@ isaac:
   - semantic_segmentation
   - instance_segmentation
   episode_writer: IsaacIndustrialEpisodeV1 / READY shard
-  available_disk_kib: 412846740
+  available_disk_kib: 404955880
 train:
   host: node2
-  project_root: /home/gl/xh-202607-qrm-lite
+  project_root: /home/gl/xh-202607-m2a
   data_root: /home/gl/xh-data/isaac-industrial
   gpus:
   - index: 0
@@ -46,7 +46,7 @@ train:
     vram_free_mib: 80085
     driver_version: 595.71.05
   environment: .venv-qrm-lite
-  available_disk_kib: 4467669820
+  available_disk_kib: 4466793332
 action_protocol:
   executed: 9D named Panda joints, radians/metres, 30 Hz, identity normalization
   qrm_residual: 10D camera optical, m/r6d/normalized gripper, 5 Hz

@@ -4,7 +4,7 @@
     "qrm_residual": "10D camera optical, m/r6d/normalized gripper, 5 Hz"
   },
   "feature_branch": "codex/m2a-isaac-data-qrm-beta",
-  "head": "f007bd490d7cf7ba11d032af94fb2799e9d62e16",
+  "head": "078153dc34ccfedab7562f77e6096256ff1dfc12",
   "isaac": {
     "annotators": [
       "rgb",
@@ -12,7 +12,7 @@
       "semantic_segmentation",
       "instance_segmentation"
     ],
-    "available_disk_kib": 412846740,
+    "available_disk_kib": 404955880,
     "camera_render_products": [
       "policy_rgbd",
       "overview",
@@ -55,7 +55,7 @@
     "kill_rule_events": []
   },
   "train": {
-    "available_disk_kib": 4467669820,
+    "available_disk_kib": 4466793332,
     "data_root": "/home/gl/xh-data/isaac-industrial",
     "environment": ".venv-qrm-lite",
     "gpus": [
@@ -68,6 +68,6 @@
       }
     ],
     "host": "node2",
-    "project_root": "/home/gl/xh-202607-qrm-lite"
+    "project_root": "/home/gl/xh-202607-m2a"
   }
 }

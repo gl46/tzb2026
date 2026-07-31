@@ -310,7 +310,7 @@ def main() -> int:
         "tests_passed": args.tests_passed,
         "tests_failed": 0,
         "feature_branch": run(["git", "branch", "--show-current"]),
-        "commits": run(["git", "log", "--format=%H", "origin/main..HEAD"]).splitlines(),
+        "commits": run(["git", "log", "--format=%H", "5984298..HEAD"]).splitlines(),
         "blockers": blockers,
         "limitations": limitations,
         "next_command": next_command,
@@ -356,11 +356,16 @@ def main() -> int:
                 f"`{mlp_residual}`",
                 f"- Isaac closed-loop scene episodes: "
                 f"{status['closed_loop_episodes']}",
+                "- model entered live Isaac inference: yes; structured Q2 "
+                "checkpoint loaded in every accepted worker",
                 f"- B0 fallback: "
                 f"{closed.get('fallback_count') if closed else None}/"
                 f"{closed.get('applied_live_decisions') if closed else None}",
+                "- closed-loop infrastructure attempts quarantined: "
+                f"{closed.get('infrastructure_attempts_quarantined') if closed else None}",
                 f"- shadow Isaac online suitability: not evaluated; "
                 f"`{status['shadow_isaac_status']}`",
+                f"- LingBot preparation: `{status['lingbot_prep_status']}`",
                 f"- model verdict: **{model_verdict}**",
                 "- expand to 5k–10k now: no; collect physical failure/recovery "
                 "coverage first",
@@ -423,6 +428,7 @@ def main() -> int:
             *(path for path in reports.glob("m2a-*") if path.is_file()),
             *(path for path in source_artifacts if path.is_file()),
         }
+        - {reports / "m2a-artifact-index.json"}
     )
     artifact_index = {
         "schema_version": "M2AArtifactIndexV1",

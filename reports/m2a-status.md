@@ -1,0 +1,26 @@
+# M2A status
+
+- status: **PASS_WITH_LIMITATIONS**
+- dual RTX 3080 generated concurrently: yes
+- final worker configuration: one independent process per GPU
+- 50-seed contract: `VERIFIED_WITH_LIMITATIONS`
+- Oracle leakage detected: False
+- Teachers: unused; Nano=CANDIDATE, BWM=CANDIDATE_LICENSE_PENDING, Super=PARKED
+- Teacher kill-rule events: none
+- valid adjacent-frame episodes: 550
+- failure/recovery fraction: `0.8254545454545454`
+- split: train=418, val=66, test=66
+- dataset hash: `9843968cdbff17b6b4a291e30907f2c5dc855838ad3e4be7095a4bb8783449bc`
+- A100 manifest verified / structured training: True/True
+- Qwen FailureContext ablation: `PASS_WITH_LIMITATIONS`, accuracy deltas=`{'mean': 0.0, 'per_seed': {'20260731': 0.0, '20260732': 0.0}}`
+- held-out FailureContext deltas: `{'accuracy': 0.0, 'failure_recovery_skill_accuracy': 0.0, 'macro_f1': 0.0}`
+- Q2 MLP held-out value: not established; residual metrics=`{'camera_translation_mae_m': 0.009068316896299137, 'collision_rejection_rate': None, 'gripper_mae': 0.007878787181321302, 'ik_acceptance_rate': None, 'mae': 0.009757063918811055, 'rmse': 0.0152670270225824, 'rotation_r6d_mae': 0.010414483552981971, 'saturation_rate': 0.7575757575757576}`
+- Isaac closed-loop scene episodes: 10
+- model entered live Isaac inference: yes; structured Q2 checkpoint loaded in every accepted worker
+- B0 fallback: 50/50
+- closed-loop infrastructure attempts quarantined: 4
+- shadow Isaac online suitability: not evaluated; `NOT_RUN`
+- LingBot preparation: `NOT_RUN`
+- model verdict: **KEEP_B0_COLLECT_MORE_DATA**
+- expand to 5k–10k now: no; collect physical failure/recovery coverage first
+- next command: `make m2a-status`

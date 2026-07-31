@@ -1,0 +1,37 @@
+{
+  "applied_live_decisions": 50,
+  "average_retries": 0.0,
+  "b0_execution": "PASS",
+  "closed_loop_episodes": 10,
+  "coarse_skill_histogram": {
+    "APPROACH": 50
+  },
+  "collision_or_safety_violations": 0,
+  "failure_context_decisions": 50,
+  "fallback_count": 50,
+  "fallback_rate": 1.0,
+  "final_success_rate": null,
+  "infrastructure_attempts_quarantined": 4,
+  "initial_success_rate": null,
+  "limitations": [
+    "This smoke proves live checkpoint inference, validation rejection, and B0 execution.",
+    "It does not claim learned residual actuation or task-success improvement.",
+    "The live checkpoint is structured Q2 coarse+MLP (backbone_dim=0), not the Qwen LoRA adapter."
+  ],
+  "live_qrm_decisions": 60,
+  "model_action_mapping": "REJECTED_NO_OFFICIAL_EVIDENCE",
+  "model_id": "Q2_COARSE_MLP_FAILURE_CONTEXT",
+  "planning_rejection_rate": 1.0,
+  "recovery_success_rate": null,
+  "residual_proposals": 50,
+  "run_roots": [
+    "/var/tmp/xh-data/isaac-industrial/closed-loop/qrm-beta-seeds-3200-3209/seeds-3200-3201",
+    "/var/tmp/xh-data/isaac-industrial/closed-loop/qrm-beta-seeds-3200-3209/seeds-3202-3203",
+    "/var/tmp/xh-data/isaac-industrial/closed-loop/qrm-beta-seeds-3200-3209/seeds-3204-3205",
+    "/var/tmp/xh-data/isaac-industrial/closed-loop/qrm-beta-seeds-3200-3209/seeds-3206-3207",
+    "/var/tmp/xh-data/isaac-industrial/closed-loop/qrm-beta-seeds-3200-3209/seeds-3208-3209"
+  ],
+  "schema_version": "M2AQRMIsaacClosedLoopV1",
+  "status": "PASS_WITH_B0_FALLBACK",
+  "wrong_object_recovery_rate": null
+}
