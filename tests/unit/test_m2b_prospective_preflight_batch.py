@@ -9,6 +9,7 @@ import pytest
 from m2b.build_prospective_runtime_decisions import canonical_sha256
 from m2b.run_prospective_preflight_batch import (
     expected_first_runtime_action,
+    model_run_key,
     preflight_command,
     scene_root_from_evidence,
     selected_action_is_physically_supported,
@@ -184,3 +185,9 @@ def test_physical_source_hashes_are_required_and_verified() -> None:
     verify_bytes_sha256(raw, digest, "scene")
     with pytest.raises(ValueError, match="sha256 mismatch"):
         verify_bytes_sha256(raw, "0" * 64, "scene")
+
+
+def test_preflight_run_key_separates_adapter_checkpoints() -> None:
+    first = {"sample_id": "sample-1", "model_checkpoint_sha256": "a" * 64}
+    second = {"sample_id": "sample-1", "model_checkpoint_sha256": "b" * 64}
+    assert model_run_key(first) != model_run_key(second)

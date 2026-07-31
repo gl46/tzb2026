@@ -1,7 +1,7 @@
 PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,python3)
 export PYTHONPATH := src:scripts
 
-.PHONY: doctor test validate sim-smoke constrained-pick-place empty-grasp-failures record-constrained-episode moveit-plan-smoke baseline teacher-audit bakeoff-prepare m0-report m0-audit status m2a-doctor isaac-contract isaac-benchmark isaac-pilot isaac-validate isaac-sync qrm-beta-train qrm-beta-eval qrm-beta-closed-loop shadow-isaac lingbot-prep m2a-status m2b-audit m2b-export-schemas m2b-generate-failures m2b-generate-residuals m2b-pack-evidence-pilot m2b-dataset m2b-coarse-dataset m2b-coarse-gate m2b-residual-pilot m2b-residual-dataset m2b-residual-training-dataset m2b-physical-gates m2b-train m2b-map-validate m2b-run-prospective-preflights m2b-preflight-manifest m2b-map-prospective m2b-status
+.PHONY: doctor test validate sim-smoke constrained-pick-place empty-grasp-failures record-constrained-episode moveit-plan-smoke baseline teacher-audit bakeoff-prepare m0-report m0-audit status m2a-doctor isaac-contract isaac-benchmark isaac-pilot isaac-validate isaac-sync qrm-beta-train qrm-beta-eval qrm-beta-closed-loop shadow-isaac lingbot-prep m2a-status m2b-audit m2b-export-schemas m2b-generate-failures m2b-generate-residuals m2b-pack-evidence-pilot m2b-dataset m2b-coarse-dataset m2b-coarse-gate m2b-residual-pilot m2b-residual-dataset m2b-residual-training-dataset m2b-physical-gates m2b-train m2b-map-validate m2b-run-prospective-preflights m2b-preflight-manifest m2b-map-prospective m2b-run-matched-closed-loop m2b-summarize-matched-closed-loop m2b-status
 doctor:
 	$(PYTHON) -m xh_agent.diagnostics.doctor --local --output reports/hardware-local.json
 	$(PYTHON) -m xh_agent.diagnostics.doctor --remote node2 --user gl --output reports/hardware-remote-node2.json
@@ -148,7 +148,7 @@ m2b-run-prospective-preflights:
 	@test -n "$${M2B_MODEL_RECORDS}" -a -n "$${M2B_PREFLIGHT_OUTPUT}" -a -n "$${M2B_PREFLIGHT_EVIDENCE_ROOT}" || (echo "M2B_MODEL_RECORDS, M2B_PREFLIGHT_OUTPUT, and M2B_PREFLIGHT_EVIDENCE_ROOT are required" >&2; exit 2)
 	$(PYTHON) scripts/m2b/run_prospective_preflight_batch.py \
 		--model-records "$${M2B_MODEL_RECORDS}" \
-		--dataset data/qrm_lite/manifests/isaac-industrial-v2-failure-rich.jsonl \
+		--dataset "$${M2B_DATASET:-artifacts/m2b/dataset-v2.jsonl}" \
 		--registry configs/qrm_runtime_mapping.yaml \
 		--local-evidence-root "$${M2B_PREFLIGHT_EVIDENCE_ROOT}" \
 		--output "$${M2B_PREFLIGHT_OUTPUT}" \
@@ -163,5 +163,24 @@ m2b-map-prospective:
 	$(PYTHON) scripts/m2b/summarize_prospective_runtime_mapping.py \
 		--decisions artifacts/m2b/prospective-runtime-decisions.jsonl \
 		--report reports/m2b-s5-runtime-mapping-offline.json
+m2b-run-matched-closed-loop:
+	@test -n "$${M2B_NO_FC_DECISIONS}" -a -n "$${M2B_FC_DECISIONS}" -a -n "$${M2B_CLOSED_LOOP_OUTPUT}" -a -n "$${M2B_CLOSED_LOOP_JOURNAL}" -a -n "$${M2B_CLOSED_LOOP_BATCH_REPORT}" || (echo "M2B_NO_FC_DECISIONS, M2B_FC_DECISIONS, M2B_CLOSED_LOOP_OUTPUT, M2B_CLOSED_LOOP_JOURNAL, and M2B_CLOSED_LOOP_BATCH_REPORT are required" >&2; exit 2)
+	$(PYTHON) scripts/m2b/run_matched_closed_loop_batch.py \
+		--no-fc-decisions "$${M2B_NO_FC_DECISIONS}" \
+		--fc-decisions "$${M2B_FC_DECISIONS}" \
+		--dataset "$${M2B_DATASET:-artifacts/m2b/dataset-v2.jsonl}" \
+		--registry configs/qrm_runtime_mapping.yaml \
+		--output "$${M2B_CLOSED_LOOP_OUTPUT}" \
+		--journal "$${M2B_CLOSED_LOOP_JOURNAL}" \
+		--report "$${M2B_CLOSED_LOOP_BATCH_REPORT}" \
+		$${M2B_CLOSED_LOOP_GPU:+--gpu "$${M2B_CLOSED_LOOP_GPU}"}
+m2b-summarize-matched-closed-loop:
+	@test -n "$${M2B_CLOSED_LOOP_EPISODES}" || (echo "M2B_CLOSED_LOOP_EPISODES is required" >&2; exit 2)
+	$(PYTHON) scripts/m2b/summarize_matched_closed_loop.py \
+		--episodes "$${M2B_CLOSED_LOOP_EPISODES}" \
+		--expected-method B0 \
+		--expected-method QRM_COARSE_NO_FC \
+		--expected-method QRM_COARSE_FC \
+		--report reports/m2b-s5-closed-loop.json
 m2b-status:
 	$(PYTHON) scripts/m2b/status.py

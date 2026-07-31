@@ -148,6 +148,28 @@ def test_fallback_success_is_system_success_not_model_success() -> None:
     assert metrics["model_decisions_fallback"] == 1
 
 
+def test_fixed_b0_continuation_is_not_attributed_as_model_success() -> None:
+    model = _decision(
+        model=True,
+        source="MODEL_SELECTED_B0_SKILL",
+        outcome="UNKNOWN",
+        suffix="model",
+    )
+    continuation = _decision(
+        model=False,
+        source="B0_BASELINE",
+        suffix="continuation",
+    ).model_copy(update={"step_id": 1})
+    episode = _episode("scene-5000", "QRM_COARSE_FC", model)
+    episode = episode.model_copy(
+        update={"decisions": [model, continuation]}
+    )
+    metrics = summarize_method([episode])
+    assert metrics["model_decisions_executed"] == 1
+    assert metrics["model_success_episodes"] == 0
+    assert metrics["system_success_with_non_model_continuation"] == 1
+
+
 def test_matched_gate_requires_twenty_real_model_executions() -> None:
     episodes = []
     for seed in range(5000, 5010):

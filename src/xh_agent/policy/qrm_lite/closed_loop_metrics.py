@@ -181,6 +181,16 @@ def summarize_method(
             for decision in episode.decisions
         )
     ]
+    system_success_with_non_model_continuation = [
+        episode
+        for episode in episodes
+        if episode.method != "B0"
+        and episode.final_success
+        and any(
+            decision.execution_source == "B0_BASELINE"
+            for decision in episode.decisions
+        )
+    ]
     model_success_episodes = [
         episode
         for episode in episodes
@@ -190,7 +200,7 @@ def summarize_method(
             for decision in episode.decisions
         )
         and not any(
-            decision.execution_source == "B0_FALLBACK"
+            decision.execution_source in {"B0_FALLBACK", "B0_BASELINE"}
             for decision in episode.decisions
         )
     ]
@@ -258,6 +268,9 @@ def summarize_method(
             else None
         ),
         "system_success_with_b0_fallback": len(system_success_with_fallback),
+        "system_success_with_non_model_continuation": len(
+            system_success_with_non_model_continuation
+        ),
         "model_success_episodes": len(model_success_episodes),
         "model_executed_successful_decisions": sum(
             decision.outcome == "SUCCESS" for decision in executed

@@ -114,6 +114,14 @@ def verify_bytes_sha256(raw: bytes, expected: str, label: str) -> None:
         raise ValueError(f"{label} sha256 mismatch")
 
 
+def model_run_key(model_record: dict[str, Any]) -> str:
+    identity = (
+        f"{model_record['sample_id']}:"
+        f"{model_record['model_checkpoint_sha256']}"
+    )
+    return hashlib.sha256(identity.encode()).hexdigest()[:20]
+
+
 def preflight_command(
     *,
     project_root: str,
@@ -314,7 +322,7 @@ def dispatch_rejection_manifest(
         "teacher_used": False,
     }
     evidence_root.mkdir(parents=True, exist_ok=True)
-    path = evidence_root / f"{hashlib.sha256(sample_id.encode()).hexdigest()}.json"
+    path = evidence_root / f"{model_run_key(model_record)}.json"
     path.write_text(json.dumps(evidence, indent=2, sort_keys=True) + "\n")
     receipt = PhysicalRuntimeGateReceiptV1(
         failure_type=failure_type,
@@ -442,9 +450,7 @@ def main() -> int:
         injection_entity, task_target_entity = target_entities(
             original_payload, failure_type
         )
-        safe_sample = hashlib.sha256(
-            str(model_record["sample_id"]).encode()
-        ).hexdigest()[:16]
+        safe_sample = model_run_key(model_record)
         remote_output = (
             f"{args.remote_output_root}/gpu{gpu}/{safe_sample}"
         )
