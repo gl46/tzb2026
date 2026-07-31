@@ -190,6 +190,7 @@ def test_closed_loop_summary_counts_scene_episodes_not_decisions(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     run_roots = [tmp_path / "run-a", tmp_path / "run-b"]
+    (tmp_path / "quarantine" / "run-a-attempt-02").mkdir(parents=True)
     for run_root in run_roots:
         run_root.mkdir()
         (run_root / "dual-benchmark-summary.json").write_text(
@@ -243,6 +244,7 @@ def test_closed_loop_summary_counts_scene_episodes_not_decisions(
     assert report["closed_loop_episodes"] == 4
     assert report["applied_live_decisions"] == 4
     assert report["live_qrm_decisions"] == 8
+    assert report["infrastructure_attempts_quarantined"] == 1
 
 
 def test_campaign_resume_never_overwrites_prior_quarantine(tmp_path: Path) -> None:

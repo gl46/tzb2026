@@ -47,6 +47,12 @@ def main() -> int:
     applied = [
         decision for decision in decisions if decision["applies_to_step"] is not None
     ]
+    output_roots = {run_root.parent for run_root in args.run_root}
+    quarantine_count = 0
+    if len(output_roots) == 1:
+        quarantine_root = next(iter(output_roots)) / "quarantine"
+        if quarantine_root.is_dir():
+            quarantine_count = sum(path.is_dir() for path in quarantine_root.iterdir())
     report = {
         "schema_version": "M2AQRMIsaacClosedLoopV1",
         "status": "PASS_WITH_B0_FALLBACK",
@@ -68,6 +74,7 @@ def main() -> int:
         "fallback_count": len(applied),
         "fallback_rate": 1.0,
         "collision_or_safety_violations": 0,
+        "infrastructure_attempts_quarantined": quarantine_count,
         "model_action_mapping": "REJECTED_NO_OFFICIAL_EVIDENCE",
         "b0_execution": "PASS",
         "initial_success_rate": None,
@@ -94,6 +101,7 @@ def main() -> int:
                 "- action mapping: `REJECTED_NO_OFFICIAL_EVIDENCE`",
                 f"- B0 fallback: {len(applied)}/{len(applied)}",
                 "- safety violations: 0",
+                f"- infrastructure attempts quarantined: {quarantine_count}",
                 "",
                 "The checkpoint ran inside each Isaac process on public RGB-D. "
                 "Every learned residual was rejected before execution because "

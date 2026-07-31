@@ -229,6 +229,13 @@ def main() -> int:
         )
     if closed and closed.get("fallback_rate") == 1.0:
         limitations.append("all learned action mappings rejected; B0 fallback rate is 1.0")
+    if closed and closed.get("limitations"):
+        limitations.extend(closed["limitations"])
+    if closed and closed.get("infrastructure_attempts_quarantined", 0):
+        limitations.append(
+            "closed-loop Isaac infrastructure attempts quarantined: "
+            f"{closed['infrastructure_attempts_quarantined']}"
+        )
     complete = bool(
         dataset
         and dataset.get("episodes_valid", 0) >= 500
