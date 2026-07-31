@@ -33,6 +33,17 @@ for seed in "${seeds[@]}"; do
       --seed "${seed}" \
       --adapter-out "${output_root}/${seed}-${failure_context}-adapter" \
       --report-json "${output_root}/${seed}-${failure_context}-report.json"
+    PYTHONPATH=src "${python_bin}" \
+      scripts/m2b/evaluate_qwen_coarse_adapter.py \
+      --dataset "${dataset}" \
+      --dataset-root "${dataset_root}" \
+      --model-id "${model_id}" \
+      --revision "" \
+      --adapter "${output_root}/${seed}-${failure_context}-adapter" \
+      --registry configs/qrm_runtime_mapping.yaml \
+      --split "${eval_split}" \
+      --output "${output_root}/${seed}-${failure_context}-heldout.jsonl" \
+      --report "${output_root}/${seed}-${failure_context}-heldout-report.json"
   done
 done
 
