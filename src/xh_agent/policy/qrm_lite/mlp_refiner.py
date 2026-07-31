@@ -18,6 +18,7 @@ class MLPRefinerConfig:
     hidden: int = 512
     max_translation_m: float = 0.05
     max_r6d: float = 0.5
+    seed: int = 0
 
 
 class MLPResidualRefiner:
@@ -27,7 +28,7 @@ class MLPResidualRefiner:
         self.cfg = cfg
         self.in_dim = cfg.context_dim + cfg.horizon * cfg.action_dim
         self.out_dim = cfg.horizon * cfg.action_dim
-        rng = np.random.default_rng(0)
+        rng = np.random.default_rng(cfg.seed)
         s1 = np.sqrt(2.0 / (self.in_dim + cfg.hidden))
         s2 = np.sqrt(2.0 / (cfg.hidden + self.out_dim))
         self.w1 = rng.normal(0, s1, size=(self.in_dim, cfg.hidden)).astype(np.float64)
