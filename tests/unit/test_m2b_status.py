@@ -106,10 +106,16 @@ def test_status_rejects_present_but_nonformal_terminal_reports(
         "m2b-s5-runtime-mapping-offline.json": {
             "runtime_mapping_rate": 1.0,
             "planning_checks_complete": True,
+            "formal_mapping_ready": True,
         },
         "m2b-s4-training.json": {
             "status": "PASS_ABLATION_COMPLETE",
             "formal_ablation": False,
+        },
+        "m2b-s4-residual-mlp.json": {
+            "status": "FAIL_FORMAL_MLP_NOT_CONSISTENTLY_BETTER",
+            "formal_two_seed_evaluation": True,
+            "mlp_residual_supported_offline": False,
         },
         "m2b-s5-closed-loop.json": {
             "status": "IN_PROGRESS_NOT_FORMAL",
@@ -137,6 +143,10 @@ def test_status_rejects_present_but_nonformal_terminal_reports(
     assert completed.returncode == 2
     assert payload["goal_complete"] is False
     assert "two-seed A100 NoFC/FC training has not run" in payload["blockers"]
+    assert (
+        "two-seed A100 residual MLP-vs-zero evaluation has not run"
+        not in payload["blockers"]
+    )
     assert (
         "matched B0/QRM Isaac closed-loop evaluation has not run"
         in payload["blockers"]

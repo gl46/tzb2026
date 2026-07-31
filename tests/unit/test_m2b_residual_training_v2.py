@@ -1,5 +1,10 @@
 from __future__ import annotations
 
+import json
+from pathlib import Path
+import subprocess
+import sys
+
 import numpy as np
 import pytest
 
@@ -111,6 +116,30 @@ def _sample(seed: int, offset: tuple[float, float, float]):
     )
 
 
+def _residual_seed_report(seed: int, beats_zero: bool) -> dict:
+    return {
+        "schema_version": "M2BMaskedResidualMLPReportV1",
+        "seed": seed,
+        "dataset_sha256": "a" * 64,
+        "eval_split": "val",
+        "failure_context": "on",
+        "teacher_used": False,
+        "privileged_truth_policy_input": False,
+        "validation": {"formal_evaluation_ready": True},
+        "beats_zero_residual": beats_zero,
+        "model_metrics": {
+            "mae": 0.001,
+            "rmse": 0.002,
+            "mean_l1_per_chunk": 0.003,
+        },
+        "zero_residual_baseline": {
+            "mae": 0.004,
+            "rmse": 0.005,
+            "mean_l1_per_chunk": 0.012,
+        },
+    }
+
+
 def test_residual_converter_supervises_only_physical_translation() -> None:
     sample = _sample(4025, (0.006, -0.002, 0.003))
     assert sample.residual_action_chunk.values == [
@@ -196,31 +225,43 @@ def test_masked_trainer_uses_train_and_evaluates_heldout() -> None:
 
 
 def test_residual_summary_requires_two_formal_consistent_seeds() -> None:
-    def report(seed: int, beats_zero: bool) -> dict:
-        return {
-            "schema_version": "M2BMaskedResidualMLPReportV1",
-            "seed": seed,
-            "dataset_sha256": "a" * 64,
-            "eval_split": "val",
-            "failure_context": "on",
-            "teacher_used": False,
-            "privileged_truth_policy_input": False,
-            "validation": {"formal_evaluation_ready": True},
-            "beats_zero_residual": beats_zero,
-            "model_metrics": {
-                "mae": 0.001,
-                "rmse": 0.002,
-                "mean_l1_per_chunk": 0.003,
-            },
-            "zero_residual_baseline": {
-                "mae": 0.004,
-                "rmse": 0.005,
-                "mean_l1_per_chunk": 0.012,
-            },
-        }
-
-    passed = summarize([report(1, True), report(2, True)])
+    passed = summarize(
+        [_residual_seed_report(1, True), _residual_seed_report(2, True)]
+    )
     assert passed["mlp_residual_supported_offline"] is True
-    failed = summarize([report(1, True), report(2, False)])
+    failed = summarize(
+        [_residual_seed_report(1, True), _residual_seed_report(2, False)]
+    )
     assert failed["mlp_residual_supported_offline"] is False
     assert failed["formal_two_seed_evaluation"] is True
+
+
+def test_formal_negative_mlp_summary_is_a_completed_experiment(
+    tmp_path,
+) -> None:
+    project = Path(__file__).resolve().parents[2]
+    reports = []
+    for seed, beats_zero in ((1, True), (2, False)):
+        path = tmp_path / f"{seed}.json"
+        path.write_text(
+            json.dumps(_residual_seed_report(seed, beats_zero))
+        )
+        reports.extend(["--seed-report", str(path)])
+    output = tmp_path / "summary.json"
+    completed = subprocess.run(
+        [
+            sys.executable,
+            str(project / "scripts/m2b/summarize_residual_mlp.py"),
+            *reports,
+            "--report",
+            str(output),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+        cwd=project,
+    )
+    payload = json.loads(output.read_text())
+    assert completed.returncode == 0
+    assert payload["formal_two_seed_evaluation"] is True
+    assert payload["mlp_residual_supported_offline"] is False

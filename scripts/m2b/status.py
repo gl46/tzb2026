@@ -45,6 +45,9 @@ def main() -> int:
         args.report_dir / "m2b-s3-residual-pairs-pilot.json"
     )
     training = load_optional(args.report_dir / "m2b-s4-training.json")
+    residual_training = load_optional(
+        args.report_dir / "m2b-s4-residual-mlp.json"
+    )
     closed_loop = load_optional(args.report_dir / "m2b-s5-closed-loop.json")
     blockers = []
     if not physical or physical.get("status") != "PASS_PUBLIC_FAILURES_AND_RECOVERIES":
@@ -81,6 +84,7 @@ def main() -> int:
         or mapping_offline.get("runtime_mapping_rate") is None
         or float(mapping_offline["runtime_mapping_rate"]) < 0.95
         or mapping_offline.get("planning_checks_complete") is not True
+        or mapping_offline.get("formal_mapping_ready") is not True
     ):
         blockers.append(
             "runtime mapping still requires Isaac IK/collision/safety dry-runs"
@@ -91,6 +95,13 @@ def main() -> int:
         or training.get("formal_ablation") is not True
     ):
         blockers.append("two-seed A100 NoFC/FC training has not run")
+    if (
+        not residual_training
+        or residual_training.get("formal_two_seed_evaluation") is not True
+    ):
+        blockers.append(
+            "two-seed A100 residual MLP-vs-zero evaluation has not run"
+        )
     if (
         not closed_loop
         or closed_loop.get("status")
@@ -175,6 +186,16 @@ def main() -> int:
             )
         ),
         "training_status": training.get("status") if training else "NOT_RUN",
+        "residual_mlp_status": (
+            residual_training.get("status")
+            if residual_training
+            else "NOT_RUN"
+        ),
+        "residual_mlp_supported_offline": (
+            residual_training.get("mlp_residual_supported_offline")
+            if residual_training
+            else None
+        ),
         "closed_loop_status": (
             closed_loop.get("status") if closed_loop else "NOT_RUN"
         ),

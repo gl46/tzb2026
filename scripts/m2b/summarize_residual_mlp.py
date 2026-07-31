@@ -120,7 +120,7 @@ def main() -> int:
     args.report.parent.mkdir(parents=True, exist_ok=True)
     args.report.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
     print(json.dumps(report, indent=2, sort_keys=True))
-    return 0 if report["mlp_residual_supported_offline"] else 2
+    return 0 if report["formal_two_seed_evaluation"] else 2
 
 
 if __name__ == "__main__":
