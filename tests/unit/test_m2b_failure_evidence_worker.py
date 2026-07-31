@@ -160,6 +160,12 @@ def test_residual_worker_uses_bounded_nonzero_camera_perturbations() -> None:
     for seed in range(4000, 4024):
         offsets = perturbations_for_scene(seed, 3)
         assert len(offsets) == len(set(offsets)) == 3
+    global_offsets = {
+        offset
+        for seed in range(4000, 4024)
+        for offset in perturbations_for_scene(seed, 3)
+    }
+    assert len(global_offsets) == 24
 
 
 def test_residual_worker_requires_hash_bound_accepted_correction(

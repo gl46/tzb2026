@@ -47,7 +47,10 @@ def perturbations_for_scene(
     if count < 1 or count > 6:
         raise ValueError("perturbations per scene must be in [1, 6]")
     offsets = tuple(
-        perturbation_for_seed(seed * 8 + index + 1)
+        # Seven is coprime with the 24 sign/magnitude combinations, so a
+        # scene window rotates through the entire bounded schedule instead
+        # of collapsing to a small subset across seeds.
+        perturbation_for_seed(seed * 7 + index + 1)
         for index in range(count)
     )
     if len(set(offsets)) != len(offsets):
