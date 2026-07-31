@@ -1,0 +1,118 @@
+{
+  "axis_stats": [
+    {
+      "dimension": "dx",
+      "exact_zero_rate": 0.0,
+      "max": 0.03,
+      "mean": 0.002998464886068447,
+      "min": -0.03,
+      "std": 0.008458685159769353
+    },
+    {
+      "dimension": "dy",
+      "exact_zero_rate": 0.0,
+      "max": 0.010820556390553793,
+      "mean": -0.01785646089100374,
+      "min": -0.03,
+      "std": 0.006910059894248987
+    },
+    {
+      "dimension": "dz",
+      "exact_zero_rate": 0.0,
+      "max": 0.03,
+      "mean": 0.024315867683463877,
+      "min": -0.03,
+      "std": 0.0094215026069462
+    },
+    {
+      "dimension": "r6d_0",
+      "exact_zero_rate": 1.0,
+      "max": 0.0,
+      "mean": 0.0,
+      "min": 0.0,
+      "std": 0.0
+    },
+    {
+      "dimension": "r6d_1",
+      "exact_zero_rate": 1.0,
+      "max": 0.0,
+      "mean": 0.0,
+      "min": 0.0,
+      "std": 0.0
+    },
+    {
+      "dimension": "r6d_2",
+      "exact_zero_rate": 1.0,
+      "max": 0.0,
+      "mean": 0.0,
+      "min": 0.0,
+      "std": 0.0
+    },
+    {
+      "dimension": "r6d_3",
+      "exact_zero_rate": 1.0,
+      "max": 0.0,
+      "mean": 0.0,
+      "min": 0.0,
+      "std": 0.0
+    },
+    {
+      "dimension": "r6d_4",
+      "exact_zero_rate": 1.0,
+      "max": 0.0,
+      "mean": 0.0,
+      "min": 0.0,
+      "std": 0.0
+    },
+    {
+      "dimension": "r6d_5",
+      "exact_zero_rate": 1.0,
+      "max": 0.0,
+      "mean": 0.0,
+      "min": 0.0,
+      "std": 0.0
+    },
+    {
+      "dimension": "gripper",
+      "exact_zero_rate": 1.0,
+      "max": 0.0,
+      "mean": 0.0,
+      "min": 0.0,
+      "std": 0.0
+    }
+  ],
+  "clip_limit_translation_m": 0.03,
+  "diagnosis": [
+    "The target is nearest simulator truth minus a public track, not a demonstrated successful correction to an executed perturbed nominal.",
+    "Every nominal action is zero and every four-step residual chunk repeats one row, so temporal correction structure is absent.",
+    "Rotation and gripper targets are identically zero while translation is frequently clipped at the 30 mm bound.",
+    "No episode records correction_success, so target magnitude alone does not establish learnability or execution benefit."
+  ],
+  "episodes": 550,
+  "exact_zero_count": 0,
+  "exact_zero_rate": 0.0,
+  "identical_rows_within_chunk_count": 550,
+  "near_zero_translation_count": 0,
+  "near_zero_translation_rate": 0.0,
+  "near_zero_translation_threshold_m": 0.001,
+  "nominal_action_exact_zero_count": 550,
+  "required_v2_change": "use bounded B0 perturbation -> physically verified safe correction pairs and retain both zero and non-zero examples",
+  "schema_version": "M2BResidualAuditV1",
+  "status": "RESIDUAL_TARGET_DEGENERATE",
+  "successful_correction_label_count": 0,
+  "target_semantics": "nearest_hard_truth_minus_public_track_camera_frame",
+  "translation_norm": {
+    "max": 0.04595155683291782,
+    "mean": 0.03277918944135487,
+    "min": 0.009370336884268622,
+    "rmse": 0.033573328732366695
+  },
+  "translation_saturation_count": 235,
+  "translation_saturation_rate": 0.42727272727272725,
+  "zero_residual_baseline": {
+    "mae_all_dimensions": 0.004919316584542153,
+    "rmse_all_dimensions": 0.010616818742785238,
+    "translation_mae": 0.016397721948473845,
+    "translation_rmse": 0.019383570381223708
+  }
+}

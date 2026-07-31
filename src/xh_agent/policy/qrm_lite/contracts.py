@@ -33,14 +33,26 @@ class FailureType(str, Enum):
 class FailureContextV1(StrictModel):
     schema_version: Literal["FailureContextV1"] = "FailureContextV1"
     last_skill: str | None = None
+    previous_skill: str | None = None
     expected_predicates: list[str] = Field(default_factory=list)
     observed_predicates: list[str] = Field(default_factory=list)
     predicate_residual: list[str] = Field(default_factory=list)
     failure_type: FailureType = FailureType.NONE
     retry_count: int = Field(default=0, ge=0)
     attempted_recoveries: list[str] = Field(default_factory=list)
+    last_recovery_result: str | None = None
     last_action_summary: str | None = None
     last_target_track_id: str | None = None
+
+    @model_validator(mode="after")
+    def skill_aliases_must_agree(self) -> "FailureContextV1":
+        if (
+            self.last_skill is not None
+            and self.previous_skill is not None
+            and self.last_skill != self.previous_skill
+        ):
+            raise ValueError("last_skill and previous_skill disagree")
+        return self
 
 
 class HistoryStepV1(StrictModel):
@@ -68,6 +80,7 @@ class QRMObservationV1(StrictModel):
     step_id: int = Field(ge=0)
     timestamp_ns: int = Field(default=0, ge=0)
     instruction: str
+    task_target_track_id: str | None = None
     rgb_uri: str | None = None
     depth_uri: str | None = None
     multi_view_rgb_uris: list[str] = Field(default_factory=list)

@@ -135,4 +135,3 @@ def test_audit_module_does_not_write_m2a_reports() -> None:
     text = source.read_text()
     assert 'write_report(\n        args.report_dir / "m2a-' not in text
     assert json.loads('{"teacher_used": false}')["teacher_used"] is False
-

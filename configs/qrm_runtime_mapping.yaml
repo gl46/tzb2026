@@ -1,0 +1,78 @@
+schema_version: RuntimeSkillRegistryV1
+model_output_schema: CoarseIntentV1
+fallback_action: B0_SAFE_HOLD
+minimum_confidence: 0.0
+skills:
+  APPROACH:
+    aliases: []
+    alias_parameters: {}
+    runtime_action: B0_PUBLIC_GEOMETRY_APPROACH
+    required_parameters: [target_track_id]
+    optional_parameters: [grasp_family]
+    coordinate_frame: world
+    units: m
+    supported_phases: [OBSERVE, APPROACH, RECOVERY]
+    residual_allowed: false
+  REOBSERVE:
+    aliases: []
+    alias_parameters: {}
+    runtime_action: HOLD_AND_CAPTURE_PUBLIC_RGBD
+    required_parameters: []
+    optional_parameters: []
+    coordinate_frame: policy_rgbd_optical
+    units: none
+    supported_phases: [OBSERVE, APPROACH, GRASP, LIFT, MOVE, PLACE, RELEASE, RECOVERY]
+    residual_allowed: false
+  REGRASP:
+    aliases: [RETRY_TOP, ALTERNATE_OBLIQUE, ALTERNATE_SIDE]
+    alias_parameters:
+      RETRY_TOP: {grasp_family: top_down}
+      ALTERNATE_OBLIQUE: {grasp_family: oblique}
+      ALTERNATE_SIDE: {grasp_family: side}
+    runtime_action: B0_PUBLIC_GEOMETRY_REGRASP
+    required_parameters: [target_track_id, grasp_family]
+    optional_parameters: []
+    coordinate_frame: world
+    units: m_rad
+    supported_phases: [RECOVERY]
+    residual_allowed: false
+  SAFE_PLACE_NON_TARGET:
+    aliases: [SafePlaceNonTarget]
+    alias_parameters: {}
+    runtime_action: B0_SAFE_PLACE_NON_TARGET
+    required_parameters: [target_track_id]
+    optional_parameters: [destination]
+    coordinate_frame: world
+    units: m_rad
+    supported_phases: [RECOVERY]
+    residual_allowed: false
+  REASSOCIATE_TARGET:
+    aliases: [ReassociateTarget]
+    alias_parameters: {}
+    runtime_action: PUBLIC_TRACK_REASSOCIATION
+    required_parameters: [target_track_id]
+    optional_parameters: []
+    coordinate_frame: world
+    units: none
+    supported_phases: [RECOVERY]
+    residual_allowed: false
+  RETRY_RELEASE:
+    aliases: [RetryRelease]
+    alias_parameters: {}
+    runtime_action: B0_RELEASE_RETRY
+    required_parameters: [target_track_id]
+    optional_parameters: [open_width_m]
+    coordinate_frame: world
+    units: m
+    supported_phases: [RELEASE, RECOVERY]
+    residual_allowed: false
+  STOP:
+    aliases: [ABORT_SAFE]
+    alias_parameters: {}
+    runtime_action: B0_SAFE_HOLD
+    required_parameters: []
+    optional_parameters: []
+    coordinate_frame: world
+    units: none
+    supported_phases: [OBSERVE, APPROACH, GRASP, LIFT, MOVE, PLACE, RELEASE, RECOVERY]
+    residual_allowed: false

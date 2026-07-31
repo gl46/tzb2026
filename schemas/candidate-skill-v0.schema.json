@@ -12,6 +12,9 @@
         "BACKOFF",
         "REGRASP",
         "REOBSERVE",
+        "SAFE_PLACE_NON_TARGET",
+        "REASSOCIATE_TARGET",
+        "RETRY_RELEASE",
         "STOP",
         "ASK_CLARIFICATION"
       ],

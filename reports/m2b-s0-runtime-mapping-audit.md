@@ -1,0 +1,48 @@
+# M2B S0 runtime mapping audit
+
+- status: **MAPPING_INTEGRATION_ABSENT**
+
+```json
+{
+  "coarse_skill_histogram": {
+    "APPROACH": 60
+  },
+  "diagnosis": [
+    "All M2A outputs were APPROACH, a canonical project skill, and every decision had public tracks.",
+    "The worker passed an unconditional False mapping callback and emitted the same REJECTED_NO_OFFICIAL_EVIDENCE reason without evaluating skill, track, schema, frame, units, parameters, range, IK, or collision separately.",
+    "M2A therefore proves fail-closed integration behavior; it does not prove that all model outputs were intrinsically invalid."
+  ],
+  "integration_gate_is_unconditional": true,
+  "integration_mapping_missing_count": 60,
+  "metrics_files": 10,
+  "model_decisions_applicable": 50,
+  "model_decisions_total": 60,
+  "model_output_invalid_count_proven": 0,
+  "public_track_count_range": [
+    3,
+    8
+  ],
+  "raw_mapping_reason_histogram": {
+    "REJECTED_NO_OFFICIAL_EVIDENCE": 60
+  },
+  "reason_histogram": {
+    "alias_or_case_mismatch": 0,
+    "coordinate_frame_mismatch": 0,
+    "integration_mapping_absent": 60,
+    "low_confidence": 0,
+    "missing_target_track": 0,
+    "other": 0,
+    "out_of_range_residual": 0,
+    "safety_rejection": 0,
+    "schema_version_mismatch": 0,
+    "stale_track": 0,
+    "unit_mismatch": 0,
+    "unknown_skill_enum": 0,
+    "unsupported_parameter": 0
+  },
+  "required_v2_change": "versioned registry plus staged schema/skill/track/frame/unit/range/IK/collision validation with distinct rejection reasons",
+  "residual_proposed_count": 60,
+  "schema_version": "M2BRuntimeMappingAuditV1",
+  "status": "MAPPING_INTEGRATION_ABSENT"
+}
+```

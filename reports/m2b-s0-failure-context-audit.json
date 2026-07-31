@@ -1,0 +1,76 @@
+{
+  "attempted_recovery_nonempty_count": 0,
+  "coarse_skill_counts": {
+    "APPROACH": 96,
+    "REOBSERVE": 454
+  },
+  "diagnosis": [
+    "FailureContext reached the prompt in the FC-on pipeline; the M2A raw reports explicitly distinguish failure_context=on/off.",
+    "The corpus exposes only NONE and TRACKING_LOST, and nominal skill is deterministic within each failure type.",
+    "retry_count is always zero and attempted_recoveries is always empty, so no history-conditioned alternative recovery decision exists.",
+    "The dominant REOBSERVE class can be inferred from public tracking quality, making FailureContext redundant rather than proven ineffective.",
+    "M2A's two-seed zero overall accuracy/macro-F1 delta is therefore inconclusive for the mandatory physical failures."
+  ],
+  "duplicate_episode_ids": 0,
+  "episodes": 550,
+  "failure_by_split": {
+    "test": {
+      "NONE": 22,
+      "TRACKING_LOST": 44
+    },
+    "train": {
+      "NONE": 63,
+      "TRACKING_LOST": 355
+    },
+    "val": {
+      "NONE": 11,
+      "TRACKING_LOST": 55
+    }
+  },
+  "failure_context_nonempty_count": 454,
+  "failure_context_nonempty_rate": 0.8254545454545454,
+  "failure_context_unique_combinations": 11,
+  "failure_type_counts": {
+    "NONE": 96,
+    "TRACKING_LOST": 454
+  },
+  "field_entropy": {
+    "attempted_recoveries_bits": -0.0,
+    "failure_type_bits": 0.6679979660496467,
+    "last_skill_bits": -0.0,
+    "predicate_residual_bits": 0.6679979660496467,
+    "retry_count_bits": -0.0
+  },
+  "mandatory_failure_counts": {
+    "EMPTY_GRASP": 0,
+    "RELEASE_FAILURE": 0,
+    "WRONG_OBJECT": 0
+  },
+  "recovery_sequence_counts": {
+    "[\"REOBSERVE\"]": 454,
+    "[]": 96
+  },
+  "required_v2_change": "collect matched visual states with distinct physical failure histories and distinct recovery labels",
+  "retry_count_values": [
+    0
+  ],
+  "same_failure_repeated_action_examples": 0,
+  "scene_split_conflicts": 0,
+  "schema_version": "M2BFailureContextAuditV1",
+  "skill_by_failure": {
+    "NONE": {
+      "APPROACH": 96
+    },
+    "TRACKING_LOST": {
+      "REOBSERVE": 454
+    }
+  },
+  "split_counts": {
+    "test": 66,
+    "train": 418,
+    "val": 66
+  },
+  "status": "LIMITED",
+  "unique_scene_seeds": 50,
+  "verdict": "INCONCLUSIVE"
+}

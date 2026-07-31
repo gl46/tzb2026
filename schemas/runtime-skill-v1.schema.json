@@ -1,0 +1,113 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "available_track_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Available Track Ids",
+      "type": "array"
+    },
+    "confidence": {
+      "anyOf": [
+        {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Confidence"
+    },
+    "coordinate_frame": {
+      "title": "Coordinate Frame",
+      "type": "string"
+    },
+    "current_phase": {
+      "title": "Current Phase",
+      "type": "string"
+    },
+    "model_class_id": {
+      "title": "Model Class Id",
+      "type": "string"
+    },
+    "model_output_schema": {
+      "default": "CoarseIntentV1",
+      "title": "Model Output Schema",
+      "type": "string"
+    },
+    "model_target_track_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Model Target Track Id"
+    },
+    "parameters": {
+      "additionalProperties": true,
+      "title": "Parameters",
+      "type": "object"
+    },
+    "residual_values": {
+      "anyOf": [
+        {
+          "items": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Residual Values"
+    },
+    "schema_version": {
+      "const": "RuntimeSkillRequestV1",
+      "default": "RuntimeSkillRequestV1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "skill": {
+      "title": "Skill",
+      "type": "string"
+    },
+    "task_target_track_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Task Target Track Id"
+    },
+    "units": {
+      "title": "Units",
+      "type": "string"
+    }
+  },
+  "required": [
+    "model_class_id",
+    "skill",
+    "coordinate_frame",
+    "units",
+    "current_phase"
+  ],
+  "title": "RuntimeSkillRequestV1",
+  "type": "object"
+}

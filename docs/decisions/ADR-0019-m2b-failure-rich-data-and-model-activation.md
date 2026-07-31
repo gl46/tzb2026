@@ -50,4 +50,3 @@ Teachers are unused. Nano remains `CANDIDATE`, BWM remains
 `CANDIDATE_LICENSE_PENDING`, and Super remains `PARKED`. Any Teacher entering
 the data labels or runtime control stack kills the affected run. Current
 Teacher kill-rule events: **none**.
-

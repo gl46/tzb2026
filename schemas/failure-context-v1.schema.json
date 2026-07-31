@@ -8,6 +8,7 @@
   "properties": {
     "schema_version": { "const": "FailureContextV1" },
     "last_skill": { "type": ["string", "null"] },
+    "previous_skill": { "type": ["string", "null"] },
     "expected_predicates": { "type": "array", "items": { "type": "string" } },
     "observed_predicates": { "type": "array", "items": { "type": "string" } },
     "predicate_residual": { "type": "array", "items": { "type": "string" } },
@@ -28,6 +29,7 @@
     },
     "retry_count": { "type": "integer", "minimum": 0 },
     "attempted_recoveries": { "type": "array", "items": { "type": "string" } },
+    "last_recovery_result": { "type": ["string", "null"] },
     "last_action_summary": { "type": ["string", "null"] },
     "last_target_track_id": { "type": ["string", "null"] }
   }
