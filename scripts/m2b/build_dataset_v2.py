@@ -50,6 +50,19 @@ def scene_split(scene_seed: int) -> str:
     return "val" if bucket < 90 else "test"
 
 
+def code_revision_histogram(
+    episodes: list[dict[str, Any]],
+) -> dict[str, int]:
+    return dict(
+        sorted(
+            Counter(
+                str(episode["provenance"]["code_revision"])
+                for episode in episodes
+            ).items()
+        )
+    )
+
+
 def remote_sha256(host: str, path: str) -> str:
     completed = subprocess.run(
         ["ssh", "-o", "BatchMode=yes", host, "sha256sum", path],
@@ -205,6 +218,7 @@ def main() -> int:
     leakage = sorted(
         group for group, splits in split_groups.items() if len(splits) > 1
     )
+    revision_histogram = code_revision_histogram(episodes)
     report = {
         "schema_version": "M2BDatasetV2ReportV1",
         "status": (
@@ -224,6 +238,9 @@ def main() -> int:
         "split_counts": dict(sorted(split_counts.items())),
         "unique_scene_groups": len(split_groups),
         "split_group_leakage": leakage,
+        "code_revision_histogram": revision_histogram,
+        "unique_code_revisions": len(revision_histogram),
+        "mixed_code_revisions": len(revision_histogram) > 1,
         "limited_coverage_gate_passed": limited_gate and not leakage,
         "model_rollout_episodes": 0,
         "coarse_failure_recovery_supervision_episodes": len(episodes),
@@ -239,6 +256,13 @@ def main() -> int:
         "limitations": [
             "These episodes supervise FailureContext and coarse recovery skills, not model rollout attribution.",
             "Residual targets remain excluded until independent perturbation/correction executions exist.",
+            *(
+                [
+                    "Accepted episodes span multiple hash-recorded probe revisions; source transitions are reported separately."
+                ]
+                if len(revision_histogram) > 1
+                else []
+            ),
         ],
     }
     args.report.parent.mkdir(parents=True, exist_ok=True)

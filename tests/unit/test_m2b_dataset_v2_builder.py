@@ -2,7 +2,11 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from m2b.build_dataset_v2 import scene_split, sources_from_manifest
+from m2b.build_dataset_v2 import (
+    code_revision_histogram,
+    scene_split,
+    sources_from_manifest,
+)
 
 
 def test_scene_split_is_deterministic_and_scene_grouped() -> None:
@@ -22,3 +26,15 @@ def test_dataset_source_manifest_is_versioned_and_restart_safe() -> None:
         "RELEASE_FAILURE",
     }
     assert len(statuses) == 4
+
+
+def test_dataset_reports_mixed_probe_revisions_without_hiding_them() -> None:
+    episodes = [
+        {"provenance": {"code_revision": "b" * 64}},
+        {"provenance": {"code_revision": "a" * 64}},
+        {"provenance": {"code_revision": "b" * 64}},
+    ]
+    assert code_revision_histogram(episodes) == {
+        "a" * 64: 1,
+        "b" * 64: 2,
+    }

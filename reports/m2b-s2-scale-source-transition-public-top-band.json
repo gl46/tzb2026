@@ -1,0 +1,37 @@
+{
+  "change": "apply an explicit public top-z 20 mm band before the existing color/world-x TaskSpec extremum",
+  "deployed_at": "2026-08-01T04:09:40+08:00",
+  "deployment_boundary": {
+    "worker0_first_wrong_object_scene_seed": 4008,
+    "worker1_first_wrong_object_scene_seed": 4011
+  },
+  "evidence_policy": "PREVIOUS_EVIDENCE_RETAINED_WITH_PER_EPISODE_SOURCE_HASHES",
+  "failure_workers_restarted": false,
+  "first_physical_validation": {
+    "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2b/failure-evidence-scale-v1/worker1/scene-4011/failures/wrong_object/wrong_object/attempt-01/actuation-probe.json",
+    "evidence_sha256": "0da591f1d3503f5d93fb2891e3d38371c220a420e4882a6e77d0aa2a0bbb6c50",
+    "injection_public_xy_error_m": 0.010392015126101271,
+    "object_lift_m": 0.14997237920761108,
+    "public_failure_predicate": "carried_target_match=false",
+    "public_recovery_predicates": [
+      "grasped=true",
+      "lifted=true"
+    ],
+    "recovery_follow_error_m": 0.00034961639921216427,
+    "recovery_training_eligible": true,
+    "selected_ik_yaw_rad": 0.7853981633974483
+  },
+  "gate_lowered": false,
+  "new_public_predicates_sha256": "22eed691ae8d5fdfebeef54929d3d1252240e884e207f67d741cb1c93d7de8db",
+  "new_probe_sha256": "4ec1b929d06d4dc9b51e663e336e1af7a50176247c0f7c8ac9bf4e64abff80bd",
+  "old_public_predicates_sha256": "74ff6dfae44b3533d7a40a53b2c2c2f7e5c90efe6caab40caee8cb98b090eb2a",
+  "old_probe_sha256": "c9ec87ca1312a9ffcdc53530464d236f2dc03ec816057e6532a9ef3732fe32a0",
+  "privileged_truth_policy_input": false,
+  "reason": "Rejected scenes 4002 and 4009 contained high-X low-height yellow fragments. The public-only top band selects the full-height TaskSpec candidate and remains explicit in the serialized target_selector.",
+  "remote_host": "root@labserver",
+  "remote_project_root": "/var/tmp/m2a-isaac-project-20260731",
+  "schema_version": "M2BScaleSourceTransitionV1",
+  "status": "PASS_FIRST_PHYSICAL_WRONG_OBJECT_RECOVERY",
+  "teacher_used": false,
+  "world_model_replaced": false
+}
