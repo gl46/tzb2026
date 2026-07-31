@@ -1,8 +1,8 @@
 {
   "counts_by_failure": {
-    "EMPTY_GRASP": 3,
-    "RELEASE_FAILURE": 8,
-    "WRONG_OBJECT": 5
+    "EMPTY_GRASP": 5,
+    "RELEASE_FAILURE": 10,
+    "WRONG_OBJECT": 8
   },
   "limitations": [
     "Receipts are post-execution B0 monitors, not model-selected decisions.",
@@ -11,17 +11,17 @@
   ],
   "model_selected_decisions": 0,
   "output": "artifacts/m2b/physical-runtime-gates.jsonl",
-  "output_sha256": "c9bdebef4c68de4d9e71ba7b5a6553385cc5e8dc787d0d8956c3c20d39bf3823",
+  "output_sha256": "fe9d7be63c2f3cca6122eae487a01439b29d20faa5ee2071a86cceeb1150d7c5",
   "passing_counts_by_failure": {
-    "EMPTY_GRASP": 3,
-    "RELEASE_FAILURE": 8,
-    "WRONG_OBJECT": 5
+    "EMPTY_GRASP": 5,
+    "RELEASE_FAILURE": 10,
+    "WRONG_OBJECT": 8
   },
   "post_execution_gate_rate": 1.0,
   "privileged_truth_policy_input": false,
   "prospective_planning_checks_complete": false,
-  "receipts_complete_and_passing": 16,
-  "receipts_valid": 16,
+  "receipts_complete_and_passing": 23,
+  "receipts_valid": 23,
   "required_probe_sha256": "1e32fa89c8b1ef403a52f1b2c8326942b72092e6e88f50e8f780eff1c08c6094",
   "runtime_mapping_rate": null,
   "schema_version": "M2BPhysicalRuntimeGateReportV1",
