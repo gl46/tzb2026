@@ -515,12 +515,24 @@ def test_isaac_probe_m2b_failures_change_physical_state_before_recovery() -> Non
     assert "attachment_remained = stage.GetPrimAtPath(ATTACH_JOINT_PATH).IsValid()" in source
     assert "np.linalg.norm(release_object_delta)) >= 0.01" in source
     assert "release_follow_error_m <= 0.02" in source
-    assert '"public_observation_status": "NOT_CAPTURED_BY_ACTUATION_PROBE"' in source
-    assert '"training_eligible": False' in source
+    assert 'else "NOT_CAPTURED_BY_ACTUATION_PROBE"' in source
+    assert '"training_eligible": bool(' in source
     assert "and m2b_injection_pass" in source
     assert '"broker_attached_actual_contact"' in source
     assert '"reassociate_target_executed": False' in source
     assert '"regrasp_target_executed": False' in source
+
+
+def test_isaac_probe_m2b_public_predicates_use_rgbd_not_truth() -> None:
+    source = (SCRIPTS / "isaac_m1b_actuation_probe.py").read_text()
+    assert '"--m2b-capture-public-rgbd"' in source
+    assert '"--m2b-task-target-public-color"' in source
+    assert "GeometricRGBDBaseline(" in source
+    assert "select_task_target_track(" in source
+    assert "infer_empty_grasp_predicates(" in source
+    assert "infer_occlusion_aware_wrong_object_predicates(" in source
+    assert "infer_occlusion_aware_release_failure_predicates(" in source
+    assert '"simulator_truth_policy_input": False' in source
 
 
 def test_isaac_stage_builder_ports_sdf_velocity_decay_to_physx() -> None:

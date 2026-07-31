@@ -34,6 +34,7 @@ class GeometricRGBDBaseline:
         min_component_pixels: int = 12,
         max_component_pixels: int = 2500,
         color_similarity: float = 0.95,
+        maximum_association_distance_m: float = 0.050,
     ) -> None:
         self.table_depth_m = table_depth_m
         self.min_component_pixels = min_component_pixels
@@ -41,7 +42,9 @@ class GeometricRGBDBaseline:
         if not 0 < color_similarity <= 1:
             raise ValueError("color_similarity must be in (0, 1]")
         self.color_similarity = color_similarity
-        self._track_associator = PublicTrackAssociator()
+        self._track_associator = PublicTrackAssociator(
+            maximum_association_distance_m=maximum_association_distance_m
+        )
 
     def infer(self, observation: PerceptionInputV1, depth_m: np.ndarray, rgb: np.ndarray | None = None) -> list[PerceptionResultV1]:
         if depth_m.ndim != 2 or not np.isfinite(depth_m).any():
@@ -117,14 +120,35 @@ class GeometricRGBDBaseline:
         simulator labels never enter this method.
         """
         rgb_float = rgb.astype(float)
-        norm = np.linalg.norm(rgb_float, axis=2)
-        unit = np.divide(rgb_float, norm[:, :, None], out=np.zeros_like(rgb_float), where=norm[:, :, None] > 1e-9)
-        prototypes = COLOR_PROTOTYPES / np.linalg.norm(COLOR_PROTOTYPES, axis=1)[:, None]
+        # Ray-traced Isaac frames contain a strong neutral illumination term
+        # (for example, source red 0.8/0.1/0.1 renders near 228/117/126).
+        # Removing each pixel's neutral component preserves hue without using
+        # semantic render labels or simulator material truth.
+        chroma = rgb_float - rgb_float.min(axis=2, keepdims=True)
+        norm = np.linalg.norm(chroma, axis=2)
+        unit = np.divide(
+            chroma,
+            norm[:, :, None],
+            out=np.zeros_like(chroma),
+            where=norm[:, :, None] > 1e-9,
+        )
+        prototype_chroma = COLOR_PROTOTYPES - COLOR_PROTOTYPES.min(
+            axis=1, keepdims=True
+        )
+        prototypes = prototype_chroma / np.linalg.norm(
+            prototype_chroma, axis=1
+        )[:, None]
         similarity = unit @ prototypes.T
         assigned = similarity.argmax(axis=2)
+        sufficiently_chromatic = chroma.max(axis=2) >= 48.0
         components: list[tuple[list[tuple[int, int]], str]] = []
         for index, name in enumerate(COLOR_NAMES):
-            mask = foreground & (assigned == index) & (similarity[:, :, index] >= self.color_similarity)
+            mask = (
+                foreground
+                & sufficiently_chromatic
+                & (assigned == index)
+                & (similarity[:, :, index] >= self.color_similarity)
+            )
             components.extend((pixels, name) for pixels in self._components(mask))
         return components
 

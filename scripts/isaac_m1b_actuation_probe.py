@@ -144,6 +144,32 @@ def parse_args() -> tuple[argparse.Namespace, list[str]]:
             "prove the object still follows, then retry detach/release."
         ),
     )
+    parser.add_argument(
+        "--m2b-capture-public-rgbd",
+        action="store_true",
+        help=(
+            "Capture synchronized policy-camera RGB-D and derive M2B failure "
+            "predicates only from the public geometric perception baseline."
+        ),
+    )
+    parser.add_argument(
+        "--m2b-task-target-public-color",
+        choices=("red", "green", "blue", "yellow", "magenta", "cyan"),
+        default=None,
+        help=(
+            "Public TaskSpec target color. Required with public RGB-D capture; "
+            "the max-world-X matching public track is selected before action."
+        ),
+    )
+    parser.add_argument(
+        "--m2b-injected-public-grasp-color",
+        choices=("red", "green", "blue", "yellow", "magenta", "cyan"),
+        default=None,
+        help=(
+            "Public track color selected by a WRONG_OBJECT injection. The "
+            "max-world-X track is bound before action; no entity ID is used."
+        ),
+    )
     return parser.parse_known_args()
 
 
@@ -249,6 +275,7 @@ import numpy as np
 import carb.settings
 import omni.kit.app
 import omni.physx
+import omni.replicator.core as rep
 import omni.timeline
 import omni.usd
 from isaacsim.core.simulation_manager import SimulationManager
@@ -284,6 +311,20 @@ extension_manager.set_extension_enabled_immediate(
 
 from isaacsim.robot.experimental.manipulators.examples.franka.franka import Franka
 from isaacsim.sensors.experimental.physics import Contact, ContactSensor
+from PIL import Image
+
+from xh_agent.data_engine.isaac.public_failure_predicates import (
+    infer_empty_grasp_predicates,
+    infer_lift_success_predicates,
+    infer_occlusion_aware_lift_success_predicates,
+    infer_occlusion_aware_release_failure_predicates,
+    infer_occlusion_aware_release_success_predicates,
+    infer_occlusion_aware_wrong_object_predicates,
+    select_task_target_track,
+    snapshots_from_perception_results,
+)
+from xh_agent.perception.geometric_rgbd import GeometricRGBDBaseline
+from xh_agent.perception.interfaces import PerceptionInputV1
 
 
 ACTION_PROTOCOL = {
@@ -1270,6 +1311,196 @@ def _enable_contact_reporting_on_colliders(
     }
 
 
+def _setup_m2b_public_rgbd(
+    stage: Usd.Stage,
+    output: Path,
+) -> dict[str, Any] | None:
+    if not ARGS.m2b_capture_public_rgbd:
+        return None
+    if ARGS.m2b_task_target_public_color is None:
+        raise ValueError(
+            "M2B public RGB-D capture requires an explicit public target color"
+        )
+    if not (
+        ARGS.m2b_inject_empty_grasp
+        or ARGS.m2b_inject_release_failure
+        or ARGS.m2b_task_target_object is not None
+    ):
+        raise ValueError("M2B public RGB-D capture requires a failure injection")
+    camera_spec = next(
+        camera for camera in SCENE.cameras if camera.name == "policy_rgbd"
+    )
+    rep.orchestrator.set_capture_on_play(False)
+    camera_name = "m2b_policy_rgbd"
+    camera = rep.functional.create.camera(
+        position=camera_spec.position,
+        look_at=camera_spec.look_at,
+        parent="/World",
+        name=camera_name,
+    )
+    render_product = rep.create.render_product(
+        camera,
+        resolution=camera_spec.resolution,
+        name="M2BPolicyRGBDRenderProduct",
+    )
+    simulation_app.update()
+    matches = [
+        prim
+        for prim in stage.Traverse()
+        if prim.IsA(UsdGeom.Camera) and prim.GetName() == camera_name
+    ]
+    if len(matches) != 1:
+        raise RuntimeError(
+            f"expected one M2B policy camera, got {[str(p.GetPath()) for p in matches]}"
+        )
+    camera_prim = UsdGeom.Camera(matches[0])
+    horizontal_aperture_mm = float(
+        camera_prim.GetHorizontalApertureAttr().Get()
+    )
+    width, height = camera_spec.resolution
+    vertical_aperture_mm = horizontal_aperture_mm * height / width
+    focal_length_mm = horizontal_aperture_mm / (
+        2.0 * math.tan(camera_spec.horizontal_fov_rad / 2.0)
+    )
+    camera_prim.GetVerticalApertureAttr().Set(vertical_aperture_mm)
+    camera_prim.GetFocalLengthAttr().Set(focal_length_mm)
+    camera_prim.GetHorizontalApertureOffsetAttr().Set(0.0)
+    camera_prim.GetVerticalApertureOffsetAttr().Set(0.0)
+    camera_prim.GetClippingRangeAttr().Set(
+        Gf.Vec2f(*camera_spec.clipping_range_m)
+    )
+    transform = UsdGeom.XformCache().GetLocalToWorldTransform(matches[0])
+    origin = transform.Transform(Gf.Vec3d(0.0, 0.0, 0.0))
+    optical_x = transform.TransformDir(Gf.Vec3d(1.0, 0.0, 0.0)).GetNormalized()
+    optical_y = transform.TransformDir(Gf.Vec3d(0.0, -1.0, 0.0)).GetNormalized()
+    optical_z = transform.TransformDir(Gf.Vec3d(0.0, 0.0, -1.0)).GetNormalized()
+    camera_to_world_optical = [
+        float(optical_x[0]),
+        float(optical_y[0]),
+        float(optical_z[0]),
+        float(origin[0]),
+        float(optical_x[1]),
+        float(optical_y[1]),
+        float(optical_z[1]),
+        float(origin[1]),
+        float(optical_x[2]),
+        float(optical_y[2]),
+        float(optical_z[2]),
+        float(origin[2]),
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+    ]
+    intrinsics = [
+        width * focal_length_mm / horizontal_aperture_mm,
+        0.0,
+        width / 2.0,
+        0.0,
+        height * focal_length_mm / vertical_aperture_mm,
+        height / 2.0,
+        0.0,
+        0.0,
+        1.0,
+    ]
+    annotators = {
+        "rgb": rep.AnnotatorRegistry.get_annotator("rgb"),
+        "depth": rep.AnnotatorRegistry.get_annotator(
+            "distance_to_image_plane"
+        ),
+    }
+    for annotator in annotators.values():
+        annotator.attach(render_product)
+    capture_root = output / "m2b_public_rgbd"
+    (capture_root / "rgb").mkdir(parents=True, exist_ok=True)
+    (capture_root / "depth").mkdir(parents=True, exist_ok=True)
+    return {
+        "annotators": annotators,
+        "render_product": render_product,
+        "intrinsics": intrinsics,
+        "camera_to_world_optical": camera_to_world_optical,
+        "resolution": [width, height],
+        "capture_root": capture_root,
+        "baseline": GeometricRGBDBaseline(
+            maximum_association_distance_m=0.12
+        ),
+        "captures": [],
+        "task_spec": {
+            "target_selector": (
+                f"visual_color={ARGS.m2b_task_target_public_color},world_x=max"
+            ),
+            "source": "PUBLIC_RGBD_TASK_SPEC",
+            "simulator_entity_id_used": False,
+        },
+    }
+
+
+def _capture_m2b_public_rgbd(
+    runtime: dict[str, Any],
+    *,
+    label: str,
+) -> list[Any]:
+    rep.orchestrator.step(
+        rt_subframes=1,
+        delta_time=1.0 / 60.0,
+        pause_timeline=False,
+    )
+    rgb_data = runtime["annotators"]["rgb"].get_data()
+    depth_data = runtime["annotators"]["depth"].get_data()
+    rgb = np.asarray(
+        rgb_data["data"] if isinstance(rgb_data, dict) else rgb_data
+    )
+    depth = np.asarray(
+        depth_data["data"] if isinstance(depth_data, dict) else depth_data,
+        dtype=np.float32,
+    )
+    width, height = runtime["resolution"]
+    if rgb.shape[:2] != (height, width) or depth.shape != (height, width):
+        raise RuntimeError(
+            f"M2B RGB-D shape mismatch: rgb={rgb.shape}, depth={depth.shape}"
+        )
+    rgb = rgb[:, :, :3].astype(np.uint8)
+    capture_root = runtime["capture_root"]
+    rgb_path = capture_root / "rgb" / f"{label}.png"
+    depth_path = capture_root / "depth" / f"{label}.npy"
+    Image.fromarray(rgb, mode="RGB").save(rgb_path)
+    np.save(depth_path, depth)
+    timestamp_ns = int(
+        SimulationManager.get_num_physics_steps()
+        * SimulationManager.get_physics_dt()
+        * 1_000_000_000
+    )
+    public_results = runtime["baseline"].infer(
+        PerceptionInputV1(
+            frame_id="m2b_policy_rgbd_optical",
+            timestamp_ns=timestamp_ns,
+            rgb_uri=f"dataset://m2b_public_rgbd/rgb/{label}.png",
+            depth_uri=f"dataset://m2b_public_rgbd/depth/{label}.npy",
+            camera_intrinsics=runtime["intrinsics"],
+            camera_frame="m2b_policy_rgbd_optical",
+        ),
+        depth,
+        rgb,
+    )
+    snapshots = snapshots_from_perception_results(
+        public_results,
+        runtime["camera_to_world_optical"],
+    )
+    runtime["captures"].append(
+        {
+            "label": label,
+            "timestamp_ns": timestamp_ns,
+            "rgb_uri": f"dataset://m2b_public_rgbd/rgb/{label}.png",
+            "depth_uri": f"dataset://m2b_public_rgbd/depth/{label}.npy",
+            "rgb_sha256": sha256_file(rgb_path),
+            "depth_sha256": sha256_file(depth_path),
+            "finite_depth_samples": int(np.isfinite(depth).sum()),
+            "tracks": [snapshot.model_dump(mode="json") for snapshot in snapshots],
+        }
+    )
+    return snapshots
+
+
 def main() -> int:
     output = Path(ARGS.output)
     output.mkdir(parents=True, exist_ok=True)
@@ -1307,6 +1538,7 @@ def main() -> int:
         raise RuntimeError(
             "Isaac stage lacks the self-described official Default Franka contract"
         )
+    m2b_public_rgbd = _setup_m2b_public_rgbd(stage, output)
 
     # The sensor step manager registers against SimulationManager.  Configure
     # the manager before constructing runtime sensors; doing this in the
@@ -1460,6 +1692,40 @@ def main() -> int:
         )
     robot.reset_to_default_pose()
     _step_gripper(robot, 0.04, steps=60)
+    m2b_clear_hand_position, m2b_clear_hand_orientation = _live_pose(hand_prim)
+    m2b_public_before: list[Any] | None = None
+    m2b_task_target_track_id: str | None = None
+    m2b_injected_grasp_track_id: str | None = None
+    if m2b_public_rgbd is not None:
+        m2b_public_before = _capture_m2b_public_rgbd(
+            m2b_public_rgbd,
+            label="before_failure",
+        )
+        task_target = select_task_target_track(
+            m2b_public_before,
+            visual_color=ARGS.m2b_task_target_public_color,
+            world_axis="x",
+            extremum="max",
+        )
+        m2b_task_target_track_id = task_target.track_id
+        m2b_public_rgbd["task_spec"]["target_track_id"] = (
+            m2b_task_target_track_id
+        )
+        if ARGS.m2b_task_target_object is not None:
+            if ARGS.m2b_injected_public_grasp_color is None:
+                raise ValueError(
+                    "WRONG_OBJECT public capture requires an injected grasp color"
+                )
+            injected_target = select_task_target_track(
+                m2b_public_before,
+                visual_color=ARGS.m2b_injected_public_grasp_color,
+                world_axis="x",
+                extremum="max",
+            )
+            m2b_injected_grasp_track_id = injected_target.track_id
+            m2b_public_rgbd["task_spec"]["injected_action_track_id"] = (
+                m2b_injected_grasp_track_id
+            )
     scene_dynamic_prims = {
         model.name: (
             target_object_prim
@@ -1768,6 +2034,27 @@ def main() -> int:
             and float(np.linalg.norm(empty_object_delta)) <= 0.005
         )
         _step_gripper(robot, 0.04, steps=60)
+        phases["empty_grasp_public_reobserve"] = _step_pose(
+            robot,
+            np.asarray(m2b_clear_hand_position, dtype=np.float32),
+            steps=120,
+            orientation_wxyz=np.asarray(
+                m2b_clear_hand_orientation, dtype=np.float32
+            ),
+        )
+        empty_public_predicates = None
+        if m2b_public_rgbd is not None:
+            assert m2b_public_before is not None
+            assert m2b_task_target_track_id is not None
+            empty_public_after = _capture_m2b_public_rgbd(
+                m2b_public_rgbd,
+                label="empty_grasp_reobserve",
+            )
+            empty_public_predicates = infer_empty_grasp_predicates(
+                m2b_public_before,
+                empty_public_after,
+                task_target_track_id=m2b_task_target_track_id,
+            )
         phases["empty_grasp_return_to_pregrasp"] = _step_pose(
             robot,
             pregrasp,
@@ -1790,10 +2077,29 @@ def main() -> int:
             "sensor_frame_count": len(empty_sensor_frames),
             "tensor_frame_count": len(empty_tensor_frames),
             "physx_frame_count": len(empty_physx_frames),
-            "public_observation_status": "NOT_CAPTURED_BY_ACTUATION_PROBE",
-            "training_eligible": False,
+            "public_observation_status": (
+                "CAPTURED_AND_VALIDATED"
+                if empty_public_predicates is not None
+                and {"grasped=false", "lifted=false"}.issubset(
+                    empty_public_predicates.predicates
+                )
+                else "NOT_CAPTURED_BY_ACTUATION_PROBE"
+            ),
+            "public_predicates": (
+                empty_public_predicates.model_dump(mode="json")
+                if empty_public_predicates is not None
+                else None
+            ),
+            "training_eligible": bool(
+                empty_public_predicates is not None
+                and {"grasped=false", "lifted=false"}.issubset(
+                    empty_public_predicates.predicates
+                )
+                and empty_physics_pass
+            ),
             "recovery_steps_executed": [
                 "OPEN_GRIPPER",
+                "REOBSERVE",
                 "RETURN_TO_PREGRASP",
             ],
         }
@@ -2519,6 +2825,44 @@ def main() -> int:
         object_motion[2] >= 0.05
         and follow_error_m <= 0.02
     )
+    m2b_public_after_lift: list[Any] | None = None
+    m2b_carried_public_track_id: str | None = None
+    m2b_public_lift_success = None
+    wrong_public_predicates = None
+    if m2b_public_rgbd is not None:
+        assert m2b_public_before is not None
+        assert m2b_task_target_track_id is not None
+        m2b_public_after_lift = _capture_m2b_public_rgbd(
+            m2b_public_rgbd,
+            label="after_physical_lift",
+        )
+        if ARGS.m2b_task_target_object is not None:
+            assert m2b_injected_grasp_track_id is not None
+            lifted_public_result = infer_occlusion_aware_wrong_object_predicates(
+                m2b_public_before,
+                m2b_public_after_lift,
+                task_target_track_id=m2b_task_target_track_id,
+                commanded_grasp_track_id=m2b_injected_grasp_track_id,
+                hand_before_world_m=hand_before,
+                hand_after_world_m=hand_after,
+                gripper_closed=True,
+            )
+            m2b_carried_public_track_id = (
+                lifted_public_result.carried_public_track_id
+            )
+            wrong_public_predicates = lifted_public_result
+        else:
+            m2b_public_lift_success = (
+                infer_occlusion_aware_lift_success_predicates(
+                    m2b_public_before,
+                    m2b_public_after_lift,
+                    task_target_track_id=m2b_task_target_track_id,
+                    hand_before_world_m=hand_before,
+                    hand_after_world_m=hand_after,
+                    gripper_closed=True,
+                )
+            )
+            m2b_carried_public_track_id = m2b_task_target_track_id
     wrong_object_injection = (
         {
             "schema_version": "M2BPhysicalInjectionProbeV1",
@@ -2538,13 +2882,30 @@ def main() -> int:
                 and str(broker_internal["actual_sim_entity_id"]) == entity
                 and entity != ARGS.m2b_task_target_object
             ),
-            "public_observation_status": "NOT_CAPTURED_BY_ACTUATION_PROBE",
-            "training_eligible": False,
+            "public_observation_status": (
+                "CAPTURED_AND_VALIDATED"
+                if wrong_public_predicates is not None
+                and "carried_target_match=false"
+                in wrong_public_predicates.predicates
+                else "NOT_CAPTURED_BY_ACTUATION_PROBE"
+            ),
+            "public_predicates": (
+                wrong_public_predicates.model_dump(mode="json")
+                if wrong_public_predicates is not None
+                else None
+            ),
+            "training_eligible": bool(
+                wrong_public_predicates is not None
+                and "carried_target_match=false"
+                in wrong_public_predicates.predicates
+                and attached_follow_pass
+            ),
         }
         if ARGS.m2b_task_target_object is not None
         else None
     )
 
+    m2b_public_pre_detach = m2b_public_after_lift
     release_failure_injection: dict[str, object] | None = None
     if ARGS.m2b_inject_release_failure:
         release_hand_before, _ = _live_pose(hand_prim)
@@ -2574,6 +2935,25 @@ def main() -> int:
             and float(np.linalg.norm(release_object_delta)) >= 0.01
             and release_follow_error_m <= 0.02
         )
+        release_public_predicates = None
+        if m2b_public_rgbd is not None:
+            assert m2b_public_after_lift is not None
+            assert m2b_carried_public_track_id is not None
+            release_public_after = _capture_m2b_public_rgbd(
+                m2b_public_rgbd,
+                label="release_failure_after_follow",
+            )
+            release_public_predicates = (
+                infer_occlusion_aware_release_failure_predicates(
+                    m2b_public_before,
+                    release_public_after,
+                    carried_public_track_id=m2b_carried_public_track_id,
+                    hand_at_grasp_world_m=hand_before,
+                    hand_before_release_world_m=release_hand_before,
+                    hand_after_release_motion_world_m=release_hand_after,
+                )
+            )
+            m2b_public_pre_detach = release_public_after
         release_failure_injection = {
             "schema_version": "M2BPhysicalInjectionProbeV1",
             "failure_type": "RELEASE_FAILURE",
@@ -2587,8 +2967,22 @@ def main() -> int:
             "follow_error_m": release_follow_error_m,
             "follow_motion": release_follow_motion,
             "physical_state_passed": release_physics_pass,
-            "public_observation_status": "NOT_CAPTURED_BY_ACTUATION_PROBE",
-            "training_eligible": False,
+            "public_observation_status": (
+                "CAPTURED_AND_VALIDATED"
+                if release_public_predicates is not None
+                and "released=false" in release_public_predicates.predicates
+                else "NOT_CAPTURED_BY_ACTUATION_PROBE"
+            ),
+            "public_predicates": (
+                release_public_predicates.model_dump(mode="json")
+                if release_public_predicates is not None
+                else None
+            ),
+            "training_eligible": bool(
+                release_public_predicates is not None
+                and "released=false" in release_public_predicates.predicates
+                and release_physics_pass
+            ),
         }
         hand_after = release_hand_after
 
@@ -2627,6 +3021,35 @@ def main() -> int:
         and detached_hand_motion_m >= minimum_detach_jog_m
         and detached_relative_change_m >= minimum_decoupled_relative_change_m
     )
+    m2b_public_after_recovery: list[Any] | None = None
+    m2b_public_release_success = None
+    if m2b_public_rgbd is not None:
+        assert m2b_public_before is not None
+        assert m2b_public_after_lift is not None
+        assert m2b_task_target_track_id is not None
+        assert m2b_public_pre_detach is not None
+        assert m2b_carried_public_track_id is not None
+        m2b_public_after_recovery = _capture_m2b_public_rgbd(
+            m2b_public_rgbd,
+            label="after_recovery_retreat",
+        )
+        if ARGS.m2b_inject_empty_grasp and m2b_public_lift_success is None:
+            m2b_public_lift_success = infer_lift_success_predicates(
+                m2b_public_before,
+                m2b_public_after_lift,
+                task_target_track_id=m2b_task_target_track_id,
+            )
+        if ARGS.m2b_inject_release_failure:
+            m2b_public_release_success = (
+                infer_occlusion_aware_release_success_predicates(
+                    m2b_public_before,
+                    m2b_public_after_recovery,
+                    carried_public_track_id=m2b_carried_public_track_id,
+                    hand_at_grasp_world_m=hand_before,
+                    hand_before_detach_world_m=hand_detached_start,
+                    hand_after_retreat_world_m=hand_detached_end,
+                )
+            )
     same_process_reset = (
         _same_process_reset_gate(
             robot,
@@ -2653,6 +3076,22 @@ def main() -> int:
             wrong_object_injection is None
             or wrong_object_injection["physical_state_passed"]
         )
+    )
+    m2b_public_record = (
+        {
+            "schema_version": "M2BPublicRGBDEvidenceV2",
+            "camera_frame": "m2b_policy_rgbd_optical",
+            "camera_intrinsics": m2b_public_rgbd["intrinsics"],
+            "camera_to_world_optical": m2b_public_rgbd[
+                "camera_to_world_optical"
+            ],
+            "depth_semantics": "METRIC_DISTANCE_TO_IMAGE_PLANE",
+            "task_spec": m2b_public_rgbd["task_spec"],
+            "captures": m2b_public_rgbd["captures"],
+            "simulator_truth_policy_input": False,
+        }
+        if m2b_public_rgbd is not None
+        else None
     )
 
     evidence.update(
@@ -2695,15 +3134,32 @@ def main() -> int:
             "m2b_release_failure_injection": release_failure_injection,
             "m2b_wrong_object_injection": wrong_object_injection,
             "m2b_injection_pass": m2b_injection_pass,
+            "m2b_public_rgbd": m2b_public_record,
             "m2b_recovery": {
                 "empty_grasp": (
                     {
                         "sequence": ["REOBSERVE", "REGRASP"],
                         "physical_regrasp_and_lift_passed": attached_follow_pass,
                         "public_reobserve_status": (
-                            "NOT_CAPTURED_BY_ACTUATION_PROBE"
+                            "CAPTURED_AND_VALIDATED"
+                            if m2b_public_lift_success is not None
+                            and {"grasped=true", "lifted=true"}.issubset(
+                                m2b_public_lift_success.predicates
+                            )
+                            else "NOT_CAPTURED_BY_ACTUATION_PROBE"
                         ),
-                        "training_eligible": False,
+                        "public_final_predicates": (
+                            m2b_public_lift_success.model_dump(mode="json")
+                            if m2b_public_lift_success is not None
+                            else None
+                        ),
+                        "training_eligible": bool(
+                            empty_grasp_injection["training_eligible"]
+                            and m2b_public_lift_success is not None
+                            and {"grasped=true", "lifted=true"}.issubset(
+                                m2b_public_lift_success.predicates
+                            )
+                        ),
                     }
                     if empty_grasp_injection is not None
                     else None
@@ -2719,9 +3175,23 @@ def main() -> int:
                             detached_noncoupling_pass
                         ),
                         "public_reobserve_status": (
-                            "NOT_CAPTURED_BY_ACTUATION_PROBE"
+                            "CAPTURED_AND_VALIDATED"
+                            if m2b_public_release_success is not None
+                            and "released=true"
+                            in m2b_public_release_success.predicates
+                            else "NOT_CAPTURED_BY_ACTUATION_PROBE"
                         ),
-                        "training_eligible": False,
+                        "public_final_predicates": (
+                            m2b_public_release_success.model_dump(mode="json")
+                            if m2b_public_release_success is not None
+                            else None
+                        ),
+                        "training_eligible": bool(
+                            release_failure_injection["training_eligible"]
+                            and m2b_public_release_success is not None
+                            and "released=true"
+                            in m2b_public_release_success.predicates
+                        ),
                     }
                     if release_failure_injection is not None
                     else None
@@ -2739,7 +3209,9 @@ def main() -> int:
                         "reassociate_target_executed": False,
                         "regrasp_target_executed": False,
                         "public_reobserve_status": (
-                            "NOT_CAPTURED_BY_ACTUATION_PROBE"
+                            "CAPTURED_PENDING_TARGET_REGRASP"
+                            if m2b_public_after_recovery is not None
+                            else "NOT_CAPTURED_BY_ACTUATION_PROBE"
                         ),
                         "training_eligible": False,
                     }
@@ -2753,6 +3225,9 @@ def main() -> int:
         json.dumps(evidence, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
+    if m2b_public_rgbd is not None:
+        for annotator in m2b_public_rgbd["annotators"].values():
+            annotator.detach()
     print(
         "M1B_ISAAC_ACTUATION_PROBE "
         + json.dumps(

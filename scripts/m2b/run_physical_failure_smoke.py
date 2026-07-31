@@ -24,6 +24,11 @@ def command(
     output: Path,
 ) -> list[str]:
     name = f"{args.container_prefix}-{failure.lower()}-a{attempt}"
+    target_object = (
+        args.public_target_object
+        if args.capture_public_rgbd and failure != "WRONG_OBJECT"
+        else args.target_object
+    )
     flags = {
         "EMPTY_GRASP": ["--m2b-inject-empty-grasp"],
         "WRONG_OBJECT": [
@@ -32,6 +37,18 @@ def command(
         ],
         "RELEASE_FAILURE": ["--m2b-inject-release-failure"],
     }[failure]
+    if args.capture_public_rgbd:
+        flags.extend(
+            [
+                "--m2b-capture-public-rgbd",
+                "--m2b-task-target-public-color",
+                "red" if failure == "WRONG_OBJECT" else "yellow",
+            ]
+        )
+        if failure == "WRONG_OBJECT":
+            flags.extend(
+                ["--m2b-injected-public-grasp-color", "yellow"]
+            )
     return [
         "docker",
         "run",
@@ -71,7 +88,7 @@ def command(
         "--output",
         "/workspace/output",
         "--target-object",
-        args.target_object,
+        target_object,
         "--physics-device",
         "cuda",
         "--contact-centerlines-m",
@@ -83,37 +100,56 @@ def command(
     ]
 
 
-def accepted(payload: dict[str, Any], failure: str) -> bool:
+def accepted(
+    payload: dict[str, Any],
+    failure: str,
+    *,
+    public_rgbd_required: bool = False,
+) -> bool:
     if payload.get("status") != "PASS" or not payload.get("m2b_injection_pass"):
         return False
     if failure == "EMPTY_GRASP":
         evidence = payload.get("m2b_empty_grasp_injection") or {}
         recovery = payload.get("m2b_recovery", {}).get("empty_grasp") or {}
-        return bool(
+        result = bool(
             evidence.get("failure_type") == failure
             and evidence.get("physical_state_passed")
-            and evidence.get("training_eligible") is False
             and recovery.get("physical_regrasp_and_lift_passed")
         )
+        if public_rgbd_required:
+            return bool(
+                result
+                and evidence.get("training_eligible") is True
+                and recovery.get("training_eligible") is True
+            )
+        return result and evidence.get("training_eligible") is False
     if failure == "WRONG_OBJECT":
         evidence = payload.get("m2b_wrong_object_injection") or {}
         recovery = payload.get("m2b_recovery", {}).get("wrong_object") or {}
-        return bool(
+        result = bool(
             evidence.get("failure_type") == failure
             and evidence.get("physical_state_passed")
-            and evidence.get("training_eligible") is False
             and recovery.get("safe_place_non_target_passed")
             and recovery.get("reassociate_target_executed") is False
             and recovery.get("regrasp_target_executed") is False
         )
+        if public_rgbd_required:
+            return bool(result and evidence.get("training_eligible") is True)
+        return result and evidence.get("training_eligible") is False
     evidence = payload.get("m2b_release_failure_injection") or {}
     recovery = payload.get("m2b_recovery", {}).get("release_failure") or {}
-    return bool(
+    result = bool(
         evidence.get("failure_type") == failure
         and evidence.get("physical_state_passed")
-        and evidence.get("training_eligible") is False
         and recovery.get("retry_detach_and_retreat_passed")
     )
+    if public_rgbd_required:
+        return bool(
+            result
+            and evidence.get("training_eligible") is True
+            and recovery.get("training_eligible") is True
+        )
+    return result and evidence.get("training_eligible") is False
 
 
 def main() -> int:
@@ -124,6 +160,7 @@ def main() -> int:
     parser.add_argument("--output-root", required=True, type=Path)
     parser.add_argument("--gpu", type=int, default=0)
     parser.add_argument("--target-object", default="cylinder_04")
+    parser.add_argument("--public-target-object", default="cylinder_04")
     parser.add_argument("--wrong-object-task-target", default="cylinder_07")
     parser.add_argument("--contact-centerline-m", default="0.120")
     parser.add_argument(
@@ -133,10 +170,22 @@ def main() -> int:
     parser.add_argument("--max-attempts", type=int, default=2)
     parser.add_argument("--timeout-s", type=float, default=1800.0)
     parser.add_argument("--settle-s", type=float, default=30.0)
+    parser.add_argument("--capture-public-rgbd", action="store_true")
+    parser.add_argument(
+        "--failures",
+        default="EMPTY_GRASP,WRONG_OBJECT,RELEASE_FAILURE",
+        help="Comma-separated subset for restart-safe targeted reruns.",
+    )
     args = parser.parse_args()
+    failures = tuple(
+        failure.strip() for failure in args.failures.split(",") if failure.strip()
+    )
+    supported_failures = {"EMPTY_GRASP", "WRONG_OBJECT", "RELEASE_FAILURE"}
+    if not failures or not set(failures).issubset(supported_failures):
+        parser.error(f"--failures must be a subset of {sorted(supported_failures)}")
     args.output_root.mkdir(parents=True, exist_ok=True)
     results = []
-    for failure in ("EMPTY_GRASP", "WRONG_OBJECT", "RELEASE_FAILURE"):
+    for failure in failures:
         accepted_record = None
         for attempt in range(1, args.max_attempts + 1):
             output = args.output_root / failure.lower() / f"attempt-{attempt:02d}"
@@ -173,7 +222,14 @@ def main() -> int:
                 "evidence_sha256": (
                     sha256(evidence_path) if evidence_path.is_file() else None
                 ),
-                "accepted": bool(payload and accepted(payload, failure)),
+                "accepted": bool(
+                    payload
+                    and accepted(
+                        payload,
+                        failure,
+                        public_rgbd_required=args.capture_public_rgbd,
+                    )
+                ),
             }
             results.append(record)
             if record["accepted"]:
@@ -191,13 +247,18 @@ def main() -> int:
         "schema_version": "M2BPhysicalFailureSmokeV1",
         "status": (
             "PASS"
-            if accepted_failures
-            == {"EMPTY_GRASP", "WRONG_OBJECT", "RELEASE_FAILURE"}
+            if accepted_failures == set(failures)
             else "PARTIAL"
         ),
         "training_eligible": False,
-        "reason": "public RGB-D predicates are not captured by this probe",
+        "reason": (
+            "WRONG_OBJECT target reassociation/regrasp remains pending"
+            if args.capture_public_rgbd
+            else "public RGB-D predicates are not captured by this probe"
+        ),
+        "public_rgbd_required": args.capture_public_rgbd,
         "accepted_failures": sorted(accepted_failures),
+        "requested_failures": list(failures),
         "attempts": results,
         "teacher_used": False,
         "privileged_truth_policy_input": False,

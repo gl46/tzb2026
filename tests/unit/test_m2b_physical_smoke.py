@@ -61,3 +61,28 @@ def test_wrong_object_smoke_requires_contact_mismatch_and_safe_place() -> None:
     assert accepted(payload, "WRONG_OBJECT") is True
     payload["m2b_recovery"]["wrong_object"]["safe_place_non_target_passed"] = False
     assert accepted(payload, "WRONG_OBJECT") is False
+
+
+def test_public_rgbd_smoke_requires_public_failure_and_recovery_gates() -> None:
+    empty = {
+        "status": "PASS",
+        "m2b_injection_pass": True,
+        "m2b_empty_grasp_injection": {
+            "failure_type": "EMPTY_GRASP",
+            "physical_state_passed": True,
+            "training_eligible": True,
+        },
+        "m2b_recovery": {
+            "empty_grasp": {
+                "physical_regrasp_and_lift_passed": True,
+                "training_eligible": True,
+            }
+        },
+    }
+    assert accepted(
+        empty, "EMPTY_GRASP", public_rgbd_required=True
+    ) is True
+    empty["m2b_recovery"]["empty_grasp"]["training_eligible"] = False
+    assert accepted(
+        empty, "EMPTY_GRASP", public_rgbd_required=True
+    ) is False

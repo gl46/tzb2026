@@ -103,6 +103,22 @@ def test_color_prototypes_keep_adjacent_differently_colored_objects_separate() -
     assert all("color_prototype_v1" in result.source_components for result in results)
 
 
+def test_color_prototypes_remove_neutral_raytracing_illumination() -> None:
+    depth = np.ones((30, 30), dtype=float)
+    depth[5:15, 4:14] = 0.8
+    depth[5:15, 16:26] = 0.8
+    rgb = np.full((30, 30, 3), 210, dtype=np.uint8)
+    rgb[5:15, 4:14] = [228, 117, 126]
+    rgb[5:15, 16:26] = [226, 217, 111]
+    results = GeometricRGBDBaseline(min_component_pixels=12).infer(
+        observation(), depth, rgb
+    )
+    assert {result.attributes["visual_color"] for result in results} == {
+        "red",
+        "yellow",
+    }
+
+
 def test_pose_state_and_offline_evaluator() -> None:
     assert orientation_state(0.02, 0.08) == "tilted"
     depth = np.ones((12, 12), dtype=float)
