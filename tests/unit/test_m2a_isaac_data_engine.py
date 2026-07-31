@@ -46,6 +46,7 @@ from m2a_status import (
     measure_ssh_upload,
     remote_python_environment,
     storage_write_evidence,
+    verified_test_count,
 )
 
 
@@ -554,6 +555,35 @@ def test_remote_python_environment_parses_executable_and_version(
         "executable": "/env/bin/python",
         "version": "Python 3.12.3",
     }
+
+
+def test_verified_test_count_uses_pytest_summary(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        "m2a_status.subprocess.run",
+        lambda *args, **kwargs: SimpleNamespace(
+            returncode=0,
+            stdout="...\n216 passed in 12.34s\n",
+            stderr="",
+        ),
+    )
+    assert verified_test_count() == 216
+
+
+def test_verified_test_count_rejects_failed_suite(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        "m2a_status.subprocess.run",
+        lambda *args, **kwargs: SimpleNamespace(
+            returncode=1,
+            stdout="1 failed, 215 passed in 12.34s\n",
+            stderr="",
+        ),
+    )
+    with pytest.raises(RuntimeError, match="pytest failed"):
+        verified_test_count()
 
 
 def test_qwen_metrics_retain_absent_class_as_zero_f1() -> None:

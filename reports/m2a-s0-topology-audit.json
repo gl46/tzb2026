@@ -4,7 +4,7 @@
     "qrm_residual": "10D camera optical, m/r6d/normalized gripper, 5 Hz"
   },
   "feature_branch": "codex/m2a-isaac-data-qrm-beta",
-  "head": "dc4d51f6ab78fee6fcec6473a7368dffad3fb9ea",
+  "head": "1c83776c91c6a9c5e7bf2d873d20da367ffdff81",
   "isaac": {
     "annotators": [
       "rgb",
@@ -13,7 +13,7 @@
       "instance_segmentation"
     ],
     "attach_detach_scope": "M1B physical contract retained; Isaac migration has calibration probes, while the M2A Pilot worker does not execute task attach/detach trajectories",
-    "available_disk_kib": 339194912,
+    "available_disk_kib": 339183024,
     "camera_render_products": [
       "policy_rgbd",
       "front_rgbd",
@@ -108,7 +108,7 @@
     "used": false
   },
   "train": {
-    "available_disk_kib": 4466793104,
+    "available_disk_kib": 4466792952,
     "data_root": "/home/gl/xh-data/isaac-industrial",
     "environment": ".venv-qrm-lite",
     "gpus": [

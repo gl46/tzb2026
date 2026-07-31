@@ -99,7 +99,7 @@
   - `src/xh_agent/policy/qrm_lite/recovery_loop.py`
   - `tests/unit/test_m2a_isaac_data_engine.py`
   - `tests/unit/test_m2a_qwen_ablation.py`
-- tests: 215 passed, 0 failed
+- tests: 217 passed, 0 failed
 - failures:
   - 15 Pilot Isaac/Hydra startup attempts were quarantined and excluded from accepted data.
   - 4 closed-loop infrastructure attempts were quarantined and excluded from the accepted evaluation.

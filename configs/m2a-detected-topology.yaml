@@ -1,7 +1,7 @@
 schema_version: M2ATopologyAuditV1
 status: PASS
 feature_branch: codex/m2a-isaac-data-qrm-beta
-head: dc4d51f6ab78fee6fcec6473a7368dffad3fb9ea
+head: 1c83776c91c6a9c5e7bf2d873d20da367ffdff81
 origin_main: 0709cc19b66e52e8043eb26babb9a6f3e8ca9a72
 m1b_baseline_commit: 0ff751800b53b52233bc82b4a73638afd3a63940
 m1b_completion_report_commit: cd015e7c3e9d18f6c80db4b741af4add2832b68d
@@ -55,7 +55,7 @@ isaac:
     shard manifest/checksum
   current_video_pipeline: policy_rgbd frames + ffmpeg evidence overlay exporter
   python_environment: /isaac-sim/python.sh in Isaac Sim 6.0.1 container
-  available_disk_kib: 339194912
+  available_disk_kib: 339183024
   estimated_episode_size:
     status: MEASURED
     bytes: 5454120.681393798
@@ -83,7 +83,7 @@ train:
   python_environment:
     executable: /home/gl/xh-202607-qrm-lite/.venv-qrm-lite/bin/python
     version: Python 3.12.3
-  available_disk_kib: 4466793104
+  available_disk_kib: 4466792952
 network_baseline:
   coordinator_to_isaac:
     bytes: 33554432

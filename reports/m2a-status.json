@@ -3,6 +3,7 @@
   "blockers": [],
   "closed_loop_episodes": 10,
   "commits": [
+    "1c83776c91c6a9c5e7bf2d873d20da367ffdff81",
     "dc4d51f6ab78fee6fcec6473a7368dffad3fb9ea",
     "19eeb78e2b5a6f43a51d40b3c36bb9404715aff5",
     "aaabf2b980a50f28e646b0e08b87bdf9632a2639",
@@ -114,7 +115,7 @@
   "teacher_used": false,
   "test_episodes": 66,
   "tests_failed": 0,
-  "tests_passed": 215,
+  "tests_passed": 217,
   "train_episodes": 418,
   "val_episodes": 66,
   "worker_strategy": "ONE_ISAAC_PROCESS_PER_GPU"

@@ -7,7 +7,9 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import subprocess
+import sys
 import time
 from pathlib import Path
 from typing import Any
@@ -23,6 +25,27 @@ def run(command: list[str], *, check: bool = True) -> str:
     if check and completed.returncode != 0:
         raise RuntimeError(f"{command}: {completed.stderr.strip()}")
     return completed.stdout.strip()
+
+
+def verified_test_count() -> int:
+    """Run the full suite and return the count from pytest's own summary."""
+    completed = subprocess.run(
+        [sys.executable, "-m", "pytest", "-q"],
+        cwd=PROJECT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if completed.stdout:
+        print(completed.stdout, end="", file=sys.stderr)
+    if completed.stderr:
+        print(completed.stderr, end="", file=sys.stderr)
+    if completed.returncode != 0:
+        raise RuntimeError("pytest failed; refusing to write passing M2A status")
+    matches = re.findall(r"(?m)^(\d+) passed(?:, [^\n]+)? in [^\n]+$", completed.stdout)
+    if len(matches) != 1:
+        raise RuntimeError("could not derive an unambiguous pytest pass count")
+    return int(matches[0])
 
 
 def ssh(host: str, command: str) -> str:
@@ -320,13 +343,23 @@ def main() -> int:
     parser.add_argument(
         "--tests-passed",
         type=int,
-        default=int(os.getenv("M2A_TESTS_PASSED", "198")),
+        default=(
+            int(os.environ["M2A_TESTS_PASSED"])
+            if "M2A_TESTS_PASSED" in os.environ
+            else None
+        ),
+        help=(
+            "verified pytest pass count; when omitted, run the full suite and "
+            "derive the count from pytest output"
+        ),
     )
     args = parser.parse_args()
     topology_report = topology(args)
     if args.doctor_only:
         print(json.dumps(topology_report, indent=2, sort_keys=True))
         return 0
+    if args.tests_passed is None:
+        args.tests_passed = verified_test_count()
 
     # Local status aggregation uses reports copied back from remote runs and
     # a dataset manifest path supplied through M2A_LOCAL_DATASET_MANIFEST.
