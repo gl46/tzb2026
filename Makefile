@@ -139,5 +139,9 @@ m2b-map-validate:
 		--split test \
 		--output artifacts/m2b/runtime-mapping-heldout.jsonl \
 		--report reports/m2b-s5-runtime-mapping-offline.json
+m2b-map-prospective:
+	$(PYTHON) scripts/m2b/summarize_prospective_runtime_mapping.py \
+		--decisions artifacts/m2b/prospective-runtime-decisions.jsonl \
+		--report reports/m2b-s5-runtime-mapping-offline.json
 m2b-status:
 	$(PYTHON) scripts/m2b/status.py
