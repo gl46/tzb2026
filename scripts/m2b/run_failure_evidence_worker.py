@@ -199,6 +199,11 @@ def failure_command(
         "--capture-public-rgbd",
         "--release-follow-delta-z-m",
         str(args.release_follow_delta_z_m),
+        "--container-prefix",
+        (
+            f"{args.container_prefix}-g{args.gpu}-"
+            f"s{sdf.stem.split('-')[-1]}"
+        ),
         "--failures",
         failure,
     ]

@@ -1,9 +1,11 @@
 from __future__ import annotations
 
-import json
 import hashlib
+import json
+from types import SimpleNamespace
 
 from m2b.run_failure_evidence_worker import (
+    failure_command,
     public_selector_entity,
     stage_is_valid,
 )
@@ -31,8 +33,10 @@ def test_stage_reuse_requires_source_and_stage_hashes(tmp_path) -> None:
     supervision.write_text("{}")
     stage = output / "m1b_physics_scene.usdc"
     stage.write_bytes(b"stage")
+
     def digest(path):
         return hashlib.sha256(path.read_bytes()).hexdigest()
+
     (output / "metrics.json").write_text(
         json.dumps(
             {
@@ -48,3 +52,27 @@ def test_stage_reuse_requires_source_and_stage_hashes(tmp_path) -> None:
     assert stage_is_valid(output, sdf=sdf, supervision=supervision)
     sdf.write_text("<sdf><changed/></sdf>")
     assert not stage_is_valid(output, sdf=sdf, supervision=supervision)
+
+
+def test_failure_container_prefix_is_unique_per_gpu_and_scene(tmp_path) -> None:
+    args = SimpleNamespace(
+        project_root=tmp_path / "project",
+        source_root=tmp_path / "source",
+        gpu=1,
+        max_failure_attempts=2,
+        settle_s=10,
+        release_follow_delta_z_m=0.08,
+        container_prefix="m2b-evidence",
+    )
+    command = failure_command(
+        args,
+        failure="EMPTY_GRASP",
+        sdf=args.source_root / "scene-4091.sdf",
+        supervision=args.source_root / "scene-4091.supervision.json",
+        stage=tmp_path / "stage.usdc",
+        output=tmp_path / "output",
+        yellow_entity="cylinder_04",
+        red_entity="cylinder_07",
+    )
+    prefix_index = command.index("--container-prefix") + 1
+    assert command[prefix_index] == "m2b-evidence-g1-s4091"

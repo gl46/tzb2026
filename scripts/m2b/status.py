@@ -46,7 +46,15 @@ def main() -> int:
     blockers = []
     if not physical or physical.get("status") != "PASS_PUBLIC_FAILURES_AND_RECOVERIES":
         blockers.append("three public+physical failure/recovery chains are incomplete")
-    if not dataset or int(dataset.get("episodes_valid", 0)) < 150:
+    failure_counts = dataset.get("failure_counts", {}) if dataset else {}
+    recovery_counts = (
+        dataset.get("successful_recovery_counts", {}) if dataset else {}
+    )
+    if not dataset or any(
+        int(failure_counts.get(failure, 0)) < 50
+        or int(recovery_counts.get(failure, 0)) < 25
+        for failure in ("EMPTY_GRASP", "WRONG_OBJECT", "RELEASE_FAILURE")
+    ):
         blockers.append("Dataset V2 has not met the limited-scale 50/class minimum")
     if not residual or int(residual.get("valid_pairs", 0)) <= 0:
         blockers.append("nondegenerate successful residual pairs are not packaged")
@@ -78,6 +86,8 @@ def main() -> int:
         "dataset_v2_episodes_valid": (
             int(dataset.get("episodes_valid", 0)) if dataset else 0
         ),
+        "dataset_v2_failure_counts": failure_counts,
+        "dataset_v2_successful_recovery_counts": recovery_counts,
         "failure_evidence_pilot_records": (
             int(evidence_pilot.get("records_valid", 0))
             if evidence_pilot
