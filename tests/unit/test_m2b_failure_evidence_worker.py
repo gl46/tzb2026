@@ -2,6 +2,9 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
+import subprocess
+from pathlib import Path
 from types import SimpleNamespace
 
 from m2b.run_failure_evidence_worker import (
@@ -76,3 +79,43 @@ def test_failure_container_prefix_is_unique_per_gpu_and_scene(tmp_path) -> None:
     )
     prefix_index = command.index("--container-prefix") + 1
     assert command[prefix_index] == "m2b-evidence-g1-s4091"
+
+
+def test_scale_launcher_partitions_seeds_without_overlapping_workers(
+    tmp_path,
+) -> None:
+    fake_bin = tmp_path / "bin"
+    fake_bin.mkdir()
+    ssh_log = tmp_path / "ssh.log"
+    fake_ssh = fake_bin / "ssh"
+    fake_ssh.write_text(
+        "#!/bin/sh\n"
+        "case \"$*\" in\n"
+        "  *pgrep*) exit 1 ;;\n"
+        "  *) printf '%s\\n' \"$*\" >>\"$FAKE_SSH_LOG\"; echo 12345 ;;\n"
+        "esac\n"
+    )
+    fake_ssh.chmod(0o755)
+    project = Path(__file__).resolve().parents[2]
+    environment = {
+        **os.environ,
+        "PATH": f"{fake_bin}:{os.environ['PATH']}",
+        "FAKE_SSH_LOG": str(ssh_log),
+        "M2B_SCENE_START": "4000",
+        "M2B_SCENE_END": "4003",
+        "M2B_EXCLUDE_SEEDS": "4001",
+    }
+    completed = subprocess.run(
+        ["bash", str(project / "scripts/m2b/launch_failure_evidence_scale.sh")],
+        capture_output=True,
+        text=True,
+        check=False,
+        env=environment,
+    )
+    assert completed.returncode == 0, completed.stderr
+    launches = ssh_log.read_text().splitlines()
+    assert len(launches) == 2
+    assert "--scene-seed 4000" in launches[0]
+    assert "--scene-seed 4002" in launches[0]
+    assert "--scene-seed 4003" in launches[1]
+    assert "--scene-seed 4001" not in ssh_log.read_text()

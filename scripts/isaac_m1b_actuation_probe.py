@@ -179,6 +179,15 @@ def parse_args() -> tuple[argparse.Namespace, list[str]]:
             "max-world-X track is bound before action; no entity ID is used."
         ),
     )
+    parser.add_argument(
+        "--m2b-public-regrasp-offset-camera-xyz-m",
+        default="0,0,0",
+        help=(
+            "Training-only bounded policy-camera optical XYZ perturbation "
+            "applied to the public recovery grasp. It is logged as "
+            "supervision and is never an online policy input."
+        ),
+    )
     return parser.parse_known_args()
 
 
@@ -220,6 +229,32 @@ if (
     raise ValueError(
         "calibration offset must be a finite XYZ triple within +/-0.02 m"
     )
+M2B_PUBLIC_REGRASP_OFFSET_CAMERA_XYZ_M = tuple(
+    float(value)
+    for value in ARGS.m2b_public_regrasp_offset_camera_xyz_m.split(",")
+)
+if (
+    len(M2B_PUBLIC_REGRASP_OFFSET_CAMERA_XYZ_M) != 3
+    or not all(
+        math.isfinite(value)
+        for value in M2B_PUBLIC_REGRASP_OFFSET_CAMERA_XYZ_M
+    )
+    or abs(M2B_PUBLIC_REGRASP_OFFSET_CAMERA_XYZ_M[0]) > 0.015
+    or abs(M2B_PUBLIC_REGRASP_OFFSET_CAMERA_XYZ_M[1]) > 0.015
+    or abs(M2B_PUBLIC_REGRASP_OFFSET_CAMERA_XYZ_M[2]) > 0.005
+):
+    raise ValueError(
+        "M2B public regrasp offset must be finite and within "
+        "+/-[0.015, 0.015, 0.005] m"
+    )
+if (
+    any(
+        abs(value) > 0.0
+        for value in M2B_PUBLIC_REGRASP_OFFSET_CAMERA_XYZ_M
+    )
+    and ARGS.m2b_task_target_object is None
+):
+    raise ValueError("M2B public regrasp offset requires WRONG_OBJECT recovery")
 if ARGS.free_close_diagnostic:
     if (
         len(CONTACT_CENTERLINES_M) != 1
@@ -1523,12 +1558,19 @@ def _execute_m2b_public_regrasp(
     contact_collector: _PhysxContactCollector,
     public_target_world_m: list[float],
     public_tracks: list[Any],
+    controlled_offset_camera_m: tuple[float, float, float],
+    controlled_offset_world_m: tuple[float, float, float],
     preclose_target_m: float,
     close_target_m: float,
 ) -> dict[str, Any]:
     """Execute the existing B0 top-grasp from public geometry only."""
 
-    target_center = np.asarray(public_target_world_m, dtype=np.float32)
+    perceived_target_center = np.asarray(
+        public_target_world_m, dtype=np.float32
+    )
+    target_center = perceived_target_center + np.asarray(
+        controlled_offset_world_m, dtype=np.float32
+    )
     neighbors = [
         track.position_world_m[:2]
         for track in public_tracks
@@ -1624,6 +1666,19 @@ def _execute_m2b_public_regrasp(
                 "status": "LIFTED",
                 "public_action_input": {
                     "target_world_m": public_target_world_m,
+                    "controlled_offset_world_m": list(
+                        controlled_offset_world_m
+                    ),
+                    "controlled_offset_camera_xyz_m": list(
+                        controlled_offset_camera_m
+                    ),
+                    "controlled_offset_coordinate_frame": (
+                        "m2b_policy_rgbd_optical"
+                    ),
+                    "commanded_target_world_m": target_center.tolist(),
+                    "controlled_offset_source": (
+                        "TRAINING_ONLY_BOUNDED_PERTURBATION"
+                    ),
                     "source": "PUBLIC_RGBD_TRACK_ONLY",
                     "simulator_truth_used": False,
                 },
@@ -1652,6 +1707,17 @@ def _execute_m2b_public_regrasp(
         "status": "CONTACT_GATE_REJECTED",
         "public_action_input": {
             "target_world_m": public_target_world_m,
+            "controlled_offset_world_m": list(controlled_offset_world_m),
+            "controlled_offset_camera_xyz_m": list(
+                controlled_offset_camera_m
+            ),
+            "controlled_offset_coordinate_frame": (
+                "m2b_policy_rgbd_optical"
+            ),
+            "commanded_target_world_m": target_center.tolist(),
+            "controlled_offset_source": (
+                "TRAINING_ONLY_BOUNDED_PERTURBATION"
+            ),
             "source": "PUBLIC_RGBD_TRACK_ONLY",
             "simulator_truth_used": False,
         },
@@ -3230,6 +3296,14 @@ def main() -> int:
             ARGS.m2b_task_target_object is not None
             and m2b_reassociated_target is not None
         ):
+            camera_to_world = np.asarray(
+                m2b_public_rgbd["camera_to_world_optical"],
+                dtype=np.float64,
+            ).reshape(4, 4)
+            regrasp_offset_world = camera_to_world[:3, :3] @ np.asarray(
+                M2B_PUBLIC_REGRASP_OFFSET_CAMERA_XYZ_M,
+                dtype=np.float64,
+            )
             m2b_wrong_regrasp = _execute_m2b_public_regrasp(
                 robot=robot,
                 hand_prim=hand_prim,
@@ -3241,6 +3315,12 @@ def main() -> int:
                     m2b_reassociated_target.position_world_m
                 ),
                 public_tracks=m2b_public_after_recovery,
+                controlled_offset_camera_m=(
+                    M2B_PUBLIC_REGRASP_OFFSET_CAMERA_XYZ_M
+                ),
+                controlled_offset_world_m=(
+                    tuple(float(value) for value in regrasp_offset_world)
+                ),
                 preclose_target_m=preclose_target_m,
                 close_target_m=close_target_m,
             )

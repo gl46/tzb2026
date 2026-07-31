@@ -1,8 +1,13 @@
 from __future__ import annotations
 
 import json
+from types import SimpleNamespace
 
-from m2b.run_physical_failure_smoke import accepted, retained_attempt_record
+from m2b.run_physical_failure_smoke import (
+    accepted,
+    command,
+    retained_attempt_record,
+)
 
 
 def test_empty_grasp_smoke_requires_failure_and_real_regrasp() -> None:
@@ -120,3 +125,35 @@ def test_restart_retains_hash_bound_accepted_attempt(tmp_path) -> None:
     assert record["accepted"] is True
     assert record["resumed_existing_attempt"] is True
     assert len(record["evidence_sha256"]) == 64
+
+
+def test_wrong_recovery_forwards_explicit_bounded_training_offset(
+    tmp_path,
+) -> None:
+    args = SimpleNamespace(
+        container_prefix="m2b-test",
+        public_target_object="cylinder_04",
+        capture_public_rgbd=True,
+        target_object="cylinder_04",
+        wrong_object_task_target="cylinder_07",
+        release_follow_delta_z_m=0.08,
+        public_regrasp_offset_camera_xyz_m="0.006,-0.002,0.003",
+        gpu=0,
+        project_root=tmp_path / "project",
+        source_root=tmp_path / "source",
+        stage=tmp_path / "stage" / "scene.usdc",
+        sdf=tmp_path / "source" / "scene.sdf",
+        supervision=tmp_path / "source" / "scene.supervision.json",
+        image="isaac:test",
+        contact_centerline_m="0.12",
+    )
+    invocation = command(
+        args,
+        failure="WRONG_OBJECT",
+        attempt=1,
+        output=tmp_path / "output",
+    )
+    offset_index = (
+        invocation.index("--m2b-public-regrasp-offset-camera-xyz-m") + 1
+    )
+    assert invocation[offset_index] == "0.006,-0.002,0.003"

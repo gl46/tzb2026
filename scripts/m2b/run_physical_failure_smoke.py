@@ -51,7 +51,12 @@ def command(
         )
         if failure == "WRONG_OBJECT":
             flags.extend(
-                ["--m2b-injected-public-grasp-color", "yellow"]
+                [
+                    "--m2b-injected-public-grasp-color",
+                    "yellow",
+                    "--m2b-public-regrasp-offset-camera-xyz-m",
+                    args.public_regrasp_offset_camera_xyz_m,
+                ]
             )
     return [
         "docker",
@@ -220,6 +225,11 @@ def main() -> int:
         default=0.08,
     )
     parser.add_argument(
+        "--public-regrasp-offset-camera-xyz-m",
+        default="0,0,0",
+        help="Training-only bounded perturbation for WRONG_OBJECT recovery.",
+    )
+    parser.add_argument(
         "--image", default="nvcr.io/nvidia/isaac-sim:6.0.1"
     )
     parser.add_argument("--container-prefix", default="m2b-physical-smoke")
@@ -235,6 +245,25 @@ def main() -> int:
     args = parser.parse_args()
     if not 0.03 <= args.release_follow_delta_z_m <= 0.10:
         parser.error("--release-follow-delta-z-m must be in [0.03, 0.10]")
+    try:
+        regrasp_offset = tuple(
+            float(value)
+            for value in args.public_regrasp_offset_camera_xyz_m.split(",")
+        )
+    except ValueError:
+        parser.error(
+            "--public-regrasp-offset-camera-xyz-m must be numeric XYZ"
+        )
+    if (
+        len(regrasp_offset) != 3
+        or abs(regrasp_offset[0]) > 0.015
+        or abs(regrasp_offset[1]) > 0.015
+        or abs(regrasp_offset[2]) > 0.005
+    ):
+        parser.error(
+            "--public-regrasp-offset-camera-xyz-m must be within "
+            "+/-[0.015,0.015,0.005] m"
+        )
     for source in (args.sdf, args.supervision):
         if source.parent != args.source_root or not source.is_file():
             parser.error(
