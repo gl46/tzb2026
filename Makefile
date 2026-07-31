@@ -139,6 +139,11 @@ m2b-map-validate:
 		--split test \
 		--output artifacts/m2b/runtime-mapping-heldout.jsonl \
 		--report reports/m2b-s5-runtime-mapping-offline.json
+m2b-preflight-manifest:
+	@test -n "$${M2B_PREFLIGHT_PLAN}" || (echo "M2B_PREFLIGHT_PLAN is required" >&2; exit 2)
+	$(PYTHON) scripts/m2b/build_isolated_preflight_manifest.py \
+		--plan "$${M2B_PREFLIGHT_PLAN}" \
+		--output artifacts/m2b/isolated-preflight-manifest.jsonl
 m2b-map-prospective:
 	@test -n "$${M2B_MODEL_RECORDS}" -a -n "$${M2B_PREFLIGHT_MANIFEST}" || (echo "M2B_MODEL_RECORDS and M2B_PREFLIGHT_MANIFEST are required" >&2; exit 2)
 	$(PYTHON) scripts/m2b/build_prospective_runtime_decisions.py \
