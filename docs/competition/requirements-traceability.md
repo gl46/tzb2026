@@ -17,4 +17,9 @@
 | Q1/Q2 virtual industrial data and perception generalization | `isaac-industrial-v1-pilot` dataset card, scene-level held-out split, RGB-D/mask hashes |
 | Q3 re-perceive, reflect, re-decide | public RGB-D transitions, predicate residual, `FailureContextV1`, live checkpoint decision log |
 | Q4 failure correction | `REOBSERVE` supervision, held-out FailureContext ablation, B0 fallback evidence |
-| Q9 code/model/data/simulator/video/report | `docs/m2a-runbook.md`, M2A artifact index and reproducibility report |
+| Q9 code/model/data/simulator/video/report | `docs/m2a-runbook.md`, M2A artifact index and reproducibility report; S8 currently has one explicitly labelled QRM representative-failure clip, not a success claim |
+
+P1 adds a 30-episode LeRobot v3 format sample and a public-state Shadow Isaac
+prototype. Both are offline evaluation/preparation artifacts. Teacher use is
+disabled, SimulatorSupervision is not exported to LeRobot, and neither artifact
+may replace the Student world-model prediction/selection role.

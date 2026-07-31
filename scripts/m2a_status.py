@@ -189,6 +189,8 @@ def main() -> int:
     offline = json_if(PROJECT / "reports" / "m2a-s4-qrm-beta-offline.json")
     qwen_ablation = json_if(PROJECT / "reports" / "m2a-s4-qwen-ablation.json")
     closed = json_if(PROJECT / "reports" / "m2a-s5-qrm-beta-closed-loop.json")
+    shadow = json_if(PROJECT / "reports" / "m2a-s6-shadow-isaac.json")
+    lingbot = json_if(PROJECT / "reports" / "m2a-s7-lingbot-prep.json")
     remote_manifest = (
         f"{args.train_data_root}/{args.dataset_version}/manifest.json"
     )
@@ -231,6 +233,10 @@ def main() -> int:
         limitations.append("all learned action mappings rejected; B0 fallback rate is 1.0")
     if closed and closed.get("limitations"):
         limitations.extend(closed["limitations"])
+    if shadow and shadow.get("limitations"):
+        limitations.extend(shadow["limitations"])
+    if lingbot and lingbot.get("limitations"):
+        limitations.extend(lingbot["limitations"])
     if closed and closed.get("infrastructure_attempts_quarantined", 0):
         limitations.append(
             "closed-loop Isaac infrastructure attempts quarantined: "
@@ -297,8 +303,8 @@ def main() -> int:
         "qrm_fc_recovery_success_rate": None,
         "same_failure_repeat_rate_delta": None,
         "model_verdict": model_verdict,
-        "shadow_isaac_status": "NOT_RUN",
-        "lingbot_prep_status": "NOT_RUN",
+        "shadow_isaac_status": shadow.get("status", "NOT_RUN") if shadow else "NOT_RUN",
+        "lingbot_prep_status": lingbot.get("status", "NOT_RUN") if lingbot else "NOT_RUN",
         "oracle_leakage_detected": bool(contract and contract["oracle_leakage_detected"]),
         "teacher_used": False,
         "teacher_states": {
@@ -363,9 +369,11 @@ def main() -> int:
                 f"{closed.get('applied_live_decisions') if closed else None}",
                 "- closed-loop infrastructure attempts quarantined: "
                 f"{closed.get('infrastructure_attempts_quarantined') if closed else None}",
-                f"- shadow Isaac online suitability: not evaluated; "
+                f"- shadow Isaac online suitability: "
+                f"{shadow.get('online_suitable') if shadow else 'not evaluated'}; "
                 f"`{status['shadow_isaac_status']}`",
                 f"- LingBot preparation: `{status['lingbot_prep_status']}`",
+                "- Teacher path remains disabled in Shadow and LingBot prep",
                 f"- model verdict: **{model_verdict}**",
                 "- expand to 5k–10k now: no; collect physical failure/recovery "
                 "coverage first",

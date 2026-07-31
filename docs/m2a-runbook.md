@@ -26,6 +26,8 @@ make qrm-beta-train
 make qrm-beta-eval
 make qrm-beta-closed-loop
 make shadow-isaac
+ISAAC_DATASET_ROOT=/path/to/isaac-industrial-v1-pilot \
+LEROBOT_OUTPUT_ROOT=/path/to/lerobot-sample30 make lingbot-prep
 make m2a-status
 ```
 
@@ -41,3 +43,15 @@ episodes by default and reports scene episodes separately from live decisions.
 scenes from public tracks and public robot state, runs three explicit
 joint-space physics probes per state, and forbids the output from Student
 training. It does not infer or guess a camera-residual-to-joint mapping.
+
+LingBot preparation is also offline-only and is not a Teacher path. The
+revision lock is `configs/lingbot_lerobot.lock.yaml`. The exporter writes a
+LeRobot v3 small sample with raw 9D named Panda joint targets; it never maps
+those targets to LingBot control tokens. Current LingBot-World v2 is
+non-commercial CC BY-NC-SA 4.0 and must not enter a commercial submission
+without human license review.
+
+S8 video evidence is deliberately partial. The retained QRM-FC clip is labelled
+as a representative failure with B0 fallback. A success clip and synchronized
+WRONG_OBJECT recovery clip must remain unavailable until a real capture exists;
+do not relabel other footage.

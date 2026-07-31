@@ -1,0 +1,144 @@
+{
+  "action_protocol": {
+    "coordinate_frame": "PANDA_DOF_ORDER_BY_NAME",
+    "dimension_names": [
+      "panda_joint1",
+      "panda_joint2",
+      "panda_joint3",
+      "panda_joint4",
+      "panda_joint5",
+      "panda_joint6",
+      "panda_joint7",
+      "panda_finger_joint1",
+      "panda_finger_joint2"
+    ],
+    "frequency_hz": 30,
+    "normalization_applied_by_exporter": false,
+    "remapping_applied_by_exporter": false,
+    "source_normalization_revision": "isaac-m1b-joint-identity-v1",
+    "units": "radian_arm_metre_finger"
+  },
+  "baseline_resource_audit": {
+    "full_training_time": "NOT_ESTIMATED_OUT_OF_SCOPE",
+    "model_repository_bytes": 86071862266,
+    "node2_gpu": "NVIDIA A100-SXM4-80GB",
+    "node2_gpu_count": 1,
+    "node2_system_python_missing_dependencies": [
+      "torch",
+      "torchvision",
+      "torchaudio",
+      "diffusers",
+      "transformers",
+      "tokenizers",
+      "accelerate",
+      "imageio",
+      "easydict",
+      "ftfy",
+      "flash_attn"
+    ],
+    "official_reference_gpu_count": 8,
+    "planning_disk_headroom_bytes": 180000000000,
+    "planning_time_budget": "4-8 hours for isolated env, download, and one smoke only",
+    "single_a100_vram_status": "NOT_VALIDATED_AND_NOT_CLAIMED"
+  },
+  "canonical_episodes_exported": 30,
+  "control_stack_integration": false,
+  "distinct_scene_groups": 30,
+  "duplicate_source_episode_ids": 0,
+  "feature_mapping": {
+    "action": "executed_action.values[0]",
+    "observation.images.next_rgb": "observation_after.rgb_uri",
+    "observation.images.rgb": "observation_before.rgb_uri",
+    "observation.next_state": "observation_after.joint_position",
+    "observation.state": "observation_before.joint_position",
+    "observation.velocity": "observation_before.joint_velocity"
+  },
+  "files": {
+    "data/chunk-000/file-000.parquet": {
+      "bytes": 5413754,
+      "sha256": "f41abb157cce7e72c76b8788d0981979ea0f03b3c1c140e68dea1bd9e84a3dcd"
+    },
+    "meta/episodes/chunk-000/file-000.parquet": {
+      "bytes": 3816,
+      "sha256": "712b347e768eeec457175c7f37c08b8c2241ab874ad77209f580f8e77ac8710e"
+    },
+    "meta/info.json": {
+      "bytes": 3563,
+      "sha256": "bedfdaab10822348336afaccd74d584581e54815a890b5ee518cd525a2d0b13c"
+    },
+    "meta/m2a-upstream-lock.yaml": {
+      "bytes": 1250,
+      "sha256": "f49b092e915901257db91dc82f7535097f2f150e7d4fbed118fba51c46c229e3"
+    },
+    "meta/stats.json": {
+      "bytes": 5244,
+      "sha256": "48c5a5bf771b0bce1efe8969c2a114beb05e916caf6944c31315f40e428b4b00"
+    },
+    "meta/tasks.parquet": {
+      "bytes": 2195,
+      "sha256": "288bf4d9c37055806ed5dc1a6962cdcc157f42410a3b31ab761355f33bfce3c5"
+    }
+  },
+  "frame_semantics": "one action-aligned frame per adjacent canonical transition",
+  "lerobot_codebase_version": "v3.0",
+  "limitations": [
+    "This is a format-validation sample, not LingBot training.",
+    "Each canonical record has one action; no terminal action was invented.",
+    "LingBot-World v2 is non-commercial CC BY-NC-SA 4.0.",
+    "The official v2 example uses eight GPUs; no single-A100 runtime claim is made.",
+    "No LingBot weight was downloaded and no VRAM/throughput metric was fabricated."
+  ],
+  "output_bytes": 5429822,
+  "output_root": "/Users/gl/tzb-m2a-data-stage/lerobot/isaac-industrial-v1-pilot-sample30",
+  "privileged_simulator_truth_exported": false,
+  "schema_version": "M2ALingBotPrepReportV1",
+  "source_dataset": "/Users/gl/tzb-m2a-data-stage/isaac-industrial-v1-pilot",
+  "source_split_counts": {
+    "test": 3,
+    "train": 24,
+    "val": 3
+  },
+  "status": "PASS_BASELINE_PREP_ONLY",
+  "teacher_enabled": false,
+  "teacher_response_exported": false,
+  "time_alignment": {
+    "all_within_one_ns": true,
+    "expected_delta_ns": 33333333,
+    "max_absolute_error_ns": 0
+  },
+  "validation": {
+    "action_storage_type": "fixed_size_list<element: float>[9]",
+    "episode_metadata_rows": 30,
+    "image_storage_type": "struct<bytes: binary, path: string>",
+    "official_huggingface_datasets_readback": {
+      "action_dimension": 9,
+      "rgb_size": [
+        640,
+        480
+      ],
+      "rows": 30,
+      "status": "PASS"
+    },
+    "parquet_columns": [
+      "observation.state",
+      "observation.velocity",
+      "observation.end_effector_pose",
+      "observation.next_state",
+      "observation.images.rgb",
+      "observation.images.next_rgb",
+      "action",
+      "timestamp",
+      "frame_index",
+      "episode_index",
+      "index",
+      "task_index",
+      "source.timestamp_ns",
+      "source.next_timestamp_ns",
+      "source.episode_id",
+      "source.split",
+      "source.task_success"
+    ],
+    "parquet_rows": 30,
+    "tasks_index_name": "task"
+  }
+}

@@ -1,0 +1,31 @@
+schema_version: M2ALingBotLeRobotLockV1
+recorded_at: "2026-07-31"
+teacher_enabled: false
+control_stack_integration: false
+selection:
+  status: BASELINE_PREP_ONLY
+  selected_repository: https://github.com/Robbyant/lingbot-world-v2
+  selected_revision: 2648877f763a06cc743bcd919936da4d25f12e7b
+  rationale: The official LingBot-World v1 README redirects future work to v2.
+  commercial_use: BLOCKED_BY_CC_BY_NC_SA_4_0
+lingbot_v2:
+  repository: https://github.com/Robbyant/lingbot-world-v2
+  revision: 2648877f763a06cc743bcd919936da4d25f12e7b
+  model_repository: robbyant/lingbot-world-v2-14b-causal-fast
+  model_revision: 5c33dd40b213598c418fd25bff30fdbd23fd38a7
+  model_size: 14B
+  model_repository_bytes: 86071862266
+  license: CC-BY-NC-SA-4.0
+  official_reference_command_gpu_count: 8
+lingbot_v1:
+  status: UPSTREAM_NO_LONGER_MAINTAINED
+  repository: https://github.com/robbyant/lingbot-world
+  revision: a43bec7f8091c83e9b30b16b912f6fc906236fa6
+  model_repository: robbyant/lingbot-world-base-cam
+  model_revision: 6fc824ffc338d64c97c77e2eb8c0f4cfc24d82bd
+  license: Apache-2.0
+lerobot:
+  repository: https://github.com/huggingface/lerobot
+  revision: 0d0737ab57f27c05d7b35fcf27e701f6003a5f3a
+  dataset_codebase_version: v3.0
+  license: Apache-2.0

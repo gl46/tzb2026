@@ -452,8 +452,11 @@ def test_isaac_capture_writes_policy_and_truth_streams_with_metric_plane_depth()
     assert '"--static-perception-audit"' in source
     assert "_freeze_cylinders_for_static_perception_audit(stage)" in source
     assert '"CALIBRATION_ONLY_STATIC_PERCEPTION"' in source
-    assert '"student_training_eligible": not ARGS.static_perception_audit' in source
-    assert '"training_eligible": not ARGS.static_perception_audit' in source
+    assert '"student_training_eligible": (' in source
+    assert "not ARGS.static_perception_audit" in source
+    assert "and not ARGS.shadow_rollout" in source
+    assert '"training_eligible": (' in source
+    assert source.count("and not ARGS.shadow_rollout") >= 2
 
 
 def test_isaac_tolerance_probe_offsets_only_calibration_target_not_scene_truth() -> None:

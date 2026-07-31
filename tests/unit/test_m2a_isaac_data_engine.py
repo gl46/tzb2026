@@ -21,6 +21,8 @@ from isaac.run_shadow_rollout_pilot import (
     minimum_assignment_errors,
     select_public_states,
 )
+from isaac.export_qrm_evidence_video import decision_lines
+from lingbot.export_canonical_to_lerobot import select_diverse_episodes, validate_mapping
 from xh_agent.data.shadow_isaac import shadow_target_positions
 from xh_agent.data_engine.isaac.contract import (
     ShardState,
@@ -444,3 +446,82 @@ def test_qwen_metrics_retain_absent_class_as_zero_f1() -> None:
     assert metrics["per_class"]["APPROACH"]["support"] == 0
     assert metrics["per_class"]["APPROACH"]["f1"] == 0.0
     assert metrics["macro_f1"] == 0.5
+
+
+def test_lerobot_export_selects_distinct_scenes_first() -> None:
+    records = []
+    for index, scene in enumerate(["a", "a", "b", "c"] + [f"s{i}" for i in range(20)]):
+        records.append(
+            (
+                {"scene_group_id": scene, "episode_id": f"episode-{index:03d}"},
+                Path(f"shard-{index}"),
+            )
+        )
+    selected = select_diverse_episodes(records, 20)
+    scenes = [item[0]["scene_group_id"] for item in selected]
+    assert len(scenes) == len(set(scenes))
+
+
+def test_lerobot_mapping_rejects_guessed_action_order() -> None:
+    episode = _episode()
+    episode["observation_before"]["timestamp_ns"] = 0
+    episode["observation_after"]["timestamp_ns"] = 33_333_333
+    episode["executed_action"].update(
+        {
+            "coordinate_frame": "PANDA_DOF_ORDER_BY_NAME",
+            "units": "radian_arm_metre_finger",
+            "frequency_hz": 30.0,
+            "dimension_names": [
+                "panda_joint1",
+                "panda_joint2",
+                "panda_joint3",
+                "panda_joint4",
+                "panda_joint5",
+                "panda_joint6",
+                "panda_joint7",
+                "panda_finger_joint1",
+                "panda_finger_joint2",
+            ],
+        }
+    )
+    assert validate_mapping(episode)["absolute_alignment_error_ns"] == 0
+    episode["executed_action"]["dimension_names"] = list(reversed(
+        episode["executed_action"]["dimension_names"]
+    ))
+    with pytest.raises(ValueError, match="joint order"):
+        validate_mapping(episode)
+
+
+def test_qrm_video_overlay_names_rejected_mapping_and_fallback() -> None:
+    lines = decision_lines(
+        {
+            "public_track_count": 4,
+            "coarse_skill": "APPROACH",
+            "model_id": "Q2",
+            "mapping_validation": "REJECTED_NO_OFFICIAL_EVIDENCE",
+            "fallback": "B0_DATASET_EXCITATION",
+            "failure_context": {
+                "expected_predicates": ["visible"],
+                "observed_predicates": ["visible"],
+                "failure_type": "NONE",
+                "retry_count": 0,
+            },
+        },
+        2,
+    )
+    text = "\n".join(lines)
+    assert "REJECTED_NO_OFFICIAL_EVIDENCE" in text
+    assert "B0_DATASET_EXCITATION" in text
+
+
+def test_shadow_reset_reinitializes_physics_before_articulation_reset() -> None:
+    source = (
+        Path(__file__).parents[2] / "scripts" / "isaac_m1b_dataset_benchmark.py"
+    ).read_text()
+    reset_block = """timeline.play()
+            # A stop invalidates articulation physics tensors.  Advance Kit
+            # once after play so the existing Articulation view is rebound
+            # before reset_to_default_state touches that tensor entity.
+            simulation_app.update()
+            robot.reset_to_default_state()"""
+    assert reset_block in source

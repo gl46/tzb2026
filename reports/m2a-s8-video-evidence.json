@@ -1,0 +1,27 @@
+{
+  "editing_policy": "all retained decision steps included; no failure step removed",
+  "schema_version": "M2AVideoEvidenceV1",
+  "status": "PARTIAL_ONE_OF_THREE",
+  "teacher_enabled": false,
+  "videos": {
+    "normal_success": {
+      "reason": "M2A Pilot contains no task_success=true episode.",
+      "status": "NOT_AVAILABLE_NO_RETAINED_CAPTURE"
+    },
+    "qrm_fc_closed_loop": {
+      "bytes": 130955,
+      "duration_s": 6,
+      "fallback_rate": 1.0,
+      "final_task_success": false,
+      "frames": 6,
+      "mapping_validation": "REJECTED_NO_OFFICIAL_EVIDENCE",
+      "path": "/Users/gl/tzb-m2a-video-stage/evidence/m2a-qrm-fc-representative-failure.mp4",
+      "sha256": "ab6cfcec3082f1ffa7e718f953482446ba119457ed747709eedd687d457515ec",
+      "status": "PASS_REPRESENTATIVE_FAILURE"
+    },
+    "wrong_object_recovery": {
+      "reason": "M1B has accepted JSON evidence but no retained synchronized video.",
+      "status": "NOT_AVAILABLE_NO_RETAINED_CAPTURE"
+    }
+  }
+}

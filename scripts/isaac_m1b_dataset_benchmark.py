@@ -1038,6 +1038,10 @@ def main() -> int:
             timeline.stop()
             simulation_app.update()
             timeline.play()
+            # A stop invalidates articulation physics tensors.  Advance Kit
+            # once after play so the existing Articulation view is rebound
+            # before reset_to_default_state touches that tensor entity.
+            simulation_app.update()
             robot.reset_to_default_state()
             simulation_app.update()
             for warmup_frame in range(ARGS.warmup_frames):
