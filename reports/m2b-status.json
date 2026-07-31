@@ -4,6 +4,7 @@
     "at least 50 informative physical residual pairs are not packaged",
     "runtime mapping still requires Isaac IK/collision/safety dry-runs",
     "two-seed A100 NoFC/FC training has not run",
+    "two-seed A100 residual MLP-vs-zero evaluation has not run",
     "matched B0/QRM Isaac closed-loop evaluation has not run"
   ],
   "closed_loop_status": "NOT_RUN",
@@ -32,6 +33,8 @@
   "physical_runtime_post_execution_gate_rate": 1.0,
   "physical_runtime_receipts_complete_and_passing": 23,
   "prospective_runtime_planning_checks_complete": false,
+  "residual_mlp_status": "NOT_RUN",
+  "residual_mlp_supported_offline": null,
   "residual_pairs_valid": 0,
   "residual_pilot_pairs": 24,
   "residual_pilot_status": "PASS_NONDEGENERATE_PILOT_NOT_SCALE",
