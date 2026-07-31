@@ -1,18 +1,19 @@
 {
-  "coarse_failure_recovery_supervision_episodes": 30,
+  "coarse_failure_recovery_supervision_episodes": 32,
   "code_revision_histogram": {
+    "1e32fa89c8b1ef403a52f1b2c8326942b72092e6e88f50e8f780eff1c08c6094": 1,
     "3c914922546ec9ff5925c8134b183bf35f327d0239a40f5469fd35739fc2e0d7": 10,
-    "4ec1b929d06d4dc9b51e663e336e1af7a50176247c0f7c8ac9bf4e64abff80bd": 5,
+    "4ec1b929d06d4dc9b51e663e336e1af7a50176247c0f7c8ac9bf4e64abff80bd": 6,
     "971a32246765378157cc346ec0f274be256c7cb53c5458761797fc5b98caea84": 1,
     "bfd54b2c70ed9c2d892be88335217d7cf734104bb6594fed19d1dae57d619453": 6,
     "e4b91e36bb3c8496a539b3ce405bedf279e90b19242df83529e489cdcb13c434": 8
   },
-  "episodes_generated": 30,
+  "episodes_generated": 32,
   "episodes_quarantined": 0,
-  "episodes_valid": 30,
+  "episodes_valid": 32,
   "failure_counts": {
     "EMPTY_GRASP": 11,
-    "RELEASE_FAILURE": 11,
+    "RELEASE_FAILURE": 13,
     "WRONG_OBJECT": 8
   },
   "limitations": [
@@ -24,7 +25,7 @@
   "mixed_code_revisions": true,
   "model_rollout_episodes": 0,
   "output_path": "artifacts/m2b/dataset-v2.jsonl",
-  "output_sha256": "67d72af3f7fb46a4e0c78c1dfdec6ae606c8d2ab6c24935f26cc7a7fc35ff9b0",
+  "output_sha256": "9e3317a365dad00c74d9112a3461970ed652d74377dd996a8eb30a876dda7844",
   "privileged_truth_policy_input": false,
   "quarantine_path": "artifacts/m2b/dataset-v2-quarantine.jsonl",
   "quarantine_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
@@ -32,17 +33,17 @@
   "schema_version": "M2BDatasetV2ReportV1",
   "split_counts": {
     "test": 2,
-    "train": 24,
+    "train": 26,
     "val": 4
   },
   "split_group_leakage": [],
   "status": "IN_PROGRESS_DATASET_V2_LIMITED_CLASS_COVERAGE",
   "successful_recovery_counts": {
     "EMPTY_GRASP": 11,
-    "RELEASE_FAILURE": 11,
+    "RELEASE_FAILURE": 13,
     "WRONG_OBJECT": 8
   },
   "teacher_used": false,
-  "unique_code_revisions": 5,
-  "unique_scene_groups": 12
+  "unique_code_revisions": 6,
+  "unique_scene_groups": 13
 }

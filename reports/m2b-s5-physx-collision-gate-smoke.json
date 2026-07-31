@@ -1,0 +1,38 @@
+{
+  "schema_version": "M2BPhysxCollisionGateSmokeV1",
+  "status": "PASS_ONE_RELEASE_RECOVERY_COLLISION_GATE_NOT_FORMAL_MAPPING_GATE",
+  "scene_seed": 4013,
+  "failure_type": "RELEASE_FAILURE",
+  "runtime_action_under_test": "B0_RELEASE_RETRY",
+  "physical_recovery_training_eligible": true,
+  "evidence": "/var/tmp/xh-data/isaac-industrial/m2b/failure-evidence-scale-v1/worker1/scene-4013/failures/release_failure/release_failure/attempt-01/actuation-probe.json",
+  "evidence_sha256": "7e9eba2e1dbb4f71247104f38683bdf7f8b317c8ddcb6f2570052a0192fd1f4d",
+  "actuation_probe_source_sha256": "1e32fa89c8b1ef403a52f1b2c8326942b72092e6e88f50e8f780eff1c08c6094",
+  "gates": {
+    "release_failure_follow_collision": {
+      "status": "PASS",
+      "source": "ISAAC_PHYSX_CONTACT_REPORT_EXECUTION_MONITOR",
+      "unexpected_robot_contact_events": 0
+    },
+    "recovery_detach_retreat_collision": {
+      "status": "PASS",
+      "source": "ISAAC_PHYSX_CONTACT_REPORT_EXECUTION_MONITOR",
+      "unexpected_robot_contact_events": 0
+    },
+    "detached_noncoupling": {
+      "status": "PASS",
+      "attachment_absent_after_detach": true,
+      "hand_motion_m": 0.04871871756282785,
+      "relative_change_m": 0.04871873276927565
+    }
+  },
+  "privileged_truth_policy_input": false,
+  "teacher_used": false,
+  "teacher_kill_rule_events": [],
+  "limitations": [
+    "This is one physical B0 release-recovery execution monitor result, not a model-selected decision.",
+    "It does not establish the >=95% runtime mapping rate.",
+    "It does not replace prospective IK, collision, and safety checks for each model-selected action.",
+    "The earlier source-transition probe was excluded because a live bind mount could change its end-of-run source hash; this accepted record uses the startup-pinned revision."
+  ]
+}
