@@ -1,20 +1,20 @@
 {
-  "coarse_failure_recovery_supervision_episodes": 54,
+  "coarse_failure_recovery_supervision_episodes": 63,
   "code_revision_histogram": {
-    "1e32fa89c8b1ef403a52f1b2c8326942b72092e6e88f50e8f780eff1c08c6094": 23,
+    "1e32fa89c8b1ef403a52f1b2c8326942b72092e6e88f50e8f780eff1c08c6094": 32,
     "3c914922546ec9ff5925c8134b183bf35f327d0239a40f5469fd35739fc2e0d7": 10,
     "4ec1b929d06d4dc9b51e663e336e1af7a50176247c0f7c8ac9bf4e64abff80bd": 6,
     "971a32246765378157cc346ec0f274be256c7cb53c5458761797fc5b98caea84": 1,
     "bfd54b2c70ed9c2d892be88335217d7cf734104bb6594fed19d1dae57d619453": 6,
     "e4b91e36bb3c8496a539b3ce405bedf279e90b19242df83529e489cdcb13c434": 8
   },
-  "episodes_generated": 54,
+  "episodes_generated": 63,
   "episodes_quarantined": 0,
-  "episodes_valid": 54,
+  "episodes_valid": 63,
   "failure_counts": {
-    "EMPTY_GRASP": 16,
-    "RELEASE_FAILURE": 22,
-    "WRONG_OBJECT": 16
+    "EMPTY_GRASP": 19,
+    "RELEASE_FAILURE": 26,
+    "WRONG_OBJECT": 18
   },
   "limitations": [
     "These episodes supervise FailureContext and coarse recovery skills, not model rollout attribution.",
@@ -25,7 +25,7 @@
   "mixed_code_revisions": true,
   "model_rollout_episodes": 0,
   "output_path": "artifacts/m2b/dataset-v2.jsonl",
-  "output_sha256": "5d3a66453a5dc1096080570cdc6bccf49f6ed22711e8fb3c8390da1d925688dc",
+  "output_sha256": "9a1fd1fdce0450e0f8aaf3cee8cb9a9c07f6bfdd34f1d2757f8b29faace2698f",
   "privileged_truth_policy_input": false,
   "quarantine_path": "artifacts/m2b/dataset-v2-quarantine.jsonl",
   "quarantine_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
@@ -33,17 +33,17 @@
   "schema_version": "M2BDatasetV2ReportV1",
   "split_counts": {
     "test": 3,
-    "train": 40,
-    "val": 11
+    "train": 45,
+    "val": 15
   },
   "split_group_leakage": [],
   "status": "IN_PROGRESS_DATASET_V2_LIMITED_CLASS_COVERAGE",
   "successful_recovery_counts": {
-    "EMPTY_GRASP": 16,
-    "RELEASE_FAILURE": 22,
-    "WRONG_OBJECT": 16
+    "EMPTY_GRASP": 19,
+    "RELEASE_FAILURE": 26,
+    "WRONG_OBJECT": 18
   },
   "teacher_used": false,
   "unique_code_revisions": 6,
-  "unique_scene_groups": 24
+  "unique_scene_groups": 29
 }
