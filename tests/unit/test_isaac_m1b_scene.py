@@ -36,6 +36,7 @@ from xh_agent.data.isaac_m1b_episode import (
 )
 from xh_agent.grasp.free_gap import (
     isaac_top_down_orientation_wxyz,
+    rank_clearance_safe_yaw_candidates,
     select_free_gap_yaw_from_xy,
 )
 from xh_agent.perception.interfaces import BBoxV1, PerceptionResultV1
@@ -639,6 +640,33 @@ def test_isaac_probe_uses_adr0016_free_gap_yaw_without_policy_truth() -> None:
     assert result["selected_yaw_rad"] == pytest.approx(np.pi / 2)
     assert result["clearance_ok"] is True
     assert result["source"] == "CALIBRATION_TEST_ONLY"
+    ranked = rank_clearance_safe_yaw_candidates(result)
+    assert ranked[0]["yaw_rad"] == pytest.approx(np.pi / 2)
+    assert all(candidate["min_clearance_m"] >= 0.005 for candidate in ranked)
+
+
+def test_public_yaw_ik_scan_never_admits_clearance_rejection() -> None:
+    ranked = rank_clearance_safe_yaw_candidates(
+        {
+            "candidates": [
+                {"yaw_rad": 0.0, "min_clearance_m": 0.0049},
+                {"yaw_rad": 0.2, "min_clearance_m": 0.02},
+                {"yaw_rad": 0.1, "min_clearance_m": 0.02},
+            ]
+        }
+    )
+    assert ranked == [
+        {"yaw_rad": 0.1, "min_clearance_m": 0.02},
+        {"yaw_rad": 0.2, "min_clearance_m": 0.02},
+    ]
+    source = (SCRIPTS / "isaac_m1b_actuation_probe.py").read_text()
+    assert "rank_clearance_safe_yaw_candidates(yaw)" in source
+    assert "PREGRASP_IK_GATE_REJECTED" in source
+    assert "<= PRODUCTION_EE_POSITION_ERROR_GATE_M" in source
+    unconstrained = select_free_gap_yaw_from_xy(
+        [0.0, 0.0], [], source="PUBLIC_NO_NEIGHBORS"
+    )
+    assert len(rank_clearance_safe_yaw_candidates(unconstrained)) == 12
 
 
 def test_isaac_tolerance_campaign_uses_writable_evidence_mount_and_validates_file() -> None:

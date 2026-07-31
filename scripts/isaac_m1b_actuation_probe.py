@@ -29,6 +29,7 @@ from xh_agent.grasp.m1b_contact_window import (
 from xh_agent.grasp.free_gap import (
     FREE_GAP_MIN_CLEARANCE_M,
     isaac_top_down_orientation_wxyz,
+    rank_clearance_safe_yaw_candidates,
     select_free_gap_yaw_from_xy,
 )
 
@@ -1581,19 +1582,68 @@ def _execute_m2b_public_regrasp(
         neighbors,
         source="PUBLIC_RGBD_FREE_GAP_GEOMETRY",
     )
-    orientation = np.asarray(
-        isaac_top_down_orientation_wxyz(
-            float(yaw["selected_yaw_rad"])
-        ),
-        dtype=np.float32,
-    )
     pregrasp = target_center + np.asarray([0.0, 0.0, 0.27], dtype=np.float32)
-    pregrasp_motion = _step_pose(
-        robot,
-        pregrasp,
-        steps=150,
-        orientation_wxyz=orientation,
-    )
+    ik_yaw_trials: list[dict[str, Any]] = []
+    orientation: np.ndarray | None = None
+    pregrasp_motion: dict[str, object] | None = None
+    selected_ik_yaw_rad: float | None = None
+    for candidate in rank_clearance_safe_yaw_candidates(yaw):
+        candidate_orientation = np.asarray(
+            isaac_top_down_orientation_wxyz(candidate["yaw_rad"]),
+            dtype=np.float32,
+        )
+        candidate_motion = _step_pose(
+            robot,
+            pregrasp,
+            steps=150,
+            orientation_wxyz=candidate_orientation,
+        )
+        passed = bool(
+            candidate_motion["final_error_m"]
+            <= PRODUCTION_EE_POSITION_ERROR_GATE_M
+        )
+        ik_yaw_trials.append(
+            {
+                **candidate,
+                "pregrasp_motion": candidate_motion,
+                "ik_position_gate_passed": passed,
+            }
+        )
+        if passed:
+            orientation = candidate_orientation
+            pregrasp_motion = candidate_motion
+            selected_ik_yaw_rad = candidate["yaw_rad"]
+            break
+    if orientation is None or pregrasp_motion is None:
+        return {
+            "status": "PREGRASP_IK_GATE_REJECTED",
+            "public_action_input": {
+                "target_world_m": public_target_world_m,
+                "controlled_offset_world_m": list(controlled_offset_world_m),
+                "controlled_offset_camera_xyz_m": list(
+                    controlled_offset_camera_m
+                ),
+                "controlled_offset_coordinate_frame": (
+                    "m2b_policy_rgbd_optical"
+                ),
+                "commanded_target_world_m": target_center.tolist(),
+                "controlled_offset_source": (
+                    "TRAINING_ONLY_BOUNDED_PERTURBATION"
+                ),
+                "source": "PUBLIC_RGBD_TRACK_ONLY",
+                "simulator_truth_used": False,
+            },
+            "public_free_gap_yaw": yaw,
+            "ik_reachability_scan": {
+                "source": (
+                    "PUBLIC_CLEARANCE_SAFE_ADR0016_GRID_PLUS_"
+                    "OFFICIAL_DLS_PREGRASP_20MM_GATE"
+                ),
+                "selected_yaw_rad": None,
+                "trials": ik_yaw_trials,
+            },
+            "attempts": [],
+        }
     attempts: list[dict[str, Any]] = []
     for centerline_m in (0.12, 0.11, 0.10, 0.09, 0.08):
         contact_goal = target_center + np.asarray(
@@ -1683,6 +1733,14 @@ def _execute_m2b_public_regrasp(
                     "simulator_truth_used": False,
                 },
                 "public_free_gap_yaw": yaw,
+                "ik_reachability_scan": {
+                    "source": (
+                        "PUBLIC_CLEARANCE_SAFE_ADR0016_GRID_PLUS_"
+                        "OFFICIAL_DLS_PREGRASP_20MM_GATE"
+                    ),
+                    "selected_yaw_rad": selected_ik_yaw_rad,
+                    "trials": ik_yaw_trials,
+                },
                 "pregrasp_motion": pregrasp_motion,
                 "attempts": attempts,
                 "broker_internal": broker,
@@ -1722,6 +1780,14 @@ def _execute_m2b_public_regrasp(
             "simulator_truth_used": False,
         },
         "public_free_gap_yaw": yaw,
+        "ik_reachability_scan": {
+            "source": (
+                "PUBLIC_CLEARANCE_SAFE_ADR0016_GRID_PLUS_"
+                "OFFICIAL_DLS_PREGRASP_20MM_GATE"
+            ),
+            "selected_yaw_rad": selected_ik_yaw_rad,
+            "trials": ik_yaw_trials,
+        },
         "pregrasp_motion": pregrasp_motion,
         "attempts": attempts,
     }

@@ -87,3 +87,47 @@ def select_free_gap_yaw_from_xy(
         "candidates": candidates,
         "source": source,
     }
+
+
+def rank_clearance_safe_yaw_candidates(
+    selection: dict[str, object],
+) -> list[dict[str, float]]:
+    """Rank the declared public-geometry grid for a downstream IK gate.
+
+    This does not claim IK feasibility or invent new orientations.  It only
+    exposes already evaluated ADR-0016 candidates whose public clearance gate
+    passed, highest clearance first with yaw as a deterministic tie-breaker.
+    """
+
+    raw = selection.get("candidates")
+    if not isinstance(raw, list):
+        raise ValueError("free-gap selection has no candidate list")
+    candidates: list[dict[str, float]] = []
+    for candidate in raw:
+        if not isinstance(candidate, dict):
+            raise ValueError("free-gap candidate is not a mapping")
+        yaw = candidate.get("yaw_rad")
+        clearance = candidate.get("min_clearance_m")
+        if (
+            isinstance(yaw, bool)
+            or isinstance(clearance, bool)
+            or not isinstance(yaw, (int, float))
+            or not isinstance(clearance, (int, float))
+            or not math.isfinite(float(yaw))
+            or math.isnan(float(clearance))
+        ):
+            raise ValueError("free-gap candidate is non-finite")
+        if float(clearance) >= FREE_GAP_MIN_CLEARANCE_M:
+            candidates.append(
+                {
+                    "yaw_rad": float(yaw),
+                    "min_clearance_m": float(clearance),
+                }
+            )
+    return sorted(
+        candidates,
+        key=lambda candidate: (
+            -candidate["min_clearance_m"],
+            candidate["yaw_rad"],
+        ),
+    )
