@@ -1,0 +1,88 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "coordinate_frame": {
+      "const": "camera_optical",
+      "default": "camera_optical",
+      "title": "Coordinate Frame",
+      "type": "string"
+    },
+    "corrected_action": {
+      "items": {
+        "type": "number"
+      },
+      "maxItems": 10,
+      "minItems": 10,
+      "title": "Corrected Action",
+      "type": "array"
+    },
+    "correction_physically_successful": {
+      "title": "Correction Physically Successful",
+      "type": "boolean"
+    },
+    "dimension_names": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 10,
+      "minItems": 10,
+      "title": "Dimension Names",
+      "type": "array"
+    },
+    "perturbation_xyz_m": {
+      "items": {
+        "type": "number"
+      },
+      "maxItems": 3,
+      "minItems": 3,
+      "title": "Perturbation Xyz M",
+      "type": "array"
+    },
+    "perturbed_nominal": {
+      "items": {
+        "type": "number"
+      },
+      "maxItems": 10,
+      "minItems": 10,
+      "title": "Perturbed Nominal",
+      "type": "array"
+    },
+    "residual_target": {
+      "items": {
+        "type": "number"
+      },
+      "maxItems": 10,
+      "minItems": 10,
+      "title": "Residual Target",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "ResidualCorrectionPairV2",
+      "default": "ResidualCorrectionPairV2",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "training_only_privileged_label": {
+      "const": true,
+      "default": true,
+      "title": "Training Only Privileged Label",
+      "type": "boolean"
+    },
+    "units": {
+      "const": "m_rad_norm",
+      "default": "m_rad_norm",
+      "title": "Units",
+      "type": "string"
+    }
+  },
+  "required": [
+    "dimension_names",
+    "perturbed_nominal",
+    "corrected_action",
+    "residual_target",
+    "perturbation_xyz_m",
+    "correction_physically_successful"
+  ],
+  "title": "ResidualCorrectionPairV2",
+  "type": "object"
+}

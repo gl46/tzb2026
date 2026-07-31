@@ -503,6 +503,26 @@ def test_isaac_probe_detach_gate_checks_relative_decoupling() -> None:
     assert "detached_object_motion_m <= 0.01" not in source
 
 
+def test_isaac_probe_m2b_failures_change_physical_state_before_recovery() -> None:
+    source = (SCRIPTS / "isaac_m1b_actuation_probe.py").read_text()
+    assert '"--m2b-inject-empty-grasp"' in source
+    assert '"--m2b-inject-release-failure"' in source
+    assert '"--m2b-task-target-object"' in source
+    assert "empty_feedback, empty_broker = broker_from_window(empty_samples)" in source
+    assert "not empty_feedback.grasp_success" in source
+    assert "empty_attachment_absent" in source
+    assert "np.linalg.norm(empty_object_delta)) <= 0.005" in source
+    assert "attachment_remained = stage.GetPrimAtPath(ATTACH_JOINT_PATH).IsValid()" in source
+    assert "np.linalg.norm(release_object_delta)) >= 0.01" in source
+    assert "release_follow_error_m <= 0.02" in source
+    assert '"public_observation_status": "NOT_CAPTURED_BY_ACTUATION_PROBE"' in source
+    assert '"training_eligible": False' in source
+    assert "and m2b_injection_pass" in source
+    assert '"broker_attached_actual_contact"' in source
+    assert '"reassociate_target_executed": False' in source
+    assert '"regrasp_target_executed": False' in source
+
+
 def test_isaac_stage_builder_ports_sdf_velocity_decay_to_physx() -> None:
     source = (SCRIPTS / "isaac_m1b_dataset_benchmark.py").read_text()
     assert "PhysxSchema.PhysxRigidBodyAPI.Apply(link_prim)" in source

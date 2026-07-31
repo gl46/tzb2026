@@ -1,0 +1,179 @@
+{
+  "$defs": {
+    "PhysicalFailureType": {
+      "enum": [
+        "EMPTY_GRASP",
+        "WRONG_OBJECT",
+        "RELEASE_FAILURE",
+        "UNSTABLE_PLACEMENT"
+      ],
+      "title": "PhysicalFailureType",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "attached_entity_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Attached Entity Id"
+    },
+    "attachment_created": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Attachment Created"
+    },
+    "attachment_remained_after_release": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Attachment Remained After Release"
+    },
+    "bilateral_grasp_observed": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Bilateral Grasp Observed"
+    },
+    "carried_follow_delta_m": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Carried Follow Delta M"
+    },
+    "carried_public_track_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Carried Public Track Id"
+    },
+    "close_command_issued": {
+      "default": false,
+      "title": "Close Command Issued",
+      "type": "boolean"
+    },
+    "contacted_entity_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Contacted Entity Id"
+    },
+    "failure_type": {
+      "$ref": "#/$defs/PhysicalFailureType"
+    },
+    "injection_commanded": {
+      "title": "Injection Commanded",
+      "type": "boolean"
+    },
+    "public_observed_predicates": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Public Observed Predicates",
+      "type": "array"
+    },
+    "release_command_issued": {
+      "default": false,
+      "title": "Release Command Issued",
+      "type": "boolean"
+    },
+    "schema_version": {
+      "const": "PhysicalFailureEvidenceV2",
+      "default": "PhysicalFailureEvidenceV2",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "supervision_only": {
+      "const": true,
+      "default": true,
+      "title": "Supervision Only",
+      "type": "boolean"
+    },
+    "target_lift_delta_m": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Target Lift Delta M"
+    },
+    "task_target_entity_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Task Target Entity Id"
+    },
+    "task_target_track_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Task Target Track Id"
+    }
+  },
+  "required": [
+    "failure_type",
+    "injection_commanded"
+  ],
+  "title": "PhysicalFailureEvidenceV2",
+  "type": "object"
+}

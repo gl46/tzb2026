@@ -47,6 +47,14 @@ def parse_args() -> tuple[argparse.Namespace, list[str]]:
     parser.add_argument("--output", required=True)
     parser.add_argument("--target-object", default="cylinder_07")
     parser.add_argument(
+        "--m2b-task-target-object",
+        default=None,
+        help=(
+            "Supervision-only TaskSpec target for a physical WRONG_OBJECT "
+            "injection probe; the broker still attaches actual finger contact."
+        ),
+    )
+    parser.add_argument(
         "--calibration-offset-xyz-m",
         default="0,0,0",
         help=(
@@ -120,6 +128,22 @@ def parse_args() -> tuple[argparse.Namespace, list[str]]:
             "gravity. It is not part of the production grasp primitive."
         ),
     )
+    parser.add_argument(
+        "--m2b-inject-empty-grasp",
+        action="store_true",
+        help=(
+            "Before the accepted grasp, close and lift in free space, prove "
+            "that no object follows, reopen, and then run the accepted grasp."
+        ),
+    )
+    parser.add_argument(
+        "--m2b-inject-release-failure",
+        action="store_true",
+        help=(
+            "After the accepted lift, issue open while the attachment remains, "
+            "prove the object still follows, then retry detach/release."
+        ),
+    )
     return parser.parse_known_args()
 
 
@@ -135,6 +159,18 @@ TARGET_MODEL = next(
 )
 if TARGET_MODEL is None:
     raise ValueError(f"target object is absent from scene: {ARGS.target_object}")
+M2B_TASK_TARGET_MODEL = next(
+    (
+        model
+        for model in SCENE.dynamic_models
+        if model.name == ARGS.m2b_task_target_object
+    ),
+    None,
+)
+if ARGS.m2b_task_target_object is not None and M2B_TASK_TARGET_MODEL is None:
+    raise ValueError(
+        f"M2B task target is absent from scene: {ARGS.m2b_task_target_object}"
+    )
 CONTACT_CENTERLINES_M = tuple(
     float(value) for value in ARGS.contact_centerlines_m.split(",")
 )
@@ -1688,6 +1724,80 @@ def main() -> int:
             orientation_wxyz=top_down_orientation_wxyz,
         )
 
+    empty_grasp_injection: dict[str, object] | None = None
+    if ARGS.m2b_inject_empty_grasp and selected_orientation_feasible:
+        empty_hand_before, _ = _live_pose(hand_prim)
+        empty_object_before, _ = _live_pose(target_object_prim)
+        (
+            empty_samples,
+            empty_sensor_frames,
+            empty_tensor_frames,
+            empty_physx_frames,
+        ) = _step_gripper(
+            robot,
+            OFFICIAL_FRANKA_CLOSED_POSITION_M,
+            steps=ARGS.gripper_close_steps,
+            sensors=sensors,
+            contact_views={
+                "left": left_finger_prim,
+                "right": right_finger_prim,
+            },
+            contact_collector=contact_collector,
+        )
+        empty_feedback, empty_broker = broker_from_window(empty_samples)
+        empty_lift_goal = np.asarray(
+            empty_hand_before, dtype=np.float32
+        ) + np.asarray([0.0, 0.0, 0.05], dtype=np.float32)
+        empty_lift_motion = _step_pose(
+            robot,
+            empty_lift_goal,
+            steps=90,
+            orientation_wxyz=top_down_orientation_wxyz,
+        )
+        empty_hand_after, _ = _live_pose(hand_prim)
+        empty_object_after, _ = _live_pose(target_object_prim)
+        empty_hand_delta = _delta(empty_hand_before, empty_hand_after)
+        empty_object_delta = _delta(empty_object_before, empty_object_after)
+        empty_attachment_absent = not stage.GetPrimAtPath(
+            ATTACH_JOINT_PATH
+        ).IsValid()
+        empty_physics_pass = bool(
+            not empty_feedback.grasp_success
+            and empty_attachment_absent
+            and float(np.linalg.norm(empty_hand_delta)) >= 0.02
+            and float(np.linalg.norm(empty_object_delta)) <= 0.005
+        )
+        _step_gripper(robot, 0.04, steps=60)
+        phases["empty_grasp_return_to_pregrasp"] = _step_pose(
+            robot,
+            pregrasp,
+            steps=90,
+            orientation_wxyz=top_down_orientation_wxyz,
+        )
+        empty_grasp_injection = {
+            "schema_version": "M2BPhysicalInjectionProbeV1",
+            "failure_type": "EMPTY_GRASP",
+            "injection_commanded": True,
+            "close_command_issued": True,
+            "bilateral_grasp_observed": bool(empty_feedback.grasp_success),
+            "attachment_created": not empty_attachment_absent,
+            "hand_lift_delta_m": empty_hand_delta.tolist(),
+            "target_lift_delta_m": float(np.linalg.norm(empty_object_delta)),
+            "lift_motion": empty_lift_motion,
+            "physical_state_passed": empty_physics_pass,
+            "broker_internal": empty_broker,
+            "contact_sample_count": len(empty_samples),
+            "sensor_frame_count": len(empty_sensor_frames),
+            "tensor_frame_count": len(empty_tensor_frames),
+            "physx_frame_count": len(empty_physx_frames),
+            "public_observation_status": "NOT_CAPTURED_BY_ACTUATION_PROBE",
+            "training_eligible": False,
+            "recovery_steps_executed": [
+                "OPEN_GRIPPER",
+                "RETURN_TO_PREGRASP",
+            ],
+        }
+
     contact_attempts: list[dict[str, object]] = []
     feedback = None
     broker_internal = None
@@ -2310,6 +2420,7 @@ def main() -> int:
             "maximum_ee_position_error_m": PRODUCTION_EE_POSITION_ERROR_GATE_M,
             "passed": selected_contact_goal is not None,
         },
+        "m2b_empty_grasp_injection": empty_grasp_injection,
     }
     if ARGS.free_close_diagnostic:
         final_finger_positions = contact_attempts[-1]["post_close_snapshot"][
@@ -2408,6 +2519,78 @@ def main() -> int:
         object_motion[2] >= 0.05
         and follow_error_m <= 0.02
     )
+    wrong_object_injection = (
+        {
+            "schema_version": "M2BPhysicalInjectionProbeV1",
+            "failure_type": "WRONG_OBJECT",
+            "injection_commanded": True,
+            "close_command_issued": True,
+            "contacted_entity_id": str(
+                broker_internal["actual_sim_entity_id"]
+            ),
+            "attached_entity_id": entity,
+            "task_target_entity_id": ARGS.m2b_task_target_object,
+            "broker_attached_actual_contact": (
+                str(broker_internal["actual_sim_entity_id"]) == entity
+            ),
+            "physical_state_passed": bool(
+                attached_follow_pass
+                and str(broker_internal["actual_sim_entity_id"]) == entity
+                and entity != ARGS.m2b_task_target_object
+            ),
+            "public_observation_status": "NOT_CAPTURED_BY_ACTUATION_PROBE",
+            "training_eligible": False,
+        }
+        if ARGS.m2b_task_target_object is not None
+        else None
+    )
+
+    release_failure_injection: dict[str, object] | None = None
+    if ARGS.m2b_inject_release_failure:
+        release_hand_before, _ = _live_pose(hand_prim)
+        release_object_before, _ = _live_pose(object_prim)
+        _step_gripper(robot, 0.04, steps=60)
+        attachment_remained = stage.GetPrimAtPath(ATTACH_JOINT_PATH).IsValid()
+        release_follow_goal = np.asarray(
+            release_hand_before, dtype=np.float32
+        ) + np.asarray([0.0, 0.0, 0.03], dtype=np.float32)
+        release_follow_motion = _step_pose(
+            robot,
+            release_follow_goal,
+            steps=90,
+            orientation_wxyz=top_down_orientation_wxyz,
+        )
+        release_hand_after, _ = _live_pose(hand_prim)
+        release_object_after, _ = _live_pose(object_prim)
+        release_hand_delta = _delta(release_hand_before, release_hand_after)
+        release_object_delta = _delta(
+            release_object_before, release_object_after
+        )
+        release_follow_error_m = float(
+            np.linalg.norm(release_hand_delta - release_object_delta)
+        )
+        release_physics_pass = bool(
+            attachment_remained
+            and float(np.linalg.norm(release_object_delta)) >= 0.01
+            and release_follow_error_m <= 0.02
+        )
+        release_failure_injection = {
+            "schema_version": "M2BPhysicalInjectionProbeV1",
+            "failure_type": "RELEASE_FAILURE",
+            "injection_commanded": True,
+            "release_command_issued": True,
+            "attachment_remained_after_release": attachment_remained,
+            "hand_follow_delta_m": release_hand_delta.tolist(),
+            "carried_follow_delta_m": float(
+                np.linalg.norm(release_object_delta)
+            ),
+            "follow_error_m": release_follow_error_m,
+            "follow_motion": release_follow_motion,
+            "physical_state_passed": release_physics_pass,
+            "public_observation_status": "NOT_CAPTURED_BY_ACTUATION_PROBE",
+            "training_eligible": False,
+        }
+        hand_after = release_hand_after
 
     _remove_attachment()
     _step_gripper(robot, 0.04, steps=60)
@@ -2457,6 +2640,20 @@ def main() -> int:
     same_process_reset_pass = bool(
         same_process_reset is None or same_process_reset["passed"]
     )
+    m2b_injection_pass = bool(
+        (
+            empty_grasp_injection is None
+            or empty_grasp_injection["physical_state_passed"]
+        )
+        and (
+            release_failure_injection is None
+            or release_failure_injection["physical_state_passed"]
+        )
+        and (
+            wrong_object_injection is None
+            or wrong_object_injection["physical_state_passed"]
+        )
+    )
 
     evidence.update(
         {
@@ -2466,6 +2663,7 @@ def main() -> int:
                     attached_follow_pass
                     and detached_noncoupling_pass
                     and same_process_reset_pass
+                    and m2b_injection_pass
                 )
                 else "PHYSICS_GATE_REJECTED"
             ),
@@ -2494,6 +2692,61 @@ def main() -> int:
                 "passed": detached_noncoupling_pass,
             },
             "same_process_reset": same_process_reset,
+            "m2b_release_failure_injection": release_failure_injection,
+            "m2b_wrong_object_injection": wrong_object_injection,
+            "m2b_injection_pass": m2b_injection_pass,
+            "m2b_recovery": {
+                "empty_grasp": (
+                    {
+                        "sequence": ["REOBSERVE", "REGRASP"],
+                        "physical_regrasp_and_lift_passed": attached_follow_pass,
+                        "public_reobserve_status": (
+                            "NOT_CAPTURED_BY_ACTUATION_PROBE"
+                        ),
+                        "training_eligible": False,
+                    }
+                    if empty_grasp_injection is not None
+                    else None
+                ),
+                "release_failure": (
+                    {
+                        "sequence": [
+                            "RETRY_RELEASE",
+                            "RETREAT",
+                            "REOBSERVE",
+                        ],
+                        "retry_detach_and_retreat_passed": (
+                            detached_noncoupling_pass
+                        ),
+                        "public_reobserve_status": (
+                            "NOT_CAPTURED_BY_ACTUATION_PROBE"
+                        ),
+                        "training_eligible": False,
+                    }
+                    if release_failure_injection is not None
+                    else None
+                ),
+                "wrong_object": (
+                    {
+                        "sequence": [
+                            "SAFE_PLACE_NON_TARGET",
+                            "REASSOCIATE_TARGET",
+                            "REGRASP",
+                        ],
+                        "safe_place_non_target_passed": (
+                            detached_noncoupling_pass
+                        ),
+                        "reassociate_target_executed": False,
+                        "regrasp_target_executed": False,
+                        "public_reobserve_status": (
+                            "NOT_CAPTURED_BY_ACTUATION_PROBE"
+                        ),
+                        "training_eligible": False,
+                    }
+                    if wrong_object_injection is not None
+                    else None
+                ),
+            },
         }
     )
     (output / "actuation-probe.json").write_text(
