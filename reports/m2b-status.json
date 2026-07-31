@@ -7,16 +7,16 @@
     "matched B0/QRM Isaac closed-loop evaluation has not run"
   ],
   "closed_loop_status": "NOT_RUN",
-  "dataset_v2_episodes_valid": 32,
+  "dataset_v2_episodes_valid": 37,
   "dataset_v2_failure_counts": {
-    "EMPTY_GRASP": 11,
-    "RELEASE_FAILURE": 13,
-    "WRONG_OBJECT": 8
+    "EMPTY_GRASP": 12,
+    "RELEASE_FAILURE": 16,
+    "WRONG_OBJECT": 9
   },
   "dataset_v2_successful_recovery_counts": {
-    "EMPTY_GRASP": 11,
-    "RELEASE_FAILURE": 13,
-    "WRONG_OBJECT": 8
+    "EMPTY_GRASP": 12,
+    "RELEASE_FAILURE": 16,
+    "WRONG_OBJECT": 9
   },
   "failure_evidence_pilot_records": 3,
   "goal_complete": false,
