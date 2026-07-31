@@ -89,6 +89,22 @@ def test_public_predicates_cover_three_mandatory_failures() -> None:
     assert release_success.predicates == ["released=true"]
 
 
+def test_explicit_public_top_band_rejects_low_color_fragments() -> None:
+    tracks = [
+        _track("true-left", "yellow", (-0.53, 0.27, 0.505), 0.99),
+        _track("true-target", "yellow", (-0.46, 0.27, 0.504), 0.99),
+        _track("low-fragment", "yellow", (-0.19, 0.14, 0.461), 0.99),
+    ]
+    unfiltered = select_task_target_track(tracks, visual_color="yellow")
+    filtered = select_task_target_track(
+        tracks,
+        visual_color="yellow",
+        maximum_height_below_tallest_m=0.02,
+    )
+    assert unfiltered.track_id == "low-fragment"
+    assert filtered.track_id == "true-target"
+
+
 def test_wrong_object_rejects_missing_public_temporal_identity() -> None:
     with pytest.raises(ValueError, match="no stable public tracks"):
         infer_wrong_object_predicates(

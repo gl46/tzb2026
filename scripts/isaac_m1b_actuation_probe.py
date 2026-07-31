@@ -1475,7 +1475,8 @@ def _setup_m2b_public_rgbd(
         "captures": [],
         "task_spec": {
             "target_selector": (
-                f"visual_color={ARGS.m2b_task_target_public_color},world_x=max"
+                f"visual_color={ARGS.m2b_task_target_public_color},"
+                "top_z_band=0.02m,world_x=max"
             ),
             "source": "PUBLIC_RGBD_TASK_SPEC",
             "simulator_entity_id_used": False,
@@ -1998,6 +1999,7 @@ def main() -> int:
             visual_color=ARGS.m2b_task_target_public_color,
             world_axis="x",
             extremum="max",
+            maximum_height_below_tallest_m=0.02,
         )
         m2b_task_target_track_id = task_target.track_id
         m2b_public_rgbd["task_spec"]["target_track_id"] = (
@@ -2013,6 +2015,7 @@ def main() -> int:
                 visual_color=ARGS.m2b_injected_public_grasp_color,
                 world_axis="x",
                 extremum="max",
+                maximum_height_below_tallest_m=0.02,
             )
             m2b_injected_grasp_track_id = injected_target.track_id
             m2b_public_rgbd["task_spec"]["injected_action_track_id"] = (

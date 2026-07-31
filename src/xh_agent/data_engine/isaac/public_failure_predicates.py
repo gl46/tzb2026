@@ -53,12 +53,30 @@ def select_task_target_track(
     visual_color: str,
     world_axis: Literal["x", "y", "z"] = "x",
     extremum: Literal["min", "max"] = "max",
+    maximum_height_below_tallest_m: float | None = None,
 ) -> PublicTrackSnapshotV2:
-    """Resolve an explicit public TaskSpec such as ``red/max-world-x``."""
+    """Resolve an explicit TaskSpec from public tracks only.
+
+    An optional top-height band is an explicit public predicate that removes
+    low color fragments before applying the requested world-axis extremum.
+    """
 
     candidates = [track for track in tracks if track.visual_color == visual_color]
     if not candidates:
         raise ValueError(f"no public {visual_color!r} target candidate")
+    if maximum_height_below_tallest_m is not None:
+        if (
+            not math.isfinite(maximum_height_below_tallest_m)
+            or maximum_height_below_tallest_m < 0.0
+        ):
+            raise ValueError("public target height band must be finite and nonnegative")
+        tallest = max(track.position_world_m[2] for track in candidates)
+        candidates = [
+            track
+            for track in candidates
+            if track.position_world_m[2]
+            >= tallest - maximum_height_below_tallest_m
+        ]
     axis = {"x": 0, "y": 1, "z": 2}[world_axis]
     ordered = sorted(
         candidates,

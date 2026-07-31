@@ -1,0 +1,23 @@
+{
+  "change": "rank clearance-safe public ADR-0016 yaw candidates through the unchanged 20 mm Isaac DLS pregrasp IK gate",
+  "deployed_at": "2026-08-01T04:06:07+08:00",
+  "deployment_boundary": {
+    "worker0_first_possible_scene_seed": 4008,
+    "worker1_first_possible_scene_seed": 4011
+  },
+  "evidence_policy": "PREVIOUS_EVIDENCE_RETAINED_WITH_PER_EPISODE_SOURCE_HASHES",
+  "failure_workers_restarted": false,
+  "gate_lowered": false,
+  "new_free_gap_sha256": "2d85ddf87611d8593f4a4abc76d1e34a6aed2e805437c7a55f7b4f77184a5cd0",
+  "new_probe_sha256": "c9ec87ca1312a9ffcdc53530464d236f2dc03ec816057e6532a9ef3732fe32a0",
+  "old_free_gap_sha256": "91c26ae3dee9844222ffe795a39ce92af2ce1da340ef420c1396b87cadd09c7c",
+  "old_probe_sha256": "bfd54b2c70ed9c2d892be88335217d7cf734104bb6594fed19d1dae57d619453",
+  "privileged_truth_policy_input": false,
+  "reason": "Most rejected WRONG_OBJECT recoveries had public target reassociation and physical contact evidence, but the maximum-clearance yaw failed the existing high-pregrasp IK gate. Alternative yaws remain restricted to the same public clearance-safe official grid.",
+  "remote_host": "root@labserver",
+  "remote_project_root": "/var/tmp/m2a-isaac-project-20260731",
+  "schema_version": "M2BScaleSourceTransitionV1",
+  "status": "DEPLOYED_FUTURE_PROBES_PENDING_PHYSICAL_EVIDENCE",
+  "teacher_used": false,
+  "world_model_replaced": false
+}
