@@ -686,9 +686,12 @@ def test_isaac_tolerance_campaign_uses_writable_evidence_mount_and_validates_fil
     assert '"prior_infrastructure_failure_count"' in source
     assert "evidence = _valid_trial_evidence(" in source
     assert "completed.returncode == 0" not in source
-    assert '"actuation_probe_source_sha256": sha256_file(__file__)' in (
-        SCRIPTS / "isaac_m1b_actuation_probe.py"
-    ).read_text()
+    probe_source = (SCRIPTS / "isaac_m1b_actuation_probe.py").read_text()
+    assert "ACTUATION_PROBE_SOURCE_SHA256 = sha256_file(__file__)" in probe_source
+    assert (
+        '"actuation_probe_source_sha256": ACTUATION_PROBE_SOURCE_SHA256'
+        in probe_source
+    )
     assert "expected_probe_sha256=probe_sha256" in source
     assert '"campaign_runner_source_sha256": runner_sha256' in source
 

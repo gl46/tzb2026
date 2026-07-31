@@ -32,9 +32,17 @@ from xh_agent.grasp.free_gap import (
     rank_clearance_safe_yaw_candidates,
     select_free_gap_yaw_from_xy,
 )
+from xh_agent.policy.qrm_lite.collision_evidence import (
+    evaluate_robot_collision_events,
+)
 
 
 PRODUCTION_GRIPPER_EVIDENCE_STEPS = 132
+# Pin the executing source revision before the long Isaac run starts.  A
+# worker may mount the project read-only while the host prepares a later
+# revision; hashing again at evidence-write time would misattribute the code
+# that Python already loaded.
+ACTUATION_PROBE_SOURCE_SHA256 = sha256_file(__file__)
 
 
 def parse_args() -> tuple[argparse.Namespace, list[str]]:
@@ -498,11 +506,19 @@ def _step_pose(
     *,
     steps: int,
     orientation_wxyz: np.ndarray | None = None,
+    contact_collector: _PhysxContactCollector | None = None,
+    collision_phase: str | None = None,
+    allowed_robot_contact_paths: tuple[str, ...] = (),
+    allowed_external_contact_paths: tuple[str, ...] = (),
 ) -> dict[str, object]:
     orientation = (
         DOWNWARD_WXYZ if orientation_wxyz is None else orientation_wxyz
     )
     errors: list[float] = []
+    contact_events: list[dict[str, object]] = []
+    contact_cursor = (
+        contact_collector.cursor() if contact_collector is not None else 0
+    )
     for _ in range(steps):
         robot.set_end_effector_pose(
             position=goal_position,
@@ -510,15 +526,29 @@ def _step_pose(
             ik_method="damped-least-squares",
         )
         simulation_app.update()
+        if contact_collector is not None:
+            contact_cursor, new_events = contact_collector.events_after(
+                contact_cursor
+            )
+            new_events.extend(contact_collector.poll_current_report())
+            contact_events.extend(dict(event) for event in new_events)
         _, position, _ = robot.get_current_state()
         errors.append(float(np.linalg.norm(position[0] - goal_position)))
-    return {
+    result: dict[str, object] = {
         "goal_world_m": goal_position.tolist(),
         "orientation_world_wxyz": orientation.tolist(),
         "steps": steps,
         "final_error_m": errors[-1],
         "minimum_error_m": min(errors),
     }
+    if contact_collector is not None:
+        result["collision_gate"] = evaluate_robot_collision_events(
+            contact_events,
+            phase=collision_phase or "UNSPECIFIED_MOTION",
+            allowed_robot_collider_prefixes=allowed_robot_contact_paths,
+            allowed_external_collider_prefixes=allowed_external_contact_paths,
+        )
+    return result
 
 
 def _step_gripper(
@@ -1598,16 +1628,24 @@ def _execute_m2b_public_regrasp(
             pregrasp,
             steps=150,
             orientation_wxyz=candidate_orientation,
+            contact_collector=contact_collector,
+            collision_phase="PUBLIC_REGRASP_PREGRASP",
         )
-        passed = bool(
+        ik_passed = bool(
             candidate_motion["final_error_m"]
             <= PRODUCTION_EE_POSITION_ERROR_GATE_M
         )
+        collision_passed = bool(
+            candidate_motion["collision_gate"]["status"] == "PASS"
+        )
+        passed = ik_passed and collision_passed
         ik_yaw_trials.append(
             {
                 **candidate,
                 "pregrasp_motion": candidate_motion,
-                "ik_position_gate_passed": passed,
+                "ik_position_gate_passed": ik_passed,
+                "collision_gate_passed": collision_passed,
+                "candidate_gate_passed": passed,
             }
         )
         if passed:
@@ -1655,6 +1693,15 @@ def _execute_m2b_public_regrasp(
             contact_goal,
             steps=120,
             orientation_wxyz=orientation,
+            contact_collector=contact_collector,
+            collision_phase="PUBLIC_REGRASP_CONTACT_DESCENT",
+            allowed_robot_contact_paths=(
+                LEFT_FINGER_PATH,
+                RIGHT_FINGER_PATH,
+            ),
+            allowed_external_contact_paths=tuple(
+                path for _, path in CONTACT_FILTERS
+            ),
         )
         _step_gripper(robot, preclose_target_m, steps=M1B_PRECLOSE_STEPS)
         _step_gripper(
@@ -1685,6 +1732,8 @@ def _execute_m2b_public_regrasp(
             <= PRODUCTION_EE_POSITION_ERROR_GATE_M
             and contact_motion["final_error_m"]
             <= PRODUCTION_EE_POSITION_ERROR_GATE_M
+            and pregrasp_motion["collision_gate"]["status"] == "PASS"
+            and contact_motion["collision_gate"]["status"] == "PASS"
         )
         attempts.append(
             {
@@ -1708,6 +1757,15 @@ def _execute_m2b_public_regrasp(
                 pregrasp,
                 steps=150,
                 orientation_wxyz=orientation,
+                contact_collector=contact_collector,
+                collision_phase="PUBLIC_REGRASP_LIFT",
+                allowed_robot_contact_paths=(
+                    LEFT_FINGER_PATH,
+                    RIGHT_FINGER_PATH,
+                ),
+                allowed_external_contact_paths=(
+                    f"/World/M1B/{entity}/link",
+                ),
             )
             hand_after, _ = _live_pose(hand_prim)
             object_after, _ = _live_pose(object_prim)
@@ -2839,7 +2897,7 @@ def main() -> int:
         broker_internal = attempt_internal
     evidence: dict[str, object] = {
         "schema_version": "IsaacM1BActuationProbeV1",
-        "actuation_probe_source_sha256": sha256_file(__file__),
+        "actuation_probe_source_sha256": ACTUATION_PROBE_SOURCE_SHA256,
         "status": "CONTACT_GATE_REJECTED",
         "scope": "CALIBRATION_ONLY_INITIALIZATION",
         "free_close_diagnostic": ARGS.free_close_diagnostic,
@@ -3117,6 +3175,10 @@ def main() -> int:
         pregrasp,
         steps=150,
         orientation_wxyz=top_down_orientation_wxyz,
+        contact_collector=contact_collector,
+        collision_phase="B0_LIFT",
+        allowed_robot_contact_paths=(LEFT_FINGER_PATH, RIGHT_FINGER_PATH),
+        allowed_external_contact_paths=(object_path,),
     )
     hand_after, _ = _live_pose(hand_prim)
     object_after, _ = _live_pose(object_prim)
@@ -3126,6 +3188,7 @@ def main() -> int:
     attached_follow_pass = bool(
         object_motion[2] >= 0.05
         and follow_error_m <= 0.02
+        and phases["lift"]["collision_gate"]["status"] == "PASS"
     )
     m2b_public_after_lift: list[Any] | None = None
     m2b_carried_public_track_id: str | None = None
@@ -3225,6 +3288,13 @@ def main() -> int:
             release_follow_goal,
             steps=90,
             orientation_wxyz=top_down_orientation_wxyz,
+            contact_collector=contact_collector,
+            collision_phase="RELEASE_FAILURE_FOLLOW",
+            allowed_robot_contact_paths=(
+                LEFT_FINGER_PATH,
+                RIGHT_FINGER_PATH,
+            ),
+            allowed_external_contact_paths=(object_path,),
         )
         release_hand_after, _ = _live_pose(hand_prim)
         release_object_after, _ = _live_pose(object_prim)
@@ -3239,6 +3309,7 @@ def main() -> int:
             attachment_remained
             and float(np.linalg.norm(release_object_delta)) >= 0.01
             and release_follow_error_m <= 0.02
+            and release_follow_motion["collision_gate"]["status"] == "PASS"
         )
         release_public_predicates = None
         if m2b_public_rgbd is not None:
@@ -3307,6 +3378,8 @@ def main() -> int:
         retreat,
         steps=90,
         orientation_wxyz=top_down_orientation_wxyz,
+        contact_collector=contact_collector,
+        collision_phase="RECOVERY_DETACH_RETREAT",
     )
     hand_detached_end, _ = _live_pose(hand_prim)
     object_detached_end, _ = _live_pose(object_prim)
@@ -3325,6 +3398,7 @@ def main() -> int:
         attachment_absent_after_detach
         and detached_hand_motion_m >= minimum_detach_jog_m
         and detached_relative_change_m >= minimum_decoupled_relative_change_m
+        and phases["detach_retreat"]["collision_gate"]["status"] == "PASS"
     )
     m2b_public_after_recovery: list[Any] | None = None
     m2b_public_release_success = None
