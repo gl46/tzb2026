@@ -19,8 +19,9 @@
 - model entered live Isaac inference: yes; structured Q2 checkpoint loaded in every accepted worker
 - B0 fallback: 50/50
 - closed-loop infrastructure attempts quarantined: 4
-- shadow Isaac online suitability: not evaluated; `NOT_RUN`
-- LingBot preparation: `NOT_RUN`
+- shadow Isaac online suitability: False; `OFFLINE_ONLY`
+- LingBot preparation: `PASS`
+- Teacher path remains disabled in Shadow and LingBot prep
 - model verdict: **KEEP_B0_COLLECT_MORE_DATA**
 - expand to 5k–10k now: no; collect physical failure/recovery coverage first
 - next command: `make m2a-status`
