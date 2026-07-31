@@ -152,16 +152,32 @@ def main() -> int:
     parser.add_argument(
         "--pair",
         action="append",
-        required=True,
+        default=[],
         help="PERTURBED_EVIDENCE,CORRECTED_EVIDENCE remote paths",
+    )
+    parser.add_argument(
+        "--remote-worker-status",
+        action="append",
+        default=[],
+        help="Remote M2BResidualEvidenceWorkerStatusV1 path.",
     )
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--quarantine", required=True, type=Path)
     parser.add_argument("--report", required=True, type=Path)
     args = parser.parse_args()
+    requested_pairs = list(args.pair)
+    for status_path in args.remote_worker_status:
+        status = remote_json(args.host, status_path)
+        requested_pairs.extend(
+            f"{record['perturbed_evidence']},{record['corrected_evidence']}"
+            for record in status.get("records", [])
+            if record.get("pair_ready") is True
+        )
+    if not requested_pairs:
+        raise SystemExit("no residual evidence pairs were supplied")
     pairs = []
     quarantine = []
-    for item in args.pair:
+    for item in requested_pairs:
         perturbed_path, corrected_path = item.split(",", 1)
         try:
             perturbed_digest = remote_sha256(args.host, perturbed_path)

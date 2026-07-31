@@ -12,6 +12,10 @@ from m2b.run_failure_evidence_worker import (
     public_selector_entity,
     stage_is_valid,
 )
+from m2b.run_residual_evidence_worker import (
+    accepted_correction,
+    perturbation_for_seed,
+)
 
 
 def test_public_selector_resolves_explicit_color_and_max_world_x(tmp_path) -> None:
@@ -119,3 +123,33 @@ def test_scale_launcher_partitions_seeds_without_overlapping_workers(
     assert "--scene-seed 4002" in launches[0]
     assert "--scene-seed 4003" in launches[1]
     assert "--scene-seed 4001" not in ssh_log.read_text()
+
+
+def test_residual_worker_uses_bounded_nonzero_camera_perturbations() -> None:
+    for seed in range(4000, 4024):
+        x, y, z = perturbation_for_seed(seed)
+        assert 0.002 <= abs(x) <= 0.015
+        assert 0.002 <= abs(y) <= 0.015
+        assert 0.001 <= abs(z) <= 0.005
+
+
+def test_residual_worker_requires_hash_bound_accepted_correction(
+    tmp_path,
+) -> None:
+    summary = tmp_path / "physical-failure-smoke.json"
+    summary.write_text(
+        json.dumps(
+            {
+                "attempts": [
+                    {
+                        "accepted": True,
+                        "evidence": "/remote/corrected.json",
+                        "evidence_sha256": "a" * 64,
+                    }
+                ]
+            }
+        )
+    )
+    result = accepted_correction(summary)
+    assert result is not None
+    assert result["evidence_sha256"] == "a" * 64

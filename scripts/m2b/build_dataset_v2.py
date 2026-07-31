@@ -25,6 +25,22 @@ from xh_agent.data_engine.isaac.failure_rich import (
 MANDATORY_FAILURES = ("EMPTY_GRASP", "WRONG_OBJECT", "RELEASE_FAILURE")
 
 
+def sources_from_manifest(
+    path: Path,
+) -> tuple[str | None, list[tuple[str, str]], list[str]]:
+    manifest = json.loads(path.read_text())
+    if manifest.get("schema_version") != "M2BDatasetSourceManifestV1":
+        raise ValueError("unsupported M2B dataset source manifest")
+    evidence = [
+        (str(item["failure_type"]), str(item["evidence_path"]))
+        for item in manifest.get("manual_evidence", [])
+    ]
+    statuses = [
+        str(status) for status in manifest.get("remote_worker_status", [])
+    ]
+    return manifest.get("host"), evidence, statuses
+
+
 def scene_split(scene_seed: int) -> str:
     bucket = int(
         hashlib.sha256(f"scene-{scene_seed}".encode()).hexdigest()[:8], 16
@@ -116,6 +132,11 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--host", default="root@labserver")
     parser.add_argument(
+        "--source-manifest",
+        type=Path,
+        help="Versioned manual evidence and remote worker-status paths.",
+    )
+    parser.add_argument(
         "--evidence",
         action="append",
         default=[],
@@ -132,6 +153,17 @@ def main() -> int:
     parser.add_argument("--report", required=True, type=Path)
     args = parser.parse_args()
     evidence = []
+    if args.source_manifest:
+        try:
+            host, manifest_evidence, manifest_statuses = (
+                sources_from_manifest(args.source_manifest)
+            )
+        except (KeyError, ValueError) as error:
+            raise SystemExit(str(error)) from error
+        if host:
+            args.host = str(host)
+        evidence.extend(manifest_evidence)
+        args.remote_worker_status.extend(manifest_statuses)
     for item in args.evidence:
         failure_type, path = item.split("=", 1)
         evidence.append((failure_type, path))

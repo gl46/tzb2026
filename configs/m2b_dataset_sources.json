@@ -1,0 +1,24 @@
+{
+  "host": "root@labserver",
+  "manual_evidence": [
+    {
+      "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2b/failure-pilot-scene4000-empty-v1/empty_grasp/attempt-01/actuation-probe.json",
+      "failure_type": "EMPTY_GRASP"
+    },
+    {
+      "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2b/failure-pilot-scene4025-wrong-v1/wrong_object/attempt-01/actuation-probe.json",
+      "failure_type": "WRONG_OBJECT"
+    },
+    {
+      "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2b/failure-pilot-scene4000-release-v2/release_failure/attempt-01/actuation-probe.json",
+      "failure_type": "RELEASE_FAILURE"
+    }
+  ],
+  "remote_worker_status": [
+    "/var/tmp/xh-data/isaac-industrial/m2b/failure-evidence-worker-pilot-v1/worker0/worker-status.json",
+    "/var/tmp/xh-data/isaac-industrial/m2b/failure-evidence-worker-pilot-v1/worker1/worker-status.json",
+    "/var/tmp/xh-data/isaac-industrial/m2b/failure-evidence-scale-v1/worker0/worker-status.json",
+    "/var/tmp/xh-data/isaac-industrial/m2b/failure-evidence-scale-v1/worker1/worker-status.json"
+  ],
+  "schema_version": "M2BDatasetSourceManifestV1"
+}

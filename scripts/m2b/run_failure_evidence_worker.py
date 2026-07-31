@@ -199,6 +199,8 @@ def failure_command(
         "--capture-public-rgbd",
         "--release-follow-delta-z-m",
         str(args.release_follow_delta_z_m),
+        "--public-regrasp-offset-camera-xyz-m",
+        getattr(args, "public_regrasp_offset_camera_xyz_m", "0,0,0"),
         "--container-prefix",
         (
             f"{args.container_prefix}-g{args.gpu}-"
