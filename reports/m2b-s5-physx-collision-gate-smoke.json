@@ -1,38 +1,62 @@
 {
-  "schema_version": "M2BPhysxCollisionGateSmokeV1",
-  "status": "PASS_ONE_RELEASE_RECOVERY_COLLISION_GATE_NOT_FORMAL_MAPPING_GATE",
-  "scene_seed": 4013,
-  "failure_type": "RELEASE_FAILURE",
-  "runtime_action_under_test": "B0_RELEASE_RETRY",
-  "physical_recovery_training_eligible": true,
-  "evidence": "/var/tmp/xh-data/isaac-industrial/m2b/failure-evidence-scale-v1/worker1/scene-4013/failures/release_failure/release_failure/attempt-01/actuation-probe.json",
-  "evidence_sha256": "7e9eba2e1dbb4f71247104f38683bdf7f8b317c8ddcb6f2570052a0192fd1f4d",
-  "actuation_probe_source_sha256": "1e32fa89c8b1ef403a52f1b2c8326942b72092e6e88f50e8f780eff1c08c6094",
-  "gates": {
-    "release_failure_follow_collision": {
-      "status": "PASS",
-      "source": "ISAAC_PHYSX_CONTACT_REPORT_EXECUTION_MONITOR",
+  "schema_version": "M2BPhysxCollisionGateSmokeV2",
+  "status": "PASS_TWO_RECOVERY_COLLISION_GATES_NOT_FORMAL_MAPPING_GATE",
+  "records": [
+    {
+      "scene_seed": 4013,
+      "failure_type": "RELEASE_FAILURE",
+      "recovery_skill": "RETRY_RELEASE",
+      "runtime_action_under_test": "B0_RELEASE_RETRY",
+      "physical_recovery_training_eligible": true,
+      "evidence": "/var/tmp/xh-data/isaac-industrial/m2b/failure-evidence-scale-v1/worker1/scene-4013/failures/release_failure/release_failure/attempt-01/actuation-probe.json",
+      "evidence_sha256": "7e9eba2e1dbb4f71247104f38683bdf7f8b317c8ddcb6f2570052a0192fd1f4d",
+      "actuation_probe_source_sha256": "1e32fa89c8b1ef403a52f1b2c8326942b72092e6e88f50e8f780eff1c08c6094",
+      "post_execution_receipt": {
+        "ik_gate": "PASS",
+        "collision_gate": "PASS",
+        "safety_gate": "PASS",
+        "model_selected": false,
+        "prospective_planning_check": false
+      },
       "unexpected_robot_contact_events": 0
     },
-    "recovery_detach_retreat_collision": {
-      "status": "PASS",
-      "source": "ISAAC_PHYSX_CONTACT_REPORT_EXECUTION_MONITOR",
+    {
+      "scene_seed": 4012,
+      "failure_type": "WRONG_OBJECT",
+      "recovery_skill": "SAFE_PLACE_NON_TARGET",
+      "runtime_action_under_test": "B0_SAFE_PLACE_NON_TARGET",
+      "physical_recovery_training_eligible": true,
+      "evidence": "/var/tmp/xh-data/isaac-industrial/m2b/failure-evidence-scale-v1/worker0/scene-4012/failures/wrong_object/wrong_object/attempt-01/actuation-probe.json",
+      "evidence_sha256": "648325d877ce4cc89ea7077c107c7f98fdc21b436fb6d689150e623cf5f0ee50",
+      "actuation_probe_source_sha256": "1e32fa89c8b1ef403a52f1b2c8326942b72092e6e88f50e8f780eff1c08c6094",
+      "post_execution_receipt": {
+        "ik_gate": "PASS",
+        "collision_gate": "PASS",
+        "safety_gate": "PASS",
+        "model_selected": false,
+        "prospective_planning_check": false
+      },
+      "public_target_regrasp": {
+        "selected_yaw_rad": 1.3089969389957472,
+        "ik_position_gate_passed": true,
+        "collision_gate_passed": true,
+        "target_hand_xy_error_m": 0.0002504883778283801,
+        "object_lift_m": 0.15016070008277893,
+        "follow_error_m": 0.0010551213300601155
+      },
       "unexpected_robot_contact_events": 0
-    },
-    "detached_noncoupling": {
-      "status": "PASS",
-      "attachment_absent_after_detach": true,
-      "hand_motion_m": 0.04871871756282785,
-      "relative_change_m": 0.04871873276927565
     }
-  },
+  ],
+  "physical_receipts_complete_and_passing": 2,
+  "model_selected_decisions": 0,
+  "runtime_mapping_rate": null,
   "privileged_truth_policy_input": false,
   "teacher_used": false,
   "teacher_kill_rule_events": [],
   "limitations": [
-    "This is one physical B0 release-recovery execution monitor result, not a model-selected decision.",
-    "It does not establish the >=95% runtime mapping rate.",
-    "It does not replace prospective IK, collision, and safety checks for each model-selected action.",
-    "The earlier source-transition probe was excluded because a live bind mount could change its end-of-run source hash; this accepted record uses the startup-pinned revision."
+    "These are physical B0 recovery execution-monitor results, not model-selected decisions.",
+    "They do not establish the >=95% runtime mapping rate.",
+    "Post-execution receipts do not replace prospective IK, collision, and safety checks for each model-selected action.",
+    "The earlier live-bind source-transition probe was excluded; both retained records use a startup-pinned source revision."
   ]
 }

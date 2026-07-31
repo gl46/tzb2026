@@ -1,0 +1,31 @@
+{
+  "counts_by_failure": {
+    "EMPTY_GRASP": 1,
+    "RELEASE_FAILURE": 4,
+    "WRONG_OBJECT": 1
+  },
+  "limitations": [
+    "Receipts are post-execution B0 monitors, not model-selected decisions.",
+    "The post-execution rate is not the formal >=95% runtime mapping rate.",
+    "Prospective per-decision IK, collision, and safety checks remain required."
+  ],
+  "model_selected_decisions": 0,
+  "output": "artifacts/m2b/physical-runtime-gates.jsonl",
+  "output_sha256": "443e561b5caa67d06770c1c4bb2395528ae4161a90d2ae1a124f1312d2160691",
+  "passing_counts_by_failure": {
+    "EMPTY_GRASP": 1,
+    "RELEASE_FAILURE": 4,
+    "WRONG_OBJECT": 1
+  },
+  "post_execution_gate_rate": 1.0,
+  "privileged_truth_policy_input": false,
+  "prospective_planning_checks_complete": false,
+  "receipts_complete_and_passing": 6,
+  "receipts_valid": 6,
+  "required_probe_sha256": "1e32fa89c8b1ef403a52f1b2c8326942b72092e6e88f50e8f780eff1c08c6094",
+  "runtime_mapping_rate": null,
+  "schema_version": "M2BPhysicalRuntimeGateReportV1",
+  "status": "PASS_PHYSICAL_POST_EXECUTION_RECEIPTS_NOT_FORMAL_MAPPING",
+  "teacher_kill_rule_events": [],
+  "teacher_used": false
+}

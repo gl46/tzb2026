@@ -33,6 +33,9 @@ def main() -> int:
     mapping_offline = load_optional(
         args.report_dir / "m2b-s5-runtime-mapping-offline.json"
     )
+    physical_runtime_gates = load_optional(
+        args.report_dir / "m2b-s5-physical-runtime-gates.json"
+    )
     dataset = load_optional(args.report_dir / "m2b-s2-dataset-v2.json")
     evidence_pilot = load_optional(
         args.report_dir / "m2b-s2-failure-evidence-pilot.json"
@@ -119,6 +122,31 @@ def main() -> int:
             mapping_offline.get("runtime_mapping_rate")
             if mapping_offline
             else None
+        ),
+        "physical_runtime_gate_status": (
+            physical_runtime_gates.get("status")
+            if physical_runtime_gates
+            else "NOT_RUN"
+        ),
+        "physical_runtime_receipts_complete_and_passing": (
+            int(
+                physical_runtime_gates.get(
+                    "receipts_complete_and_passing", 0
+                )
+            )
+            if physical_runtime_gates
+            else 0
+        ),
+        "physical_runtime_post_execution_gate_rate": (
+            physical_runtime_gates.get("post_execution_gate_rate")
+            if physical_runtime_gates
+            else None
+        ),
+        "prospective_runtime_planning_checks_complete": bool(
+            physical_runtime_gates
+            and physical_runtime_gates.get(
+                "prospective_planning_checks_complete"
+            )
         ),
         "training_status": training.get("status") if training else "NOT_RUN",
         "closed_loop_status": (

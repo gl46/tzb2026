@@ -24,6 +24,18 @@ def test_status_reports_missing_dataset_without_claiming_completion(
             }
         )
     )
+    (reports / "m2b-s5-physical-runtime-gates.json").write_text(
+        json.dumps(
+            {
+                "status": (
+                    "PASS_PHYSICAL_POST_EXECUTION_RECEIPTS_NOT_FORMAL_MAPPING"
+                ),
+                "receipts_complete_and_passing": 6,
+                "post_execution_gate_rate": 1.0,
+                "prospective_planning_checks_complete": False,
+            }
+        )
+    )
     output = tmp_path / "status.json"
     completed = subprocess.run(
         [
@@ -43,3 +55,6 @@ def test_status_reports_missing_dataset_without_claiming_completion(
     assert payload["goal_complete"] is False
     assert payload["teacher_used"] is False
     assert payload["dataset_v2_episodes_valid"] == 0
+    assert payload["physical_runtime_receipts_complete_and_passing"] == 6
+    assert payload["physical_runtime_post_execution_gate_rate"] == 1.0
+    assert payload["prospective_runtime_planning_checks_complete"] is False
