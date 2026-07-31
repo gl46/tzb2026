@@ -79,14 +79,11 @@ def command(
         if args.capture_public_rgbd and failure != "WRONG_OBJECT"
         else scheduled_target
     )
-    scheduled_wrong_task_target = scheduled_entity(
-        args.sdf, args.wrong_object_task_target, attempt
-    )
     flags = {
         "EMPTY_GRASP": ["--m2b-inject-empty-grasp"],
         "WRONG_OBJECT": [
             "--m2b-task-target-object",
-            scheduled_wrong_task_target,
+            args.wrong_object_task_target,
         ],
         "RELEASE_FAILURE": [
             "--m2b-inject-release-failure",

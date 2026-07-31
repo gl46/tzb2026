@@ -146,6 +146,9 @@ def test_wrong_recovery_forwards_explicit_bounded_training_offset(
         <model name="cylinder_07"><pose>-0.12 0 0 0 0 0</pose><link><visual>
         <material><diffuse>0.8 0.1 0.1 1</diffuse></material>
         </visual></link></model>
+        <model name="cylinder_01"><pose>-0.30 0 0 0 0 0</pose><link><visual>
+        <material><diffuse>0.8 0.1 0.1 1</diffuse></material>
+        </visual></link></model>
         </world></sdf>"""
     )
     args = SimpleNamespace(
@@ -175,6 +178,18 @@ def test_wrong_recovery_forwards_explicit_bounded_training_offset(
         invocation.index("--m2b-public-regrasp-offset-camera-xyz-m") + 1
     )
     assert invocation[offset_index] == "0.006,-0.002,0.003"
+    second_invocation = command(
+        args,
+        failure="WRONG_OBJECT",
+        attempt=2,
+        output=tmp_path / "output-2",
+    )
+    assert second_invocation[second_invocation.index("--target-object") + 1] == (
+        "cylinder_05"
+    )
+    assert second_invocation[
+        second_invocation.index("--m2b-task-target-object") + 1
+    ] == "cylinder_07"
 
 
 def test_physical_retry_rotates_same_color_supervision_entity(tmp_path) -> None:
