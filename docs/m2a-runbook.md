@@ -25,6 +25,7 @@ make isaac-sync
 make qrm-beta-train
 make qrm-beta-eval
 make qrm-beta-closed-loop
+make shadow-isaac
 make m2a-status
 ```
 
@@ -35,3 +36,8 @@ online observation, prompt, coarse head or MLP input.
 Formal Qwen FailureContext runs use the immutable test split and seeds
 `20260731` and `20260732`. The closed-loop entry point runs ten unseen scene
 episodes by default and reports scene episodes separately from live decisions.
+
+`make shadow-isaac` is P1 and evaluation-only. It reconstructs ten shadow
+scenes from public tracks and public robot state, runs three explicit
+joint-space physics probes per state, and forbids the output from Student
+training. It does not infer or guess a camera-residual-to-joint mapping.

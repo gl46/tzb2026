@@ -52,6 +52,13 @@ qrm-beta-eval:
 qrm-beta-closed-loop:
 	bash scripts/qrm_lite/run_isaac_closed_loop_eval.sh
 shadow-isaac:
-	@echo "NOT_RUN: optional P1 shadow Isaac is intentionally not implemented in M2A P0"
+	$(PYTHON) scripts/isaac/run_shadow_rollout_pilot.py \
+		--project-root "$${ISAAC_PROJECT_ROOT}" \
+		--source-root "$${ISAAC_SOURCE_ROOT}" \
+		--data-root "$${ISAAC_DATA_ROOT}/$${DATASET_VERSION:-isaac-industrial-v1-pilot}" \
+		--dataset "$${SHADOW_QRM_DATASET:-$${ISAAC_DATA_ROOT}/$${DATASET_VERSION:-isaac-industrial-v1-pilot}/qrm/isaac-fc-on.jsonl}" \
+		--output-root "$${ISAAC_DATA_ROOT}/shadow/m2a-shadow-pilot-v1" \
+		--report-json reports/m2a-s6-shadow-isaac.json \
+		--report-md reports/m2a-s6-shadow-isaac.md
 m2a-status:
 	$(PYTHON) scripts/m2a_status.py

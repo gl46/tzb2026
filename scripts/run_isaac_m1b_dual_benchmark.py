@@ -111,6 +111,16 @@ def _worker_command(
                 args.qrm_model_id,
             ]
         )
+    if args.shadow_rollout:
+        command.extend(
+            [
+                "--initial-joint-position",
+                args.worker_initial_joint_position[worker_id],
+                "--shadow-rollout",
+                "--shadow-frames-per-candidate",
+                str(args.shadow_frames_per_candidate),
+            ]
+        )
     return command
 
 
@@ -221,6 +231,7 @@ def _load_worker_metrics(
     *,
     expected_frames: int,
     expected_source_sha256: str,
+    expected_shadow: bool = False,
 ) -> dict[str, object]:
     if not path.is_file():
         raise RuntimeError(f"worker evidence is missing: {path}")
@@ -245,6 +256,18 @@ def _load_worker_metrics(
             "policy_segmentation_input"
         )
         is not False
+        or payload.get("shadow_counterfactual", {}).get("enabled")
+        is not expected_shadow
+        or (
+            expected_shadow
+            and len(
+                payload.get("shadow_counterfactual", {}).get(
+                    "profiles",
+                    [],
+                )
+            )
+            != 3
+        )
     ):
         raise RuntimeError(f"worker evidence failed closed validation: {path}")
     return payload
@@ -325,6 +348,14 @@ def main() -> int:
     parser.add_argument("--container-prefix", default="m1b-isaac-dual-final")
     parser.add_argument("--qrm-checkpoint", type=Path)
     parser.add_argument(
+        "--worker-initial-joint-position",
+        action="append",
+        default=[],
+        help="repeat twice; comma-separated public nine-DOF Panda state",
+    )
+    parser.add_argument("--shadow-rollout", action="store_true")
+    parser.add_argument("--shadow-frames-per-candidate", type=int, default=4)
+    parser.add_argument(
         "--qrm-model-id",
         default="Q2_COARSE_MLP_FAILURE_CONTEXT",
         choices=(
@@ -373,6 +404,23 @@ def main() -> int:
             parser.error(f"required directory does not exist: {required}")
     if args.qrm_checkpoint is not None and not args.qrm_checkpoint.is_file():
         parser.error(f"QRM checkpoint does not exist: {args.qrm_checkpoint}")
+    if args.shadow_rollout:
+        if len(args.worker_initial_joint_position) != 2:
+            parser.error(
+                "--shadow-rollout requires two "
+                "--worker-initial-joint-position values"
+            )
+        if args.qrm_checkpoint is not None:
+            parser.error("shadow physics probes cannot load a QRM checkpoint")
+        if args.frames != args.shadow_frames_per_candidate * 3:
+            parser.error(
+                "--frames must equal three times "
+                "--shadow-frames-per-candidate"
+            )
+    elif args.worker_initial_joint_position:
+        parser.error(
+            "--worker-initial-joint-position is shadow-rollout only"
+        )
     dataset_benchmark_path = (
         args.project_root / "scripts" / "isaac_m1b_dataset_benchmark.py"
     )
@@ -448,6 +496,7 @@ def main() -> int:
                 args.output / f"worker{worker_id}" / "output" / "metrics.json",
                 expected_frames=args.frames,
                 expected_source_sha256=dataset_benchmark_sha256,
+                expected_shadow=args.shadow_rollout,
             )
             for worker_id in range(2)
         ]

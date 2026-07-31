@@ -33,6 +33,18 @@ from xh_agent.data.isaac_m1b import (
     validate_m1b_physics_contract,
     verify_source_hashes,
 )
+from xh_agent.data.shadow_isaac import (
+    SHADOW_CANDIDATES,
+    shadow_target_positions,
+    validate_initial_joint_position,
+)
+
+
+def _parse_joint_position(value: str) -> tuple[float, ...]:
+    try:
+        return validate_initial_joint_position(value.split(","))
+    except ValueError as error:
+        raise argparse.ArgumentTypeError(str(error)) from error
 
 
 def parse_args() -> tuple[argparse.Namespace, list[str]]:
@@ -65,6 +77,17 @@ def parse_args() -> tuple[argparse.Namespace, list[str]]:
     parser.add_argument("--barrier-timeout-s", type=float, default=600.0)
     parser.add_argument("--qrm-checkpoint")
     parser.add_argument(
+        "--initial-joint-position",
+        type=_parse_joint_position,
+        help="public nine-DOF Panda observation used to initialize a shadow scene",
+    )
+    parser.add_argument(
+        "--shadow-rollout",
+        action="store_true",
+        help="run all three explicit evaluation-only counterfactual probes",
+    )
+    parser.add_argument("--shadow-frames-per-candidate", type=int, default=4)
+    parser.add_argument(
         "--qrm-model-id",
         choices=(
             "Q0_COARSE_ONLY",
@@ -82,6 +105,23 @@ def parse_args() -> tuple[argparse.Namespace, list[str]]:
         parser.error("--ready-file and --start-file must be provided together")
     if args.barrier_timeout_s <= 0:
         parser.error("--barrier-timeout-s must be positive")
+    if args.shadow_rollout:
+        if args.initial_joint_position is None:
+            parser.error("--shadow-rollout requires --initial-joint-position")
+        if args.shadow_frames_per_candidate < 2:
+            parser.error("--shadow-frames-per-candidate must be at least two")
+        expected_frames = args.shadow_frames_per_candidate * len(
+            SHADOW_CANDIDATES
+        )
+        if args.frames != expected_frames:
+            parser.error(
+                f"shadow rollout requires --frames {expected_frames}, got "
+                f"{args.frames}"
+            )
+        if args.qrm_checkpoint:
+            parser.error("shadow physics probes cannot load a QRM checkpoint")
+    elif args.initial_joint_position is not None:
+        parser.error("--initial-joint-position is shadow-rollout only")
     return args, unknown
 
 
@@ -703,9 +743,12 @@ def _configure_articulation() -> tuple[Articulation, list[float], dict[str, int]
     dof_count = max(indices.values()) + 1
     if dof_count != 9:
         raise RuntimeError(f"expected nine Panda DOFs, got {dof_count}: {indices}")
-    home = [0.0] * dof_count
-    for name, value in HOME_JOINTS.items():
-        home[indices[name]] = value
+    if ARGS.initial_joint_position is not None:
+        home = list(ARGS.initial_joint_position)
+    else:
+        home = [0.0] * dof_count
+        for name, value in HOME_JOINTS.items():
+            home[indices[name]] = value
     robot.set_default_state(dof_positions=home)
     return robot, home, indices
 
@@ -716,6 +759,18 @@ def _target_positions(
     frame_index: int,
     worker_id: int,
 ) -> list[float]:
+    if ARGS.shadow_rollout:
+        candidate_index = min(
+            frame_index // ARGS.shadow_frames_per_candidate,
+            len(SHADOW_CANDIDATES) - 1,
+        )
+        return shadow_target_positions(
+            home,
+            indices,
+            frame_index % ARGS.shadow_frames_per_candidate,
+            worker_id,
+            SHADOW_CANDIDATES[candidate_index],
+        )
     phase = 2.0 * math.pi * frame_index / 100.0 + worker_id * 0.37
     target = list(home)
     target[indices["panda_joint1"]] += 0.20 * math.sin(phase)
@@ -961,12 +1016,50 @@ def main() -> int:
     supervision_stream = supervision_frames_path.open("w", encoding="utf-8")
     episode_id = f"isaac-m1b-worker-{ARGS.worker_id}"
     qrm_decisions: list[dict[str, object]] = []
+    shadow_rollouts: list[dict[str, object]] = []
+    shadow_semantic_pixel_counts: dict[str, dict[str, int]] = {
+        candidate: {} for candidate in SHADOW_CANDIDATES
+    }
+    shadow_rollout_started = 0.0
     benchmark_start = time.perf_counter()
     for frame in range(ARGS.frames):
+        shadow_candidate = (
+            SHADOW_CANDIDATES[
+                frame // ARGS.shadow_frames_per_candidate
+            ]
+            if ARGS.shadow_rollout
+            else None
+        )
+        if (
+            ARGS.shadow_rollout
+            and frame % ARGS.shadow_frames_per_candidate == 0
+        ):
+            timeline = omni.timeline.get_timeline_interface()
+            timeline.stop()
+            simulation_app.update()
+            timeline.play()
+            robot.reset_to_default_state()
+            simulation_app.update()
+            for warmup_frame in range(ARGS.warmup_frames):
+                robot.set_dof_position_targets(
+                    shadow_target_positions(
+                        home,
+                        dof_indices,
+                        warmup_frame,
+                        ARGS.worker_id,
+                        shadow_candidate,
+                    )
+                )
+                rep.orchestrator.step(
+                    rt_subframes=1,
+                    delta_time=1.0 / 30.0,
+                    pause_timeline=False,
+                )
+            shadow_rollout_started = time.perf_counter()
         action_target = _target_positions(
             home,
             dof_indices,
-            frame + ARGS.warmup_frames,
+            frame if ARGS.shadow_rollout else frame + ARGS.warmup_frames,
             ARGS.worker_id,
         )
         robot.set_dof_position_targets(action_target)
@@ -1004,6 +1097,13 @@ def main() -> int:
                 semantic_pixel_counts[semantic_class] = (
                     semantic_pixel_counts.get(semantic_class, 0) + pixels
                 )
+                if shadow_candidate is not None:
+                    candidate_counts = shadow_semantic_pixel_counts[
+                        shadow_candidate
+                    ]
+                    candidate_counts[semantic_class] = (
+                        candidate_counts.get(semantic_class, 0) + pixels
+                    )
             stem = f"{frame:06d}"
             _save_image(camera_root / "rgb" / f"{stem}.png", rgb[:, :, :3])
             np.save(camera_root / "depth" / f"{stem}.npy", depth.astype(np.float32))
@@ -1059,6 +1159,7 @@ def main() -> int:
             "action_target_joint_position": action_target,
             "action_frequency_hz": 30.0,
             "action_normalization": "identity",
+            "shadow_candidate": shadow_candidate,
         }
         simulator_poses = {
             model.name: _world_pose_xyzw(
@@ -1089,6 +1190,7 @@ def main() -> int:
                 ),
             },
             "failure_injection": {},
+            "shadow_candidate": shadow_candidate,
             "simulator": "Isaac Sim",
             "simulator_version": "6.0.1",
         }
@@ -1214,6 +1316,38 @@ def main() -> int:
                     ),
                 }
             )
+        if (
+            shadow_candidate is not None
+            and (frame + 1) % ARGS.shadow_frames_per_candidate == 0
+        ):
+            final_shadow_positions = _numpy_values(robot.get_dof_positions())
+            shadow_rollouts.append(
+                {
+                    "candidate": shadow_candidate,
+                    "frames": ARGS.shadow_frames_per_candidate,
+                    "rollout_latency_s": (
+                        time.perf_counter() - shadow_rollout_started
+                    ),
+                    "final_joint_position": final_shadow_positions.tolist(),
+                    "final_end_effector_pose_world_xyzw": _world_pose_xyzw(
+                        stage,
+                        "/World/Robot/panda_hand",
+                    ),
+                    "semantic_pixel_counts": dict(
+                        shadow_semantic_pixel_counts[shadow_candidate]
+                    ),
+                    "collision_observed": None,
+                    "collision_evidence_available": False,
+                    "task_success": None,
+                    "public_visibility_predicate": (
+                        shadow_semantic_pixel_counts[shadow_candidate].get(
+                            "industrial_cylinder",
+                            0,
+                        )
+                        >= ARGS.shadow_frames_per_candidate * 100
+                    ),
+                }
+            )
         readback_write_times.append(time.perf_counter() - write_start)
 
     runtime_stream.close()
@@ -1256,7 +1390,11 @@ def main() -> int:
         "capture_mode": (
             "CALIBRATION_ONLY_STATIC_PERCEPTION"
             if ARGS.static_perception_audit
-            else "DYNAMIC_STUDENT_DATASET"
+            else (
+                "SHADOW_COUNTERFACTUAL_EVAL_ONLY"
+                if ARGS.shadow_rollout
+                else "DYNAMIC_STUDENT_DATASET"
+            )
         ),
         "worker_id": ARGS.worker_id,
         "physical_gpu_index": ARGS.physical_gpu_index,
@@ -1293,7 +1431,10 @@ def main() -> int:
             "frozen_rigid_body_paths": static_audit_frozen_paths,
             "clean_physics_stage_exported_before_freeze": True,
             "simulator_truth_read_for_freeze": False,
-            "student_training_eligible": not ARGS.static_perception_audit,
+            "student_training_eligible": (
+                not ARGS.static_perception_audit
+                and not ARGS.shadow_rollout
+            ),
             "scope": (
                 "CALIBRATION_ONLY_STATIC_PERCEPTION_NOT_CONTROL_OR_TRAINING"
                 if ARGS.static_perception_audit
@@ -1309,7 +1450,10 @@ def main() -> int:
             "policy_camera": "policy_rgbd",
             "policy_segmentation_input": False,
             "teacher_required": False,
-            "training_eligible": not ARGS.static_perception_audit,
+            "training_eligible": (
+                not ARGS.static_perception_audit
+                and not ARGS.shadow_rollout
+            ),
             "offline_transition_builder": "scripts/build_isaac_m1b_transitions.py",
         },
         "action_protocol": {
@@ -1318,7 +1462,38 @@ def main() -> int:
             "dimensions": 9,
             "frequency_hz": 30,
             "normalization": "none",
-            "source": "deterministic_dataset_excitation_not_policy_action",
+            "source": (
+                "explicit_shadow_joint_space_physics_probe_not_policy_action"
+                if ARGS.shadow_rollout
+                else "deterministic_dataset_excitation_not_policy_action"
+            ),
+        },
+        "shadow_counterfactual": {
+            "enabled": ARGS.shadow_rollout,
+            "initial_joint_position": (
+                list(ARGS.initial_joint_position)
+                if ARGS.initial_joint_position is not None
+                else None
+            ),
+            "initialization_source": (
+                "PUBLIC_QRM_OBSERVATION"
+                if ARGS.shadow_rollout
+                else None
+            ),
+            "profiles": shadow_rollouts,
+            "candidate_order": (
+                list(SHADOW_CANDIDATES)
+                if ARGS.shadow_rollout
+                else []
+            ),
+            "reset_method": (
+                "TIMELINE_STOP_PLAY_PLUS_PUBLIC_ROBOT_STATE"
+                if ARGS.shadow_rollout
+                else None
+            ),
+            "privileged_truth_policy_input": False,
+            "model_action_mapping_used": False,
+            "training_eligible": False,
         },
         "dof_indices": dof_indices,
         "final_dof_positions": _json_ready(final_array),

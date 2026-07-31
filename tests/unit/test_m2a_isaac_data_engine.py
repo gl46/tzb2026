@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import xml.etree.ElementTree as ET
 from argparse import Namespace
 from pathlib import Path
 
@@ -15,6 +16,12 @@ from isaac.run_pilot_campaign import (
     sha256,
     valid_prior,
 )
+from isaac.run_shadow_rollout_pilot import (
+    build_estimated_scene,
+    minimum_assignment_errors,
+    select_public_states,
+)
+from xh_agent.data.shadow_isaac import shadow_target_positions
 from xh_agent.data_engine.isaac.contract import (
     ShardState,
     audit_policy_projection,
@@ -172,6 +179,9 @@ def test_closed_loop_worker_mounts_checkpoint_read_only() -> None:
         timeout_s=10.0,
         qrm_checkpoint=Path("/checkpoints/Q2.npz"),
         qrm_model_id="Q2_COARSE_MLP_FAILURE_CONTEXT",
+        shadow_rollout=False,
+        worker_initial_joint_position=[],
+        shadow_frames_per_candidate=4,
     )
     command = _worker_command(
         args,
@@ -183,6 +193,116 @@ def test_closed_loop_worker_mounts_checkpoint_read_only() -> None:
     assert "/checkpoints:/workspace/qrm:ro" in command
     assert "--qrm-checkpoint" in command
     assert "/workspace/qrm/Q2.npz" in command
+
+
+def _shadow_sample(seed: int, step: int = 0) -> dict:
+    tracks = [
+        {
+            "track_id": f"track-{index}",
+            "category": "industrial_cylinder",
+            "confidence": 0.9,
+            "pose_xyzquat": [
+                -0.5 + 0.05 * index,
+                -0.2 + 0.05 * index,
+                0.49,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+            ],
+        }
+        for index in range(6)
+    ]
+    return {
+        "sample_id": f"sample-{seed}-{step}",
+        "observation": {
+            "episode_id": f"isaac-s{seed}-w0-t{step:06d}",
+            "joint_position": [0.0, -0.5, 0.0, -1.5, 0.0, 1.0, 0.0, 0.02, 0.02],
+            "perception_tracks": tracks,
+            "failure_context": {"failure_type": "NONE"},
+        },
+        "coarse_intent": {"skill_type": "APPROACH"},
+    }
+
+
+def test_shadow_state_selection_prefers_distinct_scene_seeds() -> None:
+    samples = [
+        _shadow_sample(3100, 0),
+        _shadow_sample(3100, 1),
+        _shadow_sample(3101, 0),
+    ]
+    selected = select_public_states(samples, 2)
+    assert [item["sample_id"] for item in selected] == [
+        "sample-3100-0",
+        "sample-3101-0",
+    ]
+
+
+def test_shadow_scene_is_rebuilt_from_public_tracks(tmp_path: Path) -> None:
+    world = [
+        "<sdf version='1.9'><world name='industrial_cylinder_v1'>",
+        "<model name='industrial_work_table'><static>true</static></model>",
+    ]
+    for index in range(8):
+        world.append(
+            f"<model name='cylinder_{index + 1:02d}'>"
+            "<pose>9 9 9 0 0 0</pose><link name='link'/></model>"
+        )
+    world.append("</world></sdf>")
+    template = tmp_path / "template.sdf"
+    template.write_text("".join(world))
+    output_sdf = tmp_path / "shadow.sdf"
+    output_supervision = tmp_path / "shadow.json"
+
+    result = build_estimated_scene(
+        template,
+        output_sdf,
+        output_supervision,
+        _shadow_sample(3100),
+    )
+
+    root = ET.parse(output_sdf).getroot()
+    cylinders = [
+        model
+        for model in root.find("world").findall("model")
+        if model.get("name", "").startswith("cylinder_")
+    ]
+    assert len(cylinders) == 6
+    assert cylinders[0].findtext("pose").startswith("-0.500000000")
+    supervision = json.loads(output_supervision.read_text())
+    assert supervision["simulator_supervision"]["policy_input"] is False
+    assert result["estimated_objects"][0][
+        "estimated_from_public_track_id"
+    ] == "track-0"
+
+
+def test_shadow_candidates_are_explicit_and_assignment_is_optimal() -> None:
+    initial = [0.0, -0.5, 0.0, -1.5, 0.0, 1.0, 0.0, 0.02, 0.02]
+    indices = {f"panda_joint{index}": index - 1 for index in range(1, 8)}
+    indices.update({"panda_finger_joint1": 7, "panda_finger_joint2": 8})
+    hold = shadow_target_positions(initial, indices, 5, 0, "reobserve_hold")
+    default = shadow_target_positions(
+        initial,
+        indices,
+        5,
+        0,
+        "geometric_default",
+    )
+    alternate = shadow_target_positions(
+        initial,
+        indices,
+        5,
+        0,
+        "alternate_joint_probe",
+    )
+    assert hold == initial
+    assert default != initial
+    assert alternate != initial
+    errors = minimum_assignment_errors(
+        [[0.0, 0.0, 0.0], [1.0, 0.0, 0.0]],
+        [[1.01, 0.0, 0.0], [0.01, 0.0, 0.0], [8.0, 8.0, 8.0]],
+    )
+    assert errors == pytest.approx([0.01, 0.01])
 
 
 def test_closed_loop_summary_counts_scene_episodes_not_decisions(
