@@ -6,12 +6,15 @@
       "20260732": 0.0
     }
   },
+  "configured_base_revision": "851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a",
+  "dataset_manifest_hash": "9843968cdbff17b6b4a291e30907f2c5dc855838ad3e4be7095a4bb8783449bc",
   "flow_status": "DISABLED",
   "limitations": [
     "Each paired run uses one epoch, at most 120 train samples, and 50 held-out test samples.",
     "Two seeds on one 550-episode Pilot dataset cannot establish deployment benefit.",
     "Physical EMPTY_GRASP, RELEASE_FAILURE, and WRONG_OBJECT cases are absent.",
-    "FailureContext did not improve held-out accuracy for every seed."
+    "FailureContext did not improve held-out accuracy for every seed.",
+    "The local Qwen snapshot did not retain Hub revision metadata; the configured base revision is recorded but not independently verified by the raw training reports."
   ],
   "macro_f1_deltas": {
     "mean": 0.0,
@@ -20,6 +23,9 @@
       "20260732": 0.0
     }
   },
+  "model_ids": [
+    "/home/gl/xh-202607-qrm-lite/hf-cache/manual/Qwen3.5-4B"
+  ],
   "oracle_policy_inputs": false,
   "pairs": [
     {
@@ -45,6 +51,12 @@
       "seed": 20260732
     }
   ],
+  "runtime_revisions": [
+    ""
+  ],
   "schema_version": "M2AQwenFailureContextAblationV1",
-  "status": "PASS_WITH_LIMITATIONS"
+  "status": "PASS_WITH_LIMITATIONS",
+  "teacher_used": false,
+  "training_code_revision": "5f5abb80665e3bb553d905f72e46630d2e244975",
+  "training_source_sha256": "f09e12c7fe927dc98579554e38e712585d2c0476e357067aee07070954938af6"
 }

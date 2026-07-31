@@ -4,7 +4,7 @@ set -euo pipefail
 : "${ISAAC_PROJECT_ROOT:?set ISAAC_PROJECT_ROOT}"
 : "${ISAAC_SOURCE_ROOT:?set ISAAC_SOURCE_ROOT}"
 : "${ISAAC_DATA_ROOT:?set ISAAC_DATA_ROOT}"
-FRAMES="${ISAAC_BENCHMARK_FRAMES:-100}"
+FRAMES="${ISAAC_BENCHMARK_FRAMES:-3000}"
 SEED0="${ISAAC_BENCHMARK_SEED0:-3100}"
 SEED1="${ISAAC_BENCHMARK_SEED1:-3101}"
 SETTLE_S="${ISAAC_BENCHMARK_SETTLE_S:-120}"
@@ -76,11 +76,17 @@ run_single single-gpu0 "$SEED0" 0 0
 run_single single-gpu1 "$SEED1" 1 1
 run_dual
 
-python3 "${ISAAC_PROJECT_ROOT}/scripts/isaac/summarize_worker_benchmark.py" \
-  --single-gpu0 "$OUT/single-gpu0/metrics.json" \
-  --single-gpu1 "$OUT/single-gpu1/metrics.json" \
-  --dual-summary "$OUT/dual/dual-benchmark-summary.json" \
-  --report-json "$OUT/m2a-s2-worker-benchmark.json" \
+SUMMARY_ARGS=(
+  --single-gpu0 "$OUT/single-gpu0/metrics.json"
+  --single-gpu1 "$OUT/single-gpu1/metrics.json"
+  --dual-summary "$OUT/dual/dual-benchmark-summary.json"
+  --report-json "$OUT/m2a-s2-worker-benchmark.json"
   --report-md "$OUT/m2a-s2-worker-benchmark.md"
+)
+if [[ -n "${ISAAC_BENCHMARK_RAW_LOG:-}" ]]; then
+  SUMMARY_ARGS+=(--raw-log "$ISAAC_BENCHMARK_RAW_LOG")
+fi
+python3 "${ISAAC_PROJECT_ROOT}/scripts/isaac/summarize_worker_benchmark.py" \
+  "${SUMMARY_ARGS[@]}"
 
 echo "$OUT"

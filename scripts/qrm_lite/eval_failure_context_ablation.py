@@ -15,7 +15,6 @@ from xh_agent.policy.qrm_lite.metrics_beta1 import (
     compare_q1_q2,
     macro_f1,
     recovery_top1_accuracy,
-    same_failed_action_repetition_rate,
     skill_accuracy,
 )
 from xh_agent.policy.qrm_lite.models_q012 import FormalModelId, FormalPolicy

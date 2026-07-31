@@ -104,7 +104,6 @@ class EmptyGraspRecoveryProtocol:
         obs = self._obs_after_empty_grasp(episode_id, seed)
         t0 = self.clock_ms()
         # nominal identity residual path for dry/unit; real loop supplies MoveIt nominal
-        import numpy as np
         from xh_agent.policy.qrm_lite.transforms import build_identity_action_chunk
 
         nominal = build_identity_action_chunk(4)

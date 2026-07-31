@@ -6,11 +6,18 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-import statistics
 import subprocess
 import time
 from pathlib import Path
 from typing import TextIO
+
+from isaac.host_resources import (
+    ResourceMonitor,
+    first_episode_window_growth,
+    parse_gpu_csv as parse_smi_csv,  # noqa: F401 - retained public test API
+    summarize_gpu_samples,
+    summarize_host_samples,
+)
 
 
 OFFICIAL_ROBOT = "NVIDIA_ISAAC_SIM_6_OFFICIAL_FRANKA_PANDA_USD"
@@ -124,83 +131,13 @@ def _worker_command(
     return command
 
 
-def parse_smi_csv(text: str) -> list[dict[str, float | int]]:
-    samples = []
-    for line in text.splitlines():
-        fields = [field.strip() for field in line.split(",")]
-        if len(fields) != 4:
-            continue
-        try:
-            samples.append(
-                {
-                    "gpu_index": int(fields[0]),
-                    "memory_used_mib": float(fields[1]),
-                    "utilization_gpu_percent": float(fields[2]),
-                    "power_draw_w": float(fields[3]),
-                }
-            )
-        except ValueError:
-            continue
-    return samples
-
-
-def _sample_gpus(
-    gpu_indices: tuple[int, int],
-    samples: list[dict[str, object]],
+def _sample_resources(
+    monitor: ResourceMonitor,
     *,
     phase: str,
     started: float,
 ) -> None:
-    completed = subprocess.run(
-        [
-            "nvidia-smi",
-            "--query-gpu=index,memory.used,utilization.gpu,power.draw",
-            "--format=csv,noheader,nounits",
-        ],
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-    if completed.returncode != 0:
-        return
-    for sample in parse_smi_csv(completed.stdout):
-        if sample["gpu_index"] in gpu_indices:
-            samples.append(
-                {
-                    **sample,
-                    "phase": phase,
-                    "elapsed_s": time.monotonic() - started,
-                }
-            )
-
-
-def summarize_gpu_samples(
-    samples: list[dict[str, object]],
-    gpu_indices: tuple[int, int],
-) -> dict[str, object]:
-    summary = {}
-    for gpu_index in gpu_indices:
-        selected = [
-            sample for sample in samples if sample["gpu_index"] == gpu_index
-        ]
-        if not selected:
-            summary[str(gpu_index)] = {"sample_count": 0}
-            continue
-        memory = [float(sample["memory_used_mib"]) for sample in selected]
-        utilization = [
-            float(sample["utilization_gpu_percent"]) for sample in selected
-        ]
-        power = [float(sample["power_draw_w"]) for sample in selected]
-        summary[str(gpu_index)] = {
-            "sample_count": len(selected),
-            "memory_used_mib_peak": max(memory),
-            "memory_used_mib_mean": statistics.fmean(memory),
-            "utilization_gpu_percent_peak": max(utilization),
-            "utilization_gpu_percent_mean": statistics.fmean(utilization),
-            "power_draw_w_peak": max(power),
-            "power_draw_w_mean": statistics.fmean(power),
-        }
-    return summary
+    monitor.sample(phase=phase, elapsed_s=time.monotonic() - started)
 
 
 def _wait_ready(
@@ -208,8 +145,7 @@ def _wait_ready(
     ready_file: Path,
     *,
     timeout_s: float,
-    gpu_indices: tuple[int, int],
-    samples: list[dict[str, object]],
+    monitor: ResourceMonitor,
     started: float,
     phase: str,
 ) -> None:
@@ -222,7 +158,7 @@ def _wait_ready(
             )
         if time.monotonic() >= deadline:
             raise TimeoutError(f"{phase} did not reach READY within {timeout_s}s")
-        _sample_gpus(gpu_indices, samples, phase=phase, started=started)
+        _sample_resources(monitor, phase=phase, started=started)
         time.sleep(0.5)
 
 
@@ -438,7 +374,7 @@ def main() -> int:
     control.mkdir()
     control.chmod(0o777)
     started = time.monotonic()
-    samples: list[dict[str, object]] = []
+    monitor = ResourceMonitor(args.output, args.gpu_indices)
     processes: list[subprocess.Popen[bytes]] = []
     logs: list[TextIO] = []
     failure: str | None = None
@@ -456,8 +392,7 @@ def main() -> int:
                 process,
                 control / f"worker{worker_id}.READY",
                 timeout_s=args.timeout_s,
-                gpu_indices=args.gpu_indices,
-                samples=samples,
+                monitor=monitor,
                 started=started,
                 phase=f"worker{worker_id}_initialization",
             )
@@ -469,9 +404,8 @@ def main() -> int:
                     time.monotonic() + args.inter_worker_settle_s
                 )
                 while time.monotonic() < settle_deadline:
-                    _sample_gpus(
-                        args.gpu_indices,
-                        samples,
+                    _sample_resources(
+                        monitor,
                         phase="inter_worker_settle",
                         started=started,
                     )
@@ -483,9 +417,8 @@ def main() -> int:
                     )
         (control / "START").touch()
         while any(process.poll() is None for process in processes):
-            _sample_gpus(
-                args.gpu_indices,
-                samples,
+            _sample_resources(
+                monitor,
                 phase="concurrent_capture",
                 started=started,
             )
@@ -523,6 +456,23 @@ def main() -> int:
     combined_sensor_frames = sum(
         int(metrics["sensor_frames"]) for metrics in worker_metrics
     )
+    combined_transitions = sum(
+        max(int(metrics["frames"]) - 1, 0) for metrics in worker_metrics
+    )
+    gpu_memory_growth = {
+        str(gpu_index): first_episode_window_growth(
+            [
+                sample
+                for sample in monitor.gpu_samples
+                if int(sample["gpu_index"]) == gpu_index
+            ],
+            value_key="memory_used_mib",
+            episode_count=combined_transitions,
+            capture_wall_s=benchmark_wall_s,
+            phase="concurrent_capture",
+        )
+        for gpu_index in args.gpu_indices
+    }
     summary = {
         "schema_version": "IsaacM1BDual3080BenchmarkV1",
         "status": "PASS" if failure is None else "FAIL",
@@ -590,8 +540,23 @@ def main() -> int:
             if benchmark_wall_s > 0
             else 0.0
         ),
-        "gpu_samples": samples,
-        "gpu_summary": summarize_gpu_samples(samples, args.gpu_indices),
+        "host_samples": monitor.host_samples,
+        "host_summary": summarize_host_samples(monitor.host_samples),
+        "gpu_samples": monitor.gpu_samples,
+        "gpu_summary": summarize_gpu_samples(
+            monitor.gpu_samples,
+            args.gpu_indices,
+        ),
+        "memory_growth_first_100_combined_episodes": {
+            "host_ram_bytes": first_episode_window_growth(
+                monitor.host_samples,
+                value_key="ram_used_bytes",
+                episode_count=combined_transitions,
+                capture_wall_s=benchmark_wall_s,
+                phase="concurrent_capture",
+            ),
+            "gpu_vram_mib": gpu_memory_growth,
+        },
         "total_runner_wall_s": time.monotonic() - started,
         "startup_protocol": (
             "SERIALIZED_KIT_INITIALIZATION_THEN_SHARED_START_BARRIER"

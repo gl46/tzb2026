@@ -24,7 +24,7 @@ from xh_agent.policy.qrm_lite.contracts import (
     QRMObservationV1,
     QRMTrainingSampleV1,
 )
-from xh_agent.policy.qrm_lite.transforms import build_identity_action_chunk, pose_xyzquat_to_mat
+from xh_agent.policy.qrm_lite.transforms import build_identity_action_chunk
 
 
 SKILLS = ["APPROACH", "GRASP", "LIFT", "MOVE", "PLACE", "RELEASE", "REGRASP", "REOBSERVE"]

@@ -4,7 +4,7 @@
     "qrm_residual": "10D camera optical, m/r6d/normalized gripper, 5 Hz"
   },
   "feature_branch": "codex/m2a-isaac-data-qrm-beta",
-  "head": "aaabf2b980a50f28e646b0e08b87bdf9632a2639",
+  "head": "19eeb78e2b5a6f43a51d40b3c36bb9404715aff5",
   "isaac": {
     "annotators": [
       "rgb",
@@ -12,21 +12,29 @@
       "semantic_segmentation",
       "instance_segmentation"
     ],
-    "available_disk_kib": 403844000,
+    "available_disk_kib": 397002712,
     "camera_render_products": [
       "policy_rgbd",
-      "overview",
-      "bin_closeup",
-      "wrist_like"
+      "front_rgbd",
+      "overhead_rgbd",
+      "side_rgbd"
     ],
+    "current_data_format": "JSONL canonical transitions + PNG RGB/mask + NPY depth + READY shard manifest/checksum",
+    "current_video_pipeline": "policy_rgbd frames + ffmpeg evidence overlay exporter",
     "data_root": "/var/tmp/xh-data/isaac-industrial",
     "episode_writer": "IsaacIndustrialEpisodeV1 / READY shard",
+    "estimated_episode_size": {
+      "bytes": 5828458.7272727275,
+      "scope": "one adjacent-frame short episode",
+      "source": "m2a-s2-worker-benchmark single-worker retained output",
+      "status": "MEASURED"
+    },
     "gpus": [
       {
         "driver_version": "595.84",
         "index": 0,
         "name": "NVIDIA GeForce RTX 3080",
-        "vram_free_mib": 9733,
+        "vram_free_mib": 7258,
         "vram_total_mib": 10240
       },
       {
@@ -41,21 +49,40 @@
     "image": "nvcr.io/nvidia/isaac-sim:6.0.1",
     "isaac_version": "6.0.1",
     "project_root": "/var/tmp/m2a-isaac-project-20260731",
+    "python_environment": "/isaac-sim/python.sh in Isaac Sim 6.0.1 container",
     "scene_entrypoint": "scripts/isaac_m1b_dataset_benchmark.py"
   },
   "m1b_baseline_commit": "5984298",
+  "network_baseline": {
+    "coordinator_to_isaac": {
+      "bytes": 33554432,
+      "elapsed_s": 23.843012749995978,
+      "method": "coordinator random-byte SSH upload to remote /dev/null",
+      "status": "PASS",
+      "throughput_mbps": 11.258453737145498
+    },
+    "coordinator_to_train": {
+      "bytes": 33554432,
+      "elapsed_s": 26.791492332995404,
+      "method": "coordinator random-byte SSH upload to remote /dev/null",
+      "status": "PASS",
+      "throughput_mbps": 10.019429028572809
+    },
+    "scope": "coordinator upload legs used for remote execution; direct Isaac-to-train SSH was unavailable"
+  },
   "origin_main": "0709cc19b66e52e8043eb26babb9a6f3e8ca9a72",
   "qrm_alpha_tag_commit": "0287d23e586f5d977c71257aeca4accacecadbe8",
   "schema_version": "M2ATopologyAuditV1",
   "status": "PASS",
-  "teacher_states": {
+  "teacher": {
     "BWM": "CANDIDATE_LICENSE_PENDING",
     "Nano": "CANDIDATE",
     "Super": "PARKED",
-    "kill_rule_events": []
+    "kill_rule_events": [],
+    "used": false
   },
   "train": {
-    "available_disk_kib": 4466793148,
+    "available_disk_kib": 4466793136,
     "data_root": "/home/gl/xh-data/isaac-industrial",
     "environment": ".venv-qrm-lite",
     "gpus": [
@@ -68,6 +95,6 @@
       }
     ],
     "host": "node2",
-    "project_root": "/home/gl/xh-202607-m2a"
+    "project_root": "/home/gl/xh-202607-qrm-lite"
   }
 }

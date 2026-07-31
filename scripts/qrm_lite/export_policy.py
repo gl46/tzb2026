@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Export a compact policy package manifest (no large weights)."""
 from __future__ import annotations
-import argparse, json
+
+import argparse
+import json
 from pathlib import Path
 
 def main():

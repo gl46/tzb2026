@@ -34,6 +34,14 @@ make m2a-status
 Flow is disabled. Only `*.READY` shards may be synchronized or trained.
 SimulatorSupervision is an offline label stream and must not be passed to the
 online observation, prompt, coarse head or MLP input.
+M2A is Teacher-free: no Teacher adapter, soft label, checkpoint, or inference
+service is required by data generation, training, Shadow, or closed-loop smoke.
+
+`make isaac-benchmark` defaults to 3,000 capture frames for each of GPU0,
+GPU1, and the dual-worker configuration. At the retained capture rate this is
+the formal 30-minute-per-configuration soak and requires roughly 70 GB of
+temporary NVMe space. Override `ISAAC_BENCHMARK_FRAMES` only for an explicitly
+labelled smoke run.
 
 Formal Qwen FailureContext runs use the immutable test split and seeds
 `20260731` and `20260732`. The closed-loop entry point runs ten unseen scene
@@ -55,3 +63,9 @@ S8 video evidence is deliberately partial. The retained QRM-FC clip is labelled
 as a representative failure with B0 fallback. A success clip and synchronized
 WRONG_OBJECT recovery clip must remain unavailable until a real capture exists;
 do not relabel other footage.
+
+The Pilot dataset remains an articulation-excitation adjacent-frame corpus.
+Physical `EMPTY_GRASP`, `WRONG_OBJECT`, and `RELEASE_FAILURE` coverage is not
+claimed: the repository has M1B acceptance evidence for parts of that chain,
+but there is no official camera-residual-to-Isaac-joint action mapping that
+would permit those records to be promoted into new policy-training episodes.

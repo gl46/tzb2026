@@ -447,7 +447,6 @@ def main() -> int:
                 # Goal § release defines success by explicit detach, retreat,
                 # and in-bin settling, so detach first and then open.
                 detach = constraint_command(DETACH_TOPIC, "detached") if lower.get("executed") else {"state_confirmed": False}
-                open_started = time.monotonic()
                 open_hand = client.command_hand([0.04, 0.04]) if detach.get("state_confirmed") else {"succeeded": False, "observed_positions_m": []}
                 attached = attached and not bool(detach.get("state_confirmed"))
                 cube_after_detach = runtime_cube_pose()

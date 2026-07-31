@@ -126,7 +126,6 @@ def main() -> int:
     idle = idle_sessions[0]
     combined = [idle, *trials]
     positives = [trial for trial in trials if trial["expected"] in {"left", "right", "bilateral"}]
-    passed_windows = sum(bool(trial.get("passed")) for trial in combined)
     passed_positives = sum(bool(trial.get("passed")) for trial in positives)
     calibrated = (
         not anomalies

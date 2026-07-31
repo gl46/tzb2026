@@ -8,6 +8,7 @@ import hashlib
 import json
 import os
 import subprocess
+import time
 from pathlib import Path
 from typing import Any
 
@@ -58,11 +59,77 @@ def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def measure_ssh_upload(host: str, *, size_mib: int = 32) -> dict[str, Any]:
+    payload = os.urandom(size_mib * 1024 * 1024)
+    started = time.monotonic()
+    completed = subprocess.run(
+        [
+            "ssh",
+            "-o",
+            "BatchMode=yes",
+            "-o",
+            "ConnectTimeout=10",
+            host,
+            "cat >/dev/null",
+        ],
+        input=payload,
+        capture_output=True,
+        check=False,
+    )
+    elapsed = time.monotonic() - started
+    if completed.returncode != 0:
+        return {
+            "status": "BLOCKED",
+            "bytes": len(payload),
+            "elapsed_s": elapsed,
+            "throughput_mbps": None,
+            "error": completed.stderr.decode(errors="replace").strip(),
+        }
+    return {
+        "status": "PASS",
+        "bytes": len(payload),
+        "elapsed_s": elapsed,
+        "throughput_mbps": len(payload) * 8 / elapsed / 1_000_000,
+        "method": "coordinator random-byte SSH upload to remote /dev/null",
+    }
+
+
+def estimated_episode_size(reports: Path) -> dict[str, Any]:
+    benchmark = json_if(reports / "m2a-s2-worker-benchmark.json")
+    values = [
+        float(benchmark[key]["average_short_episode_bytes"])
+        for key in ("single_gpu0", "single_gpu1")
+        if benchmark
+        and benchmark.get(key, {}).get("average_short_episode_bytes") is not None
+    ]
+    if not values:
+        return {"status": "NOT_MEASURED", "bytes": None, "source": None}
+    return {
+        "status": "MEASURED",
+        "bytes": sum(values) / len(values),
+        "source": "m2a-s2-worker-benchmark single-worker retained output",
+        "scope": "one adjacent-frame short episode",
+    }
+
+
 def topology(args: argparse.Namespace) -> dict[str, Any]:
+    reports = PROJECT / "reports"
+    reports.mkdir(exist_ok=True)
     isaac_gpus = gpu_rows(args.isaac_host)
     train_gpus = gpu_rows(args.train_host)
     isaac_disk = ssh(args.isaac_host, f"df -Pk '{args.isaac_data_root}' | tail -1").split()
     train_disk = ssh(args.train_host, f"df -Pk '{args.train_data_root}' | tail -1").split()
+    prior = json_if(reports / "m2a-s0-topology-audit.json") or {}
+    network_baseline = prior.get("network_baseline", {})
+    if args.measure_network:
+        network_baseline = {
+            "scope": (
+                "coordinator upload legs used for remote execution; direct "
+                "Isaac-to-train SSH was unavailable"
+            ),
+            "coordinator_to_isaac": measure_ssh_upload(args.isaac_host),
+            "coordinator_to_train": measure_ssh_upload(args.train_host),
+        }
     payload = {
         "schema_version": "M2ATopologyAuditV1",
         "status": "PASS",
@@ -81,9 +148,9 @@ def topology(args: argparse.Namespace) -> dict[str, Any]:
             "scene_entrypoint": "scripts/isaac_m1b_dataset_benchmark.py",
             "camera_render_products": [
                 "policy_rgbd",
-                "overview",
-                "bin_closeup",
-                "wrist_like",
+                "front_rgbd",
+                "overhead_rgbd",
+                "side_rgbd",
             ],
             "annotators": [
                 "rgb",
@@ -92,7 +159,16 @@ def topology(args: argparse.Namespace) -> dict[str, Any]:
                 "instance_segmentation",
             ],
             "episode_writer": "IsaacIndustrialEpisodeV1 / READY shard",
+            "current_data_format": (
+                "JSONL canonical transitions + PNG RGB/mask + NPY depth + "
+                "READY shard manifest/checksum"
+            ),
+            "current_video_pipeline": (
+                "policy_rgbd frames + ffmpeg evidence overlay exporter"
+            ),
+            "python_environment": "/isaac-sim/python.sh in Isaac Sim 6.0.1 container",
             "available_disk_kib": int(isaac_disk[3]),
+            "estimated_episode_size": estimated_episode_size(reports),
         },
         "train": {
             "host": args.train_host,
@@ -102,19 +178,19 @@ def topology(args: argparse.Namespace) -> dict[str, Any]:
             "environment": ".venv-qrm-lite",
             "available_disk_kib": int(train_disk[3]),
         },
+        "network_baseline": network_baseline,
         "action_protocol": {
             "executed": "9D named Panda joints, radians/metres, 30 Hz, identity normalization",
             "qrm_residual": "10D camera optical, m/r6d/normalized gripper, 5 Hz",
         },
-        "teacher_states": {
+        "teacher": {
+            "used": False,
             "Nano": "CANDIDATE",
             "BWM": "CANDIDATE_LICENSE_PENDING",
             "Super": "PARKED",
             "kill_rule_events": [],
         },
     }
-    reports = PROJECT / "reports"
-    reports.mkdir(exist_ok=True)
     (reports / "m2a-s0-topology-audit.json").write_text(
         json.dumps(payload, indent=2, sort_keys=True) + "\n"
     )
@@ -132,6 +208,12 @@ def topology(args: argparse.Namespace) -> dict[str, Any]:
                 + ", ".join(gpu["name"] for gpu in train_gpus),
                 "- Isaac version: `6.0.1`",
                 "- Worker strategy: one process per physical RTX 3080",
+                "- Camera products: `policy_rgbd`, `front_rgbd`, "
+                "`overhead_rgbd`, `side_rgbd`",
+                f"- Estimated short-episode bytes: "
+                f"`{payload['isaac']['estimated_episode_size']['bytes']}`",
+                f"- Network baseline: `{network_baseline}`",
+                "- Teacher used: no",
                 "- Teacher kill-rule events: none",
                 "",
             ]
@@ -143,6 +225,11 @@ def topology(args: argparse.Namespace) -> dict[str, Any]:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--doctor-only", action="store_true")
+    parser.add_argument(
+        "--measure-network",
+        action="store_true",
+        help="retain a 32 MiB random-byte SSH upload baseline for each remote leg",
+    )
     parser.add_argument("--isaac-host", default=os.getenv("ISAAC_HOST", "root@labserver"))
     parser.add_argument(
         "--isaac-project-root",
@@ -179,8 +266,20 @@ def main() -> int:
     # Local status aggregation uses reports copied back from remote runs and
     # a dataset manifest path supplied through M2A_LOCAL_DATASET_MANIFEST.
     dataset_manifest_path = Path(
-        os.getenv("M2A_LOCAL_DATASET_MANIFEST", str(PROJECT / "reports" / "m2a-dataset-manifest.json"))
+        os.getenv(
+            "M2A_LOCAL_DATASET_MANIFEST",
+            str(
+                PROJECT
+                / "data"
+                / "manifests"
+                / f"{args.dataset_version}.json"
+            ),
+        )
     )
+    retained_manifest = PROJECT / "reports" / "m2a-dataset-manifest.json"
+    if not dataset_manifest_path.is_file() and retained_manifest.is_file():
+        dataset_manifest_path.parent.mkdir(parents=True, exist_ok=True)
+        dataset_manifest_path.write_bytes(retained_manifest.read_bytes())
     dataset = json_if(dataset_manifest_path)
     contract = json_if(PROJECT / "reports" / "m2a-s1-data-contract.json")
     benchmark = json_if(PROJECT / "reports" / "m2a-s2-worker-benchmark.json")
@@ -262,12 +361,15 @@ def main() -> int:
         and contract
         and contract["status"] != "ISAAC_DATA_CONTRACT_BLOCKED"
         and benchmark
+        and benchmark.get("status") == "PASS"
         and synced
         and training
         and offline
         and qwen_ablation
         and closed
         and closed.get("closed_loop_episodes", 0) >= 10
+        and closed.get("teacher_used") is False
+        and closed.get("privileged_truth_policy_input") is False
     )
     model_verdict = (
         "KEEP_B0_COLLECT_MORE_DATA"
@@ -279,6 +381,8 @@ def main() -> int:
         if complete
         else "make isaac-pilot"
         if not dataset
+        else "make isaac-benchmark"
+        if not benchmark or benchmark.get("status") != "PASS"
         else "make isaac-sync"
         if not synced
         else "make qrm-beta-train"
@@ -286,6 +390,7 @@ def main() -> int:
         else "make qrm-beta-closed-loop"
     )
     status = {
+        "schema_version": "M2AStatusV1",
         "phase": "M2A",
         "status": "PASS_WITH_LIMITATIONS" if complete else "PARTIAL",
         "m1b_baseline_verified": True,
@@ -444,6 +549,7 @@ def main() -> int:
         PROJECT / "docs" / "m2a-runbook.md",
         PROJECT / "docs" / "decisions" / "ADR-0017-dual-3080-isaac-data-engine.md",
         PROJECT / "docs" / "decisions" / "ADR-0018-qrm-lite-beta-real-data.md",
+        dataset_manifest_path,
     ]
     artifact_paths = sorted(
         {

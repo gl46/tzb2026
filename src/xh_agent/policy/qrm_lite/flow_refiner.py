@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Callable
+from typing import Any
 
 import numpy as np
 
@@ -166,7 +166,6 @@ def train_flow_numpy_step(
     pred_flat = h @ model.weights[-1] + model.biases[-1]
     target_flat = u.reshape(bsz, -1)
     err = pred_flat - target_flat
-    loss = float(np.mean(err**2))
     dpred = (2.0 / err.size) * err
     # clip grads
     dw = np.clip(h.T @ dpred, -1.0, 1.0)

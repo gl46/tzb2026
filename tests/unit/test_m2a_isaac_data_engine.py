@@ -4,6 +4,7 @@ import json
 import xml.etree.ElementTree as ET
 from argparse import Namespace
 from pathlib import Path
+from types import SimpleNamespace
 
 import numpy as np
 import pytest
@@ -23,6 +24,11 @@ from isaac.run_shadow_rollout_pilot import (
     summarize_quarantines,
 )
 from isaac.export_qrm_evidence_video import decision_lines
+from isaac.host_resources import (
+    first_episode_window_growth,
+    parse_gpu_csv,
+    summarize_host_samples,
+)
 from lingbot.export_canonical_to_lerobot import select_diverse_episodes, validate_mapping
 from xh_agent.data.shadow_isaac import shadow_target_positions
 from xh_agent.data_engine.isaac.contract import (
@@ -35,6 +41,7 @@ from xh_agent.data_engine.isaac.contract import (
 )
 from xh_agent.policy.qrm_lite.residual_safety import ResidualSafetyFilter
 from run_isaac_m1b_dual_benchmark import _worker_command
+from m2a_status import estimated_episode_size, measure_ssh_upload
 
 
 def _action(width: int = 10) -> dict:
@@ -368,6 +375,8 @@ def test_closed_loop_summary_counts_scene_episodes_not_decisions(
     assert report["applied_live_decisions"] == 4
     assert report["live_qrm_decisions"] == 8
     assert report["infrastructure_attempts_quarantined"] == 1
+    assert report["privileged_truth_policy_input"] is False
+    assert report["teacher_used"] is False
 
 
 def test_campaign_resume_never_overwrites_prior_quarantine(tmp_path: Path) -> None:
@@ -435,6 +444,81 @@ def test_worker_benchmark_retries_and_quarantines_infrastructure_failures() -> N
     assert "quarantine_failed dual" in source
     assert "run_single single-gpu0" in source
     assert "run_single single-gpu1" in source
+
+
+def test_host_resource_summary_and_100_episode_growth_are_measured() -> None:
+    samples = [
+        {
+            "phase": "capture",
+            "elapsed_s": 10.0,
+            "cpu_utilization_percent": 20.0,
+            "ram_used_bytes": 1_000,
+            "ram_available_bytes": 9_000,
+            "filesystem_available_bytes": 20_000,
+        },
+        {
+            "phase": "capture",
+            "elapsed_s": 20.0,
+            "cpu_utilization_percent": 40.0,
+            "ram_used_bytes": 1_250,
+            "ram_available_bytes": 8_750,
+            "filesystem_available_bytes": 19_000,
+        },
+    ]
+    summary = summarize_host_samples(samples)
+    assert summary["cpu_utilization_percent_mean"] == 30.0
+    assert summary["ram_used_bytes_peak"] == 1_250
+    growth = first_episode_window_growth(
+        samples,
+        value_key="ram_used_bytes",
+        episode_count=200,
+        capture_wall_s=20.0,
+    )
+    assert growth["status"] == "MEASURED"
+    assert growth["growth"] == 250.0
+
+
+def test_gpu_resource_parser_rejects_malformed_rows() -> None:
+    parsed = parse_gpu_csv("0, 123, 50, 75.5\nbad,row\n")
+    assert parsed == [
+        {
+            "gpu_index": 0,
+            "memory_used_mib": 123.0,
+            "utilization_gpu_percent": 50.0,
+            "power_draw_w": 75.5,
+        }
+    ]
+
+
+def test_topology_episode_size_uses_retained_benchmark(tmp_path: Path) -> None:
+    (tmp_path / "m2a-s2-worker-benchmark.json").write_text(
+        json.dumps(
+            {
+                "single_gpu0": {"average_short_episode_bytes": 5_000_000},
+                "single_gpu1": {"average_short_episode_bytes": 7_000_000},
+            }
+        )
+    )
+    result = estimated_episode_size(tmp_path)
+    assert result["status"] == "MEASURED"
+    assert result["bytes"] == 6_000_000
+
+
+def test_network_baseline_streams_bytes_without_remote_file(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    observed: dict[str, object] = {}
+
+    def fake_run(command: list[str], **kwargs: object) -> SimpleNamespace:
+        observed["command"] = command
+        observed["input"] = kwargs["input"]
+        return SimpleNamespace(returncode=0, stderr=b"")
+
+    monkeypatch.setattr("m2a_status.subprocess.run", fake_run)
+    result = measure_ssh_upload("example", size_mib=1)
+    assert result["status"] == "PASS"
+    assert len(observed["input"]) == 1024 * 1024
+    assert observed["command"][-1] == "cat >/dev/null"
 
 
 def test_qwen_metrics_retain_absent_class_as_zero_f1() -> None:

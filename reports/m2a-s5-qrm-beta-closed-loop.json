@@ -22,6 +22,7 @@
   "model_action_mapping": "REJECTED_NO_OFFICIAL_EVIDENCE",
   "model_id": "Q2_COARSE_MLP_FAILURE_CONTEXT",
   "planning_rejection_rate": 1.0,
+  "privileged_truth_policy_input": false,
   "recovery_success_rate": null,
   "residual_proposals": 50,
   "run_roots": [
@@ -33,5 +34,6 @@
   ],
   "schema_version": "M2AQRMIsaacClosedLoopV1",
   "status": "PASS_WITH_B0_FALLBACK",
+  "teacher_used": false,
   "wrong_object_recovery_rate": null
 }

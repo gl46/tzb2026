@@ -86,7 +86,6 @@ class Qwen35Backbone:
     def load(self) -> None:
         if self._model is not None:
             return
-        import torch
         from transformers import AutoModelForImageTextToText, AutoProcessor
 
         self._device, self._dtype = self._resolve_device_dtype()
@@ -190,14 +189,10 @@ class Qwen35Backbone:
             proc = self._processor(
                 text=rendered, images=images, return_tensors="pt", padding=True
             )
-        import torch
-
         return {k: (v.to(self._device) if hasattr(v, "to") else v) for k, v in proc.items()}
 
     @staticmethod
     def _pool_hidden(hidden: Any, attention_mask: Any | None) -> Any:
-        import torch
-
         # hidden: [B, T, H]
         if attention_mask is None:
             return hidden.mean(dim=1)

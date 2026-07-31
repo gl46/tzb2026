@@ -4,6 +4,8 @@
 - scene episodes: 10
 - applied live decisions: 50
 - action mapping: `REJECTED_NO_OFFICIAL_EVIDENCE`
+- privileged simulator truth as policy input: no
+- Teacher used: no
 - B0 fallback: 50/50
 - safety violations: 0
 - infrastructure attempts quarantined: 4

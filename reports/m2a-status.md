@@ -1,6 +1,6 @@
 # M2A status
 
-- status: **PASS_WITH_LIMITATIONS**
+- status: **PARTIAL**
 - dual RTX 3080 generated concurrently: yes
 - final worker configuration: one independent process per GPU
 - 50-seed contract: `VERIFIED_WITH_LIMITATIONS`
@@ -24,4 +24,4 @@
 - Teacher path remains disabled in Shadow and LingBot prep
 - model verdict: **KEEP_B0_COLLECT_MORE_DATA**
 - expand to 5k–10k now: no; collect physical failure/recovery coverage first
-- next command: `make m2a-status`
+- next command: `make isaac-benchmark`

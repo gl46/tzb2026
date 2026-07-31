@@ -65,4 +65,7 @@ def test_qwen_ablation_aggregates_paired_seeds(tmp_path: Path) -> None:
     assert report["accuracy_deltas"]["per_seed"]["20260731"] == pytest.approx(0.1)
     assert report["accuracy_deltas"]["per_seed"]["20260732"] == pytest.approx(-0.04)
     assert report["accuracy_deltas"]["mean"] == pytest.approx(0.03)
-    assert "did not improve" in report["limitations"][-1]
+    assert any("did not improve" in item for item in report["limitations"])
+    assert report["teacher_used"] is False
+    assert report["runtime_revisions"] == [""]
+    assert len(report["training_source_sha256"]) == 64

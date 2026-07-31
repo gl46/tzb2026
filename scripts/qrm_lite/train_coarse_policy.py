@@ -38,7 +38,6 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--report-json", default="reports/qrm-lite-coarse-policy.json")
     args = p.parse_args(argv)
 
-    rng = np.random.default_rng(args.seed)
     random.seed(args.seed)
     samples = load_samples(Path(args.dataset), limit=args.limit)
     if not samples:
