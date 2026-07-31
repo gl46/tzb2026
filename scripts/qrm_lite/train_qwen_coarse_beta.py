@@ -11,15 +11,29 @@ from pathlib import Path
 
 from PIL import Image
 
-from xh_agent.policy.qrm_lite.contracts import FailureContextV1, QRMTrainingSampleV1
+from xh_agent.policy.qrm_lite.contracts import (
+    FailureContextV1,
+    QRMCoarseTrainingSampleV2,
+    QRMTrainingSampleV1,
+)
 
 
-def load_samples(path: Path) -> list[QRMTrainingSampleV1]:
-    return [
-        QRMTrainingSampleV1.model_validate_json(line)
-        for line in path.read_text().splitlines()
-        if line.strip()
-    ]
+CoarseSample = QRMTrainingSampleV1 | QRMCoarseTrainingSampleV2
+
+
+def load_samples(path: Path) -> list[CoarseSample]:
+    samples: list[CoarseSample] = []
+    for line in path.read_text().splitlines():
+        if not line.strip():
+            continue
+        payload = json.loads(line)
+        contract = (
+            QRMCoarseTrainingSampleV2
+            if payload.get("schema_version") == "QRMCoarseTrainingSampleV2"
+            else QRMTrainingSampleV1
+        )
+        samples.append(contract.model_validate(payload))
+    return samples
 
 
 def resolve_image(dataset_root: Path, uri: str) -> Path:
@@ -29,14 +43,22 @@ def resolve_image(dataset_root: Path, uri: str) -> Path:
     relative = Path(uri[len(prefix) :])
     if relative.is_absolute() or ".." in relative.parts:
         raise ValueError(f"RGB URI escapes dataset: {uri}")
-    # URI begins with shard-XXXXX.READY, which lives under dataset/shards.
-    path = dataset_root / "shards" / relative
-    if not path.is_file():
-        raise FileNotFoundError(path)
-    return path
+    direct = dataset_root / relative
+    if direct.is_file():
+        return direct
+    # M2A URI begins with shard-XXXXX.READY, under dataset/shards.
+    legacy = dataset_root / "shards" / relative
+    if legacy.is_file():
+        return legacy
+    raise FileNotFoundError(f"neither {direct} nor {legacy} exists")
 
 
-def prompt(sample: QRMTrainingSampleV1, *, use_failure_context: bool) -> str:
+def prompt(
+    sample: CoarseSample,
+    *,
+    use_failure_context: bool,
+    allowed_skills: list[str] | None = None,
+) -> str:
     observation = sample.observation
     tracks = [
         {
@@ -59,7 +81,7 @@ def prompt(sample: QRMTrainingSampleV1, *, use_failure_context: bool) -> str:
         "gripper_state": observation.gripper_state,
         "current_skill_stage": observation.current_skill_stage,
         "failure_context": context,
-        "allowed_skills": ["APPROACH", "REOBSERVE"],
+        "allowed_skills": allowed_skills or ["APPROACH", "REOBSERVE"],
     }
     return (
         "Choose exactly one safe coarse industrial skill from allowed_skills. "
@@ -146,11 +168,10 @@ def main() -> int:
     random.Random(args.seed).shuffle(evaluation)
     train = train[: args.max_train]
     evaluation = evaluation[: args.max_eval]
-    labels = ["APPROACH", "REOBSERVE"]
     observed_labels = sorted({sample.coarse_intent.skill_type for sample in samples})
-    unsupported_labels = sorted(set(observed_labels) - set(labels))
-    if unsupported_labels:
-        raise SystemExit(f"unsupported real Pilot coarse labels: {unsupported_labels}")
+    labels = observed_labels
+    if not labels:
+        raise SystemExit("coarse dataset has no observed labels")
     label_to_id = {label: index for index, label in enumerate(labels)}
     if not train or not evaluation:
         raise SystemExit("train/eval split is empty")
@@ -197,7 +218,16 @@ def main() -> int:
         for index, sample in enumerate(train):
             image = Image.open(resolve_image(args.dataset_root, sample.observation.rgb_uri)).convert("RGB")
             inputs = backbone._prepare_batch(
-                {"texts": [prompt(sample, use_failure_context=use_fc)], "images": [image]}
+                {
+                    "texts": [
+                        prompt(
+                            sample,
+                            use_failure_context=use_fc,
+                            allowed_skills=labels,
+                        )
+                    ],
+                    "images": [image],
+                }
             )
             optimizer.zero_grad(set_to_none=True)
             output = backbone._model(
@@ -258,7 +288,13 @@ def main() -> int:
             image = Image.open(resolve_image(args.dataset_root, sample.observation.rgb_uri)).convert("RGB")
             features = backbone.encode_multimodal(
                 {
-                    "texts": [prompt(sample, use_failure_context=use_fc)],
+                    "texts": [
+                        prompt(
+                            sample,
+                            use_failure_context=use_fc,
+                            allowed_skills=labels,
+                        )
+                    ],
                     "images": [image],
                 }
             )

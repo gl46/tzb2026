@@ -5,6 +5,7 @@ from xh_agent.policy.qrm_lite.contracts import (
     CoarseIntentV1,
     FailureContextV1,
     FailureType,
+    QRMCoarseTrainingSampleV2,
     QRMObservationV1,
     QRMTrainingSampleV1,
 )
@@ -14,6 +15,7 @@ __all__ = [
     "CoarseIntentV1",
     "FailureContextV1",
     "FailureType",
+    "QRMCoarseTrainingSampleV2",
     "QRMObservationV1",
     "QRMTrainingSampleV1",
 ]

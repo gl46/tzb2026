@@ -1,0 +1,13 @@
+{
+  "asset_root": "artifacts/m2b/dataset-v2-assets",
+  "continuous_action_targets": 0,
+  "output": "artifacts/m2b/coarse-training-v2.jsonl",
+  "output_sha256": "2fe73432e25cf877f0992fc0cd9d0a5e16afb5ffd9dcae7c45b4568481f2f003",
+  "privileged_truth_policy_input": false,
+  "samples_quarantined": 0,
+  "samples_valid": 3,
+  "schema_version": "M2BCoarseTrainingDatasetReportV1",
+  "status": "PASS",
+  "teacher_used": false,
+  "zero_filled_action_targets": 0
+}

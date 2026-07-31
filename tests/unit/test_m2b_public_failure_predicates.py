@@ -124,6 +124,20 @@ def test_occlusion_aware_lift_uses_public_site_and_hand_proprioception() -> None
     )
     assert fragment_result.predicates == ["grasped=true", "lifted=true"]
 
+    displaced_noisy_centroid = [
+        _track("target", "red", (-0.16, -0.20, 0.46), confidence=0.5)
+    ]
+    displaced_result = infer_occlusion_aware_lift_success_predicates(
+        before,
+        displaced_noisy_centroid,
+        task_target_track_id="target",
+        hand_before_world_m=[-0.11, -0.13, 0.55],
+        hand_after_world_m=[-0.11, -0.13, 0.70],
+        gripper_closed=True,
+    )
+    assert displaced_result.predicates == ["grasped=true", "lifted=true"]
+    assert displaced_result.source == "PUBLIC_RGBD_AND_ROBOT_PROPRIOCEPTION"
+
     visible_at_original_site = [_track("new-red", "red", (-0.11, -0.13, 0.49))]
     rejected = infer_occlusion_aware_lift_success_predicates(
         before,

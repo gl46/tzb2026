@@ -161,6 +161,19 @@ def build_episode(
         "observation_before": before,
         "observation_after": after,
         "recovery_observations": payload["m2b_public_rgbd"]["captures"],
+        "public_camera": {
+            "camera_frame": payload["m2b_public_rgbd"]["camera_frame"],
+            "camera_intrinsics": payload["m2b_public_rgbd"][
+                "camera_intrinsics"
+            ],
+            "camera_to_world_optical": payload["m2b_public_rgbd"][
+                "camera_to_world_optical"
+            ],
+            "depth_semantics": payload["m2b_public_rgbd"][
+                "depth_semantics"
+            ],
+            "base_to_camera_status": "NOT_AVAILABLE_NOT_GUESSED",
+        },
         "task_spec": {
             **payload["m2b_public_rgbd"]["task_spec"],
             "instruction": "Recover the public TaskSpec target safely.",

@@ -272,12 +272,19 @@ def infer_occlusion_aware_lift_success_predicates(
         and track.confidence >= minimum_visible_track_confidence
     ]
     if current:
-        return infer_lift_success_predicates(
+        direct = infer_lift_success_predicates(
             before,
             after_lift,
             task_target_track_id=task_target_track_id,
             minimum_vertical_lift_m=minimum_vertical_lift_m,
         )
+        if {"grasped=true", "lifted=true"}.issubset(direct.predicates):
+            return direct
+        # A partly occluded RGB-D mask can retain the track id while its
+        # projected centroid falls onto the table/background.  Do not treat
+        # that noisy Z estimate as an unconditional rejection: the same
+        # public original-site and hand-proprioception gates used below still
+        # distinguish a carried target from one left on the table.
     same_color_at_original_site = any(
         track.visual_color == target.visual_color
         and track.confidence >= minimum_visible_track_confidence

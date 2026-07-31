@@ -15,7 +15,7 @@
   "limited_coverage_gate_passed": false,
   "model_rollout_episodes": 0,
   "output_path": "artifacts/m2b/dataset-v2.jsonl",
-  "output_sha256": "19eb5833eb31586bd7f64110ad27aa3b5f46e547fb58f3be3ed93122b3c0d52a",
+  "output_sha256": "c9daa256e31bf541e4ff1c2b8fc3c0be6492f24b410a19346ce95f4f5588e5f1",
   "privileged_truth_policy_input": false,
   "quarantine_path": "artifacts/m2b/dataset-v2-quarantine.jsonl",
   "quarantine_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",

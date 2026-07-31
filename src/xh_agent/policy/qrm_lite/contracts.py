@@ -1,7 +1,7 @@
 """QRM-Lite training and observation contracts.
 
 Online policy inputs must never include simulator oracle fields.
-SimulatorSupervision is training/eval only and lives on QRMTrainingSampleV1 labels.
+SimulatorSupervision is training/eval only and lives on training labels.
 """
 
 from __future__ import annotations
@@ -186,6 +186,30 @@ class QRMTrainingSampleV1(StrictModel):
     nominal_action_chunk: CameraFrameActionChunkV1
     residual_action_chunk: CameraFrameActionChunkV1
     target_action_chunk: CameraFrameActionChunkV1
+    simulator_supervision: dict[str, Any] | None = None
+    provenance: dict[str, str] = Field(default_factory=dict)
+    synthetic: bool = False
+
+
+class QRMCoarseTrainingSampleV2(StrictModel):
+    """Coarse-only supervision without a fabricated continuous action target.
+
+    Failure-recovery probes expose an executed recovery skill and public
+    observations, but not a reconstructible camera-frame action trajectory.
+    Keeping this as a separate contract prevents those records from entering
+    residual training through zero-filled placeholder chunks.
+    """
+
+    schema_version: Literal["QRMCoarseTrainingSampleV2"] = (
+        "QRMCoarseTrainingSampleV2"
+    )
+    sample_id: str
+    episode_id: str
+    seed: int = 0
+    split: Literal["train", "val", "test", "overfit"] = "train"
+    observation: QRMObservationV1
+    coarse_intent: CoarseIntentV1
+    continuous_action_target_available: Literal[False] = False
     simulator_supervision: dict[str, Any] | None = None
     provenance: dict[str, str] = Field(default_factory=dict)
     synthetic: bool = False
