@@ -67,6 +67,40 @@ def select_task_target_track(
     return ordered[-1] if extremum == "max" else ordered[0]
 
 
+def reassociate_task_target_track(
+    before: list[PublicTrackSnapshotV2],
+    after: list[PublicTrackSnapshotV2],
+    *,
+    task_target_track_id: str,
+    maximum_reassociation_distance_m: float = 0.08,
+) -> PublicTrackSnapshotV2:
+    """Reacquire TaskSpec from public identity or color/geometry continuity."""
+
+    target = _by_track_id(before, task_target_track_id)
+    exact = [track for track in after if track.track_id == task_target_track_id]
+    if len(exact) == 1 and exact[0].confidence >= 0.5:
+        return exact[0]
+    candidates = [
+        track
+        for track in after
+        if track.visual_color == target.visual_color and track.confidence >= 0.5
+    ]
+    if not candidates:
+        raise ValueError("public TaskSpec target could not be reassociated")
+    reassociated = min(
+        candidates,
+        key=lambda track: math.dist(
+            track.position_world_m, target.position_world_m
+        ),
+    )
+    if (
+        math.dist(reassociated.position_world_m, target.position_world_m)
+        > maximum_reassociation_distance_m
+    ):
+        raise ValueError("public TaskSpec reassociation exceeded distance gate")
+    return reassociated
+
+
 def infer_empty_grasp_predicates(
     before: list[PublicTrackSnapshotV2],
     after: list[PublicTrackSnapshotV2],

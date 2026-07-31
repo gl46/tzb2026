@@ -321,6 +321,7 @@ from xh_agent.data_engine.isaac.public_failure_predicates import (
     infer_occlusion_aware_release_success_predicates,
     infer_occlusion_aware_wrong_object_predicates,
     select_task_target_track,
+    reassociate_task_target_track,
     snapshots_from_perception_results,
 )
 from xh_agent.perception.geometric_rgbd import GeometricRGBDBaseline
@@ -1499,6 +1500,154 @@ def _capture_m2b_public_rgbd(
         }
     )
     return snapshots
+
+
+def _execute_m2b_public_regrasp(
+    *,
+    robot: Franka,
+    hand_prim: RigidPrim,
+    left_finger_prim: RigidPrim,
+    right_finger_prim: RigidPrim,
+    sensors: dict[str, ContactSensor],
+    contact_collector: _PhysxContactCollector,
+    public_target_world_m: list[float],
+    public_tracks: list[Any],
+    preclose_target_m: float,
+    close_target_m: float,
+) -> dict[str, Any]:
+    """Execute the existing B0 top-grasp from public geometry only."""
+
+    target_center = np.asarray(public_target_world_m, dtype=np.float32)
+    neighbors = [
+        track.position_world_m[:2]
+        for track in public_tracks
+        if track.position_world_m != public_target_world_m
+    ]
+    yaw = select_free_gap_yaw_from_xy(
+        target_center[:2],
+        neighbors,
+        source="PUBLIC_RGBD_FREE_GAP_GEOMETRY",
+    )
+    orientation = np.asarray(
+        isaac_top_down_orientation_wxyz(
+            float(yaw["selected_yaw_rad"])
+        ),
+        dtype=np.float32,
+    )
+    pregrasp = target_center + np.asarray([0.0, 0.0, 0.27], dtype=np.float32)
+    pregrasp_motion = _step_pose(
+        robot,
+        pregrasp,
+        steps=150,
+        orientation_wxyz=orientation,
+    )
+    attempts: list[dict[str, Any]] = []
+    for centerline_m in (0.12, 0.11, 0.10, 0.09, 0.08):
+        contact_goal = target_center + np.asarray(
+            [0.0, 0.0, centerline_m], dtype=np.float32
+        )
+        contact_motion = _step_pose(
+            robot,
+            contact_goal,
+            steps=120,
+            orientation_wxyz=orientation,
+        )
+        _step_gripper(robot, preclose_target_m, steps=M1B_PRECLOSE_STEPS)
+        _step_gripper(
+            robot,
+            preclose_target_m,
+            steps=M1B_PRECLOSE_SETTLE_STEPS,
+        )
+        samples: list[M1BContactSampleV1] = []
+        for steps in (
+            M1B_TERMINAL_CLOSE_STEPS,
+            M1B_POST_CLOSE_OBSERVATION_STEPS,
+        ):
+            segment, _, _, _ = _step_gripper(
+                robot,
+                close_target_m,
+                steps=steps,
+                sensors=sensors,
+                contact_views={
+                    "left": left_finger_prim,
+                    "right": right_finger_prim,
+                },
+                contact_collector=contact_collector,
+            )
+            samples.extend(segment)
+        feedback, broker = broker_from_window(samples)
+        motion_passed = bool(
+            pregrasp_motion["final_error_m"]
+            <= PRODUCTION_EE_POSITION_ERROR_GATE_M
+            and contact_motion["final_error_m"]
+            <= PRODUCTION_EE_POSITION_ERROR_GATE_M
+        )
+        attempts.append(
+            {
+                "contact_centerline_m": centerline_m,
+                "contact_motion": contact_motion,
+                "motion_gate_passed": motion_passed,
+                "contact_feedback": feedback.__dict__,
+                "sample_count": len(samples),
+            }
+        )
+        if feedback.grasp_success and motion_passed:
+            entity = str(broker["actual_sim_entity_id"])
+            object_prim = RigidPrim(f"/World/M1B/{entity}/link")
+            hand_before, _ = _live_pose(hand_prim)
+            object_before, _ = _live_pose(object_prim)
+            attachment = _attach_preserving_pose(
+                entity, hand_prim, object_prim
+            )
+            lift_motion = _step_pose(
+                robot,
+                pregrasp,
+                steps=150,
+                orientation_wxyz=orientation,
+            )
+            hand_after, _ = _live_pose(hand_prim)
+            object_after, _ = _live_pose(object_prim)
+            hand_delta = _delta(hand_before, hand_after)
+            object_delta = _delta(object_before, object_after)
+            return {
+                "status": "LIFTED",
+                "public_action_input": {
+                    "target_world_m": public_target_world_m,
+                    "source": "PUBLIC_RGBD_TRACK_ONLY",
+                    "simulator_truth_used": False,
+                },
+                "public_free_gap_yaw": yaw,
+                "pregrasp_motion": pregrasp_motion,
+                "attempts": attempts,
+                "broker_internal": broker,
+                "attached_entity_id": entity,
+                "attachment": attachment,
+                "hand_before_lift_world_m": hand_before,
+                "hand_after_lift_world_m": hand_after,
+                "object_lift_m": float(object_delta[2]),
+                "follow_error_m": float(
+                    np.linalg.norm(hand_delta - object_delta)
+                ),
+                "lift_motion": lift_motion,
+            }
+        _step_gripper(robot, 0.04, steps=45)
+        _step_pose(
+            robot,
+            pregrasp,
+            steps=90,
+            orientation_wxyz=orientation,
+        )
+    return {
+        "status": "CONTACT_GATE_REJECTED",
+        "public_action_input": {
+            "target_world_m": public_target_world_m,
+            "source": "PUBLIC_RGBD_TRACK_ONLY",
+            "simulator_truth_used": False,
+        },
+        "public_free_gap_yaw": yaw,
+        "pregrasp_motion": pregrasp_motion,
+        "attempts": attempts,
+    }
 
 
 def main() -> int:
@@ -3023,6 +3172,10 @@ def main() -> int:
     )
     m2b_public_after_recovery: list[Any] | None = None
     m2b_public_release_success = None
+    m2b_reassociated_target = None
+    m2b_reassociation_error = None
+    m2b_wrong_regrasp = None
+    m2b_wrong_public_lift_success = None
     if m2b_public_rgbd is not None:
         assert m2b_public_before is not None
         assert m2b_public_after_lift is not None
@@ -3033,6 +3186,15 @@ def main() -> int:
             m2b_public_rgbd,
             label="after_recovery_retreat",
         )
+        if ARGS.m2b_task_target_object is not None:
+            try:
+                m2b_reassociated_target = reassociate_task_target_track(
+                    m2b_public_before,
+                    m2b_public_after_recovery,
+                    task_target_track_id=m2b_task_target_track_id,
+                )
+            except ValueError as error:
+                m2b_reassociation_error = str(error)
         if ARGS.m2b_inject_empty_grasp and m2b_public_lift_success is None:
             m2b_public_lift_success = infer_lift_success_predicates(
                 m2b_public_before,
@@ -3050,6 +3212,47 @@ def main() -> int:
                     hand_after_retreat_world_m=hand_detached_end,
                 )
             )
+        if (
+            ARGS.m2b_task_target_object is not None
+            and m2b_reassociated_target is not None
+        ):
+            m2b_wrong_regrasp = _execute_m2b_public_regrasp(
+                robot=robot,
+                hand_prim=hand_prim,
+                left_finger_prim=left_finger_prim,
+                right_finger_prim=right_finger_prim,
+                sensors=sensors,
+                contact_collector=contact_collector,
+                public_target_world_m=(
+                    m2b_reassociated_target.position_world_m
+                ),
+                public_tracks=m2b_public_after_recovery,
+                preclose_target_m=preclose_target_m,
+                close_target_m=close_target_m,
+            )
+            if m2b_wrong_regrasp["status"] == "LIFTED":
+                wrong_regrasp_after = _capture_m2b_public_rgbd(
+                    m2b_public_rgbd,
+                    label="wrong_object_target_after_regrasp",
+                )
+                m2b_wrong_public_lift_success = (
+                    infer_occlusion_aware_lift_success_predicates(
+                        m2b_public_after_recovery,
+                        wrong_regrasp_after,
+                        task_target_track_id=(
+                            m2b_reassociated_target.track_id
+                        ),
+                        hand_before_world_m=m2b_wrong_regrasp[
+                            "hand_before_lift_world_m"
+                        ],
+                        hand_after_world_m=m2b_wrong_regrasp[
+                            "hand_after_lift_world_m"
+                        ],
+                        gripper_closed=True,
+                    )
+                )
+                _remove_attachment()
+                _step_gripper(robot, 0.04, steps=60)
     same_process_reset = (
         _same_process_reset_gate(
             robot,
@@ -3206,14 +3409,61 @@ def main() -> int:
                         "safe_place_non_target_passed": (
                             detached_noncoupling_pass
                         ),
-                        "reassociate_target_executed": False,
-                        "regrasp_target_executed": False,
+                        "reassociate_target_executed": bool(
+                            m2b_reassociated_target is not None
+                        ),
+                        "reassociated_target_track_id": (
+                            m2b_reassociated_target.track_id
+                            if m2b_reassociated_target is not None
+                            else None
+                        ),
+                        "reassociation_rejection": m2b_reassociation_error,
+                        "regrasp_target_executed": bool(
+                            m2b_wrong_regrasp is not None
+                            and m2b_wrong_regrasp.get("status") == "LIFTED"
+                            and m2b_wrong_regrasp.get("attached_entity_id")
+                            == ARGS.m2b_task_target_object
+                            and m2b_wrong_regrasp.get("object_lift_m", 0.0)
+                            >= 0.05
+                            and m2b_wrong_regrasp.get(
+                                "follow_error_m", float("inf")
+                            )
+                            <= 0.02
+                            and m2b_wrong_public_lift_success is not None
+                            and {"grasped=true", "lifted=true"}.issubset(
+                                m2b_wrong_public_lift_success.predicates
+                            )
+                        ),
+                        "regrasp_execution": m2b_wrong_regrasp,
+                        "public_regrasp_predicates": (
+                            m2b_wrong_public_lift_success.model_dump(
+                                mode="json"
+                            )
+                            if m2b_wrong_public_lift_success is not None
+                            else None
+                        ),
                         "public_reobserve_status": (
-                            "CAPTURED_PENDING_TARGET_REGRASP"
+                            "CAPTURED_AND_VALIDATED"
+                            if m2b_wrong_public_lift_success is not None
+                            and {"grasped=true", "lifted=true"}.issubset(
+                                m2b_wrong_public_lift_success.predicates
+                            )
+                            else "CAPTURED_PENDING_TARGET_REGRASP"
                             if m2b_public_after_recovery is not None
                             else "NOT_CAPTURED_BY_ACTUATION_PROBE"
                         ),
-                        "training_eligible": False,
+                        "training_eligible": bool(
+                            wrong_object_injection["training_eligible"]
+                            and m2b_reassociated_target is not None
+                            and m2b_wrong_regrasp is not None
+                            and m2b_wrong_regrasp.get("status") == "LIFTED"
+                            and m2b_wrong_regrasp.get("attached_entity_id")
+                            == ARGS.m2b_task_target_object
+                            and m2b_wrong_public_lift_success is not None
+                            and {"grasped=true", "lifted=true"}.issubset(
+                                m2b_wrong_public_lift_success.predicates
+                            )
+                        ),
                     }
                     if wrong_object_injection is not None
                     else None

@@ -519,8 +519,8 @@ def test_isaac_probe_m2b_failures_change_physical_state_before_recovery() -> Non
     assert '"training_eligible": bool(' in source
     assert "and m2b_injection_pass" in source
     assert '"broker_attached_actual_contact"' in source
-    assert '"reassociate_target_executed": False' in source
-    assert '"regrasp_target_executed": False' in source
+    assert '"reassociate_target_executed": bool(' in source
+    assert '"regrasp_target_executed": bool(' in source
 
 
 def test_isaac_probe_m2b_public_predicates_use_rgbd_not_truth() -> None:

@@ -74,10 +74,16 @@ def main() -> int:
         empty_recovery.get("training_eligible") is True
         and release_recovery.get("training_eligible") is True
     )
+    all_recoveries_eligible = bool(
+        two_recoveries_eligible
+        and wrong_recovery.get("training_eligible") is True
+    )
     report = {
         "schema_version": "M2BS1PhysicalFailureSmokeV1",
         "status": (
-            "PASS_PUBLIC_FAILURES_TWO_RECOVERIES_WRONG_RECOVERY_PENDING"
+            "PASS_PUBLIC_FAILURES_AND_RECOVERIES"
+            if public_rgbd_complete and all_recoveries_eligible
+            else "PASS_PUBLIC_FAILURES_TWO_RECOVERIES_WRONG_RECOVERY_PENDING"
             if public_rgbd_complete and two_recoveries_eligible
             else "PASS_PHYSICAL_ONLY_PUBLIC_RGBD_PENDING"
         ),
@@ -165,11 +171,20 @@ def main() -> int:
         },
         "dataset_v2_episodes_admitted": 0,
         "training_eligible": False,
+        "failure_recovery_evidence_training_eligible": (
+            public_rgbd_complete and all_recoveries_eligible
+        ),
         "privileged_truth_policy_input": False,
         "teacher_used": False,
         "teacher_kill_rule_events": [],
         "limitations": [
-            "WRONG_OBJECT reassociation and target regrasp have not yet executed.",
+            *(
+                []
+                if wrong_recovery.get("training_eligible") is True
+                else [
+                    "WRONG_OBJECT reassociation and target regrasp have not yet executed."
+                ]
+            ),
             "Canonical FailureContextV1/EpisodeTransition packing remains pending; raw smoke evidence is not yet Dataset V2.",
         ],
         "next_command": "make m2b-generate-failures",
@@ -191,9 +206,18 @@ def main() -> int:
                 f"follow error {report['release_failure']['follow_error_m']:.6f} m; "
                 "retry detach/retreat passed.",
                 "- WRONG_OBJECT: actual contacted entity was attached and "
-                "safely placed; public reassociation and target regrasp remain pending.",
+                + (
+                    "safely placed; public reassociation and target regrasp passed."
+                    if report["wrong_object"]["training_eligible"]
+                    else "safely placed; public reassociation and target regrasp remain pending."
+                ),
                 "- Public RGB-D failure predicates: captured and validated for all three failures.",
-                "- Eligible recovery evidence: EMPTY_GRASP and RELEASE_FAILURE; WRONG_OBJECT target regrasp pending.",
+                "- Eligible recovery evidence: "
+                + (
+                    "all three mandatory failure classes."
+                    if report["failure_recovery_evidence_training_eligible"]
+                    else "EMPTY_GRASP and RELEASE_FAILURE; WRONG_OBJECT target regrasp pending."
+                ),
                 "- Dataset V2 admitted: 0 (canonical episode packing pending).",
                 "- Teacher used: no.",
                 "",

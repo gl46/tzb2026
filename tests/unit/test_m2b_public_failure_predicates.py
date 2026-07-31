@@ -15,6 +15,7 @@ from xh_agent.data_engine.isaac.public_failure_predicates import (
     infer_release_failure_predicates,
     infer_release_success_predicates,
     infer_wrong_object_predicates,
+    reassociate_task_target_track,
     select_task_target_track,
     snapshots_from_perception_results,
 )
@@ -175,6 +176,15 @@ def test_occlusion_aware_release_uses_public_site_and_hand_motion() -> None:
     )
     assert recovered.predicates == ["released=true"]
     assert recovered.carried_public_track_id == "reassociated"
+
+
+def test_task_target_reassociates_without_entity_truth() -> None:
+    before = [_track("task", "red", (-0.11, -0.13, 0.49))]
+    after = [_track("new-track", "red", (-0.115, -0.132, 0.492))]
+    result = reassociate_task_target_track(
+        before, after, task_target_track_id="task"
+    )
+    assert result.track_id == "new-track"
 
 
 @dataclass

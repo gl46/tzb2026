@@ -130,12 +130,21 @@ def accepted(
             evidence.get("failure_type") == failure
             and evidence.get("physical_state_passed")
             and recovery.get("safe_place_non_target_passed")
+        )
+        if public_rgbd_required:
+            return bool(
+                result
+                and evidence.get("training_eligible") is True
+                and recovery.get("reassociate_target_executed") is True
+                and recovery.get("regrasp_target_executed") is True
+                and recovery.get("training_eligible") is True
+            )
+        return bool(
+            result
+            and evidence.get("training_eligible") is False
             and recovery.get("reassociate_target_executed") is False
             and recovery.get("regrasp_target_executed") is False
         )
-        if public_rgbd_required:
-            return bool(result and evidence.get("training_eligible") is True)
-        return result and evidence.get("training_eligible") is False
     evidence = payload.get("m2b_release_failure_injection") or {}
     recovery = payload.get("m2b_recovery", {}).get("release_failure") or {}
     result = bool(

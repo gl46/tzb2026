@@ -4,7 +4,7 @@
     "RELEASE_FAILURE",
     "WRONG_OBJECT"
   ],
-  "attempt_count": 4,
+  "attempt_count": 5,
   "dataset_v2_episodes_admitted": 0,
   "empty_grasp": {
     "attachment_created": false,
@@ -46,8 +46,8 @@
     "target_lift_delta_m": 5.567533282121839e-07,
     "training_eligible": true
   },
+  "failure_recovery_evidence_training_eligible": true,
   "limitations": [
-    "WRONG_OBJECT reassociation and target regrasp have not yet executed.",
     "Canonical FailureContextV1/EpisodeTransition packing remains pending; raw smoke evidence is not yet Dataset V2."
   ],
   "next_command": "make m2b-generate-failures",
@@ -92,10 +92,11 @@
   },
   "remote_roots": [
     "/var/tmp/xh-data/isaac-industrial/m2b/public-rgbd-smoke-20260731-v7",
-    "/var/tmp/xh-data/isaac-industrial/m2b/public-rgbd-smoke-20260731-v8-release"
+    "/var/tmp/xh-data/isaac-industrial/m2b/public-rgbd-smoke-20260731-v8-release",
+    "/var/tmp/xh-data/isaac-industrial/m2b/public-rgbd-smoke-20260731-v10-wrong-regrasp"
   ],
   "schema_version": "M2BS1PhysicalFailureSmokeV1",
-  "status": "PASS_PUBLIC_FAILURES_TWO_RECOVERIES_WRONG_RECOVERY_PENDING",
+  "status": "PASS_PUBLIC_FAILURES_AND_RECOVERIES",
   "teacher_kill_rule_events": [],
   "teacher_used": false,
   "training_eligible": false,
@@ -103,25 +104,26 @@
     "attached_entity_id": "cylinder_04",
     "broker_attached_actual_contact": true,
     "contacted_entity_id": "cylinder_04",
-    "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2b/public-rgbd-smoke-20260731-v7/wrong_object/attempt-01/actuation-probe.json",
-    "evidence_sha256": "134a97221a361766ca56b859272a44b57b53179264dc00fd2ea9e7a47cb63c58",
+    "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2b/public-rgbd-smoke-20260731-v10-wrong-regrasp/wrong_object/attempt-01/actuation-probe.json",
+    "evidence_sha256": "6f32183edac71608a1911c004259e0e4db0c1bfc3117c1eaf21907b500112d58",
     "public_failure_predicates": {
-      "carried_public_track_id": "track-3da9e5f2",
+      "carried_public_track_id": "track-54b8ce59",
       "measurements_m": {
-        "carried_track_motion_m": 0.08132598310995082
+        "hand_vertical_lift_m": 0.14878255128860474,
+        "target_hand_xy_error_m": 0.02446269341975181
       },
       "predicates": [
         "carried_target_match=false"
       ],
       "schema_version": "PublicFailurePredicateResultV2",
       "simulator_truth_used": false,
-      "source": "PUBLIC_RGBD_TEMPORAL_TRACKS_ONLY",
+      "source": "PUBLIC_RGBD_AND_ROBOT_PROPRIOCEPTION",
       "task_target_track_id": "track-550f6239"
     },
-    "reassociate_target_executed": false,
-    "regrasp_target_executed": false,
+    "reassociate_target_executed": true,
+    "regrasp_target_executed": true,
     "safe_place_non_target_passed": true,
     "task_target_entity_id": "cylinder_07",
-    "training_eligible": false
+    "training_eligible": true
   }
 }
