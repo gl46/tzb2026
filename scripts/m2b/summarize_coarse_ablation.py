@@ -38,12 +38,47 @@ def summarize(
                     on["eval_metrics"]["macro_f1"]
                     - off["eval_metrics"]["macro_f1"]
                 ),
+                "failure_context_sanity": on.get(
+                    "failure_context_sanity", {}
+                ),
             }
         )
     accuracy_deltas = [pair["accuracy_delta"] for pair in pairs]
     macro_f1_deltas = [pair["macro_f1_delta"] for pair in pairs]
-    supported = all(value > 0.0 for value in accuracy_deltas) and all(
-        value > 0.0 for value in macro_f1_deltas
+    pipeline_verified = all(
+        pair["failure_context_sanity"].get("status")
+        == "PASS_FIELDS_MASKED_AND_PERMUTED"
+        and pair["failure_context_sanity"].get("masked_inputs_changed")
+        == pair["n_eval"]
+        and pair["failure_context_sanity"].get(
+            "permuted_inputs_changed"
+        )
+        == pair["n_eval"]
+        for pair in pairs
+    )
+    sensitivity_observed = all(
+        pair["failure_context_sanity"].get(
+            "model_sensitivity_observed"
+        )
+        is True
+        for pair in pairs
+    )
+    directionally_positive = all(
+        value > 0.0 for value in accuracy_deltas
+    ) and all(value > 0.0 for value in macro_f1_deltas)
+    supported = (
+        pipeline_verified
+        and sensitivity_observed
+        and directionally_positive
+    )
+    interpretation = (
+        "FC_PIPELINE_SANITY_FAILED"
+        if not pipeline_verified
+        else "FC_MODEL_SENSITIVITY_NOT_OBSERVED"
+        if not sensitivity_observed
+        else "FC_DIRECTIONALLY_POSITIVE_ACROSS_SEEDS"
+        if directionally_positive
+        else "FC_NOT_DIRECTIONALLY_POSITIVE_ACROSS_SEEDS"
     )
     return {
         "schema_version": "M2BCoarseFailureContextAblationV1",
@@ -52,12 +87,12 @@ def summarize(
         "pairs": pairs,
         "mean_accuracy_delta": sum(accuracy_deltas) / len(accuracy_deltas),
         "mean_macro_f1_delta": sum(macro_f1_deltas) / len(macro_f1_deltas),
-        "failure_context_supported_offline": supported,
-        "interpretation": (
-            "FC_DIRECTIONALLY_POSITIVE_ACROSS_SEEDS"
-            if supported
-            else "FC_NOT_DIRECTIONALLY_POSITIVE_ACROSS_SEEDS"
+        "failure_context_pipeline_verified": pipeline_verified,
+        "failure_context_model_sensitivity_observed": (
+            sensitivity_observed
         ),
+        "failure_context_supported_offline": supported,
+        "interpretation": interpretation,
         "formal_ablation": True,
         "teacher_used": False,
         "privileged_truth_policy_input": False,

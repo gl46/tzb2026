@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import random
 import time
@@ -14,6 +15,7 @@ from PIL import Image
 from xh_agent.policy.qrm_lite.coarse_prompt import coarse_prompt
 from xh_agent.policy.qrm_lite.contracts import (
     QRMCoarseTrainingSampleV2,
+    QRMObservationV1,
     QRMTrainingSampleV1,
 )
 
@@ -58,12 +60,50 @@ def prompt(
     *,
     use_failure_context: bool,
     allowed_skills: list[str] | None = None,
+    observation: QRMObservationV1 | None = None,
 ) -> str:
     return coarse_prompt(
-        sample.observation,
+        observation or sample.observation,
         use_failure_context=use_failure_context,
         allowed_skills=allowed_skills or ["APPROACH", "REOBSERVE"],
     )
+
+
+def permuted_failure_context_observations(
+    samples: list[CoarseSample],
+) -> list[QRMObservationV1]:
+    """Pair every observation with a context from a different failure type."""
+
+    contexts_by_failure: dict[str, list] = {}
+    for sample in samples:
+        failure = sample.observation.failure_context.failure_type.value
+        contexts_by_failure.setdefault(failure, []).append(
+            sample.observation.failure_context
+        )
+    failures = sorted(contexts_by_failure)
+    if len(failures) < 2:
+        raise ValueError(
+            "FailureContext permutation requires at least two failure types"
+        )
+    replacement = {
+        failure: failures[(index + 1) % len(failures)]
+        for index, failure in enumerate(failures)
+    }
+    cursors = {failure: 0 for failure in failures}
+    observations = []
+    for sample in samples:
+        source_failure = sample.observation.failure_context.failure_type.value
+        replacement_failure = replacement[source_failure]
+        candidates = contexts_by_failure[replacement_failure]
+        cursor = cursors[replacement_failure]
+        context = candidates[cursor % len(candidates)]
+        cursors[replacement_failure] += 1
+        observations.append(
+            sample.observation.model_copy(
+                update={"failure_context": context}
+            )
+        )
+    return observations
 
 
 def classification_metrics(
@@ -256,30 +296,176 @@ def main() -> int:
 
     backbone._model.eval()
     classifier.eval()
-    y_true: list[str] = []
-    y_pred: list[str] = []
-    confidences: list[float] = []
-    with torch.no_grad():
-        for sample in evaluation:
-            image = Image.open(resolve_image(args.dataset_root, sample.observation.rgb_uri)).convert("RGB")
+    y_true = [sample.coarse_intent.skill_type for sample in evaluation]
+
+    def predict_observations(
+        observations: list[QRMObservationV1],
+        *,
+        include_failure_context: bool,
+    ) -> tuple[list[str], list[float]]:
+        predictions: list[str] = []
+        prediction_confidences: list[float] = []
+        for sample, observation in zip(evaluation, observations):
+            assert sample.observation.rgb_uri is not None
+            image = Image.open(
+                resolve_image(
+                    args.dataset_root,
+                    sample.observation.rgb_uri,
+                )
+            ).convert("RGB")
             features = backbone.encode_multimodal(
                 {
                     "texts": [
                         prompt(
                             sample,
-                            use_failure_context=use_fc,
+                            use_failure_context=include_failure_context,
                             allowed_skills=labels,
+                            observation=observation,
                         )
                     ],
                     "images": [image],
                 }
             )
             logits = classifier(features.pooled.float())
-            y_true.append(sample.coarse_intent.skill_type)
-            y_pred.append(labels[int(logits.argmax(dim=-1))])
-            confidences.append(
+            predictions.append(labels[int(logits.argmax(dim=-1))])
+            prediction_confidences.append(
                 float(torch.softmax(logits, dim=-1).max().detach().cpu())
             )
+        return predictions, prediction_confidences
+
+    original_observations = [sample.observation for sample in evaluation]
+    with torch.no_grad():
+        y_pred, confidences = predict_observations(
+            original_observations,
+            include_failure_context=use_fc,
+        )
+        failure_context_sanity: dict = {
+            "status": "NOT_APPLICABLE_FC_OFF",
+            "inputs_changed": 0,
+            "masked_prediction_change_rate": None,
+            "permuted_prediction_change_rate": None,
+        }
+        if use_fc:
+            permuted_observations = permuted_failure_context_observations(
+                evaluation
+            )
+            masked_predictions, _ = predict_observations(
+                original_observations,
+                include_failure_context=False,
+            )
+            permuted_predictions, _ = predict_observations(
+                permuted_observations,
+                include_failure_context=True,
+            )
+            original_prompts = [
+                prompt(
+                    sample,
+                    use_failure_context=True,
+                    allowed_skills=labels,
+                    observation=observation,
+                )
+                for sample, observation in zip(
+                    evaluation, original_observations
+                )
+            ]
+            masked_prompts = [
+                prompt(
+                    sample,
+                    use_failure_context=False,
+                    allowed_skills=labels,
+                    observation=observation,
+                )
+                for sample, observation in zip(
+                    evaluation, original_observations
+                )
+            ]
+            permuted_prompts = [
+                prompt(
+                    sample,
+                    use_failure_context=True,
+                    allowed_skills=labels,
+                    observation=observation,
+                )
+                for sample, observation in zip(
+                    evaluation, permuted_observations
+                )
+            ]
+
+            def digest(prompts: list[str]) -> str:
+                payload = "\0".join(prompts).encode()
+                return hashlib.sha256(payload).hexdigest()
+
+            masked_inputs_changed = sum(
+                original != masked
+                for original, masked in zip(
+                    original_prompts, masked_prompts
+                )
+            )
+            permuted_inputs_changed = sum(
+                original != permuted
+                for original, permuted in zip(
+                    original_prompts, permuted_prompts
+                )
+            )
+            failure_context_sanity = {
+                "status": "PASS_FIELDS_MASKED_AND_PERMUTED",
+                "inputs_changed": min(
+                    masked_inputs_changed,
+                    permuted_inputs_changed,
+                ),
+                "masked_inputs_changed": masked_inputs_changed,
+                "permuted_inputs_changed": permuted_inputs_changed,
+                "original_prompt_set_sha256": digest(original_prompts),
+                "masked_prompt_set_sha256": digest(masked_prompts),
+                "permuted_prompt_set_sha256": digest(permuted_prompts),
+                "original_accuracy": sum(
+                    truth == predicted
+                    for truth, predicted in zip(y_true, y_pred)
+                )
+                / len(y_true),
+                "masked_accuracy": sum(
+                    truth == predicted
+                    for truth, predicted in zip(
+                        y_true, masked_predictions
+                    )
+                )
+                / len(y_true),
+                "permuted_accuracy": sum(
+                    truth == predicted
+                    for truth, predicted in zip(
+                        y_true, permuted_predictions
+                    )
+                )
+                / len(y_true),
+                "masked_prediction_change_rate": sum(
+                    original != changed
+                    for original, changed in zip(
+                        y_pred, masked_predictions
+                    )
+                )
+                / len(y_pred),
+                "permuted_prediction_change_rate": sum(
+                    original != changed
+                    for original, changed in zip(
+                        y_pred, permuted_predictions
+                    )
+                )
+                / len(y_pred),
+                "model_sensitivity_observed": bool(
+                    any(
+                        original != changed
+                        for original, changed in zip(
+                            y_pred, masked_predictions
+                        )
+                    )
+                    or any(
+                        original != changed
+                        for original, changed in zip(
+                            y_pred, permuted_predictions
+                        )
+                    )
+                ),
+            }
     args.adapter_out.mkdir(parents=True, exist_ok=True)
     backbone.save_adapter(args.adapter_out)
     torch.save(
@@ -351,6 +537,7 @@ def main() -> int:
         "history": history,
         "eval_accuracy": evaluation_metrics["accuracy"],
         "eval_metrics": evaluation_metrics,
+        "failure_context_sanity": failure_context_sanity,
         "eval_predictions": [
             {
                 "truth": truth,
@@ -382,6 +569,8 @@ def main() -> int:
         "classifier_update_l2": classifier_update_l2,
         "limitations": limitations,
         "oracle_policy_inputs": False,
+        "privileged_truth_policy_input": False,
+        "teacher_used": False,
         "flow_status": "DISABLED",
     }
     args.report_json.parent.mkdir(parents=True, exist_ok=True)

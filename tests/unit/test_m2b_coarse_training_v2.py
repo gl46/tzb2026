@@ -5,6 +5,9 @@ import pytest
 from m2b.build_coarse_training_v2 import _source_relative, coarse_sample
 from m2b.summarize_coarse_ablation import summarize
 from m2b.validate_coarse_training_v2 import validate
+from qrm_lite.train_qwen_coarse_beta import (
+    permuted_failure_context_observations,
+)
 from xh_agent.policy.qrm_lite.coarse_inference import (
     prediction_from_probabilities,
 )
@@ -161,6 +164,16 @@ def test_ablation_summary_requires_matched_two_seed_improvement() -> None:
             ],
             "eval_accuracy": accuracy,
             "eval_metrics": {"macro_f1": macro_f1},
+            "failure_context_sanity": (
+                {
+                    "status": "PASS_FIELDS_MASKED_AND_PERMUTED",
+                    "masked_inputs_changed": 30,
+                    "permuted_inputs_changed": 30,
+                    "model_sensitivity_observed": True,
+                }
+                if fc == "on"
+                else {"status": "NOT_APPLICABLE_FC_OFF"}
+            ),
         }
 
     off = [
@@ -173,8 +186,19 @@ def test_ablation_summary_requires_matched_two_seed_improvement() -> None:
     ]
     report = summarize(off, on, dataset_sha256="d" * 64)
     assert report["failure_context_supported_offline"] is True
+    assert report["failure_context_pipeline_verified"] is True
+    assert report["failure_context_model_sensitivity_observed"] is True
     assert report["formal_ablation"] is True
     assert len(report["pairs"]) == 2
+    on[0]["failure_context_sanity"][
+        "model_sensitivity_observed"
+    ] = False
+    insensitive = summarize(off, on, dataset_sha256="d" * 64)
+    assert insensitive["failure_context_supported_offline"] is False
+    assert (
+        insensitive["interpretation"]
+        == "FC_MODEL_SENSITIVITY_NOT_OBSERVED"
+    )
 
 
 def test_shared_prompt_masks_fc_and_prediction_maps_to_recovery() -> None:
@@ -204,3 +228,29 @@ def test_shared_prompt_masks_fc_and_prediction_maps_to_recovery() -> None:
     assert prediction.coarse.target_track_id == "carried"
     assert prediction.recovery_skill == "SAFE_PLACE_NON_TARGET"
     assert prediction.confidence == 0.8
+
+
+def test_failure_context_permutation_changes_every_failure_type() -> None:
+    samples = []
+    for failure_type, skill in (
+        ("EMPTY_GRASP", "REOBSERVE"),
+        ("WRONG_OBJECT", "SAFE_PLACE_NON_TARGET"),
+        ("RELEASE_FAILURE", "RETRY_RELEASE"),
+    ):
+        episode = _episode()
+        episode["episode_id"] = f"m2b-test-{failure_type.lower()}"
+        episode["failure_context"]["failure_type"] = failure_type
+        episode["recovery_sequence"] = [skill]
+        samples.append(
+            coarse_sample(
+                episode,
+                rgb_uri=f"dataset://episodes/{failure_type}/rgb.png",
+                depth_uri=f"dataset://episodes/{failure_type}/depth.npy",
+            )
+        )
+    permuted = permuted_failure_context_observations(samples)
+    assert all(
+        original.observation.failure_context.failure_type
+        != changed.failure_context.failure_type
+        for original, changed in zip(samples, permuted)
+    )
