@@ -18,6 +18,7 @@ def _decision(
 ) -> M2BClosedLoopDecisionV1:
     fallback = source == "B0_FALLBACK"
     baseline = source == "B0_BASELINE"
+    digest = "a" * 64
     return M2BClosedLoopDecisionV1(
         decision_id=f"decision-{source}",
         step_id=0,
@@ -34,6 +35,16 @@ def _decision(
         executed_skill="REOBSERVE",
         fallback_reason="SAFETY_REJECTION" if fallback else None,
         outcome=outcome,
+        registry_sha256=digest if model else None,
+        model_checkpoint_sha256=digest if model else None,
+        model_input_sha256=digest if model else None,
+        model_output_sha256=digest if model else None,
+        mapping_result_sha256=digest if model else None,
+        gate_evidence_sha256=(
+            {"ik": digest, "collision": digest, "safety": digest}
+            if source == "MODEL_SELECTED_B0_SKILL"
+            else {}
+        ),
     )
 
 
@@ -73,6 +84,52 @@ def test_model_execution_requires_valid_complete_gates() -> None:
             safety_gate="PASS",
             execution_source="MODEL_SELECTED_B0_SKILL",
             executed_skill="REOBSERVE",
+            registry_sha256="a" * 64,
+            model_checkpoint_sha256="a" * 64,
+            model_input_sha256="a" * 64,
+            model_output_sha256="a" * 64,
+            mapping_result_sha256="a" * 64,
+            gate_evidence_sha256={
+                "ik": "a" * 64,
+                "collision": "a" * 64,
+                "safety": "a" * 64,
+            },
+        )
+
+
+def test_model_execution_requires_hash_bound_model_and_gate_evidence() -> None:
+    with pytest.raises(ValueError, match="hash-bound provenance"):
+        M2BClosedLoopDecisionV1(
+            decision_id="unbound-model-execution",
+            step_id=0,
+            selected_skill="REOBSERVE",
+            model_decision=True,
+            mapping_status="VALID",
+            ik_gate="NOT_APPLICABLE",
+            collision_gate="NOT_APPLICABLE",
+            safety_gate="PASS",
+            execution_source="MODEL_SELECTED_B0_SKILL",
+            executed_skill="REOBSERVE",
+        )
+
+    digest = "b" * 64
+    with pytest.raises(ValueError, match="gate evidence hashes"):
+        M2BClosedLoopDecisionV1(
+            decision_id="missing-gate-receipts",
+            step_id=0,
+            selected_skill="REOBSERVE",
+            model_decision=True,
+            mapping_status="VALID",
+            ik_gate="NOT_APPLICABLE",
+            collision_gate="NOT_APPLICABLE",
+            safety_gate="PASS",
+            execution_source="MODEL_SELECTED_B0_SKILL",
+            executed_skill="REOBSERVE",
+            registry_sha256=digest,
+            model_checkpoint_sha256=digest,
+            model_input_sha256=digest,
+            model_output_sha256=digest,
+            mapping_result_sha256=digest,
         )
 
 

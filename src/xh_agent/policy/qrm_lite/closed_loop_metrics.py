@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections import Counter, defaultdict
+import re
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -46,12 +47,36 @@ class M2BClosedLoopDecisionV1(StrictModel):
     outcome: Literal["SUCCESS", "FAILURE", "UNKNOWN"] = "UNKNOWN"
     collision_or_safety_violation: bool = False
     registry_sha256: str | None = None
+    model_checkpoint_sha256: str | None = None
+    model_input_sha256: str | None = None
+    model_output_sha256: str | None = None
+    mapping_result_sha256: str | None = None
+    gate_evidence_sha256: dict[str, str] = Field(default_factory=dict)
     privileged_truth_policy_input: Literal[False] = False
     teacher_used: Literal[False] = False
 
     @model_validator(mode="after")
     def attribution_is_consistent(self) -> "M2BClosedLoopDecisionV1":
         gates = (self.ik_gate, self.collision_gate, self.safety_gate)
+        if self.model_decision:
+            provenance = {
+                "registry": self.registry_sha256,
+                "checkpoint": self.model_checkpoint_sha256,
+                "input": self.model_input_sha256,
+                "output": self.model_output_sha256,
+                "mapping_result": self.mapping_result_sha256,
+            }
+            invalid = sorted(
+                name
+                for name, digest in provenance.items()
+                if digest is None
+                or re.fullmatch(r"[0-9a-f]{64}", digest) is None
+            )
+            if invalid:
+                raise ValueError(
+                    "model decision lacks hash-bound provenance: "
+                    f"{invalid}"
+                )
         if self.execution_source == "MODEL_SELECTED_B0_SKILL":
             if not self.model_decision or self.mapping_status != "VALID":
                 raise ValueError("model execution requires a valid model mapping")
@@ -61,6 +86,20 @@ class M2BClosedLoopDecisionV1(StrictModel):
                 raise ValueError("executed model skill differs from selected skill")
             if self.fallback_reason is not None:
                 raise ValueError("model execution may not carry a fallback reason")
+            missing_gate_evidence = sorted(
+                gate
+                for gate in ("ik", "collision", "safety")
+                if re.fullmatch(
+                    r"[0-9a-f]{64}",
+                    self.gate_evidence_sha256.get(gate, ""),
+                )
+                is None
+            )
+            if missing_gate_evidence:
+                raise ValueError(
+                    "model execution lacks gate evidence hashes: "
+                    f"{missing_gate_evidence}"
+                )
         if self.execution_source == "B0_FALLBACK":
             if not self.model_decision or not self.fallback_reason:
                 raise ValueError("B0 fallback requires a model decision and reason")
