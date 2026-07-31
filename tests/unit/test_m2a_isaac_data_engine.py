@@ -20,6 +20,7 @@ from isaac.run_shadow_rollout_pilot import (
     build_estimated_scene,
     minimum_assignment_errors,
     select_public_states,
+    summarize_quarantines,
 )
 from isaac.export_qrm_evidence_video import decision_lines
 from lingbot.export_canonical_to_lerobot import select_diverse_episodes, validate_mapping
@@ -525,3 +526,22 @@ def test_shadow_reset_reinitializes_physics_before_articulation_reset() -> None:
             simulation_app.update()
             robot.reset_to_default_state()"""
     assert reset_block in source
+
+
+def test_shadow_quarantine_summary_separates_startup_and_fixed_defect(
+    tmp_path: Path,
+) -> None:
+    quarantine_root = tmp_path / "quarantine"
+    failures = [
+        "RuntimeError: worker0_initialization exited before READY with return code 1",
+        "RuntimeError: worker evidence is missing: output/metrics.json",
+    ]
+    for index, failure in enumerate(failures):
+        run = quarantine_root / f"attempt-{index}"
+        run.mkdir(parents=True)
+        (run / "dual-benchmark-summary.json").write_text(
+            json.dumps({"failure": failure})
+        )
+    total, startup, defect, counts = summarize_quarantines(quarantine_root)
+    assert (total, startup, defect) == (2, 1, 1)
+    assert counts == {failure: 1 for failure in failures}

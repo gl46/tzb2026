@@ -191,6 +191,20 @@ def main() -> int:
     closed = json_if(PROJECT / "reports" / "m2a-s5-qrm-beta-closed-loop.json")
     shadow = json_if(PROJECT / "reports" / "m2a-s6-shadow-isaac.json")
     lingbot = json_if(PROJECT / "reports" / "m2a-s7-lingbot-prep.json")
+    shadow_status = (
+        "OFFLINE_ONLY"
+        if shadow and shadow.get("status") == "OFFLINE_COUNTERFACTUAL_TOOL_ONLY"
+        else "BLOCKED"
+        if shadow
+        else "NOT_RUN"
+    )
+    lingbot_status = (
+        "PASS"
+        if lingbot and lingbot.get("status") == "PASS_BASELINE_PREP_ONLY"
+        else "PARTIAL"
+        if lingbot
+        else "NOT_RUN"
+    )
     remote_manifest = (
         f"{args.train_data_root}/{args.dataset_version}/manifest.json"
     )
@@ -303,8 +317,8 @@ def main() -> int:
         "qrm_fc_recovery_success_rate": None,
         "same_failure_repeat_rate_delta": None,
         "model_verdict": model_verdict,
-        "shadow_isaac_status": shadow.get("status", "NOT_RUN") if shadow else "NOT_RUN",
-        "lingbot_prep_status": lingbot.get("status", "NOT_RUN") if lingbot else "NOT_RUN",
+        "shadow_isaac_status": shadow_status,
+        "lingbot_prep_status": lingbot_status,
         "oracle_leakage_detected": bool(contract and contract["oracle_leakage_detected"]),
         "teacher_used": False,
         "teacher_states": {

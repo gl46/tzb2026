@@ -230,6 +230,32 @@ def percentile(values: list[float], quantile: float) -> float:
     return float(ordered[index])
 
 
+def summarize_quarantines(
+    quarantine_root: Path,
+) -> tuple[int, int, int, dict[str, int]]:
+    failures: dict[str, int] = {}
+    if quarantine_root.is_dir():
+        for quarantine in sorted(path for path in quarantine_root.iterdir() if path.is_dir()):
+            summary_path = quarantine / "dual-benchmark-summary.json"
+            failure = (
+                json.loads(summary_path.read_text()).get("failure", "UNKNOWN")
+                if summary_path.is_file()
+                else "MISSING_SUMMARY"
+            )
+            failures[failure] = failures.get(failure, 0) + 1
+    startup = sum(
+        count
+        for failure, count in failures.items()
+        if "initialization exited before READY" in failure
+    )
+    software_defect = sum(
+        count
+        for failure, count in failures.items()
+        if "worker evidence is missing" in failure
+    )
+    return sum(failures.values()), startup, software_defect, failures
+
+
 def rank_candidates(profiles: list[dict[str, Any]]) -> list[str]:
     ranked = sorted(
         profiles,
@@ -434,10 +460,13 @@ def main() -> int:
                 }
             )
     quarantine_root = args.output_root / "quarantine"
-    quarantine_count = (
-        sum(path.is_dir() for path in quarantine_root.iterdir())
-        if quarantine_root.is_dir()
-        else 0
+    (
+        quarantine_count,
+        startup_quarantines,
+        software_defect_quarantines,
+        quarantine_failures,
+    ) = summarize_quarantines(
+        quarantine_root
     )
     initialization_means = [
         state["scene_initialization_error_mean_m"] for state in state_reports
@@ -463,7 +492,10 @@ def main() -> int:
             state["coarse_intent_consistent"] for state in state_reports
         )
         / len(state_reports),
-        "infrastructure_attempts_quarantined": quarantine_count,
+        "attempts_quarantined": quarantine_count,
+        "infrastructure_attempts_quarantined": startup_quarantines,
+        "software_defect_attempts_quarantined": software_defect_quarantines,
+        "quarantine_failure_counts": quarantine_failures,
         "collision_evidence_available": False,
         "task_success_evidence_available": False,
         "main_execution_result_consistency_available": False,
@@ -500,7 +532,9 @@ def main() -> int:
                 f"- rollout latency p50/p90: "
                 f"{report['rollout_latency_s_p50']:.3f}/"
                 f"{report['rollout_latency_s_p90']:.3f} s",
-                f"- infrastructure attempts quarantined: {quarantine_count}",
+                f"- attempts quarantined: {quarantine_count} "
+                f"(Isaac startup={startup_quarantines}, "
+                f"fixed software defect={software_defect_quarantines})",
                 "- collision/task-success evidence: unavailable",
                 "- online suitability: false",
                 "",
