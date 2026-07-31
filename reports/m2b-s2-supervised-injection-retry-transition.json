@@ -1,0 +1,45 @@
+{
+  "schema_version": "M2BSupervisedInjectionRetryTransitionV1",
+  "status": "PASS_ONE_SAME_SCENE_ALTERNATE_INJECTION_RESCUE_NOT_RATE_CLAIM",
+  "scene_seed": 4017,
+  "failure_type": "WRONG_OBJECT",
+  "physical_smoke_source_sha256": "7e68c9f18b26bedaa600e642ca59339da9a99739bc2770d8aed3f87c53e98865",
+  "actuation_probe_source_sha256": "1e32fa89c8b1ef403a52f1b2c8326942b72092e6e88f50e8f780eff1c08c6094",
+  "task_target_supervision_entity_fixed": "cylinder_01",
+  "attempts": [
+    {
+      "attempt": 1,
+      "configured_injection_entity": "cylinder_10",
+      "evidence_sha256": "55d3a4235224e8863b701d9d7075a2f6a30708efba30f107cbc1f721a916d884",
+      "public_wrong_object_predicate": false,
+      "recovery_training_eligible": false,
+      "retreat_collision_gate": "PASS"
+    },
+    {
+      "attempt": 2,
+      "configured_injection_entity": "cylinder_04",
+      "evidence_sha256": "f74d531f398e4c264aeddabed9bd7ab449bad1e54fd6e2f4b000cb274f3dfacf",
+      "public_wrong_object_predicate": true,
+      "observed_predicates": [
+        "carried_target_match=false"
+      ],
+      "public_regrasp_predicates": [
+        "grasped=true",
+        "lifted=true"
+      ],
+      "regrasp_attached_entity": "cylinder_01",
+      "recovery_training_eligible": true,
+      "retreat_collision_gate": "PASS"
+    }
+  ],
+  "policy_input_source": "PUBLIC_RGBD_AND_ROBOT_PROPRIOCEPTION",
+  "injection_schedule_scope": "SUPERVISION_ONLY_NOT_RUNTIME_ACTION_MAPPING",
+  "privileged_truth_policy_input": false,
+  "teacher_used": false,
+  "teacher_kill_rule_events": [],
+  "limitations": [
+    "This is one same-scene retry transition and is not an acceptance-rate estimate.",
+    "Entity IDs configure and audit the physical failure injection only; they are not policy inputs.",
+    "The task target was held fixed; only the same-color non-target injection candidate changed."
+  ]
+}

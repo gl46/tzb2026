@@ -30,7 +30,7 @@
   "physical_failure_recovery_status": "PASS_PUBLIC_FAILURES_AND_RECOVERIES",
   "physical_runtime_gate_status": "PASS_PHYSICAL_POST_EXECUTION_RECEIPTS_NOT_FORMAL_MAPPING",
   "physical_runtime_post_execution_gate_rate": 1.0,
-  "physical_runtime_receipts_complete_and_passing": 6,
+  "physical_runtime_receipts_complete_and_passing": 9,
   "prospective_runtime_planning_checks_complete": false,
   "residual_pairs_valid": 0,
   "residual_pilot_pairs": 24,
