@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-from m2b.run_physical_failure_smoke import accepted
+import json
+
+from m2b.run_physical_failure_smoke import accepted, retained_attempt_record
 
 
 def test_empty_grasp_smoke_requires_failure_and_real_regrasp() -> None:
@@ -86,3 +88,35 @@ def test_public_rgbd_smoke_requires_public_failure_and_recovery_gates() -> None:
     assert accepted(
         empty, "EMPTY_GRASP", public_rgbd_required=True
     ) is False
+
+
+def test_restart_retains_hash_bound_accepted_attempt(tmp_path) -> None:
+    output = tmp_path / "attempt-01"
+    output.mkdir()
+    payload = {
+        "status": "PASS",
+        "m2b_injection_pass": True,
+        "m2b_empty_grasp_injection": {
+            "failure_type": "EMPTY_GRASP",
+            "physical_state_passed": True,
+            "training_eligible": True,
+        },
+        "m2b_recovery": {
+            "empty_grasp": {
+                "physical_regrasp_and_lift_passed": True,
+                "training_eligible": True,
+            }
+        },
+    }
+    evidence = output / "actuation-probe.json"
+    evidence.write_text(json.dumps(payload))
+    record = retained_attempt_record(
+        output,
+        failure="EMPTY_GRASP",
+        attempt=1,
+        public_rgbd_required=True,
+    )
+    assert record is not None
+    assert record["accepted"] is True
+    assert record["resumed_existing_attempt"] is True
+    assert len(record["evidence_sha256"]) == 64

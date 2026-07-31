@@ -35,7 +35,11 @@ def command(
             "--m2b-task-target-object",
             args.wrong_object_task_target,
         ],
-        "RELEASE_FAILURE": ["--m2b-inject-release-failure"],
+        "RELEASE_FAILURE": [
+            "--m2b-inject-release-failure",
+            "--m2b-release-follow-delta-z-m",
+            str(args.release_follow_delta_z_m),
+        ],
     }[failure]
     if args.capture_public_rgbd:
         flags.extend(
@@ -80,9 +84,9 @@ def command(
         "--stage",
         f"/workspace/stage/{args.stage.name}",
         "--sdf",
-        "/workspace/source/scene-3000.sdf",
+        f"/workspace/source/{args.sdf.name}",
         "--supervision",
-        "/workspace/source/scene-3000.supervision.json",
+        f"/workspace/source/{args.supervision.name}",
         "--urdf",
         "/workspace/source/panda_controlled.urdf",
         "--output",
@@ -161,17 +165,60 @@ def accepted(
     return result and evidence.get("training_eligible") is False
 
 
+def retained_attempt_record(
+    output: Path,
+    *,
+    failure: str,
+    attempt: int,
+    public_rgbd_required: bool,
+) -> dict[str, Any] | None:
+    if not output.exists():
+        return None
+    evidence_path = output / "actuation-probe.json"
+    payload = (
+        json.loads(evidence_path.read_text())
+        if evidence_path.is_file()
+        else None
+    )
+    return {
+        "failure_type": failure,
+        "attempt": attempt,
+        "returncode": None,
+        "elapsed_s": None,
+        "evidence": str(evidence_path),
+        "evidence_sha256": (
+            sha256(evidence_path) if evidence_path.is_file() else None
+        ),
+        "accepted": bool(
+            payload
+            and accepted(
+                payload,
+                failure,
+                public_rgbd_required=public_rgbd_required,
+            )
+        ),
+        "resumed_existing_attempt": True,
+    }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--project-root", required=True, type=Path)
     parser.add_argument("--source-root", required=True, type=Path)
     parser.add_argument("--stage", required=True, type=Path)
+    parser.add_argument("--sdf", required=True, type=Path)
+    parser.add_argument("--supervision", required=True, type=Path)
     parser.add_argument("--output-root", required=True, type=Path)
     parser.add_argument("--gpu", type=int, default=0)
     parser.add_argument("--target-object", default="cylinder_04")
     parser.add_argument("--public-target-object", default="cylinder_04")
     parser.add_argument("--wrong-object-task-target", default="cylinder_07")
     parser.add_argument("--contact-centerline-m", default="0.120")
+    parser.add_argument(
+        "--release-follow-delta-z-m",
+        type=float,
+        default=0.08,
+    )
     parser.add_argument(
         "--image", default="nvcr.io/nvidia/isaac-sim:6.0.1"
     )
@@ -186,6 +233,13 @@ def main() -> int:
         help="Comma-separated subset for restart-safe targeted reruns.",
     )
     args = parser.parse_args()
+    if not 0.03 <= args.release_follow_delta_z_m <= 0.10:
+        parser.error("--release-follow-delta-z-m must be in [0.03, 0.10]")
+    for source in (args.sdf, args.supervision):
+        if source.parent != args.source_root or not source.is_file():
+            parser.error(
+                f"scene source must be a direct file under --source-root: {source}"
+            )
     failures = tuple(
         failure.strip() for failure in args.failures.split(",") if failure.strip()
     )
@@ -198,8 +252,21 @@ def main() -> int:
         accepted_record = None
         for attempt in range(1, args.max_attempts + 1):
             output = args.output_root / failure.lower() / f"attempt-{attempt:02d}"
+            record = retained_attempt_record(
+                output,
+                failure=failure,
+                attempt=attempt,
+                public_rgbd_required=args.capture_public_rgbd,
+            )
+            if record is not None:
+                results.append(record)
+                if record["accepted"]:
+                    accepted_record = record
+                    break
+                continue
             output.mkdir(parents=True, exist_ok=False)
             output.chmod(0o777)
+            evidence_path = output / "actuation-probe.json"
             started = time.monotonic()
             completed = subprocess.run(
                 command(
@@ -216,7 +283,6 @@ def main() -> int:
             (output / "console.log").write_text(
                 completed.stdout + completed.stderr
             )
-            evidence_path = output / "actuation-probe.json"
             payload = (
                 json.loads(evidence_path.read_text())
                 if evidence_path.is_file()
@@ -239,6 +305,7 @@ def main() -> int:
                         public_rgbd_required=args.capture_public_rgbd,
                     )
                 ),
+                "resumed_existing_attempt": False,
             }
             results.append(record)
             if record["accepted"]:
@@ -259,9 +326,12 @@ def main() -> int:
             if accepted_failures == set(failures)
             else "PARTIAL"
         ),
-        "training_eligible": False,
+        "training_eligible": bool(
+            args.capture_public_rgbd
+            and accepted_failures == set(failures)
+        ),
         "reason": (
-            "WRONG_OBJECT target reassociation/regrasp remains pending"
+            "accepted physical+public failure/recovery evidence; Dataset V2 packaging remains separate"
             if args.capture_public_rgbd
             else "public RGB-D predicates are not captured by this probe"
         ),

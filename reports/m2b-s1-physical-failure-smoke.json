@@ -4,20 +4,20 @@
     "RELEASE_FAILURE",
     "WRONG_OBJECT"
   ],
-  "attempt_count": 5,
+  "attempt_count": 3,
   "dataset_v2_episodes_admitted": 0,
   "empty_grasp": {
     "attachment_created": false,
     "bilateral_grasp_observed": false,
     "close_command_issued": true,
-    "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2b/public-rgbd-smoke-20260731-v7/empty_grasp/attempt-01/actuation-probe.json",
-    "evidence_sha256": "352dde5160443e61f611a15b7b9a0830fc9c54680d1e28befbf855dbf97f85f2",
-    "hand_lift_norm_m": 0.04902093092696843,
+    "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2b/failure-pilot-scene4000-empty-v1/empty_grasp/attempt-01/actuation-probe.json",
+    "evidence_sha256": "f06eb8adc08eb7a17f3579cabffe7210949f31d5b94212a0176b43b2db69a607",
+    "hand_lift_norm_m": 0.04915446754999699,
     "physical_regrasp_and_lift_passed": true,
     "public_failure_predicates": {
       "carried_public_track_id": null,
       "measurements_m": {
-        "task_target_motion_m": 0.025107408430476926
+        "task_target_motion_m": 0.014977278929432592
       },
       "predicates": [
         "grasped=false",
@@ -26,13 +26,13 @@
       "schema_version": "PublicFailurePredicateResultV2",
       "simulator_truth_used": false,
       "source": "PUBLIC_RGBD_TEMPORAL_TRACKS_ONLY",
-      "task_target_track_id": "track-54b8ce59"
+      "task_target_track_id": "track-30a06a3e"
     },
     "public_recovery_predicates": {
-      "carried_public_track_id": "track-54b8ce59",
+      "carried_public_track_id": "track-30a06a3e",
       "measurements_m": {
-        "hand_vertical_lift_m": 0.14912694692611694,
-        "target_hand_xy_error_m": 0.024597526315255292
+        "hand_vertical_lift_m": 0.14386701583862305,
+        "target_hand_xy_error_m": 0.010837729157571797
       },
       "predicates": [
         "grasped=true",
@@ -41,9 +41,9 @@
       "schema_version": "PublicFailurePredicateResultV2",
       "simulator_truth_used": false,
       "source": "PUBLIC_RGBD_AND_ROBOT_PROPRIOCEPTION",
-      "task_target_track_id": "track-54b8ce59"
+      "task_target_track_id": "track-30a06a3e"
     },
-    "target_lift_delta_m": 5.567533282121839e-07,
+    "target_lift_delta_m": 2.9802322387695312e-08,
     "training_eligible": true
   },
   "failure_recovery_evidence_training_eligible": true,
@@ -54,15 +54,15 @@
   "privileged_truth_policy_input": false,
   "release_failure": {
     "attachment_remained_after_release": true,
-    "carried_follow_delta_m": 0.02903130241493227,
-    "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2b/public-rgbd-smoke-20260731-v8-release/release_failure/attempt-01/actuation-probe.json",
-    "evidence_sha256": "6811fa90f719922215484f855f43c801e77dbf2902503c6f4749cba27c3ae00f",
-    "follow_error_m": 0.0008552570701002215,
+    "carried_follow_delta_m": 0.07902897601051521,
+    "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2b/failure-pilot-scene4000-release-v2/release_failure/attempt-01/actuation-probe.json",
+    "evidence_sha256": "2f892d7275e822c6b9644b0f2c4a65f459e05afd4d15df581e4afcb805dfae5d",
+    "follow_error_m": 0.0010637603564417643,
     "public_failure_predicates": {
-      "carried_public_track_id": "track-54b8ce59",
+      "carried_public_track_id": "track-30a06a3e",
       "measurements_m": {
-        "hand_follow_motion_m": 0.029034155840690145,
-        "nearest_release_site_track_error_m": 0.21424424002544895
+        "hand_follow_motion_m": 0.07902822295367522,
+        "nearest_release_site_track_error_m": 0.0698649565366716
       },
       "predicates": [
         "released=false"
@@ -73,10 +73,10 @@
       "task_target_track_id": null
     },
     "public_recovery_predicates": {
-      "carried_public_track_id": "track-54b8ce59",
+      "carried_public_track_id": "track-30a06a3e",
       "measurements_m": {
-        "hand_object_relative_motion_m": 0.23943315194510845,
-        "nearest_release_site_xy_error_m": 0.00568610352963078
+        "hand_object_relative_motion_m": 0.27738801188653633,
+        "nearest_release_site_xy_error_m": 0.0003464878368899698
       },
       "predicates": [
         "released=true"
@@ -91,9 +91,9 @@
     "training_eligible": true
   },
   "remote_roots": [
-    "/var/tmp/xh-data/isaac-industrial/m2b/public-rgbd-smoke-20260731-v7",
-    "/var/tmp/xh-data/isaac-industrial/m2b/public-rgbd-smoke-20260731-v8-release",
-    "/var/tmp/xh-data/isaac-industrial/m2b/public-rgbd-smoke-20260731-v10-wrong-regrasp"
+    "/var/tmp/xh-data/isaac-industrial/m2b/failure-pilot-scene4000-empty-v1",
+    "/var/tmp/xh-data/isaac-industrial/m2b/failure-pilot-scene4000-release-v2",
+    "/var/tmp/xh-data/isaac-industrial/m2b/failure-pilot-scene4025-wrong-v1"
   ],
   "schema_version": "M2BS1PhysicalFailureSmokeV1",
   "status": "PASS_PUBLIC_FAILURES_AND_RECOVERIES",
@@ -104,13 +104,13 @@
     "attached_entity_id": "cylinder_04",
     "broker_attached_actual_contact": true,
     "contacted_entity_id": "cylinder_04",
-    "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2b/public-rgbd-smoke-20260731-v10-wrong-regrasp/wrong_object/attempt-01/actuation-probe.json",
-    "evidence_sha256": "6f32183edac71608a1911c004259e0e4db0c1bfc3117c1eaf21907b500112d58",
+    "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2b/failure-pilot-scene4025-wrong-v1/wrong_object/attempt-01/actuation-probe.json",
+    "evidence_sha256": "2b7ee1cce3301d052e87cde29ba6e2897a496e2866832f98d4be99950b0b105f",
     "public_failure_predicates": {
-      "carried_public_track_id": "track-54b8ce59",
+      "carried_public_track_id": "track-e91f94dc",
       "measurements_m": {
-        "hand_vertical_lift_m": 0.14878255128860474,
-        "target_hand_xy_error_m": 0.02446269341975181
+        "hand_vertical_lift_m": 0.14879250526428223,
+        "target_hand_xy_error_m": 0.01034098178529803
       },
       "predicates": [
         "carried_target_match=false"

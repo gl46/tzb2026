@@ -5,9 +5,9 @@
     "RELEASE_FAILURE": 1,
     "WRONG_OBJECT": 1
   },
-  "output_bytes": 82354,
+  "output_bytes": 61427,
   "output_path": "artifacts/m2b/failure-evidence-pilot.jsonl",
-  "output_sha256": "bab211039d7afc717983df19fbb826310e9b93d730be1d4c2c7d4dfb49e8323b",
+  "output_sha256": "2babe64afdacfc2f9adc6f6a3054237cfb171f49d44121b230932e35cfcfbac6",
   "privileged_truth_policy_input": false,
   "reason": "complete model/runtime action trajectories are not logged by the calibration probe",
   "records_valid": 3,

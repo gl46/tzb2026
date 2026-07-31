@@ -3,7 +3,7 @@
   "nonzero_pair_count": 24,
   "online_policy_truth_input": false,
   "output_path": "artifacts/m2b/residual-pair-pilot.jsonl",
-  "output_sha256": "86a474f5d3b9b2510e753e5ad7719b36b748112d41eb28ebd4a3f1bfea94cd17",
+  "output_sha256": "896cb65ac203692d1287202b35859aba5f4f68329510c60994b114edfdfb40f8",
   "reason": "pilot pairs share one physical correction anchor; independent perturbation/correction executions remain required",
   "residual_absolute_max": 0.015,
   "schema_version": "M2BResidualPairPilotReportV1",

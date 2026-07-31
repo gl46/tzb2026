@@ -145,6 +145,15 @@ def parse_args() -> tuple[argparse.Namespace, list[str]]:
         ),
     )
     parser.add_argument(
+        "--m2b-release-follow-delta-z-m",
+        type=float,
+        default=0.03,
+        help=(
+            "Training-injection-only attached follow motion used to make the "
+            "release predicate observable above public RGB-D uncertainty."
+        ),
+    )
+    parser.add_argument(
         "--m2b-capture-public-rgbd",
         action="store_true",
         help=(
@@ -232,6 +241,8 @@ elif (
     )
 if not 90 <= ARGS.gripper_close_steps <= 360:
     raise ValueError("gripper close settling window must be in [90, 360] steps")
+if not 0.03 <= ARGS.m2b_release_follow_delta_z_m <= 0.10:
+    raise ValueError("M2B release follow delta must be in [0.03, 0.10] m")
 if (
     not ARGS.free_close_diagnostic
     and ARGS.gripper_close_steps != PRODUCTION_GRIPPER_EVIDENCE_STEPS
@@ -3063,7 +3074,10 @@ def main() -> int:
         attachment_remained = stage.GetPrimAtPath(ATTACH_JOINT_PATH).IsValid()
         release_follow_goal = np.asarray(
             release_hand_before, dtype=np.float32
-        ) + np.asarray([0.0, 0.0, 0.03], dtype=np.float32)
+        ) + np.asarray(
+            [0.0, 0.0, ARGS.m2b_release_follow_delta_z_m],
+            dtype=np.float32,
+        )
         release_follow_motion = _step_pose(
             robot,
             release_follow_goal,
@@ -3181,7 +3195,6 @@ def main() -> int:
         assert m2b_public_after_lift is not None
         assert m2b_task_target_track_id is not None
         assert m2b_public_pre_detach is not None
-        assert m2b_carried_public_track_id is not None
         m2b_public_after_recovery = _capture_m2b_public_rgbd(
             m2b_public_rgbd,
             label="after_recovery_retreat",
@@ -3202,6 +3215,7 @@ def main() -> int:
                 task_target_track_id=m2b_task_target_track_id,
             )
         if ARGS.m2b_inject_release_failure:
+            assert m2b_carried_public_track_id is not None
             m2b_public_release_success = (
                 infer_occlusion_aware_release_success_predicates(
                     m2b_public_before,
