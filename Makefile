@@ -1,7 +1,7 @@
 PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,python3)
 export PYTHONPATH := src
 
-.PHONY: doctor test validate sim-smoke constrained-pick-place empty-grasp-failures record-constrained-episode moveit-plan-smoke baseline teacher-audit bakeoff-prepare m0-report m0-audit status m2a-doctor isaac-contract isaac-benchmark isaac-pilot isaac-validate isaac-sync qrm-beta-train qrm-beta-eval qrm-beta-closed-loop shadow-isaac lingbot-prep m2a-status
+.PHONY: doctor test validate sim-smoke constrained-pick-place empty-grasp-failures record-constrained-episode moveit-plan-smoke baseline teacher-audit bakeoff-prepare m0-report m0-audit status m2a-doctor isaac-contract isaac-benchmark isaac-pilot isaac-validate isaac-sync qrm-beta-train qrm-beta-eval qrm-beta-closed-loop shadow-isaac lingbot-prep m2a-status m2b-audit m2b-export-schemas m2b-generate-failures m2b-status
 doctor:
 	$(PYTHON) -m xh_agent.diagnostics.doctor --local --output reports/hardware-local.json
 	$(PYTHON) -m xh_agent.diagnostics.doctor --remote node2 --user gl --output reports/hardware-remote-node2.json
@@ -67,3 +67,12 @@ lingbot-prep:
 		--limit "$${LEROBOT_SAMPLE_SIZE:-30}"
 m2a-status:
 	$(PYTHON) scripts/m2a_status.py
+m2b-audit:
+	@test -n "$${M2A_DATASET_ROOT}" || (echo "M2A_DATASET_ROOT is required" >&2; exit 2)
+	$(PYTHON) scripts/m2b/audit_m2a.py --dataset-root "$${M2A_DATASET_ROOT}"
+m2b-export-schemas:
+	$(PYTHON) scripts/m2b/export_failure_rich_schemas.py
+m2b-generate-failures:
+	bash scripts/m2b/run_remote_failure_batch.sh
+m2b-status:
+	$(PYTHON) scripts/m2b/status.py

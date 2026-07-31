@@ -1,0 +1,26 @@
+{
+  "blockers": [
+    "Dataset V2 has not met the limited-scale 50/class minimum",
+    "nondegenerate successful residual pairs are not packaged",
+    "two-seed A100 NoFC/FC training has not run",
+    "matched B0/QRM Isaac closed-loop evaluation has not run"
+  ],
+  "closed_loop_status": "NOT_RUN",
+  "dataset_v2_episodes_valid": 0,
+  "goal_complete": false,
+  "m2a_freeze_status": "PASS",
+  "next_command": "make m2b-generate-failures",
+  "physical_failure_classes": [
+    "EMPTY_GRASP",
+    "RELEASE_FAILURE",
+    "WRONG_OBJECT"
+  ],
+  "physical_failure_recovery_status": "PASS_PUBLIC_FAILURES_AND_RECOVERIES",
+  "residual_pairs_valid": 0,
+  "runtime_mapping_baseline_status": "MAPPING_INTEGRATION_ABSENT",
+  "schema_version": "M2BStatusV1",
+  "teacher_kill_rule_events": [],
+  "teacher_used": false,
+  "training_status": "NOT_RUN",
+  "world_model_mainline_replaced": false
+}
