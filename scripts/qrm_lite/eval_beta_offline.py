@@ -13,7 +13,10 @@ import numpy as np
 
 from xh_agent.policy.qrm_lite.context import build_context_vector
 from xh_agent.policy.qrm_lite.contracts import FailureContextV1, QRMTrainingSampleV1
-from xh_agent.policy.qrm_lite.models_q012 import FormalModelId, build_formal_model
+from xh_agent.policy.qrm_lite.models_q012 import (
+    FormalModelId,
+    load_formal_checkpoint,
+)
 
 
 def load_samples(path: Path, split: str) -> list[QRMTrainingSampleV1]:
@@ -27,12 +30,7 @@ def load_samples(path: Path, split: str) -> list[QRMTrainingSampleV1]:
 
 
 def load_model(checkpoint: Path):
-    payload = np.load(checkpoint)
-    model = build_formal_model(str(payload["model_id"]))
-    for name in ("w1", "b1", "w2", "b2"):
-        setattr(model.coarse, name, np.asarray(payload[f"coarse_{name}"]))
-        setattr(model.mlp, name, np.asarray(payload[f"mlp_{name}"]))
-    return model
+    return load_formal_checkpoint(str(checkpoint))
 
 
 def classification_metrics(y_true: list[str], y_pred: list[str]) -> dict[str, Any]:
@@ -206,4 +204,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

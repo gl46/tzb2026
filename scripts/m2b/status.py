@@ -30,6 +30,9 @@ def main() -> int:
     mapping = load_optional(
         args.report_dir / "m2b-s0-runtime-mapping-audit.json"
     )
+    mapping_offline = load_optional(
+        args.report_dir / "m2b-s5-runtime-mapping-offline.json"
+    )
     dataset = load_optional(args.report_dir / "m2b-s2-dataset-v2.json")
     evidence_pilot = load_optional(
         args.report_dir / "m2b-s2-failure-evidence-pilot.json"
@@ -47,6 +50,14 @@ def main() -> int:
         blockers.append("Dataset V2 has not met the limited-scale 50/class minimum")
     if not residual or int(residual.get("valid_pairs", 0)) <= 0:
         blockers.append("nondegenerate successful residual pairs are not packaged")
+    if (
+        not mapping_offline
+        or mapping_offline.get("runtime_mapping_rate") is None
+        or float(mapping_offline["runtime_mapping_rate"]) < 0.95
+    ):
+        blockers.append(
+            "runtime mapping still requires Isaac IK/collision/safety dry-runs"
+        )
     if not training:
         blockers.append("two-seed A100 NoFC/FC training has not run")
     if not closed_loop:
@@ -85,6 +96,19 @@ def main() -> int:
         ),
         "runtime_mapping_baseline_status": (
             mapping.get("status") if mapping else "MISSING"
+        ),
+        "runtime_mapping_offline_status": (
+            mapping_offline.get("status") if mapping_offline else "NOT_RUN"
+        ),
+        "runtime_structural_mapping_rate": (
+            mapping_offline.get("structural_mapping_rate")
+            if mapping_offline
+            else None
+        ),
+        "runtime_mapping_rate": (
+            mapping_offline.get("runtime_mapping_rate")
+            if mapping_offline
+            else None
         ),
         "training_status": training.get("status") if training else "NOT_RUN",
         "closed_loop_status": (

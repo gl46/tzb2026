@@ -3,27 +3,112 @@ model_output_schema: CoarseIntentV1
 fallback_action: B0_SAFE_HOLD
 minimum_confidence: 0.0
 skills:
-  APPROACH:
-    aliases: []
-    alias_parameters: {}
-    runtime_action: B0_PUBLIC_GEOMETRY_APPROACH
-    required_parameters: [target_track_id]
-    optional_parameters: [grasp_family]
-    coordinate_frame: world
-    units: m
-    supported_phases: [OBSERVE, APPROACH, RECOVERY]
-    residual_allowed: false
-  REOBSERVE:
+  OBSERVE:
+    model_class_ids: [coarse.skill.OBSERVE]
     aliases: []
     alias_parameters: {}
     runtime_action: HOLD_AND_CAPTURE_PUBLIC_RGBD
     required_parameters: []
     optional_parameters: []
+    parameter_enums: {}
+    parameter_ranges: {}
+    coordinate_frame: policy_rgbd_optical
+    units: none
+    supported_phases: [OBSERVE, APPROACH, GRASP, LIFT, MOVE, PLACE, RELEASE, RECOVERY]
+    residual_allowed: false
+  APPROACH:
+    model_class_ids: [coarse.skill.APPROACH]
+    aliases: []
+    alias_parameters: {}
+    runtime_action: B0_PUBLIC_GEOMETRY_APPROACH
+    required_parameters: [target_track_id]
+    optional_parameters: [grasp_family]
+    parameter_enums: {grasp_family: [top_down, side]}
+    parameter_ranges: {}
+    coordinate_frame: world
+    units: m
+    supported_phases: [OBSERVE, APPROACH, RECOVERY]
+    residual_allowed: false
+  GRASP:
+    model_class_ids: [coarse.skill.GRASP]
+    aliases: []
+    alias_parameters: {}
+    runtime_action: B0_PUBLIC_GEOMETRY_GRASP
+    required_parameters: [target_track_id, grasp_family]
+    optional_parameters: []
+    parameter_enums: {grasp_family: [top_down, side]}
+    parameter_ranges: {}
+    coordinate_frame: world
+    units: m_rad
+    supported_phases: [APPROACH, GRASP, RECOVERY]
+    residual_allowed: false
+  LIFT:
+    model_class_ids: [coarse.skill.LIFT]
+    aliases: []
+    alias_parameters: {}
+    runtime_action: B0_CARTESIAN_LIFT
+    required_parameters: [target_track_id]
+    optional_parameters: [lift_height_m]
+    parameter_enums: {}
+    parameter_ranges: {lift_height_m: [0.02, 0.20]}
+    coordinate_frame: world
+    units: m
+    supported_phases: [GRASP, LIFT, RECOVERY]
+    residual_allowed: false
+  MOVE:
+    model_class_ids: [coarse.skill.MOVE]
+    aliases: []
+    alias_parameters: {}
+    runtime_action: B0_PUBLIC_GEOMETRY_MOVE
+    required_parameters: [target_track_id]
+    optional_parameters: [destination]
+    parameter_enums: {}
+    parameter_ranges: {}
+    coordinate_frame: world
+    units: m_rad
+    supported_phases: [LIFT, MOVE, RECOVERY]
+    residual_allowed: false
+  PLACE:
+    model_class_ids: [coarse.skill.PLACE]
+    aliases: []
+    alias_parameters: {}
+    runtime_action: B0_PUBLIC_GEOMETRY_PLACE
+    required_parameters: [target_track_id]
+    optional_parameters: [destination]
+    parameter_enums: {}
+    parameter_ranges: {}
+    coordinate_frame: world
+    units: m_rad
+    supported_phases: [MOVE, PLACE, RECOVERY]
+    residual_allowed: false
+  RELEASE:
+    model_class_ids: [coarse.skill.RELEASE]
+    aliases: []
+    alias_parameters: {}
+    runtime_action: B0_RELEASE
+    required_parameters: [target_track_id]
+    optional_parameters: [open_width_m]
+    parameter_enums: {}
+    parameter_ranges: {open_width_m: [0.0, 0.08]}
+    coordinate_frame: world
+    units: m
+    supported_phases: [PLACE, RELEASE, RECOVERY]
+    residual_allowed: false
+  REOBSERVE:
+    model_class_ids: [coarse.skill.REOBSERVE, coarse.recovery.REOBSERVE]
+    aliases: []
+    alias_parameters: {}
+    runtime_action: HOLD_AND_CAPTURE_PUBLIC_RGBD
+    required_parameters: []
+    optional_parameters: []
+    parameter_enums: {}
+    parameter_ranges: {}
     coordinate_frame: policy_rgbd_optical
     units: none
     supported_phases: [OBSERVE, APPROACH, GRASP, LIFT, MOVE, PLACE, RELEASE, RECOVERY]
     residual_allowed: false
   REGRASP:
+    model_class_ids: [coarse.skill.REGRASP, coarse.recovery.RETRY_TOP, coarse.recovery.ALTERNATE_OBLIQUE, coarse.recovery.ALTERNATE_SIDE]
     aliases: [RETRY_TOP, ALTERNATE_OBLIQUE, ALTERNATE_SIDE]
     alias_parameters:
       RETRY_TOP: {grasp_family: top_down}
@@ -32,46 +117,60 @@ skills:
     runtime_action: B0_PUBLIC_GEOMETRY_REGRASP
     required_parameters: [target_track_id, grasp_family]
     optional_parameters: []
+    parameter_enums: {grasp_family: [top_down, oblique, side]}
+    parameter_ranges: {}
     coordinate_frame: world
     units: m_rad
     supported_phases: [RECOVERY]
     residual_allowed: false
   SAFE_PLACE_NON_TARGET:
+    model_class_ids: [coarse.skill.SAFE_PLACE_NON_TARGET]
     aliases: [SafePlaceNonTarget]
     alias_parameters: {}
     runtime_action: B0_SAFE_PLACE_NON_TARGET
     required_parameters: [target_track_id]
     optional_parameters: [destination]
+    parameter_enums: {}
+    parameter_ranges: {}
     coordinate_frame: world
     units: m_rad
     supported_phases: [RECOVERY]
     residual_allowed: false
   REASSOCIATE_TARGET:
+    model_class_ids: [coarse.skill.REASSOCIATE_TARGET]
     aliases: [ReassociateTarget]
     alias_parameters: {}
     runtime_action: PUBLIC_TRACK_REASSOCIATION
     required_parameters: [target_track_id]
     optional_parameters: []
+    parameter_enums: {}
+    parameter_ranges: {}
     coordinate_frame: world
     units: none
     supported_phases: [RECOVERY]
     residual_allowed: false
   RETRY_RELEASE:
+    model_class_ids: [coarse.skill.RETRY_RELEASE]
     aliases: [RetryRelease]
     alias_parameters: {}
     runtime_action: B0_RELEASE_RETRY
     required_parameters: [target_track_id]
     optional_parameters: [open_width_m]
+    parameter_enums: {}
+    parameter_ranges: {open_width_m: [0.0, 0.08]}
     coordinate_frame: world
     units: m
     supported_phases: [RELEASE, RECOVERY]
     residual_allowed: false
   STOP:
+    model_class_ids: [coarse.skill.STOP, coarse.recovery.ABORT_SAFE]
     aliases: [ABORT_SAFE]
     alias_parameters: {}
     runtime_action: B0_SAFE_HOLD
     required_parameters: []
     optional_parameters: []
+    parameter_enums: {}
+    parameter_ranges: {}
     coordinate_frame: world
     units: none
     supported_phases: [OBSERVE, APPROACH, GRASP, LIFT, MOVE, PLACE, RELEASE, RECOVERY]

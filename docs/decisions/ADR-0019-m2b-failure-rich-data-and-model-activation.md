@@ -31,6 +31,15 @@ rejected by an unconditional integration gate before B0 executed.
 7. Compare B0, NoFC, FC, and MLP only on matched unseen scene/failure seeds.
 8. Flow and online Shadow remain disabled. No Teacher participates.
 
+## Checkpoint compatibility addendum
+
+M2B adds explicit recovery skills to the coarse label and current-stage
+vocabularies.  This is a named `M2B_Q012_V1` architecture revision.  Frozen
+M2A checkpoints remain loadable only through their exact
+`M2A_BETA1_LEGACY_V1` 110-input/70-output layout; tensors may not be silently
+padded, truncated, or reinterpreted.  New checkpoints record their schema and
+architecture revision.
+
 ## Runtime boundary
 
 The model may select a registered coarse skill and bounded parameters. Public

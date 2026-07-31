@@ -20,7 +20,23 @@ def _finite_vec(values: list[float], size: int, fill: float = 0.0) -> np.ndarray
     return arr
 
 
-_SKILL_VOCAB = [
+LEGACY_BETA1_SKILL_VOCAB = [
+    "OBSERVE",
+    "APPROACH",
+    "GRASP",
+    "LIFT",
+    "MOVE",
+    "PLACE",
+    "RELEASE",
+    "REGRASP",
+    "REOBSERVE",
+    "STOP",
+    "BACKOFF",
+    "ASK_CLARIFICATION",
+    "UNKNOWN",
+]
+
+M2B_SKILL_VOCAB = [
     "OBSERVE",
     "APPROACH",
     "GRASP",
@@ -40,15 +56,20 @@ _SKILL_VOCAB = [
 ]
 
 
-def encode_robot_state(obs: QRMObservationV1, joint_dim: int = 8) -> np.ndarray:
+def encode_robot_state(
+    obs: QRMObservationV1,
+    joint_dim: int = 8,
+    *,
+    skill_vocab: list[str] | tuple[str, ...] = M2B_SKILL_VOCAB,
+) -> np.ndarray:
     joints = _finite_vec(obs.joint_position, joint_dim)
     ee = _finite_vec(obs.end_effector_pose_base, 7)
     grip = np.asarray([obs.gripper_state], dtype=np.float64)
     skill = (obs.current_skill_stage or "UNKNOWN").upper()
-    if skill not in _SKILL_VOCAB:
+    if skill not in skill_vocab:
         skill = "UNKNOWN"
-    skill_oh = np.zeros((len(_SKILL_VOCAB),), dtype=np.float64)
-    skill_oh[_SKILL_VOCAB.index(skill)] = 1.0
+    skill_oh = np.zeros((len(skill_vocab),), dtype=np.float64)
+    skill_oh[skill_vocab.index(skill)] = 1.0
     return np.concatenate([joints, ee, grip, skill_oh], axis=0)
 
 
@@ -93,9 +114,14 @@ def build_context_vector(
     joint_dim: int = 8,
     history_len: int = 4,
     action_dim: int = 10,
+    skill_vocab: list[str] | tuple[str, ...] = M2B_SKILL_VOCAB,
 ) -> np.ndarray:
     parts = [
-        encode_robot_state(obs, joint_dim=joint_dim),
+        encode_robot_state(
+            obs,
+            joint_dim=joint_dim,
+            skill_vocab=skill_vocab,
+        ),
         encode_history(obs, history_len=history_len, action_dim=action_dim),
         encode_failure_context(obs.failure_context),
     ]
@@ -113,6 +139,7 @@ def context_dim(
     history_len: int = 4,
     action_dim: int = 10,
     n_failure_types: int | None = None,
+    skill_vocab: list[str] | tuple[str, ...] = M2B_SKILL_VOCAB,
 ) -> int:
     n = n_failure_types or len(FailureType)
     # joints + ee(7) + grip(1) + skill one-hot + history + failure one-hot/extras
@@ -121,7 +148,7 @@ def context_dim(
         + joint_dim
         + 7
         + 1
-        + len(_SKILL_VOCAB)
+        + len(skill_vocab)
         + history_len * (7 + action_dim)
         + n
         + 3

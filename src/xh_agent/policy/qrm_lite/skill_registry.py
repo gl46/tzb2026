@@ -20,11 +20,13 @@ class StrictModel(BaseModel):
 class MappingRejection(str, Enum):
     UNKNOWN_SKILL_ENUM = "UNKNOWN_SKILL_ENUM"
     ALIAS_OR_CASE_MISMATCH = "ALIAS_OR_CASE_MISMATCH"
+    MODEL_CLASS_SKILL_MISMATCH = "MODEL_CLASS_SKILL_MISMATCH"
     SCHEMA_VERSION_MISMATCH = "SCHEMA_VERSION_MISMATCH"
     MISSING_TARGET_TRACK = "MISSING_TARGET_TRACK"
     STALE_TRACK = "STALE_TRACK"
     UNSUPPORTED_PARAMETER = "UNSUPPORTED_PARAMETER"
     MISSING_PARAMETER = "MISSING_PARAMETER"
+    INVALID_PARAMETER_VALUE = "INVALID_PARAMETER_VALUE"
     UNSUPPORTED_PHASE = "UNSUPPORTED_PHASE"
     COORDINATE_FRAME_MISMATCH = "COORDINATE_FRAME_MISMATCH"
     UNIT_MISMATCH = "UNIT_MISMATCH"
@@ -36,11 +38,14 @@ class MappingRejection(str, Enum):
 
 
 class RuntimeSkillSpecV1(StrictModel):
+    model_class_ids: list[str] = Field(min_length=1)
     aliases: list[str] = Field(default_factory=list)
     alias_parameters: dict[str, dict[str, Any]] = Field(default_factory=dict)
     runtime_action: str
     required_parameters: list[str] = Field(default_factory=list)
     optional_parameters: list[str] = Field(default_factory=list)
+    parameter_enums: dict[str, list[Any]] = Field(default_factory=dict)
+    parameter_ranges: dict[str, tuple[float, float]] = Field(default_factory=dict)
     coordinate_frame: str
     units: str
     supported_phases: list[str] = Field(min_length=1)
@@ -53,6 +58,24 @@ class RuntimeSkillSpecV1(StrictModel):
             raise ValueError(
                 f"alias_parameters contains undeclared aliases: {sorted(unknown)}"
             )
+        known_parameters = set(self.required_parameters) | set(
+            self.optional_parameters
+        )
+        unknown_constraints = (
+            set(self.parameter_enums) | set(self.parameter_ranges)
+        ) - known_parameters
+        if unknown_constraints:
+            raise ValueError(
+                "parameter constraints reference undeclared parameters: "
+                f"{sorted(unknown_constraints)}"
+            )
+        invalid_ranges = {
+            name: bounds
+            for name, bounds in self.parameter_ranges.items()
+            if bounds[0] > bounds[1]
+        }
+        if invalid_ranges:
+            raise ValueError(f"invalid parameter ranges: {invalid_ranges}")
         return self
 
 
@@ -85,6 +108,21 @@ class RuntimeSkillRegistryV1(StrictModel):
         collisions = sorted(set(aliases) & canonical)
         if collisions:
             raise ValueError(f"aliases collide with canonical skills: {collisions}")
+        class_ids = [
+            class_id
+            for spec in self.skills.values()
+            for class_id in spec.model_class_ids
+        ]
+        duplicate_class_ids = sorted(
+            class_id
+            for class_id in set(class_ids)
+            if class_ids.count(class_id) > 1
+        )
+        if duplicate_class_ids:
+            raise ValueError(
+                "model class IDs map to multiple skills: "
+                f"{duplicate_class_ids}"
+            )
         return self
 
 
@@ -149,6 +187,14 @@ def _resolve_skill(
     return None, None, MappingRejection.UNKNOWN_SKILL_ENUM
 
 
+def resolve_registered_skill(
+    registry: RuntimeSkillRegistryV1,
+    raw: str,
+) -> tuple[str | None, str | None, MappingRejection | None]:
+    """Resolve only declared canonical labels and aliases."""
+    return _resolve_skill(registry, raw)
+
+
 def validate_runtime_mapping(
     request: RuntimeSkillRequestV1,
     registry: RuntimeSkillRegistryV1,
@@ -186,6 +232,15 @@ def validate_runtime_mapping(
         }
     )
     spec = registry.skills[canonical]
+    if request.model_class_id not in spec.model_class_ids:
+        return reject("model_class", MappingRejection.MODEL_CLASS_SKILL_MISMATCH)
+    trace.append(
+        {
+            "gate": "model_class",
+            "status": "PASS",
+            "model_class_id": request.model_class_id,
+        }
+    )
     if request.current_phase not in spec.supported_phases:
         return reject("phase", MappingRejection.UNSUPPORTED_PHASE)
     trace.append({"gate": "phase", "status": "PASS"})
@@ -211,6 +266,20 @@ def validate_runtime_mapping(
     missing = set(spec.required_parameters) - set(parameters)
     if missing:
         return reject("parameters", MappingRejection.MISSING_PARAMETER)
+    for name, allowed_values in spec.parameter_enums.items():
+        if name in parameters and parameters[name] not in allowed_values:
+            return reject("parameters", MappingRejection.INVALID_PARAMETER_VALUE)
+    for name, (minimum, maximum) in spec.parameter_ranges.items():
+        if name not in parameters:
+            continue
+        value = parameters[name]
+        if (
+            isinstance(value, bool)
+            or not isinstance(value, (int, float))
+            or not isfinite(float(value))
+            or not minimum <= float(value) <= maximum
+        ):
+            return reject("parameters", MappingRejection.INVALID_PARAMETER_VALUE)
     trace.append({"gate": "parameters", "status": "PASS"})
     if request.confidence is not None and request.confidence < registry.minimum_confidence:
         return reject("confidence", MappingRejection.LOW_CONFIDENCE)
@@ -243,7 +312,9 @@ def validate_runtime_mapping(
                     alias_applied=alias,
                     gate_trace=trace,
                 )
-        trace.append({"gate": name, "status": "PASS"})
+            trace.append({"gate": name, "status": "PASS"})
+        else:
+            trace.append({"gate": name, "status": "NOT_RUN"})
     residual_used = request.residual_values is not None
     return RuntimeSkillMappingResultV1(
         status="VALID",

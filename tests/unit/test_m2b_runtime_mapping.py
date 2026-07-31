@@ -19,7 +19,7 @@ REGISTRY_PATH = ROOT / "configs" / "qrm_runtime_mapping.yaml"
 
 def request(**updates: object) -> RuntimeSkillRequestV1:
     payload = {
-        "model_class_id": "class-approach",
+        "model_class_id": "coarse.skill.APPROACH",
         "skill": "APPROACH",
         "task_target_track_id": "track-01",
         "available_track_ids": ["track-01", "track-02"],
@@ -47,12 +47,23 @@ def test_valid_approach_maps_to_b0_parameterized_runtime_skill() -> None:
     assert result.runtime_action == "B0_PUBLIC_GEOMETRY_APPROACH"
     assert result.target_track_id == "track-01"
     assert result.execution_attribution == "MODEL_SELECTED_B0_PARAMETERIZED_SKILL"
+    planning = {
+        gate["gate"]: gate["status"]
+        for gate in result.gate_trace
+        if gate["gate"] in {"ik", "collision", "safety"}
+    }
+    assert planning == {
+        "ik": "NOT_RUN",
+        "collision": "NOT_RUN",
+        "safety": "NOT_RUN",
+    }
 
 
 def test_explicit_alias_injects_declared_grasp_family() -> None:
     result = validate_runtime_mapping(
         request(
             skill="ALTERNATE_SIDE",
+            model_class_id="coarse.recovery.ALTERNATE_SIDE",
             coordinate_frame="world",
             units="m_rad",
             current_phase="RECOVERY",
@@ -72,11 +83,19 @@ def test_explicit_alias_injects_declared_grasp_family() -> None:
         ({"skill": "approach"}, MappingRejection.ALIAS_OR_CASE_MISMATCH),
         ({"skill": "FLY"}, MappingRejection.UNKNOWN_SKILL_ENUM),
         (
+            {"model_class_id": "coarse.skill.GRASP"},
+            MappingRejection.MODEL_CLASS_SKILL_MISMATCH,
+        ),
+        (
             {"task_target_track_id": None, "model_target_track_id": None},
             MappingRejection.MISSING_TARGET_TRACK,
         ),
         ({"task_target_track_id": "track-stale"}, MappingRejection.STALE_TRACK),
         ({"parameters": {"speed": 99}}, MappingRejection.UNSUPPORTED_PARAMETER),
+        (
+            {"parameters": {"grasp_family": "corner"}},
+            MappingRejection.INVALID_PARAMETER_VALUE,
+        ),
         ({"coordinate_frame": "camera_optical"}, MappingRejection.COORDINATE_FRAME_MISMATCH),
         ({"units": "rad"}, MappingRejection.UNIT_MISMATCH),
         ({"current_phase": "RELEASE"}, MappingRejection.UNSUPPORTED_PHASE),

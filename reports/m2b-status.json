@@ -2,6 +2,7 @@
   "blockers": [
     "Dataset V2 has not met the limited-scale 50/class minimum",
     "nondegenerate successful residual pairs are not packaged",
+    "runtime mapping still requires Isaac IK/collision/safety dry-runs",
     "two-seed A100 NoFC/FC training has not run",
     "matched B0/QRM Isaac closed-loop evaluation has not run"
   ],
@@ -21,6 +22,9 @@
   "residual_pilot_pairs": 24,
   "residual_pilot_status": "PASS_NONDEGENERATE_PILOT_NOT_SCALE",
   "runtime_mapping_baseline_status": "MAPPING_INTEGRATION_ABSENT",
+  "runtime_mapping_offline_status": "PASS_STRUCTURAL_MAPPING_PLANNING_DRY_RUN_PENDING",
+  "runtime_mapping_rate": null,
+  "runtime_structural_mapping_rate": 1.0,
   "schema_version": "M2BStatusV1",
   "teacher_kill_rule_events": [],
   "teacher_used": false,

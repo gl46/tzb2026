@@ -198,19 +198,9 @@ PANDA_DOF_NAMES = tuple(
 
 
 def _load_qrm_checkpoint(path: str, expected_model_id: str):
-    from xh_agent.policy.qrm_lite.models_q012 import build_formal_model
+    from xh_agent.policy.qrm_lite.models_q012 import load_formal_checkpoint
 
-    payload = np.load(path)
-    observed_model_id = str(payload["model_id"])
-    if observed_model_id != expected_model_id:
-        raise ValueError(
-            f"QRM checkpoint model mismatch: {observed_model_id} != {expected_model_id}"
-        )
-    model = build_formal_model(observed_model_id)
-    for name in ("w1", "b1", "w2", "b2"):
-        setattr(model.coarse, name, np.asarray(payload[f"coarse_{name}"]))
-        setattr(model.mlp, name, np.asarray(payload[f"mlp_{name}"]))
-    return model
+    return load_formal_checkpoint(path, expected_model_id=expected_model_id)
 
 
 def _json_ready(value: Any) -> Any:

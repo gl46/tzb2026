@@ -17,7 +17,11 @@ from xh_agent.policy.qrm_lite.metrics_beta1 import (
     recovery_top1_accuracy,
     skill_accuracy,
 )
-from xh_agent.policy.qrm_lite.models_q012 import FormalModelId, FormalPolicy
+from xh_agent.policy.qrm_lite.models_q012 import (
+    FormalModelId,
+    FormalPolicy,
+    load_formal_checkpoint,
+)
 from xh_agent.policy.qrm_lite.recovery_loop import EmptyGraspRecoveryProtocol, RecoveryLoopConfig
 from xh_agent.policy.qrm_lite.transforms import build_identity_action_chunk
 
@@ -28,22 +32,6 @@ def load_samples(path: Path) -> list[QRMTrainingSampleV1]:
         for line in path.read_text(encoding="utf-8").splitlines()
         if line.strip()
     ]
-
-
-def _load_weights(model: FormalPolicy, path: Path) -> None:
-    if not path.exists():
-        return
-    data = np.load(path, allow_pickle=True)
-    if "coarse_w1" in data:
-        model.coarse.w1 = data["coarse_w1"]
-        model.coarse.b1 = data["coarse_b1"]
-        model.coarse.w2 = data["coarse_w2"]
-        model.coarse.b2 = data["coarse_b2"]
-    if model.uses_residual and "mlp_w1" in data:
-        model.mlp.w1 = data["mlp_w1"]
-        model.mlp.b1 = data["mlp_b1"]
-        model.mlp.w2 = data["mlp_w2"]
-        model.mlp.b2 = data["mlp_b2"]
 
 
 def offline_recovery_events(model: FormalPolicy, samples: list[QRMTrainingSampleV1]) -> list[RecoveryEvent]:
@@ -83,10 +71,18 @@ def main(argv: list[str] | None = None) -> int:
     val = [s for s in samples if s.split in {"val", "test"}] or samples
     fail_samples = [s for s in val if s.observation.failure_context.failure_type.value != "NONE"]
 
-    q1 = FormalPolicy(FormalModelId.Q1)
-    q2 = FormalPolicy(FormalModelId.Q2)
-    _load_weights(q1, Path(args.q1_ckpt))
-    _load_weights(q2, Path(args.q2_ckpt))
+    q1_path = Path(args.q1_ckpt)
+    q2_path = Path(args.q2_ckpt)
+    q1 = (
+        load_formal_checkpoint(str(q1_path))
+        if q1_path.exists()
+        else FormalPolicy(FormalModelId.Q1)
+    )
+    q2 = (
+        load_formal_checkpoint(str(q2_path))
+        if q2_path.exists()
+        else FormalPolicy(FormalModelId.Q2)
+    )
 
     def skill_eval(model: FormalPolicy):
         y_true = [s.coarse_intent.skill_type for s in fail_samples]

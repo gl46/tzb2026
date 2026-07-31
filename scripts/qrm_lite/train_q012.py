@@ -212,6 +212,8 @@ def main(argv: list[str] | None = None) -> int:
         ckpt = out_dir / f"{mid.name}.npz"
         np.savez(
             ckpt,
+            checkpoint_schema_version="QRMFormalCheckpointV1",
+            architecture_revision="M2B_Q012_V1",
             model_id=mid.value,
             coarse_w1=model.coarse.w1,
             coarse_b1=model.coarse.b1,
