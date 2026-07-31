@@ -8,7 +8,9 @@ from pathlib import Path
 from types import SimpleNamespace
 
 from m2b.run_failure_evidence_worker import (
+    accepted_target_reached,
     failure_command,
+    load_existing_records,
     public_selector_entity,
     stage_is_valid,
 )
@@ -85,6 +87,27 @@ def test_failure_container_prefix_is_unique_per_gpu_and_scene(tmp_path) -> None:
     assert command[prefix_index] == "m2b-evidence-g1-s4091"
 
 
+def test_worker_resume_records_and_per_class_target_are_strict(tmp_path) -> None:
+    status = {
+        "schema_version": "M2BFailureEvidenceWorkerStatusV1",
+        "teacher_used": False,
+        "records": [
+            {"scene_seed": 1, "failure_type": failure, "accepted": True}
+            for failure in (
+                "EMPTY_GRASP",
+                "WRONG_OBJECT",
+                "RELEASE_FAILURE",
+            )
+        ],
+    }
+    (tmp_path / "worker-status.json").write_text(json.dumps(status))
+    records = load_existing_records(tmp_path)
+    failures = ["EMPTY_GRASP", "WRONG_OBJECT", "RELEASE_FAILURE"]
+    assert accepted_target_reached(records, failures, 1) is True
+    assert accepted_target_reached(records, failures, 2) is False
+    assert accepted_target_reached(records, failures, 0) is False
+
+
 def test_scale_launcher_partitions_seeds_without_overlapping_workers(
     tmp_path,
 ) -> None:
@@ -123,6 +146,7 @@ def test_scale_launcher_partitions_seeds_without_overlapping_workers(
     assert "--scene-seed 4002" in launches[0]
     assert "--scene-seed 4003" in launches[1]
     assert "--scene-seed 4001" not in ssh_log.read_text()
+    assert "--accepted-target-per-failure 24" in ssh_log.read_text()
 
 
 def test_residual_worker_uses_bounded_nonzero_camera_perturbations() -> None:

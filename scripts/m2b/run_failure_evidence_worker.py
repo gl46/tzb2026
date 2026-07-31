@@ -230,6 +230,33 @@ def write_status(output_root: Path, records: list[dict[str, Any]]) -> None:
     temporary.replace(output_root / "worker-status.json")
 
 
+def load_existing_records(output_root: Path) -> list[dict[str, Any]]:
+    path = output_root / "worker-status.json"
+    if not path.is_file():
+        return []
+    payload = json.loads(path.read_text())
+    if payload.get("schema_version") != "M2BFailureEvidenceWorkerStatusV1":
+        raise ValueError("unsupported existing failure-worker status")
+    if payload.get("teacher_used") is not False:
+        raise ValueError("existing failure-worker status is not Teacher-free")
+    return [dict(record) for record in payload.get("records", [])]
+
+
+def accepted_target_reached(
+    records: list[dict[str, Any]],
+    failures: list[str],
+    target: int,
+) -> bool:
+    if target <= 0:
+        return False
+    counts = Counter(
+        str(record["failure_type"])
+        for record in records
+        if record.get("accepted") is True and record.get("failure_type")
+    )
+    return all(counts[failure] >= target for failure in failures)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--project-root", required=True, type=Path)
@@ -247,6 +274,15 @@ def main() -> int:
     parser.add_argument("--stage-timeout-s", type=float, default=900.0)
     parser.add_argument("--failure-timeout-s", type=float, default=4000.0)
     parser.add_argument("--settle-s", type=float, default=30.0)
+    parser.add_argument(
+        "--accepted-target-per-failure",
+        type=int,
+        default=0,
+        help=(
+            "Stop this worker after each requested class reaches this many "
+            "accepted records; zero consumes the full queue."
+        ),
+    )
     parser.add_argument("--release-follow-delta-z-m", type=float, default=0.08)
     parser.add_argument("--image", default="nvcr.io/nvidia/isaac-sim:6.0.1")
     parser.add_argument("--container-prefix", default="m2b-evidence")
@@ -255,13 +291,37 @@ def main() -> int:
     allowed = {"EMPTY_GRASP", "WRONG_OBJECT", "RELEASE_FAILURE"}
     if not failures or not set(failures).issubset(allowed):
         parser.error(f"--failures must be a subset of {sorted(allowed)}")
+    if args.accepted_target_per_failure < 0:
+        parser.error("--accepted-target-per-failure must be nonnegative")
     args.output_root.mkdir(parents=True, exist_ok=True)
-    records: list[dict[str, Any]] = []
+    records = load_existing_records(args.output_root)
+    recorded_failure_keys = {
+        (int(record["scene_seed"]), str(record["failure_type"]))
+        for record in records
+        if record.get("scene_seed") is not None
+        and record.get("failure_type") is not None
+    }
+    terminal_scene_statuses = {
+        int(record["scene_seed"])
+        for record in records
+        if record.get("scene_seed") is not None
+        and record.get("failure_type") is None
+        and record.get("status") in {"SOURCE_MISSING", "STAGE_FAILED"}
+    }
     for seed in args.scene_seed:
+        if accepted_target_reached(
+            records, failures, args.accepted_target_per_failure
+        ):
+            break
+        if seed in terminal_scene_statuses:
+            continue
+        if all((seed, failure) in recorded_failure_keys for failure in failures):
+            continue
         sdf = args.source_root / f"scene-{seed}.sdf"
         supervision = args.source_root / f"scene-{seed}.supervision.json"
         if not sdf.is_file() or not supervision.is_file():
             records.append({"scene_seed": seed, "status": "SOURCE_MISSING"})
+            terminal_scene_statuses.add(seed)
             write_status(args.output_root, records)
             continue
         scene_root = args.output_root / f"scene-{seed}"
@@ -274,11 +334,25 @@ def main() -> int:
         )
         if stage is None:
             records.append({"scene_seed": seed, "status": "STAGE_FAILED"})
+            terminal_scene_statuses.add(seed)
             write_status(args.output_root, records)
             continue
         yellow_entity = public_selector_entity(sdf, "yellow")
         red_entity = public_selector_entity(sdf, "red")
         for failure in failures:
+            if (seed, failure) in recorded_failure_keys:
+                continue
+            accepted = Counter(
+                str(record["failure_type"])
+                for record in records
+                if record.get("accepted") is True
+                and record.get("failure_type")
+            )
+            if (
+                args.accepted_target_per_failure > 0
+                and accepted[failure] >= args.accepted_target_per_failure
+            ):
+                continue
             output = scene_root / "failures" / failure.lower()
             completed = subprocess.run(
                 failure_command(
@@ -324,10 +398,20 @@ def main() -> int:
                     "runner_returncode": completed.returncode,
                 }
             )
+            recorded_failure_keys.add((seed, failure))
             write_status(args.output_root, records)
             time.sleep(args.settle_s)
     payload = json.loads((args.output_root / "worker-status.json").read_text())
-    payload["status"] = "COMPLETE_QUEUE"
+    payload["status"] = (
+        "COMPLETE_ACCEPTED_TARGET"
+        if accepted_target_reached(
+            records, failures, args.accepted_target_per_failure
+        )
+        else "COMPLETE_QUEUE"
+    )
+    payload["accepted_target_per_failure"] = (
+        args.accepted_target_per_failure
+    )
     (args.output_root / "worker-status.json").write_text(
         json.dumps(payload, indent=2, sort_keys=True) + "\n"
     )

@@ -8,6 +8,7 @@ output_root="${M2B_OUTPUT_ROOT:-/var/tmp/xh-data/isaac-industrial/m2b/failure-ev
 scene_start="${M2B_SCENE_START:-4000}"
 scene_end="${M2B_SCENE_END:-4149}"
 exclude_csv="${M2B_EXCLUDE_SEEDS:-4025,4063,4091,4110}"
+accepted_target_per_failure="${M2B_ACCEPTED_TARGET_PER_WORKER:-24}"
 
 if (( scene_start > scene_end )); then
   echo "M2B_SCENE_START must not exceed M2B_SCENE_END" >&2
@@ -56,6 +57,7 @@ for gpu in 0 1; do
     --max-stage-attempts 2
     --max-failure-attempts 2
     --settle-s 10
+    --accepted-target-per-failure "${accepted_target_per_failure}"
     --container-prefix m2b-scale-v1
   )
   quoted_command=""
