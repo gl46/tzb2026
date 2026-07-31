@@ -8,7 +8,10 @@ output_root="${M2B_OUTPUT_ROOT:-/var/tmp/xh-data/isaac-industrial/m2b/failure-ev
 scene_start="${M2B_SCENE_START:-4000}"
 scene_end="${M2B_SCENE_END:-4149}"
 exclude_csv="${M2B_EXCLUDE_SEEDS:-4025,4063,4091,4110}"
-accepted_target_per_failure="${M2B_ACCEPTED_TARGET_PER_WORKER:-24}"
+# Two workers at 30/class yield up to 60 independent WRONG_OBJECT correction
+# anchors.  The residual scale gate requires 50 valid pairs, so this retains a
+# bounded quarantine/failure margin while remaining within limited M2B scope.
+accepted_target_per_failure="${M2B_ACCEPTED_TARGET_PER_WORKER:-30}"
 
 if (( scene_start > scene_end )); then
   echo "M2B_SCENE_START must not exceed M2B_SCENE_END" >&2

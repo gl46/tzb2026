@@ -146,7 +146,7 @@ def test_scale_launcher_partitions_seeds_without_overlapping_workers(
     assert "--scene-seed 4002" in launches[0]
     assert "--scene-seed 4003" in launches[1]
     assert "--scene-seed 4001" not in ssh_log.read_text()
-    assert "--accepted-target-per-failure 24" in ssh_log.read_text()
+    assert "--accepted-target-per-failure 30" in ssh_log.read_text()
 
 
 def test_residual_worker_uses_bounded_nonzero_camera_perturbations() -> None:
