@@ -53,10 +53,19 @@ def main() -> int:
     recovery_counts = (
         dataset.get("successful_recovery_counts", {}) if dataset else {}
     )
-    if not dataset or any(
-        int(failure_counts.get(failure, 0)) < 50
-        or int(recovery_counts.get(failure, 0)) < 25
-        for failure in ("EMPTY_GRASP", "WRONG_OBJECT", "RELEASE_FAILURE")
+    if (
+        not dataset
+        or dataset.get("limited_coverage_gate_passed") is not True
+        or int(dataset.get("episodes_quarantined", 0)) != 0
+        or any(
+            int(failure_counts.get(failure, 0)) < 50
+            or int(recovery_counts.get(failure, 0)) < 25
+            for failure in (
+                "EMPTY_GRASP",
+                "WRONG_OBJECT",
+                "RELEASE_FAILURE",
+            )
+        )
     ):
         blockers.append("Dataset V2 has not met the limited-scale 50/class minimum")
     if (
@@ -71,13 +80,24 @@ def main() -> int:
         not mapping_offline
         or mapping_offline.get("runtime_mapping_rate") is None
         or float(mapping_offline["runtime_mapping_rate"]) < 0.95
+        or mapping_offline.get("planning_checks_complete") is not True
     ):
         blockers.append(
             "runtime mapping still requires Isaac IK/collision/safety dry-runs"
         )
-    if not training:
+    if (
+        not training
+        or training.get("status") != "PASS_ABLATION_COMPLETE"
+        or training.get("formal_ablation") is not True
+    ):
         blockers.append("two-seed A100 NoFC/FC training has not run")
-    if not closed_loop:
+    if (
+        not closed_loop
+        or closed_loop.get("status")
+        != "PASS_FORMAL_MATCHED_EVALUATION_COMPLETE"
+        or closed_loop.get("formal_evaluation_ready") is not True
+        or int(closed_loop.get("qrm_model_decisions_executed", 0)) < 20
+    ):
         blockers.append("matched B0/QRM Isaac closed-loop evaluation has not run")
     status = {
         "schema_version": "M2BStatusV1",
