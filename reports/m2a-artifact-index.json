@@ -1,6 +1,10 @@
 {
   "artifacts": [
     {
+      "path": "Makefile",
+      "sha256": "048a909778f891a01edc3b2da4c733e96b7c6efd7709e396b161a650ff5f72f7"
+    },
+    {
       "path": "configs/isaac_data_contract_v1.yaml",
       "sha256": "5de9974c9c5b4ee6a6a052767f7950404dc8594fb1f5fe6fff905af1e29285f4"
     },
@@ -21,6 +25,14 @@
       "sha256": "bef52bcfb84d6ecdb8e94c079a35a3a311f3ef24d00d8ca36e46c78db5680ebd"
     },
     {
+      "path": "docs/competition/requirements-traceability.md",
+      "sha256": "b9b9c94e67022302efe142fa21d60e23585ec9a7e043e8fb2d71fbb243cd4092"
+    },
+    {
+      "path": "docs/competition/submission-checklist.md",
+      "sha256": "a49321ed06c40eedf78eb714a5404558e6399cad0ac1d959300917c79e679035"
+    },
+    {
       "path": "docs/decisions/ADR-0017-dual-3080-isaac-data-engine.md",
       "sha256": "0c0e22a9b36fe1741d5f015a22e10dbab08b2b7ad2908b61b9354b2306d52d0f"
     },
@@ -33,6 +45,14 @@
       "sha256": "63bf35ca225560df44078cf3dcb241027ddd0feb3c91a6989c3ffda345e2ab0c"
     },
     {
+      "path": "reports/m2a-completion-audit.json",
+      "sha256": "2e0b0d11f71cbe468bcd9325c01391bf93a52a22c36db1a67b635699552dfd76"
+    },
+    {
+      "path": "reports/m2a-completion-audit.md",
+      "sha256": "9cc4e9b7b1a6abaed1fdc2cc6fc6465b62d8f201d859eb69477551deec58fde1"
+    },
+    {
       "path": "reports/m2a-dataset-card.md",
       "sha256": "7a39c437c6f996ca616cb4b545b1d05ae75b1dab71d5b4c2299d98c5abdaea3b"
     },
@@ -42,15 +62,15 @@
     },
     {
       "path": "reports/m2a-reproducibility.md",
-      "sha256": "b4aa71317fd552cda4d00c82954e0200b9d7441b4f386c3a1b20fa0341f845e4"
+      "sha256": "5edf86e3b828db9a20062dfd1edfbe74273c1d37263ee7806cfe7801a804b6b4"
     },
     {
       "path": "reports/m2a-s0-topology-audit.json",
-      "sha256": "9ce278486940708f3178062cc1888d73e6d3db9fbaf38a3be2add9b4c4a2353c"
+      "sha256": "f0ee5ff6f233824ac20cced28d1599813be7442c0cde176ca29eb0c50eb70ace"
     },
     {
       "path": "reports/m2a-s0-topology-audit.md",
-      "sha256": "992b226dac96bb010fbe6d73f1df4f1e6a403770fbe3bdaf1e2d549c92be68bc"
+      "sha256": "ba19f817457f2bc7026d01d30be1ebe996c3559706d130261d5d2f3eea2ecba2"
     },
     {
       "path": "reports/m2a-s1-data-contract.json",
@@ -62,11 +82,11 @@
     },
     {
       "path": "reports/m2a-s2-worker-benchmark.json",
-      "sha256": "a35e60a028c71d68e8b1be7b3a8150103063ee22e543e67475c2b7c8bd5531b7"
+      "sha256": "17f7fee4629b17184e6f29a540ce24459e61e269516accaedb193a2e21f4c644"
     },
     {
       "path": "reports/m2a-s2-worker-benchmark.md",
-      "sha256": "228fc00cb60cb01e2d0a74184354a589f84b03ec089d1dc79c78f7f88741ac80"
+      "sha256": "b92724614d25b4b73f35ad800ad93d5900225c613103243bb118bd79928c508c"
     },
     {
       "path": "reports/m2a-s3-pilot-dataset.json",
@@ -166,11 +186,95 @@
     },
     {
       "path": "reports/m2a-status.json",
-      "sha256": "a9eb10e9fb2525710c09a936a29c273464a216512acfc449b1f6a5b65ac02b28"
+      "sha256": "09a3fdf0f8d9f6a56c06ea10a693009f55d91d65c8a988c284e83b08167ecd12"
     },
     {
       "path": "reports/m2a-status.md",
-      "sha256": "8ea31cdcc4a427be2e1e33568ff892d0b7e669fd247b1a51196b7deb79b17fdc"
+      "sha256": "18a10c604211a384df3ce80beb81d4e69d423f414aeeb8a4696c3e62545f3f49"
+    },
+    {
+      "path": "scripts/isaac/benchmark_workers.sh",
+      "sha256": "959f14707d0269c10680b36ef1ed294a460278b03ed81304abf747eb71770f0a"
+    },
+    {
+      "path": "scripts/isaac/build_dataset_manifest.py",
+      "sha256": "52b9def334a00fb0983d6c1c952cdcb541b6de26b52d28b3e3df4b4e821e5a3a"
+    },
+    {
+      "path": "scripts/isaac/host_resources.py",
+      "sha256": "22c25618abf63c0d589991ff275fc615e9cd53590470146ae784ca3874e68f13"
+    },
+    {
+      "path": "scripts/isaac/launch_worker.py",
+      "sha256": "2f3cfe21cdd84a04fe2d5baf256e2c078f12f3bd9bb25174ea368fbadbcbd6bb"
+    },
+    {
+      "path": "scripts/isaac/run_pilot_campaign.py",
+      "sha256": "878255f7ec75958225b033a4e3611a02a0622e28b0147a0d80a38dc23531fb34"
+    },
+    {
+      "path": "scripts/isaac/summarize_worker_benchmark.py",
+      "sha256": "9e7bed041a046a4b61c7c8e4f912cf76655d0ef25f5fc17e32a4c3ca16997fe6"
+    },
+    {
+      "path": "scripts/isaac/sync_ready_shards.sh",
+      "sha256": "0f5250e3c6236f55d1817bd51dc475a8190c641e221069ac725c8114f3938cb3"
+    },
+    {
+      "path": "scripts/isaac/validate_data_contract.py",
+      "sha256": "f05fd9d10e7a4cd0a3659b1900e4383bb50ad365f3b82b4e268d9da390e39e9f"
+    },
+    {
+      "path": "scripts/isaac/validate_shard.py",
+      "sha256": "a0d446ebb7413f4c446820d72d1ec5ffacd69c7629ccbd79c24ab45bbe088de0"
+    },
+    {
+      "path": "scripts/m2a_status.py",
+      "sha256": "f97265862d208522002a2e9c37fa1581b5f3a94fa1dc60c6ed2e485f6f6be318"
+    },
+    {
+      "path": "scripts/qrm_lite/build_isaac_dataset.py",
+      "sha256": "9f6f581cb98ca80e9912075070c0385491f8b0246d200dbff4ea913d5d4f7cbd"
+    },
+    {
+      "path": "scripts/qrm_lite/eval_beta_offline.py",
+      "sha256": "f5db45696006f4cb6980c1340dd3232756268fdba6c3deded137ebab7e5a2932"
+    },
+    {
+      "path": "scripts/qrm_lite/run_isaac_closed_loop_eval.sh",
+      "sha256": "8207d05377f3c0fc09a5d4b33b4b70ddaa34ce79f3132e60c45bab6590320ea1"
+    },
+    {
+      "path": "scripts/qrm_lite/summarize_isaac_closed_loop.py",
+      "sha256": "b052b25b308e8d6139681a71eb20b99816c1e721d3121a03c0f09f4c55dd8059"
+    },
+    {
+      "path": "scripts/qrm_lite/summarize_qwen_ablation.py",
+      "sha256": "420e50f5fc4c826f90197597dba183c3ff2241151e94bfe1fcfb1b0c92592981"
+    },
+    {
+      "path": "scripts/qrm_lite/train_coarse_beta.py",
+      "sha256": "7a94012eb8f02b33340a83b50dedc3f90d18829c8aff8995ffaaf65bd5e2ee28"
+    },
+    {
+      "path": "scripts/qrm_lite/train_mlp_beta.py",
+      "sha256": "5898ef8f9df0ffad278ad3eca7247f828e0a5092e9e4e4822ab766fd580afdf3"
+    },
+    {
+      "path": "scripts/qrm_lite/train_qwen_coarse_beta.py",
+      "sha256": "f09e12c7fe927dc98579554e38e712585d2c0476e357067aee07070954938af6"
+    },
+    {
+      "path": "scripts/run_isaac_m1b_dual_benchmark.py",
+      "sha256": "e73a3037f85fc7169a0a69b60bef081cfefd0af7c8a4210c6ae5ea2622fccc81"
+    },
+    {
+      "path": "tests/unit/test_m2a_isaac_data_engine.py",
+      "sha256": "5712a85a546daf12133bdaa3a8804509d00564b66679414c5a7e860db3e1dc06"
+    },
+    {
+      "path": "tests/unit/test_m2a_qwen_ablation.py",
+      "sha256": "584e73a0f73ca8e5c80c16a4d203189e29412955d901459ad3d4cf4a24486c80"
     }
   ],
   "schema_version": "M2AArtifactIndexV1"

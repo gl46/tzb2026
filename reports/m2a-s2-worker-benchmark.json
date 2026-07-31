@@ -1,71 +1,194 @@
 {
   "crash_restart_count_in_accepted_runs": 0,
   "dual": {
-    "concurrent_capture_wall_s": 64.84967128001153,
+    "concurrent_capture_wall_s": 1913.3429329710198,
+    "effective_output_write_mb_s": 17.17049616870621,
     "gpu_indices": [
       0,
       1
     ],
     "gpu_summary": {
       "0": {
-        "memory_used_mib_mean": 2014.560975609756,
-        "memory_used_mib_peak": 2635.0,
-        "power_draw_w_mean": 40.49687804878049,
-        "power_draw_w_peak": 104.06,
-        "sample_count": 615,
-        "utilization_gpu_percent_mean": 3.4455284552845526,
-        "utilization_gpu_percent_peak": 100.0
+        "memory_used_mib_mean": 2524.654829898187,
+        "memory_used_mib_peak": 2622.0,
+        "power_draw_w_mean": 83.34756642662032,
+        "power_draw_w_peak": 95.1,
+        "sample_count": 4027,
+        "utilization_gpu_percent_mean": 14.129128383411969,
+        "utilization_gpu_percent_peak": 70.0
       },
       "1": {
-        "memory_used_mib_mean": 667.0162601626016,
-        "memory_used_mib_peak": 2496.0,
-        "power_draw_w_mean": 43.060113821138216,
-        "power_draw_w_peak": 126.53,
-        "sample_count": 615,
-        "utilization_gpu_percent_mean": 2.8552845528455286,
-        "utilization_gpu_percent_peak": 67.0
+        "memory_used_mib_mean": 2210.5535137819716,
+        "memory_used_mib_peak": 2495.0,
+        "power_draw_w_mean": 103.11887012664515,
+        "power_draw_w_peak": 126.15,
+        "sample_count": 4027,
+        "utilization_gpu_percent_mean": 13.176309908120189,
+        "utilization_gpu_percent_peak": 88.0
       }
     },
-    "sensor_frames": 800,
-    "sensor_frames_per_s_capture_only": 12.336222901511949,
+    "host_summary": {
+      "cpu_utilization_percent_mean": 4.695562390771637,
+      "cpu_utilization_percent_peak": 26.672160417525067,
+      "filesystem_available_bytes_min": 346091798528,
+      "ram_available_bytes_min": 27891572736,
+      "ram_used_bytes_mean": 36769893560.86417,
+      "ram_used_bytes_peak": 39465152512,
+      "sample_count": 4027
+    },
+    "memory_growth_first_100_combined_episodes": {
+      "gpu_vram_mib": {
+        "0": {
+          "end": 2620.0,
+          "growth": 0.0,
+          "sample_elapsed_s": 32.02062758401735,
+          "start": 2620.0,
+          "status": "MEASURED",
+          "window_episodes": 100
+        },
+        "1": {
+          "end": 2495.0,
+          "growth": 0.0,
+          "sample_elapsed_s": 32.02062758401735,
+          "start": 2495.0,
+          "status": "MEASURED",
+          "window_episodes": 100
+        }
+      },
+      "host_ram_bytes": {
+        "end": 38706548736.0,
+        "growth": -91930624.0,
+        "sample_elapsed_s": 32.02062758401735,
+        "start": 38798479360.0,
+        "status": "MEASURED",
+        "window_episodes": 100
+      }
+    },
+    "sensor_frames": 24000,
+    "sensor_frames_per_s_capture_only": 12.543491073360823,
     "startup_protocol": "SERIALIZED_KIT_INITIALIZATION_THEN_SHARED_START_BARRIER",
-    "total_runner_wall_s": 340.02650504998746,
-    "valid_short_episodes": 198,
-    "valid_short_episodes_per_hour_end_to_end": 2096.3071684520914
+    "total_runner_wall_s": 2192.197173783992,
+    "valid_short_episodes": 5998,
+    "valid_short_episodes_per_hour_end_to_end": 9849.843918340734
   },
   "dual_capture_faster_than_each_single": true,
+  "input_evidence": {
+    "dual_summary": "/var/tmp/xh-data/isaac-industrial/benchmarks/m2a-20260731-060115/dual/dual-benchmark-summary.json",
+    "single_gpu0_metrics": "/var/tmp/xh-data/isaac-industrial/benchmarks/m2a-20260731-060115/single-gpu0/metrics.json",
+    "single_gpu1_metrics": "/var/tmp/xh-data/isaac-industrial/benchmarks/m2a-20260731-060115/single-gpu1/metrics.json"
+  },
   "invalid_episode_ratio": 0.0,
-  "limitations": [
-    "benchmark duration is shorter than the requested 30-minute soak",
-    "100-episode memory-growth measurement was not completed",
-    "CPU, RAM, and NVMe utilization are not sampled by the current runner"
-  ],
+  "limitations": [],
+  "raw_log": {
+    "path": "/var/tmp/m2a-benchmark-30m-v1.log",
+    "sha256": "474749b562f961777c51d83b54c95be09ac2a8693fdb3b1fbf0eb9b5bb022b20"
+  },
+  "run_root": "/var/tmp/xh-data/isaac-industrial/benchmarks/m2a-20260731-060115",
   "schema_version": "M2AIsaacWorkerBenchmarkV1",
   "selection": "DUAL_INDEPENDENT_WORKERS",
   "single_gpu0": {
-    "app_elapsed_s": 163.92821759797516,
-    "average_short_episode_bytes": 5809548.636363637,
-    "capture_wall_s": 61.15657179898699,
-    "frames": 100,
-    "output_bytes": 575145315,
+    "app_elapsed_s": 1963.5083929509856,
+    "average_short_episode_bytes": 5470701.174058019,
+    "capture_wall_s": 1858.2479351859947,
+    "effective_output_write_mb_s": 8.82908707193469,
+    "frames": 3000,
+    "gpu_summary": {
+      "0": {
+        "memory_used_mib_mean": 2436.453668987681,
+        "memory_used_mib_peak": 2627.0,
+        "power_draw_w_mean": 87.44390198178897,
+        "power_draw_w_peak": 103.96,
+        "sample_count": 3734,
+        "utilization_gpu_percent_mean": 14.503749330476701,
+        "utilization_gpu_percent_peak": 82.0
+      }
+    },
+    "host_summary": {
+      "cpu_utilization_percent_mean": 2.9207582651639266,
+      "cpu_utilization_percent_peak": 38.58267716535433,
+      "filesystem_available_bytes_min": 396319531008,
+      "ram_available_bytes_min": 44769779712,
+      "ram_used_bytes_mean": 21057313463.464382,
+      "ram_used_bytes_peak": 22586945536,
+      "sample_count": 3734
+    },
+    "memory_growth_first_100_episodes": {
+      "gpu_vram_mib": {
+        "end": 2620.0,
+        "growth": 0.0,
+        "sample_elapsed_s": 61.77421956197941,
+        "start": 2620.0,
+        "status": "MEASURED",
+        "window_episodes": 100
+      },
+      "host_ram_bytes": {
+        "end": 21718794240.0,
+        "growth": -324829184.0,
+        "sample_elapsed_s": 61.77421956197941,
+        "start": 22043623424.0,
+        "status": "MEASURED",
+        "window_episodes": 100
+      }
+    },
+    "output_bytes": 16406632821,
     "physical_gpu_index": 0,
-    "sensor_frames": 400,
-    "sensor_frames_per_s_capture_only": 6.540588987145052,
-    "valid_short_episodes": 99,
-    "valid_short_episodes_per_hour_end_to_end": 2174.1223397795443
+    "sensor_frames": 12000,
+    "sensor_frames_per_s_capture_only": 6.457695861127865,
+    "valid_short_episodes": 2999,
+    "valid_short_episodes_per_hour_end_to_end": 5498.525006951425
   },
   "single_gpu1": {
-    "app_elapsed_s": 165.1446958099841,
-    "average_short_episode_bytes": 5847368.818181818,
-    "capture_wall_s": 60.876468911010306,
-    "frames": 100,
-    "output_bytes": 578889513,
+    "app_elapsed_s": 1926.0673616240092,
+    "average_short_episode_bytes": 5437540.188729577,
+    "capture_wall_s": 1821.227035087999,
+    "effective_output_write_mb_s": 8.95395396171025,
+    "frames": 3000,
+    "gpu_summary": {
+      "1": {
+        "memory_used_mib_mean": 2285.7403164211673,
+        "memory_used_mib_peak": 2495.0,
+        "power_draw_w_mean": 108.62946808510638,
+        "power_draw_w_peak": 127.73,
+        "sample_count": 3666,
+        "utilization_gpu_percent_mean": 13.987997817785052,
+        "utilization_gpu_percent_peak": 86.0
+      }
+    },
+    "host_summary": {
+      "cpu_utilization_percent_mean": 2.922409778460062,
+      "cpu_utilization_percent_peak": 28.817092235539345,
+      "filesystem_available_bytes_min": 379870777344,
+      "ram_available_bytes_min": 44498702336,
+      "ram_used_bytes_mean": 21731398208.52373,
+      "ram_used_bytes_peak": 22858022912,
+      "sample_count": 3666
+    },
+    "memory_growth_first_100_episodes": {
+      "gpu_vram_mib": {
+        "end": 2463.0,
+        "growth": 0.0,
+        "sample_elapsed_s": 60.964385047002,
+        "start": 2463.0,
+        "status": "MEASURED",
+        "window_episodes": 100
+      },
+      "host_ram_bytes": {
+        "end": 22352203776.0,
+        "growth": -379932672.0,
+        "sample_elapsed_s": 60.964385047002,
+        "start": 22732136448.0,
+        "status": "MEASURED",
+        "window_episodes": 100
+      }
+    },
+    "output_bytes": 16307183026,
     "physical_gpu_index": 1,
-    "sensor_frames": 400,
-    "sensor_frames_per_s_capture_only": 6.570683338823793,
-    "valid_short_episodes": 99,
-    "valid_short_episodes_per_hour_end_to_end": 2158.1074599578706
+    "sensor_frames": 12000,
+    "sensor_frames_per_s_capture_only": 6.5889643459087885,
+    "valid_short_episodes": 2999,
+    "valid_short_episodes_per_hour_end_to_end": 5605.41142802854
   },
-  "status": "PASS_WITH_LIMITATIONS",
+  "status": "PASS",
+  "target_capture_duration_s_per_configuration": 1800,
   "worker_strategy": "ONE_ISAAC_PROCESS_PER_PHYSICAL_GPU"
 }

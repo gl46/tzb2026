@@ -191,7 +191,10 @@ def main() -> int:
                 "",
                 "## Limitations",
                 "",
-                *[f"- {item}" for item in report["limitations"]],
+                *(
+                    [f"- {item}" for item in report["limitations"]]
+                    or ["- None."]
+                ),
                 "",
             ]
         )

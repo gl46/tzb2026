@@ -41,7 +41,12 @@ from xh_agent.data_engine.isaac.contract import (
 )
 from xh_agent.policy.qrm_lite.residual_safety import ResidualSafetyFilter
 from run_isaac_m1b_dual_benchmark import _worker_command
-from m2a_status import estimated_episode_size, measure_ssh_upload
+from m2a_status import (
+    estimated_episode_size,
+    measure_ssh_upload,
+    remote_python_environment,
+    storage_write_evidence,
+)
 
 
 def _action(width: int = 10) -> dict:
@@ -504,6 +509,23 @@ def test_topology_episode_size_uses_retained_benchmark(tmp_path: Path) -> None:
     assert result["bytes"] == 6_000_000
 
 
+def test_topology_storage_write_uses_effective_benchmark_rate(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "m2a-s2-worker-benchmark.json").write_text(
+        json.dumps(
+            {
+                "single_gpu0": {"effective_output_write_mb_s": 10.0},
+                "single_gpu1": {"effective_output_write_mb_s": 11.0},
+                "dual": {"effective_output_write_mb_s": 18.0},
+            }
+        )
+    )
+    result = storage_write_evidence(tmp_path)
+    assert result["status"] == "MEASURED"
+    assert result["mb_per_s"]["dual"] == 18.0
+
+
 def test_network_baseline_streams_bytes_without_remote_file(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -519,6 +541,19 @@ def test_network_baseline_streams_bytes_without_remote_file(
     assert result["status"] == "PASS"
     assert len(observed["input"]) == 1024 * 1024
     assert observed["command"][-1] == "cat >/dev/null"
+
+
+def test_remote_python_environment_parses_executable_and_version(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        "m2a_status.ssh",
+        lambda _host, _command: "/env/bin/python|Python 3.12.3",
+    )
+    assert remote_python_environment("node", "/env/bin/python") == {
+        "executable": "/env/bin/python",
+        "version": "Python 3.12.3",
+    }
 
 
 def test_qwen_metrics_retain_absent_class_as_zero_f1() -> None:

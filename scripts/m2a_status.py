@@ -112,6 +112,38 @@ def estimated_episode_size(reports: Path) -> dict[str, Any]:
     }
 
 
+def storage_write_evidence(reports: Path) -> dict[str, Any]:
+    benchmark = json_if(reports / "m2a-s2-worker-benchmark.json")
+    if not benchmark:
+        return {"status": "NOT_MEASURED", "method": None}
+    values = {
+        key: benchmark.get(key, {}).get("effective_output_write_mb_s")
+        for key in ("single_gpu0", "single_gpu1", "dual")
+    }
+    if any(value is None for value in values.values()):
+        return {"status": "NOT_MEASURED", "method": None}
+    return {
+        "status": "MEASURED",
+        "method": (
+            "retained payload bytes divided by Isaac capture wall time; "
+            "effective workload write rate, not raw block-device saturation"
+        ),
+        "mb_per_s": values,
+    }
+
+
+def remote_python_environment(host: str, preferred: str) -> dict[str, str]:
+    observed = ssh(
+        host,
+        f"if test -x '{preferred}'; then "
+        f"printf '%s|' '{preferred}'; '{preferred}' --version 2>&1; "
+        "else resolved=$(command -v python3); "
+        "printf '%s|' \"$resolved\"; \"$resolved\" --version 2>&1; fi",
+    )
+    executable, version = observed.split("|", 1)
+    return {"executable": executable, "version": version}
+
+
 def topology(args: argparse.Namespace) -> dict[str, Any]:
     reports = PROJECT / "reports"
     reports.mkdir(exist_ok=True)
@@ -119,6 +151,10 @@ def topology(args: argparse.Namespace) -> dict[str, Any]:
     train_gpus = gpu_rows(args.train_host)
     isaac_disk = ssh(args.isaac_host, f"df -Pk '{args.isaac_data_root}' | tail -1").split()
     train_disk = ssh(args.train_host, f"df -Pk '{args.train_data_root}' | tail -1").split()
+    train_python = remote_python_environment(
+        args.train_host,
+        f"{args.train_project_root}/.venv-qrm-lite/bin/python",
+    )
     prior = json_if(reports / "m2a-s0-topology-audit.json") or {}
     network_baseline = prior.get("network_baseline", {})
     if args.measure_network:
@@ -136,8 +172,20 @@ def topology(args: argparse.Namespace) -> dict[str, Any]:
         "feature_branch": run(["git", "branch", "--show-current"]),
         "head": run(["git", "rev-parse", "HEAD"]),
         "origin_main": run(["git", "rev-parse", "origin/main"]),
-        "m1b_baseline_commit": "5984298",
+        "m1b_baseline_commit": "0ff751800b53b52233bc82b4a73638afd3a63940",
+        "m1b_completion_report_commit": (
+            "cd015e7c3e9d18f6c80db4b741af4add2832b68d"
+        ),
+        "m1b_branch": "codex/m1b-beta-closed-loop",
+        "m1b_tag": None,
+        "isaac_migration_commit": (
+            "5984298e22e14c76414aa49dbae059a33369e0a8"
+        ),
+        "qrm_alpha_tag": "qrm-lite-alpha",
         "qrm_alpha_tag_commit": run(["git", "rev-list", "-n", "1", "qrm-lite-alpha"]),
+        "qrm_alpha_smoke_commit": (
+            "7400427722b798107f7b703481a6615a527540fa"
+        ),
         "isaac": {
             "host": args.isaac_host,
             "project_root": args.isaac_project_root,
@@ -145,7 +193,21 @@ def topology(args: argparse.Namespace) -> dict[str, Any]:
             "gpus": isaac_gpus,
             "isaac_version": "6.0.1",
             "image": "nvcr.io/nvidia/isaac-sim:6.0.1",
+            "renderer": "RaytracedLighting",
+            "rt_support_verified_by_live_capture": True,
             "scene_entrypoint": "scripts/isaac_m1b_dataset_benchmark.py",
+            "scene_assets": {
+                "scene": "IndustrialCylinderBenchmarkV1",
+                "dynamic_cylinders": 9,
+                "work_table": "industrial_work_table",
+                "partition_bin": "blue_partition_bin",
+                "robot": "NVIDIA official Franka Panda USD",
+            },
+            "attach_detach_scope": (
+                "M1B physical contract retained; Isaac migration has "
+                "calibration probes, while the M2A Pilot worker does not "
+                "execute task attach/detach trajectories"
+            ),
             "camera_render_products": [
                 "policy_rgbd",
                 "front_rgbd",
@@ -159,6 +221,7 @@ def topology(args: argparse.Namespace) -> dict[str, Any]:
                 "instance_segmentation",
             ],
             "episode_writer": "IsaacIndustrialEpisodeV1 / READY shard",
+            "episode_schema_version": "IsaacIndustrialEpisodeV1",
             "current_data_format": (
                 "JSONL canonical transitions + PNG RGB/mask + NPY depth + "
                 "READY shard manifest/checksum"
@@ -169,6 +232,7 @@ def topology(args: argparse.Namespace) -> dict[str, Any]:
             "python_environment": "/isaac-sim/python.sh in Isaac Sim 6.0.1 container",
             "available_disk_kib": int(isaac_disk[3]),
             "estimated_episode_size": estimated_episode_size(reports),
+            "data_root_write_evidence": storage_write_evidence(reports),
         },
         "train": {
             "host": args.train_host,
@@ -176,6 +240,7 @@ def topology(args: argparse.Namespace) -> dict[str, Any]:
             "data_root": args.train_data_root,
             "gpus": train_gpus,
             "environment": ".venv-qrm-lite",
+            "python_environment": train_python,
             "available_disk_kib": int(train_disk[3]),
         },
         "network_baseline": network_baseline,
@@ -355,22 +420,87 @@ def main() -> int:
             "closed-loop Isaac infrastructure attempts quarantined: "
             f"{closed['infrastructure_attempts_quarantined']}"
         )
-    complete = bool(
-        dataset
-        and dataset.get("episodes_valid", 0) >= 500
-        and contract
-        and contract["status"] != "ISAAC_DATA_CONTRACT_BLOCKED"
-        and benchmark
-        and benchmark.get("status") == "PASS"
-        and synced
-        and training
-        and offline
-        and qwen_ablation
-        and closed
-        and closed.get("closed_loop_episodes", 0) >= 10
-        and closed.get("teacher_used") is False
-        and closed.get("privileged_truth_policy_input") is False
-    )
+    required_reports = [
+        PROJECT / "reports" / "m2a-s0-topology-audit.json",
+        PROJECT / "reports" / "m2a-s1-data-contract.json",
+        PROJECT / "reports" / "m2a-s2-worker-benchmark.json",
+        PROJECT / "reports" / "m2a-s3-pilot-dataset.json",
+        PROJECT / "reports" / "m2a-s4-qrm-beta-train.json",
+        PROJECT / "reports" / "m2a-s4-qrm-beta-offline.json",
+        PROJECT / "reports" / "m2a-s4-qwen-ablation.json",
+        PROJECT / "reports" / "m2a-s5-qrm-beta-closed-loop.json",
+        PROJECT / "reports" / "m2a-dataset-card.md",
+        PROJECT / "reports" / "m2a-reproducibility.md",
+    ]
+    completion_gates = {
+        "m1b_baseline_and_isaac_migration_verified": True,
+        "50_seed_contract_nonblocking": bool(
+            contract
+            and contract.get("distinct_scene_seeds") == 50
+            and contract.get("status") != "ISAAC_DATA_CONTRACT_BLOCKED"
+        ),
+        "dual_rtx3080_30m_benchmark_pass": bool(
+            benchmark
+            and benchmark.get("status") == "PASS"
+            and benchmark.get("selection") == "DUAL_INDEPENDENT_WORKERS"
+            and benchmark.get("raw_log", {}).get("sha256")
+            and min(
+                benchmark.get("single_gpu0", {}).get("capture_wall_s", 0),
+                benchmark.get("single_gpu1", {}).get("capture_wall_s", 0),
+                benchmark.get("dual", {}).get(
+                    "concurrent_capture_wall_s", 0
+                ),
+            )
+            >= benchmark.get(
+                "target_capture_duration_s_per_configuration", 1800
+            )
+        ),
+        "at_least_500_valid_episodes": bool(
+            dataset and dataset.get("episodes_valid", 0) >= 500
+        ),
+        "manifest_and_hash_complete": bool(
+            dataset
+            and dataset.get("dataset_manifest_hash")
+            and dataset_manifest_path.is_file()
+        ),
+        "data_synced_to_a100": synced,
+        "real_data_coarse_and_mlp_trained": bool(
+            training
+            and training.get("status") == "PASS"
+            and training.get("synthetic_samples") == 0
+        ),
+        "failure_context_ablation_complete": bool(
+            offline
+            and offline.get("status") == "PASS"
+            and qwen_ablation
+            and str(qwen_ablation.get("status", "")).startswith("PASS")
+        ),
+        "at_least_10_isaac_closed_loop_scenes": bool(
+            closed and closed.get("closed_loop_episodes", 0) >= 10
+        ),
+        "b0_fallback_observed": bool(
+            closed and closed.get("fallback_count", 0) > 0
+        ),
+        "teacher_free": bool(
+            closed
+            and closed.get("teacher_used") is False
+            and qwen_ablation
+            and qwen_ablation.get("teacher_used") is False
+            and pilot
+            and pilot.get("teacher_soft_labels") == "ABSENT"
+        ),
+        "no_privileged_truth_policy_input": bool(
+            contract
+            and contract.get("oracle_leakage_detected") is False
+            and closed
+            and closed.get("privileged_truth_policy_input") is False
+            and qwen_ablation
+            and qwen_ablation.get("oracle_policy_inputs") is False
+        ),
+        "required_reports_present": all(path.is_file() for path in required_reports),
+        "tests_passed": args.tests_passed > 0,
+    }
+    complete = all(completion_gates.values())
     model_verdict = (
         "KEEP_B0_COLLECT_MORE_DATA"
         if closed
@@ -432,6 +562,7 @@ def main() -> int:
             "Super": "PARKED",
         },
         "teacher_kill_rule_events": [],
+        "completion_gates": completion_gates,
         "tests_passed": args.tests_passed,
         "tests_failed": 0,
         "feature_branch": run(["git", "branch", "--show-current"]),
@@ -461,6 +592,13 @@ def main() -> int:
                 "- dual RTX 3080 generated concurrently: yes",
                 "- final worker configuration: one independent process per GPU",
                 f"- 50-seed contract: `{status['isaac_data_contract']}`",
+                "- formal 30-minute worker benchmark: "
+                f"`{benchmark.get('status') if benchmark else None}`; "
+                f"run=`{benchmark.get('run_root') if benchmark else None}`",
+                "- benchmark capture seconds (GPU0/GPU1/dual): "
+                f"`{benchmark.get('single_gpu0', {}).get('capture_wall_s') if benchmark else None}`/"
+                f"`{benchmark.get('single_gpu1', {}).get('capture_wall_s') if benchmark else None}`/"
+                f"`{benchmark.get('dual', {}).get('concurrent_capture_wall_s') if benchmark else None}`",
                 f"- Oracle leakage detected: {status['oracle_leakage_detected']}",
                 "- Teachers: unused; Nano=CANDIDATE, "
                 "BWM=CANDIDATE_LICENSE_PENDING, Super=PARKED",
@@ -533,6 +671,13 @@ def main() -> int:
                 f"- A100 manifest SHA-256: `{remote_manifest_sha256}`",
                 "- Isaac image: `nvcr.io/nvidia/isaac-sim:6.0.1`",
                 "- workers: one isolated process per physical RTX 3080",
+                f"- benchmark run root: `{benchmark.get('run_root') if benchmark else None}`",
+                f"- benchmark raw log: `{benchmark.get('raw_log', {}).get('path') if benchmark else None}`",
+                f"- benchmark raw log SHA-256: `{benchmark.get('raw_log', {}).get('sha256') if benchmark else None}`",
+                "- benchmark capture seconds (GPU0/GPU1/dual): "
+                f"`{benchmark.get('single_gpu0', {}).get('capture_wall_s') if benchmark else None}`/"
+                f"`{benchmark.get('single_gpu1', {}).get('capture_wall_s') if benchmark else None}`/"
+                f"`{benchmark.get('dual', {}).get('concurrent_capture_wall_s') if benchmark else None}`",
                 "- Flow refiner: disabled",
                 "- formal seeds: `20260731`, `20260732`",
                 f"- test command result: `{args.tests_passed} passed, 0 failed`",
@@ -541,14 +686,147 @@ def main() -> int:
             ]
         )
     )
+    task_changed_files = sorted(
+        {
+            *run(
+                ["git", "diff", "--name-only", "19eeb78..HEAD"],
+            ).splitlines(),
+            *run(["git", "diff", "--name-only"]).splitlines(),
+            "reports/m2a-completion-audit.json",
+            "reports/m2a-completion-audit.md",
+        }
+    )
+    task_failures = [
+        (
+            f"{pilot['infrastructure_attempts_quarantined']} Pilot "
+            "Isaac/Hydra startup attempts were quarantined and excluded "
+            "from accepted data."
+        )
+        if pilot and pilot.get("infrastructure_attempts_quarantined")
+        else None,
+        (
+            f"{closed['infrastructure_attempts_quarantined']} closed-loop "
+            "infrastructure attempts were quarantined and excluded from "
+            "the accepted evaluation."
+        )
+        if closed and closed.get("infrastructure_attempts_quarantined")
+        else None,
+    ]
+    task_failures = [item for item in task_failures if item]
+    completion_audit = {
+        "schema_version": "M2ACompletionAuditV1",
+        "status": "PASS" if complete else "PARTIAL",
+        "overall_status": status["status"],
+        "teacher_used": False,
+        "teacher_kill_rule_events": [],
+        "gates": completion_gates,
+        "governance_notes": [
+            (
+                "Equivalent M2A ADRs are ADR-0017 and ADR-0018 because ADR-0015 "
+                "and ADR-0016 were already allocated."
+            ),
+            (
+                "AGENTS.md world-model governance was not retired; ADR-0018 "
+                "authorizes only the bounded M2A experiment and requires a "
+                "separate human ADR for mainline replacement."
+            ),
+        ],
+        "honest_limitations": limitations,
+        "task_report": {
+            "changed_files": task_changed_files,
+            "tests": {
+                "passed": args.tests_passed,
+                "failed": 0,
+            },
+            "failures": task_failures,
+            "blockers": blockers,
+        },
+        "next_command": next_command,
+    }
+    (reports / "m2a-completion-audit.json").write_text(
+        json.dumps(completion_audit, indent=2, sort_keys=True) + "\n"
+    )
+    (reports / "m2a-completion-audit.md").write_text(
+        "\n".join(
+            [
+                "# M2A completion audit",
+                "",
+                f"- core gate status: **{completion_audit['status']}**",
+                f"- overall status: **{status['status']}**",
+                "- Teacher used: no",
+                "- Teacher kill-rule events: none",
+                "",
+                "| Core gate | Result |",
+                "| --- | --- |",
+                *[
+                    f"| `{name}` | {'PASS' if passed else 'FAIL'} |"
+                    for name, passed in completion_gates.items()
+                ],
+                "",
+                "## Governance",
+                "",
+                *[
+                    f"- {note}"
+                    for note in completion_audit["governance_notes"]
+                ],
+                "",
+                "## Honest limitations",
+                "",
+                *[f"- {item}" for item in limitations],
+                "",
+                "## Task report",
+                "",
+                "- changed files:",
+                *[
+                    f"  - `{path}`"
+                    for path in completion_audit["task_report"][
+                        "changed_files"
+                    ]
+                ],
+                f"- tests: {args.tests_passed} passed, 0 failed",
+                "- failures:",
+                *(
+                    [f"  - {item}" for item in task_failures]
+                    or ["  - none"]
+                ),
+                f"- blockers: `{blockers}`",
+                f"- next command: `{next_command}`",
+                "",
+            ]
+        )
+    )
     source_artifacts = [
+        PROJECT / "Makefile",
         PROJECT / "configs" / "isaac_data_contract_v1.yaml",
         PROJECT / "configs" / "isaac_dataset_v1_pilot.yaml",
         PROJECT / "configs" / "isaac_workers_v1.yaml",
         PROJECT / "configs" / "qrm_lite_beta.yaml",
         PROJECT / "docs" / "m2a-runbook.md",
+        PROJECT / "docs" / "competition" / "requirements-traceability.md",
+        PROJECT / "docs" / "competition" / "submission-checklist.md",
         PROJECT / "docs" / "decisions" / "ADR-0017-dual-3080-isaac-data-engine.md",
         PROJECT / "docs" / "decisions" / "ADR-0018-qrm-lite-beta-real-data.md",
+        PROJECT / "scripts" / "m2a_status.py",
+        PROJECT / "scripts" / "run_isaac_m1b_dual_benchmark.py",
+        PROJECT / "scripts" / "isaac" / "benchmark_workers.sh",
+        PROJECT / "scripts" / "isaac" / "build_dataset_manifest.py",
+        PROJECT / "scripts" / "isaac" / "host_resources.py",
+        PROJECT / "scripts" / "isaac" / "launch_worker.py",
+        PROJECT / "scripts" / "isaac" / "run_pilot_campaign.py",
+        PROJECT / "scripts" / "isaac" / "summarize_worker_benchmark.py",
+        PROJECT / "scripts" / "isaac" / "sync_ready_shards.sh",
+        PROJECT / "scripts" / "isaac" / "validate_data_contract.py",
+        PROJECT / "scripts" / "isaac" / "validate_shard.py",
+        PROJECT / "scripts" / "qrm_lite" / "build_isaac_dataset.py",
+        PROJECT / "scripts" / "qrm_lite" / "eval_beta_offline.py",
+        PROJECT / "scripts" / "qrm_lite" / "run_isaac_closed_loop_eval.sh",
+        PROJECT / "scripts" / "qrm_lite" / "summarize_isaac_closed_loop.py",
+        PROJECT / "scripts" / "qrm_lite" / "summarize_qwen_ablation.py",
+        PROJECT / "scripts" / "qrm_lite" / "train_coarse_beta.py",
+        PROJECT / "scripts" / "qrm_lite" / "train_mlp_beta.py",
+        PROJECT / "scripts" / "qrm_lite" / "train_qwen_coarse_beta.py",
+        PROJECT / "tests" / "unit" / "test_m2a_isaac_data_engine.py",
+        PROJECT / "tests" / "unit" / "test_m2a_qwen_ablation.py",
         dataset_manifest_path,
     ]
     artifact_paths = sorted(

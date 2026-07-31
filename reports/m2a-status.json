@@ -3,6 +3,7 @@
   "blockers": [],
   "closed_loop_episodes": 10,
   "commits": [
+    "dc4d51f6ab78fee6fcec6473a7368dffad3fb9ea",
     "19eeb78e2b5a6f43a51d40b3c36bb9404715aff5",
     "aaabf2b980a50f28e646b0e08b87bdf9632a2639",
     "82afb698357b8d296bb644d26ac2e281388b9d88",
@@ -35,6 +36,22 @@
     "7400427722b798107f7b703481a6615a527540fa",
     "98b5747247bf9d67c959d371790c753491b1efdf"
   ],
+  "completion_gates": {
+    "50_seed_contract_nonblocking": true,
+    "at_least_10_isaac_closed_loop_scenes": true,
+    "at_least_500_valid_episodes": true,
+    "b0_fallback_observed": true,
+    "data_synced_to_a100": true,
+    "dual_rtx3080_30m_benchmark_pass": true,
+    "failure_context_ablation_complete": true,
+    "m1b_baseline_and_isaac_migration_verified": true,
+    "manifest_and_hash_complete": true,
+    "no_privileged_truth_policy_input": true,
+    "real_data_coarse_and_mlp_trained": true,
+    "required_reports_present": true,
+    "teacher_free": true,
+    "tests_passed": true
+  },
   "data_sync_manifest_sha256": "bef52bcfb84d6ecdb8e94c079a35a3a311f3ef24d00d8ca36e46c78db5680ebd",
   "data_synced_to_a100": true,
   "dataset_manifest_hash": "9843968cdbff17b6b4a291e30907f2c5dc855838ad3e4be7095a4bb8783449bc",
@@ -49,9 +66,6 @@
   "isaac_migration_verified": true,
   "limitations": [
     "pilot adjacent-frame corpus does not physically exercise: EMPTY_GRASP, RELEASE_FAILURE, WRONG_OBJECT",
-    "benchmark duration is shorter than the requested 30-minute soak",
-    "100-episode memory-growth measurement was not completed",
-    "CPU, RAM, and NVMe utilization are not sampled by the current runner",
     "The adjacent-frame Pilot does not physically exercise EMPTY_GRASP, WRONG_OBJECT, or RELEASE_FAILURE.",
     "Fifteen failed Isaac/Hydra startup attempts were retained as infrastructure quarantine and are not counted as failed episodes.",
     "Each paired run uses one epoch, at most 120 train samples, and 50 held-out test samples.",
@@ -79,7 +93,7 @@
   "lingbot_prep_status": "PASS",
   "m1b_baseline_verified": true,
   "model_verdict": "KEEP_B0_COLLECT_MORE_DATA",
-  "next_command": "make isaac-benchmark",
+  "next_command": "make m2a-status",
   "oracle_leakage_detected": false,
   "phase": "M2A",
   "qrm_coarse_trained": true,
@@ -90,7 +104,7 @@
   "same_failure_repeat_rate_delta": null,
   "schema_version": "M2AStatusV1",
   "shadow_isaac_status": "OFFLINE_ONLY",
-  "status": "PARTIAL",
+  "status": "PASS_WITH_LIMITATIONS",
   "teacher_kill_rule_events": [],
   "teacher_states": {
     "BWM": "CANDIDATE_LICENSE_PENDING",
@@ -100,7 +114,7 @@
   "teacher_used": false,
   "test_episodes": 66,
   "tests_failed": 0,
-  "tests_passed": 213,
+  "tests_passed": 215,
   "train_episodes": 418,
   "val_episodes": 66,
   "worker_strategy": "ONE_ISAAC_PROCESS_PER_GPU"

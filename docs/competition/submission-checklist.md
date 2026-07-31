@@ -2,12 +2,12 @@
 
 | Item | Owner | Status | Evidence |
 | --- | --- | --- | --- |
-| Simulation environment | M1B-alpha | in progress | industrial SDF and configuration |
-| Perception module | M1B-alpha | software verified | `xh_agent.perception` tests |
-| Virtual dataset and split | M1B-alpha | fixture verified | seed manifest generator |
-| Fine-tuned open-domain model | M1B-alpha | pending | adapter only; no checkpoint claimed |
-| Closed-loop task/recovery | M1B-beta | blocked by Alpha gate | not started |
-| Demo/video/rosbag | M1B-alpha | pending live runtime | recorder contract only |
+| Simulation environment | M2A | pass with retained dynamic limitations | Isaac Sim 6.0.1, dual RTX 3080, official Franka |
+| Perception module | M2A | software/data-contract verified | public RGB-D and track audit; no Oracle input |
+| Virtual dataset and split | M2A | READY | 550 valid episodes, 11 READY shards, 418/66/66 split |
+| Fine-tuned open-domain model | M2A | pass with limitations | Qwen LoRA two-seed ablation; no FailureContext gain or generalization claim |
+| Closed-loop task/recovery | M2A | smoke only | ten Isaac scenes, 50/50 B0 fallbacks; task success not established |
+| Demo/video/rosbag | M2A | partial | one honest QRM representative-failure clip; success and WRONG_OBJECT clips missing |
 # M2A additions
 
 - [x] Retain the versioned READY manifest and dataset card locally.

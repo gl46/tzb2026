@@ -1,10 +1,16 @@
 schema_version: M2ATopologyAuditV1
 status: PASS
 feature_branch: codex/m2a-isaac-data-qrm-beta
-head: 19eeb78e2b5a6f43a51d40b3c36bb9404715aff5
+head: dc4d51f6ab78fee6fcec6473a7368dffad3fb9ea
 origin_main: 0709cc19b66e52e8043eb26babb9a6f3e8ca9a72
-m1b_baseline_commit: '5984298'
+m1b_baseline_commit: 0ff751800b53b52233bc82b4a73638afd3a63940
+m1b_completion_report_commit: cd015e7c3e9d18f6c80db4b741af4add2832b68d
+m1b_branch: codex/m1b-beta-closed-loop
+m1b_tag: null
+isaac_migration_commit: 5984298e22e14c76414aa49dbae059a33369e0a8
+qrm_alpha_tag: qrm-lite-alpha
 qrm_alpha_tag_commit: 0287d23e586f5d977c71257aeca4accacecadbe8
+qrm_alpha_smoke_commit: 7400427722b798107f7b703481a6615a527540fa
 isaac:
   host: root@labserver
   project_root: /var/tmp/m2a-isaac-project-20260731
@@ -13,7 +19,7 @@ isaac:
   - index: 0
     name: NVIDIA GeForce RTX 3080
     vram_total_mib: 10240
-    vram_free_mib: 7258
+    vram_free_mib: 9733
     driver_version: '595.84'
   - index: 1
     name: NVIDIA GeForce RTX 3080
@@ -22,7 +28,17 @@ isaac:
     driver_version: '595.84'
   isaac_version: 6.0.1
   image: nvcr.io/nvidia/isaac-sim:6.0.1
+  renderer: RaytracedLighting
+  rt_support_verified_by_live_capture: true
   scene_entrypoint: scripts/isaac_m1b_dataset_benchmark.py
+  scene_assets:
+    scene: IndustrialCylinderBenchmarkV1
+    dynamic_cylinders: 9
+    work_table: industrial_work_table
+    partition_bin: blue_partition_bin
+    robot: NVIDIA official Franka Panda USD
+  attach_detach_scope: M1B physical contract retained; Isaac migration has calibration
+    probes, while the M2A Pilot worker does not execute task attach/detach trajectories
   camera_render_products:
   - policy_rgbd
   - front_rgbd
@@ -34,16 +50,25 @@ isaac:
   - semantic_segmentation
   - instance_segmentation
   episode_writer: IsaacIndustrialEpisodeV1 / READY shard
+  episode_schema_version: IsaacIndustrialEpisodeV1
   current_data_format: JSONL canonical transitions + PNG RGB/mask + NPY depth + READY
     shard manifest/checksum
   current_video_pipeline: policy_rgbd frames + ffmpeg evidence overlay exporter
   python_environment: /isaac-sim/python.sh in Isaac Sim 6.0.1 container
-  available_disk_kib: 397002712
+  available_disk_kib: 339194912
   estimated_episode_size:
     status: MEASURED
-    bytes: 5828458.7272727275
+    bytes: 5454120.681393798
     source: m2a-s2-worker-benchmark single-worker retained output
     scope: one adjacent-frame short episode
+  data_root_write_evidence:
+    status: MEASURED
+    method: retained payload bytes divided by Isaac capture wall time; effective workload
+      write rate, not raw block-device saturation
+    mb_per_s:
+      single_gpu0: 8.82908707193469
+      single_gpu1: 8.95395396171025
+      dual: 17.17049616870621
 train:
   host: node2
   project_root: /home/gl/xh-202607-qrm-lite
@@ -55,7 +80,10 @@ train:
     vram_free_mib: 80085
     driver_version: 595.71.05
   environment: .venv-qrm-lite
-  available_disk_kib: 4466793136
+  python_environment:
+    executable: /home/gl/xh-202607-qrm-lite/.venv-qrm-lite/bin/python
+    version: Python 3.12.3
+  available_disk_kib: 4466793104
 network_baseline:
   coordinator_to_isaac:
     bytes: 33554432

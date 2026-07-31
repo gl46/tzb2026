@@ -1,9 +1,11 @@
 # M2A status
 
-- status: **PARTIAL**
+- status: **PASS_WITH_LIMITATIONS**
 - dual RTX 3080 generated concurrently: yes
 - final worker configuration: one independent process per GPU
 - 50-seed contract: `VERIFIED_WITH_LIMITATIONS`
+- formal 30-minute worker benchmark: `PASS`; run=`/var/tmp/xh-data/isaac-industrial/benchmarks/m2a-20260731-060115`
+- benchmark capture seconds (GPU0/GPU1/dual): `1858.2479351859947`/`1821.227035087999`/`1913.3429329710198`
 - Oracle leakage detected: False
 - Teachers: unused; Nano=CANDIDATE, BWM=CANDIDATE_LICENSE_PENDING, Super=PARKED
 - Teacher kill-rule events: none
@@ -24,4 +26,4 @@
 - Teacher path remains disabled in Shadow and LingBot prep
 - model verdict: **KEEP_B0_COLLECT_MORE_DATA**
 - expand to 5k–10k now: no; collect physical failure/recovery coverage first
-- next command: `make isaac-benchmark`
+- next command: `make m2a-status`
