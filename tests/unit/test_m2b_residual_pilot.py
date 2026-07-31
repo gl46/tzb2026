@@ -75,3 +75,29 @@ def test_scaled_residual_pair_requires_independent_physical_correction() -> None
         "independent_executions"
     ] is True
     assert pair["teacher_used"] is False
+
+
+def test_scaled_residual_pair_ids_follow_independent_perturbed_execution() -> None:
+    corrected = _physical_execution([0.0, 0.0, 0.0], lifted=True)
+    first = build_pair(
+        _physical_execution([0.006, -0.002, 0.003], lifted=False),
+        corrected,
+        perturbed_path="/remote/perturbed-1.json",
+        corrected_path="/remote/corrected.json",
+        perturbed_sha256="b" * 64,
+        corrected_sha256="c" * 64,
+    )
+    second = build_pair(
+        _physical_execution([-0.015, 0.015, -0.005], lifted=False),
+        corrected,
+        perturbed_path="/remote/perturbed-2.json",
+        corrected_path="/remote/corrected.json",
+        perturbed_sha256="d" * 64,
+        corrected_sha256="c" * 64,
+    )
+    assert first["pair_id"] != second["pair_id"]
+    assert (
+        first["physical_correction_evidence"]["corrected_evidence_sha256"]
+        == second["physical_correction_evidence"]["corrected_evidence_sha256"]
+        == "c" * 64
+    )

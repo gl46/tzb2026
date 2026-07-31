@@ -17,6 +17,8 @@ from m2b.run_failure_evidence_worker import (
 from m2b.run_residual_evidence_worker import (
     accepted_correction,
     perturbation_for_seed,
+    perturbations_for_scene,
+    write_status as write_residual_status,
 )
 
 
@@ -155,6 +157,9 @@ def test_residual_worker_uses_bounded_nonzero_camera_perturbations() -> None:
         assert 0.002 <= abs(x) <= 0.015
         assert 0.002 <= abs(y) <= 0.015
         assert 0.001 <= abs(z) <= 0.005
+    for seed in range(4000, 4024):
+        offsets = perturbations_for_scene(seed, 3)
+        assert len(offsets) == len(set(offsets)) == 3
 
 
 def test_residual_worker_requires_hash_bound_accepted_correction(
@@ -177,3 +182,21 @@ def test_residual_worker_requires_hash_bound_accepted_correction(
     result = accepted_correction(summary)
     assert result is not None
     assert result["evidence_sha256"] == "a" * 64
+
+
+def test_residual_status_tracks_pair_target_and_remaining(tmp_path) -> None:
+    write_residual_status(
+        tmp_path,
+        [
+            {"scene_seed": 1, "perturbation_index": 1, "pair_ready": True},
+            {"scene_seed": 1, "perturbation_index": 2, "pair_ready": False},
+        ],
+        pair_target=30,
+        perturbations_per_scene=3,
+    )
+    payload = json.loads((tmp_path / "worker-status.json").read_text())
+    assert payload["pairs_ready"] == 1
+    assert payload["pairs_remaining"] == 29
+    assert payload["pair_target"] == 30
+    assert payload["perturbations_per_scene"] == 3
+    assert payload["teacher_used"] is False

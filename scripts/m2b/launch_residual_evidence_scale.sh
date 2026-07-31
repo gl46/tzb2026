@@ -45,6 +45,8 @@ for gpu in 0 1; do
     --gpu "${gpu}"
     --worker-id "${gpu}"
     --settle-s 10
+    --perturbations-per-scene 3
+    --pair-target 30
   )
   quoted_command=""
   printf -v quoted_command '%q ' "${remote_command[@]}"
