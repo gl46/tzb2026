@@ -1,0 +1,18 @@
+{
+  "all_targets_reconstructible": true,
+  "nonzero_pair_count": 24,
+  "online_policy_truth_input": false,
+  "output_path": "artifacts/m2b/residual-pair-pilot.jsonl",
+  "output_sha256": "86a474f5d3b9b2510e753e5ad7719b36b748112d41eb28ebd4a3f1bfea94cd17",
+  "reason": "pilot pairs share one physical correction anchor; independent perturbation/correction executions remain required",
+  "residual_absolute_max": 0.015,
+  "schema_version": "M2BResidualPairPilotReportV1",
+  "status": "PASS_NONDEGENERATE_PILOT_NOT_SCALE",
+  "sufficient_for_training": false,
+  "teacher_used": false,
+  "training_only_privileged_label": true,
+  "translation_max_m": 0.015,
+  "translation_min_m": 0.001,
+  "unique_physical_correction_anchors": 1,
+  "valid_pairs": 24
+}

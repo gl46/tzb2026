@@ -1,0 +1,17 @@
+{
+  "dataset_v2_episodes_admitted": 0,
+  "failure_counts": {
+    "EMPTY_GRASP": 1,
+    "RELEASE_FAILURE": 1,
+    "WRONG_OBJECT": 1
+  },
+  "output_bytes": 82354,
+  "output_path": "artifacts/m2b/failure-evidence-pilot.jsonl",
+  "output_sha256": "bab211039d7afc717983df19fbb826310e9b93d730be1d4c2c7d4dfb49e8323b",
+  "privileged_truth_policy_input": false,
+  "reason": "complete model/runtime action trajectories are not logged by the calibration probe",
+  "records_valid": 3,
+  "schema_version": "M2BFailureEvidencePilotReportV1",
+  "status": "PASS_PRE_DATASET_EVIDENCE_ONLY",
+  "teacher_used": false
+}

@@ -31,7 +31,13 @@ def main() -> int:
         args.report_dir / "m2b-s0-runtime-mapping-audit.json"
     )
     dataset = load_optional(args.report_dir / "m2b-s2-dataset-v2.json")
+    evidence_pilot = load_optional(
+        args.report_dir / "m2b-s2-failure-evidence-pilot.json"
+    )
     residual = load_optional(args.report_dir / "m2b-s3-residual-pairs.json")
+    residual_pilot = load_optional(
+        args.report_dir / "m2b-s3-residual-pairs-pilot.json"
+    )
     training = load_optional(args.report_dir / "m2b-s4-training.json")
     closed_loop = load_optional(args.report_dir / "m2b-s5-closed-loop.json")
     blockers = []
@@ -61,8 +67,21 @@ def main() -> int:
         "dataset_v2_episodes_valid": (
             int(dataset.get("episodes_valid", 0)) if dataset else 0
         ),
+        "failure_evidence_pilot_records": (
+            int(evidence_pilot.get("records_valid", 0))
+            if evidence_pilot
+            else 0
+        ),
         "residual_pairs_valid": (
             int(residual.get("valid_pairs", 0)) if residual else 0
+        ),
+        "residual_pilot_status": (
+            residual_pilot.get("status") if residual_pilot else "NOT_RUN"
+        ),
+        "residual_pilot_pairs": (
+            int(residual_pilot.get("valid_pairs", 0))
+            if residual_pilot
+            else 0
         ),
         "runtime_mapping_baseline_status": (
             mapping.get("status") if mapping else "MISSING"
