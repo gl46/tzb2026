@@ -41,8 +41,10 @@ class M2BProspectiveRuntimeDecisionV1(StrictModel):
     model_input_sha256: str
     model_output_sha256: str
     request_sha256: str
+    structural_mapping_result_sha256: str
     mapping_result_sha256: str
     source_hashes: dict[str, str] = Field(default_factory=dict)
+    isolated_preflight_evidence_path: str | None = None
     isolated_preflight_evidence_sha256: str | None = None
     prospective_planning_check: bool
     isolated_from_evaluation_rollout: bool
@@ -61,6 +63,9 @@ class M2BProspectiveRuntimeDecisionV1(StrictModel):
             "input": self.model_input_sha256,
             "output": self.model_output_sha256,
             "request": self.request_sha256,
+            "structural_mapping_result": (
+                self.structural_mapping_result_sha256
+            ),
             "mapping_result": self.mapping_result_sha256,
         }
         invalid = sorted(
@@ -100,6 +105,10 @@ class M2BProspectiveRuntimeDecisionV1(StrictModel):
             ) is None:
                 raise ValueError(
                     "prospective planning lacks isolated preflight evidence"
+                )
+            if not self.isolated_preflight_evidence_path:
+                raise ValueError(
+                    "prospective planning lacks a preflight evidence path"
                 )
             if not self.source_hashes or any(
                 re.fullmatch(r"[0-9a-f]{64}", digest) is None

@@ -140,6 +140,12 @@ m2b-map-validate:
 		--output artifacts/m2b/runtime-mapping-heldout.jsonl \
 		--report reports/m2b-s5-runtime-mapping-offline.json
 m2b-map-prospective:
+	@test -n "$${M2B_MODEL_RECORDS}" -a -n "$${M2B_PREFLIGHT_MANIFEST}" || (echo "M2B_MODEL_RECORDS and M2B_PREFLIGHT_MANIFEST are required" >&2; exit 2)
+	$(PYTHON) scripts/m2b/build_prospective_runtime_decisions.py \
+		--model-records "$${M2B_MODEL_RECORDS}" \
+		--preflight-manifest "$${M2B_PREFLIGHT_MANIFEST}" \
+		--registry configs/qrm_runtime_mapping.yaml \
+		--output artifacts/m2b/prospective-runtime-decisions.jsonl
 	$(PYTHON) scripts/m2b/summarize_prospective_runtime_mapping.py \
 		--decisions artifacts/m2b/prospective-runtime-decisions.jsonl \
 		--report reports/m2b-s5-runtime-mapping-offline.json
