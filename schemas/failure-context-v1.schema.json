@@ -31,6 +31,7 @@
     "attempted_recoveries": { "type": "array", "items": { "type": "string" } },
     "last_recovery_result": { "type": ["string", "null"] },
     "last_action_summary": { "type": ["string", "null"] },
-    "last_target_track_id": { "type": ["string", "null"] }
+    "last_target_track_id": { "type": ["string", "null"] },
+    "last_carried_track_id": { "type": ["string", "null"] }
   }
 }

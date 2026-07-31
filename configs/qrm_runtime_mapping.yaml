@@ -124,7 +124,7 @@ skills:
     supported_phases: [RECOVERY]
     residual_allowed: false
   SAFE_PLACE_NON_TARGET:
-    model_class_ids: [coarse.skill.SAFE_PLACE_NON_TARGET]
+    model_class_ids: [coarse.skill.SAFE_PLACE_NON_TARGET, coarse.recovery.SAFE_PLACE_NON_TARGET]
     aliases: [SafePlaceNonTarget]
     alias_parameters: {}
     runtime_action: B0_SAFE_PLACE_NON_TARGET
@@ -137,7 +137,7 @@ skills:
     supported_phases: [RECOVERY]
     residual_allowed: false
   REASSOCIATE_TARGET:
-    model_class_ids: [coarse.skill.REASSOCIATE_TARGET]
+    model_class_ids: [coarse.skill.REASSOCIATE_TARGET, coarse.recovery.REASSOCIATE_TARGET]
     aliases: [ReassociateTarget]
     alias_parameters: {}
     runtime_action: PUBLIC_TRACK_REASSOCIATION
@@ -150,12 +150,12 @@ skills:
     supported_phases: [RECOVERY]
     residual_allowed: false
   RETRY_RELEASE:
-    model_class_ids: [coarse.skill.RETRY_RELEASE]
+    model_class_ids: [coarse.skill.RETRY_RELEASE, coarse.recovery.RETRY_RELEASE]
     aliases: [RetryRelease]
     alias_parameters: {}
     runtime_action: B0_RELEASE_RETRY
-    required_parameters: [target_track_id]
-    optional_parameters: [open_width_m]
+    required_parameters: []
+    optional_parameters: [target_track_id, open_width_m]
     parameter_enums: {}
     parameter_ranges: {open_width_m: [0.0, 0.08]}
     coordinate_frame: world

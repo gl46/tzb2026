@@ -5,6 +5,10 @@ import pytest
 from m2b.build_coarse_training_v2 import _source_relative, coarse_sample
 from m2b.summarize_coarse_ablation import summarize
 from m2b.validate_coarse_training_v2 import validate
+from xh_agent.policy.qrm_lite.coarse_inference import (
+    prediction_from_probabilities,
+)
+from xh_agent.policy.qrm_lite.coarse_prompt import coarse_prompt
 
 
 def _episode() -> dict:
@@ -25,6 +29,7 @@ def _episode() -> dict:
         "last_recovery_result": "SUCCESS",
         "last_action_summary": "public physical probe",
         "last_target_track_id": "target",
+        "last_carried_track_id": "carried",
     }
     return {
         "episode_id": "m2b-test-wrong-1",
@@ -32,6 +37,17 @@ def _episode() -> dict:
         "split": "train",
         "split_group": "scene-4025",
         "dataset_version": "isaac-industrial-v2-failure-rich",
+        "observation_before": {
+            "tracks": [
+                {
+                    "track_id": "carried",
+                    "category": "industrial_cylinder",
+                    "visual_color": "yellow",
+                    "position_world_m": [1.5, 2.5, 3.5],
+                    "confidence": 0.9,
+                }
+            ]
+        },
         "observation_after": {
             "label": "after_physical_lift",
             "timestamp_ns": 42,
@@ -90,6 +106,7 @@ def test_coarse_v2_has_no_fabricated_continuous_action_target() -> None:
     )
     payload = sample.model_dump(mode="json")
     assert sample.coarse_intent.skill_type == "SAFE_PLACE_NON_TARGET"
+    assert sample.coarse_intent.target_track_id == "carried"
     assert sample.continuous_action_target_available is False
     assert "nominal_action_chunk" not in payload
     assert "target_action_chunk" not in payload
@@ -99,6 +116,10 @@ def test_coarse_v2_has_no_fabricated_continuous_action_target() -> None:
         2.0,
         3.0,
     ]
+    retained = sample.observation.perception_tracks[-1]
+    assert retained.track_id == "carried"
+    assert retained.confidence == 0.0
+    assert retained.pose_xyzquat is None
     assert sample.provenance["base_to_camera_extrinsics"] == (
         "ABSENT_NOT_GUESSED"
     )
@@ -154,3 +175,32 @@ def test_ablation_summary_requires_matched_two_seed_improvement() -> None:
     assert report["failure_context_supported_offline"] is True
     assert report["formal_ablation"] is True
     assert len(report["pairs"]) == 2
+
+
+def test_shared_prompt_masks_fc_and_prediction_maps_to_recovery() -> None:
+    sample = coarse_sample(
+        _episode(),
+        rgb_uri="dataset://episodes/m2b-test/rgb/after.png",
+        depth_uri="dataset://episodes/m2b-test/depth/after.npy",
+    )
+    no_fc = coarse_prompt(
+        sample.observation,
+        use_failure_context=False,
+        allowed_skills=["REOBSERVE", "SAFE_PLACE_NON_TARGET"],
+    )
+    with_fc = coarse_prompt(
+        sample.observation,
+        use_failure_context=True,
+        allowed_skills=["REOBSERVE", "SAFE_PLACE_NON_TARGET"],
+    )
+    assert '"failure_type": "NONE"' in no_fc
+    assert '"failure_type": "WRONG_OBJECT"' in with_fc
+    prediction = prediction_from_probabilities(
+        sample.observation,
+        {"REOBSERVE": 0.2, "SAFE_PLACE_NON_TARGET": 0.8},
+        use_failure_context=True,
+    )
+    assert prediction.coarse.skill_type == "SAFE_PLACE_NON_TARGET"
+    assert prediction.coarse.target_track_id == "carried"
+    assert prediction.recovery_skill == "SAFE_PLACE_NON_TARGET"
+    assert prediction.confidence == 0.8

@@ -1,0 +1,35 @@
+{
+  "adapter": "/home/gl/xh-data/qrm-m2b/pipeline-smoke-v2/on-adapter",
+  "dataset_sha256": "67816d2592a3e94aaadcc3d99d1a2749934299ad7d5b9530058135aa9d74880d",
+  "failure_context": "on",
+  "initial_failure": {
+    "rejection_reason": "UNSUPPORTED_PHASE",
+    "rejections": 4,
+    "remote_report_sha256": "1d9039d254ee2be214145b6b9790b89f0905ff3017ea32eb417e07e9f81a4535",
+    "root_cause": "RECOVERY_DECISION was not normalized to the declared RECOVERY runtime phase",
+    "structural_mapping_rate": 0.0
+  },
+  "limitations": [
+    "This is a four-sample adapter reload and structural mapping smoke, not the formal ablation.",
+    "IK, collision, safety, and physical execution remain NOT_RUN."
+  ],
+  "planning_checks_complete": false,
+  "planning_gate_status": {
+    "collision": "NOT_RUN",
+    "ik": "NOT_RUN",
+    "safety": "NOT_RUN"
+  },
+  "privileged_truth_policy_input": false,
+  "remote_host": "gl@node2",
+  "remote_output_sha256": "52ab6ac59d233a86dd0a90be222a759814ed27bd1a011f5cb173c9276e143bc9",
+  "remote_report_sha256": "91cfee9c3b43c812cfc89cdbcda79b3c99ca7bb7d920874f50e77c313c4e5543",
+  "runtime_mapping_rate": null,
+  "samples": 4,
+  "schema_version": "M2BQwenAdapterReloadSmokeV1",
+  "skill_accuracy": 0.25,
+  "status": "PASS_ADAPTER_RELOAD_STRUCTURAL_MAPPING",
+  "structural_mapping_rate": 1.0,
+  "structurally_valid": 4,
+  "teacher_kill_rule_events": [],
+  "teacher_used": false
+}

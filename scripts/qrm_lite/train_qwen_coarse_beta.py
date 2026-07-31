@@ -11,8 +11,8 @@ from pathlib import Path
 
 from PIL import Image
 
+from xh_agent.policy.qrm_lite.coarse_prompt import coarse_prompt
 from xh_agent.policy.qrm_lite.contracts import (
-    FailureContextV1,
     QRMCoarseTrainingSampleV2,
     QRMTrainingSampleV1,
 )
@@ -59,34 +59,10 @@ def prompt(
     use_failure_context: bool,
     allowed_skills: list[str] | None = None,
 ) -> str:
-    observation = sample.observation
-    tracks = [
-        {
-            "track_id": track.track_id,
-            "category": track.category,
-            "confidence": round(track.confidence, 4),
-            "pose_xyzquat": track.pose_xyzquat,
-        }
-        for track in observation.perception_tracks
-    ]
-    context = (
-        observation.failure_context.model_dump(mode="json")
-        if use_failure_context
-        else FailureContextV1().model_dump(mode="json")
-    )
-    payload = {
-        "instruction": observation.instruction,
-        "public_tracks": tracks,
-        "joint_position": observation.joint_position,
-        "gripper_state": observation.gripper_state,
-        "current_skill_stage": observation.current_skill_stage,
-        "failure_context": context,
-        "allowed_skills": allowed_skills or ["APPROACH", "REOBSERVE"],
-    }
-    return (
-        "Choose exactly one safe coarse industrial skill from allowed_skills. "
-        "Simulator truth is unavailable. Context:\n"
-        + json.dumps(payload, sort_keys=True)
+    return coarse_prompt(
+        sample.observation,
+        use_failure_context=use_failure_context,
+        allowed_skills=allowed_skills or ["APPROACH", "REOBSERVE"],
     )
 
 

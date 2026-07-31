@@ -86,6 +86,7 @@ def test_adapter_selects_declared_recovery_head_only_when_failure_active() -> No
 
 
 def test_only_declared_recovery_stages_normalize_to_recovery_phase() -> None:
+    assert normalize_runtime_phase("RECOVERY_DECISION") == "RECOVERY"
     assert normalize_runtime_phase("REOBSERVE") == "RECOVERY"
     assert normalize_runtime_phase("ALTERNATE_OBLIQUE") == "RECOVERY"
     assert normalize_runtime_phase("APPROACH") == "APPROACH"

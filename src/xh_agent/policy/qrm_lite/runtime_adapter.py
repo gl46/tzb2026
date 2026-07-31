@@ -16,6 +16,7 @@ if TYPE_CHECKING:
 
 
 RECOVERY_STAGE_SKILLS = {
+    "RECOVERY_DECISION",
     "REGRASP",
     "REOBSERVE",
     "RETRY_TOP",
@@ -86,6 +87,6 @@ def build_runtime_skill_request(
         ),
         units=spec.units if spec is not None else "UNRESOLVED",
         current_phase=normalize_runtime_phase(observation.current_skill_stage),
-        confidence=None,
+        confidence=getattr(output, "confidence", None),
         residual_values=None,
     )

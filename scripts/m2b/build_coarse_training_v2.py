@@ -46,6 +46,7 @@ def coarse_sample(
     recovery_skill = str(episode["recovery_sequence"][0])
     capture = episode["observation_after"]
     camera = episode["public_camera"]
+    context = FailureContextV1.model_validate(episode["failure_context"])
     tracks = [
         PerceptionTrackV1(
             track_id=track["track_id"],
@@ -68,6 +69,39 @@ def coarse_sample(
         )
         for track in capture["tracks"]
     ]
+    if (
+        context.last_carried_track_id
+        and context.last_carried_track_id
+        not in {track.track_id for track in tracks}
+    ):
+        retained = next(
+            (
+                track
+                for track in episode["observation_before"]["tracks"]
+                if track["track_id"] == context.last_carried_track_id
+            ),
+            None,
+        )
+        if retained is None:
+            raise ValueError("public carried-track memory has no prior track")
+        tracks.append(
+            PerceptionTrackV1(
+                track_id=retained["track_id"],
+                category=(
+                    f"{retained['category']}:{retained['visual_color']}"
+                    if retained.get("visual_color")
+                    else retained["category"]
+                ),
+                confidence=0.0,
+                pose_xyzquat=None,
+            )
+        )
+    action_target_track_id = (
+        context.last_carried_track_id
+        if recovery_skill in {"SAFE_PLACE_NON_TARGET", "RETRY_RELEASE"}
+        and context.last_carried_track_id
+        else episode["task_spec"]["target_track_id"]
+    )
     transform_digest = hashlib.sha256(
         json.dumps(
             camera["camera_to_world_optical"], separators=(",", ":")
@@ -89,9 +123,7 @@ def coarse_sample(
         gripper_state=GRIPPER_AFTER_FAILURE[failure_type],
         current_skill_stage="RECOVERY_DECISION",
         perception_tracks=tracks,
-        failure_context=FailureContextV1.model_validate(
-            episode["failure_context"]
-        ),
+        failure_context=context,
     )
     return QRMCoarseTrainingSampleV2(
         sample_id=f"{episode['episode_id']}:coarse-recovery-0",
@@ -101,7 +133,7 @@ def coarse_sample(
         observation=observation,
         coarse_intent=CoarseIntentV1(
             skill_type=recovery_skill,
-            target_track_id=episode["task_spec"]["target_track_id"],
+            target_track_id=action_target_track_id,
             recovery_mode=failure_type.lower(),
             reobserve_flag=recovery_skill == "REOBSERVE",
             failure_type_aux=failure_type,
@@ -115,6 +147,11 @@ def coarse_sample(
             "continuous_action_target": "ABSENT_NOT_GUESSED",
             "base_to_camera_extrinsics": "ABSENT_NOT_GUESSED",
             "public_camera_to_world_sha256": transform_digest,
+            "occluded_carried_track_retention": (
+                "PUBLIC_TEMPORAL_MEMORY_CONFIDENCE_ZERO"
+                if context.last_carried_track_id
+                else "NOT_APPLICABLE"
+            ),
         },
     )
 

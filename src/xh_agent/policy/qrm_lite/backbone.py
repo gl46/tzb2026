@@ -256,12 +256,21 @@ class Qwen35Backbone:
                 torch.save(self._model.state_dict(), path / "full_state.pt")
 
     def load_adapter(self, path: str | Path) -> None:
+        """Load a saved LoRA adapter for inference without mutating base weights."""
+
         path = Path(path)
         self.load()
+        if self._peft_attached:
+            raise RuntimeError("a LoRA adapter is already attached")
         if (path / "adapter_config.json").exists():
             from peft import PeftModel
 
-            self._model = PeftModel.from_pretrained(self._model, str(path))
+            self._model = PeftModel.from_pretrained(
+                self._model,
+                str(path),
+                is_trainable=False,
+            )
+            self._model.eval()
             self._peft_attached = True
             return
         marker = path / "adapter_marker.json"

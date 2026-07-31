@@ -532,6 +532,9 @@ def test_isaac_probe_m2b_public_predicates_use_rgbd_not_truth() -> None:
     assert "infer_empty_grasp_predicates(" in source
     assert "infer_occlusion_aware_wrong_object_predicates(" in source
     assert "infer_occlusion_aware_release_failure_predicates(" in source
+    assert "except ValueError as error:" in source
+    assert "PUBLIC_TARGET_TRACK_MISSING" in source
+    assert '"public_observation_rejection": empty_public_rejection' in source
     assert '"simulator_truth_policy_input": False' in source
 
 

@@ -113,6 +113,9 @@ def build_episode(
         last_recovery_result="SUCCESS",
         last_action_summary="physical failure injection followed by recovery",
         last_target_track_id=target_track_id,
+        last_carried_track_id=public_predicates.get(
+            "carried_public_track_id"
+        ),
     )
     physical: dict[str, Any] = {
         "schema_version": "PhysicalFailureEvidenceV2",

@@ -2,7 +2,7 @@
   "asset_root": "artifacts/m2b/dataset-v2-assets",
   "continuous_action_targets": 0,
   "output": "artifacts/m2b/coarse-training-v2.jsonl",
-  "output_sha256": "4631139a7379632d29d83a6525544977c9815f7ebda6a0100d6f3b493263a536",
+  "output_sha256": "67816d2592a3e94aaadcc3d99d1a2749934299ad7d5b9530058135aa9d74880d",
   "privileged_truth_policy_input": false,
   "samples_quarantined": 0,
   "samples_valid": 11,

@@ -76,6 +76,23 @@ def test_explicit_alias_injects_declared_grasp_family() -> None:
     assert result.parameters["grasp_family"] == "side"
 
 
+def test_retry_release_does_not_require_an_occluded_object_track() -> None:
+    result = validate_runtime_mapping(
+        request(
+            skill="RETRY_RELEASE",
+            model_class_id="coarse.recovery.RETRY_RELEASE",
+            task_target_track_id="track-occluded",
+            available_track_ids=[],
+            coordinate_frame="world",
+            units="m",
+            current_phase="RECOVERY",
+        ),
+        load_registry(REGISTRY_PATH),
+    )
+    assert result.status == "VALID"
+    assert result.runtime_action == "B0_RELEASE_RETRY"
+
+
 @pytest.mark.parametrize(
     ("updates", "reason"),
     [

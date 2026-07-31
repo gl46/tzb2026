@@ -43,6 +43,7 @@ class FailureContextV1(StrictModel):
     last_recovery_result: str | None = None
     last_action_summary: str | None = None
     last_target_track_id: str | None = None
+    last_carried_track_id: str | None = None
 
     @model_validator(mode="after")
     def skill_aliases_must_agree(self) -> "FailureContextV1":

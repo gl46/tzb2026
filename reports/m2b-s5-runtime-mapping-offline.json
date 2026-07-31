@@ -30,7 +30,7 @@
   },
   "privileged_truth_policy_input": false,
   "registry": "configs/qrm_runtime_mapping.yaml",
-  "registry_sha256": "86ce6e0d47d9e7f35dd23402ea63cfa107bacd4e7a2d5cb9aaf989c7733e52e6",
+  "registry_sha256": "0019b10e54c79cbca16f842dbfd86708ac1f5259e0d7d062be85855062207559",
   "rejection_reason_histogram": {},
   "runtime_mapping_rate": null,
   "schema_version": "M2BRuntimeMappingOfflineV1",

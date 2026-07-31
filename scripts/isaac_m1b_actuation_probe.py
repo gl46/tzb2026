@@ -2269,6 +2269,7 @@ def main() -> int:
             ),
         )
         empty_public_predicates = None
+        empty_public_rejection = None
         if m2b_public_rgbd is not None:
             assert m2b_public_before is not None
             assert m2b_task_target_track_id is not None
@@ -2276,11 +2277,16 @@ def main() -> int:
                 m2b_public_rgbd,
                 label="empty_grasp_reobserve",
             )
-            empty_public_predicates = infer_empty_grasp_predicates(
-                m2b_public_before,
-                empty_public_after,
-                task_target_track_id=m2b_task_target_track_id,
-            )
+            try:
+                empty_public_predicates = infer_empty_grasp_predicates(
+                    m2b_public_before,
+                    empty_public_after,
+                    task_target_track_id=m2b_task_target_track_id,
+                )
+            except ValueError as error:
+                empty_public_rejection = (
+                    f"PUBLIC_TARGET_TRACK_MISSING: {error}"
+                )
         phases["empty_grasp_return_to_pregrasp"] = _step_pose(
             robot,
             pregrasp,
@@ -2316,6 +2322,7 @@ def main() -> int:
                 if empty_public_predicates is not None
                 else None
             ),
+            "public_observation_rejection": empty_public_rejection,
             "training_eligible": bool(
                 empty_public_predicates is not None
                 and {"grasped=false", "lifted=false"}.issubset(
