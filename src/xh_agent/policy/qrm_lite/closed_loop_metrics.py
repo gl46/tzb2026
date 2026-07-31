@@ -285,6 +285,40 @@ def summarize_matched(
     by_method: dict[str, list[M2BClosedLoopEpisodeV1]] = defaultdict(list)
     by_key: dict[str, list[M2BClosedLoopEpisodeV1]] = defaultdict(list)
     findings: list[str] = []
+    mandatory_methods = {
+        "B0",
+        "QRM_COARSE_NO_FC",
+        "QRM_COARSE_FC",
+    }
+    missing_mandatory = mandatory_methods - set(expected_methods)
+    if missing_mandatory:
+        findings.append(
+            f"mandatory methods absent: {sorted(missing_mandatory)}"
+        )
+    episode_ids = [episode.episode_id for episode in episodes]
+    duplicate_episode_ids = sorted(
+        episode_id
+        for episode_id in set(episode_ids)
+        if episode_ids.count(episode_id) > 1
+    )
+    if duplicate_episode_ids:
+        findings.append(
+            f"duplicate episode IDs: {duplicate_episode_ids}"
+        )
+    decision_ids = [
+        decision.decision_id
+        for episode in episodes
+        for decision in episode.decisions
+    ]
+    duplicate_decision_ids = sorted(
+        decision_id
+        for decision_id in set(decision_ids)
+        if decision_ids.count(decision_id) > 1
+    )
+    if duplicate_decision_ids:
+        findings.append(
+            f"duplicate decision IDs: {duplicate_decision_ids}"
+        )
     for episode in episodes:
         by_method[episode.method].append(episode)
         by_key[episode.matched_key].append(episode)
@@ -334,6 +368,8 @@ def summarize_matched(
         "episodes": len(episodes),
         "matched_keys": len(by_key),
         "complete_matched_keys": complete_keys,
+        "unique_episode_ids": len(set(episode_ids)),
+        "unique_decision_ids": len(set(decision_ids)),
         "qrm_model_decisions_executed": qrm_executed,
         "minimum_model_executed_gate": 20,
         "method_metrics": method_metrics,

@@ -15,12 +15,13 @@ def _decision(
     model: bool,
     source: str,
     outcome: str = "SUCCESS",
+    suffix: str = "",
 ) -> M2BClosedLoopDecisionV1:
     fallback = source == "B0_FALLBACK"
     baseline = source == "B0_BASELINE"
     digest = "a" * 64
     return M2BClosedLoopDecisionV1(
-        decision_id=f"decision-{source}",
+        decision_id=f"decision-{source}-{suffix}",
         step_id=0,
         selected_skill="REOBSERVE",
         previous_failed_skill="GRASP",
@@ -156,20 +157,28 @@ def test_matched_gate_requires_twenty_real_model_executions() -> None:
                 _episode(
                     key,
                     "B0",
-                    _decision(model=False, source="B0_BASELINE"),
+                    _decision(
+                        model=False,
+                        source="B0_BASELINE",
+                        suffix=f"{seed}-b0",
+                    ),
                 ),
                 _episode(
                     key,
                     "QRM_COARSE_NO_FC",
                     _decision(
-                        model=True, source="MODEL_SELECTED_B0_SKILL"
+                        model=True,
+                        source="MODEL_SELECTED_B0_SKILL",
+                        suffix=f"{seed}-no-fc",
                     ),
                 ),
                 _episode(
                     key,
                     "QRM_COARSE_FC",
                     _decision(
-                        model=True, source="MODEL_SELECTED_B0_SKILL"
+                        model=True,
+                        source="MODEL_SELECTED_B0_SKILL",
+                        suffix=f"{seed}-fc",
                     ),
                 ),
             ]
@@ -197,5 +206,52 @@ def test_matched_gate_reports_missing_method() -> None:
     )
     assert report["formal_evaluation_ready"] is False
     assert report["findings"] == [
+        "mandatory methods absent: ['QRM_COARSE_NO_FC']",
         "scene-5000: missing methods ['QRM_COARSE_FC']"
     ]
+
+
+def test_matched_gate_rejects_duplicate_decision_evidence() -> None:
+    episodes = []
+    for seed in range(5000, 5010):
+        key = f"scene-{seed}"
+        episodes.extend(
+            [
+                _episode(
+                    key,
+                    "B0",
+                    _decision(
+                        model=False,
+                        source="B0_BASELINE",
+                        suffix=f"{seed}-b0",
+                    ),
+                ),
+                _episode(
+                    key,
+                    "QRM_COARSE_NO_FC",
+                    _decision(
+                        model=True,
+                        source="MODEL_SELECTED_B0_SKILL",
+                        suffix="reused",
+                    ),
+                ),
+                _episode(
+                    key,
+                    "QRM_COARSE_FC",
+                    _decision(
+                        model=True,
+                        source="MODEL_SELECTED_B0_SKILL",
+                        suffix=f"{seed}-fc",
+                    ),
+                ),
+            ]
+        )
+    report = summarize_matched(
+        episodes,
+        expected_methods=("B0", "QRM_COARSE_NO_FC", "QRM_COARSE_FC"),
+    )
+    assert report["formal_evaluation_ready"] is False
+    assert any(
+        finding.startswith("duplicate decision IDs:")
+        for finding in report["findings"]
+    )
