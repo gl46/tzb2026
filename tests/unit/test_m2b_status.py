@@ -200,3 +200,114 @@ def test_status_routes_to_residual_collection_after_dataset_gate(
     payload = json.loads(output.read_text())
     assert completed.returncode == 2
     assert payload["next_command"] == "make m2b-generate-residuals"
+
+
+def test_status_requires_persisted_final_verification_for_completion(
+    tmp_path: Path,
+) -> None:
+    reports = tmp_path / "reports"
+    reports.mkdir()
+    fixtures = {
+        "m2b-s0-m2a-freeze.json": {
+            "status": "PASS",
+            "baseline_commit_exists": True,
+            "dataset_hash_verified": True,
+            "m2a_reports_mutated": False,
+        },
+        "m2b-s1-physical-failure-smoke.json": {
+            "status": "PASS_PUBLIC_FAILURES_AND_RECOVERIES",
+            "accepted_failures": list(("EMPTY_GRASP", "WRONG_OBJECT", "RELEASE_FAILURE")),
+        },
+        "m2b-s2-dataset-v2.json": {
+            "limited_coverage_gate_passed": True,
+            "episodes_generated": 150,
+            "episodes_valid": 150,
+            "episodes_quarantined": 0,
+            "failure_counts": {failure: 50 for failure in ("EMPTY_GRASP", "WRONG_OBJECT", "RELEASE_FAILURE")},
+            "successful_recovery_counts": {failure: 50 for failure in ("EMPTY_GRASP", "WRONG_OBJECT", "RELEASE_FAILURE")},
+        },
+        "m2b-s3-residual-pairs.json": {
+            "status": "PASS_INFORMATIVE_RESIDUAL_TARGETS",
+            "valid_pairs": 50,
+            "all_targets_reconstructible": True,
+            "online_policy_truth_input": False,
+            "teacher_used": False,
+        },
+        "m2b-s4-training.json": {
+            "status": "PASS_ABLATION_COMPLETE",
+            "formal_ablation": True,
+            "failure_context_pipeline_verified": True,
+            "failure_context_model_sensitivity_observed": True,
+            "teacher_used": False,
+            "privileged_truth_policy_input": False,
+            "pairs": [{"seed": 1}, {"seed": 2}],
+        },
+        "m2b-s4-residual-mlp.json": {
+            "formal_two_seed_evaluation": True,
+            "mlp_residual_supported_offline": True,
+            "teacher_used": False,
+            "privileged_truth_policy_input": False,
+            "world_model_replaced": False,
+        },
+        "m2b-s5-runtime-mapping-offline.json": {
+            "runtime_mapping_rate": 1.0,
+            "planning_checks_complete": True,
+            "prospective_preflight_only": True,
+            "formal_mapping_ready": True,
+            "teacher_used": False,
+            "privileged_truth_policy_input": False,
+        },
+        "m2b-s5-closed-loop.json": {
+            "status": "PASS_FORMAL_MATCHED_EVALUATION_COMPLETE",
+            "formal_evaluation_ready": True,
+            "episodes": 60,
+            "matched_keys": 20,
+            "complete_matched_keys": 20,
+            "qrm_model_decisions_executed": 30,
+            "teacher_used": False,
+            "privileged_truth_policy_input": False,
+            "world_model_replaced": False,
+            "method_metrics": {
+                "B0": {"final_task_success_rate": 1.0},
+                "QRM_COARSE_NO_FC": {"model_decisions_total": 20, "final_task_success_rate": 0.5},
+                "QRM_COARSE_FC": {"model_decisions_total": 20, "final_task_success_rate": 1.0},
+            },
+        },
+    }
+    for name, payload in fixtures.items():
+        (reports / name).write_text(json.dumps(payload))
+    output = reports / "m2b-status.json"
+    missing = subprocess.run(
+        [sys.executable, "scripts/m2b/status.py", "--report-dir", str(reports), "--output", str(output)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert missing.returncode == 2
+    assert json.loads(output.read_text())["goal_complete"] is False
+
+    (reports / "m2b-final-verification.json").write_text(
+        json.dumps({"status": "PASS", "tests": {"passed": 300, "failed": 0}, "commands": []})
+    )
+    passed = subprocess.run(
+        [sys.executable, "scripts/m2b/status.py", "--report-dir", str(reports), "--output", str(output)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    payload = json.loads(output.read_text())
+    assert passed.returncode == 0
+    assert payload["goal_complete"] is True
+    assert payload["status"] == "PASS_WITH_LIMITATIONS"
+    assert payload["model_decisions_total"] == 40
+    assert payload["model_decision_coverage"] == 0.75
+    assert payload["system_verdict"] == "GO_QRM_COARSE_ONLY"
+    for name in (
+        "m2b-status.md",
+        "m2b-completion-audit.json",
+        "m2b-completion-audit.md",
+        "m2b-dataset-card.md",
+        "m2b-reproducibility.md",
+        "m2b-artifact-index.json",
+    ):
+        assert (reports / name).is_file()

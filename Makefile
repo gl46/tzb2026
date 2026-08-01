@@ -1,7 +1,7 @@
 PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,python3)
 export PYTHONPATH := src:scripts
 
-.PHONY: doctor test validate sim-smoke constrained-pick-place empty-grasp-failures record-constrained-episode moveit-plan-smoke baseline teacher-audit bakeoff-prepare m0-report m0-audit status m2a-doctor isaac-contract isaac-benchmark isaac-pilot isaac-validate isaac-sync qrm-beta-train qrm-beta-eval qrm-beta-closed-loop shadow-isaac lingbot-prep m2a-status m2b-audit m2b-export-schemas m2b-generate-failures m2b-generate-residuals m2b-pack-evidence-pilot m2b-dataset m2b-coarse-dataset m2b-coarse-gate m2b-residual-pilot m2b-residual-dataset m2b-residual-training-dataset m2b-physical-gates m2b-train m2b-map-validate m2b-run-prospective-preflights m2b-merge-preflight-shards m2b-preflight-manifest m2b-map-prospective m2b-run-matched-closed-loop m2b-merge-closed-loop-shards m2b-summarize-matched-closed-loop m2b-status
+.PHONY: doctor test validate sim-smoke constrained-pick-place empty-grasp-failures record-constrained-episode moveit-plan-smoke baseline teacher-audit bakeoff-prepare m0-report m0-audit status m2a-doctor isaac-contract isaac-benchmark isaac-pilot isaac-validate isaac-sync qrm-beta-train qrm-beta-eval qrm-beta-closed-loop shadow-isaac lingbot-prep m2a-status m2b-audit m2b-export-schemas m2b-generate-failures m2b-generate-residuals m2b-pack-evidence-pilot m2b-dataset m2b-coarse-dataset m2b-coarse-gate m2b-residual-pilot m2b-residual-dataset m2b-residual-training-dataset m2b-physical-gates m2b-train m2b-map-validate m2b-run-prospective-preflights m2b-merge-preflight-shards m2b-preflight-manifest m2b-map-prospective m2b-run-matched-closed-loop m2b-closed-loop m2b-merge-closed-loop-shards m2b-summarize-matched-closed-loop m2b-status
 doctor:
 	$(PYTHON) -m xh_agent.diagnostics.doctor --local --output reports/hardware-local.json
 	$(PYTHON) -m xh_agent.diagnostics.doctor --remote node2 --user gl --output reports/hardware-remote-node2.json
@@ -181,6 +181,7 @@ m2b-run-matched-closed-loop:
 		--journal "$${M2B_CLOSED_LOOP_JOURNAL}" \
 		--report "$${M2B_CLOSED_LOOP_BATCH_REPORT}" \
 		$${M2B_CLOSED_LOOP_GPU:+--gpu "$${M2B_CLOSED_LOOP_GPU}"}
+m2b-closed-loop: m2b-run-matched-closed-loop
 m2b-merge-closed-loop-shards:
 	@test -n "$${M2B_CLOSED_LOOP_EPISODE_SHARD0}" -a -n "$${M2B_CLOSED_LOOP_EPISODE_SHARD1}" -a -n "$${M2B_CLOSED_LOOP_JOURNAL_SHARD0}" -a -n "$${M2B_CLOSED_LOOP_JOURNAL_SHARD1}" -a -n "$${M2B_CLOSED_LOOP_EPISODES}" -a -n "$${M2B_CLOSED_LOOP_JOURNAL}" -a -n "$${M2B_CLOSED_LOOP_MERGE_REPORT}" || (echo "all closed-loop shard, output, and merge-report variables are required" >&2; exit 2)
 	$(PYTHON) scripts/m2b/merge_matched_closed_loop_shards.py \

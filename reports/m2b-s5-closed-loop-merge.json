@@ -1,0 +1,38 @@
+{
+  "episode_shards": [
+    {
+      "path": "artifacts/m2b/closed-loop-shards/20260731-gpu0-episodes.jsonl",
+      "sha256": "41888e06d9271d06163374317a3c479a2564a61847f8c2d126ccb4d95466c21a"
+    },
+    {
+      "path": "artifacts/m2b/closed-loop-shards/20260731-gpu1-episodes.jsonl",
+      "sha256": "c3bc5828622ed99f2600e1461ac31a30143a9ff336e227ca3ca4c2d190d9be85"
+    }
+  ],
+  "episodes": 60,
+  "episodes_output": "artifacts/m2b/closed-loop-20260731-episodes.jsonl",
+  "episodes_output_sha256": "6d9f2f87aa82045d24354b08d2010b2b9cdbaed508d36a3debfa278610f03d28",
+  "journal_output": "artifacts/m2b/closed-loop-20260731-journal.jsonl",
+  "journal_output_sha256": "7fadaff1408a8699912c8dbc864ec3cc895218cd4ea1c45d43784bee60464a43",
+  "journal_shards": [
+    {
+      "path": "artifacts/m2b/closed-loop-shards/20260731-gpu0-journal.jsonl",
+      "sha256": "39b0a692d53ee895b385e23c76a11ce6786824af951f3b50399eef3a436b4c58"
+    },
+    {
+      "path": "artifacts/m2b/closed-loop-shards/20260731-gpu1-journal.jsonl",
+      "sha256": "fcc31d82f92eeea6cbaca5ca54707b295c997c28346a7c83a8e34444f010edab"
+    }
+  ],
+  "matched_keys": 20,
+  "methods": {
+    "B0": 20,
+    "QRM_COARSE_FC": 20,
+    "QRM_COARSE_NO_FC": 20
+  },
+  "privileged_truth_policy_input": false,
+  "schema_version": "M2BMatchedClosedLoopShardMergeV1",
+  "status": "PASS",
+  "teacher_used": false,
+  "unique_decision_ids": 150
+}

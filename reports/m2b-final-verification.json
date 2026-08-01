@@ -1,0 +1,44 @@
+{
+  "commands": [
+    "PYTHONPATH=src:scripts .venv/bin/python -m pytest -q",
+    ".venv/bin/ruff check .",
+    ".venv/bin/python -m compileall -q src scripts tests",
+    "bash -n on every scripts/**/*.sh entry",
+    "PYTHONPATH=src:scripts .venv/bin/python scripts/validate_project.py",
+    "git diff --check",
+    "verify every reports/m2b-artifact-index.json SHA-256 entry",
+    "audit frozen matched closed-loop episode/journal identity, provenance, gates, and attribution invariants"
+  ],
+  "artifact_index_verified": true,
+  "closed_loop_evidence_audit": {
+    "collision_or_safety_violations": 0,
+    "decisions": 150,
+    "episodes": 60,
+    "journals": 60,
+    "matched_keys": 20,
+    "model_decisions": 40,
+    "model_executed": 30,
+    "model_rejected": 10,
+    "privileged_truth_policy_input": false,
+    "recorded_execution_evidence": 50,
+    "status": "PASS",
+    "teacher_used": false,
+    "unique_execution_evidence_hashes": 50
+  },
+  "failures": [
+    "One early residual candidate was quarantined because it did not contain independent physical perturbation/correction attempts; the source classification was corrected and the formal residual set ended at 51 valid / 0 quarantined.",
+    "Two pre-execution matched-batch invocations were rejected by shard-size validation before Isaac execution; explicit frozen GPU-shard support and regression tests were added, and neither rejected invocation entered accepted evidence."
+  ],
+  "project_validation": {
+    "root_import": "CPU_ONLY",
+    "schemas": 9,
+    "status": "PASS"
+  },
+  "schema_version": "M2BFinalVerificationV1",
+  "shell_syntax_failures": 0,
+  "status": "PASS",
+  "tests": {
+    "failed": 0,
+    "passed": 364
+  }
+}
