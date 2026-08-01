@@ -1,0 +1,26 @@
+{
+  "executable_mappings": 10,
+  "failure_types": [
+    "EMPTY_GRASP",
+    "RELEASE_FAILURE",
+    "WRONG_OBJECT"
+  ],
+  "findings": [],
+  "formal_mapping_ready": false,
+  "minimum_runtime_mapping_rate": 0.95,
+  "model_outputs": 20,
+  "model_selected_decisions": 20,
+  "planning_checks_complete": true,
+  "post_execution_receipts_promoted": false,
+  "privileged_truth_policy_input": false,
+  "prospective_preflight_only": true,
+  "rejection_reason_histogram": {
+    "SAFETY_REJECTION": 10
+  },
+  "runtime_mapping_rate": 0.5,
+  "schema_version": "M2BProspectiveRuntimeMappingReportV1",
+  "status": "IN_PROGRESS_PROSPECTIVE_RUNTIME_MAPPING",
+  "teacher_used": false,
+  "unique_decision_ids": 20,
+  "unique_sample_ids": 20
+}

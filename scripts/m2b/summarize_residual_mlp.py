@@ -27,6 +27,11 @@ def summarize(reports: list[dict[str, Any]]) -> dict[str, Any]:
     dataset_hashes = {report.get("dataset_sha256") for report in reports}
     if len(dataset_hashes) != 1:
         findings.append("seed reports use different datasets")
+    checkpoint_hashes = [report.get("checkpoint_sha256") for report in reports]
+    if any(not isinstance(digest, str) or len(digest) != 64 for digest in checkpoint_hashes):
+        findings.append("every seed report must bind a SHA-256 checkpoint hash")
+    elif len(set(checkpoint_hashes)) != len(checkpoint_hashes):
+        findings.append("training seeds produced duplicate checkpoint hashes")
     eval_splits = {report.get("eval_split") for report in reports}
     if len(eval_splits) != 1:
         findings.append("seed reports use different held-out splits")
@@ -34,14 +39,10 @@ def summarize(reports: list[dict[str, Any]]) -> dict[str, Any]:
         findings.append("formal residual reports must use FailureContext on")
     if any(report.get("teacher_used") is not False for report in reports):
         findings.append("no-Teacher boundary is missing")
-    if any(
-        report.get("privileged_truth_policy_input") is not False
-        for report in reports
-    ):
+    if any(report.get("privileged_truth_policy_input") is not False for report in reports):
         findings.append("privileged truth entered policy input")
     if any(
-        not report.get("validation", {}).get("formal_evaluation_ready", False)
-        for report in reports
+        not report.get("validation", {}).get("formal_evaluation_ready", False) for report in reports
     ):
         findings.append("at least one seed report is not a formal held-out evaluation")
     for report in reports:
@@ -49,26 +50,18 @@ def summarize(reports: list[dict[str, Any]]) -> dict[str, Any]:
             for metric in METRICS:
                 value = report.get(group, {}).get(metric)
                 if not isinstance(value, (int, float)) or not math.isfinite(value):
-                    findings.append(
-                        f"seed {report.get('seed')}: {group}.{metric} is not finite"
-                    )
+                    findings.append(f"seed {report.get('seed')}: {group}.{metric} is not finite")
     formal = not findings
     all_beat_zero = bool(
-        reports
-        and all(report.get("beats_zero_residual") is True for report in reports)
+        reports and all(report.get("beats_zero_residual") is True for report in reports)
     )
     supported = formal and all_beat_zero
     aggregate = {
         metric: {
-            "model_mean": mean(
-                float(report["model_metrics"][metric]) for report in reports
-            )
+            "model_mean": mean(float(report["model_metrics"][metric]) for report in reports)
             if reports
             else None,
-            "zero_mean": mean(
-                float(report["zero_residual_baseline"][metric])
-                for report in reports
-            )
+            "zero_mean": mean(float(report["zero_residual_baseline"][metric]) for report in reports)
             if reports
             else None,
             "model_minus_zero_mean": mean(
@@ -95,8 +88,10 @@ def summarize(reports: list[dict[str, Any]]) -> dict[str, Any]:
         "dataset_sha256": next(iter(dataset_hashes), None),
         "eval_split": next(iter(eval_splits), None),
         "per_seed_beats_zero": {
-            str(report.get("seed")): report.get("beats_zero_residual")
-            for report in reports
+            str(report.get("seed")): report.get("beats_zero_residual") for report in reports
+        },
+        "checkpoint_sha256_by_seed": {
+            str(report.get("seed")): report.get("checkpoint_sha256") for report in reports
         },
         "aggregate_metrics": aggregate,
         "formal_two_seed_evaluation": formal,
@@ -110,9 +105,7 @@ def summarize(reports: list[dict[str, Any]]) -> dict[str, Any]:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--seed-report", action="append", required=True, type=Path
-    )
+    parser.add_argument("--seed-report", action="append", required=True, type=Path)
     parser.add_argument("--report", required=True, type=Path)
     args = parser.parse_args()
     reports = [json.loads(path.read_text()) for path in args.seed_report]

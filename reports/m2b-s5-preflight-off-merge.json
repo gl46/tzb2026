@@ -1,0 +1,20 @@
+{
+  "output": "artifacts/m2b/preflight-shards/20260731-off-merged.jsonl",
+  "output_sha256": "f2f6081701fbe5d75ffe6375c425d6efacfc4bd8d4224345318c3bf424331f5e",
+  "privileged_truth_policy_input": false,
+  "records": 20,
+  "schema_version": "M2BIsolatedPreflightShardMergeV1",
+  "shards": [
+    {
+      "path": "artifacts/m2b/preflight-shards/20260731-off-gpu0.jsonl",
+      "sha256": "4e781f176e4d20aae5b8bc78645e9e40be372e70fbd0d9229e5abba3e6d361af"
+    },
+    {
+      "path": "artifacts/m2b/preflight-shards/20260731-off-gpu1.jsonl",
+      "sha256": "45707550b2869aa9e7bbc435e91277df874a7d5c51c56aad43de27aa84826dc1"
+    }
+  ],
+  "status": "PASS",
+  "teacher_used": false,
+  "unique_sample_ids": 20
+}

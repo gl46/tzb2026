@@ -16,6 +16,7 @@
   "backbone_features": "NONE_STRUCTURED_CONTEXT_AND_NOMINAL_ONLY",
   "beats_zero_residual": true,
   "checkpoint": "/home/gl/xh-data/qrm-m2b/residual-mlp-v2/20260801-mlp.npz",
+  "checkpoint_sha256": "8fc8d59e80108e8b781e53ad89882791199003746800e35dccf677223f1d1214",
   "dataset": "/home/gl/xh-data/isaac-industrial/isaac-industrial-v2-failure-rich/residual-training-v2.jsonl",
   "dataset_sha256": "4a9a7cd53c6daa01088db55389684be08b8f7bb93112b6d1015e26f93e505835",
   "eval_split": "val",

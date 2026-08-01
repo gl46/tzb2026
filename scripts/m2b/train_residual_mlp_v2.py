@@ -52,9 +52,7 @@ def _masked_observation(
 ) -> QRMObservationV1:
     if use_failure_context:
         return observation
-    return observation.model_copy(
-        update={"failure_context": FailureContextV1()}
-    )
+    return observation.model_copy(update={"failure_context": FailureContextV1()})
 
 
 def sample_tensors(
@@ -77,16 +75,10 @@ def sample_tensors(
         ]
     )
     nominal = np.stack(
-        [
-            np.asarray(sample.nominal_action_chunk.values, dtype=np.float64)
-            for sample in samples
-        ]
+        [np.asarray(sample.nominal_action_chunk.values, dtype=np.float64) for sample in samples]
     )
     target = np.stack(
-        [
-            np.asarray(sample.residual_action_chunk.values, dtype=np.float64)
-            for sample in samples
-        ]
+        [np.asarray(sample.residual_action_chunk.values, dtype=np.float64) for sample in samples]
     )
     mask = np.stack(
         [
@@ -100,9 +92,7 @@ def sample_tensors(
     return context, nominal, target, mask
 
 
-def validate_samples(
-    samples: list[QRMTrainingSampleV1], *, eval_split: Split
-) -> dict[str, Any]:
+def validate_samples(samples: list[QRMTrainingSampleV1], *, eval_split: Split) -> dict[str, Any]:
     findings: list[str] = []
     split_counts = Counter(sample.split for sample in samples)
     episode_splits: dict[str, set[str]] = defaultdict(set)
@@ -113,22 +103,16 @@ def validate_samples(
             sample.residual_action_chunk,
             sample.target_action_chunk,
         )
-        expected_mask = [
-            [1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-        ]
+        expected_mask = [[1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]]
         for chunk in chunks:
             if len(chunk.values) != 1:
                 findings.append(f"{sample.sample_id}: horizon is not 1")
             if chunk.fps != 1.0:
                 findings.append(f"{sample.sample_id}: fps is not 1 Hz")
             if chunk.dimension_names != DIMENSIONS:
-                findings.append(
-                    f"{sample.sample_id}: action dimensions are not explicit M2B 10D"
-                )
+                findings.append(f"{sample.sample_id}: action dimensions are not explicit M2B 10D")
             if chunk.coordinate_frame != "camera_optical":
-                findings.append(
-                    f"{sample.sample_id}: action frame is not camera optical"
-                )
+                findings.append(f"{sample.sample_id}: action frame is not camera optical")
             if chunk.action_mask != expected_mask:
                 findings.append(
                     f"{sample.sample_id}: mask supervises dimensions without physical evidence"
@@ -142,26 +126,15 @@ def validate_samples(
         if not sample.simulator_supervision or not sample.simulator_supervision.get(
             "training_and_evaluation_only"
         ):
-            findings.append(
-                f"{sample.sample_id}: supervision boundary missing"
-            )
+            findings.append(f"{sample.sample_id}: supervision boundary missing")
         elif sample.simulator_supervision.get("teacher_used") is not False:
             findings.append(f"{sample.sample_id}: no-Teacher boundary missing")
-    leakage = sorted(
-        episode
-        for episode, splits in episode_splits.items()
-        if len(splits) > 1
-    )
+    leakage = sorted(episode for episode, splits in episode_splits.items() if len(splits) > 1)
     if leakage:
         findings.append(f"episode split leakage: {leakage}")
     n_train = split_counts["train"]
     n_eval = split_counts[eval_split]
-    formal_ready = bool(
-        len(samples) >= 50
-        and n_train >= 30
-        and n_eval >= 5
-        and not findings
-    )
+    formal_ready = bool(len(samples) >= 50 and n_train >= 30 and n_eval >= 5 and not findings)
     return {
         "findings": sorted(set(findings)),
         "split_counts": dict(sorted(split_counts.items())),
@@ -219,25 +192,18 @@ def masked_metrics(
             np.count_nonzero(active & (np.abs(prediction) <= 1e-12)) / count
         ),
         "target_near_zero_value_fraction": float(
-            np.count_nonzero(active & (np.abs(target) <= near_zero_threshold))
-            / count
+            np.count_nonzero(active & (np.abs(target) <= near_zero_threshold)) / count
         ),
         "prediction_near_zero_value_fraction": float(
-            np.count_nonzero(
-                active & (np.abs(prediction) <= near_zero_threshold)
-            )
-            / count
+            np.count_nonzero(active & (np.abs(prediction) <= near_zero_threshold)) / count
         ),
         "target_exact_zero_chunk_fraction": float(
-            np.mean(
-                np.sum(np.abs(target_active), axis=(1, 2)) <= 1e-12
-            )
+            np.mean(np.sum(np.abs(target_active), axis=(1, 2)) <= 1e-12)
         ),
         "prediction_near_zero_chunk_fraction": float(
             np.mean(
                 np.sum(
-                    active
-                    & (np.abs(prediction_active) <= near_zero_threshold),
+                    active & (np.abs(prediction_active) <= near_zero_threshold),
                     axis=(1, 2),
                 )
                 == supervised_per_sample
@@ -361,9 +327,7 @@ def train_masked_mlp_torch(
     m = torch.as_tensor(mask, dtype=torch.float32, device=tensor_device)
     x = torch.cat([c, n.reshape(len(train_samples), -1)], dim=-1)
     parameters = [
-        torch.nn.Parameter(
-            torch.as_tensor(value, dtype=torch.float32, device=tensor_device)
-        )
+        torch.nn.Parameter(torch.as_tensor(value, dtype=torch.float32, device=tensor_device))
         for value in (model.w1, model.b1, model.w2, model.b2)
     ]
     w1, b1, w2, b2 = parameters
@@ -390,9 +354,7 @@ def train_masked_mlp_torch(
             optimizer.step()
             squared_error += float(batch_squared_error.detach().item())
             active_total += float(active.detach().item())
-        history.append(
-            {"epoch": epoch, "masked_mse": squared_error / active_total}
-        )
+        history.append({"epoch": epoch, "masked_mse": squared_error / active_total})
     model.w1 = w1.detach().cpu().numpy().astype(np.float64)
     model.b1 = b1.detach().cpu().numpy().astype(np.float64)
     model.w2 = w2.detach().cpu().numpy().astype(np.float64)
@@ -442,9 +404,7 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--dataset", required=True, type=Path)
     parser.add_argument("--eval-split", choices=("val", "test"), default="val")
-    parser.add_argument(
-        "--failure-context", choices=("off", "on"), default="on"
-    )
+    parser.add_argument("--failure-context", choices=("off", "on"), default="on")
     parser.add_argument("--seed", type=int, default=20260731)
     parser.add_argument("--epochs", type=int, default=1000)
     parser.add_argument("--learning-rate", type=float, default=0.1)
@@ -457,13 +417,9 @@ def main() -> int:
     samples = load_samples(args.dataset)
     validation = validate_samples(samples, eval_split=args.eval_split)
     if validation["findings"]:
-        raise SystemExit(
-            "invalid residual dataset: " + "; ".join(validation["findings"])
-        )
+        raise SystemExit("invalid residual dataset: " + "; ".join(validation["findings"]))
     train_samples = [sample for sample in samples if sample.split == "train"]
-    eval_samples = [
-        sample for sample in samples if sample.split == args.eval_split
-    ]
+    eval_samples = [sample for sample in samples if sample.split == args.eval_split]
     if not train_samples or not eval_samples:
         raise SystemExit("train and requested held-out split must both be non-empty")
     use_failure_context = args.failure_context == "on"
@@ -500,15 +456,12 @@ def main() -> int:
     beats_zero = bool(
         model_metrics["mae"] < zero_metrics["mae"]
         and model_metrics["rmse"] < zero_metrics["rmse"]
-        and model_metrics["mean_l1_per_chunk"]
-        < zero_metrics["mean_l1_per_chunk"]
+        and model_metrics["mean_l1_per_chunk"] < zero_metrics["mean_l1_per_chunk"]
     )
     formal = validation["formal_evaluation_ready"]
     if formal:
         status = (
-            "PASS_FORMAL_MLP_BEATS_ZERO"
-            if beats_zero
-            else "FAIL_FORMAL_MLP_NOT_BETTER_THAN_ZERO"
+            "PASS_FORMAL_MLP_BEATS_ZERO" if beats_zero else "FAIL_FORMAL_MLP_NOT_BETTER_THAN_ZERO"
         )
     else:
         status = "PIPELINE_SMOKE_NOT_FORMAL"
@@ -518,6 +471,7 @@ def main() -> int:
         "dataset": str(args.dataset),
         "dataset_sha256": hashlib.sha256(args.dataset.read_bytes()).hexdigest(),
         "checkpoint": str(args.checkpoint),
+        "checkpoint_sha256": hashlib.sha256(args.checkpoint.read_bytes()).hexdigest(),
         "seed": args.seed,
         "failure_context": args.failure_context,
         "backbone_features": "NONE_STRUCTURED_CONTEXT_AND_NOMINAL_ONLY",

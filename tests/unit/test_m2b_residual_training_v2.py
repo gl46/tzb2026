@@ -62,11 +62,7 @@ def _payload() -> dict:
                 }
             ],
         },
-        "m2b_recovery": {
-            "wrong_object": {
-                "reassociated_target_track_id": "target-red"
-            }
-        },
+        "m2b_recovery": {"wrong_object": {"reassociated_target_track_id": "target-red"}},
     }
 
 
@@ -77,10 +73,7 @@ def _pair(seed: int, offset: tuple[float, float, float]) -> dict:
         "pair_id": f"pair-{seed}",
         "scene_seed": seed,
         "perturbed_nominal": nominal,
-        "residual_target": [
-            target - source
-            for source, target in zip(nominal, corrected)
-        ],
+        "residual_target": [target - source for source, target in zip(nominal, corrected)],
         "corrected_action": corrected,
         "physical_correction_evidence": {
             "independent_executions": True,
@@ -121,6 +114,7 @@ def _residual_seed_report(seed: int, beats_zero: bool) -> dict:
         "schema_version": "M2BMaskedResidualMLPReportV1",
         "seed": seed,
         "dataset_sha256": "a" * 64,
+        "checkpoint_sha256": f"{seed:064x}",
         "eval_split": "val",
         "failure_context": "on",
         "teacher_used": False,
@@ -150,9 +144,7 @@ def test_residual_converter_supervises_only_physical_translation() -> None:
     ]
     assert sample.nominal_action_chunk.fps == 1.0
     assert sample.observation.camera_extrinsics_base_T_cam == []
-    assert sample.provenance["base_to_camera_extrinsics"] == (
-        "ABSENT_NOT_GUESSED"
-    )
+    assert sample.provenance["base_to_camera_extrinsics"] == ("ABSENT_NOT_GUESSED")
     assert sample.simulator_supervision["training_and_evaluation_only"] is True
 
 
@@ -163,9 +155,7 @@ def test_residual_converter_supervises_only_physical_translation() -> None:
         ({"corrected_action": [1.0] * 10}, "does not reconstruct"),
     ],
 )
-def test_residual_converter_rejects_untrusted_pair(
-    mutation: dict, message: str
-) -> None:
+def test_residual_converter_rejects_untrusted_pair(mutation: dict, message: str) -> None:
     pair = _pair(4025, (0.006, -0.002, 0.003))
     pair.update(mutation)
     with pytest.raises(ValueError, match=message):
@@ -213,25 +203,21 @@ def test_masked_trainer_uses_train_and_evaluates_heldout() -> None:
         batch_size=4,
         hidden=64,
     )
-    model_metrics, zero_metrics = evaluate(
-        model, heldout, use_failure_context=True
-    )
-    context, nominal, _, _ = sample_tensors(
-        heldout, use_failure_context=True
-    )
+    model_metrics, zero_metrics = evaluate(model, heldout, use_failure_context=True)
+    context, nominal, _, _ = sample_tensors(heldout, use_failure_context=True)
     assert np.all(model.forward(context, nominal)[..., 3:] == 0.0)
     assert history[-1]["masked_mse"] < history[0]["masked_mse"]
     assert model_metrics["mae"] < zero_metrics["mae"]
 
 
 def test_residual_summary_requires_two_formal_consistent_seeds() -> None:
-    passed = summarize(
-        [_residual_seed_report(1, True), _residual_seed_report(2, True)]
-    )
+    passed = summarize([_residual_seed_report(1, True), _residual_seed_report(2, True)])
     assert passed["mlp_residual_supported_offline"] is True
-    failed = summarize(
-        [_residual_seed_report(1, True), _residual_seed_report(2, False)]
-    )
+    assert passed["checkpoint_sha256_by_seed"] == {
+        "1": f"{1:064x}",
+        "2": f"{2:064x}",
+    }
+    failed = summarize([_residual_seed_report(1, True), _residual_seed_report(2, False)])
     assert failed["mlp_residual_supported_offline"] is False
     assert failed["formal_two_seed_evaluation"] is True
 
@@ -243,9 +229,7 @@ def test_formal_negative_mlp_summary_is_a_completed_experiment(
     reports = []
     for seed, beats_zero in ((1, True), (2, False)):
         path = tmp_path / f"{seed}.json"
-        path.write_text(
-            json.dumps(_residual_seed_report(seed, beats_zero))
-        )
+        path.write_text(json.dumps(_residual_seed_report(seed, beats_zero)))
         reports.extend(["--seed-report", str(path)])
     output = tmp_path / "summary.json"
     completed = subprocess.run(
