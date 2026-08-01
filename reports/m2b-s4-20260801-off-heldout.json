@@ -1,0 +1,30 @@
+{
+  "adapter": "/home/gl/xh-data/qrm-m2b/coarse-ablation-v1/20260801-off-adapter",
+  "dataset_sha256": "2b32be13a00fe951af3374589391617162e27b956ea582cfdf109a80f916c219",
+  "failure_context": "off",
+  "limitations": [
+    "This reload gate validates held-out model inference and structural mapping only.",
+    "IK, collision, safety, and physical execution remain NOT_RUN."
+  ],
+  "model_checkpoint_sha256": "65147337449f1312c886c26fac32730c8c07e6efa2369b5fad55ee61347a1e25",
+  "output": "/home/gl/xh-data/qrm-m2b/coarse-ablation-v1/20260801-off-heldout.jsonl",
+  "output_sha256": "8f4b77c381a44bef1e11df33920041e3a6ce37c24017a99e9f75239a460de21d",
+  "planning_checks_complete": false,
+  "planning_gate_status": {
+    "collision": "NOT_RUN",
+    "ik": "NOT_RUN",
+    "safety": "NOT_RUN"
+  },
+  "privileged_truth_policy_input": false,
+  "registry_sha256": "0019b10e54c79cbca16f842dbfd86708ac1f5259e0d7d062be85855062207559",
+  "rejection_reason_histogram": {},
+  "runtime_mapping_rate": null,
+  "samples": 26,
+  "schema_version": "M2BQwenCoarseAdapterHeldoutV1",
+  "skill_accuracy": 0.38461538461538464,
+  "split": "val",
+  "status": "PASS_ADAPTER_RELOAD_STRUCTURAL_MAPPING",
+  "structural_mapping_rate": 1.0,
+  "structurally_valid": 26,
+  "teacher_used": false
+}

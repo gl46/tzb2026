@@ -2,7 +2,6 @@
   "blockers": [
     "at least 50 informative physical residual pairs are not packaged",
     "runtime mapping still requires Isaac IK/collision/safety dry-runs",
-    "two-seed A100 NoFC/FC training has not run",
     "two-seed A100 residual MLP-vs-zero evaluation has not run",
     "matched B0/QRM Isaac closed-loop evaluation has not run"
   ],
@@ -44,6 +43,6 @@
   "schema_version": "M2BStatusV1",
   "teacher_kill_rule_events": [],
   "teacher_used": false,
-  "training_status": "NOT_RUN",
+  "training_status": "PASS_ABLATION_COMPLETE",
   "world_model_mainline_replaced": false
 }

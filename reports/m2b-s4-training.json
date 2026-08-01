@@ -1,0 +1,68 @@
+{
+  "dataset_sha256": "2b32be13a00fe951af3374589391617162e27b956ea582cfdf109a80f916c219",
+  "failure_context_model_sensitivity_observed": true,
+  "failure_context_pipeline_verified": true,
+  "failure_context_supported_offline": true,
+  "formal_ablation": true,
+  "interpretation": "FC_DIRECTIONALLY_POSITIVE_ACROSS_SEEDS",
+  "mean_accuracy_delta": 0.6153846153846154,
+  "mean_macro_f1_delta": 0.8148148148148148,
+  "pairs": [
+    {
+      "accuracy_delta": 0.6153846153846154,
+      "failure_context_sanity": {
+        "inputs_changed": 26,
+        "masked_accuracy": 0.4230769230769231,
+        "masked_inputs_changed": 26,
+        "masked_prediction_change_rate": 0.5769230769230769,
+        "masked_prompt_set_sha256": "68dc832e01893260d9b681620d48a0885cff95176a7d765a9d80e4b4ab9f3244",
+        "model_sensitivity_observed": true,
+        "original_accuracy": 1.0,
+        "original_prompt_set_sha256": "982376d37f14490ad679dee91b56cf4db542096dd695255e6264d1675830ab94",
+        "permuted_accuracy": 0.0,
+        "permuted_inputs_changed": 26,
+        "permuted_prediction_change_rate": 1.0,
+        "permuted_prompt_set_sha256": "f77afb522e372ef97706cf16fc2beee2ef93ac07cc23f91a8c2c94c1e8ddf788",
+        "status": "PASS_FIELDS_MASKED_AND_PERMUTED"
+      },
+      "macro_f1_delta": 0.8148148148148148,
+      "n_eval": 26,
+      "n_train": 125,
+      "off_accuracy": 0.38461538461538464,
+      "off_macro_f1": 0.1851851851851852,
+      "on_accuracy": 1.0,
+      "on_macro_f1": 1.0,
+      "seed": 20260731
+    },
+    {
+      "accuracy_delta": 0.6153846153846154,
+      "failure_context_sanity": {
+        "inputs_changed": 26,
+        "masked_accuracy": 0.2692307692307692,
+        "masked_inputs_changed": 26,
+        "masked_prediction_change_rate": 0.7307692307692307,
+        "masked_prompt_set_sha256": "7b28f55c4ee088b121ce376ad11d58c1f1cdf74bfa1206fbb56fe50902a69890",
+        "model_sensitivity_observed": true,
+        "original_accuracy": 1.0,
+        "original_prompt_set_sha256": "897827bc711c6f1fb5421d88e5d867130b4ffb4371fd2ec1c066ed0356940ca1",
+        "permuted_accuracy": 0.0,
+        "permuted_inputs_changed": 26,
+        "permuted_prediction_change_rate": 1.0,
+        "permuted_prompt_set_sha256": "4c4d75c6bbbab5bf2423c6c725d6c8b9994ef3a88d6e4c19ed58778c9c1956b8",
+        "status": "PASS_FIELDS_MASKED_AND_PERMUTED"
+      },
+      "macro_f1_delta": 0.8148148148148148,
+      "n_eval": 26,
+      "n_train": 125,
+      "off_accuracy": 0.38461538461538464,
+      "off_macro_f1": 0.1851851851851852,
+      "on_accuracy": 1.0,
+      "on_macro_f1": 1.0,
+      "seed": 20260801
+    }
+  ],
+  "privileged_truth_policy_input": false,
+  "schema_version": "M2BCoarseFailureContextAblationV1",
+  "status": "PASS_ABLATION_COMPLETE",
+  "teacher_used": false
+}
