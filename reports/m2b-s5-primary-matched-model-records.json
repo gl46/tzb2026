@@ -1,0 +1,48 @@
+{
+  "counts_by_failure": {
+    "EMPTY_GRASP": 5,
+    "RELEASE_FAILURE": 10,
+    "WRONG_OBJECT": 5
+  },
+  "fc_checkpoint_sha256": "69bebed69cf8065d64fe9ee6899b7bd46f709fa90a55d1f55803ba3e50b0dda2",
+  "fc_output": "artifacts/m2b/coarse-ablation-v1/20260731-on-prospective20.jsonl",
+  "fc_output_sha256": "047e07ca710eb400a07c235b87947a015a1cd19b658b98bb4e869a931c7611f4",
+  "metric_based_selection": false,
+  "no_fc_checkpoint_sha256": "2a6f4296085cabaa1b6265db044f8d5b2929460b28d3aed0d5d330908e4bba11",
+  "no_fc_output": "artifacts/m2b/coarse-ablation-v1/20260731-off-prospective20.jsonl",
+  "no_fc_output_sha256": "f56c1d4b8da1500f2ffab02c710097efa2625304e83ba49addc1c1e9962bcd8f",
+  "privileged_truth_policy_input": false,
+  "quotas": {
+    "EMPTY_GRASP": 5,
+    "RELEASE_FAILURE": 10,
+    "WRONG_OBJECT": 5
+  },
+  "registry_sha256": "0019b10e54c79cbca16f842dbfd86708ac1f5259e0d7d062be85855062207559",
+  "sample_ids": [
+    "m2b-4017-release_failure-2257499164:coarse-recovery-0",
+    "m2b-4017-wrong_object-4149039903:coarse-recovery-0",
+    "m2b-4018-empty_grasp-644242592:coarse-recovery-0",
+    "m2b-4018-release_failure-4236713326:coarse-recovery-0",
+    "m2b-4019-empty_grasp-1588172247:coarse-recovery-0",
+    "m2b-4019-release_failure-3513606675:coarse-recovery-0",
+    "m2b-4019-wrong_object-3676316004:coarse-recovery-0",
+    "m2b-4030-empty_grasp-2110414995:coarse-recovery-0",
+    "m2b-4030-release_failure-3543928054:coarse-recovery-0",
+    "m2b-4030-wrong_object-2967380919:coarse-recovery-0",
+    "m2b-4031-empty_grasp-121776044:coarse-recovery-0",
+    "m2b-4031-release_failure-1069972000:coarse-recovery-0",
+    "m2b-4031-wrong_object-2461073064:coarse-recovery-0",
+    "m2b-4033-empty_grasp-2480697116:coarse-recovery-0",
+    "m2b-4033-release_failure-4247434628:coarse-recovery-0",
+    "m2b-4038-release_failure-1564605934:coarse-recovery-0",
+    "m2b-4038-wrong_object-706416412:coarse-recovery-0",
+    "m2b-4063-release_failure-3642957237:coarse-recovery-0",
+    "m2b-4069-release_failure-2858780891:coarse-recovery-0",
+    "m2b-4091-release_failure-545359681:coarse-recovery-0"
+  ],
+  "schema_version": "M2BMatchedModelRecordSelectionV1",
+  "selected_samples": 20,
+  "selection_policy": "LEXICOGRAPHIC_SAMPLE_ID_WITHIN_FAILURE_TYPE_NO_METRIC_SELECTION",
+  "status": "PASS_MATCHED_MODEL_RECORDS_SELECTED",
+  "teacher_used": false
+}
