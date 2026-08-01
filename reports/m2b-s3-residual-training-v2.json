@@ -1,0 +1,29 @@
+{
+  "masked_unsupervised_dimensions": [
+    "r6d_0",
+    "r6d_1",
+    "r6d_2",
+    "r6d_3",
+    "r6d_4",
+    "r6d_5",
+    "gripper"
+  ],
+  "output": "artifacts/m2b/residual-training-v2.jsonl",
+  "output_sha256": "4a9a7cd53c6daa01088db55389684be08b8f7bb93112b6d1015e26f93e505835",
+  "privileged_truth_policy_input": false,
+  "samples_quarantined": 0,
+  "samples_valid": 51,
+  "schema_version": "M2BResidualTrainingDatasetReportV1",
+  "split_counts": {
+    "test": 1,
+    "train": 43,
+    "val": 7
+  },
+  "status": "PASS",
+  "supervised_dimensions": [
+    "dx",
+    "dy",
+    "dz"
+  ],
+  "teacher_used": false
+}

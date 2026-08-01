@@ -1,0 +1,159 @@
+{
+  "action_dimensions": [
+    "dx",
+    "dy",
+    "dz",
+    "r6d_0",
+    "r6d_1",
+    "r6d_2",
+    "r6d_3",
+    "r6d_4",
+    "r6d_5",
+    "gripper"
+  ],
+  "action_frame": "camera_optical",
+  "action_units": "m_rad_norm",
+  "backbone_features": "NONE_STRUCTURED_CONTEXT_AND_NOMINAL_ONLY",
+  "beats_zero_residual": true,
+  "checkpoint": "/home/gl/xh-data/qrm-m2b/residual-mlp-v2/20260731-mlp.npz",
+  "dataset": "/home/gl/xh-data/isaac-industrial/isaac-industrial-v2-failure-rich/residual-training-v2.jsonl",
+  "dataset_sha256": "4a9a7cd53c6daa01088db55389684be08b8f7bb93112b6d1015e26f93e505835",
+  "eval_split": "val",
+  "failure_context": "on",
+  "fps": 1.0,
+  "horizon": 1,
+  "metric_delta_model_minus_zero": {
+    "mae": -0.004988160301346723,
+    "mean_l1_per_chunk": -0.014964480904040168,
+    "rmse": -0.00711182854777102
+  },
+  "model_metrics": {
+    "mae": 1.1839698653276799e-05,
+    "mean_l1_per_chunk": 3.55190959598304e-05,
+    "per_axis": {
+      "dx": {
+        "bias": 2.1353999812005877e-06,
+        "count": 7,
+        "mae": 2.1353999812005877e-06,
+        "rmse": 2.2501655004927494e-06
+      },
+      "dy": {
+        "bias": 2.9645270896078406e-06,
+        "count": 7,
+        "mae": 7.136867686841497e-06,
+        "rmse": 7.295912427545605e-06
+      },
+      "dz": {
+        "bias": -1.2009573517531287e-05,
+        "count": 7,
+        "mae": 2.6246828291788316e-05,
+        "rmse": 2.7093004374901418e-05
+      }
+    },
+    "prediction_exact_zero_value_fraction": 0.0,
+    "prediction_near_zero_chunk_fraction": 0.0,
+    "prediction_near_zero_value_fraction": 0.0,
+    "rmse": 1.625140474942038e-05,
+    "supervised_value_count": 21,
+    "target_exact_zero_chunk_fraction": 0.0,
+    "target_exact_zero_value_fraction": 0.0,
+    "target_near_zero_value_fraction": 0.0
+  },
+  "near_zero_threshold": 1e-06,
+  "normalization": "none",
+  "privileged_truth_policy_input": false,
+  "schema_version": "M2BMaskedResidualMLPReportV1",
+  "seed": 20260731,
+  "simulator_hard_truth_training_label": true,
+  "status": "PASS_FORMAL_MLP_BEATS_ZERO",
+  "supervised_dimensions": [
+    "dx",
+    "dy",
+    "dz"
+  ],
+  "teacher_used": false,
+  "training": {
+    "batch_size": 32,
+    "device": {
+      "backend": "PYTORCH_CUDA",
+      "cuda_device_name": "NVIDIA A100-SXM4-80GB",
+      "cuda_runtime": "13.0",
+      "optimizer": "Adam",
+      "peak_memory_allocated_bytes": 17452032,
+      "torch_version": "2.13.0+cu130"
+    },
+    "epochs": 1000,
+    "final_masked_mse": 1.6796770348419652e-10,
+    "hidden": 128,
+    "history_tail": [
+      {
+        "epoch": 995,
+        "masked_mse": 1.7532770067815407e-10
+      },
+      {
+        "epoch": 996,
+        "masked_mse": 1.7336157660151524e-10
+      },
+      {
+        "epoch": 997,
+        "masked_mse": 1.7165828792861938e-10
+      },
+      {
+        "epoch": 998,
+        "masked_mse": 1.740184878194439e-10
+      },
+      {
+        "epoch": 999,
+        "masked_mse": 1.6796770348419652e-10
+      }
+    ],
+    "initial_masked_mse": 0.07070205285567646,
+    "learning_rate": 0.001
+  },
+  "unsupported_output_policy": "EXACT_ZERO_FROZEN_BY_ZERO_WEIGHTS",
+  "validation": {
+    "episode_split_leakage": [],
+    "findings": [],
+    "formal_evaluation_ready": true,
+    "n_eval": 7,
+    "n_train": 43,
+    "split_counts": {
+      "test": 1,
+      "train": 43,
+      "val": 7
+    }
+  },
+  "world_model_replaced": false,
+  "zero_residual_baseline": {
+    "mae": 0.005,
+    "mean_l1_per_chunk": 0.014999999999999998,
+    "per_axis": {
+      "dx": {
+        "bias": 0.006285714285714286,
+        "count": 7,
+        "mae": 0.006285714285714286,
+        "rmse": 0.008468428763016532
+      },
+      "dy": {
+        "bias": 0.004571428571428571,
+        "count": 7,
+        "mae": 0.006285714285714286,
+        "rmse": 0.008468428763016532
+      },
+      "dz": {
+        "bias": -0.001,
+        "count": 7,
+        "mae": 0.0024285714285714292,
+        "rmse": 0.003
+      }
+    },
+    "prediction_exact_zero_value_fraction": 1.0,
+    "prediction_near_zero_chunk_fraction": 1.0,
+    "prediction_near_zero_value_fraction": 1.0,
+    "rmse": 0.007128079952520441,
+    "supervised_value_count": 21,
+    "target_exact_zero_chunk_fraction": 0.0,
+    "target_exact_zero_value_fraction": 0.0,
+    "target_near_zero_value_fraction": 0.0
+  }
+}

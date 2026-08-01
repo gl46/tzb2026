@@ -1,0 +1,19 @@
+{
+  "all_targets_reconstructible": true,
+  "correction_outcome_advantage_fraction": 0.13725490196078433,
+  "nonzero_pair_fraction": 1.0,
+  "online_policy_truth_input": false,
+  "output": "artifacts/m2b/residual-pairs.jsonl",
+  "output_sha256": "054a929ca639e914461f2172993f6f23d1ab5aad65cfd2175c298fddb67805e4",
+  "perturbed_success_fraction": 0.8627450980392157,
+  "quarantined_pairs": 0,
+  "schema_version": "M2BResidualPairsReportV1",
+  "status": "PASS_INFORMATIVE_RESIDUAL_TARGETS",
+  "successful_correction_fraction": 1.0,
+  "teacher_used": false,
+  "training_only_privileged_label": true,
+  "unique_pair_ids": 51,
+  "unique_perturbed_execution_hashes": 51,
+  "unique_physical_correction_anchors": 37,
+  "valid_pairs": 51
+}

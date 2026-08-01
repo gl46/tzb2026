@@ -1,0 +1,38 @@
+{
+  "aggregate_metrics": {
+    "mae": {
+      "model_mean": 6.623679782898732e-06,
+      "model_minus_zero_mean": -0.004993376320217101,
+      "zero_mean": 0.005
+    },
+    "mean_l1_per_chunk": {
+      "model_mean": 1.9871039348696193e-05,
+      "model_minus_zero_mean": -0.014980128960651302,
+      "zero_mean": 0.014999999999999998
+    },
+    "rmse": {
+      "model_mean": 9.019732631661756e-06,
+      "model_minus_zero_mean": -0.007119060219888779,
+      "zero_mean": 0.007128079952520441
+    }
+  },
+  "dataset_sha256": "4a9a7cd53c6daa01088db55389684be08b8f7bb93112b6d1015e26f93e505835",
+  "eval_split": "val",
+  "findings": [],
+  "formal_two_seed_evaluation": true,
+  "mlp_residual_supported_offline": true,
+  "per_seed_beats_zero": {
+    "20260731": true,
+    "20260801": true
+  },
+  "privileged_truth_policy_input": false,
+  "reports": 2,
+  "schema_version": "M2BResidualMLPTwoSeedSummaryV1",
+  "seeds": [
+    20260731,
+    20260801
+  ],
+  "status": "PASS_FORMAL_TWO_SEED_MLP_BEATS_ZERO",
+  "teacher_used": false,
+  "world_model_replaced": false
+}

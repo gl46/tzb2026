@@ -16,8 +16,10 @@ from m2b.run_failure_evidence_worker import (
 )
 from m2b.run_residual_evidence_worker import (
     accepted_correction,
+    perturbed_action_attempted,
     perturbation_for_seed,
     perturbations_for_scene,
+    revalidate_pair_ready_records,
     write_status as write_residual_status,
 )
 
@@ -119,9 +121,9 @@ def test_scale_launcher_partitions_seeds_without_overlapping_workers(
     fake_ssh = fake_bin / "ssh"
     fake_ssh.write_text(
         "#!/bin/sh\n"
-        "case \"$*\" in\n"
+        'case "$*" in\n'
         "  *pgrep*) exit 1 ;;\n"
-        "  *) printf '%s\\n' \"$*\" >>\"$FAKE_SSH_LOG\"; echo 12345 ;;\n"
+        '  *) printf \'%s\\n\' "$*" >>"$FAKE_SSH_LOG"; echo 12345 ;;\n'
         "esac\n"
     )
     fake_ssh.chmod(0o755)
@@ -160,9 +162,9 @@ def test_scale_launcher_can_resume_a_single_failure_class(tmp_path) -> None:
     fake_ssh = fake_bin / "ssh"
     fake_ssh.write_text(
         "#!/bin/sh\n"
-        "case \"$*\" in\n"
+        'case "$*" in\n'
         "  *pgrep*) exit 1 ;;\n"
-        "  *) printf '%s\\n' \"$*\" >>\"$FAKE_SSH_LOG\"; echo 12345 ;;\n"
+        '  *) printf \'%s\\n\' "$*" >>"$FAKE_SSH_LOG"; echo 12345 ;;\n'
         "esac\n"
     )
     fake_ssh.chmod(0o755)
@@ -185,15 +187,10 @@ def test_scale_launcher_can_resume_a_single_failure_class(tmp_path) -> None:
         env=environment,
     )
     assert completed.returncode == 0, completed.stderr
-    launches = [
-        launch.replace("\\,", ",")
-        for launch in ssh_log.read_text().splitlines()
-    ]
+    launches = [launch.replace("\\,", ",") for launch in ssh_log.read_text().splitlines()]
     assert len(launches) == 2
     assert all("--failures WRONG_OBJECT" in launch for launch in launches)
-    assert all(
-        "--accepted-target-per-failure 30" in launch for launch in launches
-    )
+    assert all("--accepted-target-per-failure 30" in launch for launch in launches)
 
 
 def test_residual_worker_uses_bounded_nonzero_camera_perturbations() -> None:
@@ -206,9 +203,7 @@ def test_residual_worker_uses_bounded_nonzero_camera_perturbations() -> None:
         offsets = perturbations_for_scene(seed, 3)
         assert len(offsets) == len(set(offsets)) == 3
     global_offsets = {
-        offset
-        for seed in range(4000, 4024)
-        for offset in perturbations_for_scene(seed, 3)
+        offset for seed in range(4000, 4024) for offset in perturbations_for_scene(seed, 3)
     }
     assert len(global_offsets) == 24
 
@@ -251,3 +246,28 @@ def test_residual_status_tracks_pair_target_and_remaining(tmp_path) -> None:
     assert payload["pair_target"] == 30
     assert payload["perturbations_per_scene"] == 3
     assert payload["teacher_used"] is False
+
+
+def test_residual_worker_reclassifies_evidence_without_physical_attempts(
+    tmp_path,
+) -> None:
+    valid = tmp_path / "valid.json"
+    invalid = tmp_path / "invalid.json"
+    valid.write_text(
+        json.dumps(
+            {"m2b_recovery": {"wrong_object": {"regrasp_execution": {"attempts": [{"step": 1}]}}}}
+        )
+    )
+    invalid.write_text(
+        json.dumps({"m2b_recovery": {"wrong_object": {"regrasp_execution": {"attempts": []}}}})
+    )
+    assert perturbed_action_attempted(valid) is True
+    assert perturbed_action_attempted(invalid) is False
+    records = [
+        {"pair_ready": True, "perturbed_evidence": str(valid)},
+        {"pair_ready": True, "perturbed_evidence": str(invalid)},
+    ]
+    assert revalidate_pair_ready_records(records) == 1
+    assert records[0]["pair_ready"] is True
+    assert records[1]["pair_ready"] is False
+    assert records[1]["status"] == "PERTURBED_ACTION_NOT_ATTEMPTED"

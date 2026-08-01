@@ -41,9 +41,7 @@ def perturbation_for_seed(seed: int) -> tuple[float, float, float]:
     return tuple(sign * value for sign, value in zip(signs, magnitude))
 
 
-def perturbations_for_scene(
-    seed: int, count: int
-) -> tuple[tuple[float, float, float], ...]:
+def perturbations_for_scene(seed: int, count: int) -> tuple[tuple[float, float, float], ...]:
     if count < 1 or count > 6:
         raise ValueError("perturbations per scene must be in [1, 6]")
     offsets = tuple(
@@ -72,9 +70,32 @@ def accepted_correction(summary_path: Path) -> dict[str, Any] | None:
     return accepted[-1] if accepted else None
 
 
-def valid_stage(
-    scene_root: Path, *, sdf: Path, supervision: Path
-) -> Path | None:
+def perturbed_action_attempted(evidence_path: Path) -> bool:
+    if not evidence_path.is_file():
+        return False
+    try:
+        payload = json.loads(evidence_path.read_text())
+        execution = payload["m2b_recovery"]["wrong_object"]["regrasp_execution"]
+    except (json.JSONDecodeError, KeyError, TypeError):
+        return False
+    return bool(execution.get("attempts"))
+
+
+def revalidate_pair_ready_records(records: list[dict[str, Any]]) -> int:
+    changed = 0
+    for record in records:
+        if record.get("pair_ready") is not True:
+            continue
+        evidence = record.get("perturbed_evidence")
+        if evidence and perturbed_action_attempted(Path(str(evidence))):
+            continue
+        record["pair_ready"] = False
+        record["status"] = "PERTURBED_ACTION_NOT_ATTEMPTED"
+        changed += 1
+    return changed
+
+
+def valid_stage(scene_root: Path, *, sdf: Path, supervision: Path) -> Path | None:
     for attempt in sorted(scene_root.glob("stage-attempt-*")):
         if stage_is_valid(attempt, sdf=sdf, supervision=supervision):
             return attempt / "m1b_physics_scene.usdc"
@@ -118,6 +139,11 @@ def main() -> int:
     parser.add_argument("--timeout-s", type=float, default=4000.0)
     parser.add_argument("--perturbations-per-scene", type=int, default=3)
     parser.add_argument("--pair-target", type=int, default=30)
+    parser.add_argument(
+        "--revalidate-only",
+        action="store_true",
+        help="Revalidate existing pair-ready records without running Isaac.",
+    )
     parser.add_argument("--image", default="nvcr.io/nvidia/isaac-sim:6.0.1")
     parser.add_argument("--container-prefix", default="m2b-residual")
     args = parser.parse_args()
@@ -138,11 +164,32 @@ def main() -> int:
         records = [dict(record) for record in existing.get("records", [])]
     else:
         records = []
+    revalidated = revalidate_pair_ready_records(records)
+    if revalidated:
+        write_status(
+            args.output_root,
+            records,
+            pair_target=args.pair_target,
+            perturbations_per_scene=args.perturbations_per_scene,
+        )
+    if args.revalidate_only:
+        if not status_path.is_file():
+            write_status(
+                args.output_root,
+                records,
+                pair_target=args.pair_target,
+                perturbations_per_scene=args.perturbations_per_scene,
+            )
+        payload = json.loads(status_path.read_text())
+        payload["status"] = "REVALIDATED_PARTIAL"
+        payload["records_reclassified"] = revalidated
+        status_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
+        print(json.dumps(payload, indent=2, sort_keys=True))
+        return 0
     recorded_keys = {
         (int(record["scene_seed"]), int(record["perturbation_index"]))
         for record in records
-        if record.get("scene_seed") is not None
-        and record.get("perturbation_index") is not None
+        if record.get("scene_seed") is not None and record.get("perturbation_index") is not None
     }
     for seed in args.scene_seed:
         if sum(record.get("pair_ready") is True for record in records) >= args.pair_target:
@@ -151,12 +198,9 @@ def main() -> int:
         supervision = args.source_root / f"scene-{seed}.supervision.json"
         failure_scene = args.failure_worker_root / f"scene-{seed}"
         correction = accepted_correction(
-            failure_scene
-            / "failures/wrong_object/physical-failure-smoke.json"
+            failure_scene / "failures/wrong_object/physical-failure-smoke.json"
         )
-        stage = valid_stage(
-            failure_scene, sdf=sdf, supervision=supervision
-        )
+        stage = valid_stage(failure_scene, sdf=sdf, supervision=supervision)
         if correction is None or stage is None:
             if (seed, 0) not in recorded_keys:
                 records.append(
@@ -183,15 +227,9 @@ def main() -> int:
                 break
             if (seed, perturbation_index) in recorded_keys:
                 continue
-            args.public_regrasp_offset_camera_xyz_m = ",".join(
-                f"{value:.6f}" for value in offset
-            )
-            args.container_prefix = (
-                f"m2b-residual-g{args.gpu}-s{seed}-p{perturbation_index}"
-            )
-            output = args.output_root / (
-                f"scene-{seed}/perturbation-{perturbation_index:02d}"
-            )
+            args.public_regrasp_offset_camera_xyz_m = ",".join(f"{value:.6f}" for value in offset)
+            args.container_prefix = f"m2b-residual-g{args.gpu}-s{seed}-p{perturbation_index}"
+            output = args.output_root / (f"scene-{seed}/perturbation-{perturbation_index:02d}")
             output.mkdir(parents=True, exist_ok=True)
             completed = subprocess.run(
                 failure_command(
@@ -209,33 +247,25 @@ def main() -> int:
                 check=False,
                 timeout=args.timeout_s,
             )
-            (output / "worker-console.log").write_text(
-                completed.stdout + completed.stderr
-            )
+            (output / "worker-console.log").write_text(completed.stdout + completed.stderr)
             summary_path = output / "physical-failure-smoke.json"
-            summary = (
-                json.loads(summary_path.read_text())
-                if summary_path.is_file()
-                else {}
-            )
+            summary = json.loads(summary_path.read_text()) if summary_path.is_file() else {}
             evidence_attempts = [
                 attempt
                 for attempt in summary.get("attempts", [])
-                if attempt.get("evidence") and attempt.get("evidence_sha256")
+                if attempt.get("evidence")
+                and attempt.get("evidence_sha256")
+                and perturbed_action_attempted(Path(str(attempt["evidence"])))
             ]
             perturbed = evidence_attempts[-1] if evidence_attempts else None
             records.append(
                 {
                     "scene_seed": seed,
                     "perturbation_index": perturbation_index,
-                    "status": (
-                        "PAIR_READY" if perturbed else "NO_PERTURBED_EVIDENCE"
-                    ),
+                    "status": ("PAIR_READY" if perturbed else "NO_PERTURBED_EVIDENCE"),
                     "pair_ready": perturbed is not None,
                     "perturbation_camera_xyz_m": list(offset),
-                    "perturbed_evidence": (
-                        perturbed["evidence"] if perturbed else None
-                    ),
+                    "perturbed_evidence": (perturbed["evidence"] if perturbed else None),
                     "perturbed_evidence_sha256": (
                         perturbed["evidence_sha256"] if perturbed else None
                     ),
