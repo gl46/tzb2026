@@ -104,9 +104,7 @@ def matched_pairs(
             raise ValueError(f"{sample_id}: adapter registries differ")
         pairs.append((first, second))
     buckets = {
-        failure: [
-            pair for pair in pairs if pair[0].failure_type == failure
-        ]
+        failure: [pair for pair in pairs if pair[0].failure_type == failure]
         for failure in EXPECTED_FIRST_RECOVERY_SKILL
     }
     empty = sorted(failure for failure, items in buckets.items() if not items)
@@ -118,9 +116,7 @@ def matched_pairs(
             if buckets[failure] and len(selected) < max_keys:
                 selected.append(buckets[failure].pop(0))
     if len(selected) < max_keys:
-        raise ValueError(
-            f"only {len(selected)} matched keys available; need {max_keys}"
-        )
+        raise ValueError(f"only {len(selected)} matched keys available; need {max_keys}")
     return selected
 
 
@@ -165,8 +161,7 @@ def injection_is_valid(payload: dict[str, Any], failure_type: str) -> bool:
     }[failure_type]
     injection = payload.get(key) or {}
     return bool(
-        payload.get("m2b_injection_pass") is True
-        and injection.get("training_eligible") is True
+        payload.get("m2b_injection_pass") is True and injection.get("training_eligible") is True
     )
 
 
@@ -195,11 +190,7 @@ def run_or_load_execution(
         )
         returncode = completed.returncode
     summary = remote_json(host, summary_path)
-    attempts = [
-        item
-        for item in summary.get("attempts", [])
-        if item.get("evidence")
-    ]
+    attempts = [item for item in summary.get("attempts", []) if item.get("evidence")]
     if not attempts:
         raise RuntimeError(f"evaluation evidence missing: {summary_path}")
     attempt = attempts[-1]
@@ -212,9 +203,7 @@ def run_or_load_execution(
     if validated_source_hashes(payload) != expected_source_hashes:
         raise ValueError(f"{evidence_path}: evaluation scene sources changed")
     if not injection_is_valid(payload, failure_type):
-        raise RuntimeError(
-            f"{evidence_path}: requested failure was not physically established"
-        )
+        raise RuntimeError(f"{evidence_path}: requested failure was not physically established")
     receipt = extract_physical_runtime_gate_receipt(
         payload,
         failure_type=failure_type,
@@ -236,10 +225,7 @@ def violation_from_receipt(
 ) -> bool:
     return bool(
         receipt.collision_gate == "REJECTED"
-        or (
-            receipt.failure_type != "EMPTY_GRASP"
-            and receipt.safety_gate == "REJECTED"
-        )
+        or (receipt.failure_type != "EMPTY_GRASP" and receipt.safety_gate == "REJECTED")
     )
 
 
@@ -368,10 +354,7 @@ def qrm_execution_episode(
 ) -> M2BClosedLoopEpisodeV1:
     if not prospective.executable_mapping:
         raise ValueError("non-executable model mapping reached execution")
-    if (
-        not recovery_sequence
-        or recovery_sequence[0] != prospective.request.skill
-    ):
+    if not recovery_sequence or recovery_sequence[0] != prospective.request.skill:
         raise ValueError("model skill differs from executed recovery sequence")
     violation = violation_from_receipt(receipt)
     success = receipt.physical_recovery_success and not violation
@@ -388,12 +371,8 @@ def qrm_execution_episode(
         safety_gate=prospective.safety_gate,
         execution_source="MODEL_SELECTED_B0_SKILL",
         executed_skill=prospective.request.skill,
-        outcome=(
-            "SUCCESS" if success else "FAILURE"
-        ) if len(recovery_sequence) == 1 else "UNKNOWN",
-        collision_or_safety_violation=(
-            violation if len(recovery_sequence) == 1 else False
-        ),
+        outcome=("SUCCESS" if success else "FAILURE") if len(recovery_sequence) == 1 else "UNKNOWN",
+        collision_or_safety_violation=(violation if len(recovery_sequence) == 1 else False),
         registry_sha256=prospective.registry_sha256,
         model_checkpoint_sha256=prospective.model_checkpoint_sha256,
         model_input_sha256=prospective.model_input_sha256,
@@ -434,9 +413,7 @@ def qrm_execution_episode(
                 "execution_outcome": execution_evidence_sha256,
             },
         )
-        for index, recovery_skill in enumerate(
-            recovery_sequence[1:], start=1
-        )
+        for index, recovery_skill in enumerate(recovery_sequence[1:], start=1)
     ]
     return M2BClosedLoopEpisodeV1(
         episode_id=f"{key}:{method}",
@@ -471,9 +448,7 @@ def append_json(path: Path, payload: dict[str, Any]) -> None:
         os.fsync(stream.fileno())
 
 
-def validate_journal_episode(
-    journal: dict[str, Any], episode: M2BClosedLoopEpisodeV1
-) -> None:
+def validate_journal_episode(journal: dict[str, Any], episode: M2BClosedLoopEpisodeV1) -> None:
     if journal.get("schema_version") != "M2BClosedLoopExecutionJournalV1":
         raise ValueError("invalid execution journal schema")
     if journal.get("teacher_used") is not False:
@@ -517,10 +492,7 @@ def main() -> int:
     )
     parser.add_argument(
         "--remote-output-root",
-        default=(
-            "/var/tmp/xh-data/isaac-industrial/m2b/"
-            "matched-closed-loop-v1"
-        ),
+        default=("/var/tmp/xh-data/isaac-industrial/m2b/matched-closed-loop-v1"),
     )
     parser.add_argument("--gpu", type=int, choices=(0, 1), default=None)
     parser.add_argument("--max-matched-keys", type=int, default=10)
@@ -535,36 +507,30 @@ def main() -> int:
     no_fc = load_decisions(args.no_fc_decisions)
     fc = load_decisions(args.fc_decisions)
     pairs = matched_pairs(no_fc, fc, max_keys=args.max_matched_keys)
-    if any(
-        decision.registry_sha256 != registry_sha256
-        for pair in pairs
-        for decision in pair
-    ):
+    if any(decision.registry_sha256 != registry_sha256 for pair in pairs for decision in pair):
         raise ValueError("prospective decisions use a different registry")
-    rows = [
-        json.loads(line)
-        for line in args.dataset.read_text().splitlines()
-        if line.strip()
-    ]
+    rows = [json.loads(line) for line in args.dataset.read_text().splitlines() if line.strip()]
     episodes = {str(row["episode_id"]): row for row in rows}
     if len(episodes) != len(rows):
         raise ValueError("duplicate dataset episode_id")
-    existing = [
-        M2BClosedLoopEpisodeV1.model_validate_json(line)
-        for line in args.output.read_text().splitlines()
-        if line.strip()
-    ] if args.output.is_file() else []
+    existing = (
+        [
+            M2BClosedLoopEpisodeV1.model_validate_json(line)
+            for line in args.output.read_text().splitlines()
+            if line.strip()
+        ]
+        if args.output.is_file()
+        else []
+    )
     existing_by_id = {item.episode_id: item for item in existing}
     if len(existing_by_id) != len(existing):
         raise ValueError("output contains duplicate episode_id")
-    journal_rows = [
-        json.loads(line)
-        for line in args.journal.read_text().splitlines()
-        if line.strip()
-    ] if args.journal.is_file() else []
-    journal_by_id = {
-        str(item["episode_id"]): item for item in journal_rows
-    }
+    journal_rows = (
+        [json.loads(line) for line in args.journal.read_text().splitlines() if line.strip()]
+        if args.journal.is_file()
+        else []
+    )
+    journal_by_id = {str(item["episode_id"]): item for item in journal_rows}
     if len(journal_by_id) != len(journal_rows):
         raise ValueError("journal contains duplicate episode_id")
     orphaned = sorted(set(existing_by_id) - set(journal_by_id))
@@ -602,17 +568,20 @@ def main() -> int:
         source_payload = json.loads(evidence_bytes)
         source_hashes = validated_source_hashes(source_payload)
         for prospective in (no_fc_decision, fc_decision):
-            if prospective.source_hashes and (
-                prospective.source_hashes != source_hashes
-            ):
+            if prospective.source_hashes and (prospective.source_hashes != source_hashes):
                 raise ValueError(f"{sample_id}: preflight scene sources differ")
         scene_root = scene_root_from_evidence(evidence_path, scene_seed)
-        stage = remote_stage(args.host, scene_root)
+        stage_hash = source_hashes.get("m1b_physics_scene.usdc")
+        if stage_hash is None:
+            raise ValueError(f"{sample_id}: m1b_physics_scene.usdc hash missing")
+        stage = remote_stage(
+            args.host,
+            scene_root,
+            expected_sha256=stage_hash,
+        )
         required_sources = {
             "m1b_physics_scene.usdc": stage,
-            f"scene-{scene_seed}.sdf": (
-                f"{args.source_root}/scene-{scene_seed}.sdf"
-            ),
+            f"scene-{scene_seed}.sdf": (f"{args.source_root}/scene-{scene_seed}.sdf"),
             f"scene-{scene_seed}.supervision.json": (
                 f"{args.source_root}/scene-{scene_seed}.supervision.json"
             ),
@@ -632,18 +601,10 @@ def main() -> int:
             source_hashes=source_hashes,
         )
         expected_matched_keys.add(key)
-        injection_entity, task_target_entity = target_entities(
-            source_payload, failure_type
-        )
-        expected_action = expected_first_runtime_action(
-            registry, failure_type
-        )
-        previous_failed_skill = dataset_episode["failure_context"].get(
-            "last_skill"
-        )
-        recovery_sequence = [
-            str(skill) for skill in dataset_episode["recovery_sequence"]
-        ]
+        injection_entity, task_target_entity = target_entities(source_payload, failure_type)
+        expected_action = expected_first_runtime_action(registry, failure_type)
+        previous_failed_skill = dataset_episode["failure_context"].get("last_skill")
+        recovery_sequence = [str(skill) for skill in dataset_episode["recovery_sequence"]]
         method_decisions = {
             "QRM_COARSE_NO_FC": no_fc_decision,
             "QRM_COARSE_FC": fc_decision,
@@ -678,21 +639,16 @@ def main() -> int:
                 if episode.episode_id not in journal_by_id:
                     append_json(args.journal, journal)
                     journal_by_id[episode.episode_id] = journal
-                validate_journal_episode(
-                    journal_by_id[episode.episode_id], episode
-                )
+                validate_journal_episode(journal_by_id[episode.episode_id], episode)
                 append_episode(args.output, episode)
                 existing_by_id[episode.episode_id] = episode
                 run_records.append(journal)
                 continue
             checkpoint_key = (
-                prospective.model_checkpoint_sha256[:16]
-                if prospective is not None
-                else "baseline"
+                prospective.model_checkpoint_sha256[:16] if prospective is not None else "baseline"
             )
             remote_output = (
-                f"{args.remote_output_root}/gpu{gpu}/"
-                f"{key[10:30]}/{method.lower()}-{checkpoint_key}"
+                f"{args.remote_output_root}/gpu{gpu}/{key[10:30]}/{method.lower()}-{checkpoint_key}"
             )
             command = preflight_command(
                 project_root=args.project_root,
@@ -704,9 +660,7 @@ def main() -> int:
                 output_root=remote_output,
                 injection_entity=injection_entity,
                 task_target_entity=task_target_entity,
-                container_prefix=(
-                    f"m2b-loop-g{gpu}-{key[10:22]}-{method.lower()}"
-                ),
+                container_prefix=(f"m2b-loop-g{gpu}-{key[10:22]}-{method.lower()}"),
             )
             summary_path = f"{remote_output}/physical-failure-smoke.json"
             (
@@ -715,15 +669,13 @@ def main() -> int:
                 execution_sha256,
                 elapsed_s,
                 returncode,
-            ) = (
-                run_or_load_execution(
-                    host=args.host,
-                    command=command,
-                    summary_path=summary_path,
-                    failure_type=failure_type,
-                    expected_runtime_action=expected_action,
-                    expected_source_hashes=source_hashes,
-                )
+            ) = run_or_load_execution(
+                host=args.host,
+                command=command,
+                summary_path=summary_path,
+                failure_type=failure_type,
+                expected_runtime_action=expected_action,
+                expected_source_hashes=source_hashes,
             )
             if prospective is None:
                 episode = baseline_episode(
@@ -738,9 +690,7 @@ def main() -> int:
                 )
             else:
                 if prospective.mapping.runtime_action != expected_action:
-                    raise ValueError(
-                        f"{sample_id}: model action differs from executed action"
-                    )
+                    raise ValueError(f"{sample_id}: model action differs from executed action")
                 episode = qrm_execution_episode(
                     key=key,
                     method=method,
@@ -770,20 +720,14 @@ def main() -> int:
                 append_json(args.journal, journal)
                 journal_by_id[episode.episode_id] = journal
             else:
-                validate_journal_episode(
-                    journal_by_id[episode.episode_id], episode
-                )
+                validate_journal_episode(journal_by_id[episode.episode_id], episode)
             append_episode(args.output, episode)
             existing_by_id[episode.episode_id] = episode
             run_records.append(journal)
     if set(existing_by_id) != expected_episode_ids:
-        raise ValueError(
-            "closed-loop output differs from selected matched shard"
-        )
+        raise ValueError("closed-loop output differs from selected matched shard")
     if set(journal_by_id) != expected_episode_ids:
-        raise ValueError(
-            "execution journal differs from selected matched shard"
-        )
+        raise ValueError("execution journal differs from selected matched shard")
     report = {
         "schema_version": "M2BMatchedClosedLoopBatchReportV1",
         "selected_matched_keys": len(pairs),
@@ -796,9 +740,7 @@ def main() -> int:
         "output_sha256": hashlib.sha256(args.output.read_bytes()).hexdigest(),
         "journal": str(args.journal),
         "journal_records": len(journal_by_id),
-        "journal_sha256": hashlib.sha256(
-            args.journal.read_bytes()
-        ).hexdigest(),
+        "journal_sha256": hashlib.sha256(args.journal.read_bytes()).hexdigest(),
         "model_decisions_executed": sum(
             decision.execution_source == "MODEL_SELECTED_B0_SKILL"
             for episode in existing_by_id.values()

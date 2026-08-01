@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -11,6 +12,7 @@ from m2b.run_prospective_preflight_batch import (
     expected_first_runtime_action,
     model_run_key,
     preflight_command,
+    remote_stage,
     scene_root_from_evidence,
     selected_action_is_physically_supported,
     target_entities,
@@ -37,9 +39,7 @@ def test_preflight_routes_only_declared_first_recovery_actions() -> None:
     assert selected_action_is_physically_supported(
         REGISTRY, "WRONG_OBJECT", "B0_SAFE_PLACE_NON_TARGET"
     )
-    assert selected_action_is_physically_supported(
-        REGISTRY, "RELEASE_FAILURE", "B0_RELEASE_RETRY"
-    )
+    assert selected_action_is_physically_supported(REGISTRY, "RELEASE_FAILURE", "B0_RELEASE_RETRY")
     assert not selected_action_is_physically_supported(
         REGISTRY, "WRONG_OBJECT", "B0_PUBLIC_GEOMETRY_REGRASP"
     )
@@ -68,6 +68,37 @@ def test_preflight_reuses_hash_bound_injection_entities_and_scene() -> None:
     assert str(root) == "/data/worker1/scene-4029"
 
 
+def test_remote_stage_selects_the_attempt_matching_evidence_hash(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    first = "/data/scene-4091/stage-attempt-01/m1b_physics_scene.usdc"
+    second = "/data/scene-4091/stage-attempt-02/m1b_physics_scene.usdc"
+    expected = hashlib.sha256(b"matching-stage").hexdigest()
+
+    def fake_run(*_args, **_kwargs):
+        return SimpleNamespace(returncode=0, stdout=f"{first}\n{second}\n")
+
+    def fake_remote_bytes(_host: str, path: str) -> bytes:
+        return b"matching-stage" if path == second else b"stale-stage"
+
+    monkeypatch.setattr("m2b.run_prospective_preflight_batch.subprocess.run", fake_run)
+    monkeypatch.setattr("m2b.run_prospective_preflight_batch.remote_bytes", fake_remote_bytes)
+    assert (
+        remote_stage(
+            "host",
+            scene_root_from_evidence("/data/scene-4091/failures/release/evidence.json", 4091),
+            expected_sha256=expected,
+        )
+        == second
+    )
+    with pytest.raises(ValueError, match="matches evidence sha256"):
+        remote_stage(
+            "host",
+            scene_root_from_evidence("/data/scene-4091/failures/release/evidence.json", 4091),
+            expected_sha256="0" * 64,
+        )
+
+
 def test_preflight_command_is_single_attempt_zero_residual() -> None:
     command = preflight_command(
         project_root="/project",
@@ -83,10 +114,7 @@ def test_preflight_command_is_single_attempt_zero_residual() -> None:
     )
     assert command[command.index("--max-attempts") + 1] == "1"
     assert command[command.index("--failures") + 1] == "WRONG_OBJECT"
-    assert (
-        command[command.index("--public-regrasp-offset-camera-xyz-m") + 1]
-        == "0,0,0"
-    )
+    assert command[command.index("--public-regrasp-offset-camera-xyz-m") + 1] == "0,0,0"
 
 
 def valid_batch_fixture() -> tuple[list[dict], dict[str, dict]]:
@@ -127,9 +155,7 @@ def valid_batch_fixture() -> tuple[list[dict], dict[str, dict]]:
         "model_output": model_output,
         "request": request,
         "mapping": mapping,
-        "registry_sha256": hashlib.sha256(
-            REGISTRY_PATH.read_bytes()
-        ).hexdigest(),
+        "registry_sha256": hashlib.sha256(REGISTRY_PATH.read_bytes()).hexdigest(),
         "model_checkpoint_sha256": "b" * 64,
         "model_input_sha256": canonical_sha256(model_input),
         "model_output_sha256": canonical_sha256(model_output),
@@ -164,9 +190,7 @@ def test_batch_validates_all_hashes_and_episode_binding_before_runs() -> None:
 
 def test_batch_rejects_dataset_failure_mismatch_before_runs() -> None:
     records, episodes = valid_batch_fixture()
-    episodes[records[0]["episode_id"]]["failure_context"][
-        "failure_type"
-    ] = "WRONG_OBJECT"
+    episodes[records[0]["episode_id"]]["failure_context"]["failure_type"] = "WRONG_OBJECT"
     with pytest.raises(ValueError, match="dataset failure type mismatch"):
         validate_batch_inputs(
             records,
@@ -179,9 +203,9 @@ def test_batch_rejects_dataset_failure_mismatch_before_runs() -> None:
 def test_physical_source_hashes_are_required_and_verified() -> None:
     raw = b"physical-evidence"
     digest = hashlib.sha256(raw).hexdigest()
-    assert validated_source_hashes(
-        {"source_hashes": {"scene.sdf": digest}}
-    ) == {"scene.sdf": digest}
+    assert validated_source_hashes({"source_hashes": {"scene.sdf": digest}}) == {
+        "scene.sdf": digest
+    }
     verify_bytes_sha256(raw, digest, "scene")
     with pytest.raises(ValueError, match="sha256 mismatch"):
         verify_bytes_sha256(raw, "0" * 64, "scene")

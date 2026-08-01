@@ -41,8 +41,7 @@ def remote_bytes(host: str, path: str) -> bytes:
     )
     if completed.returncode != 0:
         raise RuntimeError(
-            completed.stderr.decode(errors="replace").strip()
-            or f"cannot read {host}:{path}"
+            completed.stderr.decode(errors="replace").strip() or f"cannot read {host}:{path}"
         )
     return completed.stdout
 
@@ -57,13 +56,16 @@ def scene_root_from_evidence(path: str, scene_seed: int) -> PurePosixPath:
     try:
         index = evidence.parts.index(marker)
     except ValueError as error:
-        raise ValueError(
-            f"evidence path does not contain {marker}: {path}"
-        ) from error
+        raise ValueError(f"evidence path does not contain {marker}: {path}") from error
     return PurePosixPath(*evidence.parts[: index + 1])
 
 
-def remote_stage(host: str, scene_root: PurePosixPath) -> str:
+def remote_stage(
+    host: str,
+    scene_root: PurePosixPath,
+    *,
+    expected_sha256: str,
+) -> str:
     completed = subprocess.run(
         [
             "ssh",
@@ -85,12 +87,17 @@ def remote_stage(host: str, scene_root: PurePosixPath) -> str:
     stages = sorted(line for line in completed.stdout.splitlines() if line)
     if completed.returncode != 0 or not stages:
         raise RuntimeError(f"no physical stage under {scene_root}")
-    return stages[0]
+    matching = [
+        stage
+        for stage in stages
+        if hashlib.sha256(remote_bytes(host, stage)).hexdigest() == expected_sha256
+    ]
+    if not matching:
+        raise ValueError(f"no stage under {scene_root} matches evidence sha256 {expected_sha256}")
+    return matching[0]
 
 
-def target_entities(
-    payload: dict[str, Any], failure_type: str
-) -> tuple[str, str]:
+def target_entities(payload: dict[str, Any], failure_type: str) -> tuple[str, str]:
     attached = str(payload["attached_entity"])
     wrong = payload.get("m2b_wrong_object_injection") or {}
     task_target = str(wrong.get("task_target_entity_id") or attached)
@@ -102,8 +109,7 @@ def target_entities(
 def validated_source_hashes(payload: dict[str, Any]) -> dict[str, str]:
     source_hashes = payload.get("source_hashes") or {}
     if not source_hashes or any(
-        re.fullmatch(r"[0-9a-f]{64}", str(digest)) is None
-        for digest in source_hashes.values()
+        re.fullmatch(r"[0-9a-f]{64}", str(digest)) is None for digest in source_hashes.values()
     ):
         raise ValueError("physical evidence lacks hash-bound scene sources")
     return dict(source_hashes)
@@ -115,10 +121,7 @@ def verify_bytes_sha256(raw: bytes, expected: str, label: str) -> None:
 
 
 def model_run_key(model_record: dict[str, Any]) -> str:
-    identity = (
-        f"{model_record['sample_id']}:"
-        f"{model_record['model_checkpoint_sha256']}"
-    )
+    identity = f"{model_record['sample_id']}:{model_record['model_checkpoint_sha256']}"
     return hashlib.sha256(identity.encode()).hexdigest()[:20]
 
 
@@ -174,9 +177,7 @@ def preflight_command(
     ]
 
 
-def expected_first_runtime_action(
-    registry: RuntimeSkillRegistryV1, failure_type: str
-) -> str:
+def expected_first_runtime_action(registry: RuntimeSkillRegistryV1, failure_type: str) -> str:
     skill = EXPECTED_FIRST_RECOVERY_SKILL[failure_type]
     return registry.skills[skill].runtime_action
 
@@ -268,18 +269,19 @@ def prepare_preflights(
             "stage": None,
         }
         runtime_action = str(model_record["mapping"]["runtime_action"])
-        if selected_action_is_physically_supported(
-            registry, failure_type, runtime_action
-        ):
-            scene_root = scene_root_from_evidence(
-                evidence_path, scene_seed
+        if selected_action_is_physically_supported(registry, failure_type, runtime_action):
+            scene_root = scene_root_from_evidence(evidence_path, scene_seed)
+            stage_hash = source_hashes.get("m1b_physics_scene.usdc")
+            if stage_hash is None:
+                raise ValueError(f"{sample_id}: m1b_physics_scene.usdc hash missing")
+            stage = remote_stage(
+                host,
+                scene_root,
+                expected_sha256=stage_hash,
             )
-            stage = remote_stage(host, scene_root)
             required_sources = {
                 "m1b_physics_scene.usdc": stage,
-                f"scene-{scene_seed}.sdf": (
-                    f"{source_root}/scene-{scene_seed}.sdf"
-                ),
+                f"scene-{scene_seed}.sdf": (f"{source_root}/scene-{scene_seed}.sdf"),
                 f"scene-{scene_seed}.supervision.json": (
                     f"{source_root}/scene-{scene_seed}.supervision.json"
                 ),
@@ -368,24 +370,17 @@ def main() -> int:
     )
     parser.add_argument(
         "--remote-output-root",
-        default=(
-            "/var/tmp/xh-data/isaac-industrial/m2b/"
-            "prospective-runtime-preflight-v1"
-        ),
+        default=("/var/tmp/xh-data/isaac-industrial/m2b/prospective-runtime-preflight-v1"),
     )
     parser.add_argument("--gpu", type=int, choices=(0, 1), default=None)
     parser.add_argument("--local-evidence-root", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
     args = parser.parse_args()
     model_records = [
-        json.loads(line)
-        for line in args.model_records.read_text().splitlines()
-        if line.strip()
+        json.loads(line) for line in args.model_records.read_text().splitlines() if line.strip()
     ]
     episode_rows = [
-        json.loads(line)
-        for line in args.dataset.read_text().splitlines()
-        if line.strip()
+        json.loads(line) for line in args.dataset.read_text().splitlines() if line.strip()
     ]
     episodes = {episode["episode_id"]: episode for episode in episode_rows}
     if len(episodes) != len(episode_rows):
@@ -422,12 +417,8 @@ def main() -> int:
         original_payload = prepared_item["payload"]
         source_hashes = prepared_item["source_hashes"]
         runtime_action = str(model_record["mapping"]["runtime_action"])
-        supported_runtime_action = expected_first_runtime_action(
-            registry, failure_type
-        )
-        if not selected_action_is_physically_supported(
-            registry, failure_type, runtime_action
-        ):
+        supported_runtime_action = expected_first_runtime_action(registry, failure_type)
+        if not selected_action_is_physically_supported(registry, failure_type, runtime_action):
             manifests.append(
                 dispatch_rejection_manifest(
                     model_record=model_record,
@@ -447,13 +438,9 @@ def main() -> int:
         stage = prepared_item["stage"]
         if not stage:
             raise AssertionError("supported action lacks a prepared stage")
-        injection_entity, task_target_entity = target_entities(
-            original_payload, failure_type
-        )
+        injection_entity, task_target_entity = target_entities(original_payload, failure_type)
         safe_sample = model_run_key(model_record)
-        remote_output = (
-            f"{args.remote_output_root}/gpu{gpu}/{safe_sample}"
-        )
+        remote_output = f"{args.remote_output_root}/gpu{gpu}/{safe_sample}"
         command = preflight_command(
             project_root=args.project_root,
             source_root=args.source_root,
@@ -481,39 +468,29 @@ def main() -> int:
         summary_path = f"{remote_output}/physical-failure-smoke.json"
         summary = remote_json(args.host, summary_path)
         evidence_paths = [
-            str(item["evidence"])
-            for item in summary.get("attempts", [])
-            if item.get("evidence")
+            str(item["evidence"]) for item in summary.get("attempts", []) if item.get("evidence")
         ]
         if not evidence_paths:
-            raise RuntimeError(
-                f"{model_record['sample_id']}: preflight evidence missing"
-            )
+            raise RuntimeError(f"{model_record['sample_id']}: preflight evidence missing")
         evidence_path = evidence_paths[-1]
         evidence_bytes = remote_bytes(args.host, evidence_path)
         preflight_payload = json.loads(evidence_bytes)
         preflight_source_hashes = preflight_payload.get("source_hashes") or {}
         if preflight_source_hashes != source_hashes:
-            raise ValueError(
-                f"{model_record['sample_id']}: preflight scene sources changed"
-            )
+            raise ValueError(f"{model_record['sample_id']}: preflight scene sources changed")
         receipt = extract_physical_runtime_gate_receipt(
             preflight_payload,
             failure_type=failure_type,
         )
         if receipt.runtime_action != runtime_action:
-            raise ValueError(
-                f"{model_record['sample_id']}: wrong action preflighted"
-            )
+            raise ValueError(f"{model_record['sample_id']}: wrong action preflighted")
         manifests.append(
             IsolatedIsaacPreflightManifestV1(
                 sample_id=model_record["sample_id"],
                 failure_type=failure_type,
                 source_hashes=preflight_source_hashes,
                 preflight_evidence_path=evidence_path,
-                preflight_evidence_sha256=hashlib.sha256(
-                    evidence_bytes
-                ).hexdigest(),
+                preflight_evidence_sha256=hashlib.sha256(evidence_bytes).hexdigest(),
                 receipt=receipt,
             )
         )
@@ -528,9 +505,7 @@ def main() -> int:
             }
         )
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(
-        "".join(item.model_dump_json() + "\n" for item in manifests)
-    )
+    args.output.write_text("".join(item.model_dump_json() + "\n" for item in manifests))
     report = {
         "schema_version": "M2BProspectivePreflightBatchReportV1",
         "records": len(manifests),
