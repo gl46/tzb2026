@@ -1,42 +1,24 @@
 {
-  "checkpoint": "artifacts/qrm_lite/beta1/Q2.npz",
-  "checkpoint_revision": "M2A_BETA1_LEGACY_V1",
-  "checkpoint_sha256": "48ff296f87f3a985b683d807cdbd99a1e4869bba99ab9adb47568fbba7561a66",
-  "dataset": "data/qrm_lite/manifests/real-v1.jsonl",
-  "dataset_sha256": "0bc487b240a7fa6deaa7bdec779c2e25e5aac2fde365c1695c72a3eca0be78e9",
-  "heldout_model_outputs": 46,
-  "limitations": [
-    "This is a structural mapping gate over held-out model outputs.",
-    "IK, collision, controller, and safety dry-runs require Isaac scene execution before runtime_mapping_rate may be populated.",
-    "The frozen M2A model is evaluated for integration only; it is not an M2B performance claim."
+  "executable_mappings": 20,
+  "failure_types": [
+    "EMPTY_GRASP",
+    "RELEASE_FAILURE",
+    "WRONG_OBJECT"
   ],
-  "model_outputs": "artifacts/m2b/runtime-mapping-heldout.jsonl",
-  "model_outputs_sha256": "90999ac00e49e7ca17ff595e8769d4a9d78037802d551a40e26b1058cbd463f5",
-  "planning_checks_complete": false,
-  "planning_gate_status": {
-    "collision": "NOT_RUN",
-    "ik": "NOT_RUN",
-    "safety": "NOT_RUN"
-  },
-  "predicted_runtime_skill_histogram": {
-    "ALTERNATE_SIDE": 4,
-    "APPROACH": 6,
-    "GRASP": 11,
-    "LIFT": 2,
-    "MOVE": 5,
-    "OBSERVE": 3,
-    "PLACE": 4,
-    "REOBSERVE": 11
-  },
+  "findings": [],
+  "formal_mapping_ready": true,
+  "minimum_runtime_mapping_rate": 0.95,
+  "model_outputs": 20,
+  "model_selected_decisions": 20,
+  "planning_checks_complete": true,
+  "post_execution_receipts_promoted": false,
   "privileged_truth_policy_input": false,
-  "registry": "configs/qrm_runtime_mapping.yaml",
-  "registry_sha256": "0019b10e54c79cbca16f842dbfd86708ac1f5259e0d7d062be85855062207559",
+  "prospective_preflight_only": true,
   "rejection_reason_histogram": {},
-  "runtime_mapping_rate": null,
-  "schema_version": "M2BRuntimeMappingOfflineV1",
-  "status": "PASS_STRUCTURAL_MAPPING_PLANNING_DRY_RUN_PENDING",
-  "structural_mapping_rate": 1.0,
-  "structurally_valid": 46,
-  "target_track_source": "PUBLIC_FAILURE_CONTEXT_LAST_TARGET",
-  "teacher_used": false
+  "runtime_mapping_rate": 1.0,
+  "schema_version": "M2BProspectiveRuntimeMappingReportV1",
+  "status": "PASS_PROSPECTIVE_RUNTIME_MAPPING",
+  "teacher_used": false,
+  "unique_decision_ids": 20,
+  "unique_sample_ids": 20
 }

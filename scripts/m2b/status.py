@@ -148,8 +148,9 @@ def main() -> int:
             else None
         ),
         "prospective_runtime_planning_checks_complete": bool(
-            physical_runtime_gates
-            and physical_runtime_gates.get("prospective_planning_checks_complete")
+            mapping_offline
+            and mapping_offline.get("prospective_preflight_only") is True
+            and mapping_offline.get("planning_checks_complete") is True
         ),
         "training_status": training.get("status") if training else "NOT_RUN",
         "residual_mlp_status": (

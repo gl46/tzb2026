@@ -1,6 +1,5 @@
 {
   "blockers": [
-    "runtime mapping still requires Isaac IK/collision/safety dry-runs",
     "matched B0/QRM Isaac closed-loop evaluation has not run"
   ],
   "closed_loop_status": "NOT_RUN",
@@ -18,7 +17,7 @@
   "failure_evidence_pilot_records": 3,
   "goal_complete": false,
   "m2a_freeze_status": "PASS",
-  "next_command": "make m2b-map-validate",
+  "next_command": "make m2b-run-matched-closed-loop",
   "physical_failure_classes": [
     "EMPTY_GRASP",
     "RELEASE_FAILURE",
@@ -28,16 +27,16 @@
   "physical_runtime_gate_status": "PASS_PHYSICAL_POST_EXECUTION_RECEIPTS_NOT_FORMAL_MAPPING",
   "physical_runtime_post_execution_gate_rate": 1.0,
   "physical_runtime_receipts_complete_and_passing": 131,
-  "prospective_runtime_planning_checks_complete": false,
+  "prospective_runtime_planning_checks_complete": true,
   "residual_mlp_status": "PASS_FORMAL_TWO_SEED_MLP_BEATS_ZERO",
   "residual_mlp_supported_offline": true,
   "residual_pairs_valid": 51,
   "residual_pilot_pairs": 24,
   "residual_pilot_status": "PASS_NONDEGENERATE_PILOT_NOT_SCALE",
   "runtime_mapping_baseline_status": "MAPPING_INTEGRATION_ABSENT",
-  "runtime_mapping_offline_status": "PASS_STRUCTURAL_MAPPING_PLANNING_DRY_RUN_PENDING",
-  "runtime_mapping_rate": null,
-  "runtime_structural_mapping_rate": 1.0,
+  "runtime_mapping_offline_status": "PASS_PROSPECTIVE_RUNTIME_MAPPING",
+  "runtime_mapping_rate": 1.0,
+  "runtime_structural_mapping_rate": null,
   "schema_version": "M2BStatusV1",
   "teacher_kill_rule_events": [],
   "teacher_used": false,
