@@ -30,13 +30,9 @@ from xh_agent.policy.qrm_lite.skill_registry import (
 class IsolatedIsaacPreflightManifestV1(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    schema_version: Literal["IsolatedIsaacPreflightManifestV1"] = (
-        "IsolatedIsaacPreflightManifestV1"
-    )
+    schema_version: Literal["IsolatedIsaacPreflightManifestV1"] = "IsolatedIsaacPreflightManifestV1"
     sample_id: str
-    failure_type: Literal[
-        "EMPTY_GRASP", "WRONG_OBJECT", "RELEASE_FAILURE"
-    ]
+    failure_type: Literal["EMPTY_GRASP", "WRONG_OBJECT", "RELEASE_FAILURE"]
     source_hashes: dict[str, str]
     preflight_evidence_path: str
     preflight_evidence_sha256: str
@@ -57,6 +53,13 @@ def canonical_sha256(payload: object) -> str:
     return hashlib.sha256(encoded).hexdigest()
 
 
+def scene_seed_from_sample_id(sample_id: str) -> int:
+    match = re.match(r"^m2b-(\d+)-", sample_id)
+    if match is None:
+        raise ValueError(f"{sample_id}: scene seed is not encoded in sample_id")
+    return int(match.group(1))
+
+
 def _verify_hash(
     model_record: dict[str, Any],
     *,
@@ -65,9 +68,7 @@ def _verify_hash(
 ) -> None:
     actual = canonical_sha256(model_record[payload_key])
     if actual != model_record.get(hash_key):
-        raise ValueError(
-            f"{model_record.get('sample_id')}: {hash_key} mismatch"
-        )
+        raise ValueError(f"{model_record.get('sample_id')}: {hash_key} mismatch")
 
 
 def validate_model_record(
@@ -91,17 +92,18 @@ def validate_model_record(
         )
     if model_record.get("registry_sha256") != registry_sha256:
         raise ValueError(f"{sample_id}: runtime registry hash mismatch")
-    if re.fullmatch(
-        r"[0-9a-f]{64}",
-        str(model_record.get("model_checkpoint_sha256", "")),
-    ) is None:
+    if (
+        re.fullmatch(
+            r"[0-9a-f]{64}",
+            str(model_record.get("model_checkpoint_sha256", "")),
+        )
+        is None
+    ):
         raise ValueError(f"{sample_id}: model checkpoint hash missing")
     request = RuntimeSkillRequestV1.model_validate(model_record["request"])
     structural = validate_runtime_mapping(request, registry)
     if structural.model_dump(mode="json") != model_record["mapping"]:
-        raise ValueError(
-            f"{sample_id}: structural mapping is not reproducible"
-        )
+        raise ValueError(f"{sample_id}: structural mapping is not reproducible")
     return request, structural
 
 
@@ -127,18 +129,14 @@ def build_records(
         structural_payload = structural.model_dump(mode="json")
         structural_sha256 = canonical_sha256(structural_payload)
         if structural_payload != model_record["mapping"]:
-            raise ValueError(
-                f"{sample_id}: structural mapping is not reproducible"
-            )
+            raise ValueError(f"{sample_id}: structural mapping is not reproducible")
         common = {
             "decision_id": f"prospective-{sample_id}",
             "sample_id": sample_id,
             "failure_type": model_record["failure_type"],
             "request": request,
             "registry_sha256": registry_sha256,
-            "model_checkpoint_sha256": model_record[
-                "model_checkpoint_sha256"
-            ],
+            "model_checkpoint_sha256": model_record["model_checkpoint_sha256"],
             "model_input_sha256": model_record["model_input_sha256"],
             "model_output_sha256": model_record["model_output_sha256"],
             "request_sha256": model_record["request_sha256"],
@@ -177,9 +175,7 @@ def build_records(
             raise ValueError(f"{sample_id}: preflight contains an unrun gate")
 
         def check(name: str):
-            def result(
-                _action: str, _parameters: dict[str, Any]
-            ) -> tuple[bool, str | None]:
+            def result(_action: str, _parameters: dict[str, Any]) -> tuple[bool, str | None]:
                 status = gates[name]
                 return (
                     status in {"PASS", "NOT_APPLICABLE"},
@@ -205,12 +201,8 @@ def build_records(
                 collision_gate=gates["collision"],
                 safety_gate=gates["safety"],
                 source_hashes=preflight.source_hashes,
-                isolated_preflight_evidence_path=(
-                    preflight.preflight_evidence_path
-                ),
-                isolated_preflight_evidence_sha256=(
-                    preflight.preflight_evidence_sha256
-                ),
+                isolated_preflight_evidence_path=(preflight.preflight_evidence_path),
+                isolated_preflight_evidence_sha256=(preflight.preflight_evidence_sha256),
                 prospective_planning_check=True,
                 isolated_from_evaluation_rollout=True,
                 evaluation_execution_started=False,
@@ -224,35 +216,39 @@ def main() -> int:
     parser.add_argument("--model-records", required=True, type=Path)
     parser.add_argument("--preflight-manifest", required=True, type=Path)
     parser.add_argument("--registry", required=True, type=Path)
+    parser.add_argument("--gpu", type=int, choices=(0, 1), default=None)
     parser.add_argument("--output", required=True, type=Path)
     args = parser.parse_args()
     model_records = [
-        json.loads(line)
-        for line in args.model_records.read_text().splitlines()
-        if line.strip()
+        json.loads(line) for line in args.model_records.read_text().splitlines() if line.strip()
     ]
     preflights = [
         IsolatedIsaacPreflightManifestV1.model_validate_json(line)
         for line in args.preflight_manifest.read_text().splitlines()
         if line.strip()
     ]
+    if args.gpu is not None:
+        model_records = [
+            record
+            for record in model_records
+            if scene_seed_from_sample_id(str(record["sample_id"])) % 2 == args.gpu
+        ]
+        selected_ids = {str(record["sample_id"]) for record in model_records}
+        preflights = [preflight for preflight in preflights if preflight.sample_id in selected_ids]
     records = build_records(
         model_records,
         preflights,
         registry_path=args.registry,
     )
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(
-        "".join(record.model_dump_json() + "\n" for record in records)
-    )
+    args.output.write_text("".join(record.model_dump_json() + "\n" for record in records))
     print(
         json.dumps(
             {
                 "records": len(records),
+                "gpu_filter": args.gpu,
                 "output": str(args.output),
-                "output_sha256": hashlib.sha256(
-                    args.output.read_bytes()
-                ).hexdigest(),
+                "output_sha256": hashlib.sha256(args.output.read_bytes()).hexdigest(),
                 "teacher_used": False,
             },
             indent=2,

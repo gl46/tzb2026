@@ -10,6 +10,7 @@ from m2b.build_prospective_runtime_decisions import (
     IsolatedIsaacPreflightManifestV1,
     build_records,
     canonical_sha256,
+    scene_seed_from_sample_id,
 )
 from xh_agent.policy.qrm_lite.physical_runtime_gates import (
     PhysicalRuntimeGateReceiptV1,
@@ -27,6 +28,12 @@ from xh_agent.policy.qrm_lite.skill_registry import (
 
 ROOT = Path(__file__).parents[2]
 REGISTRY = load_registry(ROOT / "configs/qrm_runtime_mapping.yaml")
+
+
+def test_scene_seed_from_model_sample_id_supports_gpu_sharding() -> None:
+    assert scene_seed_from_sample_id("m2b-4018-empty_grasp-1:coarse-recovery-0") == 4018
+    with pytest.raises(ValueError, match="scene seed is not encoded"):
+        scene_seed_from_sample_id("sample-without-seed")
 
 
 def request() -> RuntimeSkillRequestV1:
@@ -85,10 +92,7 @@ def test_twenty_unique_three_class_prospective_mappings_pass() -> None:
         "WRONG_OBJECT",
         "RELEASE_FAILURE",
     )
-    records = [
-        record(index, failure_type=failures[index % len(failures)])
-        for index in range(20)
-    ]
+    records = [record(index, failure_type=failures[index % len(failures)]) for index in range(20)]
     report = summarize_prospective_runtime_mapping(records)
     assert report["formal_mapping_ready"] is True
     assert report["runtime_mapping_rate"] == 1.0
@@ -98,9 +102,7 @@ def test_twenty_unique_three_class_prospective_mappings_pass() -> None:
 
 
 def test_post_execution_receipt_cannot_claim_prospective_mapping() -> None:
-    payload = record(0, failure_type="EMPTY_GRASP").model_dump(
-        mode="json"
-    )
+    payload = record(0, failure_type="EMPTY_GRASP").model_dump(mode="json")
     payload["prospective_planning_check"] = False
     with pytest.raises(
         ValidationError,
@@ -115,13 +117,8 @@ def test_duplicate_model_sample_does_not_satisfy_scale_gate() -> None:
         "WRONG_OBJECT",
         "RELEASE_FAILURE",
     )
-    records = [
-        record(index, failure_type=failures[index % len(failures)])
-        for index in range(20)
-    ]
-    records[-1] = records[-1].model_copy(
-        update={"sample_id": records[0].sample_id}
-    )
+    records = [record(index, failure_type=failures[index % len(failures)]) for index in range(20)]
+    records[-1] = records[-1].model_copy(update={"sample_id": records[0].sample_id})
     report = summarize_prospective_runtime_mapping(records)
     assert report["formal_mapping_ready"] is False
     assert report["findings"] == ["duplicate sample_id"]

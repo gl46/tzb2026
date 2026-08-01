@@ -58,9 +58,7 @@ def prospective(*, rejected: bool = False) -> M2BProspectiveRuntimeDecisionV1:
             else (lambda _action, _parameters: (True, None))
         ),
     )
-    mapping_sha256 = hashlib.sha256(
-        mapping.model_dump_json().encode()
-    ).hexdigest()
+    mapping_sha256 = hashlib.sha256(mapping.model_dump_json().encode()).hexdigest()
     return M2BProspectiveRuntimeDecisionV1(
         decision_id="prospective-sample-1",
         sample_id="episode-1:coarse-recovery-0",
@@ -70,9 +68,7 @@ def prospective(*, rejected: bool = False) -> M2BProspectiveRuntimeDecisionV1:
         ik_gate="PASS",
         collision_gate="PASS",
         safety_gate="REJECTED" if rejected else "PASS",
-        registry_sha256=hashlib.sha256(
-            REGISTRY_PATH.read_bytes()
-        ).hexdigest(),
+        registry_sha256=hashlib.sha256(REGISTRY_PATH.read_bytes()).hexdigest(),
         model_checkpoint_sha256="b" * 64,
         model_input_sha256="c" * 64,
         model_output_sha256="d" * 64,
@@ -114,9 +110,7 @@ def test_matched_selection_round_robins_all_failure_classes() -> None:
         for index, failure in enumerate(failures)
     }
     fc = {
-        sample_id: item.model_copy(
-            update={"model_checkpoint_sha256": "8" * 64}
-        )
+        sample_id: item.model_copy(update={"model_checkpoint_sha256": "8" * 64})
         for sample_id, item in no_fc.items()
     }
     selected = matched_pairs(no_fc, fc, max_keys=3)
@@ -131,6 +125,26 @@ def test_matched_selection_rejects_different_adapter_samples() -> None:
             {},
             max_keys=1,
         )
+
+
+def test_matched_selection_allows_an_underfilled_gpu_shard() -> None:
+    base = prospective()
+    failures = ("EMPTY_GRASP", "WRONG_OBJECT", "RELEASE_FAILURE")
+    no_fc = {
+        f"episode-{index}:coarse-recovery-0": base.model_copy(
+            update={
+                "sample_id": f"episode-{index}:coarse-recovery-0",
+                "failure_type": failure,
+            }
+        )
+        for index, failure in enumerate(failures)
+    }
+    fc = {
+        sample_id: item.model_copy(update={"model_checkpoint_sha256": "8" * 64})
+        for sample_id, item in no_fc.items()
+    }
+    selected = matched_pairs(no_fc, fc, max_keys=20, require_count=False)
+    assert len(selected) == 3
 
 
 def test_matched_key_binds_scene_sources() -> None:
@@ -248,9 +262,7 @@ def test_execution_loader_verifies_root_sources_and_physical_injection(
             "simulator_truth_policy_input": False,
             "captures": [{"label": "empty_grasp_reobserve"}],
         },
-        "m2b_recovery": {
-            "empty_grasp": {"training_eligible": True}
-        },
+        "m2b_recovery": {"empty_grasp": {"training_eligible": True}},
     }
     raw = json.dumps(payload).encode()
     monkeypatch.setattr(
@@ -259,9 +271,7 @@ def test_execution_loader_verifies_root_sources_and_physical_injection(
     )
     monkeypatch.setattr(
         "m2b.run_matched_closed_loop_batch.remote_json",
-        lambda _host, _path: {
-            "attempts": [{"evidence": evidence_path, "elapsed_s": 2.5}]
-        },
+        lambda _host, _path: {"attempts": [{"evidence": evidence_path, "elapsed_s": 2.5}]},
     )
     monkeypatch.setattr(
         "m2b.run_matched_closed_loop_batch.remote_bytes",
@@ -291,9 +301,7 @@ def test_execution_loader_rejects_evidence_outside_run_root(
     )
     monkeypatch.setattr(
         "m2b.run_matched_closed_loop_batch.remote_json",
-        lambda _host, _path: {
-            "attempts": [{"evidence": "/other/evidence.json"}]
-        },
+        lambda _host, _path: {"attempts": [{"evidence": "/other/evidence.json"}]},
     )
     with pytest.raises(ValueError, match="escapes"):
         run_or_load_execution(

@@ -81,6 +81,7 @@ def matched_pairs(
     fc: dict[str, M2BProspectiveRuntimeDecisionV1],
     *,
     max_keys: int,
+    require_count: bool = True,
 ) -> list[
     tuple[
         M2BProspectiveRuntimeDecisionV1,
@@ -115,7 +116,7 @@ def matched_pairs(
         for failure in EXPECTED_FIRST_RECOVERY_SKILL:
             if buckets[failure] and len(selected) < max_keys:
                 selected.append(buckets[failure].pop(0))
-    if len(selected) < max_keys:
+    if require_count and len(selected) < max_keys:
         raise ValueError(f"only {len(selected)} matched keys available; need {max_keys}")
     return selected
 
@@ -500,13 +501,18 @@ def main() -> int:
     parser.add_argument("--journal", required=True, type=Path)
     parser.add_argument("--report", required=True, type=Path)
     args = parser.parse_args()
-    if args.max_matched_keys < 10:
+    if args.gpu is None and args.max_matched_keys < 10:
         raise ValueError("formal matched evaluation requires at least 10 keys")
     registry = load_registry(args.registry)
     registry_sha256 = hashlib.sha256(args.registry.read_bytes()).hexdigest()
     no_fc = load_decisions(args.no_fc_decisions)
     fc = load_decisions(args.fc_decisions)
-    pairs = matched_pairs(no_fc, fc, max_keys=args.max_matched_keys)
+    pairs = matched_pairs(
+        no_fc,
+        fc,
+        max_keys=args.max_matched_keys,
+        require_count=args.gpu is None,
+    )
     if any(decision.registry_sha256 != registry_sha256 for pair in pairs for decision in pair):
         raise ValueError("prospective decisions use a different registry")
     rows = [json.loads(line) for line in args.dataset.read_text().splitlines() if line.strip()]
