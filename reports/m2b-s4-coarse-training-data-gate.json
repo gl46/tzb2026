@@ -2,36 +2,36 @@
   "continuous_action_targets": 0,
   "counts_by_split": {
     "test": {
-      "EMPTY_GRASP": 2,
-      "RELEASE_FAILURE": 3,
-      "WRONG_OBJECT": 2
+      "EMPTY_GRASP": 3,
+      "RELEASE_FAILURE": 4,
+      "WRONG_OBJECT": 4
     },
     "train": {
-      "EMPTY_GRASP": 31,
-      "RELEASE_FAILURE": 40,
-      "WRONG_OBJECT": 26
+      "EMPTY_GRASP": 40,
+      "RELEASE_FAILURE": 47,
+      "WRONG_OBJECT": 38
     },
     "val": {
-      "EMPTY_GRASP": 7,
-      "RELEASE_FAILURE": 9,
-      "WRONG_OBJECT": 6
+      "EMPTY_GRASP": 8,
+      "RELEASE_FAILURE": 10,
+      "WRONG_OBJECT": 8
     }
   },
-  "dataset_sha256": "85889784912350e87f8c7b1165de22c2aa503e01e4203433f90d737a24dfda71",
+  "dataset_sha256": "2b32be13a00fe951af3374589391617162e27b956ea582cfdf109a80f916c219",
   "eval_coverage": true,
   "findings": [],
-  "formal_training_ready": false,
-  "limited_failure_coverage": false,
+  "formal_training_ready": true,
+  "limited_failure_coverage": true,
   "privileged_truth_policy_input": false,
-  "samples": 126,
+  "samples": 162,
   "schema_version": "M2BCoarseTrainingDataGateV1",
   "split_group_leakage": [],
-  "status": "NOT_READY",
+  "status": "PASS_FORMAL_TRAINING_READY",
   "teacher_used": false,
   "total_failure_counts": {
-    "EMPTY_GRASP": 40,
-    "RELEASE_FAILURE": 52,
-    "WRONG_OBJECT": 34
+    "EMPTY_GRASP": 51,
+    "RELEASE_FAILURE": 61,
+    "WRONG_OBJECT": 50
   },
-  "train_coverage": false
+  "train_coverage": true
 }

@@ -1,6 +1,5 @@
 {
   "blockers": [
-    "Dataset V2 has not met the limited-scale 50/class minimum",
     "at least 50 informative physical residual pairs are not packaged",
     "runtime mapping still requires Isaac IK/collision/safety dry-runs",
     "two-seed A100 NoFC/FC training has not run",
@@ -8,21 +7,21 @@
     "matched B0/QRM Isaac closed-loop evaluation has not run"
   ],
   "closed_loop_status": "NOT_RUN",
-  "dataset_v2_episodes_valid": 126,
+  "dataset_v2_episodes_valid": 162,
   "dataset_v2_failure_counts": {
-    "EMPTY_GRASP": 40,
-    "RELEASE_FAILURE": 52,
-    "WRONG_OBJECT": 34
+    "EMPTY_GRASP": 51,
+    "RELEASE_FAILURE": 61,
+    "WRONG_OBJECT": 50
   },
   "dataset_v2_successful_recovery_counts": {
-    "EMPTY_GRASP": 40,
-    "RELEASE_FAILURE": 52,
-    "WRONG_OBJECT": 34
+    "EMPTY_GRASP": 51,
+    "RELEASE_FAILURE": 61,
+    "WRONG_OBJECT": 50
   },
   "failure_evidence_pilot_records": 3,
   "goal_complete": false,
   "m2a_freeze_status": "PASS",
-  "next_command": "make m2b-generate-failures",
+  "next_command": "make m2b-generate-residuals",
   "physical_failure_classes": [
     "EMPTY_GRASP",
     "RELEASE_FAILURE",
@@ -31,7 +30,7 @@
   "physical_failure_recovery_status": "PASS_PUBLIC_FAILURES_AND_RECOVERIES",
   "physical_runtime_gate_status": "PASS_PHYSICAL_POST_EXECUTION_RECEIPTS_NOT_FORMAL_MAPPING",
   "physical_runtime_post_execution_gate_rate": 1.0,
-  "physical_runtime_receipts_complete_and_passing": 97,
+  "physical_runtime_receipts_complete_and_passing": 131,
   "prospective_runtime_planning_checks_complete": false,
   "residual_mlp_status": "NOT_RUN",
   "residual_mlp_supported_offline": null,
