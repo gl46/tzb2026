@@ -2,14 +2,14 @@
   "continuous_action_targets": 0,
   "counts_by_split": {
     "test": {
-      "EMPTY_GRASP": 1,
-      "RELEASE_FAILURE": 1,
-      "WRONG_OBJECT": 1
+      "EMPTY_GRASP": 2,
+      "RELEASE_FAILURE": 3,
+      "WRONG_OBJECT": 2
     },
     "train": {
-      "EMPTY_GRASP": 24,
-      "RELEASE_FAILURE": 32,
-      "WRONG_OBJECT": 19
+      "EMPTY_GRASP": 31,
+      "RELEASE_FAILURE": 40,
+      "WRONG_OBJECT": 26
     },
     "val": {
       "EMPTY_GRASP": 7,
@@ -17,21 +17,21 @@
       "WRONG_OBJECT": 6
     }
   },
-  "dataset_sha256": "c204da7a85c826c9ee93e737a78e669a8c9a53bfdaad0e87d63c0b2bb41e2214",
+  "dataset_sha256": "85889784912350e87f8c7b1165de22c2aa503e01e4203433f90d737a24dfda71",
   "eval_coverage": true,
   "findings": [],
   "formal_training_ready": false,
   "limited_failure_coverage": false,
   "privileged_truth_policy_input": false,
-  "samples": 100,
+  "samples": 126,
   "schema_version": "M2BCoarseTrainingDataGateV1",
   "split_group_leakage": [],
   "status": "NOT_READY",
   "teacher_used": false,
   "total_failure_counts": {
-    "EMPTY_GRASP": 32,
-    "RELEASE_FAILURE": 42,
-    "WRONG_OBJECT": 26
+    "EMPTY_GRASP": 40,
+    "RELEASE_FAILURE": 52,
+    "WRONG_OBJECT": 34
   },
   "train_coverage": false
 }
