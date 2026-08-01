@@ -1,0 +1,22 @@
+# M2B status
+
+- M2B 总状态：**PASS_WITH_LIMITATIONS**（P0 completion gates: PASS）
+- M2A 基线冻结：`PASS`；commit/hash verified=True/True
+- Dataset V2：162 valid / 0 quarantined；`PASS_DATASET_V2_LIMITED_CLASS_COVERAGE`
+- 三类 failure/recovery 数量：`{'EMPTY_GRASP': 51, 'RELEASE_FAILURE': 61, 'WRONG_OBJECT': 50}` / `{'EMPTY_GRASP': 51, 'RELEASE_FAILURE': 61, 'WRONG_OBJECT': 50}`
+- FailureContext 信息量：`INFORMATIVE`；verdict=`FC_SUPPORTED`
+- Residual 目标状态：`INFORMATIVE`；51 pairs；MLP verdict=`COARSE_ONLY`
+- 运行时映射通过率：`1.0`；prospective planning checks complete=True
+- 模型真实执行决策数/覆盖率：30/40 (`0.75`)
+- NoFC vs FC：final success `0.5` vs `1.0`；两 seed 离线 accuracy delta=`0.6153846153846154`
+- MLP vs zero residual：offline=True；closed-loop improvement=False
+- B0 vs QRM 闭环：B0/NoFC/FC final success = `1.0`/`0.5`/`1.0`
+- 归因边界：FC 的 20 个成功 episode 均由模型选择首个 coarse recovery skill，随后由固定 B0 continuation 完成；pure model-success episodes=0。
+- LingBot：`NOT_RUN`（P1，不阻塞 P0）
+- Oracle 泄漏：False；privileged simulator truth 未进入 test-time policy input
+- Teacher：used=False；states=`{'Nano': 'CANDIDATE', 'BWM': 'CANDIDATE_LICENSE_PENDING', 'Super': 'PARKED'}`；kill-rule events=0
+- 测试：364 passed / 0 failed；verification=`PASS`
+- Git：branch=`codex/m2b-failure-rich-qrm-activation`；evidence commits=67
+- 主要限制：Dataset V2 passes only the reduced 50-failures/25-recoveries per-class gate, not the recommended 100/50 coverage.; The optional UNSTABLE_PLACEMENT/WRONG_CELL class was not collected.; The matched evaluation uses 20 frozen keys and 30 executed model decisions; this clears the minimum gate but not the recommended 50 model executions.; QRM-Coarse-FC selects the first recovery skill, but all 20 successful episodes require fixed non-model B0 continuation; pure model-success episodes are zero.; The residual MLP beats zero only offline for dx/dy/dz; r6d/gripper outputs are frozen to zero and the MLP was not activated in closed loop.; LingBot P1 bring-up and M2B representative videos were not run; neither blocks the P0 verdict.
+- 最终 system verdict：**GO_QRM_COARSE_ONLY**；保留 B0 safety/delivery fallback，不替换 world-model mainline。
+- 下一条唯一命令：`make m2b-status`
