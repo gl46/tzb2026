@@ -148,7 +148,52 @@ def test_scale_launcher_partitions_seeds_without_overlapping_workers(
     assert "--scene-seed 4002" in launches[0]
     assert "--scene-seed 4003" in launches[1]
     assert "--scene-seed 4001" not in ssh_log.read_text()
+    launch_text = ssh_log.read_text().replace("\\,", ",")
+    assert "--failures EMPTY_GRASP,WRONG_OBJECT,RELEASE_FAILURE" in launch_text
     assert "--accepted-target-per-failure 25" in ssh_log.read_text()
+
+
+def test_scale_launcher_can_resume_a_single_failure_class(tmp_path) -> None:
+    fake_bin = tmp_path / "bin"
+    fake_bin.mkdir()
+    ssh_log = tmp_path / "ssh.log"
+    fake_ssh = fake_bin / "ssh"
+    fake_ssh.write_text(
+        "#!/bin/sh\n"
+        "case \"$*\" in\n"
+        "  *pgrep*) exit 1 ;;\n"
+        "  *) printf '%s\\n' \"$*\" >>\"$FAKE_SSH_LOG\"; echo 12345 ;;\n"
+        "esac\n"
+    )
+    fake_ssh.chmod(0o755)
+    project = Path(__file__).resolve().parents[2]
+    environment = {
+        **os.environ,
+        "PATH": f"{fake_bin}:{os.environ['PATH']}",
+        "FAKE_SSH_LOG": str(ssh_log),
+        "M2B_SCENE_START": "4000",
+        "M2B_SCENE_END": "4001",
+        "M2B_EXCLUDE_SEEDS": "",
+        "M2B_FAILURES": "WRONG_OBJECT",
+        "M2B_ACCEPTED_TARGET_PER_WORKER": "30",
+    }
+    completed = subprocess.run(
+        ["bash", str(project / "scripts/m2b/launch_failure_evidence_scale.sh")],
+        capture_output=True,
+        text=True,
+        check=False,
+        env=environment,
+    )
+    assert completed.returncode == 0, completed.stderr
+    launches = [
+        launch.replace("\\,", ",")
+        for launch in ssh_log.read_text().splitlines()
+    ]
+    assert len(launches) == 2
+    assert all("--failures WRONG_OBJECT" in launch for launch in launches)
+    assert all(
+        "--accepted-target-per-failure 30" in launch for launch in launches
+    )
 
 
 def test_residual_worker_uses_bounded_nonzero_camera_perturbations() -> None:

@@ -13,6 +13,7 @@ exclude_csv="${M2B_EXCLUDE_SEEDS:-4025,4063,4091,4110}"
 # independent perturbation executions per accepted WRONG_OBJECT correction,
 # so failure collection no longer needs a larger correction-anchor margin.
 accepted_target_per_failure="${M2B_ACCEPTED_TARGET_PER_WORKER:-25}"
+failures="${M2B_FAILURES:-EMPTY_GRASP,WRONG_OBJECT,RELEASE_FAILURE}"
 
 if (( scene_start > scene_end )); then
   echo "M2B_SCENE_START must not exceed M2B_SCENE_END" >&2
@@ -61,6 +62,7 @@ for gpu in 0 1; do
     --max-stage-attempts 2
     --max-failure-attempts 2
     --settle-s 10
+    --failures "${failures}"
     --accepted-target-per-failure "${accepted_target_per_failure}"
     --container-prefix m2b-scale-v1
   )
