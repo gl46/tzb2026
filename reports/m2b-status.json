@@ -8,16 +8,16 @@
     "matched B0/QRM Isaac closed-loop evaluation has not run"
   ],
   "closed_loop_status": "NOT_RUN",
-  "dataset_v2_episodes_valid": 63,
+  "dataset_v2_episodes_valid": 100,
   "dataset_v2_failure_counts": {
-    "EMPTY_GRASP": 19,
-    "RELEASE_FAILURE": 26,
-    "WRONG_OBJECT": 18
+    "EMPTY_GRASP": 32,
+    "RELEASE_FAILURE": 42,
+    "WRONG_OBJECT": 26
   },
   "dataset_v2_successful_recovery_counts": {
-    "EMPTY_GRASP": 19,
-    "RELEASE_FAILURE": 26,
-    "WRONG_OBJECT": 18
+    "EMPTY_GRASP": 32,
+    "RELEASE_FAILURE": 42,
+    "WRONG_OBJECT": 26
   },
   "failure_evidence_pilot_records": 3,
   "goal_complete": false,
@@ -31,7 +31,7 @@
   "physical_failure_recovery_status": "PASS_PUBLIC_FAILURES_AND_RECOVERIES",
   "physical_runtime_gate_status": "PASS_PHYSICAL_POST_EXECUTION_RECEIPTS_NOT_FORMAL_MAPPING",
   "physical_runtime_post_execution_gate_rate": 1.0,
-  "physical_runtime_receipts_complete_and_passing": 32,
+  "physical_runtime_receipts_complete_and_passing": 69,
   "prospective_runtime_planning_checks_complete": false,
   "residual_mlp_status": "NOT_RUN",
   "residual_mlp_supported_offline": null,
