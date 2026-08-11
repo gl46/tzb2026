@@ -1,0 +1,81 @@
+{
+  "schema_version": "M2CS2ExplorationAttemptV1",
+  "status": "INVALID_DOMAIN_STOPPED",
+  "candidate_manifest": {
+    "path": "configs/m2c_headroom_domain_v2.json",
+    "sha256": "72dc38fc58c96914f1588f5eb7758a15d9fbf190f1583f1f6ab31fde3489d2dd",
+    "domain_sha256": "cd6797cccdd08a520dde8a40e45985e192f65ce91a1481b4b210937657c40406",
+    "preregistration_commit": "50e3933"
+  },
+  "decision": {
+    "q_a_counted": false,
+    "b0_final_task_success_rate": null,
+    "b0_headroom": null,
+    "reason": "The tall-cylinder candidate did not preserve the public perception contract. Scene 7018 established the physical EMPTY_GRASP state but not its public failure predicate; scene 7037 had no selectable yellow public target. These are not admissible B0 recovery outcomes for a Student policy.",
+    "remaining_keys_stopped_before_counting": true
+  },
+  "executions": [
+    {
+      "scene_seed": 7018,
+      "gpu": 0,
+      "classification": "INVALID_PUBLIC_FAILURE_PREDICATE",
+      "runner_status": "PARTIAL",
+      "runner_elapsed_s": 175.22048684908077,
+      "probe_status": "CONTACT_GATE_REJECTED",
+      "empty_grasp_physical_state_passed": true,
+      "empty_grasp_training_eligible": false,
+      "target_motion_during_empty_grasp_m": 6.143906154658885e-08,
+      "public_observation_status": "NOT_CAPTURED_BY_ACTUATION_PROBE",
+      "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/headroom-v2/b0/gpu0/scene-7018/failures/empty_grasp/empty_grasp/attempt-01/actuation-probe.json",
+      "evidence_sha256": "750d8fb98c71efd7a4a306d60c4bd3a85a8e3f5eab8f580dc1dcf39f13674fef",
+      "summary_path": "/var/tmp/xh-data/isaac-industrial/m2c/headroom-v2/b0/gpu0/scene-7018/failures/empty_grasp/physical-failure-smoke.json",
+      "summary_sha256": "2f97ecea59b5e1b65d889016b3ba6716594c8dd0f65d9943860cfa865b8c1103",
+      "console_sha256": "f6b1960c9e782b2ce9d314cf7c5033bb40aaf66cc7289c7d7ea0328a64b7f3e5"
+    },
+    {
+      "scene_seed": 7037,
+      "gpu": 1,
+      "classification": "INVALID_PUBLIC_TARGET_ABSENT",
+      "runner_status": "PARTIAL",
+      "runner_elapsed_s": 134.95777204399928,
+      "actuation_evidence_written": false,
+      "fatal_error": "ValueError: no public 'yellow' target candidate",
+      "summary_path": "/var/tmp/xh-data/isaac-industrial/m2c/headroom-v2/b0/gpu1/scene-7037/failures/empty_grasp/physical-failure-smoke.json",
+      "summary_sha256": "d04940c0a08493e4817475ee3fafb7b5a1f0db1b921d512c20b114c3fbfefe37",
+      "console_sha256": "efe0cbbf0cb4fe3f3dbe9d330d0ed0f77f285cf18669358f4c9ba93331c52a9d"
+    }
+  ],
+  "aborted_without_counted_outcome": [
+    7038,
+    7039,
+    7058,
+    7077,
+    7078,
+    7097,
+    7117,
+    7118
+  ],
+  "b0_probe_sha256": "1e32fa89c8b1ef403a52f1b2c8326942b72092e6e88f50e8f780eff1c08c6094",
+  "b0_runner_sha256": "7e68c9f18b26bedaa600e642ca59339da9a99739bc2770d8aed3f87c53e98865",
+  "b0_modified": false,
+  "teacher_used": false,
+  "teacher_kill_rule_events": [],
+  "privileged_truth_policy_input": false,
+  "world_model_mainline_replaced": false,
+  "task_report": {
+    "changed_files": [
+      "reports/m2c-s2-exploration-v2.json",
+      "reports/m2c-s2-exploration-v2.md"
+    ],
+    "tests": {
+      "real_isaac_executions_started": 2,
+      "valid_q_a_executions": 0
+    },
+    "failures": [
+      "scene 7018 lacked a public EMPTY_GRASP predicate",
+      "scene 7037 public target absent"
+    ],
+    "blockers": [],
+    "next_command": "make m2c-s2-domain-v3"
+  }
+}

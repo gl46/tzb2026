@@ -1,0 +1,418 @@
+{
+  "b0_freeze_manifest": "/Users/gl/tzb-qrm-lite/configs/m2c_b0_freeze.json",
+  "b0_freeze_manifest_sha256": "4bec9104be849dfd8d71b32b537eb2b5d70ea4d8560b4bdd65b1d1019d3e8d04",
+  "baseline_commit": "141e45dabddcaf59bb49ab958d9d5273d1f54d88",
+  "baseline_protocol": {
+    "expected_result": "safe free-gap rejection before physical action",
+    "final_success": "true only if the frozen probe physically lifts the public task target; a safety rejection is false",
+    "implementation_parameters_retries_and_gates_changed": false,
+    "probe": "scripts/isaac_m1b_actuation_probe.py",
+    "probe_sha256": "1e32fa89c8b1ef403a52f1b2c8326942b72092e6e88f50e8f780eff1c08c6094",
+    "target": "public yellow world_x=max"
+  },
+  "dataset_version": "isaac-industrial-v3-headroom",
+  "derived_existence_probe": {
+    "builder": "scripts/m2c/derive_blocker_probe.py",
+    "builder_sha256": "3fa0d74f5121a5019a7bebd26f945bf99aa7558e3cead2f5ea4673aab42fed53",
+    "counted_as_b0": false,
+    "path": "/Users/gl/tzb-m2c-evidence/m2c-s2/source-v3/isaac_m2c_blocker_probe.py",
+    "sha256": "6623b1ce1dc5b289e1166ce7a59ea742fa6de2c3595d4818ab65ef03f0553f87",
+    "upstream_b0_probe": "scripts/isaac_m1b_actuation_probe.py",
+    "upstream_b0_probe_sha256": "1e32fa89c8b1ef403a52f1b2c8326942b72092e6e88f50e8f780eff1c08c6094"
+  },
+  "domain_sha256": "7ed332bd0761a06ce4276ff7ae8eeb689d0d84cbecf54633a066f918c764a775",
+  "existence_proof_protocol": {
+    "live_pose_used_only_for_evaluator_scripted_transport": true,
+    "policy_input_simulator_truth": false,
+    "probe_sha256": "6623b1ce1dc5b289e1166ce7a59ea742fa6de2c3595d4818ab65ef03f0553f87",
+    "purpose": "physical recoverability only; never counted as B0",
+    "same_ik_collision_safety_contact_and_schema_gates": true,
+    "sequence": [
+      "PUBLIC_RED_BLOCKER_GRASP",
+      "LIFT",
+      "COLLISION_GATED_MOVE_TO_OFFICIAL_BIN_CELL",
+      "RELEASE",
+      "PUBLIC_REASSOCIATE_YELLOW_TARGET",
+      "PUBLIC_REGRASP_YELLOW_TARGET"
+    ]
+  },
+  "keys": [
+    {
+      "anchor_xy_m": [
+        -0.11,
+        0.13
+      ],
+      "blocker_distance_m": 0.04,
+      "failure_type": "PATH_BLOCKED",
+      "matched_key": "m2c-headroom-v3-da003f225d74a820a949b6045417c9fced578bb46124f98c300a8bfe44507306",
+      "minimum_surface_gap_m": 0.009999999999999995,
+      "outcome_observed_during_selection": false,
+      "part_count": 6,
+      "scene_seed": 8018,
+      "scripted_bin_cell_index": 3,
+      "scripted_bin_cell_world_m": [
+        0.125,
+        0.15,
+        0.56
+      ],
+      "scripted_blocker_clearance_m": 0.02136871616134165,
+      "scripted_blocker_clearance_ok": true,
+      "scripted_blocker_entity_evaluator_only": "cylinder_01",
+      "scripted_blocker_selector_policy_input": "visual_color=red,top_z_band=0.02m,world_x=max",
+      "sdf": "/Users/gl/tzb-m2c-evidence/m2c-s2/source-v3/scene-8018.sdf",
+      "sdf_sha256": "13af7ac2fe2748f7aa9ada14c920f291a83c1392e80dad463114cd14d5df0a7c",
+      "split": "test",
+      "supervision": "/Users/gl/tzb-m2c-evidence/m2c-s2/source-v3/scene-8018.supervision.json",
+      "supervision_sha256": "95b1464f646ee804b8d5bc0dafcedce600c8b5091a0a525141daf9dada1be2bc",
+      "target_clearance_after_relocation_m": 0.029590319076428617,
+      "target_clearance_after_relocation_ok": true,
+      "target_clearance_before_m": 0.0025086828031234618,
+      "target_clearance_before_ok": false,
+      "target_entity_evaluator_only": "cylinder_04",
+      "target_selector_policy_input": "visual_color=yellow,top_z_band=0.02m,world_x=max"
+    },
+    {
+      "anchor_xy_m": [
+        -0.11,
+        0.2
+      ],
+      "blocker_distance_m": 0.04,
+      "failure_type": "PATH_BLOCKED",
+      "matched_key": "m2c-headroom-v3-3b6dc8798b6148b8ecba4df588fbec8aaa0f8448a8ddcf2ae3fba5dd4ac8a3cf",
+      "minimum_surface_gap_m": 0.009999999999999995,
+      "outcome_observed_during_selection": false,
+      "part_count": 6,
+      "scene_seed": 8038,
+      "scripted_bin_cell_index": 3,
+      "scripted_bin_cell_world_m": [
+        0.125,
+        0.15,
+        0.56
+      ],
+      "scripted_blocker_clearance_m": 0.02136871616134165,
+      "scripted_blocker_clearance_ok": true,
+      "scripted_blocker_entity_evaluator_only": "cylinder_01",
+      "scripted_blocker_selector_policy_input": "visual_color=red,top_z_band=0.02m,world_x=max",
+      "sdf": "/Users/gl/tzb-m2c-evidence/m2c-s2/source-v3/scene-8038.sdf",
+      "sdf_sha256": "814461c8fb2c161ea5be242c3b54d6935426ad86db925a165fb60156b7bfce14",
+      "split": "test",
+      "supervision": "/Users/gl/tzb-m2c-evidence/m2c-s2/source-v3/scene-8038.supervision.json",
+      "supervision_sha256": "7155385cc593c5ef317579b2cb629ea247690dfa50143b55c2334a3549516fe7",
+      "target_clearance_after_relocation_m": 0.029590319076428617,
+      "target_clearance_after_relocation_ok": true,
+      "target_clearance_before_m": 0.0025086828031234618,
+      "target_clearance_before_ok": false,
+      "target_entity_evaluator_only": "cylinder_04",
+      "target_selector_policy_input": "visual_color=yellow,top_z_band=0.02m,world_x=max"
+    },
+    {
+      "anchor_xy_m": [
+        -0.11,
+        0.27
+      ],
+      "blocker_distance_m": 0.04,
+      "failure_type": "PATH_BLOCKED",
+      "matched_key": "m2c-headroom-v3-aca62865e7592a67f0a04b238e3f188fb6732b809ba5e1fd94f679b53771a32b",
+      "minimum_surface_gap_m": 0.009999999999999995,
+      "outcome_observed_during_selection": false,
+      "part_count": 6,
+      "scene_seed": 8039,
+      "scripted_bin_cell_index": 3,
+      "scripted_bin_cell_world_m": [
+        0.125,
+        0.15,
+        0.56
+      ],
+      "scripted_blocker_clearance_m": 0.02136871616134165,
+      "scripted_blocker_clearance_ok": true,
+      "scripted_blocker_entity_evaluator_only": "cylinder_01",
+      "scripted_blocker_selector_policy_input": "visual_color=red,top_z_band=0.02m,world_x=max",
+      "sdf": "/Users/gl/tzb-m2c-evidence/m2c-s2/source-v3/scene-8039.sdf",
+      "sdf_sha256": "ece549ef570d66847ffa061880a89e66704d044311994235c14f7e63847dfa73",
+      "split": "test",
+      "supervision": "/Users/gl/tzb-m2c-evidence/m2c-s2/source-v3/scene-8039.supervision.json",
+      "supervision_sha256": "6f7469bd654a7c662d07788530388704a25b74788e311887345d25d18f29ffd4",
+      "target_clearance_after_relocation_m": 0.029590319076428603,
+      "target_clearance_after_relocation_ok": true,
+      "target_clearance_before_m": 0.0025086828031234618,
+      "target_clearance_before_ok": false,
+      "target_entity_evaluator_only": "cylinder_04",
+      "target_selector_policy_input": "visual_color=yellow,top_z_band=0.02m,world_x=max"
+    },
+    {
+      "anchor_xy_m": [
+        -0.11,
+        0.34
+      ],
+      "blocker_distance_m": 0.04,
+      "failure_type": "PATH_BLOCKED",
+      "matched_key": "m2c-headroom-v3-af06b9cb42b09b0fa6e93ea94cfb19bce4e53590c1e8f008669f94bd7462fc58",
+      "minimum_surface_gap_m": 0.009999999999999995,
+      "outcome_observed_during_selection": false,
+      "part_count": 6,
+      "scene_seed": 8097,
+      "scripted_bin_cell_index": 3,
+      "scripted_bin_cell_world_m": [
+        0.125,
+        0.15,
+        0.56
+      ],
+      "scripted_blocker_clearance_m": 0.02136871616134163,
+      "scripted_blocker_clearance_ok": true,
+      "scripted_blocker_entity_evaluator_only": "cylinder_01",
+      "scripted_blocker_selector_policy_input": "visual_color=red,top_z_band=0.02m,world_x=max",
+      "sdf": "/Users/gl/tzb-m2c-evidence/m2c-s2/source-v3/scene-8097.sdf",
+      "sdf_sha256": "d3a4ac47fa22b32492c1d49851f08e0c577a404b25241a4489221107ca01501b",
+      "split": "test",
+      "supervision": "/Users/gl/tzb-m2c-evidence/m2c-s2/source-v3/scene-8097.supervision.json",
+      "supervision_sha256": "6a0f643e413e2ffb86f73c96e123a27cf412260fcfa192fac30078bc3f116ab8",
+      "target_clearance_after_relocation_m": 0.029590319076428603,
+      "target_clearance_after_relocation_ok": true,
+      "target_clearance_before_m": 0.0025086828031234618,
+      "target_clearance_before_ok": false,
+      "target_entity_evaluator_only": "cylinder_04",
+      "target_selector_policy_input": "visual_color=yellow,top_z_band=0.02m,world_x=max"
+    },
+    {
+      "anchor_xy_m": [
+        -0.25,
+        0.27
+      ],
+      "blocker_distance_m": 0.04,
+      "failure_type": "PATH_BLOCKED",
+      "matched_key": "m2c-headroom-v3-8dd17045047f857681c5734f413dc4ed325bed829b1a24bdf4c5696da688e57d",
+      "minimum_surface_gap_m": 0.010000000000000009,
+      "outcome_observed_during_selection": false,
+      "part_count": 6,
+      "scene_seed": 8277,
+      "scripted_bin_cell_index": 3,
+      "scripted_bin_cell_world_m": [
+        0.125,
+        0.15,
+        0.56
+      ],
+      "scripted_blocker_clearance_m": 0.02136871616134165,
+      "scripted_blocker_clearance_ok": true,
+      "scripted_blocker_entity_evaluator_only": "cylinder_01",
+      "scripted_blocker_selector_policy_input": "visual_color=red,top_z_band=0.02m,world_x=max",
+      "sdf": "/Users/gl/tzb-m2c-evidence/m2c-s2/source-v3/scene-8277.sdf",
+      "sdf_sha256": "c19a221f2a5fea995de52f082f7275ca0aea87eb825e4f2a11bcb3e829bd83c8",
+      "split": "test",
+      "supervision": "/Users/gl/tzb-m2c-evidence/m2c-s2/source-v3/scene-8277.supervision.json",
+      "supervision_sha256": "347c30fff86c58decbe5b98cc6d80a81223ae4eec9b328c2344f0e57c71271c1",
+      "target_clearance_after_relocation_m": 0.029590319076428603,
+      "target_clearance_after_relocation_ok": true,
+      "target_clearance_before_m": 0.0025086828031234618,
+      "target_clearance_before_ok": false,
+      "target_entity_evaluator_only": "cylinder_04",
+      "target_selector_policy_input": "visual_color=yellow,top_z_band=0.02m,world_x=max"
+    },
+    {
+      "anchor_xy_m": [
+        -0.25,
+        0.34
+      ],
+      "blocker_distance_m": 0.04,
+      "failure_type": "PATH_BLOCKED",
+      "matched_key": "m2c-headroom-v3-5ba640f94f857b0da66413147f967e6f8f71223689fdb38d480196f77a491179",
+      "minimum_surface_gap_m": 0.010000000000000009,
+      "outcome_observed_during_selection": false,
+      "part_count": 6,
+      "scene_seed": 8318,
+      "scripted_bin_cell_index": 3,
+      "scripted_bin_cell_world_m": [
+        0.125,
+        0.15,
+        0.56
+      ],
+      "scripted_blocker_clearance_m": 0.02136871616134163,
+      "scripted_blocker_clearance_ok": true,
+      "scripted_blocker_entity_evaluator_only": "cylinder_01",
+      "scripted_blocker_selector_policy_input": "visual_color=red,top_z_band=0.02m,world_x=max",
+      "sdf": "/Users/gl/tzb-m2c-evidence/m2c-s2/source-v3/scene-8318.sdf",
+      "sdf_sha256": "f394d33b5e65773a465d304befd3923c062dc0c00ea694ab8fea87bf21c67c67",
+      "split": "test",
+      "supervision": "/Users/gl/tzb-m2c-evidence/m2c-s2/source-v3/scene-8318.supervision.json",
+      "supervision_sha256": "cfaf8113b532fafcbc59967d255db3ea57a0f95eabbeabf3f2cd19eb68ced98b",
+      "target_clearance_after_relocation_m": 0.029590319076428603,
+      "target_clearance_after_relocation_ok": true,
+      "target_clearance_before_m": 0.0025086828031234618,
+      "target_clearance_before_ok": false,
+      "target_entity_evaluator_only": "cylinder_04",
+      "target_selector_policy_input": "visual_color=yellow,top_z_band=0.02m,world_x=max"
+    },
+    {
+      "anchor_xy_m": [
+        -0.46,
+        0.27
+      ],
+      "blocker_distance_m": 0.04,
+      "failure_type": "PATH_BLOCKED",
+      "matched_key": "m2c-headroom-v3-4f77c38c2222c1fb752ddd4091b45b75dd670df82fb60b88c8d3cbc2392be45c",
+      "minimum_surface_gap_m": 0.009999999999999981,
+      "outcome_observed_during_selection": false,
+      "part_count": 6,
+      "scene_seed": 8337,
+      "scripted_bin_cell_index": 3,
+      "scripted_bin_cell_world_m": [
+        0.125,
+        0.15,
+        0.56
+      ],
+      "scripted_blocker_clearance_m": 0.021368716161341637,
+      "scripted_blocker_clearance_ok": true,
+      "scripted_blocker_entity_evaluator_only": "cylinder_01",
+      "scripted_blocker_selector_policy_input": "visual_color=red,top_z_band=0.02m,world_x=max",
+      "sdf": "/Users/gl/tzb-m2c-evidence/m2c-s2/source-v3/scene-8337.sdf",
+      "sdf_sha256": "feb912116eb5d83c17558a1307ce5c83440d3b36a6c8caac4fa5a9009e9eb227",
+      "split": "test",
+      "supervision": "/Users/gl/tzb-m2c-evidence/m2c-s2/source-v3/scene-8337.supervision.json",
+      "supervision_sha256": "c0b4daf9d0aec9c6e8124d68a48a0f65a94f99ef3c9e9e8739fc19151b607f0d",
+      "target_clearance_after_relocation_m": 0.02959031907642863,
+      "target_clearance_after_relocation_ok": true,
+      "target_clearance_before_m": 0.002508682803123455,
+      "target_clearance_before_ok": false,
+      "target_entity_evaluator_only": "cylinder_04",
+      "target_selector_policy_input": "visual_color=yellow,top_z_band=0.02m,world_x=max"
+    },
+    {
+      "anchor_xy_m": [
+        -0.46,
+        0.34
+      ],
+      "blocker_distance_m": 0.04,
+      "failure_type": "PATH_BLOCKED",
+      "matched_key": "m2c-headroom-v3-f1b61e829ab4957e376c292c61fee85418ff4a212d12860baf694e2d8c67ebc8",
+      "minimum_surface_gap_m": 0.009999999999999981,
+      "outcome_observed_during_selection": false,
+      "part_count": 6,
+      "scene_seed": 8339,
+      "scripted_bin_cell_index": 3,
+      "scripted_bin_cell_world_m": [
+        0.125,
+        0.15,
+        0.56
+      ],
+      "scripted_blocker_clearance_m": 0.021368716161341617,
+      "scripted_blocker_clearance_ok": true,
+      "scripted_blocker_entity_evaluator_only": "cylinder_01",
+      "scripted_blocker_selector_policy_input": "visual_color=red,top_z_band=0.02m,world_x=max",
+      "sdf": "/Users/gl/tzb-m2c-evidence/m2c-s2/source-v3/scene-8339.sdf",
+      "sdf_sha256": "1fa10ed829cec497f0c75a9817194f3d456b8545180b08a15cab54f49ce6c4f9",
+      "split": "test",
+      "supervision": "/Users/gl/tzb-m2c-evidence/m2c-s2/source-v3/scene-8339.supervision.json",
+      "supervision_sha256": "4587593b3ab34ed45761cba561eb9378b631a6e29f5c14e956610c9af7298213",
+      "target_clearance_after_relocation_m": 0.02959031907642863,
+      "target_clearance_after_relocation_ok": true,
+      "target_clearance_before_m": 0.002508682803123455,
+      "target_clearance_before_ok": false,
+      "target_entity_evaluator_only": "cylinder_04",
+      "target_selector_policy_input": "visual_color=yellow,top_z_band=0.02m,world_x=max"
+    },
+    {
+      "anchor_xy_m": [
+        -0.53,
+        0.27
+      ],
+      "blocker_distance_m": 0.04,
+      "failure_type": "PATH_BLOCKED",
+      "matched_key": "m2c-headroom-v3-4a0a31f171255e6a9bd70dbaee3d828654aafd929c199ff70175bd6cbdb4ee1c",
+      "minimum_surface_gap_m": 0.009999999999999981,
+      "outcome_observed_during_selection": false,
+      "part_count": 6,
+      "scene_seed": 8398,
+      "scripted_bin_cell_index": 3,
+      "scripted_bin_cell_world_m": [
+        0.125,
+        0.15,
+        0.56
+      ],
+      "scripted_blocker_clearance_m": 0.021368716161341672,
+      "scripted_blocker_clearance_ok": true,
+      "scripted_blocker_entity_evaluator_only": "cylinder_01",
+      "scripted_blocker_selector_policy_input": "visual_color=red,top_z_band=0.02m,world_x=max",
+      "sdf": "/Users/gl/tzb-m2c-evidence/m2c-s2/source-v3/scene-8398.sdf",
+      "sdf_sha256": "3d483a36aeab21ba86e3ce8464e62c053ab6ec205fdadd7e441e5dbcfabeb060",
+      "split": "test",
+      "supervision": "/Users/gl/tzb-m2c-evidence/m2c-s2/source-v3/scene-8398.supervision.json",
+      "supervision_sha256": "ea4113fe761120380c002bf466108e456a5d3274dd8c69040ae62686cd9af44d",
+      "target_clearance_after_relocation_m": 0.029590319076428583,
+      "target_clearance_after_relocation_ok": true,
+      "target_clearance_before_m": 0.0025086828031234756,
+      "target_clearance_before_ok": false,
+      "target_entity_evaluator_only": "cylinder_04",
+      "target_selector_policy_input": "visual_color=yellow,top_z_band=0.02m,world_x=max"
+    },
+    {
+      "anchor_xy_m": [
+        -0.53,
+        0.34
+      ],
+      "blocker_distance_m": 0.04,
+      "failure_type": "PATH_BLOCKED",
+      "matched_key": "m2c-headroom-v3-e037003930b67846abede79b574399cf3d7df46bf9bfd3ac17a6caa9a54f40a1",
+      "minimum_surface_gap_m": 0.009999999999999981,
+      "outcome_observed_during_selection": false,
+      "part_count": 6,
+      "scene_seed": 8399,
+      "scripted_bin_cell_index": 3,
+      "scripted_bin_cell_world_m": [
+        0.125,
+        0.15,
+        0.56
+      ],
+      "scripted_blocker_clearance_m": 0.021368716161341644,
+      "scripted_blocker_clearance_ok": true,
+      "scripted_blocker_entity_evaluator_only": "cylinder_01",
+      "scripted_blocker_selector_policy_input": "visual_color=red,top_z_band=0.02m,world_x=max",
+      "sdf": "/Users/gl/tzb-m2c-evidence/m2c-s2/source-v3/scene-8399.sdf",
+      "sdf_sha256": "e1b97d798f7a218be6c159084f7991758263642680f2398bb31eee035646a802",
+      "split": "test",
+      "supervision": "/Users/gl/tzb-m2c-evidence/m2c-s2/source-v3/scene-8399.supervision.json",
+      "supervision_sha256": "dfd15ab3499fcc3898283e0993cbe92efb861017c1db6263a222c32b7b964f77",
+      "target_clearance_after_relocation_m": 0.029590319076428583,
+      "target_clearance_after_relocation_ok": true,
+      "target_clearance_before_m": 0.0025086828031234756,
+      "target_clearance_before_ok": false,
+      "target_entity_evaluator_only": "cylinder_04",
+      "target_selector_policy_input": "visual_color=yellow,top_z_band=0.02m,world_x=max"
+    }
+  ],
+  "outcomes_observed": false,
+  "privileged_truth_policy_input": false,
+  "q_a_decision": null,
+  "schema_version": "M2CHeadroomDomainManifestV3",
+  "selection_protocol": {
+    "candidate_order": "ascending_seed_with_exactly_six_objects",
+    "clearance_gate_m": 0.005,
+    "failure_type": "PATH_BLOCKED",
+    "key_count": 10,
+    "minimum_physical_surface_gap_m": 0.005,
+    "object_geometry_mass_material_and_dynamics": "unchanged M2B",
+    "observes_isaac_outcomes": false,
+    "seed_range_half_open": [
+      8000,
+      8800
+    ],
+    "split": "test",
+    "target_blocker_center_distance_m": 0.04
+  },
+  "source_generator": "scripts/generate_industrial_scenes.py",
+  "source_generator_sha256": "e9f9e20106a05dbec24453ce39422d57aa212709567fb7eba7f8d9beb03cd6c5",
+  "status": "PREREGISTERED_NOT_EVALUATED",
+  "supersedes_invalid_candidates": [
+    {
+      "domain_sha256": "6630402d9e5ee4762cfef468f391af691dcef57b96bf8d2e2ac8b35cca337dd2",
+      "manifest": "configs/m2c_headroom_domain.json"
+    },
+    {
+      "domain_sha256": "cd6797cccdd08a520dde8a40e45985e192f65ce91a1481b4b210937657c40406",
+      "exploration_report": "/Users/gl/tzb-qrm-lite/reports/m2c-s2-exploration-v2.json",
+      "exploration_report_sha256": "307d4888e6abd0d30d7aca1b86fcda6941a3602189033a937d881cfd3a44c934",
+      "manifest": "configs/m2c_headroom_domain_v2.json"
+    }
+  ],
+  "teacher_kill_rule_events": [],
+  "teacher_used": false,
+  "world_model_mainline_replaced": false
+}
