@@ -143,7 +143,9 @@ def test_fallback_success_is_system_success_not_model_success() -> None:
     metrics = summarize_method([episode])
     assert metrics["final_task_success_rate"] == 1.0
     assert metrics["system_success_with_b0_fallback"] == 1
-    assert metrics["model_success_episodes"] == 0
+    assert metrics["successful_episodes_with_any_model_decision"] == 1
+    assert metrics["pure_model_success_episodes"] == 0
+    assert metrics["pure_model_success_exclusions"][0]["reasons"]
     assert metrics["model_decisions_executed"] == 0
     assert metrics["model_decisions_fallback"] == 1
 
@@ -166,8 +168,24 @@ def test_fixed_b0_continuation_is_not_attributed_as_model_success() -> None:
     )
     metrics = summarize_method([episode])
     assert metrics["model_decisions_executed"] == 1
-    assert metrics["model_success_episodes"] == 0
+    assert metrics["successful_episodes_with_any_model_decision"] == 1
+    assert metrics["pure_model_success_episodes"] == 0
+    reasons = metrics["pure_model_success_exclusions"][0]["reasons"]
+    assert any(reason.endswith(":FIXED_B0_CONTINUATION") for reason in reasons)
     assert metrics["system_success_with_non_model_continuation"] == 1
+
+
+def test_strict_pure_count_is_bounded_by_any_model_count() -> None:
+    model = _decision(model=True, source="MODEL_SELECTED_B0_SKILL")
+    episode = _episode("scene-5000", "QRM_COARSE_FC", model)
+    metrics = summarize_method([episode])
+    assert metrics["successful_episodes_with_any_model_decision"] == 1
+    assert metrics["pure_model_success_episodes"] == 1
+    assert metrics["pure_model_success_exclusions"] == []
+    assert (
+        metrics["pure_model_success_episodes"]
+        <= metrics["successful_episodes_with_any_model_decision"]
+    )
 
 
 def test_matched_gate_requires_twenty_real_model_executions() -> None:

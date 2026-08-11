@@ -9,6 +9,8 @@ from xh_agent.policy.qrm_lite.closed_loop_metrics import (
     fc_gain_over_b0,
     model_owned_decision_ratio,
     pure_model_success_episode,
+    pure_model_success_exclusion_reasons,
+    summarize_method,
 )
 
 
@@ -74,6 +76,17 @@ def test_pure_model_success_requires_every_recovery_decision_to_be_model_owned()
         ]
     )
     assert pure_model_success_episode(with_b0_continuation) is False
+    assert any(
+        reason.endswith(":FIXED_B0_CONTINUATION")
+        for reason in pure_model_success_exclusion_reasons(
+            with_b0_continuation
+        )
+    )
+
+    metrics = summarize_method([model_only, with_b0_continuation])
+    assert metrics["successful_episodes_with_any_model_decision"] == 2
+    assert metrics["pure_model_success_episodes"] == 1
+    assert len(metrics["pure_model_success_exclusions"]) == 1
 
 
 def test_pure_model_success_requires_final_task_success() -> None:

@@ -181,7 +181,9 @@ def test_qrm_execution_records_fixed_continuation_separately() -> None:
     assert episode.decisions[1].execution_source == "B0_BASELINE"
     metrics = summarize_method([episode])
     assert metrics["model_decisions_executed"] == 1
-    assert metrics["model_success_episodes"] == 0
+    assert metrics["successful_episodes_with_any_model_decision"] == 1
+    assert metrics["pure_model_success_episodes"] == 0
+    assert metrics["pure_model_success_exclusions"][0]["reasons"]
     assert metrics["system_success_with_non_model_continuation"] == 1
 
 

@@ -189,6 +189,43 @@ def pure_model_success_episode(episode: M2BClosedLoopEpisodeV1) -> bool:
     )
 
 
+def pure_model_success_exclusion_reasons(
+    episode: M2BClosedLoopEpisodeV1,
+) -> list[str]:
+    """Explain every failed clause of the strict pure-model predicate."""
+
+    reasons: list[str] = []
+    if not episode.final_success:
+        reasons.append("FINAL_TASK_NOT_SUCCESSFUL")
+    if not episode.recovery_attempted:
+        reasons.append("RECOVERY_NOT_ATTEMPTED")
+    if not episode.decisions:
+        reasons.append("NO_RECOVERY_DECISIONS")
+    for decision in episode.decisions:
+        prefix = f"{decision.decision_id}:"
+        if not decision.model_decision:
+            reasons.append(prefix + "NON_MODEL_RECOVERY_DECISION")
+        if decision.mapping_status != "VALID":
+            reasons.append(prefix + "MAPPING_NOT_VALID")
+        if decision.execution_source == "B0_FALLBACK":
+            reasons.append(prefix + "B0_FALLBACK")
+        elif decision.execution_source == "B0_BASELINE":
+            reasons.append(prefix + "FIXED_B0_CONTINUATION")
+        elif decision.execution_source == "NONE":
+            reasons.append(prefix + "RECOVERY_DECISION_NOT_EXECUTED")
+        if decision.execution_source != "MODEL_SELECTED_B0_SKILL":
+            reasons.append(prefix + "NOT_MODEL_OWNED_EXECUTION")
+        if decision.executed_skill is None:
+            reasons.append(prefix + "EXECUTED_SKILL_MISSING")
+        if decision.ik_gate in {"REJECTED", "NOT_RUN"}:
+            reasons.append(prefix + "IK_GATE_NOT_PASSING")
+        if decision.collision_gate in {"REJECTED", "NOT_RUN"}:
+            reasons.append(prefix + "COLLISION_GATE_NOT_PASSING")
+        if decision.safety_gate != "PASS":
+            reasons.append(prefix + "SAFETY_GATE_NOT_PASSING")
+    return reasons
+
+
 def b0_headroom(b0_final_task_success_rate: float) -> float:
     """Return one minus B0 final task success on the same matched keys."""
 
@@ -259,19 +296,31 @@ def summarize_method(
             for decision in episode.decisions
         )
     ]
-    model_success_episodes = [
+    successful_episodes_with_any_model_decision = [
         episode
         for episode in episodes
         if episode.final_success
-        and any(
-            decision.execution_source == "MODEL_SELECTED_B0_SKILL"
-            for decision in episode.decisions
-        )
-        and not any(
-            decision.execution_source in {"B0_FALLBACK", "B0_BASELINE"}
-            for decision in episode.decisions
-        )
+        and any(decision.model_decision for decision in episode.decisions)
     ]
+    pure_model_success_episodes = [
+        episode for episode in episodes if pure_model_success_episode(episode)
+    ]
+    pure_model_success_exclusions = [
+        {
+            "episode_id": episode.episode_id,
+            "matched_key": episode.matched_key,
+            "reasons": pure_model_success_exclusion_reasons(episode),
+        }
+        for episode in episodes
+        if episode.final_success
+        and not pure_model_success_episode(episode)
+    ]
+    assert len(pure_model_success_episodes) <= len(
+        successful_episodes_with_any_model_decision
+    ), "pure_model_success_episodes must not exceed successful any-model episodes"
+    assert all(
+        item["reasons"] for item in pure_model_success_exclusions
+    ), "every successful non-pure episode requires an exclusion reason"
     recovery = [episode for episode in episodes if episode.recovery_attempted]
     recovery_success = [
         episode for episode in recovery if episode.recovery_success is True
@@ -339,7 +388,11 @@ def summarize_method(
         "system_success_with_non_model_continuation": len(
             system_success_with_non_model_continuation
         ),
-        "model_success_episodes": len(model_success_episodes),
+        "successful_episodes_with_any_model_decision": len(
+            successful_episodes_with_any_model_decision
+        ),
+        "pure_model_success_episodes": len(pure_model_success_episodes),
+        "pure_model_success_exclusions": pure_model_success_exclusions,
         "model_executed_successful_decisions": sum(
             decision.outcome == "SUCCESS" for decision in executed
         ),
@@ -439,7 +492,7 @@ def summarize_matched(
         and qrm_executed >= 20
     )
     return {
-        "schema_version": "M2BMatchedClosedLoopReportV1",
+        "schema_version": "M2CMatchedClosedLoopReportV2",
         "status": (
             "PASS_FORMAL_MATCHED_EVALUATION_COMPLETE"
             if formal_ready
