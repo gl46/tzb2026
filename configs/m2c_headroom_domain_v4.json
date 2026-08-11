@@ -1,0 +1,294 @@
+{
+  "b0_freeze_manifest": "/Users/gl/tzb-qrm-lite/configs/m2c_b0_freeze.json",
+  "b0_freeze_manifest_sha256": "4bec9104be849dfd8d71b32b537eb2b5d70ea4d8560b4bdd65b1d1019d3e8d04",
+  "baseline_commit": "141e45dabddcaf59bb49ab958d9d5273d1f54d88",
+  "baseline_protocol": {
+    "expected_result": "safe free-gap rejection before physical action",
+    "final_success": "true only if the frozen probe physically lifts the public task target; a safety rejection is false",
+    "implementation_parameters_retries_and_gates_changed": false,
+    "probe": "scripts/isaac_m1b_actuation_probe.py",
+    "probe_sha256": "1e32fa89c8b1ef403a52f1b2c8326942b72092e6e88f50e8f780eff1c08c6094",
+    "retry_count": 2,
+    "runner": "scripts/m2b/run_physical_failure_smoke.py",
+    "runner_sha256": "7e68c9f18b26bedaa600e642ca59339da9a99739bc2770d8aed3f87c53e98865",
+    "target": "public yellow world_x=max"
+  },
+  "candidate_number": 4,
+  "dataset_version": "isaac-industrial-v3-headroom",
+  "derived_existence_probe": {
+    "builder": "scripts/m2c/derive_blocker_probe.py",
+    "builder_sha256": "3fa0d74f5121a5019a7bebd26f945bf99aa7558e3cead2f5ea4673aab42fed53",
+    "changed_since_v3": false,
+    "counted_as_b0": false,
+    "path": "/Users/gl/tzb-m2c-evidence/m2c-s2/source-v4/isaac_m2c_blocker_probe.py",
+    "sha256": "6623b1ce1dc5b289e1166ce7a59ea742fa6de2c3595d4818ab65ef03f0553f87",
+    "upstream_b0_probe": "scripts/isaac_m1b_actuation_probe.py",
+    "upstream_b0_probe_sha256": "1e32fa89c8b1ef403a52f1b2c8326942b72092e6e88f50e8f780eff1c08c6094"
+  },
+  "domain_builder": "scripts/m2c/build_final_headroom_domain.py",
+  "domain_builder_sha256": "cbfa3e88cd184138b91681db53a124646d10b4b90bf1b470866a83d66dd3da7a",
+  "domain_sha256": "a08d0deec846168511ecdb8dac1ee54284493a973eb1d9a0e5fa843718196359",
+  "existence_proof_protocol": {
+    "collision_violations_required": 0,
+    "live_pose_used_only_for_evaluator_scripted_transport": true,
+    "policy_input_simulator_truth": false,
+    "probe_sha256": "6623b1ce1dc5b289e1166ce7a59ea742fa6de2c3595d4818ab65ef03f0553f87",
+    "purpose": "physical recoverability only; never counted as B0",
+    "same_ik_collision_safety_contact_and_schema_gates": true,
+    "sequence": [
+      "PUBLIC_RED_BLOCKER_GRASP",
+      "LIFT",
+      "COLLISION_GATED_MOVE_TO_OFFICIAL_BIN_CELL",
+      "RELEASE",
+      "PUBLIC_REASSOCIATE_YELLOW_TARGET",
+      "PUBLIC_REGRASP_YELLOW_TARGET"
+    ],
+    "strict_success_predicate_all_required": [
+      "m2c_scripted_safe_place.passed == true",
+      "m2c_scripted_safe_place.motion.collision_gate.status == PASS",
+      "m2b_wrong_object_injection.training_eligible == true",
+      "m2b_recovery.wrong_object.reassociate_target_executed == true",
+      "m2b_recovery.wrong_object.regrasp_target_executed == true",
+      "m2b_recovery.wrong_object.public_regrasp_predicates contains grasped=true and lifted=true",
+      "m2b_recovery.wrong_object.training_eligible == true"
+    ],
+    "top_level_probe_pass_alone_is_insufficient": true
+  },
+  "final_domain_candidate": true,
+  "further_domain_iterations_forbidden": true,
+  "keys": [
+    {
+      "anchor_xy_m": [
+        -0.11,
+        0.13
+      ],
+      "blocker_distance_m": 0.04,
+      "failure_type": "PATH_BLOCKED",
+      "matched_key": "m2c-headroom-v4-604aecfc01390011adfc3a39233fdd96cc318605ec3afd2873c73b4ad1f1d297",
+      "minimum_surface_gap_m": 0.009999999999999995,
+      "part_count": 6,
+      "retained_blocker_distance_m": 0.062,
+      "scene_seed": 9038,
+      "scripted_bin_cell_index": 3,
+      "scripted_bin_cell_world_m": [
+        0.125,
+        0.15,
+        0.56
+      ],
+      "scripted_blocker_clearance_m": 0.02136871616134165,
+      "scripted_blocker_clearance_ok": true,
+      "scripted_blocker_entity_evaluator_only": "cylinder_01",
+      "scripted_blocker_selector_policy_input": "visual_color=red,top_z_band=0.02m,world_x=max",
+      "sdf": "/Users/gl/tzb-m2c-evidence/m2c-s2/source-v4/scene-9038.sdf",
+      "sdf_sha256": "769d539378a899420e55c172a34c01cfaef19c1a83fe3eded3f7a4ba190c825d",
+      "split": "test",
+      "supervision": "/Users/gl/tzb-m2c-evidence/m2c-s2/source-v4/scene-9038.supervision.json",
+      "supervision_sha256": "b84b9afb5ff64330bd4a2feeb283491d373eeb5fe55c417b5490bfc2537395a2",
+      "target_clearance_after_relocation_m": 0.04616848030597954,
+      "target_clearance_after_relocation_ok": true,
+      "target_clearance_before_m": 0.002710215501577809,
+      "target_clearance_before_ok": false,
+      "target_entity_evaluator_only": "cylinder_04",
+      "target_selector_policy_input": "visual_color=yellow,top_z_band=0.02m,world_x=max",
+      "v4_outcome_observed_during_selection": false
+    },
+    {
+      "anchor_xy_m": [
+        -0.105,
+        0.13
+      ],
+      "blocker_distance_m": 0.04,
+      "failure_type": "PATH_BLOCKED",
+      "matched_key": "m2c-headroom-v4-1cad17ac5f6796634510abb8250ff2e7a36c0f9e5735068fd089ea59e5c97258",
+      "minimum_surface_gap_m": 0.009999999999999995,
+      "part_count": 6,
+      "retained_blocker_distance_m": 0.062,
+      "scene_seed": 9057,
+      "scripted_bin_cell_index": 3,
+      "scripted_bin_cell_world_m": [
+        0.125,
+        0.15,
+        0.56
+      ],
+      "scripted_blocker_clearance_m": 0.02136871616134165,
+      "scripted_blocker_clearance_ok": true,
+      "scripted_blocker_entity_evaluator_only": "cylinder_01",
+      "scripted_blocker_selector_policy_input": "visual_color=red,top_z_band=0.02m,world_x=max",
+      "sdf": "/Users/gl/tzb-m2c-evidence/m2c-s2/source-v4/scene-9057.sdf",
+      "sdf_sha256": "e30efb66aef4ff948e48551cb26d03990c14b6bb25813b9a8fd6e8b7c9831cf7",
+      "split": "test",
+      "supervision": "/Users/gl/tzb-m2c-evidence/m2c-s2/source-v4/scene-9057.supervision.json",
+      "supervision_sha256": "0992f527963a011d0615c006678b8de3d12e53c0c672ad3a86d4ddd21c81e79b",
+      "target_clearance_after_relocation_m": 0.04616848030597954,
+      "target_clearance_after_relocation_ok": true,
+      "target_clearance_before_m": 0.002710215501577809,
+      "target_clearance_before_ok": false,
+      "target_entity_evaluator_only": "cylinder_04",
+      "target_selector_policy_input": "visual_color=yellow,top_z_band=0.02m,world_x=max",
+      "v4_outcome_observed_during_selection": false
+    },
+    {
+      "anchor_xy_m": [
+        -0.115,
+        0.13
+      ],
+      "blocker_distance_m": 0.04,
+      "failure_type": "PATH_BLOCKED",
+      "matched_key": "m2c-headroom-v4-361948b69e40fb892ad46d49ffa625574bc56a8772b4c04bff008ab6918e49f5",
+      "minimum_surface_gap_m": 0.009999999999999995,
+      "part_count": 6,
+      "retained_blocker_distance_m": 0.062,
+      "scene_seed": 9077,
+      "scripted_bin_cell_index": 3,
+      "scripted_bin_cell_world_m": [
+        0.125,
+        0.15,
+        0.56
+      ],
+      "scripted_blocker_clearance_m": 0.02136871616134165,
+      "scripted_blocker_clearance_ok": true,
+      "scripted_blocker_entity_evaluator_only": "cylinder_01",
+      "scripted_blocker_selector_policy_input": "visual_color=red,top_z_band=0.02m,world_x=max",
+      "sdf": "/Users/gl/tzb-m2c-evidence/m2c-s2/source-v4/scene-9077.sdf",
+      "sdf_sha256": "2bd5a27d6d3a2ff42152024e4fbd9a68749840c153f3fe68e5b27085e58b1615",
+      "split": "test",
+      "supervision": "/Users/gl/tzb-m2c-evidence/m2c-s2/source-v4/scene-9077.supervision.json",
+      "supervision_sha256": "1203e6dcacc4c6d10b4117f89e71b9ebd01ea0662011f808868735a9edc51820",
+      "target_clearance_after_relocation_m": 0.04616848030597954,
+      "target_clearance_after_relocation_ok": true,
+      "target_clearance_before_m": 0.002710215501577809,
+      "target_clearance_before_ok": false,
+      "target_entity_evaluator_only": "cylinder_04",
+      "target_selector_policy_input": "visual_color=yellow,top_z_band=0.02m,world_x=max",
+      "v4_outcome_observed_during_selection": false
+    }
+  ],
+  "outcome_informed_design": {
+    "changes_from_v3": [
+      "retain the proven public-camera-region target anchor and use only +/-5 mm x micro-jitter across three keys",
+      "keep the red blocker 40 mm from the target so frozen B0 still fails the unchanged 5 mm free-gap gate",
+      "move the retained green blocker from 40 mm at 105 degrees to 62 mm at 90 degrees, increasing post-relocation target clearance from about 29.6 mm to about 46.2 mm",
+      "reuse the unchanged V3 derived existence probe and bin cell"
+    ],
+    "uses_v3_results": true,
+    "v3_manifest": "/Users/gl/tzb-qrm-lite/configs/m2c_headroom_domain_v3.json",
+    "v3_manifest_sha256": "2023dae4d6ab1ceafbf05fd0e316e389753051ff3f356af13643c9fc6c2c562b",
+    "v3_report": "/Users/gl/tzb-qrm-lite/reports/m2c-s2-exploration-v3.json",
+    "v3_report_sha256": "dd0237c4bae722098e79ecd1db1d6614447f52526267a7eda4a90d8bec681bd7",
+    "v4_results_used_for_design": false
+  },
+  "preregistration_timing": {
+    "date_asia_shanghai": "2026-08-12",
+    "statement": "V1-V3 outcomes informed this layout; no V4 Isaac result was observed before this manifest was generated and committed.",
+    "written_after_v3_results": true,
+    "written_before_any_v4_isaac_execution": true
+  },
+  "prior_candidate_reports": [
+    {
+      "candidate_number": 1,
+      "path": "/Users/gl/tzb-qrm-lite/reports/m2c-s2-exploration-v1.json",
+      "sha256": "f4eec8e5bfb2642f93d99411db6406ce73759059bc76920dfed27ca9eaf179c5"
+    },
+    {
+      "candidate_number": 2,
+      "path": "/Users/gl/tzb-qrm-lite/reports/m2c-s2-exploration-v2.json",
+      "sha256": "307d4888e6abd0d30d7aca1b86fcda6941a3602189033a937d881cfd3a44c934"
+    },
+    {
+      "candidate_number": 3,
+      "path": "/Users/gl/tzb-qrm-lite/reports/m2c-s2-exploration-v3.json",
+      "sha256": "dd0237c4bae722098e79ecd1db1d6614447f52526267a7eda4a90d8bec681bd7"
+    }
+  ],
+  "privileged_truth_policy_input": false,
+  "public_contract_gate": {
+    "missing_required_public_track": "INVALID_DOMAIN_AND_TRIGGER_D1",
+    "required_before_counting_b0": [
+      "public yellow target selected",
+      "two frozen B0 attempts completed"
+    ],
+    "required_before_counting_existence_proof": [
+      "public red blocker selected",
+      "public yellow target selected or publicly reassociated"
+    ]
+  },
+  "q_a_acceptance": {
+    "b0_final_task_success_rate_lt": 0.8,
+    "both_conditions_required": true,
+    "minimum_complete_existence_proofs": 1,
+    "v4_nonpass": "TRIGGER_D1_WITHOUT_V5"
+  },
+  "q_a_decision": null,
+  "schema_version": "M2CHeadroomDomainManifestV4",
+  "selection_protocol": {
+    "anchor_order": [
+      [
+        -0.11,
+        0.13
+      ],
+      [
+        -0.105,
+        0.13
+      ],
+      [
+        -0.115,
+        0.13
+      ]
+    ],
+    "candidate_order": "ascending_seed_with_exactly_six_objects",
+    "clearance_gate_m": 0.005,
+    "failure_type": "PATH_BLOCKED",
+    "key_count": 3,
+    "minimum_physical_surface_gap_m": 0.005,
+    "object_geometry_mass_material_and_dynamics": "unchanged M2B",
+    "observes_v4_isaac_outcomes": false,
+    "retained_blocker_center_distance_m": 0.062,
+    "seed_range_half_open": [
+      9000,
+      9400
+    ],
+    "split": "test",
+    "target_blocker_center_distance_m": 0.04,
+    "uses_prior_v3_outcomes": true
+  },
+  "source_generator": "scripts/generate_industrial_scenes.py",
+  "source_generator_sha256": "e9f9e20106a05dbec24453ce39422d57aa212709567fb7eba7f8d9beb03cd6c5",
+  "status": "FINAL_CANDIDATE_PREREGISTERED_NOT_EVALUATED",
+  "stop_loss": {
+    "authorized_candidate_number": 4,
+    "disposition": "ALLOW_FINAL_DOMAIN_CANDIDATE",
+    "max_domain_candidates": 4,
+    "records": [
+      {
+        "candidate_number": 1,
+        "reason": "no public target and natural instability",
+        "status": "INVALID_PUBLIC_CONTRACT"
+      },
+      {
+        "candidate_number": 2,
+        "reason": "public predicate rejected physical EMPTY_GRASP and no public target",
+        "status": "INVALID_PUBLIC_CONTRACT"
+      },
+      {
+        "candidate_number": 3,
+        "reason": "public target/blocker selection was not stable across frozen keys",
+        "status": "INVALID_PUBLIC_CONTRACT"
+      }
+    ],
+    "v4_nonpass_disposition": "TRIGGER_D1",
+    "v5_and_later_forbidden": true
+  },
+  "supersedes_v3_nonpass": {
+    "domain_sha256": "7ed332bd0761a06ce4276ff7ae8eeb689d0d84cbecf54633a066f918c764a775",
+    "exploration_report": "reports/m2c-s2-exploration-v3.json",
+    "exploration_report_sha256": "dd0237c4bae722098e79ecd1db1d6614447f52526267a7eda4a90d8bec681bd7",
+    "manifest": "configs/m2c_headroom_domain_v3.json",
+    "manifest_sha256": "2023dae4d6ab1ceafbf05fd0e316e389753051ff3f356af13643c9fc6c2c562b"
+  },
+  "teacher_kill_rule_events": [],
+  "teacher_used": false,
+  "template": "/Users/gl/tzb-qrm-lite/robot_ws/src/xh_sim/worlds/industrial_cylinder_v1.sdf",
+  "template_sha256": "1eea1b34b832d858ba9a4adec775018e807061b54cb1afff19d710d848ad926d",
+  "v4_outcomes_observed": false,
+  "world_model_mainline_replaced": false
+}
