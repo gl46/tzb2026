@@ -1,0 +1,172 @@
+{
+  "schema_version": "M2CS2ExplorationAttemptV1",
+  "status": "Q_A_NOT_PASSED_V3_STOPPED",
+  "candidate_number": 3,
+  "candidate_manifest": {
+    "path": "configs/m2c_headroom_domain_v3.json",
+    "sha256": "2023dae4d6ab1ceafbf05fd0e316e389753051ff3f356af13643c9fc6c2c562b",
+    "domain_sha256": "7ed332bd0761a06ce4276ff7ae8eeb689d0d84cbecf54633a066f918c764a775",
+    "preregistration_commit": "1c085281bb774cef12fc02839d136bff274cf6ca"
+  },
+  "decision": {
+    "q_a_passed": false,
+    "q_a_counted": false,
+    "b0_final_task_success_rate": null,
+    "b0_headroom": null,
+    "admissible_b0_failure_examples": 2,
+    "complete_existence_proofs": 0,
+    "reason": "Frozen B0 was safely rejected on public-valid seeds 8018 and 8277, but V3 produced no complete blocker-relocation-plus-target-regrasp trajectory. Two other B0 keys lacked a public yellow target, two existence attempts lacked a required public target, and all three existence attempts that reached target regrasp were rejected by unchanged IK/contact gates. The full pre-registered domain is therefore not admissible and physical recoverability is not established.",
+    "remaining_v3_work_stopped": true,
+    "stop_loss_disposition": "ALLOW_FINAL_DOMAIN_CANDIDATE",
+    "next_candidate_number": 4,
+    "domain_candidates_remaining": 1
+  },
+  "b0_executions": [
+    {
+      "scene_seed": 8018,
+      "classification": "ADMISSIBLE_B0_SAFE_REJECTION",
+      "attempts": 2,
+      "final_task_success": false,
+      "fatal_error": "RuntimeError: calibration free-gap yaw has no candidate with at least 0.005 m clearance",
+      "summary_path": "/var/tmp/xh-data/isaac-industrial/m2c/headroom-v3/pilot/scene-8018/b0/physical-failure-smoke.json",
+      "summary_sha256": "45a939593ba84ddcafc948da288d8bea0679b1b511859924dab17570a3ea3698",
+      "attempt_console_sha256": [
+        "9728a3dcdbc108e6579b487cb37cc2fdcfdd9c9de96c162b042170217a97567e",
+        "d0e27c7e3e2d8552fb69f7d1023b297bc6a5155afe14b9f1516951f06aaa4c52"
+      ]
+    },
+    {
+      "scene_seed": 8039,
+      "classification": "INVALID_PUBLIC_TARGET_ABSENT",
+      "attempts": 2,
+      "final_task_success": null,
+      "fatal_error": "ValueError: no public 'yellow' target candidate",
+      "summary_sha256": "21c883d898dbeaf2b12e8cf3c64f8a8a3c43b3fa9758617cbe20a9d913df7c52",
+      "attempt_console_sha256": [
+        "91df9175df9f90551d75aecd1de79c3849035fc09be44e7a7f0fb0f7cb8a3f21",
+        "30f853b8ef7261e33e5344d97077964679f03afc899ea04288fa3853d4e15998"
+      ]
+    },
+    {
+      "scene_seed": 8097,
+      "classification": "INVALID_PUBLIC_TARGET_ABSENT",
+      "attempts": 2,
+      "final_task_success": null,
+      "fatal_error": "ValueError: no public 'yellow' target candidate",
+      "summary_sha256": "05ca46a847b048170ef491ee7ef956339ae7b6fe079b962d247fa71b6d3bb23b",
+      "attempt_console_sha256": [
+        "e1c7fe3fd0f6647848754c815fd9ba7fe281a224c7f5c1abea86da26f0989ac8",
+        "20e4842f9cbd7de96588942e7d30daba459fdf97e83da83e3a82a0f40053fcbf"
+      ]
+    },
+    {
+      "scene_seed": 8277,
+      "classification": "ADMISSIBLE_B0_SAFE_REJECTION",
+      "attempts": 2,
+      "final_task_success": false,
+      "fatal_error": "RuntimeError: calibration free-gap yaw has no candidate with at least 0.005 m clearance",
+      "summary_sha256": "81094a8ebeb7694fbec2dc90be123a40550fe8175d9907feb342c234fcd7ceed",
+      "attempt_console_sha256": [
+        "4d2393a95abf42c4b67936ed5ab24f87cef71cdca73a763d78a39e47be515d7a",
+        "257a26e324d22d13cf0a63ef013bedd0e671204caec62ecd0c51d3a564f1eb31"
+      ]
+    }
+  ],
+  "existence_proof_executions": [
+    {
+      "scene_seed": 8018,
+      "classification": "PARTIAL_TARGET_CONTACT_GATE_REJECTED",
+      "blocker_transport_passed": true,
+      "destination_error_m": 0.0019531904254108667,
+      "transport_follow_error_m": 0.000741314312241451,
+      "transport_collision_gate": "PASS",
+      "target_reassociated": true,
+      "target_regrasp_status": "CONTACT_GATE_REJECTED",
+      "target_regrasp_executed": false,
+      "evidence_sha256": "bd24a65da09be306d4e544118add61fb834651043a0d192f32207912a985624c",
+      "console_sha256": "8ecbc2d6ec4d8c3588cb5a058926eaf9a80c242b68cc408033c69b170732372e"
+    },
+    {
+      "scene_seed": 8038,
+      "classification": "PARTIAL_TARGET_PREGRASP_IK_REJECTED",
+      "blocker_transport_passed": true,
+      "destination_error_m": 0.002350962720811367,
+      "transport_follow_error_m": 0.0007826847616734158,
+      "transport_collision_gate": "PASS",
+      "target_reassociated": true,
+      "target_regrasp_status": "PREGRASP_IK_GATE_REJECTED",
+      "target_regrasp_executed": false,
+      "evidence_sha256": "9d26b5932fd7ce47e4700796a78172d1ab5cebed0594004deaee0eaae2b780f5",
+      "console_sha256": "6de919df3b46cf18c71f39a0816df66afc43f870551961d50f1b89eb415df8d1"
+    },
+    {
+      "scene_seed": 8039,
+      "classification": "INVALID_PUBLIC_TARGET_ABSENT",
+      "fatal_error": "ValueError: no public 'yellow' target candidate",
+      "evidence_sha256": null,
+      "console_sha256": "20676b05612e8b6fd2ac4912537db6738bc81f24c17cf19bfb93c6070076aa79"
+    },
+    {
+      "scene_seed": 8277,
+      "classification": "INVALID_PUBLIC_BLOCKER_ABSENT",
+      "fatal_error": "ValueError: no public 'red' target candidate",
+      "evidence_sha256": null,
+      "console_sha256": "a737e2c063b1b62764e031d1faf0724557d59215f864da1dd1528a49cf769ee2"
+    },
+    {
+      "scene_seed": 8337,
+      "classification": "PARTIAL_TARGET_CONTACT_GATE_REJECTED",
+      "blocker_transport_passed": true,
+      "destination_error_m": 0.003205134067684412,
+      "transport_follow_error_m": 0.0010845230532227819,
+      "transport_collision_gate": "PASS",
+      "target_reassociated": true,
+      "target_regrasp_status": "CONTACT_GATE_REJECTED",
+      "target_regrasp_executed": false,
+      "evidence_sha256": "f29165201613e09fa7b82f97a6d5ae49d700fc8378378d7fbdda54a95739f692",
+      "console_sha256": "6a871737a117018f544d7b8a6e2e4c92560d955382ea3a1169530d5dbd787f80"
+    }
+  ],
+  "stopped_without_counted_outcome": [
+    8318,
+    8339,
+    8398,
+    8399
+  ],
+  "findings": [
+    "The unchanged B0 free-gap safety gate creates a real headroom example on public-valid V3 keys without weakening B0.",
+    "The one-blocker relocation itself passed three times with 0 collision violations, <=3.21 mm destination error, and <=1.09 mm carried-object follow error.",
+    "V3 still failed Q-A because no execution completed the target regrasp and public target/blocker selection was not stable across the pre-registered keys.",
+    "The derived probe top-level PASS is intentionally not accepted as an existence proof unless the nested public target regrasp and final predicates pass."
+  ],
+  "b0_probe_sha256": "1e32fa89c8b1ef403a52f1b2c8326942b72092e6e88f50e8f780eff1c08c6094",
+  "b0_runner_sha256": "7e68c9f18b26bedaa600e642ca59339da9a99739bc2770d8aed3f87c53e98865",
+  "derived_existence_probe_sha256": "6623b1ce1dc5b289e1166ce7a59ea742fa6de2c3595d4818ab65ef03f0553f87",
+  "b0_modified": false,
+  "teacher_used": false,
+  "teacher_kill_rule_events": [],
+  "privileged_truth_policy_input": false,
+  "world_model_mainline_replaced": false,
+  "task_report": {
+    "changed_files": [
+      "reports/m2c-s2-exploration-v3.json",
+      "reports/m2c-s2-exploration-v3.md"
+    ],
+    "tests": {
+      "real_b0_attempts_completed": 8,
+      "real_existence_executions_completed": 5,
+      "admissible_b0_failure_examples": 2,
+      "complete_existence_proofs": 0
+    },
+    "failures": [
+      "two V3 B0 keys lacked the public yellow target",
+      "two existence runs lacked a required public target",
+      "three target regrasp executions failed unchanged IK/contact gates"
+    ],
+    "blockers": [
+      "Q-A remains closed; only V4 is allowed before D1",
+      "Q-B additionally requires the human ADR identified by the expressivity pre-registration"
+    ],
+    "next_command": "preregister V4 before any V4 Isaac execution"
+  }
+}
