@@ -1,0 +1,83 @@
+{
+  "schema_version": "M2CS2ExplorationAttemptV1",
+  "status": "INVALID_DOMAIN_STOPPED",
+  "candidate_manifest": {
+    "path": "configs/m2c_headroom_domain.json",
+    "sha256": "4c042e960e6ea70f54e716afc4aaa24737f0abe50463b7e4ed0dc856270a8131",
+    "domain_sha256": "6630402d9e5ee4762cfef468f391af691dcef57b96bf8d2e2ac8b35cca337dd2",
+    "preregistration_commit": "d46e7d7"
+  },
+  "decision": {
+    "q_a_counted": false,
+    "b0_final_task_success_rate": null,
+    "b0_headroom": null,
+    "reason": "The first two pre-registered executions did not establish an admissible failure domain. One target was absent from public RGB-D selection and one horizontal free cylinder moved during the EMPTY_GRASP injection. Neither result is a B0 recovery failure.",
+    "remaining_keys_stopped_before_counting": true
+  },
+  "executions": [
+    {
+      "scene_seed": 6017,
+      "gpu": 0,
+      "classification": "INVALID_PUBLIC_TARGET_ABSENT",
+      "runner_status": "PARTIAL",
+      "runner_elapsed_s": 138.86263263202272,
+      "actuation_evidence_written": false,
+      "fatal_error": "ValueError: no public 'yellow' target candidate",
+      "summary_path": "/var/tmp/xh-data/isaac-industrial/m2c/headroom-v1/b0/gpu0/scene-6017/failures/empty_grasp/physical-failure-smoke.json",
+      "summary_sha256": "3d2ece7c7de3de6be3d6e6baf046c8e3de1abd9927c20ba8c2969ef71c360e25",
+      "console_path": "/var/tmp/xh-data/isaac-industrial/m2c/headroom-v1/b0/gpu0/scene-6017/failures/empty_grasp/empty_grasp/attempt-01/console.log",
+      "console_sha256": "8ba73ea57a2d8383f2407ecfc51bcc2164836b61b239a5d2f566dae6e80af5fa"
+    },
+    {
+      "scene_seed": 6019,
+      "gpu": 1,
+      "classification": "INVALID_NATURAL_STABILITY_AND_PUBLIC_TRACK",
+      "runner_status": "PARTIAL",
+      "runner_elapsed_s": 170.11015790794045,
+      "probe_status": "CONTACT_GATE_REJECTED",
+      "empty_grasp_physical_state_passed": false,
+      "empty_grasp_training_eligible": false,
+      "target_motion_during_empty_grasp_m": 0.07038299851804827,
+      "public_rejection": "PUBLIC_TARGET_TRACK_MISSING",
+      "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/headroom-v1/b0/gpu1/scene-6019/failures/empty_grasp/empty_grasp/attempt-01/actuation-probe.json",
+      "evidence_sha256": "56d7797f4032fe94b291c9c046f8a52bc51240d8b9f56223424821b759624c6d",
+      "summary_path": "/var/tmp/xh-data/isaac-industrial/m2c/headroom-v1/b0/gpu1/scene-6019/failures/empty_grasp/physical-failure-smoke.json",
+      "summary_sha256": "8bfad196881f8575aaa2c4f9479370ed4c43be1457cffa529dbc99c316ec17b9",
+      "console_path": "/var/tmp/xh-data/isaac-industrial/m2c/headroom-v1/b0/gpu1/scene-6019/failures/empty_grasp/empty_grasp/attempt-01/console.log",
+      "console_sha256": "16e9a50aedf13c27da7be512b1af05aeb3837fd637636015d67caef1294e464a"
+    }
+  ],
+  "aborted_without_counted_outcome": [
+    6038,
+    6098,
+    6118,
+    6138,
+    6158,
+    6159,
+    6177,
+    6179
+  ],
+  "b0_probe_sha256": "1e32fa89c8b1ef403a52f1b2c8326942b72092e6e88f50e8f780eff1c08c6094",
+  "b0_runner_sha256": "7e68c9f18b26bedaa600e642ca59339da9a99739bc2770d8aed3f87c53e98865",
+  "b0_modified": false,
+  "teacher_used": false,
+  "teacher_kill_rule_events": [],
+  "privileged_truth_policy_input": false,
+  "world_model_mainline_replaced": false,
+  "task_report": {
+    "changed_files": [
+      "reports/m2c-s2-exploration-v1.json",
+      "reports/m2c-s2-exploration-v1.md"
+    ],
+    "tests": {
+      "real_isaac_executions_started": 2,
+      "valid_q_a_executions": 0
+    },
+    "failures": [
+      "scene 6017 public target absent",
+      "scene 6019 horizontal target moved 0.070383 m during injection"
+    ],
+    "blockers": [],
+    "next_command": "make m2c-s2-domain-v2"
+  }
+}
