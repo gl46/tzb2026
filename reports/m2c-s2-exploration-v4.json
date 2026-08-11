@@ -1,0 +1,245 @@
+{
+  "schema_version": "M2CS2QAGateReportV1",
+  "status": "Q_A_PASSED",
+  "completed_at": "2026-08-12T07:40:31+08:00",
+  "candidate_number": 4,
+  "candidate_manifest": {
+    "path": "configs/m2c_headroom_domain_v4.json",
+    "sha256": "4e78c044b68b11c1d871ecb90e65c7e2dfc616c8971abb89cb9969d2d48f738b",
+    "domain_sha256": "a08d0deec846168511ecdb8dac1ee54284493a973eb1d9a0e5fa843718196359",
+    "preregistration_commit": "f40459d70ee669995c257245d6019a0c050936db",
+    "written_before_any_v4_isaac_execution": true,
+    "outcome_informed_by_v3": true
+  },
+  "decision": {
+    "q_a_passed": true,
+    "q_a_counted": true,
+    "b0_final_task_successes": 0,
+    "b0_valid_matched_keys": 3,
+    "b0_final_task_success_rate": 0.0,
+    "b0_headroom": 1.0,
+    "b0_rate_below_0_8": true,
+    "complete_existence_proofs": 1,
+    "minimum_complete_existence_proofs": 1,
+    "physical_recoverability_established": true,
+    "stop_loss_disposition": "PASS_Q_A",
+    "d1_triggered": false,
+    "v5_forbidden": true,
+    "s3_data_collection_authorized": true,
+    "q_b_training_or_evaluation_authorized": false,
+    "reason": "All three pre-registered V4 keys had a selectable public yellow target and the unchanged B0 failed safely before action in both frozen attempts. Seed 9077 then completed the pre-registered public blocker relocation and public target regrasp chain with grasped=true, lifted=true, recovery training eligibility, and zero collision violations. Both frozen Q-A conditions are therefore satisfied."
+  },
+  "stage_executions": [
+    {
+      "scene_seed": 9038,
+      "gpu": 0,
+      "status": "PASS",
+      "metrics_path": "/var/tmp/xh-data/isaac-industrial/m2c/headroom-v4/pilot/scene-9038/stage-attempt-01/metrics.json",
+      "metrics_sha256": "28d1deee27d8242df157d4e34423ae71ccfc408a4a79ed5bdab7cf9cdea433f5",
+      "physics_stage_path": "/var/tmp/xh-data/isaac-industrial/m2c/headroom-v4/pilot/scene-9038/stage-attempt-01/m1b_physics_scene.usdc",
+      "physics_stage_sha256": "9e3a021c783457c8c4a8d726e0a1989cde5ef089b1b71fcc623c1fd922a24cba"
+    },
+    {
+      "scene_seed": 9057,
+      "gpu": 0,
+      "status": "PASS",
+      "metrics_path": "/var/tmp/xh-data/isaac-industrial/m2c/headroom-v4/pilot/scene-9057/stage-attempt-01/metrics.json",
+      "metrics_sha256": "e63b7336fc3489a390512156b74d51d22b047a9b1a513f6ac2f557f7d482c2c4",
+      "physics_stage_path": "/var/tmp/xh-data/isaac-industrial/m2c/headroom-v4/pilot/scene-9057/stage-attempt-01/m1b_physics_scene.usdc",
+      "physics_stage_sha256": "fd816288c54445307e67104aeffada48f30aaddd7ad6811024c9064be365b388"
+    },
+    {
+      "scene_seed": 9077,
+      "gpu": 1,
+      "status": "PASS",
+      "metrics_path": "/var/tmp/xh-data/isaac-industrial/m2c/headroom-v4/pilot/scene-9077/stage-attempt-01/metrics.json",
+      "metrics_sha256": "905760ded86b82a606077ec33919427c8f31243c53f3220907c8747ccbe7d866",
+      "physics_stage_path": "/var/tmp/xh-data/isaac-industrial/m2c/headroom-v4/pilot/scene-9077/stage-attempt-01/m1b_physics_scene.usdc",
+      "physics_stage_sha256": "768eb00c1d40828c669181443fe56749e03d495775e7fbe24a33a01b7af4f33a"
+    }
+  ],
+  "b0_executions": [
+    {
+      "scene_seed": 9038,
+      "classification": "ADMISSIBLE_B0_SAFE_REJECTION",
+      "attempts": 2,
+      "public_target_valid": true,
+      "final_task_success": false,
+      "fatal_error": "RuntimeError: calibration free-gap yaw has no candidate with at least 0.005 m clearance",
+      "action_started_before_rejection": false,
+      "summary_path": "/var/tmp/xh-data/isaac-industrial/m2c/headroom-v4/pilot/scene-9038/b0/physical-failure-smoke.json",
+      "summary_sha256": "f8b0ab599c7c876a2c9e8e604433e6b39753978e79014ee5902c94b9cd2f2364",
+      "attempt_console_sha256": [
+        "5141bb8ceec41b27f1164572abfae8bcc20bc5bb5414c51fdb498fcb464ed5d5",
+        "0828f908749512bf68075fcb4cb4d45ab6e5e14d90af8b0c1e6726c91a85c385"
+      ]
+    },
+    {
+      "scene_seed": 9057,
+      "classification": "ADMISSIBLE_B0_SAFE_REJECTION",
+      "attempts": 2,
+      "public_target_valid": true,
+      "final_task_success": false,
+      "fatal_error": "RuntimeError: calibration free-gap yaw has no candidate with at least 0.005 m clearance",
+      "action_started_before_rejection": false,
+      "summary_path": "/var/tmp/xh-data/isaac-industrial/m2c/headroom-v4/pilot/scene-9057/b0/physical-failure-smoke.json",
+      "summary_sha256": "a25815ab99a1e0ed1a27c3cd8e217866cb6d978bf0597e1b75d958c69689092b",
+      "attempt_console_sha256": [
+        "6dfb0fc52650a432a79cd25db139f60efa300eb599d2cf14300595c982ba52b2",
+        "48d0c0b3b6b1816cc8e40d963711c6f04582e3ddd666a0080e2efbcf945a3e5a"
+      ]
+    },
+    {
+      "scene_seed": 9077,
+      "classification": "ADMISSIBLE_B0_SAFE_REJECTION",
+      "attempts": 2,
+      "public_target_valid": true,
+      "final_task_success": false,
+      "fatal_error": "RuntimeError: calibration free-gap yaw has no candidate with at least 0.005 m clearance",
+      "action_started_before_rejection": false,
+      "summary_path": "/var/tmp/xh-data/isaac-industrial/m2c/headroom-v4/pilot/scene-9077/b0/physical-failure-smoke.json",
+      "summary_sha256": "652bb5c31e1e74d660da767e63d45133920ba02a250f687d9b3acef3e9120f2c",
+      "attempt_console_sha256": [
+        "c1314ce3130e8d8fd434cf7d7b69e665085e3b886a74f33dcf4a590c00fd16b7",
+        "605245387b9497ebe96bad729d4b74fc3b7e83122171261ba8c825c7b6e316e7"
+      ]
+    }
+  ],
+  "existence_proof_executions": [
+    {
+      "scene_seed": 9038,
+      "classification": "EXCLUDED_TARGET_CONTACT_GATE_REJECTED",
+      "strict_complete_existence_proof": false,
+      "top_level_probe_status": "PASS",
+      "blocker_transport_passed": true,
+      "destination_error_m": 0.0019531904254108667,
+      "transport_follow_error_m": 0.000741314312241451,
+      "wrong_object_training_eligible": true,
+      "target_reassociated": true,
+      "target_regrasp_status": "CONTACT_GATE_REJECTED",
+      "target_regrasp_executed": false,
+      "public_regrasp_predicates": [],
+      "recovery_training_eligible": false,
+      "collision_gate_count": 10,
+      "collision_violations": 0,
+      "exclusion_reasons": [
+        "target_regrasp_executed=false",
+        "public grasped/lifted predicates absent",
+        "recovery training_eligible=false"
+      ],
+      "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/headroom-v4/pilot/scene-9038/existence/attempt-01/actuation-probe.json",
+      "evidence_sha256": "8da47d4aec59a91c00d8cff512ab3423b285f9fddcb72ab67cc7038a0d13c86d",
+      "console_sha256": "743a66d7c141c59c7d7d3fa261a9741c54886552b58b26e595168ca8ddcc8132"
+    },
+    {
+      "scene_seed": 9057,
+      "classification": "EXCLUDED_TARGET_PREGRASP_IK_REJECTED",
+      "strict_complete_existence_proof": false,
+      "top_level_probe_status": "PASS",
+      "blocker_transport_passed": true,
+      "destination_error_m": 0.0025106039829552174,
+      "transport_follow_error_m": 0.0008692350591938417,
+      "wrong_object_training_eligible": true,
+      "target_reassociated": true,
+      "target_regrasp_status": "PREGRASP_IK_GATE_REJECTED",
+      "target_regrasp_executed": false,
+      "public_regrasp_predicates": [],
+      "recovery_training_eligible": false,
+      "collision_gate_count": 10,
+      "collision_violations": 0,
+      "exclusion_reasons": [
+        "target_regrasp_executed=false",
+        "public grasped/lifted predicates absent",
+        "recovery training_eligible=false"
+      ],
+      "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/headroom-v4/pilot/scene-9057/existence/attempt-01/actuation-probe.json",
+      "evidence_sha256": "c326230441690eb79a17fc2c496a5ea1b0d1978e27852a3af31dc8813363d2fb",
+      "console_sha256": "0c44aa86fcecad5c518b148e339ecb131bb896b64d8de53d80185f018fb041c8"
+    },
+    {
+      "scene_seed": 9077,
+      "classification": "COMPLETE_STRICT_EXISTENCE_PROOF",
+      "strict_complete_existence_proof": true,
+      "top_level_probe_status": "PASS",
+      "blocker_transport_passed": true,
+      "destination_error_m": 0.0019932982977479696,
+      "transport_follow_error_m": 0.0007551712271778724,
+      "wrong_object_training_eligible": true,
+      "target_reassociated": true,
+      "reassociated_target_track_id": "track-e91f94dc",
+      "target_regrasp_status": "LIFTED",
+      "target_regrasp_executed": true,
+      "public_regrasp_predicates": [
+        "grasped=true",
+        "lifted=true"
+      ],
+      "recovery_training_eligible": true,
+      "collision_gate_count": 13,
+      "collision_violations": 0,
+      "exclusion_reasons": [],
+      "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/headroom-v4/pilot/scene-9077/existence/attempt-01/actuation-probe.json",
+      "evidence_sha256": "b06631f3d06f91871720f05a466df26f7425a86d41c01eed4757016e0c7947fe",
+      "console_sha256": "520c845537e9e75997537a069099f04fff36714e1195671da3a0214522d2bfed"
+    }
+  ],
+  "q_b_expressivity_gate": {
+    "preregistration": "docs/decisions/M2C-QB-EXPRESSIVITY-PREREG.md",
+    "preregistration_sha256": "1b3453a975352d78f78759446ae774f5317a93d60fbb097708a07f0934b99e70",
+    "human_adr_committed": false,
+    "current_coarse_intent_v1_sufficient": false,
+    "q_b_training_executed": false,
+    "q_b_evaluation_executed": false,
+    "q_b_blocked": true,
+    "blocker": "A separate human ADR must approve a versioned public-track pointer and registered destination-cell contract or a new blocker-clearing skill before any Q-B execution."
+  },
+  "frozen_runtime": {
+    "evidence_root": "/var/tmp/xh-data/isaac-industrial/m2c/headroom-v4",
+    "evidence_sha256_ledger": "/var/tmp/xh-data/isaac-industrial/m2c/headroom-v4/evidence-sha256.txt",
+    "evidence_sha256_ledger_sha256": "99ae0f4f60bde5ccf0e224164a146c533ce635ffe306a5fc850399cfb8c08e48",
+    "evidence_file_count": 167,
+    "evidence_tree_readonly": true,
+    "b0_probe_sha256": "1e32fa89c8b1ef403a52f1b2c8326942b72092e6e88f50e8f780eff1c08c6094",
+    "b0_runner_sha256": "7e68c9f18b26bedaa600e642ca59339da9a99739bc2770d8aed3f87c53e98865",
+    "derived_existence_probe_sha256": "6623b1ce1dc5b289e1166ce7a59ea742fa6de2c3595d4818ab65ef03f0553f87",
+    "panda_controlled_urdf_sha256": "6678ff409d60f074283805879f53edaa939ead34f97a5a961ee67f6229b44ba8",
+    "isaac_sim_image": "nvcr.io/nvidia/isaac-sim:6.0.1",
+    "isaac_sim_image_id": "sha256:783444c706538aa76cf5126e911ddc5e618779e6105305ad4af4260362a30aa9",
+    "b0_modified": false,
+    "retries_changed": false,
+    "safety_ik_collision_schema_or_mapping_gates_changed": false
+  },
+  "findings": [
+    "V4 establishes measurable model headroom without weakening B0: the unchanged B0 final task success rate is 0/3 on a public-admissible matched domain.",
+    "Seed 9077 proves the domain is physically recoverable under the pre-registered strict public-track chain with zero collision violations.",
+    "The top-level derived probe PASS on seeds 9038 and 9057 is not counted because target regrasp and the public grasped/lifted predicates did not complete.",
+    "D1 is not triggered and no V5 is allowed or needed.",
+    "Q-A passing does not authorize Q-B: current CoarseIntentV1 cannot model-select the blocker track and registered destination end to end, so a separate human ADR remains mandatory."
+  ],
+  "teacher_used": false,
+  "teacher_kill_rule_events": [],
+  "privileged_truth_policy_input": false,
+  "world_model_mainline_replaced": false,
+  "task_report": {
+    "changed_files": [
+      "reports/m2c-s2-exploration-v4.json",
+      "reports/m2c-s2-exploration-v4.md",
+      "tests/unit/test_m2c_s2_v4_report.py"
+    ],
+    "tests": {
+      "real_stage_executions": 3,
+      "real_b0_attempts_completed": 6,
+      "real_existence_executions_completed": 3,
+      "public_admissible_b0_keys": 3,
+      "complete_strict_existence_proofs": 1,
+      "collision_violations": 0
+    },
+    "failures": [
+      "seed 9038 strict existence proof excluded at the unchanged target contact gate",
+      "seed 9057 strict existence proof excluded at the unchanged target pregrasp IK gate"
+    ],
+    "blockers": [
+      "Q-B remains blocked pending the separate human expressivity ADR; no Q-B training or evaluation is authorized"
+    ],
+    "next_command": "sed -n '1,220p' docs/decisions/M2C-QB-EXPRESSIVITY-PREREG.md"
+  }
+}
