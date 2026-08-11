@@ -1,0 +1,149 @@
+{
+  "checklist": {
+    "path": "docs/competition/submission-checklist.md",
+    "status": "PASS",
+    "unchecked_required_items": []
+  },
+  "editing_policy": "all retained public RGB-D captures are included in timestamp order; videos explicitly disclose sparse capture and B0 continuation",
+  "episode_id": "m2b-match-432a8e20f3b3829a17c0da5ee81a5f6b3dd3eef440ddf51efa7d604c2f9a89a9:QRM_COARSE_FC",
+  "evidence_status": "PASS",
+  "m2b_attribution_video": {
+    "b0_continuation_decisions": 2,
+    "bytes": 101666,
+    "final_task_success": true,
+    "frames": 3,
+    "model_owned_decisions": 1,
+    "path": "/Users/gl/tzb-m2c-evidence/m2c-s1/m2c-s1-m2b-attribution.mp4",
+    "pure_model_success_episode": false,
+    "sha256": "17183a5e20a2def1afa3e9c8471e1eee031c904cadd8536e554f153a3f11d79c",
+    "status": "PASS_HONEST_ATTRIBUTION"
+  },
+  "next_command": "make m2c-s2",
+  "privileged_truth_policy_input": false,
+  "schema_version": "M2CS1DeliverablesV1",
+  "status": "PASS",
+  "synchronization": {
+    "captures": [
+      {
+        "depth_path": "/Users/gl/tzb-m2c-evidence/m2c-s1/captures/before_failure.npy",
+        "depth_sha256": "0653705d4f512c5af51e63e6670f204870e6bb9668a158f251bdf2407b83cd7d",
+        "finite_depth_samples": 183362,
+        "label": "before_failure",
+        "rgb_path": "/Users/gl/tzb-m2c-evidence/m2c-s1/captures/before_failure.png",
+        "rgb_sha256": "864e3bdb099dad0f14d7bafb9d8e1bb3991b3140232754b180f08373ce99142f",
+        "timestamp_ns": 1066666666
+      },
+      {
+        "depth_path": "/Users/gl/tzb-m2c-evidence/m2c-s1/captures/after_physical_lift.npy",
+        "depth_sha256": "f2e5ed80dcc342fe41989519e59f352c6d22f0a9ebdd3829d93b7ecd9ba158ac",
+        "finite_depth_samples": 174037,
+        "label": "after_physical_lift",
+        "rgb_path": "/Users/gl/tzb-m2c-evidence/m2c-s1/captures/after_physical_lift.png",
+        "rgb_sha256": "42050a912b1cce92b78daa5db6deec95ebb25ec1ea864c7734fbe1a217417d5b",
+        "timestamp_ns": 19000000000
+      },
+      {
+        "depth_path": "/Users/gl/tzb-m2c-evidence/m2c-s1/captures/after_recovery_retreat.npy",
+        "depth_sha256": "fd6043f3c164c3170a11f3f5b7762bddfeaf3f0a0fd908ea96b1fefe62b13b82",
+        "finite_depth_samples": 174419,
+        "label": "after_recovery_retreat",
+        "rgb_path": "/Users/gl/tzb-m2c-evidence/m2c-s1/captures/after_recovery_retreat.png",
+        "rgb_sha256": "c4c72f015ee9c4502978f234a281450fd9c59808f504a77a9477d6f64aacb16a",
+        "timestamp_ns": 21533333333
+      },
+      {
+        "depth_path": "/Users/gl/tzb-m2c-evidence/m2c-s1/captures/wrong_object_target_after_regrasp.npy",
+        "depth_sha256": "73c2379ebb0f82ce91bc8a382524a937938b6e13b55f34e96b2c6f49cde9ca28",
+        "finite_depth_samples": 157694,
+        "label": "wrong_object_target_after_regrasp",
+        "rgb_path": "/Users/gl/tzb-m2c-evidence/m2c-s1/captures/wrong_object_target_after_regrasp.png",
+        "rgb_sha256": "2ffbf55d29bd74c3e6e86d379f908541887aafb4b34af80d36ff69add90d0396",
+        "timestamp_ns": 31966666666
+      }
+    ],
+    "monotonic_timestamps": true,
+    "source": "M2BPublicRGBDEvidenceV2.capture.timestamp_ns",
+    "status": "PASS"
+  },
+  "task_report": {
+    "blockers": [],
+    "changed_files": [
+      "Makefile",
+      "docs/competition/submission-checklist.md",
+      "reports/m2c-s1-deliverables.json",
+      "reports/m2c-s1-deliverables.md",
+      "reports/m2c-s1-verification.json",
+      "scripts/m2c/export_s1_evidence.py",
+      "tests/unit/test_m2c_s1_evidence.py"
+    ],
+    "failures": [
+      "The first standalone B0-freeze recheck omitted scripts from PYTHONPATH and stopped with ModuleNotFoundError before evaluating evidence; it was rerun with the project PYTHONPATH and passed 12/12 B0 files, 116/116 index entries, and zero M2B report mismatches."
+    ],
+    "tests": {
+      "failed": 0,
+      "passed": 375
+    }
+  },
+  "task_success_rgbd": {
+    "camera_frame": "m2b_policy_rgbd_optical",
+    "camera_intrinsics": [
+      554.3827128226441,
+      0.0,
+      320.0,
+      0.0,
+      554.3827128226441,
+      240.0,
+      0.0,
+      0.0,
+      1.0
+    ],
+    "capture_label": "wrong_object_target_after_regrasp",
+    "capture_timestamp_ns": 31966666666,
+    "depth": {
+      "finite_depth_samples": 157694,
+      "path": "/Users/gl/tzb-m2c-evidence/m2c-s1/task-success-rgbd/depth.npy",
+      "semantics": "METRIC_DISTANCE_TO_IMAGE_PLANE",
+      "sha256": "73c2379ebb0f82ce91bc8a382524a937938b6e13b55f34e96b2c6f49cde9ca28"
+    },
+    "episode_id": "m2b-match-432a8e20f3b3829a17c0da5ee81a5f6b3dd3eef440ddf51efa7d604c2f9a89a9:QRM_COARSE_FC",
+    "failure_type": "WRONG_OBJECT",
+    "manifest_path": "/Users/gl/tzb-m2c-evidence/m2c-s1/task-success-rgbd/manifest.json",
+    "manifest_sha256": "2102b9c379833f8738eff60dbe549663a5ec04570790224051ee7a8932cdc1ee",
+    "matched_key": "m2b-match-432a8e20f3b3829a17c0da5ee81a5f6b3dd3eef440ddf51efa7d604c2f9a89a9",
+    "method": "QRM_COARSE_FC",
+    "policy_input_simulator_truth": false,
+    "raw_actuation_probe_task_success_field_present": false,
+    "recovery_success": true,
+    "rgb": {
+      "path": "/Users/gl/tzb-m2c-evidence/m2c-s1/task-success-rgbd/rgb.png",
+      "sha256": "2ffbf55d29bd74c3e6e86d379f908541887aafb4b34af80d36ff69add90d0396"
+    },
+    "scene_seed": 4017,
+    "schema_version": "M2CTaskSuccessRGBDExampleV1",
+    "source_execution_evidence": {
+      "host": "root@labserver",
+      "path": "/var/tmp/xh-data/isaac-industrial/m2b/matched-closed-loop-v1/gpu1/432a8e20f3b3829a17c0/qrm_coarse_fc-69bebed69cf8065d/wrong_object/attempt-01/actuation-probe.json",
+      "sha256": "bbfe23c0e18c78e86e7c7d9a894e7624a30bbd6f61af9053ff1046a0b9309c0f"
+    },
+    "task_success": true,
+    "task_success_source": "M2BClosedLoopEpisodeV1.final_success",
+    "teacher_used": false
+  },
+  "teacher_kill_rule_events": [],
+  "teacher_used": false,
+  "world_model_mainline_replaced": false,
+  "wrong_object_recovery_video": {
+    "bytes": 140430,
+    "continuous_capture": false,
+    "frames": 4,
+    "path": "/Users/gl/tzb-m2c-evidence/m2c-s1/m2c-s1-wrong-object-recovery.mp4",
+    "sha256": "963b18c6e3b7396766929efb4113f4e47183e2edb60a5dee406c7a478a24eb4b",
+    "source_timestamps_ns": [
+      1066666666,
+      19000000000,
+      21533333333,
+      31966666666
+    ],
+    "status": "PASS_SPARSE_SYNCHRONIZED_RGBD"
+  }
+}

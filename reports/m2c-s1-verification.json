@@ -1,0 +1,57 @@
+{
+  "b0_freeze_recheck": {
+    "artifact_index_verified": 116,
+    "b0_files_verified": 12,
+    "m2b_report_mismatches": [],
+    "status": "PASS"
+  },
+  "commands": [
+    "make test",
+    ".venv/bin/ruff check .",
+    ".venv/bin/python -m compileall -q src scripts tests",
+    "PYTHONPATH=src:scripts .venv/bin/python scripts/validate_project.py",
+    "bash -n on every scripts/**/*.sh entry",
+    "git diff --check",
+    "re-run build_report against configs/m2c_b0_freeze.json",
+    "ffprobe both S1 videos and verify RGB-D/sample hashes"
+  ],
+  "failures": [
+    "The first standalone B0-freeze recheck omitted scripts from PYTHONPATH and stopped with ModuleNotFoundError before evaluating evidence; it was rerun with the project PYTHONPATH and passed 12/12 B0 files, 116/116 index entries, and zero M2B report mismatches."
+  ],
+  "media": {
+    "attribution_video": {
+      "codec": "h264",
+      "frames": 3,
+      "height": 900,
+      "sha256": "17183a5e20a2def1afa3e9c8471e1eee031c904cadd8536e554f153a3f11d79c",
+      "width": 1440
+    },
+    "task_success_depth_sha256": "73c2379ebb0f82ce91bc8a382524a937938b6e13b55f34e96b2c6f49cde9ca28",
+    "task_success_rgb_sha256": "2ffbf55d29bd74c3e6e86d379f908541887aafb4b34af80d36ff69add90d0396",
+    "wrong_object_video": {
+      "codec": "h264",
+      "frames": 4,
+      "height": 900,
+      "sha256": "963b18c6e3b7396766929efb4113f4e47183e2edb60a5dee406c7a478a24eb4b",
+      "width": 1440
+    }
+  },
+  "project_validation": {
+    "root_import": "CPU_ONLY",
+    "schemas": 9,
+    "status": "PASS"
+  },
+  "schema_version": "M2CS1VerificationV1",
+  "status": "PASS",
+  "tests": {
+    "failed": 0,
+    "passed": 375
+  },
+  "visual_qa": {
+    "attribution_discloses_b0_continuation": true,
+    "depth_panel_rendered": true,
+    "sparse_capture_disclosure_visible": true,
+    "status": "PASS",
+    "task_success_rgb_visible": true
+  }
+}
