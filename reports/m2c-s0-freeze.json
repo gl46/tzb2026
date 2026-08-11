@@ -1,0 +1,203 @@
+{
+  "adr": "docs/decisions/ADR-0020-m2c-model-owned-recovery.md",
+  "b0_files": [
+    {
+      "baseline_sha256": "1e32fa89c8b1ef403a52f1b2c8326942b72092e6e88f50e8f780eff1c08c6094",
+      "matches_m2b": true,
+      "path": "scripts/isaac_m1b_actuation_probe.py",
+      "role": "physical B0 actuation, recovery, and task-state evidence",
+      "sha256": "1e32fa89c8b1ef403a52f1b2c8326942b72092e6e88f50e8f780eff1c08c6094",
+      "working_tree_sha256": "1e32fa89c8b1ef403a52f1b2c8326942b72092e6e88f50e8f780eff1c08c6094"
+    },
+    {
+      "baseline_sha256": "7e68c9f18b26bedaa600e642ca59339da9a99739bc2770d8aed3f87c53e98865",
+      "matches_m2b": true,
+      "path": "scripts/m2b/run_physical_failure_smoke.py",
+      "role": "M2B B0 retry count and physical failure runner parameters",
+      "sha256": "7e68c9f18b26bedaa600e642ca59339da9a99739bc2770d8aed3f87c53e98865",
+      "working_tree_sha256": "7e68c9f18b26bedaa600e642ca59339da9a99739bc2770d8aed3f87c53e98865"
+    },
+    {
+      "baseline_sha256": "5dcb5e17d7a7850939c121ee1fbee4442b40a3a3804b1f1e165a6685d2a21795",
+      "matches_m2b": true,
+      "path": "scripts/m2b/run_matched_closed_loop_batch.py",
+      "role": "M2B matched B0 sequences and fixed continuation",
+      "sha256": "5dcb5e17d7a7850939c121ee1fbee4442b40a3a3804b1f1e165a6685d2a21795",
+      "working_tree_sha256": "5dcb5e17d7a7850939c121ee1fbee4442b40a3a3804b1f1e165a6685d2a21795"
+    },
+    {
+      "baseline_sha256": "2aa2fc71ac56d6ad01a101c228c7538e8d159bc05c88e6a5419a72d35621f191",
+      "matches_m2b": true,
+      "path": "scripts/m2b/run_prospective_preflight_batch.py",
+      "role": "prospective physical preflight and execution command",
+      "sha256": "2aa2fc71ac56d6ad01a101c228c7538e8d159bc05c88e6a5419a72d35621f191",
+      "working_tree_sha256": "2aa2fc71ac56d6ad01a101c228c7538e8d159bc05c88e6a5419a72d35621f191"
+    },
+    {
+      "baseline_sha256": "396dbd1f8ce7c28e89c33e55e22fc297a27b73ebafef2d2435d4aa73f6cb0afc",
+      "matches_m2b": true,
+      "path": "src/xh_agent/policy/qrm_lite/physical_runtime_gates.py",
+      "role": "physical runtime gate contract",
+      "sha256": "396dbd1f8ce7c28e89c33e55e22fc297a27b73ebafef2d2435d4aa73f6cb0afc",
+      "working_tree_sha256": "396dbd1f8ce7c28e89c33e55e22fc297a27b73ebafef2d2435d4aa73f6cb0afc"
+    },
+    {
+      "baseline_sha256": "8e720054c7caf7884b04238a94cef341e8a27ce574c6bdbb51c3c51a1610d93c",
+      "matches_m2b": true,
+      "path": "src/xh_agent/policy/qrm_lite/collision_evidence.py",
+      "role": "collision evidence validation",
+      "sha256": "8e720054c7caf7884b04238a94cef341e8a27ce574c6bdbb51c3c51a1610d93c",
+      "working_tree_sha256": "8e720054c7caf7884b04238a94cef341e8a27ce574c6bdbb51c3c51a1610d93c"
+    },
+    {
+      "baseline_sha256": "69189ad5fd39980f4d762aeb899b8d953cc5680b534ac853446328af8fc09194",
+      "matches_m2b": true,
+      "path": "src/xh_agent/policy/qrm_lite/runtime_adapter.py",
+      "role": "model-to-runtime adapter",
+      "sha256": "69189ad5fd39980f4d762aeb899b8d953cc5680b534ac853446328af8fc09194",
+      "working_tree_sha256": "69189ad5fd39980f4d762aeb899b8d953cc5680b534ac853446328af8fc09194"
+    },
+    {
+      "baseline_sha256": "b8082408e6321affa929876ef563b72e39ed1d3329e98406ce6aa13d0e5b5030",
+      "matches_m2b": true,
+      "path": "src/xh_agent/policy/qrm_lite/safety_adapter.py",
+      "role": "fail-closed safety adapter",
+      "sha256": "b8082408e6321affa929876ef563b72e39ed1d3329e98406ce6aa13d0e5b5030",
+      "working_tree_sha256": "b8082408e6321affa929876ef563b72e39ed1d3329e98406ce6aa13d0e5b5030"
+    },
+    {
+      "baseline_sha256": "d62b2d11440a74152d89e9b58fa86dd14f8e33f12bc6975c6080d72bf6b91a0d",
+      "matches_m2b": true,
+      "path": "src/xh_agent/policy/qrm_lite/skill_registry.py",
+      "role": "canonical skill mapping and validation",
+      "sha256": "d62b2d11440a74152d89e9b58fa86dd14f8e33f12bc6975c6080d72bf6b91a0d",
+      "working_tree_sha256": "d62b2d11440a74152d89e9b58fa86dd14f8e33f12bc6975c6080d72bf6b91a0d"
+    },
+    {
+      "baseline_sha256": "40257bef2907faddf5f28c136023dbd7c4f8eb172c31a147682859d11f3b3829",
+      "matches_m2b": true,
+      "path": "src/xh_agent/policy/qrm_lite/transforms.py",
+      "role": "explicit frame and unit transforms",
+      "sha256": "40257bef2907faddf5f28c136023dbd7c4f8eb172c31a147682859d11f3b3829",
+      "working_tree_sha256": "40257bef2907faddf5f28c136023dbd7c4f8eb172c31a147682859d11f3b3829"
+    },
+    {
+      "baseline_sha256": "0019b10e54c79cbca16f842dbfd86708ac1f5259e0d7d062be85855062207559",
+      "matches_m2b": true,
+      "path": "configs/qrm_runtime_mapping.yaml",
+      "role": "runtime skill registry, parameter bounds, frames, and units",
+      "sha256": "0019b10e54c79cbca16f842dbfd86708ac1f5259e0d7d062be85855062207559",
+      "working_tree_sha256": "0019b10e54c79cbca16f842dbfd86708ac1f5259e0d7d062be85855062207559"
+    },
+    {
+      "baseline_sha256": "1b4e52b03eb9a069362fb8b898d3ceeb2719e6eb60f378b74234eae472980cd8",
+      "matches_m2b": true,
+      "path": "scripts/run_constrained_pick_place.sh",
+      "role": "delivery B0 constrained-pick-place entrypoint",
+      "sha256": "1b4e52b03eb9a069362fb8b898d3ceeb2719e6eb60f378b74234eae472980cd8",
+      "working_tree_sha256": "1b4e52b03eb9a069362fb8b898d3ceeb2719e6eb60f378b74234eae472980cd8"
+    }
+  ],
+  "b0_files_match_m2b": true,
+  "baseline_commit": "141e45dabddcaf59bb49ab958d9d5273d1f54d88",
+  "findings": [],
+  "local_artifacts": [
+    {
+      "actual_sha256": "c24e34493ba2226c1aa691c1b1c43993fbecdff5ad74b291e08c4913efc71362",
+      "matches_m2b": true,
+      "path": "artifacts/m2b/dataset-v2.jsonl",
+      "required": true,
+      "sha256": "c24e34493ba2226c1aa691c1b1c43993fbecdff5ad74b291e08c4913efc71362"
+    },
+    {
+      "actual_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "matches_m2b": true,
+      "path": "artifacts/m2b/dataset-v2-quarantine.jsonl",
+      "required": true,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "actual_sha256": "2b32be13a00fe951af3374589391617162e27b956ea582cfdf109a80f916c219",
+      "matches_m2b": true,
+      "path": "artifacts/m2b/coarse-training-v2.jsonl",
+      "required": true,
+      "sha256": "2b32be13a00fe951af3374589391617162e27b956ea582cfdf109a80f916c219"
+    },
+    {
+      "actual_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "matches_m2b": true,
+      "path": "artifacts/m2b/coarse-training-v2-quarantine.jsonl",
+      "required": true,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "actual_sha256": "054a929ca639e914461f2172993f6f23d1ab5aad65cfd2175c298fddb67805e4",
+      "matches_m2b": true,
+      "path": "artifacts/m2b/residual-pairs.jsonl",
+      "required": true,
+      "sha256": "054a929ca639e914461f2172993f6f23d1ab5aad65cfd2175c298fddb67805e4"
+    },
+    {
+      "actual_sha256": "4a9a7cd53c6daa01088db55389684be08b8f7bb93112b6d1015e26f93e505835",
+      "matches_m2b": true,
+      "path": "artifacts/m2b/residual-training-v2.jsonl",
+      "required": true,
+      "sha256": "4a9a7cd53c6daa01088db55389684be08b8f7bb93112b6d1015e26f93e505835"
+    },
+    {
+      "actual_sha256": "6d9f2f87aa82045d24354b08d2010b2b9cdbaed508d36a3debfa278610f03d28",
+      "matches_m2b": true,
+      "path": "artifacts/m2b/closed-loop-20260731-episodes.jsonl",
+      "required": true,
+      "sha256": "6d9f2f87aa82045d24354b08d2010b2b9cdbaed508d36a3debfa278610f03d28"
+    },
+    {
+      "actual_sha256": "7fadaff1408a8699912c8dbc864ec3cc895218cd4ea1c45d43784bee60464a43",
+      "matches_m2b": true,
+      "path": "artifacts/m2b/closed-loop-20260731-journal.jsonl",
+      "required": true,
+      "sha256": "7fadaff1408a8699912c8dbc864ec3cc895218cd4ea1c45d43784bee60464a43"
+    }
+  ],
+  "local_artifacts_match_m2b": true,
+  "m2b_artifact_index": {
+    "entries": 116,
+    "expected_sha256": "7235bc2a897100ad128f3eabdeeb4de099ff285ad580f156d184c5dfc25f17bd",
+    "failures": [],
+    "path": "reports/m2b-artifact-index.json",
+    "sha256": "7235bc2a897100ad128f3eabdeeb4de099ff285ad580f156d184c5dfc25f17bd",
+    "verified_entries": 116
+  },
+  "m2b_evidence_readonly": true,
+  "m2b_reports": {
+    "baseline_count": 51,
+    "mismatches": []
+  },
+  "next_command": "make m2c-s1",
+  "privileged_truth_policy_input": false,
+  "schema_version": "M2CS0FreezeReportV1",
+  "status": "PASS",
+  "task_report": {
+    "blockers": [],
+    "changed_files": [
+      "akefile",
+      "configs/m2c_b0_freeze.json",
+      "docs/decisions/ADR-0020-m2c-model-owned-recovery.md",
+      "reports/m2c-s0-freeze.json",
+      "reports/m2c-s0-freeze.md",
+      "reports/m2c-s0-verification.json",
+      "scripts/m2c/",
+      "src/xh_agent/policy/qrm_lite/closed_loop_metrics.py",
+      "tests/unit/test_m2c_freeze.py",
+      "tests/unit/test_m2c_metrics.py"
+    ],
+    "failures": [],
+    "tests": {
+      "failed": 0,
+      "passed": 372
+    }
+  },
+  "teacher_kill_rule_events": [],
+  "teacher_used": false,
+  "world_model_mainline_replaced": false
+}

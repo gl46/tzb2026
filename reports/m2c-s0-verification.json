@@ -1,0 +1,49 @@
+{
+  "commands": [
+    "make test",
+    ".venv/bin/ruff check .",
+    ".venv/bin/python -m compileall -q src scripts tests",
+    "PYTHONPATH=src:scripts .venv/bin/python scripts/validate_project.py",
+    "bash -n on every scripts/**/*.sh entry",
+    "git diff --check"
+  ],
+  "failures": [],
+  "host_preflight": {
+    "isaac": {
+      "data_root": "/var/tmp/xh-data/isaac-industrial",
+      "gpus": [
+        "NVIDIA GeForce RTX 3080 10240 MiB",
+        "NVIDIA GeForce RTX 3080 10240 MiB"
+      ],
+      "host": "root@labserver",
+      "status": "PASS"
+    },
+    "training": {
+      "gpu": "NVIDIA A100-SXM4-80GB 81920 MiB",
+      "host": "gl@node2",
+      "project_root": "/home/gl/m2b-qrm-project-20260731",
+      "runtime_root": "/home/gl/xh-202607-qrm-lite",
+      "status": "PASS"
+    }
+  },
+  "human_direction": {
+    "path": "/Users/gl/tzb/CODEX_GOAL_M2C_HEADROOM.md",
+    "sha256": "b8f12e481690b279cbcac2b91d8fece9e5acf815c2c94bf01e1678b62e58469d"
+  },
+  "project_validation": {
+    "root_import": "CPU_ONLY",
+    "schemas": 9,
+    "status": "PASS"
+  },
+  "runner": {
+    "path": "/Users/gl/tzb/run_codex_m2c.sh",
+    "sha256": "ff35974a612a4be8b0b877d638bc62e5fc7376d9ff8d66a09e67407caf665705",
+    "syntax": "PASS"
+  },
+  "schema_version": "M2CS0VerificationV1",
+  "status": "PASS",
+  "tests": {
+    "failed": 0,
+    "passed": 372
+  }
+}

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections import Counter, defaultdict
+import math
 import re
 from typing import Literal
 
@@ -154,6 +155,73 @@ class M2BClosedLoopEpisodeV1(StrictModel):
 
 def _rate(numerator: int, denominator: int) -> float | None:
     return numerator / denominator if denominator else None
+
+
+def _validated_rate(value: float, name: str) -> float:
+    if not math.isfinite(value) or not 0.0 <= value <= 1.0:
+        raise ValueError(f"{name} must be a finite rate in [0, 1]")
+    return value
+
+
+def pure_model_success_episode(episode: M2BClosedLoopEpisodeV1) -> bool:
+    """Return the frozen M2C pure-recovery attribution predicate.
+
+    Closed-loop episode decisions begin at the first observed task failure and
+    contain only recovery decisions. A successful episode is pure-model only
+    when every such decision was selected and physically executed by the
+    model, with no B0 or human continuation.
+    """
+
+    return bool(
+        episode.final_success
+        and episode.recovery_attempted
+        and episode.decisions
+        and all(
+            decision.model_decision
+            and decision.mapping_status == "VALID"
+            and decision.execution_source == "MODEL_SELECTED_B0_SKILL"
+            and decision.executed_skill is not None
+            and decision.ik_gate not in {"REJECTED", "NOT_RUN"}
+            and decision.collision_gate not in {"REJECTED", "NOT_RUN"}
+            and decision.safety_gate == "PASS"
+            for decision in episode.decisions
+        )
+    )
+
+
+def b0_headroom(b0_final_task_success_rate: float) -> float:
+    """Return one minus B0 final task success on the same matched keys."""
+
+    return 1.0 - _validated_rate(
+        b0_final_task_success_rate,
+        "b0_final_task_success_rate",
+    )
+
+
+def fc_gain_over_b0(
+    fc_final_task_success_rate: float,
+    b0_final_task_success_rate: float,
+) -> float:
+    """Return the primary M2C FC-vs-unchanged-B0 success-rate difference."""
+
+    fc = _validated_rate(fc_final_task_success_rate, "fc_final_task_success_rate")
+    b0 = _validated_rate(b0_final_task_success_rate, "b0_final_task_success_rate")
+    return fc - b0
+
+
+def model_owned_decision_ratio(
+    decisions: list[M2BClosedLoopDecisionV1],
+) -> float | None:
+    """Return physically executed model decisions over all recovery decisions."""
+
+    return _rate(
+        sum(
+            decision.model_decision
+            and decision.execution_source == "MODEL_SELECTED_B0_SKILL"
+            for decision in decisions
+        ),
+        len(decisions),
+    )
 
 
 def summarize_method(
