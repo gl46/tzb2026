@@ -136,3 +136,46 @@ def test_output_report_fails_closed_on_packaging_quarantine(
     assert report["episodes_quarantined"] == 1
     assert report["collection_rejections"] == 1
     assert report["fourth_class"]["model_training_eligible"] is False
+
+
+def test_output_report_passes_full_gate_and_keeps_fourth_class_raw_only(
+    tmp_path: Path,
+) -> None:
+    by_failure = {}
+    for item in BASE:
+        by_failure.setdefault(item["failure_context"]["failure_type"], item)
+    additions = []
+    index = 1
+    for failure in ("EMPTY_GRASP", "WRONG_OBJECT", "RELEASE_FAILURE"):
+        for _ in range(50):
+            additions.append(clone_episode(by_failure[failure], index=index))
+            index += 1
+
+    output = tmp_path / "dataset.jsonl"
+    quarantine = tmp_path / "quarantine.jsonl"
+    fourth = tmp_path / "path-blocked.jsonl"
+    report = write_outputs(
+        base=BASE,
+        additions=additions,
+        package_quarantine=[],
+        collection_rejections=[],
+        plan=PLAN,
+        output=output,
+        quarantine_path=quarantine,
+        fourth_class_path=fourth,
+        report_path=tmp_path / "report.json",
+    )
+
+    assert report["status"] == "PASS_S3_FULL_CLASS_COVERAGE"
+    assert report["failure_counts"] == {
+        "EMPTY_GRASP": 101,
+        "WRONG_OBJECT": 100,
+        "RELEASE_FAILURE": 111,
+    }
+    assert report["successful_recovery_counts"] == report["failure_counts"]
+    assert report["episodes_quarantined"] == 0
+    assert quarantine.read_text() == ""
+    assert len(load_jsonl(fourth)) == 3
+    assert all(
+        item["failure_context"]["failure_type"] != "PATH_BLOCKED" for item in load_jsonl(output)
+    )
