@@ -1,7 +1,7 @@
 # M2C S4 Q-B entry gate
 
 - Status: **BLOCKED_FORMAL_Q_B_EVALUATION**
-- Checked Git HEAD: `1a46ebf2c14077d03fb715b71eaf33bb56c9300d`
+- Checked Git HEAD: `7015816fa72415f0a6df873fbeebc9c5282ac624`
 - Required physical policy: trained Qwen V2 world-model bundle (LoRA adapter + skill/pointer/destination heads).
 - Structured Q0/Q1/Q2 checkpoint accepted as world model: `false`
 - Governance gate passed: `True`
@@ -24,6 +24,13 @@ Local pytest evidence proves contracts only. ADR §7(3) passes only with one rea
 
 ## Blockers
 
+- formal Qwen-to-Isaac runner is not independently reviewed, real-Isaac contract-verified, and frozen
+- formal runner has no frozen host-local signing proxies; central Qwen/Isaac HMAC-key custody remains source-level blocked
+- formal deployment has no frozen implementation commit, container image, and complete transitive-import closure
+- formal runtime fallback is not attributed to a frozen unchanged B0 wrapper
+- wire HMAC authenticity has no frozen offline verifier/public trust root receipt
+- offline attestation signing-key custody is not independently provisioned and frozen
+- preregistered wire challenge has no frozen create-only consumption ledger; single-use enforcement is not yet proven
 - real Isaac Qwen-world-model physical integration receipt not provided
 - formal Q-B evaluation is blocked until every ADR section 7 layer passes
 

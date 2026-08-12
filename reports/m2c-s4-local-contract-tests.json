@@ -1,5 +1,5 @@
 {
-  "checked_implementation_commit": "1a46ebf2c14077d03fb715b71eaf33bb56c9300d",
+  "checked_implementation_commit": "7015816fa72415f0a6df873fbeebc9c5282ac624",
   "command": [
     "python",
     "-m",
@@ -15,6 +15,8 @@
     "tests/unit/test_m2c_qwen_coarse_v2.py",
     "tests/unit/test_m2c_formal_split_runner_v2.py",
     "tests/unit/test_m2c_formal_isaac_endpoint_v2.py",
+    "tests/unit/test_m2c_qwen_service_audit.py",
+    "tests/unit/test_m2c_offline_wire_auth.py",
     "tests/unit/test_m2c_hard_freeze.py"
   ],
   "evidence_origin": "LOCAL_CONTRACT_TESTS",
@@ -30,6 +32,8 @@
     "tests/unit/test_m2c_qwen_coarse_v2.py",
     "tests/unit/test_m2c_formal_split_runner_v2.py",
     "tests/unit/test_m2c_formal_isaac_endpoint_v2.py",
+    "tests/unit/test_m2c_qwen_service_audit.py",
+    "tests/unit/test_m2c_offline_wire_auth.py",
     "tests/unit/test_m2c_hard_freeze.py"
   ],
   "privileged_truth_policy_input": false,
@@ -42,19 +46,21 @@
     "scripts/m2c/evaluate_qwen_coarse_v2.py": "ca7de0fac0c143d917c449fb9aba18e8ab26312fd81a401585815a8a89ccd422",
     "scripts/m2c/formal_isaac_v4_backend.py": "73ada118846c4392c73aa3f0459195e71a1d54378c549487e1ef3504bc4d79bf",
     "scripts/m2c/qwen_coarse_v2.py": "b6c4e29486941c54a8b4d6c069bd95a625751fff1f17900581ec9b8e0c613ae6",
-    "scripts/m2c/run_formal_model_owned_chain.py": "e8059b184d0cbdb5f3e037ef9c0c71fa2d468d1972e7c20dff252221ca14d6aa",
-    "scripts/m2c/serve_formal_isaac_endpoint.py": "72294ec73cb56a467f85f5e82a6f831c9e9dc72de0f8d87aeb48b9beb4bc7c2d",
-    "scripts/m2c/serve_qwen_coarse_v2.py": "a470329f373874472280842356c5febcf7300ff5b421dd79709e6d09d7996c05",
+    "scripts/m2c/run_formal_model_owned_chain.py": "6fc21c237d3dff2c276cdd5a15c9c6379a6555d99cad65a76297cbd6089af59c",
+    "scripts/m2c/serve_formal_isaac_endpoint.py": "13a9fe4a4666161383c7149785a1035465ab9413e3742bd3b425f054b4f077c8",
+    "scripts/m2c/serve_qwen_coarse_v2.py": "f1f3448e6ee16747226c6a1e7bf61a08f985a1d3f1aebb739e9650c2596dd7a7",
     "scripts/m2c/train_qwen_coarse_v2.py": "8b25a36448c57b9744c98c00675978c6ead86ac72cb4840b7ffe224dc9011c76",
+    "scripts/m2c/verify_formal_wire_auth.py": "a6b48e7fd160109cfc81d9da594ca27f99dd43de9f1ce0d97cd291886c9203ab",
     "src/xh_agent/policy/qrm_lite/backbone.py": "291fe17515e86c75b944849972583f0af4c7c8f2fb5dd0161fe2e34d1ab02375",
     "src/xh_agent/policy/qrm_lite/closed_loop_metrics.py": "a4cd355fd39c4f2b41d6886c973902ce12cea78b5b5f58f72ced5be9f51c5746",
     "src/xh_agent/policy/qrm_lite/executed_intent_history_v2.py": "e8d7587c11e23976732c80800481853b8a851eb0a78f40f40f47eb0fb04bb748",
     "src/xh_agent/policy/qrm_lite/formal_isaac_endpoint_v2.py": "ce11aa23efd271e85bd6ada98ee336f37bb77319be6cd8a6b0a1059f42dc3c9b",
     "src/xh_agent/policy/qrm_lite/formal_public_role_selector_v2.py": "4e853dcb86c2bb51a9ca58f8441199e10d85366657669087e5b26a3aaf8a93a4",
-    "src/xh_agent/policy/qrm_lite/formal_split_runner_v2.py": "674e494f24288d8faadedbebb6f2bbd8c6b79c8075bbae0c9c0cce08447a1705",
+    "src/xh_agent/policy/qrm_lite/formal_split_runner_v2.py": "85805eb73cb0febb1b2157db388d6d44a539442903f1833cb38ea33fc147e7f6",
     "src/xh_agent/policy/qrm_lite/m2c_hard_freeze.py": "36cac68c45242337bd181afaa5898cb257c643e5245037e72602b9d6fbea3dd9",
     "src/xh_agent/policy/qrm_lite/model_owned_chain_v2.py": "fd76aebd3d319dd30857a721e89bcb028ae144d4d60b6d761d2d8e04f8614444",
     "src/xh_agent/policy/qrm_lite/models_q012_v2.py": "5334fbee5750fd4df1f6b421eac0336ced98849aa68e1c6948986bdbb15f540c",
+    "src/xh_agent/policy/qrm_lite/offline_wire_auth_v1.py": "ba5dbfd65b58b4e504c03296e5c8dad8fe7b3d83f65a24664038cbb5eb3c423e",
     "src/xh_agent/policy/qrm_lite/public_tracks_v2.py": "0d3f04767fd218f8759d42d58e5507b5f2c2b835e8d6c8c873b086ff7e614f6b",
     "src/xh_agent/policy/qrm_lite/runtime_adapter_v2.py": "483b0d1f259b5c52e2158686729e0f53c7c2d82a0f350cff789a27ad10983b25",
     "src/xh_agent/policy/qrm_lite/skill_registry_v2.py": "b12b575c205883f7ae48acf8976df9b38ed9ed47c364acad8521c4d3b6a7e089"
@@ -62,6 +68,6 @@
   "schema_version": "M2CS4LocalContractTestReceiptV2",
   "teacher_used": false,
   "tests_failed": 0,
-  "tests_passed": 207,
+  "tests_passed": 226,
   "tests_skipped": 0
 }
