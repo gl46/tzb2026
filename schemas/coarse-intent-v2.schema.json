@@ -1,0 +1,123 @@
+{
+  "$defs": {
+    "FailureType": {
+      "enum": [
+        "NONE",
+        "EMPTY_GRASP",
+        "WRONG_OBJECT",
+        "DROP_OR_SLIP",
+        "UNSTABLE_PLACEMENT",
+        "WRONG_CELL",
+        "RELEASE_FAILURE",
+        "PATH_BLOCKED",
+        "TRACKING_LOST",
+        "UNKNOWN"
+      ],
+      "title": "FailureType",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "ADR-0020 intent with a model-selectable registered destination.\n\n``target_track_id`` retains its V1 shape, but V2 decoding is obligated to\nfill it from the public-track pointer head when a pointer is selected.\nRuntime provenance checks, rather than this wire contract, distinguish a\nmodel prediction from the legacy TaskSpec fallback.",
+  "properties": {
+    "coarse_rotation_bins": {
+      "items": {
+        "type": "integer"
+      },
+      "title": "Coarse Rotation Bins",
+      "type": "array"
+    },
+    "coarse_translation_bins": {
+      "items": {
+        "type": "integer"
+      },
+      "title": "Coarse Translation Bins",
+      "type": "array"
+    },
+    "destination_cell": {
+      "anyOf": [
+        {
+          "enum": [
+            "BIN_CELL_0",
+            "BIN_CELL_1",
+            "BIN_CELL_2",
+            "BIN_CELL_3",
+            "BIN_CELL_4",
+            "BIN_CELL_5"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Destination Cell"
+    },
+    "failure_type_aux": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/FailureType"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "grasp_family": {
+      "default": "unknown",
+      "title": "Grasp Family",
+      "type": "string"
+    },
+    "orientation_goal": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Orientation Goal"
+    },
+    "recovery_mode": {
+      "default": "none",
+      "title": "Recovery Mode",
+      "type": "string"
+    },
+    "reobserve_flag": {
+      "default": false,
+      "title": "Reobserve Flag",
+      "type": "boolean"
+    },
+    "schema_version": {
+      "const": "CoarseIntentV2",
+      "default": "CoarseIntentV2",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "skill_type": {
+      "title": "Skill Type",
+      "type": "string"
+    },
+    "target_track_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Target Track Id"
+    }
+  },
+  "required": [
+    "skill_type"
+  ],
+  "title": "CoarseIntentV2",
+  "type": "object"
+}

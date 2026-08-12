@@ -13,6 +13,16 @@ from typing import Any, Literal
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
+DestinationCellV2 = Literal[
+    "BIN_CELL_0",
+    "BIN_CELL_1",
+    "BIN_CELL_2",
+    "BIN_CELL_3",
+    "BIN_CELL_4",
+    "BIN_CELL_5",
+]
+
+
 class StrictModel(BaseModel):
     model_config = ConfigDict(extra="forbid", validate_assignment=True)
 
@@ -117,6 +127,19 @@ class CoarseIntentV1(StrictModel):
     coarse_translation_bins: list[int] = Field(default_factory=list)
     coarse_rotation_bins: list[int] = Field(default_factory=list)
     failure_type_aux: FailureType | None = None
+
+
+class CoarseIntentV2(CoarseIntentV1):
+    """ADR-0020 intent with a model-selectable registered destination.
+
+    ``target_track_id`` retains its V1 shape, but V2 decoding is obligated to
+    fill it from the public-track pointer head when a pointer is selected.
+    Runtime provenance checks, rather than this wire contract, distinguish a
+    model prediction from the legacy TaskSpec fallback.
+    """
+
+    schema_version: Literal["CoarseIntentV2"] = "CoarseIntentV2"
+    destination_cell: DestinationCellV2 | None = None
 
 
 class CameraFrameActionChunkV1(StrictModel):

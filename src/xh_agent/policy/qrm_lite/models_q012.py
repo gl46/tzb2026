@@ -202,38 +202,127 @@ def load_formal_checkpoint(
     110-input/70-output architecture is a frozen, named revision; any other
     unversioned shape is rejected rather than padded or truncated.
     """
-    payload = np.load(path)
-    observed_model_id = str(payload["model_id"])
-    if expected_model_id is not None and observed_model_id != expected_model_id:
-        raise ValueError(
-            f"QRM checkpoint model mismatch: {observed_model_id} != "
-            f"{expected_model_id}"
-        )
-    input_dim = int(payload["coarse_w1"].shape[0])
-    output_dim = int(payload["coarse_w2"].shape[1])
-    current = build_formal_model(observed_model_id)
-    current_shape = (current.context_dim, current.coarse.out_dim)
-    if (input_dim, output_dim) == current_shape:
-        model = current
-        revision = "M2B_Q012_V1"
-    elif (input_dim, output_dim) == (110, 70):
-        model = build_formal_model(
+    required_tensors = {
+        "coarse_w1",
+        "coarse_b1",
+        "coarse_w2",
+        "coarse_b2",
+        "mlp_w1",
+        "mlp_b1",
+        "mlp_w2",
+        "mlp_b2",
+    }
+    required_keys = {"model_id", *required_tensors}
+    metadata_keys = {"checkpoint_schema_version", "architecture_revision"}
+
+    def scalar_text(payload: np.lib.npyio.NpzFile, key: str) -> str:
+        value = np.asarray(payload[key])
+        if value.shape != ():
+            raise ValueError(f"QRM checkpoint metadata {key} must be scalar")
+        return str(value.item())
+
+    with np.load(path, allow_pickle=False) as payload:
+        keys = set(payload.files)
+        missing = sorted(required_keys - keys)
+        if missing:
+            raise ValueError(f"QRM checkpoint missing fields: {missing}")
+        unknown = sorted(keys - required_keys - metadata_keys)
+        if unknown:
+            raise ValueError(f"QRM checkpoint has unsupported fields: {unknown}")
+        observed_model_id = scalar_text(payload, "model_id")
+        if expected_model_id is not None and observed_model_id != expected_model_id:
+            raise ValueError(
+                f"QRM checkpoint model mismatch: {observed_model_id} != "
+                f"{expected_model_id}"
+            )
+
+        current = build_formal_model(observed_model_id)
+        current_shapes = {
+            "coarse_w1": current.coarse.w1.shape,
+            "coarse_b1": current.coarse.b1.shape,
+            "coarse_w2": current.coarse.w2.shape,
+            "coarse_b2": current.coarse.b2.shape,
+            "mlp_w1": current.mlp.w1.shape,
+            "mlp_b1": current.mlp.b1.shape,
+            "mlp_w2": current.mlp.w2.shape,
+            "mlp_b2": current.mlp.b2.shape,
+        }
+        legacy = build_formal_model(
             observed_model_id,
             cfg=Q012Config(
                 context_skill_vocab=tuple(LEGACY_BETA1_SKILL_VOCAB),
                 coarse_base_skills=tuple(LEGACY_BETA1_COARSE_SKILLS),
             ),
         )
-        revision = "M2A_BETA1_LEGACY_V1"
-    else:
-        raise ValueError(
-            "unsupported unversioned QRM checkpoint architecture: "
-            f"input/output={(input_dim, output_dim)}, "
-            f"known={[current_shape, (110, 70)]}"
-        )
+        legacy_shapes = {
+            "coarse_w1": legacy.coarse.w1.shape,
+            "coarse_b1": legacy.coarse.b1.shape,
+            "coarse_w2": legacy.coarse.w2.shape,
+            "coarse_b2": legacy.coarse.b2.shape,
+            "mlp_w1": legacy.mlp.w1.shape,
+            "mlp_b1": legacy.mlp.b1.shape,
+            "mlp_w2": legacy.mlp.w2.shape,
+            "mlp_b2": legacy.mlp.b2.shape,
+        }
+        observed_shapes = {
+            name: tuple(np.asarray(payload[name]).shape)
+            for name in sorted(required_tensors)
+        }
+        if observed_shapes == current_shapes:
+            model = current
+            revision = "M2B_Q012_V1"
+            if metadata_keys - keys:
+                raise ValueError(
+                    "M2B_Q012_V1 checkpoint requires schema and architecture metadata"
+                )
+        elif observed_shapes == legacy_shapes:
+            model = legacy
+            revision = "M2A_BETA1_LEGACY_V1"
+            if bool(metadata_keys & keys) and metadata_keys - keys:
+                raise ValueError(
+                    "legacy checkpoint metadata must include schema and revision together"
+                )
+        else:
+            mismatches = {
+                name: {
+                    "observed": observed_shapes[name],
+                    "m2b": current_shapes[name],
+                    "legacy": legacy_shapes[name],
+                }
+                for name in sorted(required_tensors)
+                if observed_shapes[name]
+                not in {current_shapes[name], legacy_shapes[name]}
+            }
+            raise ValueError(
+                "unsupported QRM checkpoint tensor layout; tensors may not be "
+                f"padded or truncated: {mismatches or observed_shapes}"
+            )
+
+        if metadata_keys <= keys:
+            schema = scalar_text(payload, "checkpoint_schema_version")
+            declared_revision = scalar_text(payload, "architecture_revision")
+            if schema != "QRMFormalCheckpointV1":
+                raise ValueError(
+                    f"unsupported QRM checkpoint schema: {schema}"
+                )
+            if declared_revision != revision:
+                raise ValueError(
+                    "QRM checkpoint revision/layout mismatch: "
+                    f"{declared_revision} != {revision}"
+                )
+
+        tensors: dict[str, np.ndarray] = {}
+        for name in sorted(required_tensors):
+            value = np.asarray(payload[name])
+            if not np.issubdtype(value.dtype, np.number):
+                raise ValueError(f"QRM checkpoint tensor {name} is not numeric")
+            if not np.all(np.isfinite(value)):
+                raise ValueError(f"QRM checkpoint tensor {name} is non-finite")
+            tensors[name] = value.copy()
+
     for name in ("w1", "b1", "w2", "b2"):
-        setattr(model.coarse, name, np.asarray(payload[f"coarse_{name}"]))
-        setattr(model.mlp, name, np.asarray(payload[f"mlp_{name}"]))
+        setattr(model.coarse, name, tensors[f"coarse_{name}"])
+        setattr(model.mlp, name, tensors[f"mlp_{name}"])
     model.meta_checkpoint_revision = revision
     return model
 

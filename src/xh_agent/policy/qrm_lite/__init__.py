@@ -3,6 +3,7 @@
 from xh_agent.policy.qrm_lite.contracts import (
     CameraFrameActionChunkV1,
     CoarseIntentV1,
+    CoarseIntentV2,
     FailureContextV1,
     FailureType,
     QRMCoarseTrainingSampleV2,
@@ -17,6 +18,7 @@ from xh_agent.policy.qrm_lite.coarse_inference import (
 __all__ = [
     "CameraFrameActionChunkV1",
     "CoarseIntentV1",
+    "CoarseIntentV2",
     "FailureContextV1",
     "FailureType",
     "QRMCoarseTrainingSampleV2",

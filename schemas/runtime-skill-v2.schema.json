@@ -1,0 +1,159 @@
+{
+  "$defs": {
+    "ParameterProvenanceV2": {
+      "enum": [
+        "MODEL",
+        "TASK_SPEC_FALLBACK",
+        "REGISTRY_ALIAS",
+        "REGISTRY_DERIVED",
+        "NONE"
+      ],
+      "title": "ParameterProvenanceV2",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "canonical_track_ids": {
+      "items": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "maxItems": 8,
+      "minItems": 8,
+      "title": "Canonical Track Ids",
+      "type": "array"
+    },
+    "confidence": {
+      "anyOf": [
+        {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Confidence"
+    },
+    "coordinate_frame": {
+      "title": "Coordinate Frame",
+      "type": "string"
+    },
+    "current_phase": {
+      "title": "Current Phase",
+      "type": "string"
+    },
+    "model_class_id": {
+      "title": "Model Class Id",
+      "type": "string"
+    },
+    "model_output_schema": {
+      "default": "CoarseIntentV2",
+      "title": "Model Output Schema",
+      "type": "string"
+    },
+    "model_target_slot": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Model Target Slot"
+    },
+    "model_target_track_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Model Target Track Id"
+    },
+    "parameter_provenance": {
+      "additionalProperties": {
+        "$ref": "#/$defs/ParameterProvenanceV2"
+      },
+      "title": "Parameter Provenance",
+      "type": "object"
+    },
+    "parameters": {
+      "additionalProperties": true,
+      "title": "Parameters",
+      "type": "object"
+    },
+    "residual_values": {
+      "anyOf": [
+        {
+          "items": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Residual Values"
+    },
+    "schema_version": {
+      "const": "RuntimeSkillRequestV2",
+      "default": "RuntimeSkillRequestV2",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "skill": {
+      "title": "Skill",
+      "type": "string"
+    },
+    "target_track_provenance": {
+      "$ref": "#/$defs/ParameterProvenanceV2",
+      "default": "NONE"
+    },
+    "task_target_track_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Task Target Track Id"
+    },
+    "units": {
+      "title": "Units",
+      "type": "string"
+    }
+  },
+  "required": [
+    "model_class_id",
+    "skill",
+    "canonical_track_ids",
+    "coordinate_frame",
+    "units",
+    "current_phase"
+  ],
+  "title": "RuntimeSkillRequestV2",
+  "type": "object"
+}
