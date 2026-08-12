@@ -47,6 +47,9 @@ def derive_probe_bytes(upstream: bytes) -> bytes:
         """    parser.add_argument(
         "--m2c-chain-role", choices=("TRAIN", "SMOKE"), required=True
     )
+    parser.add_argument(
+        "--m2c-split", choices=("train", "val", "test"), required=True
+    )
     parser.add_argument("--m2c-matched-key", required=True)
     parser.add_argument("--m2c-failure-seed", type=int, required=True)
     parser.add_argument(
@@ -657,7 +660,12 @@ def _execute_m2b_public_regrasp(
                 measurements={
                     "status": m2b_wrong_regrasp.get("status"),
                     "object_lift_m": float(m2b_wrong_regrasp.get("object_lift_m", 0.0)),
-                    "follow_error_m": float(m2b_wrong_regrasp.get("follow_error_m", float("inf"))),
+                    "follow_error_m": (
+                        float(m2b_wrong_regrasp["follow_error_m"])
+                        if m2b_wrong_regrasp.get("follow_error_m") is not None
+                        and np.isfinite(float(m2b_wrong_regrasp["follow_error_m"]))
+                        else None
+                    ),
                 },
             )
             m2c_chain_steps.append(_m2c_step(
@@ -677,7 +685,7 @@ def _execute_m2b_public_regrasp(
                 "episode_id": f"{ARGS.m2c_matched_key}-failure-{ARGS.m2c_failure_seed}",
                 "scene_seed": SCENE.scene_seed,
                 "failure_seed": ARGS.m2c_failure_seed,
-                "split": SCENE.split,
+                "split": ARGS.m2c_split,
                 "split_group": f"scene-{SCENE.scene_seed}",
                 "matched_key": ARGS.m2c_matched_key,
                 "collection_role": ARGS.m2c_chain_role,

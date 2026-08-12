@@ -83,7 +83,7 @@ def _assert_b0_fallback(result: object) -> None:
     assert result.status == "INVALID"
     assert result.fallback_required is True
     assert result.fallback_action == "B0_SAFE_HOLD"
-    assert result.execution_attribution == "NONE_B0_FALLBACK"
+    assert result.execution_attribution == "NO_PHYSICAL_EXECUTION"
 
 
 def test_v2_registry_diff_is_exactly_adr_authorized_delta() -> None:

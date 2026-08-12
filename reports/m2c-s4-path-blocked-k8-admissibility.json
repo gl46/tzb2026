@@ -1,0 +1,3421 @@
+{
+  "adr_authorized_contract": {
+    "canonicalization": "literal track_id ascending",
+    "confidence_filter": false,
+    "slot_count": 8
+  },
+  "adr_path": "docs/decisions/ADR-0020-m2c-coarse-intent-v2-model-owned-chain.md",
+  "attempt4_infrastructure_failure": {
+    "failure": "stage process exited 139 during RTX/USD startup before public probe evidence",
+    "included_in_k8_finding": false,
+    "scene_seed": 12008,
+    "status": "EXCLUDED_INFRASTRUCTURE_FAILURE"
+  },
+  "attempts": [
+    {
+      "attempt_identity": {
+        "failure_seed": 120007,
+        "matched_key": "m2c-s4-s6-4962a57684c57e8aafaeef69aa747485dff6907c87f83bee63ede1ea91bf7a6c",
+        "scene_seed": 12000,
+        "sdf_sha256": "2bd5a27d6d3a2ff42152024e4fbd9a68749840c153f3fe68e5b27085e58b1615",
+        "supervision_sha256": "ae6b6229f3ece836afe02a5b0878bdce131e84e6d7e4edcc55de4a89b28a02a9"
+      },
+      "evidence_use": "DIAGNOSTIC_ONLY_NOT_TRAINING_OR_EVALUATION",
+      "frames": [
+        {
+          "canonical_k8_slots": [
+            "track-1611248e",
+            "track-17429ad2",
+            "track-4710fcfe",
+            "track-550f6239",
+            "track-b4f89753",
+            "track-e91f94dc",
+            "track-fa4b3304",
+            null
+          ],
+          "depth_sha256": "9d7f450c835ca62804631a4ad6b11d1c0b9246a67cdfcb0b9ff6db8404ec6d10",
+          "frame_index": 0,
+          "label": "before_failure_identity_binding",
+          "public_tracks": [
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.7083333333333334,
+              "position_world_m": [
+                -0.11460768890982442,
+                0.18058629780488888,
+                0.4731484808743117
+              ],
+              "track_id": "track-4710fcfe",
+              "visual_color": "green"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.12188336415291634,
+                0.12311587473218599,
+                0.5052669459171397
+              ],
+              "track_id": "track-e91f94dc",
+              "visual_color": "yellow"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.5340537772540446,
+                -0.34567735838388786,
+                0.5160628655483941
+              ],
+              "track_id": "track-b4f89753",
+              "visual_color": "blue"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.08198690241782058,
+                0.12292444993539398,
+                0.505529199232505
+              ],
+              "track_id": "track-550f6239",
+              "visual_color": "red"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.3541666666666667,
+              "position_world_m": [
+                -0.006666549382987941,
+                -0.007770020258909605,
+                0.8934782450699116
+              ],
+              "track_id": "track-1611248e",
+              "visual_color": "blue"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.2578112046568093,
+                -0.34506734118394544,
+                0.5092927466264232
+              ],
+              "track_id": "track-17429ad2",
+              "visual_color": "magenta"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.11871462265782717,
+                -0.34460480081765477,
+                0.5076068660740791
+              ],
+              "track_id": "track-fa4b3304",
+              "visual_color": "cyan"
+            }
+          ],
+          "rgb_sha256": "ea79f6471c186517781c76fc052a2ca8e241dc32927d7968b7d970839ef9a04a",
+          "timestamp_ns": 1000000000
+        },
+        {
+          "canonical_k8_slots": [
+            "track-17429ad2",
+            "track-1c14fc3a",
+            "track-3da9e5f2",
+            "track-4710fcfe",
+            "track-61cfc5e4",
+            "track-b4f89753",
+            "track-b91edb62",
+            "track-e91f94dc"
+          ],
+          "depth_sha256": "f17bb71c112c16cb968b9127dee03e51109bdeeeabd843f35b11ba468f75c0c9",
+          "frame_index": 1,
+          "label": "after_physical_lift",
+          "public_tracks": [
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.4166666666666667,
+              "position_world_m": [
+                -0.4539277577021247,
+                0.10823486449031439,
+                0.4610991739166772
+              ],
+              "track_id": "track-3da9e5f2",
+              "visual_color": "yellow"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.2916666666666667,
+              "position_world_m": [
+                -0.4363741448295829,
+                0.1047155954195007,
+                0.46092128078261485
+              ],
+              "track_id": "track-1c14fc3a",
+              "visual_color": "yellow"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.12013657039964021,
+                0.1823678564289778,
+                0.4792121162003127
+              ],
+              "track_id": "track-4710fcfe",
+              "visual_color": "green"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.14399391242754656,
+                0.13213931591746775,
+                0.4762483761295423
+              ],
+              "track_id": "track-e91f94dc",
+              "visual_color": "yellow"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.5339415777804947,
+                -0.34573514208516254,
+                0.516106896669378
+              ],
+              "track_id": "track-b4f89753",
+              "visual_color": "blue"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.089547325236629,
+                0.12165519466573727,
+                0.6470452829467241
+              ],
+              "track_id": "track-b91edb62",
+              "visual_color": "red"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.1464183187863941,
+                -0.10974628046400692,
+                0.46183943583704545
+              ],
+              "track_id": "track-61cfc5e4",
+              "visual_color": "cyan"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.25779079871591704,
+                -0.34502235672164067,
+                0.5093531874741103
+              ],
+              "track_id": "track-17429ad2",
+              "visual_color": "magenta"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.11878097863260906,
+                -0.34453424781850933,
+                0.5076158870096446
+              ],
+              "track_id": "track-fa4b3304",
+              "visual_color": "cyan"
+            }
+          ],
+          "rgb_sha256": "7b2e23ca92e31f831e2b493cbd8c4e0b1613629c1ac2e00e7fa8a094e2582c09",
+          "timestamp_ns": 1000000001
+        },
+        {
+          "canonical_k8_slots": [
+            "track-1611248e",
+            "track-17429ad2",
+            "track-4710fcfe",
+            "track-550f6239",
+            "track-b4f89753",
+            "track-e91f94dc",
+            "track-fa4b3304",
+            null
+          ],
+          "depth_sha256": "9d7f450c835ca62804631a4ad6b11d1c0b9246a67cdfcb0b9ff6db8404ec6d10",
+          "frame_index": 2,
+          "label": "m2c_step_00_grasp",
+          "public_tracks": [
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.7083333333333334,
+              "position_world_m": [
+                -0.11460768890982442,
+                0.18058629780488888,
+                0.4731484808743117
+              ],
+              "track_id": "track-4710fcfe",
+              "visual_color": "green"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.12177497771594326,
+                0.12317615151267625,
+                0.5052319279545578
+              ],
+              "track_id": "track-e91f94dc",
+              "visual_color": "yellow"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.5340490262711906,
+                -0.3457158229676641,
+                0.5160309042786326
+              ],
+              "track_id": "track-b4f89753",
+              "visual_color": "blue"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.08191629233372955,
+                0.12292969847983248,
+                0.5054720057546899
+              ],
+              "track_id": "track-550f6239",
+              "visual_color": "red"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.3541666666666667,
+              "position_world_m": [
+                -0.006666549382987941,
+                -0.007770020258909605,
+                0.8934782450699116
+              ],
+              "track_id": "track-1611248e",
+              "visual_color": "blue"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.2578112046568093,
+                -0.34506734118394544,
+                0.5092927466264232
+              ],
+              "track_id": "track-17429ad2",
+              "visual_color": "magenta"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.11871124076235562,
+                -0.3445592737180267,
+                0.5076526991317788
+              ],
+              "track_id": "track-fa4b3304",
+              "visual_color": "cyan"
+            }
+          ],
+          "rgb_sha256": "0a14cfa82923835413af122a4d6927a001a0a066a5f11282bdeb74ddfa29d41b",
+          "timestamp_ns": 1000000002
+        },
+        {
+          "canonical_k8_slots": [
+            "track-17429ad2",
+            "track-4710fcfe",
+            "track-550f6239",
+            "track-b4f89753",
+            "track-cde3be93",
+            "track-e91f94dc",
+            "track-fa4b3304",
+            null
+          ],
+          "depth_sha256": "27f2e23a7357b189e51df489077644d5c774065a077b7fc2a2fdec559f7caa5b",
+          "frame_index": 3,
+          "label": "m2c_step_01_lift",
+          "public_tracks": [
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.12019025863892263,
+                0.18292977218150086,
+                0.48925058598545645
+              ],
+              "track_id": "track-4710fcfe",
+              "visual_color": "green"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.12189459109259193,
+                0.12317329326854687,
+                0.5054963244778766
+              ],
+              "track_id": "track-e91f94dc",
+              "visual_color": "yellow"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.5338915648023861,
+                -0.34562936947898226,
+                0.5162512088444084
+              ],
+              "track_id": "track-b4f89753",
+              "visual_color": "blue"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.08807835818158882,
+                0.11626390794056696,
+                0.4989062900297483
+              ],
+              "track_id": "track-550f6239",
+              "visual_color": "red"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.25,
+              "position_world_m": [
+                -0.0596686403901161,
+                0.08116283790696333,
+                0.6477568906593157
+              ],
+              "track_id": "track-cde3be93",
+              "visual_color": "blue"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.25782109309624424,
+                -0.34509754265953996,
+                0.50925598578426
+              ],
+              "track_id": "track-17429ad2",
+              "visual_color": "magenta"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.11877532484520159,
+                -0.3445700740617602,
+                0.5075865730788425
+              ],
+              "track_id": "track-fa4b3304",
+              "visual_color": "cyan"
+            }
+          ],
+          "rgb_sha256": "0ba3f2db66a088035f803c6f2a13618f71051638d6f1c3a88701fdf0b80f0055",
+          "timestamp_ns": 1000000003
+        },
+        {
+          "canonical_k8_slots": [
+            "track-17429ad2",
+            "track-1c14fc3a",
+            "track-2d8d68b0",
+            "track-3da9e5f2",
+            "track-4710fcfe",
+            "track-61cfc5e4",
+            "track-b4f89753",
+            "track-b91edb62"
+          ],
+          "depth_sha256": "5ed42a58e70675b28fcb87a2ddb7d4e96998e33a4d1461aa449e7b2d375f3872",
+          "frame_index": 4,
+          "label": "m2c_step_02_move",
+          "public_tracks": [
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.3333333333333333,
+              "position_world_m": [
+                -0.4569713889578461,
+                0.10823207507031452,
+                0.46045791531288205
+              ],
+              "track_id": "track-3da9e5f2",
+              "visual_color": "yellow"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.4583333333333333,
+              "position_world_m": [
+                -0.44028966236619455,
+                0.10591897811751683,
+                0.46066996264664783
+              ],
+              "track_id": "track-1c14fc3a",
+              "visual_color": "yellow"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.12009170189871943,
+                0.1821335976253592,
+                0.47937846185655475
+              ],
+              "track_id": "track-4710fcfe",
+              "visual_color": "green"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.1440124277646383,
+                0.13186856539194813,
+                0.4759774096428453
+              ],
+              "track_id": "track-e91f94dc",
+              "visual_color": "yellow"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.5339504472986007,
+                -0.3457647926591389,
+                0.5160722830599864
+              ],
+              "track_id": "track-b4f89753",
+              "visual_color": "blue"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.08935832375875896,
+                0.12150516332737271,
+                0.6470716213233274
+              ],
+              "track_id": "track-b91edb62",
+              "visual_color": "red"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.2712218372213987,
+                -0.13969412219559418,
+                0.4658751576312994
+              ],
+              "track_id": "track-2d8d68b0",
+              "visual_color": "cyan"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.25790764509240094,
+                -0.34508591566887037,
+                0.5091899756790599
+              ],
+              "track_id": "track-17429ad2",
+              "visual_color": "magenta"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.3125,
+              "position_world_m": [
+                -0.10534479236458116,
+                -0.20808601812829552,
+                0.4606756321477351
+              ],
+              "track_id": "track-61cfc5e4",
+              "visual_color": "cyan"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.12213436061329541,
+                -0.3139136659299749,
+                0.4780396801574254
+              ],
+              "track_id": "track-fa4b3304",
+              "visual_color": "cyan"
+            }
+          ],
+          "rgb_sha256": "e9a58f2737735677284ea04dc27aab213b3c8d526ea6152754477f47ea6b176e",
+          "timestamp_ns": 1000000004
+        },
+        {
+          "canonical_k8_slots": [
+            "track-17429ad2",
+            "track-43a27a1c",
+            "track-4710fcfe",
+            "track-b360e329",
+            "track-b4f89753",
+            "track-e91f94dc",
+            "track-fa4b3304",
+            null
+          ],
+          "depth_sha256": "f52ee17e09acc2d4f8d0d51b873221333f29a98f55363385c1549f1436a9ed1a",
+          "frame_index": 5,
+          "label": "m2c_step_03_place",
+          "public_tracks": [
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.11998975249719512,
+                0.1830377134924167,
+                0.4899378180991171
+              ],
+              "track_id": "track-4710fcfe",
+              "visual_color": "green"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.12179783750200102,
+                0.12318141194775445,
+                0.5053923203702495
+              ],
+              "track_id": "track-e91f94dc",
+              "visual_color": "yellow"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.53379274907565,
+                -0.3456666764906896,
+                0.5163028002469648
+              ],
+              "track_id": "track-b4f89753",
+              "visual_color": "blue"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                0.11898062705082624,
+                0.13384095937343488,
+                0.6622784378139044
+              ],
+              "track_id": "track-43a27a1c",
+              "visual_color": "red"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                0.18552233006404872,
+                0.13073059114947405,
+                0.49370643388889757
+              ],
+              "track_id": "track-b360e329",
+              "visual_color": "blue"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.2578141360330076,
+                -0.3450705549996377,
+                0.5092869407669144
+              ],
+              "track_id": "track-17429ad2",
+              "visual_color": "magenta"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.11874978764712307,
+                -0.34459507564550573,
+                0.5075862560412769
+              ],
+              "track_id": "track-fa4b3304",
+              "visual_color": "cyan"
+            }
+          ],
+          "rgb_sha256": "f9ee2bd7d4911a078c5b3dba09f10b783dc4b3b75d73ae71f28e81d2a11bf7d0",
+          "timestamp_ns": 1000000005
+        },
+        {
+          "canonical_k8_slots": [
+            "track-17429ad2",
+            "track-1d685b55",
+            "track-43a27a1c",
+            "track-4710fcfe",
+            "track-b360e329",
+            "track-b4f89753",
+            "track-e91f94dc",
+            "track-fa4b3304"
+          ],
+          "depth_sha256": "00aae97eccf46fe6bc9a43ce06a9cae04cd1b9eafde17a933719a90eb1238ba3",
+          "frame_index": 6,
+          "label": "m2c_step_04_release",
+          "public_tracks": [
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.12011358317453469,
+                0.18268052280886893,
+                0.4877778990504603
+              ],
+              "track_id": "track-4710fcfe",
+              "visual_color": "green"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.12180021211864278,
+                0.12317817957536537,
+                0.5053954526962748
+              ],
+              "track_id": "track-e91f94dc",
+              "visual_color": "yellow"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.5340104929632654,
+                -0.3458624968573295,
+                0.5159268582481545
+              ],
+              "track_id": "track-b4f89753",
+              "visual_color": "blue"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                0.19554035895502908,
+                0.2995000051425709,
+                0.4891834939945636
+              ],
+              "track_id": "track-1d685b55",
+              "visual_color": "blue"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                0.114172340820487,
+                0.1470237508941713,
+                0.5643768385925401
+              ],
+              "track_id": "track-43a27a1c",
+              "visual_color": "red"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.2578587140670221,
+                -0.3451245597499639,
+                0.5091971683801199
+              ],
+              "track_id": "track-17429ad2",
+              "visual_color": "magenta"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                0.18528703542806513,
+                0.10017394350521436,
+                0.49264273717320173
+              ],
+              "track_id": "track-b360e329",
+              "visual_color": "blue"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.11879845921409116,
+                -0.3446289235446418,
+                0.5075102861970034
+              ],
+              "track_id": "track-fa4b3304",
+              "visual_color": "cyan"
+            }
+          ],
+          "rgb_sha256": "5759658d46cbe889afcf5a0cef27ffa0124ad19444f4db99889322c44d8852b2",
+          "timestamp_ns": 1000000006
+        },
+        {
+          "canonical_k8_slots": [
+            "track-17429ad2",
+            "track-43a27a1c",
+            "track-4710fcfe",
+            "track-66d0ead8",
+            "track-a397a2f1",
+            "track-b360e329",
+            "track-b4f89753",
+            "track-e4fe9d6b"
+          ],
+          "depth_sha256": "b81065378a676e74347ebac4e7414dcb6955e04cce9c0bb4724a5f29fd67385e",
+          "frame_index": 7,
+          "label": "m2c_step_05_reobserve",
+          "public_tracks": [
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.1198503933379631,
+                0.18280960822862535,
+                0.4921083252065237
+              ],
+              "track_id": "track-4710fcfe",
+              "visual_color": "green"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.12177145783904253,
+                0.12318094264586099,
+                0.5052272842546578
+              ],
+              "track_id": "track-e91f94dc",
+              "visual_color": "yellow"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.533947887974535,
+                -0.3455773550882088,
+                0.5162499315436804
+              ],
+              "track_id": "track-b4f89753",
+              "visual_color": "blue"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                0.07654150189297881,
+                0.14775156866999684,
+                0.48875329533108114
+              ],
+              "track_id": "track-a397a2f1",
+              "visual_color": "blue"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                0.1179352447083113,
+                0.1429633189071392,
+                0.5173087567875628
+              ],
+              "track_id": "track-43a27a1c",
+              "visual_color": "red"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.2916666666666667,
+              "position_world_m": [
+                0.13576121125703222,
+                0.1436776977355092,
+                0.520736036082831
+              ],
+              "track_id": "track-e4fe9d6b",
+              "visual_color": "magenta"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.2580081710819656,
+                -0.3450496431668728,
+                0.5091354151056979
+              ],
+              "track_id": "track-17429ad2",
+              "visual_color": "magenta"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                0.21096844760975952,
+                0.12908178530671466,
+                0.4900008890355869
+              ],
+              "track_id": "track-b360e329",
+              "visual_color": "blue"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.11871029782727849,
+                -0.34460721689275686,
+                0.5076095756502607
+              ],
+              "track_id": "track-fa4b3304",
+              "visual_color": "cyan"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                0.34128303999994025,
+                -0.04689466189031777,
+                0.4604616798716944
+              ],
+              "track_id": "track-66d0ead8",
+              "visual_color": "blue"
+            }
+          ],
+          "rgb_sha256": "5a7ece6287080528aee53b197956aaabbdadcf290517654189a58f1f31f3efe8",
+          "timestamp_ns": 1000000007
+        },
+        {
+          "canonical_k8_slots": [
+            "track-17429ad2",
+            "track-43a27a1c",
+            "track-4710fcfe",
+            "track-66d0ead8",
+            "track-a397a2f1",
+            "track-b360e329",
+            "track-b4f89753",
+            "track-e4fe9d6b"
+          ],
+          "depth_sha256": "bdedf82b3f987505d042f1e1b1cf0c342cd9d0f591524c1c45525b84e031d43a",
+          "frame_index": 8,
+          "label": "m2c_step_06_reassociate_target",
+          "public_tracks": [
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.1198511548787663,
+                0.18280850780952496,
+                0.49210934174251564
+              ],
+              "track_id": "track-4710fcfe",
+              "visual_color": "green"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.12177358093939539,
+                0.12317805275600358,
+                0.5052300852165023
+              ],
+              "track_id": "track-e91f94dc",
+              "visual_color": "yellow"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.5339083630315009,
+                -0.3457690183934917,
+                0.5161053417810516
+              ],
+              "track_id": "track-b4f89753",
+              "visual_color": "blue"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                0.07654150189297881,
+                0.14775156866999684,
+                0.48875329533108114
+              ],
+              "track_id": "track-a397a2f1",
+              "visual_color": "blue"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                0.11793206025416714,
+                0.1429600476268763,
+                0.5173118189750141
+              ],
+              "track_id": "track-43a27a1c",
+              "visual_color": "red"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.2708333333333333,
+              "position_world_m": [
+                0.13559646287678295,
+                0.14354647156321532,
+                0.5225859851328203
+              ],
+              "track_id": "track-e4fe9d6b",
+              "visual_color": "magenta"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.257938615860943,
+                -0.34506921065668894,
+                0.509178468187484
+              ],
+              "track_id": "track-17429ad2",
+              "visual_color": "magenta"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                0.21089675708161804,
+                0.1289202093608397,
+                0.49006021615664275
+              ],
+              "track_id": "track-b360e329",
+              "visual_color": "blue"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.11873346700528209,
+                -0.34470029791421763,
+                0.5075005536783663
+              ],
+              "track_id": "track-fa4b3304",
+              "visual_color": "cyan"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.9791666666666666,
+              "position_world_m": [
+                0.3432600391192975,
+                -0.04863309204822164,
+                0.46056992128008056
+              ],
+              "track_id": "track-66d0ead8",
+              "visual_color": "blue"
+            }
+          ],
+          "rgb_sha256": "b2f698baeb5ec5cc0ba18246974136ae5c508a230232e135cc74317f2c69996d",
+          "timestamp_ns": 1000000008
+        }
+      ],
+      "frozen_baseline": {
+        "canonical_slot_count": 8,
+        "confidence_filter_applied": false,
+        "maximum_association_distance_m": 0.12,
+        "name": "GeometricRGBDBaseline"
+      },
+      "initial_public_task_selector": {
+        "canonical_slot_index": 5,
+        "public_track_count": 7,
+        "reason": null,
+        "target_confidence": 0.99,
+        "target_rank_by_literal_track_id": 6,
+        "target_track_id": "track-e91f94dc",
+        "visual_color": "yellow"
+      },
+      "input_file_sha256": {
+        "frames": [
+          {
+            "depth_sha256": "9d7f450c835ca62804631a4ad6b11d1c0b9246a67cdfcb0b9ff6db8404ec6d10",
+            "frame_index": 0,
+            "label": "before_failure_identity_binding",
+            "rgb_sha256": "ea79f6471c186517781c76fc052a2ca8e241dc32927d7968b7d970839ef9a04a"
+          },
+          {
+            "depth_sha256": "f17bb71c112c16cb968b9127dee03e51109bdeeeabd843f35b11ba468f75c0c9",
+            "frame_index": 1,
+            "label": "after_physical_lift",
+            "rgb_sha256": "7b2e23ca92e31f831e2b493cbd8c4e0b1613629c1ac2e00e7fa8a094e2582c09"
+          },
+          {
+            "depth_sha256": "9d7f450c835ca62804631a4ad6b11d1c0b9246a67cdfcb0b9ff6db8404ec6d10",
+            "frame_index": 2,
+            "label": "m2c_step_00_grasp",
+            "rgb_sha256": "0a14cfa82923835413af122a4d6927a001a0a066a5f11282bdeb74ddfa29d41b"
+          },
+          {
+            "depth_sha256": "27f2e23a7357b189e51df489077644d5c774065a077b7fc2a2fdec559f7caa5b",
+            "frame_index": 3,
+            "label": "m2c_step_01_lift",
+            "rgb_sha256": "0ba3f2db66a088035f803c6f2a13618f71051638d6f1c3a88701fdf0b80f0055"
+          },
+          {
+            "depth_sha256": "5ed42a58e70675b28fcb87a2ddb7d4e96998e33a4d1461aa449e7b2d375f3872",
+            "frame_index": 4,
+            "label": "m2c_step_02_move",
+            "rgb_sha256": "e9a58f2737735677284ea04dc27aab213b3c8d526ea6152754477f47ea6b176e"
+          },
+          {
+            "depth_sha256": "f52ee17e09acc2d4f8d0d51b873221333f29a98f55363385c1549f1436a9ed1a",
+            "frame_index": 5,
+            "label": "m2c_step_03_place",
+            "rgb_sha256": "f9ee2bd7d4911a078c5b3dba09f10b783dc4b3b75d73ae71f28e81d2a11bf7d0"
+          },
+          {
+            "depth_sha256": "00aae97eccf46fe6bc9a43ce06a9cae04cd1b9eafde17a933719a90eb1238ba3",
+            "frame_index": 6,
+            "label": "m2c_step_04_release",
+            "rgb_sha256": "5759658d46cbe889afcf5a0cef27ffa0124ad19444f4db99889322c44d8852b2"
+          },
+          {
+            "depth_sha256": "b81065378a676e74347ebac4e7414dcb6955e04cce9c0bb4724a5f29fd67385e",
+            "frame_index": 7,
+            "label": "m2c_step_05_reobserve",
+            "rgb_sha256": "5a7ece6287080528aee53b197956aaabbdadcf290517654189a58f1f31f3efe8"
+          },
+          {
+            "depth_sha256": "bdedf82b3f987505d042f1e1b1cf0c342cd9d0f591524c1c45525b84e031d43a",
+            "frame_index": 8,
+            "label": "m2c_step_06_reassociate_target",
+            "rgb_sha256": "b2f698baeb5ec5cc0ba18246974136ae5c508a230232e135cc74317f2c69996d"
+          }
+        ],
+        "stage_metrics": "9eb690ac45eb4e3935779292a053c5de54aecd57fa64ab7503660659bebb4a8e"
+      },
+      "partial_failure_evidence_sha256": {
+        "collection_job": "d430fd74b85b67c1b5a708ff15eab2bb1d067eb11b0fc21d6e35e867c74863f3",
+        "probe_console": "2e1857c630861e306bf495ecc2880a6ded67ca00e7e59f093b79e3973943f01d"
+      },
+      "partial_public_rgbd_record_sha256": "e29296665e850770cb112e2edc7d42981d7b9c4ce646f8c9627501e42d960a77",
+      "privileged_truth_policy_input": false,
+      "schema_version": "M2CPathBlockedK8AuditV1",
+      "stage_metrics_sha256": "9eb690ac45eb4e3935779292a053c5de54aecd57fa64ab7503660659bebb4a8e",
+      "step6_public_reassociation": {
+        "canonical_slot_index": null,
+        "public_track_count": 10,
+        "reason": "PUBLIC_TARGET_OUTSIDE_CANONICAL_K8",
+        "target_confidence": 0.99,
+        "target_rank_by_literal_track_id": 9,
+        "target_track_id": "track-e91f94dc"
+      },
+      "teacher_used": false
+    },
+    {
+      "attempt_identity": {
+        "failure_seed": 120057,
+        "matched_key": "m2c-s4-s6-6a2da6182be05c10358e9f88221133ef922ee644b86f13ba1d9d96a66060380b",
+        "scene_seed": 12005,
+        "sdf_sha256": "769d539378a899420e55c172a34c01cfaef19c1a83fe3eded3f7a4ba190c825d",
+        "supervision_sha256": "c956f28306028ffaefa3cf85d3a804673a67435283506e82c638e098e565ba51"
+      },
+      "evidence_use": "DIAGNOSTIC_ONLY_NOT_TRAINING_OR_EVALUATION",
+      "frames": [
+        {
+          "canonical_k8_slots": [
+            "track-1611248e",
+            "track-17429ad2",
+            "track-4710fcfe",
+            "track-550f6239",
+            "track-b4f89753",
+            "track-e91f94dc",
+            "track-fa4b3304",
+            null
+          ],
+          "depth_sha256": "190a47fdba3f3266b8780f238752c3ec4abeb12cfa96149959de50561a198040",
+          "frame_index": 0,
+          "label": "before_failure_identity_binding",
+          "public_tracks": [
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.9166666666666666,
+              "position_world_m": [
+                -0.11119390469535073,
+                0.18058053841467814,
+                0.47556641225168095
+              ],
+              "track_id": "track-4710fcfe",
+              "visual_color": "green"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.11704913278407625,
+                0.12270334931625893,
+                0.5057613465668497
+              ],
+              "track_id": "track-e91f94dc",
+              "visual_color": "yellow"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.5340537772540446,
+                -0.34567735838388786,
+                0.5160628655483941
+              ],
+              "track_id": "track-b4f89753",
+              "visual_color": "blue"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.07712904674449506,
+                0.12317770032472397,
+                0.5047292090074401
+              ],
+              "track_id": "track-550f6239",
+              "visual_color": "red"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.3541666666666667,
+              "position_world_m": [
+                -0.006666549382987941,
+                -0.007770020258909605,
+                0.8934782450699116
+              ],
+              "track_id": "track-1611248e",
+              "visual_color": "blue"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.2578112046568093,
+                -0.34506734118394544,
+                0.5092927466264232
+              ],
+              "track_id": "track-17429ad2",
+              "visual_color": "magenta"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.11871462265782717,
+                -0.34460480081765477,
+                0.5076068660740791
+              ],
+              "track_id": "track-fa4b3304",
+              "visual_color": "cyan"
+            }
+          ],
+          "rgb_sha256": "8c3d22002a8d66fcda6ebcd263254a9bc00811a305645221cd3374f4f10ec74c",
+          "timestamp_ns": 1000000000
+        },
+        {
+          "canonical_k8_slots": [
+            "track-17429ad2",
+            "track-1c14fc3a",
+            "track-3da9e5f2",
+            "track-4710fcfe",
+            "track-61cfc5e4",
+            "track-b4f89753",
+            "track-b91edb62",
+            "track-e91f94dc"
+          ],
+          "depth_sha256": "7b9ea773f982bfe7fd9c4e699c151c9d3178f48cdd6f5b08227b7004a2c2d851",
+          "frame_index": 1,
+          "label": "after_physical_lift",
+          "public_tracks": [
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.5833333333333334,
+              "position_world_m": [
+                -0.45290733594757887,
+                0.10856378251147958,
+                0.4602622896222387
+              ],
+              "track_id": "track-3da9e5f2",
+              "visual_color": "yellow"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.2708333333333333,
+              "position_world_m": [
+                -0.4352199590456832,
+                0.10553432471558188,
+                0.4606390994194228
+              ],
+              "track_id": "track-1c14fc3a",
+              "visual_color": "yellow"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.11578544648152533,
+                0.1829973132275725,
+                0.4794902858211827
+              ],
+              "track_id": "track-4710fcfe",
+              "visual_color": "green"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.14151631421577915,
+                0.13344637925774272,
+                0.47439067182710626
+              ],
+              "track_id": "track-e91f94dc",
+              "visual_color": "yellow"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.5339415777804947,
+                -0.34573514208516254,
+                0.516106896669378
+              ],
+              "track_id": "track-b4f89753",
+              "visual_color": "blue"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.08490270069576678,
+                0.12404795967126836,
+                0.6454537544383716
+              ],
+              "track_id": "track-b91edb62",
+              "visual_color": "red"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.2673913925801996,
+                -0.14012129778099547,
+                0.46504607782510576
+              ],
+              "track_id": "track-61cfc5e4",
+              "visual_color": "cyan"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.2579241890417753,
+                -0.3451388747219961,
+                0.5091252423901853
+              ],
+              "track_id": "track-17429ad2",
+              "visual_color": "magenta"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.11974224809331624,
+                -0.31881104821461664,
+                0.4805076219567568
+              ],
+              "track_id": "track-fa4b3304",
+              "visual_color": "cyan"
+            }
+          ],
+          "rgb_sha256": "650279ff0ea3782ad792d1b02a9954a0ee74b133c726f89013c64f2b82e4e357",
+          "timestamp_ns": 1000000001
+        },
+        {
+          "canonical_k8_slots": [
+            "track-1611248e",
+            "track-17429ad2",
+            "track-4710fcfe",
+            "track-550f6239",
+            "track-b4f89753",
+            "track-e91f94dc",
+            "track-fa4b3304",
+            null
+          ],
+          "depth_sha256": "190a47fdba3f3266b8780f238752c3ec4abeb12cfa96149959de50561a198040",
+          "frame_index": 2,
+          "label": "m2c_step_00_grasp",
+          "public_tracks": [
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.9166666666666666,
+              "position_world_m": [
+                -0.11119390469535073,
+                0.18058053841467814,
+                0.47556641225168095
+              ],
+              "track_id": "track-4710fcfe",
+              "visual_color": "green"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.11694574249370016,
+                0.12267037593626384,
+                0.5055335555995757
+              ],
+              "track_id": "track-e91f94dc",
+              "visual_color": "yellow"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.5340490262711906,
+                -0.3457158229676641,
+                0.5160309042786326
+              ],
+              "track_id": "track-b4f89753",
+              "visual_color": "blue"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.07696014850429256,
+                0.1233082894722396,
+                0.5044946428332207
+              ],
+              "track_id": "track-550f6239",
+              "visual_color": "red"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.3541666666666667,
+              "position_world_m": [
+                -0.006666549382987941,
+                -0.007770020258909605,
+                0.8934782450699116
+              ],
+              "track_id": "track-1611248e",
+              "visual_color": "blue"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.2578112046568093,
+                -0.34506734118394544,
+                0.5092927466264232
+              ],
+              "track_id": "track-17429ad2",
+              "visual_color": "magenta"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.11871124076235562,
+                -0.3445592737180267,
+                0.5076526991317788
+              ],
+              "track_id": "track-fa4b3304",
+              "visual_color": "cyan"
+            }
+          ],
+          "rgb_sha256": "13aecb9ba395cab22be4eddd9794c777eaa080f60600b60e97e2324f4ba92b6f",
+          "timestamp_ns": 1000000002
+        },
+        {
+          "canonical_k8_slots": [
+            "track-17429ad2",
+            "track-4710fcfe",
+            "track-550f6239",
+            "track-b4f89753",
+            "track-cde3be93",
+            "track-e91f94dc",
+            "track-fa4b3304",
+            null
+          ],
+          "depth_sha256": "f74a29f9d2e5a96bddae96f5723e9e8ecc7415a38513ba3fc50ed500940a78a6",
+          "frame_index": 3,
+          "label": "m2c_step_01_lift",
+          "public_tracks": [
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.11523760948597073,
+                0.18332965554583203,
+                0.49150265949642513
+              ],
+              "track_id": "track-4710fcfe",
+              "visual_color": "green"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.11679400569800125,
+                0.12263852354415938,
+                0.5055290791409464
+              ],
+              "track_id": "track-e91f94dc",
+              "visual_color": "yellow"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.5338636463579052,
+                -0.34569656945463184,
+                0.5162125470862156
+              ],
+              "track_id": "track-b4f89753",
+              "visual_color": "blue"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.0836492614335923,
+                0.1156070272423092,
+                0.4988113890039745
+              ],
+              "track_id": "track-550f6239",
+              "visual_color": "red"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                0.18548786855115162,
+                0.1308558661646071,
+                0.4934758854565737
+              ],
+              "track_id": "track-cde3be93",
+              "visual_color": "blue"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.25779782748581814,
+                -0.3451251662791067,
+                0.5092503209797149
+              ],
+              "track_id": "track-17429ad2",
+              "visual_color": "magenta"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.11874954626909362,
+                -0.34459491428813477,
+                0.5075859398445741
+              ],
+              "track_id": "track-fa4b3304",
+              "visual_color": "cyan"
+            }
+          ],
+          "rgb_sha256": "7d855f20f182a294a416cfb9d50030ee87769d4f924465b61603dd1700f16ae7",
+          "timestamp_ns": 1000000003
+        },
+        {
+          "canonical_k8_slots": [
+            "track-17429ad2",
+            "track-1c14fc3a",
+            "track-3da9e5f2",
+            "track-4710fcfe",
+            "track-61cfc5e4",
+            "track-b4f89753",
+            "track-b91edb62",
+            "track-e91f94dc"
+          ],
+          "depth_sha256": "d01a3878647c6e1a4f736cdf02623295b196639b262f88275712604f68706c52",
+          "frame_index": 4,
+          "label": "m2c_step_02_move",
+          "public_tracks": [
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.2708333333333333,
+              "position_world_m": [
+                -0.4571175011598229,
+                0.10604683764890854,
+                0.46127618519817193
+              ],
+              "track_id": "track-3da9e5f2",
+              "visual_color": "yellow"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.25,
+              "position_world_m": [
+                -0.43498130742707686,
+                0.10528538613106808,
+                0.46061547653035195
+              ],
+              "track_id": "track-1c14fc3a",
+              "visual_color": "yellow"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.11554908208590664,
+                0.1828894899544481,
+                0.47959891857536063
+              ],
+              "track_id": "track-4710fcfe",
+              "visual_color": "green"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.14138872711765438,
+                0.13339123550101217,
+                0.47445134866774696
+              ],
+              "track_id": "track-e91f94dc",
+              "visual_color": "yellow"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.5339736934353181,
+                -0.3457482343938114,
+                0.5160673560130355
+              ],
+              "track_id": "track-b4f89753",
+              "visual_color": "blue"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.08478648739433958,
+                0.12374739850317329,
+                0.6453688578165561
+              ],
+              "track_id": "track-b91edb62",
+              "visual_color": "red"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.2651192487496885,
+                -0.13864054946954274,
+                0.4646237097519519
+              ],
+              "track_id": "track-61cfc5e4",
+              "visual_color": "cyan"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.25790764509240094,
+                -0.34508591566887037,
+                0.5091899756790599
+              ],
+              "track_id": "track-17429ad2",
+              "visual_color": "magenta"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.11834371818582945,
+                -0.31640156538998604,
+                0.47904271484538263
+              ],
+              "track_id": "track-fa4b3304",
+              "visual_color": "cyan"
+            }
+          ],
+          "rgb_sha256": "ad4ff9ca160e66484c08090b40190c1bef02fe9b1f1545b5fce1280e20e61cd2",
+          "timestamp_ns": 1000000004
+        },
+        {
+          "canonical_k8_slots": [
+            "track-17429ad2",
+            "track-254812a9",
+            "track-4710fcfe",
+            "track-b4f89753",
+            "track-cde3be93",
+            "track-e91f94dc",
+            "track-fa4b3304",
+            null
+          ],
+          "depth_sha256": "4c5815d150329c38c5ad571704f2bbcc66802ed5fd21fcc0f46d3fba92d18a8e",
+          "frame_index": 5,
+          "label": "m2c_step_03_place",
+          "public_tracks": [
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.1151339966655639,
+                0.18320247303184412,
+                0.49132766525209115
+              ],
+              "track_id": "track-4710fcfe",
+              "visual_color": "green"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.11707607878591131,
+                0.12273647374846786,
+                0.505421901119926
+              ],
+              "track_id": "track-e91f94dc",
+              "visual_color": "yellow"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.53379274907565,
+                -0.3456666764906896,
+                0.5163028002469648
+              ],
+              "track_id": "track-b4f89753",
+              "visual_color": "blue"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                0.11902141073114869,
+                0.13300411531766265,
+                0.6632954743370605
+              ],
+              "track_id": "track-254812a9",
+              "visual_color": "red"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                0.18553828185781251,
+                0.1308523816631666,
+                0.49369766195404585
+              ],
+              "track_id": "track-cde3be93",
+              "visual_color": "blue"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.2578141360330076,
+                -0.3450705549996377,
+                0.5092869407669144
+              ],
+              "track_id": "track-17429ad2",
+              "visual_color": "magenta"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.11874978764712307,
+                -0.34459507564550573,
+                0.5075862560412769
+              ],
+              "track_id": "track-fa4b3304",
+              "visual_color": "cyan"
+            }
+          ],
+          "rgb_sha256": "b9989ab314fe1a544748f862cd4a95a5caae9293070108345698e15f3dee933e",
+          "timestamp_ns": 1000000005
+        },
+        {
+          "canonical_k8_slots": [
+            "track-0f3d6345",
+            "track-17429ad2",
+            "track-254812a9",
+            "track-372e4fb8",
+            "track-3da9e5f2",
+            "track-4710fcfe",
+            "track-61cfc5e4",
+            "track-b4f89753"
+          ],
+          "depth_sha256": "cbc225a1734b594d76f9928d18aada241e8460c399c7096a5763c2cd44721dcb",
+          "frame_index": 6,
+          "label": "m2c_step_04_release",
+          "public_tracks": [
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.8541666666666666,
+              "position_world_m": [
+                -0.4550140446619032,
+                0.11166332345277108,
+                0.4613204493643559
+              ],
+              "track_id": "track-3da9e5f2",
+              "visual_color": "yellow"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.375,
+              "position_world_m": [
+                -0.3122235130415409,
+                0.21290297241316547,
+                0.4603383475160666
+              ],
+              "track_id": "track-372e4fb8",
+              "visual_color": "yellow"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.11569514235670497,
+                0.1828297224215164,
+                0.48621108623328224
+              ],
+              "track_id": "track-4710fcfe",
+              "visual_color": "green"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.1416955362258141,
+                0.13395393148402768,
+                0.47471003637142195
+              ],
+              "track_id": "track-e91f94dc",
+              "visual_color": "yellow"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.5340104929632654,
+                -0.3458624968573295,
+                0.5159268582481545
+              ],
+              "track_id": "track-b4f89753",
+              "visual_color": "blue"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.2650362695572801,
+                -0.13186882966601932,
+                0.46723448058785255
+              ],
+              "track_id": "track-61cfc5e4",
+              "visual_color": "cyan"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                0.11345426642502465,
+                0.14634603796244106,
+                0.5661840999279371
+              ],
+              "track_id": "track-254812a9",
+              "visual_color": "red"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.2579052030987775,
+                -0.3451382043585328,
+                0.5091432093732166
+              ],
+              "track_id": "track-17429ad2",
+              "visual_color": "magenta"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.6458333333333334,
+              "position_world_m": [
+                -0.16347620259508222,
+                -0.2897727700013062,
+                0.4606419615688009
+              ],
+              "track_id": "track-0f3d6345",
+              "visual_color": "cyan"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.12172403443355584,
+                -0.33272818157359185,
+                0.4925441975126643
+              ],
+              "track_id": "track-fa4b3304",
+              "visual_color": "cyan"
+            }
+          ],
+          "rgb_sha256": "afc779fd75a70fbf8166f90d284818ef8c964c26f90e434405edc5fe2b06b886",
+          "timestamp_ns": 1000000006
+        },
+        {
+          "canonical_k8_slots": [
+            "track-17429ad2",
+            "track-254812a9",
+            "track-372e4fb8",
+            "track-3da9e5f2",
+            "track-4710fcfe",
+            "track-61cfc5e4",
+            "track-75fd4e15",
+            "track-b4f89753"
+          ],
+          "depth_sha256": "a1a7b75ace7e9d3c8de58743bb21a454f6be80c120d269da7bfab1051de2a13c",
+          "frame_index": 7,
+          "label": "m2c_step_05_reobserve",
+          "public_tracks": [
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.25,
+              "position_world_m": [
+                -0.45567947908094686,
+                0.10397285093618724,
+                0.46113018913166415
+              ],
+              "track_id": "track-3da9e5f2",
+              "visual_color": "yellow"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.3541666666666667,
+              "position_world_m": [
+                -0.3299327697605627,
+                0.17716676330760062,
+                0.4601753368738146
+              ],
+              "track_id": "track-372e4fb8",
+              "visual_color": "yellow"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.11507634079593887,
+                0.18328731792636876,
+                0.48982408333964034
+              ],
+              "track_id": "track-4710fcfe",
+              "visual_color": "green"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.14032596733074498,
+                0.134051502433018,
+                0.47601031091189117
+              ],
+              "track_id": "track-e91f94dc",
+              "visual_color": "yellow"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.5338587585460277,
+                -0.3456791285610805,
+                0.5162326910676232
+              ],
+              "track_id": "track-b4f89753",
+              "visual_color": "blue"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.2597695891618823,
+                -0.14590333140588252,
+                0.4663290897819763
+              ],
+              "track_id": "track-61cfc5e4",
+              "visual_color": "cyan"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                0.11757183233037505,
+                0.14256286368725624,
+                0.5161156923503563
+              ],
+              "track_id": "track-254812a9",
+              "visual_color": "red"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.375,
+              "position_world_m": [
+                0.1347299696892208,
+                0.14207344326794136,
+                0.4943091710645242
+              ],
+              "track_id": "track-75fd4e15",
+              "visual_color": "magenta"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.10936033399541722,
+                -0.15017196747371764,
+                0.4608346178866143
+              ],
+              "track_id": "track-d268e949",
+              "visual_color": "cyan"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.2579849660516573,
+                -0.3450888194572639,
+                0.5091190183305148
+              ],
+              "track_id": "track-17429ad2",
+              "visual_color": "magenta"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.12128625102304702,
+                -0.3350566559539865,
+                0.4956938518976095
+              ],
+              "track_id": "track-fa4b3304",
+              "visual_color": "cyan"
+            }
+          ],
+          "rgb_sha256": "e23769d9ad0c428cc380c0ca52d96c9ac08b693ed53f12449d0155c64e78815a",
+          "timestamp_ns": 1000000007
+        },
+        {
+          "canonical_k8_slots": [
+            "track-17429ad2",
+            "track-254812a9",
+            "track-372e4fb8",
+            "track-3da9e5f2",
+            "track-4710fcfe",
+            "track-61cfc5e4",
+            "track-75fd4e15",
+            "track-b4f89753"
+          ],
+          "depth_sha256": "29cf56a825f3e0af1007b3f15c872c9748479986ab2fe3084efcd0c5ce8c212f",
+          "frame_index": 8,
+          "label": "m2c_step_06_reassociate_target",
+          "public_tracks": [
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.3541666666666667,
+              "position_world_m": [
+                -0.4553745006575522,
+                0.10653472123096808,
+                0.46026932761427497
+              ],
+              "track_id": "track-3da9e5f2",
+              "visual_color": "yellow"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.5625,
+              "position_world_m": [
+                -0.3295351559195478,
+                0.17899190279624833,
+                0.4622439508364927
+              ],
+              "track_id": "track-372e4fb8",
+              "visual_color": "yellow"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.11497948009633718,
+                0.18330599744118758,
+                0.49002072415026987
+              ],
+              "track_id": "track-4710fcfe",
+              "visual_color": "green"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.1413240571766574,
+                0.13413959691779287,
+                0.4752125559093784
+              ],
+              "track_id": "track-e91f94dc",
+              "visual_color": "yellow"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.5339083630315009,
+                -0.3457690183934917,
+                0.5161053417810516
+              ],
+              "track_id": "track-b4f89753",
+              "visual_color": "blue"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.25939488767997476,
+                -0.14294690697622303,
+                0.4656213795410733
+              ],
+              "track_id": "track-61cfc5e4",
+              "visual_color": "cyan"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                0.11776054478205933,
+                0.1426530979660755,
+                0.5170085749677749
+              ],
+              "track_id": "track-254812a9",
+              "visual_color": "red"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.4375,
+              "position_world_m": [
+                0.1340946371078079,
+                0.1415397408224418,
+                0.5001011683096216
+              ],
+              "track_id": "track-75fd4e15",
+              "visual_color": "magenta"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.8958333333333334,
+              "position_world_m": [
+                -0.10770135144061344,
+                -0.15156487535773888,
+                0.4609872592939066
+              ],
+              "track_id": "track-d268e949",
+              "visual_color": "cyan"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.25798482061643,
+                -0.34508294876109397,
+                0.5091246720164899
+              ],
+              "track_id": "track-17429ad2",
+              "visual_color": "magenta"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.1215697622972921,
+                -0.3291583347003967,
+                0.4897223338236194
+              ],
+              "track_id": "track-fa4b3304",
+              "visual_color": "cyan"
+            }
+          ],
+          "rgb_sha256": "31c0e3a2d8d07d1ed9e1748a206e65f1276c3ab1031d0e8db285ff393d18f044",
+          "timestamp_ns": 1000000008
+        }
+      ],
+      "frozen_baseline": {
+        "canonical_slot_count": 8,
+        "confidence_filter_applied": false,
+        "maximum_association_distance_m": 0.12,
+        "name": "GeometricRGBDBaseline"
+      },
+      "initial_public_task_selector": {
+        "canonical_slot_index": 5,
+        "public_track_count": 7,
+        "reason": null,
+        "target_confidence": 0.99,
+        "target_rank_by_literal_track_id": 6,
+        "target_track_id": "track-e91f94dc",
+        "visual_color": "yellow"
+      },
+      "input_file_sha256": {
+        "frames": [
+          {
+            "depth_sha256": "190a47fdba3f3266b8780f238752c3ec4abeb12cfa96149959de50561a198040",
+            "frame_index": 0,
+            "label": "before_failure_identity_binding",
+            "rgb_sha256": "8c3d22002a8d66fcda6ebcd263254a9bc00811a305645221cd3374f4f10ec74c"
+          },
+          {
+            "depth_sha256": "7b9ea773f982bfe7fd9c4e699c151c9d3178f48cdd6f5b08227b7004a2c2d851",
+            "frame_index": 1,
+            "label": "after_physical_lift",
+            "rgb_sha256": "650279ff0ea3782ad792d1b02a9954a0ee74b133c726f89013c64f2b82e4e357"
+          },
+          {
+            "depth_sha256": "190a47fdba3f3266b8780f238752c3ec4abeb12cfa96149959de50561a198040",
+            "frame_index": 2,
+            "label": "m2c_step_00_grasp",
+            "rgb_sha256": "13aecb9ba395cab22be4eddd9794c777eaa080f60600b60e97e2324f4ba92b6f"
+          },
+          {
+            "depth_sha256": "f74a29f9d2e5a96bddae96f5723e9e8ecc7415a38513ba3fc50ed500940a78a6",
+            "frame_index": 3,
+            "label": "m2c_step_01_lift",
+            "rgb_sha256": "7d855f20f182a294a416cfb9d50030ee87769d4f924465b61603dd1700f16ae7"
+          },
+          {
+            "depth_sha256": "d01a3878647c6e1a4f736cdf02623295b196639b262f88275712604f68706c52",
+            "frame_index": 4,
+            "label": "m2c_step_02_move",
+            "rgb_sha256": "ad4ff9ca160e66484c08090b40190c1bef02fe9b1f1545b5fce1280e20e61cd2"
+          },
+          {
+            "depth_sha256": "4c5815d150329c38c5ad571704f2bbcc66802ed5fd21fcc0f46d3fba92d18a8e",
+            "frame_index": 5,
+            "label": "m2c_step_03_place",
+            "rgb_sha256": "b9989ab314fe1a544748f862cd4a95a5caae9293070108345698e15f3dee933e"
+          },
+          {
+            "depth_sha256": "cbc225a1734b594d76f9928d18aada241e8460c399c7096a5763c2cd44721dcb",
+            "frame_index": 6,
+            "label": "m2c_step_04_release",
+            "rgb_sha256": "afc779fd75a70fbf8166f90d284818ef8c964c26f90e434405edc5fe2b06b886"
+          },
+          {
+            "depth_sha256": "a1a7b75ace7e9d3c8de58743bb21a454f6be80c120d269da7bfab1051de2a13c",
+            "frame_index": 7,
+            "label": "m2c_step_05_reobserve",
+            "rgb_sha256": "e23769d9ad0c428cc380c0ca52d96c9ac08b693ed53f12449d0155c64e78815a"
+          },
+          {
+            "depth_sha256": "29cf56a825f3e0af1007b3f15c872c9748479986ab2fe3084efcd0c5ce8c212f",
+            "frame_index": 8,
+            "label": "m2c_step_06_reassociate_target",
+            "rgb_sha256": "31c0e3a2d8d07d1ed9e1748a206e65f1276c3ab1031d0e8db285ff393d18f044"
+          }
+        ],
+        "stage_metrics": "67ced16720e25e4b319721b608214df81a74f259049a573aa509af47ab16e073"
+      },
+      "partial_failure_evidence_sha256": {
+        "collection_job": "e70c62ace11b41158b226e65ccd03ffd127f97b96b2ba5e0e99896423d88ca88",
+        "probe_console": "abb60306302e7f4ffd9a1175b0229cafa95836cc350d347bff1c5aab24bb9c05"
+      },
+      "partial_public_rgbd_record_sha256": "0f97fc859a471f7649f9acac601e912f260a6d7bc53f3b209acba6ba8f0607d4",
+      "privileged_truth_policy_input": false,
+      "schema_version": "M2CPathBlockedK8AuditV1",
+      "stage_metrics_sha256": "67ced16720e25e4b319721b608214df81a74f259049a573aa509af47ab16e073",
+      "step6_public_reassociation": {
+        "canonical_slot_index": null,
+        "public_track_count": 11,
+        "reason": "PUBLIC_TARGET_OUTSIDE_CANONICAL_K8",
+        "target_confidence": 0.99,
+        "target_rank_by_literal_track_id": 10,
+        "target_track_id": "track-e91f94dc"
+      },
+      "teacher_used": false
+    },
+    {
+      "attempt_identity": {
+        "failure_seed": 120087,
+        "matched_key": "m2c-s4-s6-4fa521ea25328b9effeec7d9e8167d02093e70ec06db929d557f6d07956e1a2c",
+        "scene_seed": 12008,
+        "sdf_sha256": "e30efb66aef4ff948e48551cb26d03990c14b6bb25813b9a8fd6e8b7c9831cf7",
+        "supervision_sha256": "e8c1a795f1b3d8a108df282c7494cdd3e62a38e96ce0815cc518d5cb29869c1e"
+      },
+      "evidence_use": "DIAGNOSTIC_ONLY_NOT_TRAINING_OR_EVALUATION",
+      "frames": [
+        {
+          "canonical_k8_slots": [
+            "track-1611248e",
+            "track-17429ad2",
+            "track-4710fcfe",
+            "track-550f6239",
+            "track-b4f89753",
+            "track-e91f94dc",
+            "track-fa4b3304",
+            null
+          ],
+          "depth_sha256": "a8ebe098a974caa6f9089e5d7d0da97fa9df0039691986b81da5183f571bf533",
+          "frame_index": 0,
+          "label": "before_failure_identity_binding",
+          "public_tracks": [
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.10639937153419388,
+                0.18073996569364548,
+                0.4793829306671097
+              ],
+              "track_id": "track-4710fcfe",
+              "visual_color": "green"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.11211253325352111,
+                0.12299416943113073,
+                0.5052634065614079
+              ],
+              "track_id": "track-e91f94dc",
+              "visual_color": "yellow"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.5340537772540446,
+                -0.34567735838388786,
+                0.5160628655483941
+              ],
+              "track_id": "track-b4f89753",
+              "visual_color": "blue"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.07234554522125203,
+                0.12261298720810121,
+                0.505014208346513
+              ],
+              "track_id": "track-550f6239",
+              "visual_color": "red"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.3333333333333333,
+              "position_world_m": [
+                -0.0070305704246221845,
+                -0.007959245881347443,
+                0.8938900936769557
+              ],
+              "track_id": "track-1611248e",
+              "visual_color": "blue"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.2578112046568093,
+                -0.34506734118394544,
+                0.5092927466264232
+              ],
+              "track_id": "track-17429ad2",
+              "visual_color": "magenta"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.11871462265782717,
+                -0.34460480081765477,
+                0.5076068660740791
+              ],
+              "track_id": "track-fa4b3304",
+              "visual_color": "cyan"
+            }
+          ],
+          "rgb_sha256": "09ddc38fb9edb66abf818abd7aa28520c4373bad036aa55a3d2e7c1c337858d1",
+          "timestamp_ns": 1000000000
+        },
+        {
+          "canonical_k8_slots": [
+            "track-17429ad2",
+            "track-1c14fc3a",
+            "track-2d8d68b0",
+            "track-3da9e5f2",
+            "track-4710fcfe",
+            "track-61cfc5e4",
+            "track-7ba736f9",
+            "track-b4f89753"
+          ],
+          "depth_sha256": "1702c7d6629a7435b4e52ebe59c039fd84708f98523cbc511a0355e9c74bcf0b",
+          "frame_index": 1,
+          "label": "after_physical_lift",
+          "public_tracks": [
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.75,
+              "position_world_m": [
+                -0.4524458762658401,
+                0.1087192121285081,
+                0.4608157465932118
+              ],
+              "track_id": "track-3da9e5f2",
+              "visual_color": "yellow"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.25,
+              "position_world_m": [
+                -0.43498130742707686,
+                0.10528538613106808,
+                0.46061547653035195
+              ],
+              "track_id": "track-1c14fc3a",
+              "visual_color": "yellow"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.1112231493442184,
+                0.18273125621084696,
+                0.4803423984747417
+              ],
+              "track_id": "track-4710fcfe",
+              "visual_color": "green"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.13999087619998418,
+                0.13342048947191665,
+                0.4749469817933435
+              ],
+              "track_id": "track-e91f94dc",
+              "visual_color": "yellow"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.5340316114691956,
+                -0.3456858199774662,
+                0.5160749948455177
+              ],
+              "track_id": "track-b4f89753",
+              "visual_color": "blue"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.080788584258496,
+                0.12597813099669164,
+                0.6463559856564893
+              ],
+              "track_id": "track-b91edb62",
+              "visual_color": "red"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.2691302136678053,
+                -0.14177722430681006,
+                0.4657599465422253
+              ],
+              "track_id": "track-61cfc5e4",
+              "visual_color": "cyan"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.25789205648961766,
+                -0.3450688219051772,
+                0.5092200131586683
+              ],
+              "track_id": "track-17429ad2",
+              "visual_color": "magenta"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.4791666666666667,
+              "position_world_m": [
+                -0.17615120312160126,
+                -0.28474068872112124,
+                0.46146172226160553
+              ],
+              "track_id": "track-2d8d68b0",
+              "visual_color": "cyan"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.2708333333333333,
+              "position_world_m": [
+                -0.10630978690773196,
+                -0.21025418119621997,
+                0.4619094958960782
+              ],
+              "track_id": "track-7ba736f9",
+              "visual_color": "cyan"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.12266117956028677,
+                -0.3157819413109621,
+                0.47944350394127255
+              ],
+              "track_id": "track-fa4b3304",
+              "visual_color": "cyan"
+            }
+          ],
+          "rgb_sha256": "c9257ed3594d47f744fd3acedcb6fed6cde793eac8d4b1c21fccd1766c382cd7",
+          "timestamp_ns": 1000000001
+        },
+        {
+          "canonical_k8_slots": [
+            "track-1611248e",
+            "track-17429ad2",
+            "track-4710fcfe",
+            "track-550f6239",
+            "track-b4f89753",
+            "track-e91f94dc",
+            "track-fa4b3304",
+            null
+          ],
+          "depth_sha256": "a8ebe098a974caa6f9089e5d7d0da97fa9df0039691986b81da5183f571bf533",
+          "frame_index": 2,
+          "label": "m2c_step_00_grasp",
+          "public_tracks": [
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.10655504848384645,
+                0.18073323927270601,
+                0.47938566216975853
+              ],
+              "track_id": "track-4710fcfe",
+              "visual_color": "green"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.11211253325352111,
+                0.12299416943113073,
+                0.5052634065614079
+              ],
+              "track_id": "track-e91f94dc",
+              "visual_color": "yellow"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.5340490262711906,
+                -0.3457158229676641,
+                0.5160309042786326
+              ],
+              "track_id": "track-b4f89753",
+              "visual_color": "blue"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.07248816185781748,
+                0.12243255902901318,
+                0.5052688381876361
+              ],
+              "track_id": "track-550f6239",
+              "visual_color": "red"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.3333333333333333,
+              "position_world_m": [
+                -0.0070305704246221845,
+                -0.007959245881347443,
+                0.8938900936769557
+              ],
+              "track_id": "track-1611248e",
+              "visual_color": "blue"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.2578112046568093,
+                -0.34506734118394544,
+                0.5092927466264232
+              ],
+              "track_id": "track-17429ad2",
+              "visual_color": "magenta"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.11871124076235562,
+                -0.3445592737180267,
+                0.5076526991317788
+              ],
+              "track_id": "track-fa4b3304",
+              "visual_color": "cyan"
+            }
+          ],
+          "rgb_sha256": "7ba96d9b126323e7e8b74cf448c224401347ceb224058c851b019b720433741f",
+          "timestamp_ns": 1000000002
+        },
+        {
+          "canonical_k8_slots": [
+            "track-17429ad2",
+            "track-372e4fb8",
+            "track-4710fcfe",
+            "track-550f6239",
+            "track-b4f89753",
+            "track-e91f94dc",
+            "track-fa4b3304",
+            null
+          ],
+          "depth_sha256": "926e16e94dafd291691c9f0ee093edc247eae191dfe0d5b55be5eddd27909cac",
+          "frame_index": 3,
+          "label": "m2c_step_01_lift",
+          "public_tracks": [
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.5416666666666666,
+              "position_world_m": [
+                -0.3253576712440868,
+                0.1872403591669205,
+                0.46161190446122247
+              ],
+              "track_id": "track-372e4fb8",
+              "visual_color": "yellow"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.11083640658199956,
+                0.18299778410674494,
+                0.4932225516836547
+              ],
+              "track_id": "track-4710fcfe",
+              "visual_color": "green"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.13885160199801605,
+                0.13651099246676546,
+                0.47432829879579974
+              ],
+              "track_id": "track-e91f94dc",
+              "visual_color": "yellow"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.5339013641848027,
+                -0.3457069420311635,
+                0.5161695042284669
+              ],
+              "track_id": "track-b4f89753",
+              "visual_color": "blue"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.07912023185852401,
+                0.11477467557404408,
+                0.4999632679734751
+              ],
+              "track_id": "track-550f6239",
+              "visual_color": "red"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.2577753329669178,
+                -0.3450848663731686,
+                0.5093081956962571
+              ],
+              "track_id": "track-17429ad2",
+              "visual_color": "magenta"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.11874954626909362,
+                -0.34459491428813477,
+                0.5075859398445741
+              ],
+              "track_id": "track-fa4b3304",
+              "visual_color": "cyan"
+            }
+          ],
+          "rgb_sha256": "1ebe5912ef65fc618e5d18a9c941f85d0be72084d6c4fc5cc434bf148f6c18ad",
+          "timestamp_ns": 1000000003
+        },
+        {
+          "canonical_k8_slots": [
+            "track-17429ad2",
+            "track-4710fcfe",
+            "track-b4f89753",
+            "track-b91edb62",
+            "track-e91f94dc",
+            "track-fa4b3304",
+            null,
+            null
+          ],
+          "depth_sha256": "77820cd723aa273d70e1fd71fd8610450ed52fa192e90d71eeb164c99624c51d",
+          "frame_index": 4,
+          "label": "m2c_step_02_move",
+          "public_tracks": [
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.1111075673448001,
+                0.18259830419609968,
+                0.4803141921074875
+              ],
+              "track_id": "track-4710fcfe",
+              "visual_color": "green"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.1356452824494585,
+                0.13567048586126063,
+                0.4763659499339956
+              ],
+              "track_id": "track-e91f94dc",
+              "visual_color": "yellow"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.53397807478564,
+                -0.34569649686322906,
+                0.5161112599868523
+              ],
+              "track_id": "track-b4f89753",
+              "visual_color": "blue"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.08060390285492325,
+                0.12613901125060023,
+                0.6461581148569138
+              ],
+              "track_id": "track-b91edb62",
+              "visual_color": "red"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.2577918680163731,
+                -0.3450303878398024,
+                0.509344782566623
+              ],
+              "track_id": "track-17429ad2",
+              "visual_color": "magenta"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.11876363832622505,
+                -0.3445602393365798,
+                0.507606724675157
+              ],
+              "track_id": "track-fa4b3304",
+              "visual_color": "cyan"
+            }
+          ],
+          "rgb_sha256": "30a82e4edffa8ccba9a6e9ced341bb376604444ab57e1e1683b0564f876975fc",
+          "timestamp_ns": 1000000004
+        },
+        {
+          "canonical_k8_slots": [
+            "track-17429ad2",
+            "track-1d685b55",
+            "track-4710fcfe",
+            "track-4fe139d8",
+            "track-a397a2f1",
+            "track-b4f89753",
+            "track-e91f94dc",
+            "track-fa4b3304"
+          ],
+          "depth_sha256": "3c02822164b8e35bb59bc0942b1a611f1079596e23cdd379774b3179da3da729",
+          "frame_index": 5,
+          "label": "m2c_step_03_place",
+          "public_tracks": [
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.1107181476469411,
+                0.183288145717159,
+                0.49070273026302313
+              ],
+              "track_id": "track-4710fcfe",
+              "visual_color": "green"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.11195627700015554,
+                0.12301668153686696,
+                0.5054230513313954
+              ],
+              "track_id": "track-e91f94dc",
+              "visual_color": "yellow"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.5338864233307603,
+                -0.3458140964403477,
+                0.5160814956097548
+              ],
+              "track_id": "track-b4f89753",
+              "visual_color": "blue"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                0.11917905254855266,
+                0.13312665767167853,
+                0.6637045980883158
+              ],
+              "track_id": "track-4fe139d8",
+              "visual_color": "red"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                0.18557191044770893,
+                0.1305019787405236,
+                0.49333333063936435
+              ],
+              "track_id": "track-1d685b55",
+              "visual_color": "blue"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.25783012411732265,
+                -0.3451006471174754,
+                0.5092447062267116
+              ],
+              "track_id": "track-17429ad2",
+              "visual_color": "magenta"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.11881838533229128,
+                -0.344629197943503,
+                0.5074924460714065
+              ],
+              "track_id": "track-fa4b3304",
+              "visual_color": "cyan"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                0.3040993072182392,
+                -0.019014032706884842,
+                0.46042974792206226
+              ],
+              "track_id": "track-a397a2f1",
+              "visual_color": "blue"
+            }
+          ],
+          "rgb_sha256": "e6274798e07564ba05d6b8a8d23cf83a78725fd2a6b9a6b89b9ecc8ed6e1494c",
+          "timestamp_ns": 1000000005
+        },
+        {
+          "canonical_k8_slots": [
+            "track-17429ad2",
+            "track-1d685b55",
+            "track-4710fcfe",
+            "track-4fe139d8",
+            "track-66d0ead8",
+            "track-a397a2f1",
+            "track-b4f89753",
+            "track-e91f94dc"
+          ],
+          "depth_sha256": "fa96218710ae80e5e06253543a0e6f7c9836e04cff2fcac3edf74b3951ae2aa8",
+          "frame_index": 6,
+          "label": "m2c_step_04_release",
+          "public_tracks": [
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.11059750369361288,
+                0.18297327877542802,
+                0.48858470528179976
+              ],
+              "track_id": "track-4710fcfe",
+              "visual_color": "green"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.11197732412752659,
+                0.1228593807350753,
+                0.5051359852040045
+              ],
+              "track_id": "track-e91f94dc",
+              "visual_color": "yellow"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.5340001995706823,
+                -0.3458435613652367,
+                0.5159537622913766
+              ],
+              "track_id": "track-b4f89753",
+              "visual_color": "blue"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                0.19563387878934113,
+                0.29939828013226344,
+                0.4886899403716769
+              ],
+              "track_id": "track-66d0ead8",
+              "visual_color": "blue"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                0.11367836024886246,
+                0.1451313912259804,
+                0.5669738333101915
+              ],
+              "track_id": "track-4fe139d8",
+              "visual_color": "red"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.2578595575153083,
+                -0.3450830153467751,
+                0.5092348437305513
+              ],
+              "track_id": "track-17429ad2",
+              "visual_color": "magenta"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                0.18520091523877003,
+                0.10006701537129292,
+                0.492275710358015
+              ],
+              "track_id": "track-1d685b55",
+              "visual_color": "blue"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.11876035377197525,
+                -0.344593362593417,
+                0.507578253399172
+              ],
+              "track_id": "track-fa4b3304",
+              "visual_color": "cyan"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.2708333333333333,
+              "position_world_m": [
+                0.35041616437834366,
+                -0.05374474445425392,
+                0.46207298776330163
+              ],
+              "track_id": "track-a397a2f1",
+              "visual_color": "blue"
+            }
+          ],
+          "rgb_sha256": "086bf85abacffc96d08d58af9e335e746efd024b325d3c1e60319fee86d6aea2",
+          "timestamp_ns": 1000000006
+        },
+        {
+          "canonical_k8_slots": [
+            "track-17429ad2",
+            "track-3da9e5f2",
+            "track-4710fcfe",
+            "track-4fe139d8",
+            "track-61cfc5e4",
+            "track-b4f89753",
+            "track-e4fe9d6b",
+            "track-e91f94dc"
+          ],
+          "depth_sha256": "d7938aa331052b54579f7cc58e7cc5e3a9b7b90d73fa29c48a3ed99678e48337",
+          "frame_index": 7,
+          "label": "m2c_step_05_reobserve",
+          "public_tracks": [
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.2916666666666667,
+              "position_world_m": [
+                -0.45626802767679564,
+                0.10620565130649551,
+                0.46067329772415544
+              ],
+              "track_id": "track-3da9e5f2",
+              "visual_color": "yellow"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.1104507156829806,
+                0.18305894113480214,
+                0.492830903228366
+              ],
+              "track_id": "track-4710fcfe",
+              "visual_color": "green"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.13722200493175984,
+                0.13597188143004013,
+                0.4752585852895962
+              ],
+              "track_id": "track-e91f94dc",
+              "visual_color": "yellow"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.533947887974535,
+                -0.3455773550882088,
+                0.5162499315436804
+              ],
+              "track_id": "track-b4f89753",
+              "visual_color": "blue"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.256801515962503,
+                -0.14440932474210855,
+                0.46653325544300495
+              ],
+              "track_id": "track-61cfc5e4",
+              "visual_color": "cyan"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                0.11966434503976298,
+                0.1442810528845423,
+                0.5179429888311102
+              ],
+              "track_id": "track-4fe139d8",
+              "visual_color": "red"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.25,
+              "position_world_m": [
+                0.13595978032654932,
+                0.14309799547468782,
+                0.4826833351422277
+              ],
+              "track_id": "track-e4fe9d6b",
+              "visual_color": "magenta"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.2580546667495327,
+                -0.3450635750448675,
+                0.5090812771643234
+              ],
+              "track_id": "track-17429ad2",
+              "visual_color": "magenta"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.12114671470506355,
+                -0.3328756996319272,
+                0.49406445469183957
+              ],
+              "track_id": "track-fa4b3304",
+              "visual_color": "cyan"
+            }
+          ],
+          "rgb_sha256": "155ea64ee93494bd32a2194ffa7f16aeabb20e80b7fd25f6ae3d56cf59dca79b",
+          "timestamp_ns": 1000000007
+        },
+        {
+          "canonical_k8_slots": [
+            "track-17429ad2",
+            "track-372e4fb8",
+            "track-3da9e5f2",
+            "track-4710fcfe",
+            "track-4fe139d8",
+            "track-61cfc5e4",
+            "track-7ba736f9",
+            "track-b4f89753"
+          ],
+          "depth_sha256": "318ec458417e1bb07d3b42c0e11e7bb43d1cd2eed9d1913fe67210b7f3bbed15",
+          "frame_index": 8,
+          "label": "m2c_step_06_reassociate_target",
+          "public_tracks": [
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.3541666666666667,
+              "position_world_m": [
+                -0.4553745006575522,
+                0.10653472123096808,
+                0.46026932761427497
+              ],
+              "track_id": "track-3da9e5f2",
+              "visual_color": "yellow"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.375,
+              "position_world_m": [
+                -0.33123306773960953,
+                0.17518219670993784,
+                0.45955804322945915
+              ],
+              "track_id": "track-372e4fb8",
+              "visual_color": "yellow"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.11066555900253561,
+                0.18310259774766902,
+                0.4925643118560382
+              ],
+              "track_id": "track-4710fcfe",
+              "visual_color": "green"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.1382628845275402,
+                0.13598199857493154,
+                0.4743498787783016
+              ],
+              "track_id": "track-e91f94dc",
+              "visual_color": "yellow"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.5339083630315009,
+                -0.3457690183934917,
+                0.5161053417810516
+              ],
+              "track_id": "track-b4f89753",
+              "visual_color": "blue"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.2594827731130894,
+                -0.14288437896027195,
+                0.4656026834696835
+              ],
+              "track_id": "track-61cfc5e4",
+              "visual_color": "cyan"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                0.11955555337334678,
+                0.14419629024723413,
+                0.5177656629254294
+              ],
+              "track_id": "track-4fe139d8",
+              "visual_color": "red"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.3125,
+              "position_world_m": [
+                0.13548104890984447,
+                0.14272322732726206,
+                0.48837713826109763
+              ],
+              "track_id": "track-e4fe9d6b",
+              "visual_color": "magenta"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.10708145717729578,
+                -0.1531207755128836,
+                0.46006994554447
+              ],
+              "track_id": "track-7ba736f9",
+              "visual_color": "cyan"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.25798482061643,
+                -0.34508294876109397,
+                0.5091246720164899
+              ],
+              "track_id": "track-17429ad2",
+              "visual_color": "magenta"
+            },
+            {
+              "category": "industrial_cylinder",
+              "confidence": 0.99,
+              "position_world_m": [
+                -0.12179879504128133,
+                -0.3277885728594343,
+                0.4879863156141472
+              ],
+              "track_id": "track-fa4b3304",
+              "visual_color": "cyan"
+            }
+          ],
+          "rgb_sha256": "4126fe703bf95065b9b810bcb0542014e958959ce93167b15a34fa7a94699367",
+          "timestamp_ns": 1000000008
+        }
+      ],
+      "frozen_baseline": {
+        "canonical_slot_count": 8,
+        "confidence_filter_applied": false,
+        "maximum_association_distance_m": 0.12,
+        "name": "GeometricRGBDBaseline"
+      },
+      "initial_public_task_selector": {
+        "canonical_slot_index": 5,
+        "public_track_count": 7,
+        "reason": null,
+        "target_confidence": 0.99,
+        "target_rank_by_literal_track_id": 6,
+        "target_track_id": "track-e91f94dc",
+        "visual_color": "yellow"
+      },
+      "input_file_sha256": {
+        "frames": [
+          {
+            "depth_sha256": "a8ebe098a974caa6f9089e5d7d0da97fa9df0039691986b81da5183f571bf533",
+            "frame_index": 0,
+            "label": "before_failure_identity_binding",
+            "rgb_sha256": "09ddc38fb9edb66abf818abd7aa28520c4373bad036aa55a3d2e7c1c337858d1"
+          },
+          {
+            "depth_sha256": "1702c7d6629a7435b4e52ebe59c039fd84708f98523cbc511a0355e9c74bcf0b",
+            "frame_index": 1,
+            "label": "after_physical_lift",
+            "rgb_sha256": "c9257ed3594d47f744fd3acedcb6fed6cde793eac8d4b1c21fccd1766c382cd7"
+          },
+          {
+            "depth_sha256": "a8ebe098a974caa6f9089e5d7d0da97fa9df0039691986b81da5183f571bf533",
+            "frame_index": 2,
+            "label": "m2c_step_00_grasp",
+            "rgb_sha256": "7ba96d9b126323e7e8b74cf448c224401347ceb224058c851b019b720433741f"
+          },
+          {
+            "depth_sha256": "926e16e94dafd291691c9f0ee093edc247eae191dfe0d5b55be5eddd27909cac",
+            "frame_index": 3,
+            "label": "m2c_step_01_lift",
+            "rgb_sha256": "1ebe5912ef65fc618e5d18a9c941f85d0be72084d6c4fc5cc434bf148f6c18ad"
+          },
+          {
+            "depth_sha256": "77820cd723aa273d70e1fd71fd8610450ed52fa192e90d71eeb164c99624c51d",
+            "frame_index": 4,
+            "label": "m2c_step_02_move",
+            "rgb_sha256": "30a82e4edffa8ccba9a6e9ced341bb376604444ab57e1e1683b0564f876975fc"
+          },
+          {
+            "depth_sha256": "3c02822164b8e35bb59bc0942b1a611f1079596e23cdd379774b3179da3da729",
+            "frame_index": 5,
+            "label": "m2c_step_03_place",
+            "rgb_sha256": "e6274798e07564ba05d6b8a8d23cf83a78725fd2a6b9a6b89b9ecc8ed6e1494c"
+          },
+          {
+            "depth_sha256": "fa96218710ae80e5e06253543a0e6f7c9836e04cff2fcac3edf74b3951ae2aa8",
+            "frame_index": 6,
+            "label": "m2c_step_04_release",
+            "rgb_sha256": "086bf85abacffc96d08d58af9e335e746efd024b325d3c1e60319fee86d6aea2"
+          },
+          {
+            "depth_sha256": "d7938aa331052b54579f7cc58e7cc5e3a9b7b90d73fa29c48a3ed99678e48337",
+            "frame_index": 7,
+            "label": "m2c_step_05_reobserve",
+            "rgb_sha256": "155ea64ee93494bd32a2194ffa7f16aeabb20e80b7fd25f6ae3d56cf59dca79b"
+          },
+          {
+            "depth_sha256": "318ec458417e1bb07d3b42c0e11e7bb43d1cd2eed9d1913fe67210b7f3bbed15",
+            "frame_index": 8,
+            "label": "m2c_step_06_reassociate_target",
+            "rgb_sha256": "4126fe703bf95065b9b810bcb0542014e958959ce93167b15a34fa7a94699367"
+          }
+        ],
+        "stage_metrics": "3f081f1be95e387f880f13a0c79bb5541e0b2ef00b0baae3a14bbbe1a2a51b2e"
+      },
+      "partial_failure_evidence_sha256": {
+        "collection_job": "25b4c1db35e6a3061ef2f635ac932ff431a7916591281aa4ae5ba2e9f7d9990a",
+        "probe_console": "5f8e2d3635940bbcd86bfb306de9d74a8f1dbd11dc3e699e6930cd2a1c30b3c6"
+      },
+      "partial_public_rgbd_record_sha256": "233d51e028f20fce61ccd877fcf6ccd9c2b538ebed1fa62d64f5cea61dfec181",
+      "privileged_truth_policy_input": false,
+      "schema_version": "M2CPathBlockedK8AuditV1",
+      "stage_metrics_sha256": "3f081f1be95e387f880f13a0c79bb5541e0b2ef00b0baae3a14bbbe1a2a51b2e",
+      "step6_public_reassociation": {
+        "canonical_slot_index": null,
+        "public_track_count": 11,
+        "reason": "PUBLIC_TARGET_OUTSIDE_CANONICAL_K8",
+        "target_confidence": 0.99,
+        "target_rank_by_literal_track_id": 10,
+        "target_track_id": "track-e91f94dc"
+      },
+      "teacher_used": false
+    }
+  ],
+  "attempts_audited": 3,
+  "audit_aggregate_external_path": "/Users/gl/tzb-m2c-evidence/m2c-s4/k8-admissibility/.aggregate-v2.of5BHh/aggregate.json",
+  "audit_aggregate_sha256": "940a6f46d8571f27e48a1ac9fd78ad2398b37465b0e7ef726037929034f17af2",
+  "audit_tool_path": "scripts/m2c/audit_path_blocked_k8_failure.py",
+  "audit_tool_sha256": "2752ff807c959f4e0489f8b2839196d904afe43cf2a43512d5350f3b94c1fbf8",
+  "b0_implementation_or_parameters_changed": false,
+  "blockers": [
+    "all three frozen byte-identical SDF layout variants have one observed TRAIN key failing the exact ADR K=8 public pointer admissibility contract at step 6",
+    "0 eligible PATH_BLOCKED supervised chain samples packaged",
+    "33/36 frozen TRAIN key identities remain physically unobserved; their failure-seed outcomes are not inferred",
+    "formal Isaac runner remains unfrozen and physically unverified"
+  ],
+  "changed_files": [
+    "scripts/m2c/audit_path_blocked_k8_failure.py",
+    "tests/unit/test_m2c_path_blocked_k8_audit.py",
+    "reports/m2c-s4-path-blocked-k8-admissibility.json",
+    "reports/m2c-s4-path-blocked-k8-admissibility.md"
+  ],
+  "checked_implementation_commit": "8cdf289f53baf6e17dcdd661cc3d9ab205a43d2c",
+  "d1_reason": "Q-A V4 already passed; this is an S4 training-input admissibility blocker, not a new domain candidate",
+  "d1_triggered": false,
+  "d2_reason": "training and formal Q-B evaluation were not executed; pure-model success is unmeasured, not zero",
+  "d2_triggered": false,
+  "failures": [
+    "attempt4 scene 12008 stage infrastructure crash exit 139 (excluded)",
+    "observed TRAIN keys 12000, 12005, and 12008 fail closed at step 6 with PUBLIC_TARGET_OUTSIDE_CANONICAL_K8"
+  ],
+  "finding": "all audited unique TRAIN geometries reached step 6 with the public task target visible but outside the frozen literal-ID canonical K=8",
+  "frozen_training_manifest": {
+    "audited_training_keys": 3,
+    "audited_unique_sdf_layouts": 3,
+    "content_sha256": "f5dc3566d028821f5df48afd07f133ea94af21fae21ec8bd5be63644893145e2",
+    "coverage_semantics": "one observed TRAIN key per each frozen byte-identical SDF layout; 3/36 key identities physically observed",
+    "file_sha256": "ca2162a898853ee04600aaf9246c121ac0604754638e497d1824b159c161fd94",
+    "keys_per_sdf_layout": [
+      12,
+      12,
+      12
+    ],
+    "path": "configs/m2c_s4_training_keys.json",
+    "training_keys_total": 36,
+    "unique_sdf_layouts_total": 3
+  },
+  "next_command": "continue frozen TRAIN collection only if additional failure-seed coverage is required; do not train/evaluate with zero eligible PATH_BLOCKED samples and do not change K/sorting without human ADR",
+  "observed_sdf_layout_coverage": {
+    "byte_identical_repetitions_per_layout": 12,
+    "total": 3,
+    "unique_sdf_layouts": 3
+  },
+  "observed_training_key_coverage": {
+    "keys": 3,
+    "physical_rollout_outcomes_not_inferred_for_unobserved_keys": true,
+    "total": 36
+  },
+  "privileged_truth_policy_input": false,
+  "pure_model_success_episodes": null,
+  "q_b_evaluation_executed": false,
+  "safety_or_mapping_gates_relaxed": false,
+  "schema_version": "M2CS4PathBlockedInputAdmissibilityReportV1",
+  "status": "BLOCKED_PUBLIC_INPUT_ADMISSIBILITY",
+  "teacher_used": false,
+  "tests": [
+    "PYTHONPATH=src:scripts .venv/bin/python -m pytest -q tests/unit/test_m2c_path_blocked_k8_audit.py"
+  ],
+  "training_executed": false,
+  "training_samples_eligible": 0,
+  "training_samples_packaged": 0,
+  "unauthorized_workarounds_rejected": [
+    "increase K",
+    "confidence filtering",
+    "TaskSpec target injection",
+    "privileged entity/prim identity",
+    "replace frozen TRAIN keys",
+    "train on SMOKE or S6 keys"
+  ]
+}

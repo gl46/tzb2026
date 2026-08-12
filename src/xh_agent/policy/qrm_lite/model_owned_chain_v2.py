@@ -47,6 +47,7 @@ ExecutionSource = Literal[
     "MODEL_SELECTED_REGISTERED_SKILL",
     "B0_FALLBACK",
     "B0_CONTINUATION",
+    "NO_PHYSICAL_EXECUTION",
 ]
 
 
@@ -359,6 +360,8 @@ def _validate_receipts(
             _reason(reasons, prefix + receipt.execution_source)
             if not receipt.fallback_reason:
                 _reason(reasons, prefix + "FALLBACK_REASON_MISSING")
+        elif receipt.execution_source == "NO_PHYSICAL_EXECUTION":
+            _reason(reasons, prefix + "NO_PHYSICAL_EXECUTION")
         elif receipt.fallback_reason is not None:
             _reason(reasons, prefix + "MODEL_RECEIPT_HAS_FALLBACK_REASON")
 

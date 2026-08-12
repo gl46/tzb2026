@@ -268,6 +268,8 @@ def test_worker_dry_run_is_exact_single_key_scripted_public_chain(tmp_path: Path
     assert receipt["privileged_truth_policy_input"] is False
     assert "--m2c-chain-role" in probe
     assert probe[probe.index("--m2c-chain-role") + 1] == "SMOKE"
+    assert "--m2c-split" in probe
+    assert probe[probe.index("--m2c-split") + 1] == "val"
     assert probe[probe.index("--m2c-matched-key") + 1] == args.matched_key
     assert probe[probe.index("--m2c-decision-source") + 1] == (
         "SCRIPTED_PUBLIC_PHYSICAL_SUPERVISION"
@@ -280,6 +282,9 @@ def test_worker_dry_run_is_exact_single_key_scripted_public_chain(tmp_path: Path
     assert stage[stage.index("--physical-gpu-index") + 1] == "0"
     derived = Path(receipt["derived_probe"])
     assert derived.is_file()
+    derived_source = derived.read_text(encoding="utf-8")
+    assert 'm2b_wrong_regrasp.get("follow_error_m", float("inf"))' not in derived_source
+    assert 'np.isfinite(float(m2b_wrong_regrasp["follow_error_m"]))' in derived_source
     assert hashlib.sha256(derived.read_bytes()).hexdigest() == receipt["derived_probe_sha256"]
     job = json.loads((derived.parent / "collection-job-v2.json").read_text())
     assert job["training_executed"] is False

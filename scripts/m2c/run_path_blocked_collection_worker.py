@@ -181,6 +181,8 @@ def probe_command(
         str(source_record["destination_cell"]).removeprefix("BIN_CELL_"),
         "--m2c-chain-role",
         args.role,
+        "--m2c-split",
+        str(source_record["split"]),
         "--m2c-matched-key",
         args.matched_key,
         "--m2c-failure-seed",

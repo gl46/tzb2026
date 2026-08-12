@@ -157,7 +157,8 @@ class RuntimeSkillMappingResultV2(StrictModel):
         "MODEL_SELECTED_REGISTERED_SKILL",
         "MODEL_AND_RESIDUAL",
         "NONE_B0_FALLBACK",
-    ] = "NONE_B0_FALLBACK"
+        "NO_PHYSICAL_EXECUTION",
+    ] = "NO_PHYSICAL_EXECUTION"
     gate_trace: list[dict[str, Any]] = Field(default_factory=list)
 
 

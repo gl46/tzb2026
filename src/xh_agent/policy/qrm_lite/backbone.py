@@ -44,14 +44,18 @@ class Qwen35Backbone:
         cache_dir: str | None = None,
         local_files_only: bool = False,
         trust_remote_code: bool = True,
+        resolved_model_path: str | None = None,
     ) -> None:
         self.model_id = model_id
         self.revision = revision
         self.device_pref = device
         self.dtype_name = dtype
-        self.cache_dir = cache_dir or os.environ.get("HF_HOME") or os.environ.get("HUGGINGFACE_HUB_CACHE")
+        self.cache_dir = (
+            cache_dir or os.environ.get("HF_HOME") or os.environ.get("HUGGINGFACE_HUB_CACHE")
+        )
         self.local_files_only = local_files_only
         self.trust_remote_code = trust_remote_code
+        self.resolved_model_path = resolved_model_path
         self._model = None
         self._processor = None
         self._device = None
@@ -94,21 +98,22 @@ class Qwen35Backbone:
             "local_files_only": self.local_files_only,
         }
         # Local directories / empty revision should not pass a bogus revision pin.
-        if self.revision:
+        load_source = self.resolved_model_path or self.model_id
+        if self.revision and self.resolved_model_path is None:
             kwargs["revision"] = self.revision
         if self.cache_dir:
             kwargs["cache_dir"] = self.cache_dir
 
-        self._processor = AutoProcessor.from_pretrained(self.model_id, **kwargs)
+        self._processor = AutoProcessor.from_pretrained(load_source, **kwargs)
         model_kwargs = dict(kwargs)
         # transformers>=4.46 prefers dtype=; keep torch_dtype as fallback for older builds.
         model_kwargs["dtype"] = self._dtype
         try:
-            self._model = AutoModelForImageTextToText.from_pretrained(self.model_id, **model_kwargs)
+            self._model = AutoModelForImageTextToText.from_pretrained(load_source, **model_kwargs)
         except TypeError:
             model_kwargs.pop("dtype", None)
             model_kwargs["torch_dtype"] = self._dtype
-            self._model = AutoModelForImageTextToText.from_pretrained(self.model_id, **model_kwargs)
+            self._model = AutoModelForImageTextToText.from_pretrained(load_source, **model_kwargs)
         self._model.to(self._device)
         self._model.eval()
 
@@ -186,9 +191,7 @@ class Qwen35Backbone:
                     )
                 else:
                     rendered.append(t)
-            proc = self._processor(
-                text=rendered, images=images, return_tensors="pt", padding=True
-            )
+            proc = self._processor(text=rendered, images=images, return_tensors="pt", padding=True)
         return {k: (v.to(self._device) if hasattr(v, "to") else v) for k, v in proc.items()}
 
     @staticmethod
@@ -233,7 +236,9 @@ class Qwen35Backbone:
     def forward_policy_context(self, batch: dict[str, Any]) -> PolicyContextFeatures:
         feats = self.encode_multimodal(batch)
         # Context vector is backbone pooled features; extra projections live in context.py.
-        return PolicyContextFeatures(backbone=feats, context_vector=feats.pooled, meta=dict(feats.meta))
+        return PolicyContextFeatures(
+            backbone=feats, context_vector=feats.pooled, meta=dict(feats.meta)
+        )
 
     def save_adapter(self, path: str | Path) -> None:
         path = Path(path)
@@ -249,7 +254,9 @@ class Qwen35Backbone:
                 "revision": self.revision,
                 "peft_attached": self._peft_attached,
             }
-            (path / "adapter_marker.json").write_text(json.dumps(marker, indent=2), encoding="utf-8")
+            (path / "adapter_marker.json").write_text(
+                json.dumps(marker, indent=2), encoding="utf-8"
+            )
             if bool(os.environ.get("QRM_SAVE_FULL_STATE", "0") == "1"):
                 import torch
 
