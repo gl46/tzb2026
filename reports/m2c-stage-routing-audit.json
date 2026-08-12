@@ -1,0 +1,74 @@
+{
+  "schema_version": "M2CStageRoutingAuditV1",
+  "status": "PASS_FAIL_CLOSED_IN_PROGRESS",
+  "checked_head_commit": "09a8bb03172e7544f220ace2263ad4a5b0c88ee2",
+  "current_stage_route": "S4_IN_PROGRESS_UNMEASURED",
+  "q_a_state": "PASSED",
+  "q_b_state": "UNMEASURED",
+  "pure_model_success_episodes": null,
+  "d1_triggered": false,
+  "d2_triggered": false,
+  "goal_complete": false,
+  "system_verdict": "EVIDENCE_PENDING",
+  "current_s4_evidence": {
+    "collection_status": "BLOCKED_ZERO_ELIGIBLE_TRAIN_SAMPLES",
+    "entry_status": "BLOCKED_FORMAL_Q_B_EVALUATION",
+    "training_executed": false,
+    "model_rollout_executed": false,
+    "formal_q_b_evaluation_executed": false,
+    "teacher_used": false,
+    "privileged_truth_policy_input": false
+  },
+  "s2_verification_scope": {
+    "report_internal_per_key_replay": true,
+    "local_frozen_source_hashes_replayed": true,
+    "remote_167_file_raw_evidence_tree_replayed_locally": false,
+    "limitation": "The remote Isaac V4 evidence tree is not mirrored in this repository; status therefore does not claim a raw-byte terminal replay of that tree."
+  },
+  "teacher_states": {
+    "Nano": "CANDIDATE",
+    "BWM": "CANDIDATE_LICENSE_PENDING",
+    "Super": "PARKED"
+  },
+  "tests": {
+    "focused_stage_and_status": {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:scripts .venv/bin/python -m pytest -q -p no:cacheprovider tests/unit/test_m2c_stage_route.py tests/unit/test_m2c_status.py",
+      "passed": 26,
+      "failed": 0
+    },
+    "cross_stage": {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:scripts .venv/bin/python -m pytest -q -p no:cacheprovider tests/unit/test_m2c_stage_route.py tests/unit/test_m2c_status.py tests/unit/test_m2c_s2_v4_report.py tests/unit/test_m2c_s5_residual_closed_loop.py tests/unit/test_m2c_s6_matched.py tests/unit/test_m2c_hard_freeze.py",
+      "passed": 78,
+      "failed": 0
+    },
+    "full_suite": {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:scripts .venv/bin/python -m pytest -q -p no:cacheprovider",
+      "passed": 762,
+      "failed": 0
+    },
+    "ruff_check": "PASS",
+    "changed_file_format_check": "PASS",
+    "git_diff_check": "PASS"
+  },
+  "failures": [
+    "Repository-wide ruff format check remains non-green because 226 historical files predate the current formatter; all five files changed in commit 09a8bb0 pass format check."
+  ],
+  "blockers": [
+    "human ADR direction is required for the frozen public K=8 admissibility blocker",
+    "human ADR direction is required for a hash-frozen exact-plan-aware physical primitive and unchanged B0 fallback wrapper",
+    "S4 has zero eligible training rows and no trained world-model bundle",
+    "formal runner/deployment/B0-wrapper/offline-authentication bindings remain unset",
+    "S5 has no accepted human ADR and no residual-enabled formal runtime",
+    "S6 has no authenticated 120-episode evidence set and no signed terminal-failure lifecycle"
+  ],
+  "changed_files": [
+    "scripts/m2c/status.py",
+    "scripts/m2c/terminal_evidence.py",
+    "src/xh_agent/policy/qrm_lite/m2c_stage_route.py",
+    "tests/unit/test_m2c_stage_route.py",
+    "tests/unit/test_m2c_status.py",
+    "reports/m2c-stage-routing-audit.json",
+    "reports/m2c-stage-routing-audit.md"
+  ],
+  "next_command": "sed -n '1,260p' docs/decisions/M2C-S4-PUBLIC-CANDIDATE-ADR-REQUEST.md && sed -n '1,320p' docs/decisions/M2C-S4-EXACT-PLAN-PRIMITIVE-ADR-REQUEST.md"
+}
