@@ -345,6 +345,11 @@ def evaluate(
     }
 
 
+def gate_exit_code(payload: dict[str, Any]) -> int:
+    """Make a measured NO_GO observable to shell orchestration."""
+    return 1 if payload.get("status") == "NO_GO" else 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -449,7 +454,7 @@ def main() -> int:
     )
     summary = {key: value for key, value in payload.items() if key != "matches"}
     print(json.dumps(summary, sort_keys=True))
-    return 0
+    return gate_exit_code(payload)
 
 
 if __name__ == "__main__":
