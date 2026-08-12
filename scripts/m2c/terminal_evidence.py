@@ -753,13 +753,19 @@ def verify_terminal_evidence(
 
     s4_result = verify_s4(root, s4)
     d2_verified = bool(s4_result.passed and s4_result.metrics.get("d2_triggered"))
+    if d2_verified and d2_summary_claimed:
+        s5_result = VerificationResult(True, (), {"skipped_by_verified_d2": True})
+    elif not s4_result.passed:
+        s5_result = VerificationResult(
+            False,
+            ("S5 terminal evidence failed closed: a verified S4 governed disposition is required",),
+            {"residual_gain_over_fc": None},
+        )
+    else:
+        s5_result = verify_s5(root, s5)
     return {
         "s4": s4_result,
-        "s5": (
-            VerificationResult(True, (), {"skipped_by_verified_d2": True})
-            if d2_verified and d2_summary_claimed
-            else verify_s5(root, s5)
-        ),
+        "s5": s5_result,
         "s6": verify_s6(root, s6),
         "final": verify_final(root, verification),
     }

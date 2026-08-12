@@ -8,6 +8,9 @@ import sys
 from m2c.terminal_evidence import verify_final
 
 
+PROJECT = Path(__file__).resolve().parents[2]
+
+
 def run_status(reports: Path) -> tuple[subprocess.CompletedProcess[str], dict]:
     output = reports / "m2c-status.json"
     completed = subprocess.run(
@@ -53,16 +56,7 @@ def complete_fixtures(reports: Path, *, pure: int = 2) -> None:
     write(
         reports,
         "m2c-s2-exploration-v4.json",
-        common_report(
-            status="Q_A_PASSED",
-            decision={
-                "q_a_passed": True,
-                "physical_recoverability_established": True,
-                "d1_triggered": False,
-                "b0_final_task_success_rate": 0.0,
-                "b0_headroom": 1.0,
-            },
-        ),
+        json.loads((PROJECT / "reports/m2c-s2-exploration-v4.json").read_text()),
     )
     counts = {
         "EMPTY_GRASP": 101,
@@ -188,6 +182,10 @@ def test_status_fails_closed_when_terminal_evidence_is_missing(tmp_path: Path) -
     assert payload["privileged_truth_policy_input"] is False
     assert payload["world_model_mainline_replaced"] is False
     assert payload["completion_gates"]["teacher_free"] is False
+    assert payload["stage_route"] == "S2_IN_PROGRESS_UNMEASURED"
+    assert payload["s4_measurement_state"] == "UNMEASURED"
+    assert payload["d1_triggered"] is False
+    assert payload["d2_triggered"] is False
     assert payload["next_command"] == "M2B_EVIDENCE_READONLY=1 make m2c-s3-dataset"
     for name in (
         "m2c-status.md",
@@ -214,6 +212,8 @@ def test_status_rejects_synthetic_terminal_summaries(tmp_path: Path) -> None:
     assert payload["model_decisions_executed"] == 0
     assert payload["teacher_used"] is False
     assert payload["system_verdict"] == "EVIDENCE_PENDING"
+    assert payload["stage_route"] == "S4_IN_PROGRESS_UNMEASURED"
+    assert payload["s4_measurement_state"] == "UNMEASURED"
     assert any("S4 terminal evidence failed closed" in item for item in payload["blockers"])
     assert any("S5 terminal evidence failed closed" in item for item in payload["blockers"])
     assert any("S6 terminal evidence failed closed" in item for item in payload["blockers"])
@@ -231,6 +231,65 @@ def test_synthetic_d2_does_not_skip_s5_or_complete(tmp_path: Path) -> None:
     assert payload["system_verdict"] == "EVIDENCE_PENDING"
     assert payload["completion_gates"]["s4_q_b_governed_disposition"] is False
     assert payload["completion_gates"]["s5_residual_closed_loop_or_d2_disposition"] is False
+    assert payload["stage_route"] == "INVALID_PREMATURE_D2"
+    assert payload["pure_model_success_episodes"] is None
+
+
+def test_synthetic_d1_shape_does_not_skip_s3_to_s5(tmp_path: Path) -> None:
+    reports = tmp_path / "reports"
+    reports.mkdir()
+    write(reports, "m2c-s0-freeze.json", common_report(status="PASS"))
+    write(reports, "m2c-s1-deliverables.json", common_report(status="PASS"))
+    write(
+        reports,
+        "m2c-s2-exploration-v4.json",
+        common_report(
+            schema_version="M2CS2QAGateReportV1",
+            status="Q_A_NOT_PASSED",
+            candidate_number=4,
+            decision={
+                "q_a_passed": False,
+                "stop_loss_disposition": "TRIGGER_D1",
+                "d1_triggered": True,
+                "v5_forbidden": True,
+            },
+        ),
+    )
+
+    completed, payload = run_status(reports)
+
+    assert completed.returncode == 2
+    assert payload["stage_route"] == "D1_FINAL_CANDIDATE_NONPASS"
+    assert payload["d1_triggered"] is True
+    assert payload["stage_requirements"] == {
+        "s3_required": False,
+        "s4_required": False,
+        "s5_required": False,
+        "s6_required": True,
+    }
+    assert payload["completion_gates"]["s3_full_class_coverage"] is True
+    assert payload["completion_gates"]["s4_q_b_governed_disposition"] is True
+    assert payload["completion_gates"]["s5_residual_closed_loop_or_d2_disposition"] is True
+    assert payload["goal_complete"] is False
+
+
+def test_status_rejects_q_a_summary_when_per_key_outcomes_disagree(
+    tmp_path: Path,
+) -> None:
+    reports = tmp_path / "reports"
+    reports.mkdir()
+    complete_fixtures(reports)
+    s2_path = reports / "m2c-s2-exploration-v4.json"
+    s2 = json.loads(s2_path.read_text())
+    s2["b0_executions"][0]["final_task_success"] = True
+    s2_path.write_text(json.dumps(s2))
+
+    completed, payload = run_status(reports)
+
+    assert completed.returncode == 2
+    assert payload["stage_route"] == "S2_IN_PROGRESS_UNMEASURED"
+    assert payload["completion_gates"]["s2_q_a_or_d1_governed_disposition"] is False
+    assert payload["d1_triggered"] is False
 
 
 def test_status_rejects_summary_only_underpowered_or_unsafe_s6(tmp_path: Path) -> None:
