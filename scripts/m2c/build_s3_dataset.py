@@ -18,6 +18,7 @@ from m2b.build_dataset_v2 import (
     remote_sha256,
 )
 from m2c.build_headroom_domain import DATASET_VERSION, PROJECT, sha256_file
+from m2c.freeze_s3_evidence import DEFAULT_REMOTE_ROOT, LEDGER_NAME
 from xh_agent.data_engine.isaac.failure_rich import (
     validate_failure_recovery_episode,
 )
@@ -29,6 +30,7 @@ FULL_RECOVERY_MINIMUM = 50
 BASE_DATASET = PROJECT / "artifacts/m2b/dataset-v2.jsonl"
 BASE_DATASET_SHA256 = "c24e34493ba2226c1aa691c1b1c43993fbecdff5ad74b291e08c4913efc71362"
 DEFAULT_PLAN = PROJECT / "configs/m2c_s3_collection_plan.json"
+DEFAULT_FREEZE_REPORT = PROJECT / "reports/m2c-s3-evidence-freeze.json"
 
 
 def load_stable_worker_status(
@@ -55,6 +57,65 @@ def load_stable_worker_status(
         "privileged_truth_policy_input": status.get("privileged_truth_policy_input"),
     }
     return status, snapshot
+
+
+def validate_evidence_freeze(
+    path: Path,
+    *,
+    host: str,
+    worker_status_snapshots: list[dict[str, Any]],
+) -> dict[str, Any]:
+    freeze = json.loads(path.read_text(encoding="utf-8"))
+    if freeze.get("schema_version") != "M2CS3EvidenceFreezeV1":
+        raise ValueError("unsupported S3 evidence-freeze report")
+    if freeze.get("status") != "PASS" or freeze.get("evidence_tree_readonly") is not True:
+        raise ValueError("S3 evidence tree is not frozen read-only")
+    if freeze.get("host") != host:
+        raise ValueError("S3 evidence-freeze host does not match packaging host")
+    if freeze.get("remote_root") != str(DEFAULT_REMOTE_ROOT):
+        raise ValueError("S3 evidence-freeze root does not match frozen S3 root")
+    if freeze.get("ledger") != str(DEFAULT_REMOTE_ROOT / LEDGER_NAME):
+        raise ValueError("S3 evidence-freeze ledger path is unexpected")
+    if freeze.get("teacher_used") is not False:
+        raise ValueError("S3 evidence freeze is not explicitly Teacher-free")
+    if freeze.get("privileged_truth_policy_input") is not False:
+        raise ValueError("S3 evidence freeze used privileged truth as policy input")
+    ledger_digest = str(freeze.get("ledger_sha256", ""))
+    if len(ledger_digest) != 64:
+        raise ValueError("S3 evidence-freeze ledger SHA-256 is malformed")
+    if int(freeze.get("files_hashed", 0)) <= 0:
+        raise ValueError("S3 evidence-freeze file inventory is empty")
+
+    frozen_by_path = {
+        str(item.get("path")): item for item in freeze.get("worker_status_snapshots", [])
+    }
+    current_by_path = {str(item.get("path")): item for item in worker_status_snapshots}
+    if set(frozen_by_path) != set(current_by_path):
+        raise ValueError("S3 frozen/current worker-status path sets differ")
+    for status_path, current in current_by_path.items():
+        frozen = frozen_by_path[status_path]
+        for field in (
+            "sha256",
+            "status",
+            "accepted_counts",
+            "record_count",
+            "teacher_used",
+            "privileged_truth_policy_input",
+        ):
+            if frozen.get(field) != current.get(field):
+                raise ValueError(
+                    f"S3 frozen/current worker status differs at {status_path}: {field}"
+                )
+    return {
+        "report_path": str(path),
+        "report_sha256": sha256_file(path),
+        "host": host,
+        "remote_root": freeze.get("remote_root"),
+        "ledger": freeze.get("ledger"),
+        "ledger_sha256": ledger_digest,
+        "files_hashed": int(freeze.get("files_hashed", 0)),
+        "evidence_tree_readonly": True,
+    }
 
 
 def load_jsonl(path: Path) -> list[dict[str, Any]]:
@@ -230,6 +291,7 @@ def write_outputs(
     package_quarantine: list[dict[str, Any]],
     collection_rejections: list[dict[str, object]],
     worker_status_snapshots: list[dict[str, Any]],
+    evidence_freeze: dict[str, Any],
     plan: dict[str, Any],
     output: Path,
     quarantine_path: Path,
@@ -284,6 +346,7 @@ def write_outputs(
         "collection_rejection_counts": dict(sorted(rejections_by_failure.items())),
         "collection_rejection_records": collection_rejections,
         "worker_status_snapshots": worker_status_snapshots,
+        "evidence_freeze": evidence_freeze,
         "code_revision_histogram": code_revision_histogram(merged),
         "base_dataset": {
             "path": str(BASE_DATASET),
@@ -329,6 +392,7 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--host", default="root@labserver")
     parser.add_argument("--plan", type=Path, default=DEFAULT_PLAN)
+    parser.add_argument("--freeze-report", type=Path, default=DEFAULT_FREEZE_REPORT)
     parser.add_argument(
         "--worker-status",
         action="append",
@@ -363,6 +427,14 @@ def main() -> int:
         counts = status.get("accepted_counts", {})
         if any(int(counts.get(failure, 0)) < 25 for failure in MANDATORY_FAILURES):
             raise SystemExit("S3 worker accepted counts are below 25/class")
+    try:
+        evidence_freeze = validate_evidence_freeze(
+            args.freeze_report,
+            host=args.host,
+            worker_status_snapshots=worker_status_snapshots,
+        )
+    except (OSError, ValueError) as error:
+        raise SystemExit(str(error)) from error
     evidence, rejected = accepted_evidence(statuses)
     additions, package_quarantine = package(evidence, host=args.host)
     report = write_outputs(
@@ -371,6 +443,7 @@ def main() -> int:
         package_quarantine=package_quarantine,
         collection_rejections=rejected,
         worker_status_snapshots=worker_status_snapshots,
+        evidence_freeze=evidence_freeze,
         plan=plan,
         output=args.output,
         quarantine_path=args.quarantine,

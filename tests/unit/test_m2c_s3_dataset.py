@@ -12,6 +12,7 @@ from m2c.build_s3_dataset import (
     load_stable_worker_status,
     load_jsonl,
     merge_episodes,
+    validate_evidence_freeze,
     write_outputs,
 )
 
@@ -33,6 +34,16 @@ WORKER_STATUS_SNAPSHOT = {
     "record_count": 75,
     "teacher_used": False,
     "privileged_truth_policy_input": False,
+}
+EVIDENCE_FREEZE = {
+    "report_path": "/local/m2c-s3-evidence-freeze.json",
+    "report_sha256": "b" * 64,
+    "host": "root@labserver",
+    "remote_root": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1",
+    "ledger": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/evidence-sha256.txt",
+    "ledger_sha256": "c" * 64,
+    "files_hashed": 10,
+    "evidence_tree_readonly": True,
 }
 
 
@@ -114,6 +125,73 @@ def test_worker_status_snapshot_rejects_mid_read_change(monkeypatch) -> None:
         raise AssertionError("changing worker status was accepted")
 
 
+def test_evidence_freeze_binds_exact_worker_status_snapshots(tmp_path: Path) -> None:
+    frozen_snapshot = {key: value for key, value in WORKER_STATUS_SNAPSHOT.items() if key != "host"}
+    freeze_path = tmp_path / "freeze.json"
+    freeze_path.write_text(
+        json.dumps(
+            {
+                "schema_version": "M2CS3EvidenceFreezeV1",
+                "status": "PASS",
+                "host": "root@labserver",
+                "remote_root": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1",
+                "ledger": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/evidence-sha256.txt",
+                "ledger_sha256": "c" * 64,
+                "files_hashed": 10,
+                "evidence_tree_readonly": True,
+                "worker_status_snapshots": [frozen_snapshot],
+                "teacher_used": False,
+                "privileged_truth_policy_input": False,
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    binding = validate_evidence_freeze(
+        freeze_path,
+        host="root@labserver",
+        worker_status_snapshots=[WORKER_STATUS_SNAPSHOT],
+    )
+
+    assert binding["ledger_sha256"] == "c" * 64
+    assert binding["evidence_tree_readonly"] is True
+
+
+def test_evidence_freeze_rejects_changed_worker_status(tmp_path: Path) -> None:
+    frozen_snapshot = {key: value for key, value in WORKER_STATUS_SNAPSHOT.items() if key != "host"}
+    frozen_snapshot["sha256"] = "d" * 64
+    freeze_path = tmp_path / "freeze.json"
+    freeze_path.write_text(
+        json.dumps(
+            {
+                "schema_version": "M2CS3EvidenceFreezeV1",
+                "status": "PASS",
+                "host": "root@labserver",
+                "remote_root": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1",
+                "ledger": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/evidence-sha256.txt",
+                "ledger_sha256": "c" * 64,
+                "files_hashed": 10,
+                "evidence_tree_readonly": True,
+                "worker_status_snapshots": [frozen_snapshot],
+                "teacher_used": False,
+                "privileged_truth_policy_input": False,
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    try:
+        validate_evidence_freeze(
+            freeze_path,
+            host="root@labserver",
+            worker_status_snapshots=[WORKER_STATUS_SNAPSHOT],
+        )
+    except ValueError as error:
+        assert "differs" in str(error)
+    else:
+        raise AssertionError("changed worker status was accepted")
+
+
 def test_merge_promotes_version_and_deduplicates_evidence() -> None:
     base = [BASE[0]]
     duplicate = deepcopy(BASE[0])
@@ -178,6 +256,7 @@ def test_output_report_fails_closed_on_packaging_quarantine(
             }
         ],
         worker_status_snapshots=[WORKER_STATUS_SNAPSHOT],
+        evidence_freeze=EVIDENCE_FREEZE,
         plan=PLAN,
         output=tmp_path / "dataset.jsonl",
         quarantine_path=tmp_path / "quarantine.jsonl",
@@ -188,6 +267,7 @@ def test_output_report_fails_closed_on_packaging_quarantine(
     assert report["episodes_quarantined"] == 1
     assert report["collection_rejections"] == 1
     assert report["worker_status_snapshots"] == [WORKER_STATUS_SNAPSHOT]
+    assert report["evidence_freeze"] == EVIDENCE_FREEZE
     assert report["fourth_class"]["model_training_eligible"] is False
 
 
@@ -213,6 +293,7 @@ def test_output_report_passes_full_gate_and_keeps_fourth_class_raw_only(
         package_quarantine=[],
         collection_rejections=[],
         worker_status_snapshots=[WORKER_STATUS_SNAPSHOT],
+        evidence_freeze=EVIDENCE_FREEZE,
         plan=PLAN,
         output=output,
         quarantine_path=quarantine,
