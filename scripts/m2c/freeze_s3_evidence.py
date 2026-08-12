@@ -58,8 +58,8 @@ def validate_worker_status(
         raise ValueError(f"worker status used privileged truth as policy input: {path}")
 
     reported = status.get("accepted_counts", {})
-    if any(int(reported.get(failure, 0)) < accepted_target for failure in MANDATORY_FAILURES):
-        raise ValueError(f"worker accepted counts are below target: {path}")
+    if any(int(reported.get(failure, -1)) != accepted_target for failure in MANDATORY_FAILURES):
+        raise ValueError(f"worker accepted counts do not equal frozen target: {path}")
 
     observed: Counter[str] = Counter()
     evidence_paths: list[Path] = []

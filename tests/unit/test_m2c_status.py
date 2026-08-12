@@ -94,6 +94,29 @@ def complete_fixtures(reports: Path, *, pure: int = 2) -> None:
                 }
                 for digest in ("e", "f")
             ],
+            accepted_evidence_audit={
+                "status": "PASS",
+                "records_audited": 150,
+                "counts_by_failure": {
+                    "EMPTY_GRASP": 50,
+                    "WRONG_OBJECT": 50,
+                    "RELEASE_FAILURE": 50,
+                },
+                "evidence_sha256_matches": 150,
+                "strict_physical_public_predicates_passed": 150,
+                "public_predicate_results_checked": 300,
+                "collision_gates_checked": 550,
+                "collision_or_safety_violations": 0,
+                "teacher_used": False,
+                "privileged_truth_policy_input": False,
+                "acceptance_predicate": {
+                    "path": "scripts/m2b/run_physical_failure_smoke.py",
+                    "sha256": "7e68c9f18b26bedaa600e642ca59339da9a99739bc2770d8aed3f87c53e98865",
+                    "public_rgbd_required": True,
+                    "predicate": "m2b.run_physical_failure_smoke.accepted",
+                },
+                "records": [{} for _ in range(150)],
+            },
         ),
     )
     write(
@@ -234,6 +257,25 @@ def test_status_rejects_s3_without_frozen_evidence_ledger(tmp_path: Path) -> Non
     s3 = json.loads(s3_path.read_text())
     s3["evidence_freeze"]["evidence_tree_readonly"] = False
     s3["worker_status_snapshots"][1]["status"] = "RUNNING_OR_PARTIAL"
+    s3_path.write_text(json.dumps(s3))
+
+    completed, payload = run_status(reports)
+
+    assert completed.returncode == 2
+    assert payload["goal_complete"] is False
+    assert payload["completion_gates"]["s3_full_class_coverage"] is False
+
+
+def test_status_rejects_s3_without_complete_strict_evidence_audit(
+    tmp_path: Path,
+) -> None:
+    reports = tmp_path / "reports"
+    reports.mkdir()
+    complete_fixtures(reports)
+    s3_path = reports / "m2c-s3-dataset-v3.json"
+    s3 = json.loads(s3_path.read_text())
+    s3["accepted_evidence_audit"]["records_audited"] = 149
+    s3["accepted_evidence_audit"]["collision_or_safety_violations"] = 1
     s3_path.write_text(json.dumps(s3))
 
     completed, payload = run_status(reports)

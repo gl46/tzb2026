@@ -109,3 +109,18 @@ def test_worker_status_rejects_teacher_boundary_violation(tmp_path: Path) -> Non
         assert "Teacher-free" in str(error)
     else:
         raise AssertionError("Teacher boundary violation was accepted")
+
+
+def test_worker_status_rejects_counts_above_frozen_target(tmp_path: Path) -> None:
+    root = tmp_path / "s3-failure-evidence-v1"
+    status = build_worker(root, "worker0")
+    payload = json.loads(status.read_text())
+    payload["accepted_counts"]["EMPTY_GRASP"] = 2
+    status.write_text(json.dumps(payload), encoding="utf-8")
+
+    try:
+        validate_worker_status(root, status, accepted_target=1)
+    except ValueError as error:
+        assert "do not equal frozen target" in str(error)
+    else:
+        raise AssertionError("accepted count above frozen target was accepted")

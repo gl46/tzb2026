@@ -19,6 +19,10 @@ from m2b.build_dataset_v2 import (
     remote_json,
     remote_sha256,
 )
+from m2b.run_physical_failure_smoke import (
+    PHYSICAL_SMOKE_SOURCE_SHA256,
+    accepted as strict_smoke_accepted,
+)
 from m2c.build_headroom_domain import DATASET_VERSION, PROJECT, sha256_file
 from m2c.freeze_s3_evidence import DEFAULT_REMOTE_ROOT, LEDGER_NAME
 from xh_agent.data_engine.isaac.failure_rich import (
@@ -27,6 +31,38 @@ from xh_agent.data_engine.isaac.failure_rich import (
 
 
 MANDATORY_FAILURES = ("EMPTY_GRASP", "WRONG_OBJECT", "RELEASE_FAILURE")
+EXPECTED_NEW_ACCEPTED_PER_FAILURE = 50
+FROZEN_PHYSICAL_RUNNER = "scripts/m2b/run_physical_failure_smoke.py"
+FROZEN_PHYSICAL_RUNNER_SHA256 = (
+    "7e68c9f18b26bedaa600e642ca59339da9a99739bc2770d8aed3f87c53e98865"
+)
+REQUIRED_COLLISION_GATE_PATHS = {
+    "EMPTY_GRASP": {
+        "$.phases.detach_retreat.collision_gate",
+        "$.phases.lift.collision_gate",
+    },
+    "WRONG_OBJECT": {
+        "$.m2b_recovery.wrong_object.regrasp_execution.lift_motion.collision_gate",
+        "$.m2b_recovery.wrong_object.regrasp_execution.pregrasp_motion.collision_gate",
+        "$.phases.detach_retreat.collision_gate",
+        "$.phases.lift.collision_gate",
+    },
+    "RELEASE_FAILURE": {
+        "$.m2b_release_failure_injection.follow_motion.collision_gate",
+        "$.phases.detach_retreat.collision_gate",
+        "$.phases.lift.collision_gate",
+    },
+}
+INJECTION_KEY = {
+    "EMPTY_GRASP": "m2b_empty_grasp_injection",
+    "WRONG_OBJECT": "m2b_wrong_object_injection",
+    "RELEASE_FAILURE": "m2b_release_failure_injection",
+}
+RECOVERY_PUBLIC_PREDICATE_KEY = {
+    "EMPTY_GRASP": "public_final_predicates",
+    "WRONG_OBJECT": "public_regrasp_predicates",
+    "RELEASE_FAILURE": "public_final_predicates",
+}
 FULL_FAILURE_MINIMUM = 100
 FULL_RECOVERY_MINIMUM = 50
 BASE_DATASET = PROJECT / "artifacts/m2b/dataset-v2.jsonl"
@@ -184,6 +220,252 @@ def accepted_evidence(
     return evidence, rejected
 
 
+def validate_frozen_acceptance_predicate(plan: dict[str, Any]) -> dict[str, Any]:
+    """Bind the re-audit to the exact predicate source used for S3 collection."""
+    runtime = plan.get("frozen_collection_runtime")
+    if not isinstance(runtime, dict):
+        raise ValueError("S3 plan lacks frozen collection runtime")
+    if runtime.get("physical_runner") != FROZEN_PHYSICAL_RUNNER:
+        raise ValueError("S3 physical acceptance predicate path changed")
+    if runtime.get("physical_runner_sha256") != FROZEN_PHYSICAL_RUNNER_SHA256:
+        raise ValueError("S3 plan physical acceptance predicate SHA-256 changed")
+    runner = PROJECT / FROZEN_PHYSICAL_RUNNER
+    actual = sha256_file(runner)
+    if actual != FROZEN_PHYSICAL_RUNNER_SHA256:
+        raise ValueError("local S3 physical acceptance predicate source changed")
+    if PHYSICAL_SMOKE_SOURCE_SHA256 != FROZEN_PHYSICAL_RUNNER_SHA256:
+        raise ValueError("imported S3 physical acceptance predicate source changed")
+    return {
+        "path": FROZEN_PHYSICAL_RUNNER,
+        "sha256": FROZEN_PHYSICAL_RUNNER_SHA256,
+        "public_rgbd_required": True,
+        "predicate": "m2b.run_physical_failure_smoke.accepted",
+    }
+
+
+def _walk_objects(value: object, path: str = "$") -> list[tuple[str, dict[str, Any]]]:
+    objects: list[tuple[str, dict[str, Any]]] = []
+    if isinstance(value, dict):
+        objects.append((path, value))
+        for key, child in value.items():
+            objects.extend(_walk_objects(child, f"{path}.{key}"))
+    elif isinstance(value, list):
+        for index, child in enumerate(value):
+            objects.extend(_walk_objects(child, f"{path}[{index}]"))
+    return objects
+
+
+def _validate_public_predicate_result(
+    predicate: object,
+    *,
+    location: str,
+) -> None:
+    if not isinstance(predicate, dict):
+        raise ValueError(f"missing public predicate result at {location}")
+    if predicate.get("schema_version") != "PublicFailurePredicateResultV2":
+        raise ValueError(f"unsupported public predicate schema at {location}")
+    if predicate.get("simulator_truth_used") is not False:
+        raise ValueError(f"simulator truth entered public predicate at {location}")
+    if not str(predicate.get("source", "")).startswith("PUBLIC_"):
+        raise ValueError(f"non-public predicate source at {location}")
+    if not predicate.get("predicates"):
+        raise ValueError(f"empty public predicate result at {location}")
+
+
+def audit_accepted_payload(
+    payload: dict[str, Any],
+    *,
+    failure: str,
+    evidence_path: str,
+    declared_sha256: str,
+    actual_sha256: str,
+    scene_seed: int,
+) -> dict[str, Any]:
+    """Re-run the frozen physical/public acceptance boundary for one record."""
+    if failure not in MANDATORY_FAILURES:
+        raise ValueError(f"unsupported accepted failure type: {failure}")
+    if declared_sha256 != actual_sha256 or len(actual_sha256) != 64:
+        raise ValueError(f"accepted evidence SHA-256 mismatch: {evidence_path}")
+    if int(payload.get("scene_seed", -1)) != scene_seed:
+        raise ValueError(f"accepted evidence scene seed mismatch: {evidence_path}")
+    if not strict_smoke_accepted(payload, failure, public_rgbd_required=True):
+        raise ValueError(f"strict physical/public predicate failed: {evidence_path}")
+
+    objects = _walk_objects(payload)
+    teacher_true = [
+        path
+        for path, item in objects
+        if item.get("teacher_used") is True
+        or ("teacher_response" in item and item.get("teacher_response") is not None)
+    ]
+    if teacher_true:
+        raise ValueError(f"Teacher boundary violation at {teacher_true[0]}")
+    policy_truth_true = [
+        path
+        for path, item in objects
+        if item.get("privileged_truth_policy_input") is True
+        or item.get("simulator_truth_policy_input") is True
+        or item.get("policy_input_simulator_truth") is True
+    ]
+    if policy_truth_true:
+        raise ValueError(f"privileged truth policy-input violation at {policy_truth_true[0]}")
+
+    public_rgbd = payload.get("m2b_public_rgbd")
+    if not isinstance(public_rgbd, dict):
+        raise ValueError(f"missing public RGB-D evidence: {evidence_path}")
+    if public_rgbd.get("schema_version") != "M2BPublicRGBDEvidenceV2":
+        raise ValueError(f"unsupported public RGB-D schema: {evidence_path}")
+    if public_rgbd.get("simulator_truth_policy_input") is not False:
+        raise ValueError(f"public RGB-D used simulator truth: {evidence_path}")
+    task_spec = public_rgbd.get("task_spec")
+    if not isinstance(task_spec, dict) or not str(task_spec.get("target_track_id", "")).startswith(
+        "track-"
+    ):
+        raise ValueError(f"public TaskSpec target track is missing: {evidence_path}")
+
+    injection = payload.get(INJECTION_KEY[failure])
+    recovery = (payload.get("m2b_recovery") or {}).get(failure.lower())
+    if not isinstance(injection, dict) or not isinstance(recovery, dict):
+        raise ValueError(f"failure/recovery payload is missing: {evidence_path}")
+    _validate_public_predicate_result(
+        injection.get("public_predicates"),
+        location=f"{evidence_path}:{INJECTION_KEY[failure]}.public_predicates",
+    )
+    recovery_predicate_key = RECOVERY_PUBLIC_PREDICATE_KEY[failure]
+    _validate_public_predicate_result(
+        recovery.get(recovery_predicate_key),
+        location=f"{evidence_path}:m2b_recovery.{failure.lower()}.{recovery_predicate_key}",
+    )
+
+    protocol = payload.get("action_protocol")
+    protocol_fields = ("frame", "units", "dimensions", "frequency_hz", "normalization")
+    if not isinstance(protocol, dict) or any(protocol.get(field) in (None, "") for field in protocol_fields):
+        raise ValueError(f"action protocol is not explicit: {evidence_path}")
+
+    collision_gates = [
+        (path, item)
+        for path, item in objects
+        if item.get("schema_version") == "M2BIsaacCollisionGateV1"
+    ]
+    collision_paths = {path for path, _ in collision_gates}
+    missing_collision_paths = REQUIRED_COLLISION_GATE_PATHS[failure] - collision_paths
+    if failure == "WRONG_OBJECT" and not any(
+        path.startswith(
+            "$.m2b_recovery.wrong_object.regrasp_execution.attempts["
+        )
+        and path.endswith("].contact_motion.collision_gate")
+        for path in collision_paths
+    ):
+        missing_collision_paths.add(
+            "$.m2b_recovery.wrong_object.regrasp_execution."
+            "attempts[*].contact_motion.collision_gate"
+        )
+    if failure == "WRONG_OBJECT" and not any(
+        path.startswith(
+            "$.m2b_recovery.wrong_object.regrasp_execution.ik_reachability_scan.trials["
+        )
+        and path.endswith("].pregrasp_motion.collision_gate")
+        for path in collision_paths
+    ):
+        missing_collision_paths.add(
+            "$.m2b_recovery.wrong_object.regrasp_execution."
+            "ik_reachability_scan.trials[*].pregrasp_motion.collision_gate"
+        )
+    if missing_collision_paths:
+        raise ValueError(
+            f"required collision gates are missing for {failure}: "
+            f"{sorted(missing_collision_paths)}: {evidence_path}"
+        )
+    for path, gate in collision_gates:
+        if (
+            gate.get("status") != "PASS"
+            or gate.get("contact_reporting_required") is not True
+            or int(gate.get("unexpected_robot_contact_events", -1)) != 0
+            or gate.get("unexpected_contacts") not in ([], None)
+            or gate.get("teacher_used") is not False
+            or gate.get("privileged_truth_policy_input") is not False
+        ):
+            raise ValueError(f"collision/safety gate failed at {path}: {evidence_path}")
+
+    return {
+        "scene_seed": scene_seed,
+        "failure_type": failure,
+        "evidence_path": evidence_path,
+        "evidence_sha256": actual_sha256,
+        "strict_physical_public_predicate_passed": True,
+        "public_predicate_results_checked": 2,
+        "collision_gates_checked": len(collision_gates),
+        "collision_or_safety_violations": 0,
+        "teacher_used": False,
+        "privileged_truth_policy_input": False,
+    }
+
+
+def audit_accepted_evidence(
+    statuses: list[dict[str, Any]],
+    *,
+    host: str,
+    predicate_binding: dict[str, Any],
+    expected_per_failure: int = EXPECTED_NEW_ACCEPTED_PER_FAILURE,
+) -> dict[str, Any]:
+    """Independently re-audit every accepted S3 payload after evidence freeze."""
+    records: list[dict[str, Any]] = []
+    counts: Counter[str] = Counter()
+    for status in statuses:
+        if status.get("teacher_used") is not False:
+            raise ValueError("S3 worker status is not explicitly Teacher-free")
+        if status.get("privileged_truth_policy_input") is not False:
+            raise ValueError("S3 worker status used privileged policy input")
+        for record in status.get("records", []):
+            if record.get("accepted") is not True:
+                continue
+            failure = str(record.get("failure_type"))
+            path = str(record.get("evidence"))
+            declared_sha256 = str(record.get("evidence_sha256", ""))
+            actual_sha256 = remote_sha256(host, path)
+            payload = remote_json(host, path)
+            audited = audit_accepted_payload(
+                payload,
+                failure=failure,
+                evidence_path=path,
+                declared_sha256=declared_sha256,
+                actual_sha256=actual_sha256,
+                scene_seed=int(record.get("scene_seed", -1)),
+            )
+            records.append(audited)
+            counts[failure] += 1
+
+    expected_total = expected_per_failure * len(MANDATORY_FAILURES)
+    if len(records) != expected_total or any(
+        counts[failure] != expected_per_failure for failure in MANDATORY_FAILURES
+    ):
+        raise ValueError(
+            "accepted evidence audit did not bind the exact frozen S3 target: "
+            f"records={len(records)}, counts={dict(counts)}"
+        )
+    return {
+        "schema_version": "M2CS3AcceptedEvidenceAuditV1",
+        "status": "PASS",
+        "records_audited": len(records),
+        "counts_by_failure": {
+            failure: counts[failure] for failure in MANDATORY_FAILURES
+        },
+        "evidence_sha256_matches": len(records),
+        "strict_physical_public_predicates_passed": len(records),
+        "public_predicate_results_checked": sum(
+            int(record["public_predicate_results_checked"]) for record in records
+        ),
+        "collision_gates_checked": sum(
+            int(record["collision_gates_checked"]) for record in records
+        ),
+        "collision_or_safety_violations": 0,
+        "teacher_used": False,
+        "privileged_truth_policy_input": False,
+        "acceptance_predicate": predicate_binding,
+        "records": records,
+    }
+
+
 def _promote_record(
     episode: dict[str, Any],
     *,
@@ -311,6 +593,7 @@ def write_report_markdown(path: Path, report: dict[str, Any]) -> None:
     recoveries = report["successful_recovery_counts"]
     snapshots = report["worker_status_snapshots"]
     freeze = report["evidence_freeze"]
+    audit = report["accepted_evidence_audit"]
     rejected = report["collection_rejections"]
     lines = [
         "# M2C S3 Dataset V3",
@@ -321,6 +604,12 @@ def write_report_markdown(path: Path, report: dict[str, Any]) -> None:
         f"- Successful recovery counts: `{recoveries}`.",
         f"- Split-group leakage: `{report['split_group_leakage']}`.",
         f"- Collection attempts rejected by frozen predicates: {rejected}; every rejection is retained in the JSON report.",
+        (
+            f"- Accepted-evidence audit: {audit['records_audited']}/150 records; "
+            f"strict predicates {audit['strict_physical_public_predicates_passed']}/150; "
+            f"SHA matches {audit['evidence_sha256_matches']}/150; "
+            f"collision gates checked {audit['collision_gates_checked']}; violations 0."
+        ),
         "",
         "## Evidence boundary",
         "",
@@ -347,7 +636,7 @@ def write_report_markdown(path: Path, report: dict[str, Any]) -> None:
         f"  - `{report['fourth_class']['path']}` (SHA-256 `{report['fourth_class']['sha256']}`)",
         f"  - `{report['evidence_freeze']['report_path']}` (SHA-256 `{report['evidence_freeze']['report_sha256']}`)",
         f"  - `{path}`",
-        "- Verification: full class-coverage gate, strict episode validation, accepted-evidence SHA binding, zero packaging quarantine, and split-group leakage check.",
+        "- Verification: full class-coverage gate, 150/150 strict physical/public acceptance re-audit, recursive collision/safety gate audit, strict episode validation, accepted-evidence SHA binding, zero packaging quarantine, and split-group leakage check.",
         f"- Failures: {rejected} collection attempts were rejected and retained with explicit reasons; packaging quarantine is {report['episodes_quarantined']}.",
         "- Blocker: Q-B remains forbidden until a separate human expressivity ADR is committed; this S3 result does not authorize Q-B.",
         "- Next command: `sed -n '1,240p' docs/decisions/M2C-QB-EXPRESSIVITY-PREREG.md`.",
@@ -365,6 +654,7 @@ def write_outputs(
     worker_status_snapshots: list[dict[str, Any]],
     evidence_freeze: dict[str, Any],
     plan: dict[str, Any],
+    accepted_evidence_audit: dict[str, Any],
     output: Path,
     quarantine_path: Path,
     fourth_class_path: Path,
@@ -398,9 +688,44 @@ def write_outputs(
     rejections_by_failure = Counter(
         str(item.get("failure_type") or "INFRASTRUCTURE") for item in collection_rejections
     )
+    evidence_audit_passed = bool(
+        accepted_evidence_audit.get("status") == "PASS"
+        and int(accepted_evidence_audit.get("records_audited", -1))
+        == EXPECTED_NEW_ACCEPTED_PER_FAILURE * len(MANDATORY_FAILURES)
+        and accepted_evidence_audit.get("counts_by_failure")
+        == {
+            failure: EXPECTED_NEW_ACCEPTED_PER_FAILURE
+            for failure in MANDATORY_FAILURES
+        }
+        and int(accepted_evidence_audit.get("evidence_sha256_matches", -1))
+        == int(accepted_evidence_audit.get("records_audited", -2))
+        and int(
+            accepted_evidence_audit.get(
+                "strict_physical_public_predicates_passed", -1
+            )
+        )
+        == int(accepted_evidence_audit.get("records_audited", -2))
+        and int(accepted_evidence_audit.get("public_predicate_results_checked", -1))
+        == 300
+        and int(accepted_evidence_audit.get("collision_gates_checked", -1)) >= 550
+        and int(accepted_evidence_audit.get("collision_or_safety_violations", -1))
+        == 0
+        and len(accepted_evidence_audit.get("records", [])) == 150
+        and accepted_evidence_audit.get("teacher_used") is False
+        and accepted_evidence_audit.get("privileged_truth_policy_input") is False
+        and accepted_evidence_audit.get("acceptance_predicate")
+        == {
+            "path": FROZEN_PHYSICAL_RUNNER,
+            "sha256": FROZEN_PHYSICAL_RUNNER_SHA256,
+            "public_rgbd_required": True,
+            "predicate": "m2b.run_physical_failure_smoke.accepted",
+        }
+    )
     status = (
         "PASS_S3_FULL_CLASS_COVERAGE"
-        if coverage["full_class_coverage_gate_passed"] and not quarantine
+        if coverage["full_class_coverage_gate_passed"]
+        and not quarantine
+        and evidence_audit_passed
         else "IN_PROGRESS_S3_FULL_CLASS_COVERAGE"
     )
     report: dict[str, Any] = {
@@ -420,6 +745,7 @@ def write_outputs(
         "collection_rejection_records": collection_rejections,
         "worker_status_snapshots": worker_status_snapshots,
         "evidence_freeze": evidence_freeze,
+        "accepted_evidence_audit": accepted_evidence_audit,
         "code_revision_histogram": code_revision_histogram(merged),
         "base_dataset": {
             "path": str(BASE_DATASET),
@@ -501,8 +827,8 @@ def main() -> int:
         if status.get("status") != "COMPLETE_ACCEPTED_TARGET":
             raise SystemExit("S3 worker has not reached its frozen accepted target")
         counts = status.get("accepted_counts", {})
-        if any(int(counts.get(failure, 0)) < 25 for failure in MANDATORY_FAILURES):
-            raise SystemExit("S3 worker accepted counts are below 25/class")
+        if any(int(counts.get(failure, -1)) != 25 for failure in MANDATORY_FAILURES):
+            raise SystemExit("S3 worker accepted counts do not equal 25/class")
     try:
         evidence_freeze = validate_evidence_freeze(
             args.freeze_report,
@@ -513,6 +839,15 @@ def main() -> int:
     except (OSError, ValueError, subprocess.SubprocessError) as error:
         raise SystemExit(str(error)) from error
     evidence, rejected = accepted_evidence(statuses)
+    try:
+        predicate_binding = validate_frozen_acceptance_predicate(plan)
+        accepted_evidence_audit = audit_accepted_evidence(
+            statuses,
+            host=args.host,
+            predicate_binding=predicate_binding,
+        )
+    except (KeyError, TypeError, ValueError, subprocess.SubprocessError) as error:
+        raise SystemExit(str(error)) from error
     additions, package_quarantine = package(evidence, host=args.host)
     report = write_outputs(
         base=load_jsonl(BASE_DATASET),
@@ -521,6 +856,7 @@ def main() -> int:
         collection_rejections=rejected,
         worker_status_snapshots=worker_status_snapshots,
         evidence_freeze=evidence_freeze,
+        accepted_evidence_audit=accepted_evidence_audit,
         plan=plan,
         output=args.output,
         quarantine_path=args.quarantine,

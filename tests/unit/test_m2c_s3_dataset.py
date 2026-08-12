@@ -6,7 +6,11 @@ from pathlib import Path
 
 import m2c.build_s3_dataset as s3_dataset
 from m2c.build_s3_dataset import (
+    FROZEN_PHYSICAL_RUNNER,
+    FROZEN_PHYSICAL_RUNNER_SHA256,
     accepted_evidence,
+    audit_accepted_evidence,
+    audit_accepted_payload,
     coverage_summary,
     fourth_class_records,
     load_stable_worker_status,
@@ -14,6 +18,7 @@ from m2c.build_s3_dataset import (
     merge_episodes,
     validate_evidence_freeze,
     verify_remote_evidence_ledger,
+    validate_frozen_acceptance_predicate,
     write_outputs,
 )
 
@@ -46,6 +51,30 @@ EVIDENCE_FREEZE = {
     "files_hashed": 10,
     "evidence_tree_readonly": True,
 }
+ACCEPTED_EVIDENCE_AUDIT = {
+    "schema_version": "M2CS3AcceptedEvidenceAuditV1",
+    "status": "PASS",
+    "records_audited": 150,
+    "counts_by_failure": {
+        "EMPTY_GRASP": 50,
+        "WRONG_OBJECT": 50,
+        "RELEASE_FAILURE": 50,
+    },
+    "evidence_sha256_matches": 150,
+    "strict_physical_public_predicates_passed": 150,
+    "public_predicate_results_checked": 300,
+    "collision_gates_checked": 550,
+    "collision_or_safety_violations": 0,
+    "teacher_used": False,
+    "privileged_truth_policy_input": False,
+    "acceptance_predicate": {
+        "path": FROZEN_PHYSICAL_RUNNER,
+        "sha256": FROZEN_PHYSICAL_RUNNER_SHA256,
+        "public_rgbd_required": True,
+        "predicate": "m2b.run_physical_failure_smoke.accepted",
+    },
+    "records": [{} for _ in range(150)],
+}
 
 
 def clone_episode(source: dict, *, index: int) -> dict:
@@ -62,6 +91,111 @@ def clone_episode(source: dict, *, index: int) -> dict:
     item["provenance"]["evidence_sha256"] = digest
     item["provenance"]["evidence_path"] = f"/remote/evidence-{index}.json"
     return item
+
+
+def accepted_payload(failure: str, *, scene_seed: int = 10000) -> dict:
+    public_result = {
+        "schema_version": "PublicFailurePredicateResultV2",
+        "source": "PUBLIC_RGBD_TEMPORAL_TRACKS_ONLY",
+        "predicates": ["observed=true"],
+        "simulator_truth_used": False,
+    }
+    injection_key = {
+        "EMPTY_GRASP": "m2b_empty_grasp_injection",
+        "WRONG_OBJECT": "m2b_wrong_object_injection",
+        "RELEASE_FAILURE": "m2b_release_failure_injection",
+    }[failure]
+    recovery_key = {
+        "EMPTY_GRASP": "public_final_predicates",
+        "WRONG_OBJECT": "public_regrasp_predicates",
+        "RELEASE_FAILURE": "public_final_predicates",
+    }[failure]
+    recovery = {
+        "training_eligible": True,
+        recovery_key: deepcopy(public_result),
+    }
+    if failure == "EMPTY_GRASP":
+        recovery["physical_regrasp_and_lift_passed"] = True
+    elif failure == "WRONG_OBJECT":
+        recovery.update(
+            {
+                "safe_place_non_target_passed": True,
+                "reassociate_target_executed": True,
+                "regrasp_target_executed": True,
+            }
+        )
+    else:
+        recovery["retry_detach_and_retreat_passed"] = True
+    collision_gate = {
+        "schema_version": "M2BIsaacCollisionGateV1",
+        "status": "PASS",
+        "contact_reporting_required": True,
+        "unexpected_robot_contact_events": 0,
+        "unexpected_contacts": [],
+        "teacher_used": False,
+        "privileged_truth_policy_input": False,
+    }
+    payload = {
+        "status": "PASS",
+        "scene_seed": scene_seed,
+        "m2b_injection_pass": True,
+        injection_key: {
+            "failure_type": failure,
+            "physical_state_passed": True,
+            "training_eligible": True,
+            "public_predicates": deepcopy(public_result),
+        },
+        "m2b_recovery": {failure.lower(): recovery},
+        "m2b_public_rgbd": {
+            "schema_version": "M2BPublicRGBDEvidenceV2",
+            "simulator_truth_policy_input": False,
+            "task_spec": {"target_track_id": "track-public"},
+        },
+        "action_protocol": {
+            "frame": "PANDA_JOINT_ORDER_BY_NAME",
+            "units": "radian_arm_metre_finger",
+            "dimensions": 9,
+            "frequency_hz": 60,
+            "normalization": "none",
+        },
+        "phases": {
+            "detach_retreat": {"collision_gate": deepcopy(collision_gate)},
+            "lift": {"collision_gate": deepcopy(collision_gate)},
+        },
+    }
+    if failure == "RELEASE_FAILURE":
+        payload["m2b_release_failure_injection"]["follow_motion"] = {
+            "collision_gate": deepcopy(collision_gate)
+        }
+    elif failure == "WRONG_OBJECT":
+        payload["m2b_recovery"]["wrong_object"]["regrasp_execution"] = {
+            "attempts": [
+                {"contact_motion": {"collision_gate": deepcopy(collision_gate)}}
+            ],
+            "ik_reachability_scan": {
+                "trials": [
+                    {
+                        "pregrasp_motion": {
+                            "collision_gate": deepcopy(collision_gate)
+                        }
+                    }
+                ]
+            },
+            "lift_motion": {"collision_gate": deepcopy(collision_gate)},
+            "pregrasp_motion": {"collision_gate": deepcopy(collision_gate)},
+        }
+    return payload
+
+
+def audit_one(payload: dict, failure: str) -> dict:
+    return audit_accepted_payload(
+        payload,
+        failure=failure,
+        evidence_path=f"/remote/{failure}.json",
+        declared_sha256="a" * 64,
+        actual_sha256="a" * 64,
+        scene_seed=10000,
+    )
 
 
 def test_worker_status_extracts_accepted_and_records_rejections() -> None:
@@ -90,6 +224,121 @@ def test_worker_status_extracts_accepted_and_records_rejections() -> None:
     assert evidence == [("EMPTY_GRASP", "/accepted.json")]
     assert len(rejected) == 2
     assert all(item["reason"] for item in rejected)
+
+
+def test_strict_accepted_payload_audit_rechecks_all_three_failure_classes() -> None:
+    audited = {
+        failure: audit_one(accepted_payload(failure), failure)
+        for failure in ("EMPTY_GRASP", "WRONG_OBJECT", "RELEASE_FAILURE")
+    }
+    assert {
+        failure: item["collision_gates_checked"]
+        for failure, item in audited.items()
+    } == {"EMPTY_GRASP": 2, "WRONG_OBJECT": 6, "RELEASE_FAILURE": 3}
+    assert all(item["strict_physical_public_predicate_passed"] for item in audited.values())
+    assert all(item["collision_or_safety_violations"] == 0 for item in audited.values())
+
+
+def test_strict_accepted_payload_audit_rejects_predicate_and_collision_drift() -> None:
+    predicate_drift = accepted_payload("EMPTY_GRASP")
+    predicate_drift["m2b_empty_grasp_injection"]["physical_state_passed"] = False
+    try:
+        audit_one(predicate_drift, "EMPTY_GRASP")
+    except ValueError as error:
+        assert "strict physical/public predicate failed" in str(error)
+    else:
+        raise AssertionError("failed physical predicate was accepted")
+
+    collision_drift = accepted_payload("WRONG_OBJECT")
+    collision_drift["phases"]["lift"]["collision_gate"]["status"] = "REJECTED"
+    try:
+        audit_one(collision_drift, "WRONG_OBJECT")
+    except ValueError as error:
+        assert "collision/safety gate failed" in str(error)
+    else:
+        raise AssertionError("failed collision gate was accepted")
+
+
+def test_strict_accepted_payload_audit_rejects_teacher_truth_and_hash_drift() -> None:
+    teacher_drift = accepted_payload("RELEASE_FAILURE")
+    teacher_drift["nested"] = {"teacher_used": True}
+    try:
+        audit_one(teacher_drift, "RELEASE_FAILURE")
+    except ValueError as error:
+        assert "Teacher boundary violation" in str(error)
+    else:
+        raise AssertionError("Teacher boundary violation was accepted")
+
+    truth_drift = accepted_payload("RELEASE_FAILURE")
+    truth_drift["nested"] = {"privileged_truth_policy_input": True}
+    try:
+        audit_one(truth_drift, "RELEASE_FAILURE")
+    except ValueError as error:
+        assert "privileged truth policy-input violation" in str(error)
+    else:
+        raise AssertionError("privileged truth policy input was accepted")
+
+    try:
+        audit_accepted_payload(
+            accepted_payload("EMPTY_GRASP"),
+            failure="EMPTY_GRASP",
+            evidence_path="/remote/evidence.json",
+            declared_sha256="a" * 64,
+            actual_sha256="b" * 64,
+            scene_seed=10000,
+        )
+    except ValueError as error:
+        assert "SHA-256 mismatch" in str(error)
+    else:
+        raise AssertionError("evidence hash drift was accepted")
+
+
+def test_accepted_evidence_audit_requires_exact_per_class_target(monkeypatch) -> None:
+    statuses = [
+        {
+            "teacher_used": False,
+            "privileged_truth_policy_input": False,
+            "records": [
+                {
+                    "accepted": True,
+                    "failure_type": failure,
+                    "scene_seed": 10000,
+                    "evidence": f"/remote/{failure}.json",
+                    "evidence_sha256": "a" * 64,
+                }
+                for failure in ("EMPTY_GRASP", "WRONG_OBJECT", "RELEASE_FAILURE")
+            ],
+        }
+    ]
+    payloads = {
+        f"/remote/{failure}.json": accepted_payload(failure)
+        for failure in ("EMPTY_GRASP", "WRONG_OBJECT", "RELEASE_FAILURE")
+    }
+    monkeypatch.setattr(s3_dataset, "remote_sha256", lambda host, path: "a" * 64)
+    monkeypatch.setattr(s3_dataset, "remote_json", lambda host, path: payloads[path])
+
+    audit = audit_accepted_evidence(
+        statuses,
+        host="root@labserver",
+        predicate_binding=ACCEPTED_EVIDENCE_AUDIT["acceptance_predicate"],
+        expected_per_failure=1,
+    )
+    assert audit["records_audited"] == 3
+    assert audit["strict_physical_public_predicates_passed"] == 3
+    assert audit["collision_gates_checked"] == 11
+
+    statuses[0]["records"].pop()
+    try:
+        audit_accepted_evidence(
+            statuses,
+            host="root@labserver",
+            predicate_binding=ACCEPTED_EVIDENCE_AUDIT["acceptance_predicate"],
+            expected_per_failure=1,
+        )
+    except ValueError as error:
+        assert "exact frozen S3 target" in str(error)
+    else:
+        raise AssertionError("incomplete per-class evidence target was accepted")
 
 
 def test_stable_worker_status_snapshot_binds_remote_bytes(monkeypatch) -> None:
@@ -124,6 +373,20 @@ def test_worker_status_snapshot_rejects_mid_read_change(monkeypatch) -> None:
         assert "changed while being read" in str(error)
     else:
         raise AssertionError("changing worker status was accepted")
+
+
+def test_acceptance_predicate_is_bound_to_frozen_collection_source() -> None:
+    binding = validate_frozen_acceptance_predicate(PLAN)
+    assert binding == ACCEPTED_EVIDENCE_AUDIT["acceptance_predicate"]
+
+    changed = deepcopy(PLAN)
+    changed["frozen_collection_runtime"]["physical_runner_sha256"] = "0" * 64
+    try:
+        validate_frozen_acceptance_predicate(changed)
+    except ValueError as error:
+        assert "predicate SHA-256 changed" in str(error)
+    else:
+        raise AssertionError("changed physical acceptance predicate was accepted")
 
 
 def test_evidence_freeze_binds_exact_worker_status_snapshots(tmp_path: Path) -> None:
@@ -295,6 +558,7 @@ def test_output_report_fails_closed_on_packaging_quarantine(
         ],
         worker_status_snapshots=[WORKER_STATUS_SNAPSHOT],
         evidence_freeze=EVIDENCE_FREEZE,
+        accepted_evidence_audit=ACCEPTED_EVIDENCE_AUDIT,
         plan=PLAN,
         output=tmp_path / "dataset.jsonl",
         quarantine_path=tmp_path / "quarantine.jsonl",
@@ -332,6 +596,7 @@ def test_output_report_passes_full_gate_and_keeps_fourth_class_raw_only(
         collection_rejections=[],
         worker_status_snapshots=[WORKER_STATUS_SNAPSHOT],
         evidence_freeze=EVIDENCE_FREEZE,
+        accepted_evidence_audit=ACCEPTED_EVIDENCE_AUDIT,
         plan=PLAN,
         output=output,
         quarantine_path=quarantine,
@@ -357,5 +622,6 @@ def test_output_report_passes_full_gate_and_keeps_fourth_class_raw_only(
     markdown = (tmp_path / "report.md").read_text()
     assert "# M2C S3 Dataset V3" in markdown
     assert "Teacher used: no" in markdown
+    assert "150/150 records" in markdown
     assert "Q-B remains forbidden" in markdown
     assert EVIDENCE_FREEZE["ledger_sha256"] in markdown
