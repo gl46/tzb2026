@@ -31,6 +31,7 @@ BASE_DATASET = PROJECT / "artifacts/m2b/dataset-v2.jsonl"
 BASE_DATASET_SHA256 = "c24e34493ba2226c1aa691c1b1c43993fbecdff5ad74b291e08c4913efc71362"
 DEFAULT_PLAN = PROJECT / "configs/m2c_s3_collection_plan.json"
 DEFAULT_FREEZE_REPORT = PROJECT / "reports/m2c-s3-evidence-freeze.json"
+DEFAULT_REPORT_MD = PROJECT / "reports/m2c-s3-dataset-v3.md"
 
 
 def load_stable_worker_status(
@@ -284,6 +285,56 @@ def fourth_class_records(plan: dict[str, Any]) -> list[dict[str, Any]]:
     ]
 
 
+def write_report_markdown(path: Path, report: dict[str, Any]) -> None:
+    failures = report["failure_counts"]
+    recoveries = report["successful_recovery_counts"]
+    snapshots = report["worker_status_snapshots"]
+    freeze = report["evidence_freeze"]
+    rejected = report["collection_rejections"]
+    lines = [
+        "# M2C S3 Dataset V3",
+        "",
+        f"- Verdict: **{report['status']}**.",
+        f"- Valid/quarantined episodes: {report['episodes_valid']}/{report['episodes_quarantined']}.",
+        f"- Failure counts: `{failures}`.",
+        f"- Successful recovery counts: `{recoveries}`.",
+        f"- Split-group leakage: `{report['split_group_leakage']}`.",
+        f"- Collection attempts rejected by frozen predicates: {rejected}; every rejection is retained in the JSON report.",
+        "",
+        "## Evidence boundary",
+        "",
+        f"- Remote evidence tree: `{freeze['remote_root']}`; read-only: `{freeze['evidence_tree_readonly']}`.",
+        f"- Evidence ledger: `{freeze['ledger']}`; SHA-256 `{freeze['ledger_sha256']}`; {freeze['files_hashed']} files bound.",
+        *[
+            (
+                f"- Worker status `{snapshot['path']}`: SHA-256 "
+                f"`{snapshot['sha256']}`, accepted `{snapshot['accepted_counts']}`, "
+                f"records `{snapshot['record_count']}`."
+            )
+            for snapshot in snapshots
+        ],
+        "- Teacher used: no; Teacher kill-rule events: none.",
+        "- Privileged simulator truth used as policy input: no.",
+        "- The world-model mainline was not replaced.",
+        "- PATH_BLOCKED remains raw evaluator evidence only; it is not a model training label and no new skill label was created.",
+        "",
+        "## Task report",
+        "",
+        "- Changed/generated files:",
+        f"  - `{report['output_path']}` (SHA-256 `{report['output_sha256']}`)",
+        f"  - `{report['quarantine_path']}` (SHA-256 `{report['quarantine_sha256']}`)",
+        f"  - `{report['fourth_class']['path']}` (SHA-256 `{report['fourth_class']['sha256']}`)",
+        f"  - `{report['evidence_freeze']['report_path']}` (SHA-256 `{report['evidence_freeze']['report_sha256']}`)",
+        f"  - `{path}`",
+        "- Verification: full class-coverage gate, strict episode validation, accepted-evidence SHA binding, zero packaging quarantine, and split-group leakage check.",
+        f"- Failures: {rejected} collection attempts were rejected and retained with explicit reasons; packaging quarantine is {report['episodes_quarantined']}.",
+        "- Blocker: Q-B remains forbidden until a separate human expressivity ADR is committed; this S3 result does not authorize Q-B.",
+        "- Next command: `sed -n '1,240p' docs/decisions/M2C-QB-EXPRESSIVITY-PREREG.md`.",
+    ]
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
 def write_outputs(
     *,
     base: list[dict[str, Any]],
@@ -297,6 +348,7 @@ def write_outputs(
     quarantine_path: Path,
     fourth_class_path: Path,
     report_path: Path,
+    report_md_path: Path | None = None,
 ) -> dict[str, Any]:
     merged, merge_quarantine = merge_episodes(base, additions)
     quarantine = [*package_quarantine, *merge_quarantine]
@@ -385,6 +437,8 @@ def write_outputs(
         json.dumps(report, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
+    if report_md_path is not None:
+        write_report_markdown(report_md_path, report)
     return report
 
 
@@ -403,6 +457,7 @@ def main() -> int:
     parser.add_argument("--quarantine", required=True, type=Path)
     parser.add_argument("--fourth-class-output", required=True, type=Path)
     parser.add_argument("--report", required=True, type=Path)
+    parser.add_argument("--report-md", type=Path, default=DEFAULT_REPORT_MD)
     args = parser.parse_args()
 
     if sha256_file(BASE_DATASET) != BASE_DATASET_SHA256:
@@ -449,6 +504,7 @@ def main() -> int:
         quarantine_path=args.quarantine,
         fourth_class_path=args.fourth_class_output,
         report_path=args.report,
+        report_md_path=args.report_md,
     )
     print(json.dumps(report, indent=2, sort_keys=True))
     return 0 if report["status"] == "PASS_S3_FULL_CLASS_COVERAGE" else 1

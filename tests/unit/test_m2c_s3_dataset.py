@@ -299,6 +299,7 @@ def test_output_report_passes_full_gate_and_keeps_fourth_class_raw_only(
         quarantine_path=quarantine,
         fourth_class_path=fourth,
         report_path=tmp_path / "report.json",
+        report_md_path=tmp_path / "report.md",
     )
 
     assert report["status"] == "PASS_S3_FULL_CLASS_COVERAGE"
@@ -315,3 +316,8 @@ def test_output_report_passes_full_gate_and_keeps_fourth_class_raw_only(
     assert all(
         item["failure_context"]["failure_type"] != "PATH_BLOCKED" for item in load_jsonl(output)
     )
+    markdown = (tmp_path / "report.md").read_text()
+    assert "# M2C S3 Dataset V3" in markdown
+    assert "Teacher used: no" in markdown
+    assert "Q-B remains forbidden" in markdown
+    assert EVIDENCE_FREEZE["ledger_sha256"] in markdown

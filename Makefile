@@ -239,7 +239,8 @@ m2c-s3-dataset: m2c-s3-evidence-freeze
 		--output artifacts/m2c/dataset-v3.jsonl \
 		--quarantine artifacts/m2c/dataset-v3-quarantine.jsonl \
 		--fourth-class-output artifacts/m2c/path-blocked-raw-v1.jsonl \
-		--report reports/m2c-s3-dataset-v3.json
+		--report reports/m2c-s3-dataset-v3.json \
+		--report-md reports/m2c-s3-dataset-v3.md
 
 m2c-status:
 	M2B_EVIDENCE_READONLY=1 $(PYTHON) scripts/m2c/status.py
