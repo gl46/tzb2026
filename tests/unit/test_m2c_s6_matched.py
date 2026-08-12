@@ -81,6 +81,44 @@ def episode(
     )
 
 
+def nonexecution_episode(index: int, method: str) -> M2BClosedLoopEpisodeV1:
+    key = f"m2c-s6-key-{index:03d}"
+    digest = hashlib.sha256(f"{key}:{method}:rejected".encode()).hexdigest()
+    item = M2BClosedLoopDecisionV1(
+        decision_id=f"{key}:{method}:decision-0",
+        step_id=0,
+        selected_skill="REOBSERVE",
+        previous_failed_skill="GRASP",
+        model_decision=True,
+        mapping_status="REJECTED",
+        ik_gate="NOT_RUN",
+        collision_gate="NOT_RUN",
+        safety_gate="REJECTED",
+        execution_source="NONE",
+        executed_skill=None,
+        outcome="FAILURE",
+        registry_sha256=digest,
+        model_checkpoint_sha256=digest,
+        model_input_sha256=digest,
+        model_output_sha256=digest,
+        mapping_result_sha256=digest,
+    )
+    return M2BClosedLoopEpisodeV1(
+        episode_id=f"{key}:{method}",
+        matched_key=key,
+        method=method,
+        scene_seed=20_000 + index,
+        failure_type=("EMPTY_GRASP", "WRONG_OBJECT", "RELEASE_FAILURE")[index % 3],
+        initial_success=False,
+        final_success=False,
+        recovery_attempted=False,
+        recovery_success=None,
+        retries=0,
+        task_time_s=0.0,
+        decisions=[item],
+    )
+
+
 def matched_episodes(count: int = 30) -> list[M2BClosedLoopEpisodeV1]:
     rows = []
     for index in range(count):
@@ -183,3 +221,25 @@ def test_s6_rejects_execution_receipt_reuse_across_episodes() -> None:
     assert report["reused_execution_outcome_receipts"] == {
         reused: [rows[1].episode_id, rows[5].episode_id]
     }
+
+
+def test_s6_requires_fifty_physically_executed_model_decisions() -> None:
+    rows = matched_episodes()
+    replacements = 41
+    for offset, row in enumerate(rows):
+        if replacements and row.method != "B0":
+            rows[offset] = nonexecution_episode(
+                row.scene_seed - 20_000,
+                row.method,
+            )
+            replacements -= 1
+    assert replacements == 0
+    report = summarize_s6(
+        rows,
+        bootstrap_resamples=20,
+        bootstrap_seed=7,
+    )
+    assert report["complete_matched_keys"] == 30
+    assert report["qrm_model_decisions_executed"] == 49
+    assert report["formal_evaluation_ready"] is False
+    assert "physically executed model decisions 49 < 50" in report["findings"]
