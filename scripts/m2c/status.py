@@ -458,10 +458,14 @@ def main() -> int:
         pass
     source_artifacts: list[Path] = []
     if real_reports:
+        decision_artifacts = {
+            *PROJECT.glob("docs/decisions/*M2C*"),
+            *PROJECT.glob("docs/decisions/*m2c*"),
+        }
         source_artifacts = [
             PROJECT / "Makefile",
             *sorted((PROJECT / "configs").glob("m2c*")),
-            *sorted((PROJECT / "docs/decisions").glob("*M2C*")),
+            *sorted(decision_artifacts),
             *sorted((PROJECT / "scripts/m2c").glob("*")),
             *sorted((PROJECT / "tests/unit").glob("test_m2c_*.py")),
         ]
