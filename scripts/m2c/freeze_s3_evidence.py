@@ -324,6 +324,9 @@ def _run_over_ssh(args: argparse.Namespace) -> dict[str, Any]:
         report = json.loads(completed.stdout)
     except json.JSONDecodeError as error:
         raise SystemExit("remote S3 evidence freeze returned malformed JSON") from error
+    # Creating versus revalidating the same ledger is an invocation detail.
+    # Do not let an idempotent rerun change the formal local report hash.
+    report.pop("already_frozen", None)
     report["host"] = args.host
     return report
 

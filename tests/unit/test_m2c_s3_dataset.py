@@ -615,6 +615,15 @@ def test_output_report_passes_full_gate_and_keeps_fourth_class_raw_only(
     assert report["episodes_quarantined"] == 0
     assert report["worker_status_snapshots"] == [WORKER_STATUS_SNAPSHOT]
     assert quarantine.read_text() == ""
+    assert report["task_report"]["tests"][0]["status"] == "PASS"
+    assert report["task_report"]["failures"] == {
+        "collection_attempts_rejected": 0,
+        "packaging_quarantine": 0,
+    }
+    assert report["task_report"]["blockers"] == [
+        "Q-B is forbidden until a separate human expressivity ADR is committed."
+    ]
+    assert report["task_report"]["next_command"].startswith("sed -n")
     assert len(load_jsonl(fourth)) == 3
     assert all(
         item["failure_context"]["failure_type"] != "PATH_BLOCKED" for item in load_jsonl(output)
@@ -623,5 +632,6 @@ def test_output_report_passes_full_gate_and_keeps_fourth_class_raw_only(
     assert "# M2C S3 Dataset V3" in markdown
     assert "Teacher used: no" in markdown
     assert "150/150 records" in markdown
+    assert "- Tests:" in markdown
     assert "Q-B remains forbidden" in markdown
     assert EVIDENCE_FREEZE["ledger_sha256"] in markdown

@@ -4,7 +4,9 @@ from collections import Counter
 import hashlib
 import json
 from pathlib import Path
+from types import SimpleNamespace
 
+import m2c.freeze_s3_evidence as freeze_s3
 from m2c.freeze_s3_evidence import (
     LEDGER_NAME,
     MANDATORY_FAILURES,
@@ -124,3 +126,40 @@ def test_worker_status_rejects_counts_above_frozen_target(tmp_path: Path) -> Non
         assert "do not equal frozen target" in str(error)
     else:
         raise AssertionError("accepted count above frozen target was accepted")
+
+
+def test_local_freeze_report_drops_idempotence_execution_detail(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    class Completed:
+        returncode = 0
+        stdout = json.dumps(
+            {
+                "schema_version": "M2CS3EvidenceFreezeV1",
+                "status": "PASS",
+                "already_frozen": True,
+            }
+        )
+        stderr = ""
+
+    monkeypatch.setattr(
+        freeze_s3.subprocess,
+        "run",
+        lambda *args, **kwargs: Completed(),
+    )
+    source = tmp_path / "freeze.py"
+    source.write_text("# synthetic source\n", encoding="utf-8")
+    monkeypatch.setattr(freeze_s3, "__file__", str(source))
+
+    report = freeze_s3._run_over_ssh(
+        SimpleNamespace(
+            host="root@labserver",
+            root=freeze_s3.DEFAULT_REMOTE_ROOT,
+            accepted_target=25,
+        )
+    )
+
+    assert report["status"] == "PASS"
+    assert report["host"] == "root@labserver"
+    assert "already_frozen" not in report

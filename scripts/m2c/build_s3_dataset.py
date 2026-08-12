@@ -636,7 +636,7 @@ def write_report_markdown(path: Path, report: dict[str, Any]) -> None:
         f"  - `{report['fourth_class']['path']}` (SHA-256 `{report['fourth_class']['sha256']}`)",
         f"  - `{report['evidence_freeze']['report_path']}` (SHA-256 `{report['evidence_freeze']['report_sha256']}`)",
         f"  - `{path}`",
-        "- Verification: full class-coverage gate, 150/150 strict physical/public acceptance re-audit, recursive collision/safety gate audit, strict episode validation, accepted-evidence SHA binding, zero packaging quarantine, and split-group leakage check.",
+        "- Tests: full class-coverage gate, 150/150 strict physical/public acceptance re-audit, recursive collision/safety gate audit, strict episode validation, accepted-evidence SHA binding, zero packaging quarantine, and split-group leakage check.",
         f"- Failures: {rejected} collection attempts were rejected and retained with explicit reasons; packaging quarantine is {report['episodes_quarantined']}.",
         "- Blocker: Q-B remains forbidden until a separate human expressivity ADR is committed; this S3 result does not authorize Q-B.",
         "- Next command: `sed -n '1,240p' docs/decisions/M2C-QB-EXPRESSIVITY-PREREG.md`.",
@@ -778,6 +778,42 @@ def write_outputs(
         "teacher_kill_rule_events": [],
         "privileged_truth_policy_input": False,
         "world_model_mainline_replaced": False,
+        "task_report": {
+            "changed_or_generated_files": [
+                str(output),
+                str(quarantine_path),
+                str(fourth_class_path),
+                str(evidence_freeze["report_path"]),
+                str(report_path),
+                *([str(report_md_path)] if report_md_path is not None else []),
+            ],
+            "tests": [
+                {
+                    "name": "S3 frozen-evidence dataset gates",
+                    "status": "PASS" if status == "PASS_S3_FULL_CLASS_COVERAGE" else "FAIL",
+                    "checks": [
+                        "full class coverage",
+                        "150/150 strict physical/public acceptance re-audit",
+                        "recursive collision/safety gate audit",
+                        "strict episode validation",
+                        "accepted-evidence SHA binding",
+                        "zero packaging quarantine",
+                        "split-group leakage",
+                    ],
+                }
+            ],
+            "failures": {
+                "collection_attempts_rejected": len(collection_rejections),
+                "packaging_quarantine": len(quarantine),
+            },
+            "blockers": [
+                "Q-B is forbidden until a separate human expressivity ADR is committed."
+            ],
+            "next_command": (
+                "sed -n '1,240p' "
+                "docs/decisions/M2C-QB-EXPRESSIVITY-PREREG.md"
+            ),
+        },
     }
     report_path.parent.mkdir(parents=True, exist_ok=True)
     report_path.write_text(

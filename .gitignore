@@ -42,3 +42,4 @@ data/qrm_lite/manifests/*.jsonl
 data/qrm_lite/manifests/real-v*.jsonl
 artifacts/qrm_lite/beta1/
 artifacts/m2b/
+artifacts/m2c/

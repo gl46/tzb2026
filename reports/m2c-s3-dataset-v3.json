@@ -1,0 +1,2403 @@
+{
+  "accepted_evidence_audit": {
+    "acceptance_predicate": {
+      "path": "scripts/m2b/run_physical_failure_smoke.py",
+      "predicate": "m2b.run_physical_failure_smoke.accepted",
+      "public_rgbd_required": true,
+      "sha256": "7e68c9f18b26bedaa600e642ca59339da9a99739bc2770d8aed3f87c53e98865"
+    },
+    "collision_gates_checked": 557,
+    "collision_or_safety_violations": 0,
+    "counts_by_failure": {
+      "EMPTY_GRASP": 50,
+      "RELEASE_FAILURE": 50,
+      "WRONG_OBJECT": 50
+    },
+    "evidence_sha256_matches": 150,
+    "privileged_truth_policy_input": false,
+    "public_predicate_results_checked": 300,
+    "records": [
+      {
+        "collision_gates_checked": 2,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10000/failures/empty_grasp/empty_grasp/attempt-01/actuation-probe.json",
+        "evidence_sha256": "e43fc16c51ab4b19d6139fb322c56b08fa704d07ad134146489b1c9bde875f81",
+        "failure_type": "EMPTY_GRASP",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10000,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 3,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10000/failures/release_failure/release_failure/attempt-01/actuation-probe.json",
+        "evidence_sha256": "2c4c6b8d63e0e1cf85839c68211e23079b34ec796226eec3ab78ab8e6f2ac03d",
+        "failure_type": "RELEASE_FAILURE",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10000,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 6,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10002/failures/wrong_object/wrong_object/attempt-01/actuation-probe.json",
+        "evidence_sha256": "68910fb6359e49d250222de8dc4e1198831b2eba8656b21e5a0e77be5d548d7c",
+        "failure_type": "WRONG_OBJECT",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10002,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 3,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10002/failures/release_failure/release_failure/attempt-01/actuation-probe.json",
+        "evidence_sha256": "af3ed07df89bb8ccfa2091fb1820a623a3b60340323cb58ad204178590d99dcf",
+        "failure_type": "RELEASE_FAILURE",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10002,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 6,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10004/failures/wrong_object/wrong_object/attempt-01/actuation-probe.json",
+        "evidence_sha256": "44146b3caacadc09d4697d2fa815e3fb15f1e4c0c82ae0f178fd1dfed71a98f1",
+        "failure_type": "WRONG_OBJECT",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10004,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 3,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10004/failures/release_failure/release_failure/attempt-01/actuation-probe.json",
+        "evidence_sha256": "228d1e17364a8c78d32400359bd085b91d1f11dca9947dd88c6f6e524868986a",
+        "failure_type": "RELEASE_FAILURE",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10004,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 6,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10006/failures/wrong_object/wrong_object/attempt-01/actuation-probe.json",
+        "evidence_sha256": "9f8ff557469289bcf4b2dd4fab89fc71386c145323dff8ff06cab14195f770a9",
+        "failure_type": "WRONG_OBJECT",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10006,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 3,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10006/failures/release_failure/release_failure/attempt-01/actuation-probe.json",
+        "evidence_sha256": "7b7b86f2445f43b4d420d7f1d48e4048b30249176afbe49e24e6c7d233f19167",
+        "failure_type": "RELEASE_FAILURE",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10006,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 2,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10008/failures/empty_grasp/empty_grasp/attempt-01/actuation-probe.json",
+        "evidence_sha256": "2d6a05c88a422e9ce22dc8151afb9c44cfe09dc51b6f1d142b4994fd55896f90",
+        "failure_type": "EMPTY_GRASP",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10008,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 6,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10008/failures/wrong_object/wrong_object/attempt-01/actuation-probe.json",
+        "evidence_sha256": "c66d414af9c106f91e726cef2519358855a25f451c227ea16a507e791b39725b",
+        "failure_type": "WRONG_OBJECT",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10008,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 3,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10008/failures/release_failure/release_failure/attempt-01/actuation-probe.json",
+        "evidence_sha256": "b4b478dde67a4b0bbc781317fffb8aa0261fd1edef21b467f66ee3a9517bf551",
+        "failure_type": "RELEASE_FAILURE",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10008,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 2,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10010/failures/empty_grasp/empty_grasp/attempt-02/actuation-probe.json",
+        "evidence_sha256": "25decc2c6cea21e216a9aaab585ecb9f92aa1256a28501aec0faa0ab19897236",
+        "failure_type": "EMPTY_GRASP",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10010,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 6,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10010/failures/wrong_object/wrong_object/attempt-02/actuation-probe.json",
+        "evidence_sha256": "4b92b73acc7ed2ad813558400eb2a852a20390b5b597fe1ce2ac662481181a49",
+        "failure_type": "WRONG_OBJECT",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10010,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 3,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10010/failures/release_failure/release_failure/attempt-01/actuation-probe.json",
+        "evidence_sha256": "5efba79f9529d433c66727d3d6524769ac05a2908d705afad725bcd50178afac",
+        "failure_type": "RELEASE_FAILURE",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10010,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 2,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10012/failures/empty_grasp/empty_grasp/attempt-01/actuation-probe.json",
+        "evidence_sha256": "cfc6c2873be071ba78e8ede49fc3ea8929d50e5624984b7272c91636ff83fc95",
+        "failure_type": "EMPTY_GRASP",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10012,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 3,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10012/failures/release_failure/release_failure/attempt-01/actuation-probe.json",
+        "evidence_sha256": "224b03d07c938245ee8da3f2745b5e3400476000e655d28428e5443da6389ed7",
+        "failure_type": "RELEASE_FAILURE",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10012,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 3,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10014/failures/release_failure/release_failure/attempt-01/actuation-probe.json",
+        "evidence_sha256": "18eb2af3b66f8c8a3f99aa53bf4e369395d774c53cb33d3893770c0f312ba39a",
+        "failure_type": "RELEASE_FAILURE",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10014,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 2,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10016/failures/empty_grasp/empty_grasp/attempt-01/actuation-probe.json",
+        "evidence_sha256": "8138397512a7446b71a54d4c07efcd1845fae7a99b7cd97b53cf045ec7dbc179",
+        "failure_type": "EMPTY_GRASP",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10016,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 6,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10016/failures/wrong_object/wrong_object/attempt-01/actuation-probe.json",
+        "evidence_sha256": "6c2743988acf813fcf0c0e81895e02db921965c2d7b32f31550cd26c216fc2ef",
+        "failure_type": "WRONG_OBJECT",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10016,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 3,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10016/failures/release_failure/release_failure/attempt-01/actuation-probe.json",
+        "evidence_sha256": "ca49a15f30c1ce4fd9b38266b54d906b07766869c5e82ac40149d495e1f8d8aa",
+        "failure_type": "RELEASE_FAILURE",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10016,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 2,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10018/failures/empty_grasp/empty_grasp/attempt-01/actuation-probe.json",
+        "evidence_sha256": "fd5c5fa4fbd79d76991b0af84889ba230b62d1e9a40eb8277cd2e4af3354ce07",
+        "failure_type": "EMPTY_GRASP",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10018,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 6,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10018/failures/wrong_object/wrong_object/attempt-01/actuation-probe.json",
+        "evidence_sha256": "afb8396bffac17f4e23897e9ec536cd2270cbd3b1faef2efafde71798e22e3b0",
+        "failure_type": "WRONG_OBJECT",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10018,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 3,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10018/failures/release_failure/release_failure/attempt-01/actuation-probe.json",
+        "evidence_sha256": "ab889528545c0614a29ffd231086d8ce95ab8f1c7aa541c5dee632afba0847fb",
+        "failure_type": "RELEASE_FAILURE",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10018,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 2,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10020/failures/empty_grasp/empty_grasp/attempt-01/actuation-probe.json",
+        "evidence_sha256": "cbaf1a1ef495acbd18ef9c807c2f9427cc2cabb64a5eca315e7614b5349f955c",
+        "failure_type": "EMPTY_GRASP",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10020,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 6,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10020/failures/wrong_object/wrong_object/attempt-01/actuation-probe.json",
+        "evidence_sha256": "95fd6e711777da74ddebb80eff69531bc6a64437d4ba69ddc2a3afc2ff023192",
+        "failure_type": "WRONG_OBJECT",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10020,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 3,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10020/failures/release_failure/release_failure/attempt-01/actuation-probe.json",
+        "evidence_sha256": "e0f4e5124fef5471d99f2efd4459ae8ef8e509663a05586db26492d16db5a9e5",
+        "failure_type": "RELEASE_FAILURE",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10020,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 2,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10022/failures/empty_grasp/empty_grasp/attempt-02/actuation-probe.json",
+        "evidence_sha256": "5bf4162882ff2cb7fe58448973915d7696fe88968de1e903654bf2724097596b",
+        "failure_type": "EMPTY_GRASP",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10022,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 6,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10022/failures/wrong_object/wrong_object/attempt-02/actuation-probe.json",
+        "evidence_sha256": "ff1ab20077931b6aa36d20f766418a9a5cbbb93470701115339a10aca89d2e7d",
+        "failure_type": "WRONG_OBJECT",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10022,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 3,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10022/failures/release_failure/release_failure/attempt-01/actuation-probe.json",
+        "evidence_sha256": "706487bd3c94cda49f93b5cde7864a25f16ae3bc03fd010551bd2210e72d9fea",
+        "failure_type": "RELEASE_FAILURE",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10022,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 6,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10024/failures/wrong_object/wrong_object/attempt-01/actuation-probe.json",
+        "evidence_sha256": "5f1983feaf492ce20a630f6912f2aa89b6cb5213d1e061673e6f87d458aadc36",
+        "failure_type": "WRONG_OBJECT",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10024,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 3,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10024/failures/release_failure/release_failure/attempt-01/actuation-probe.json",
+        "evidence_sha256": "f03c79e8884f6f1f76550c7665186fd059b0827317803a2c72fcaabc8690e084",
+        "failure_type": "RELEASE_FAILURE",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10024,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 2,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10026/failures/empty_grasp/empty_grasp/attempt-01/actuation-probe.json",
+        "evidence_sha256": "d8acec04d147aeecedd2364f0ee53bc41b9a57f11b0c90e30dc8d7cb9570cc3b",
+        "failure_type": "EMPTY_GRASP",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10026,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 3,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10026/failures/release_failure/release_failure/attempt-01/actuation-probe.json",
+        "evidence_sha256": "a99d3f40b2d8f6ac191b3720b6a83894c29a9698543ebfe882520cd06186a454",
+        "failure_type": "RELEASE_FAILURE",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10026,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 2,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10028/failures/empty_grasp/empty_grasp/attempt-01/actuation-probe.json",
+        "evidence_sha256": "5dc203fa59d748a434f2c38601e26ba1b0eaa5b01c033679a8bf44ec929b52a3",
+        "failure_type": "EMPTY_GRASP",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10028,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 6,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10028/failures/wrong_object/wrong_object/attempt-01/actuation-probe.json",
+        "evidence_sha256": "5e7b15ab59f9d74461885e4ebd96957c1183cd68386c06f7810fb3e4f843b5a5",
+        "failure_type": "WRONG_OBJECT",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10028,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 3,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10028/failures/release_failure/release_failure/attempt-01/actuation-probe.json",
+        "evidence_sha256": "31797d430c4dd70611673d37fd32f06ef697bf23370ea9c763419f157150b25d",
+        "failure_type": "RELEASE_FAILURE",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10028,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 2,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10030/failures/empty_grasp/empty_grasp/attempt-01/actuation-probe.json",
+        "evidence_sha256": "d9a4173c6c659f9886349ee94e8b35e5a0b70bc3a4e60c7d6af70c206c7b15ed",
+        "failure_type": "EMPTY_GRASP",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10030,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 6,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10030/failures/wrong_object/wrong_object/attempt-01/actuation-probe.json",
+        "evidence_sha256": "4faf2a4da7d05c345587c07d74ac88647bb590b3a2901cccb0830ef95f6ec54d",
+        "failure_type": "WRONG_OBJECT",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10030,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 3,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10030/failures/release_failure/release_failure/attempt-01/actuation-probe.json",
+        "evidence_sha256": "8191b6eb50f0b55c8af2c91e510a42593fe1a8f1194f86f4d589b1779148eefb",
+        "failure_type": "RELEASE_FAILURE",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10030,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 2,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10032/failures/empty_grasp/empty_grasp/attempt-01/actuation-probe.json",
+        "evidence_sha256": "e45ea6950b2952a1fe7b1314517660f1437a70f8abefc04ff4d4b56e92ce25a5",
+        "failure_type": "EMPTY_GRASP",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10032,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 7,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10032/failures/wrong_object/wrong_object/attempt-01/actuation-probe.json",
+        "evidence_sha256": "17466a8475327f66978faa16feb6150e6e14a3389c067f0fd84ff63dbc875c78",
+        "failure_type": "WRONG_OBJECT",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10032,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 3,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10032/failures/release_failure/release_failure/attempt-01/actuation-probe.json",
+        "evidence_sha256": "ca88f33374b1b60fe69fe3a73d84ef9a4173a5ebdfc90f1eef437c72a888f044",
+        "failure_type": "RELEASE_FAILURE",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10032,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 2,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10034/failures/empty_grasp/empty_grasp/attempt-02/actuation-probe.json",
+        "evidence_sha256": "176f79e9711017d66f4e47b6d2f25fe2c38f4ee16e240b6ba776504d574f7d2b",
+        "failure_type": "EMPTY_GRASP",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10034,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 7,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10034/failures/wrong_object/wrong_object/attempt-02/actuation-probe.json",
+        "evidence_sha256": "8253e5fc5b720bff4a2b3c3f7bebf2f90a86dae5a7c11e0194213afd240ac48e",
+        "failure_type": "WRONG_OBJECT",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10034,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 3,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10034/failures/release_failure/release_failure/attempt-01/actuation-probe.json",
+        "evidence_sha256": "6354c383da363bebf8fb9a45dbe62d4483c1f8bc53800653ecc496e7cb0038c3",
+        "failure_type": "RELEASE_FAILURE",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10034,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 2,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10036/failures/empty_grasp/empty_grasp/attempt-01/actuation-probe.json",
+        "evidence_sha256": "7d24d0952f71d986dd87f2baf62682dfa49c768872abb192825023f9d478ba19",
+        "failure_type": "EMPTY_GRASP",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10036,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 3,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10036/failures/release_failure/release_failure/attempt-01/actuation-probe.json",
+        "evidence_sha256": "f71f6defb9c1595aa21045030aa50f96d23a9a41b23aad560d14915b7578f14d",
+        "failure_type": "RELEASE_FAILURE",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10036,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 2,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10040/failures/empty_grasp/empty_grasp/attempt-02/actuation-probe.json",
+        "evidence_sha256": "fd9e645e3a53bc98c558751e67554e7aaf1bba2fc5e7fd78e487db5ed7fe6d37",
+        "failure_type": "EMPTY_GRASP",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10040,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 3,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10040/failures/release_failure/release_failure/attempt-01/actuation-probe.json",
+        "evidence_sha256": "321102820217c1bd985b12c00f6b817d60e98c83f74a5bbbaf443243934acfa1",
+        "failure_type": "RELEASE_FAILURE",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10040,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 8,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10042/failures/wrong_object/wrong_object/attempt-01/actuation-probe.json",
+        "evidence_sha256": "b077c7b59c75e37ed9b3c2dbd43d0d44423e6a43d6ccb75c11b539a444a13538",
+        "failure_type": "WRONG_OBJECT",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10042,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 3,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10042/failures/release_failure/release_failure/attempt-01/actuation-probe.json",
+        "evidence_sha256": "0480a9c35497b8e17e8777ab7f35b712fabb9838d5ac601ee8c12b63b5fc135e",
+        "failure_type": "RELEASE_FAILURE",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10042,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 2,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10044/failures/empty_grasp/empty_grasp/attempt-01/actuation-probe.json",
+        "evidence_sha256": "ef6dd188e5f6dbcdd975f580324f1c01edd9c732948f1d4809e02058764a46e1",
+        "failure_type": "EMPTY_GRASP",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10044,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 6,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10044/failures/wrong_object/wrong_object/attempt-01/actuation-probe.json",
+        "evidence_sha256": "d4dc3afa8c9cb8df1e5e08ee2830a52c0c9c74ee02170bcf467000ee50035329",
+        "failure_type": "WRONG_OBJECT",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10044,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 3,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10044/failures/release_failure/release_failure/attempt-01/actuation-probe.json",
+        "evidence_sha256": "001b5119bd9c1ee53649cdcdd77b7dcdd6a29ac70765358eca2dbca8c7c0bc55",
+        "failure_type": "RELEASE_FAILURE",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10044,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 3,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10046/failures/release_failure/release_failure/attempt-01/actuation-probe.json",
+        "evidence_sha256": "1071641e632e285394770148dd58348a663d58a55cea7072ccffe15583252f57",
+        "failure_type": "RELEASE_FAILURE",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10046,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 2,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10048/failures/empty_grasp/empty_grasp/attempt-02/actuation-probe.json",
+        "evidence_sha256": "110ec9c5ab86ef850ee18c4993c8a271069d0e702e4fe7256d9b1bffbbc03691",
+        "failure_type": "EMPTY_GRASP",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10048,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 6,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10048/failures/wrong_object/wrong_object/attempt-02/actuation-probe.json",
+        "evidence_sha256": "aa32d9c7cbeea1dca9f74bc223f6d4a4c5244901b341665e7c41ea2b8695a104",
+        "failure_type": "WRONG_OBJECT",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10048,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 3,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10048/failures/release_failure/release_failure/attempt-01/actuation-probe.json",
+        "evidence_sha256": "f7a526a91bded544294aa7840e3946a2b68794b2322e6685f7bac8cb891f3544",
+        "failure_type": "RELEASE_FAILURE",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10048,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 2,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10050/failures/empty_grasp/empty_grasp/attempt-01/actuation-probe.json",
+        "evidence_sha256": "d5db8b08bf05aa08f0649069b3d4583f58bdde3af93f9ddf52b20d381cf0c281",
+        "failure_type": "EMPTY_GRASP",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10050,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 3,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10050/failures/release_failure/release_failure/attempt-01/actuation-probe.json",
+        "evidence_sha256": "3fd0216c51b493cac517eb0b4ba5b2634be888dc70bce5fa3dc5d72bf367e25b",
+        "failure_type": "RELEASE_FAILURE",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10050,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 2,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10052/failures/empty_grasp/empty_grasp/attempt-01/actuation-probe.json",
+        "evidence_sha256": "d68914ef862022a0801a3883a271205e4bd62bb4d4955df80e9122e072114dbc",
+        "failure_type": "EMPTY_GRASP",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10052,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 6,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10052/failures/wrong_object/wrong_object/attempt-01/actuation-probe.json",
+        "evidence_sha256": "54164df7a4c8eac792dd236c53ba555eb83579821d6dde7b21844855d8084e38",
+        "failure_type": "WRONG_OBJECT",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10052,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 6,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10054/failures/wrong_object/wrong_object/attempt-02/actuation-probe.json",
+        "evidence_sha256": "8f90b3870f8203e1eee11f3ff3bcb4874255c62425ce98b3f7feff4bcd8b9c17",
+        "failure_type": "WRONG_OBJECT",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10054,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 2,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10056/failures/empty_grasp/empty_grasp/attempt-01/actuation-probe.json",
+        "evidence_sha256": "32930c3811db077626782d9a416241e5462c17d665a4702a79d0d05c90f6bc09",
+        "failure_type": "EMPTY_GRASP",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10056,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 6,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10056/failures/wrong_object/wrong_object/attempt-01/actuation-probe.json",
+        "evidence_sha256": "e28d110632dcbad73c1c317f7c9b29b9ef7cd38339213634e595231f6d5395fe",
+        "failure_type": "WRONG_OBJECT",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10056,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 2,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10058/failures/empty_grasp/empty_grasp/attempt-01/actuation-probe.json",
+        "evidence_sha256": "b863718d4a3da93a451ba9caf7d36313db0619d522bb8555bbabc1f7d08d6ae4",
+        "failure_type": "EMPTY_GRASP",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10058,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 2,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10062/failures/empty_grasp/empty_grasp/attempt-01/actuation-probe.json",
+        "evidence_sha256": "5d8ae5c1d755bac7963f41eb1692fdbd6031099e60482d0205632b462f22796c",
+        "failure_type": "EMPTY_GRASP",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10062,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 6,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10062/failures/wrong_object/wrong_object/attempt-01/actuation-probe.json",
+        "evidence_sha256": "dc767c6dc554fc44287c8761db9419459b3fe5c4b94b16f2dad56c277e9c0a1a",
+        "failure_type": "WRONG_OBJECT",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10062,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 2,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10064/failures/empty_grasp/empty_grasp/attempt-01/actuation-probe.json",
+        "evidence_sha256": "f9dd98dfe6a2eb4b43fc74102fc3b176d81d34f9d689a4ce4c8b2e25e1745f02",
+        "failure_type": "EMPTY_GRASP",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10064,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 6,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10064/failures/wrong_object/wrong_object/attempt-01/actuation-probe.json",
+        "evidence_sha256": "dda4a05a908957d5f1e51a0da2e4708e335c7d014c02186c57a09a83113ae3ac",
+        "failure_type": "WRONG_OBJECT",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10064,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 6,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10066/failures/wrong_object/wrong_object/attempt-01/actuation-probe.json",
+        "evidence_sha256": "b70974910f5b753be70f3ca3e52b368e8fd3ddb54829d0b53ab4b60291a98aa0",
+        "failure_type": "WRONG_OBJECT",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10066,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 2,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10068/failures/empty_grasp/empty_grasp/attempt-01/actuation-probe.json",
+        "evidence_sha256": "76d41ce0157587444bf278ee4f98aac54f43431cfdd45de685cfd580a63d8380",
+        "failure_type": "EMPTY_GRASP",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10068,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 6,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10068/failures/wrong_object/wrong_object/attempt-01/actuation-probe.json",
+        "evidence_sha256": "2ae6dfc9bacdb91f56bf6c8ee045899a2e69bea141b70adeb4e4b6101e809d6b",
+        "failure_type": "WRONG_OBJECT",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10068,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 2,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10070/failures/empty_grasp/empty_grasp/attempt-02/actuation-probe.json",
+        "evidence_sha256": "20cf81d88d2b940acb51140fea39e49703c3aac1e5d7eb7b2ab4c3929c9dcf6e",
+        "failure_type": "EMPTY_GRASP",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10070,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 6,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/scene-10072/failures/wrong_object/wrong_object/attempt-01/actuation-probe.json",
+        "evidence_sha256": "ef9afe660037ba35b03fb8123ce9a75701edf02441579ae2da7083a062f331af",
+        "failure_type": "WRONG_OBJECT",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10072,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 2,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10003/failures/empty_grasp/empty_grasp/attempt-01/actuation-probe.json",
+        "evidence_sha256": "7660a1fa720f7f1c587ab976694bc0886ca67eed10f79b330930d46f963c05b1",
+        "failure_type": "EMPTY_GRASP",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10003,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 3,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10003/failures/release_failure/release_failure/attempt-02/actuation-probe.json",
+        "evidence_sha256": "47280078298e564fdb87c74ec5a9437a841470888c0a35f2730acc480b85baa4",
+        "failure_type": "RELEASE_FAILURE",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10003,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 2,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10005/failures/empty_grasp/empty_grasp/attempt-02/actuation-probe.json",
+        "evidence_sha256": "51cbe44337f97a4d1c93baf7a1af8ae02d50b73888f7bec6c4732a072efbd9c4",
+        "failure_type": "EMPTY_GRASP",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10005,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 6,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10005/failures/wrong_object/wrong_object/attempt-02/actuation-probe.json",
+        "evidence_sha256": "21fb57012949e16bd1a2539a348d015dc9ca58038e55a5d03f01b24300588f6e",
+        "failure_type": "WRONG_OBJECT",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10005,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 3,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10005/failures/release_failure/release_failure/attempt-01/actuation-probe.json",
+        "evidence_sha256": "3b12575c91b67d44e36ca29a740f5bf2778af220feda809ad00fa352657f23a1",
+        "failure_type": "RELEASE_FAILURE",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10005,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 6,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10007/failures/wrong_object/wrong_object/attempt-01/actuation-probe.json",
+        "evidence_sha256": "5858a62597323e6a3591586d5558b6f0ec2d3093c304cbedb985fa756aa0a049",
+        "failure_type": "WRONG_OBJECT",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10007,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 3,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10007/failures/release_failure/release_failure/attempt-01/actuation-probe.json",
+        "evidence_sha256": "dd89e8e267bb9e9ea7fb9896859eee5206046175b7aefc550e109982b86a7720",
+        "failure_type": "RELEASE_FAILURE",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10007,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 2,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10009/failures/empty_grasp/empty_grasp/attempt-01/actuation-probe.json",
+        "evidence_sha256": "ef85e7477218a9763692042d8753d2cc2db76215c58062c307278d170d6a9ad5",
+        "failure_type": "EMPTY_GRASP",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10009,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 3,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10009/failures/release_failure/release_failure/attempt-01/actuation-probe.json",
+        "evidence_sha256": "e761c0d01d29152dce924f44860bbbe78d6827522d8e1a9c3e832cbfc1c0bdf2",
+        "failure_type": "RELEASE_FAILURE",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10009,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 2,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10011/failures/empty_grasp/empty_grasp/attempt-01/actuation-probe.json",
+        "evidence_sha256": "3a8cd2927317aeb0e4a62f924cf60a309804f7fd8c237886c22f697b3199d3d9",
+        "failure_type": "EMPTY_GRASP",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10011,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 3,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10011/failures/release_failure/release_failure/attempt-01/actuation-probe.json",
+        "evidence_sha256": "3b43058429f616fdc8ee838b6efcfe05218fb75dc62b2c780b53dda00e2a1332",
+        "failure_type": "RELEASE_FAILURE",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10011,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 2,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10013/failures/empty_grasp/empty_grasp/attempt-01/actuation-probe.json",
+        "evidence_sha256": "5663e4ee45aefb81cb8a1ea50de90a10c7d4a2883f97eaeae154f10506107ca6",
+        "failure_type": "EMPTY_GRASP",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10013,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 6,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10013/failures/wrong_object/wrong_object/attempt-01/actuation-probe.json",
+        "evidence_sha256": "7b95c27d3ac993844b362e8eafff715e7baee4e7116429d1169a8f72a6f525fa",
+        "failure_type": "WRONG_OBJECT",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10013,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 3,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10013/failures/release_failure/release_failure/attempt-01/actuation-probe.json",
+        "evidence_sha256": "570f022d7f9da8a353ef17f3d4facbb9f85184982cafea5d11524037726ab498",
+        "failure_type": "RELEASE_FAILURE",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10013,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 2,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10015/failures/empty_grasp/empty_grasp/attempt-01/actuation-probe.json",
+        "evidence_sha256": "5abeb51aa2bfb798e020941392be6263dfd6831b3d58881fb790702c569d8a73",
+        "failure_type": "EMPTY_GRASP",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10015,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 6,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10015/failures/wrong_object/wrong_object/attempt-01/actuation-probe.json",
+        "evidence_sha256": "27fc8fdd397c4e898182b4dc06fa5bd5f3fc09b619db87618c1b60439f020634",
+        "failure_type": "WRONG_OBJECT",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10015,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 3,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10015/failures/release_failure/release_failure/attempt-01/actuation-probe.json",
+        "evidence_sha256": "cbf5bcf00f1884a0b5b4e50b3a320fd2f41d5bc58cbad0c20ac4678d44212026",
+        "failure_type": "RELEASE_FAILURE",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10015,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 2,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10017/failures/empty_grasp/empty_grasp/attempt-02/actuation-probe.json",
+        "evidence_sha256": "aef4dc71885924040f5bcf5de8e88e5bf58fa9a475fbda40e963cd93eaa4a13f",
+        "failure_type": "EMPTY_GRASP",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10017,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 3,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10017/failures/release_failure/release_failure/attempt-01/actuation-probe.json",
+        "evidence_sha256": "30e0422cdc2f8b7923378817cb14d48301106466f2a69e431731234f4e7c4bbb",
+        "failure_type": "RELEASE_FAILURE",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10017,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 6,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10019/failures/wrong_object/wrong_object/attempt-01/actuation-probe.json",
+        "evidence_sha256": "20771e2326ae941c855cff2b88261cc39ad4667c625aab32a80d35697a60af6d",
+        "failure_type": "WRONG_OBJECT",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10019,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 3,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10019/failures/release_failure/release_failure/attempt-01/actuation-probe.json",
+        "evidence_sha256": "dffcee7ef52b69c67d1bbfd431fc462ff147e49cb182923ebc156e68290e48ba",
+        "failure_type": "RELEASE_FAILURE",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10019,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 6,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10021/failures/wrong_object/wrong_object/attempt-01/actuation-probe.json",
+        "evidence_sha256": "1f33cf44e4923e76f55185b7c8ad242fbcbdc96da65166669ce750437f3c31fa",
+        "failure_type": "WRONG_OBJECT",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10021,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 3,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10021/failures/release_failure/release_failure/attempt-01/actuation-probe.json",
+        "evidence_sha256": "dac32c5760dc3b748e863522a79c28c935db45489eed8167908d5327b99727d9",
+        "failure_type": "RELEASE_FAILURE",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10021,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 2,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10023/failures/empty_grasp/empty_grasp/attempt-02/actuation-probe.json",
+        "evidence_sha256": "706339e193f702a9b23af6eb285012eaf479a1c748da3a4a423a4569ee0312f8",
+        "failure_type": "EMPTY_GRASP",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10023,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 6,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10023/failures/wrong_object/wrong_object/attempt-02/actuation-probe.json",
+        "evidence_sha256": "d1aea43ac510a0e2b764a27b986315e28ed95a8b8faabd708ca62183e03a6427",
+        "failure_type": "WRONG_OBJECT",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10023,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 3,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10023/failures/release_failure/release_failure/attempt-01/actuation-probe.json",
+        "evidence_sha256": "152b8dd8ab99a20745ab8eb954c01b755e31fc9a52cde1fb6b8b83de418e1b67",
+        "failure_type": "RELEASE_FAILURE",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10023,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 2,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10025/failures/empty_grasp/empty_grasp/attempt-01/actuation-probe.json",
+        "evidence_sha256": "78c30a59355b11aafdb761307e625c52c6af387a04d2cec3e25a0b403f1bbcc1",
+        "failure_type": "EMPTY_GRASP",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10025,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 3,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10025/failures/release_failure/release_failure/attempt-01/actuation-probe.json",
+        "evidence_sha256": "a1f76319302ffc496410f1503ac024aca4178d9c660a8164acd295bf9e9ebd90",
+        "failure_type": "RELEASE_FAILURE",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10025,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 2,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10027/failures/empty_grasp/empty_grasp/attempt-01/actuation-probe.json",
+        "evidence_sha256": "af67aee34f097087132b12aa41a5deaf3fe00412aa16a0a4b4073c892ecd7923",
+        "failure_type": "EMPTY_GRASP",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10027,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 3,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10027/failures/release_failure/release_failure/attempt-01/actuation-probe.json",
+        "evidence_sha256": "72ea520351987f75496a95d5c81b62b0d6ef612761a882f7e4c8eb68542d7e34",
+        "failure_type": "RELEASE_FAILURE",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10027,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 2,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10033/failures/empty_grasp/empty_grasp/attempt-02/actuation-probe.json",
+        "evidence_sha256": "5c6a5c5565d4cc8b753a88ee6689150b0304428499f3941fae74906aac1a0144",
+        "failure_type": "EMPTY_GRASP",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10033,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 3,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10033/failures/release_failure/release_failure/attempt-01/actuation-probe.json",
+        "evidence_sha256": "caba05ebe867e5e76e4ae5bdd3497bdadd399141d7c28930d63b8606c9646cac",
+        "failure_type": "RELEASE_FAILURE",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10033,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 2,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10035/failures/empty_grasp/empty_grasp/attempt-01/actuation-probe.json",
+        "evidence_sha256": "050d8b3350b6ae0489968ce9cdfa0d90f959e9ed7cab4461a9d5033303183b52",
+        "failure_type": "EMPTY_GRASP",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10035,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 6,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10035/failures/wrong_object/wrong_object/attempt-01/actuation-probe.json",
+        "evidence_sha256": "c08e14abbf8330074660c9273d4e9d87ee1ac099063aa21fb9275a4d1557e34d",
+        "failure_type": "WRONG_OBJECT",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10035,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 6,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10037/failures/wrong_object/wrong_object/attempt-01/actuation-probe.json",
+        "evidence_sha256": "88c3ef0004439cd306577021029986c6148c33c5de13fd0ee8fb075f0af56f06",
+        "failure_type": "WRONG_OBJECT",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10037,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 3,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10037/failures/release_failure/release_failure/attempt-01/actuation-probe.json",
+        "evidence_sha256": "325dd6602b87b8ad42d83d9af117a66750582987fb5f6149f1531b16accacb24",
+        "failure_type": "RELEASE_FAILURE",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10037,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 6,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10039/failures/wrong_object/wrong_object/attempt-01/actuation-probe.json",
+        "evidence_sha256": "da70d348d9bc5b13edd7f584d6ce9f47b4acd69bec2eae10d7bb8c35645c145c",
+        "failure_type": "WRONG_OBJECT",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10039,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 3,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10039/failures/release_failure/release_failure/attempt-01/actuation-probe.json",
+        "evidence_sha256": "a0643cf6201b710498957d8cb72c919a2639f66ebed63bc2ecc26d0bc7b11e82",
+        "failure_type": "RELEASE_FAILURE",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10039,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 2,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10041/failures/empty_grasp/empty_grasp/attempt-01/actuation-probe.json",
+        "evidence_sha256": "1e446eb80aabd2d09d43f156e60a8fdd71b699960c314ff21f41d7b06d3bdf00",
+        "failure_type": "EMPTY_GRASP",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10041,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 3,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10041/failures/release_failure/release_failure/attempt-01/actuation-probe.json",
+        "evidence_sha256": "1ba87c13de1fe199fac2b261448db7d1f6e7298eeee01d87434740dc207c5c69",
+        "failure_type": "RELEASE_FAILURE",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10041,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 6,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10043/failures/wrong_object/wrong_object/attempt-01/actuation-probe.json",
+        "evidence_sha256": "8e51e9bcef6c465b5f48c7eda488be62294a60d9d11aae286d92b35fca23e65f",
+        "failure_type": "WRONG_OBJECT",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10043,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 3,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10043/failures/release_failure/release_failure/attempt-01/actuation-probe.json",
+        "evidence_sha256": "5a83a890c9d13b141aebb79dc6e572937a7e0b4feef308cf60cf3103372bd109",
+        "failure_type": "RELEASE_FAILURE",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10043,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 3,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10045/failures/release_failure/release_failure/attempt-01/actuation-probe.json",
+        "evidence_sha256": "4d5b5460493f8471ff79ea9c557ef6b3cf86b628c5c01fa2a824e0ca2fe507a1",
+        "failure_type": "RELEASE_FAILURE",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10045,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 6,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10047/failures/wrong_object/wrong_object/attempt-01/actuation-probe.json",
+        "evidence_sha256": "64cc569778116a1dd8051fc6b2358555a4684c7ef02f48498ab21d20999a88b6",
+        "failure_type": "WRONG_OBJECT",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10047,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 3,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10047/failures/release_failure/release_failure/attempt-01/actuation-probe.json",
+        "evidence_sha256": "67c5a7b59a8ffbb925355f0c9e9d7c52afdb5983b6b60f26eb4b7e4390b7e3d3",
+        "failure_type": "RELEASE_FAILURE",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10047,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 2,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10051/failures/empty_grasp/empty_grasp/attempt-01/actuation-probe.json",
+        "evidence_sha256": "bfbbaddee1240b060d0217bfd82b6ab3fe63ed99cf6f0349011cc7b9538e6fdc",
+        "failure_type": "EMPTY_GRASP",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10051,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 3,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10051/failures/release_failure/release_failure/attempt-01/actuation-probe.json",
+        "evidence_sha256": "f04cece39b63fae89d675e22111fb9c24b3de132cf5b8edb84c2971f807c0196",
+        "failure_type": "RELEASE_FAILURE",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10051,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 2,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10053/failures/empty_grasp/empty_grasp/attempt-01/actuation-probe.json",
+        "evidence_sha256": "6d216ef9c1dd317483fd61c05bdb9c6c4c13bd6246f1016628a4623ef920f0dc",
+        "failure_type": "EMPTY_GRASP",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10053,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 6,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10053/failures/wrong_object/wrong_object/attempt-02/actuation-probe.json",
+        "evidence_sha256": "6484b33860a5d0467c0ef587892318d5107c1b98e5d3e2f114a195579d1113ef",
+        "failure_type": "WRONG_OBJECT",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10053,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 3,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10053/failures/release_failure/release_failure/attempt-01/actuation-probe.json",
+        "evidence_sha256": "e039d2e5ae0db3379bb392431076f103dcb118b137fa67102b836db8fdba0a8e",
+        "failure_type": "RELEASE_FAILURE",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10053,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 6,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10055/failures/wrong_object/wrong_object/attempt-01/actuation-probe.json",
+        "evidence_sha256": "4a159726a7eedaa34e339d4a382d792870fa9e2610bd813f8c278a1bbfd9d0a6",
+        "failure_type": "WRONG_OBJECT",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10055,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 3,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10055/failures/release_failure/release_failure/attempt-01/actuation-probe.json",
+        "evidence_sha256": "950d08a8501c0ac312c15500210b722532f3aa1df26ad94f4e218d52ca0a83d1",
+        "failure_type": "RELEASE_FAILURE",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10055,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 2,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10057/failures/empty_grasp/empty_grasp/attempt-01/actuation-probe.json",
+        "evidence_sha256": "40674c3991bf700158a607a4244d13d57de9d3fe97ddf8c493d336224845ff68",
+        "failure_type": "EMPTY_GRASP",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10057,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 6,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10057/failures/wrong_object/wrong_object/attempt-01/actuation-probe.json",
+        "evidence_sha256": "13293582c2f698f9050db33088b762d5a7410cfd789e1d91948f4dbcc5ee4c1a",
+        "failure_type": "WRONG_OBJECT",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10057,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 3,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10057/failures/release_failure/release_failure/attempt-01/actuation-probe.json",
+        "evidence_sha256": "a6b0a76a0ea9978a6b8f6c4abca253f162ba6b536cda0f594fa8aede4e12415d",
+        "failure_type": "RELEASE_FAILURE",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10057,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 2,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10061/failures/empty_grasp/empty_grasp/attempt-01/actuation-probe.json",
+        "evidence_sha256": "ced2d4d49e0dd929ce314da15f3ea786a3445b2049a640fd11d5c4ba326e1881",
+        "failure_type": "EMPTY_GRASP",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10061,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 3,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10061/failures/release_failure/release_failure/attempt-01/actuation-probe.json",
+        "evidence_sha256": "bd6efa3d3b75bc7c951a0ad0da589e9739e3e97998e2955e4b325c961cea2041",
+        "failure_type": "RELEASE_FAILURE",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10061,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 2,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10063/failures/empty_grasp/empty_grasp/attempt-01/actuation-probe.json",
+        "evidence_sha256": "f40c47e9e70ef052abca3ceefae34a9037cf8a0d7acc4c0fc42e45e237596883",
+        "failure_type": "EMPTY_GRASP",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10063,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 9,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10063/failures/wrong_object/wrong_object/attempt-01/actuation-probe.json",
+        "evidence_sha256": "7da937995c6ed0c0fc669121fb637d409d87e9da1df996b1f0705f07c1ed2e60",
+        "failure_type": "WRONG_OBJECT",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10063,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 2,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10065/failures/empty_grasp/empty_grasp/attempt-01/actuation-probe.json",
+        "evidence_sha256": "9c2904226b94914c556f8b84ecd84ca6df3083443a8d517d7e02ab7c6c20ba48",
+        "failure_type": "EMPTY_GRASP",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10065,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 6,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10071/failures/wrong_object/wrong_object/attempt-01/actuation-probe.json",
+        "evidence_sha256": "bb6188b633108ae7825cd9ac20701cbcaf67bfe1cfc19690586a609f12fe19e8",
+        "failure_type": "WRONG_OBJECT",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10071,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 2,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10073/failures/empty_grasp/empty_grasp/attempt-01/actuation-probe.json",
+        "evidence_sha256": "08a01b8f568ad6ab4e7f643389566af69c2a7862c99c4c34067f2c1ad5cfd375",
+        "failure_type": "EMPTY_GRASP",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10073,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 6,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10073/failures/wrong_object/wrong_object/attempt-01/actuation-probe.json",
+        "evidence_sha256": "019602504daa61a5970230238de9bade0ee2d02e24df00c20e5cbf02e44439cc",
+        "failure_type": "WRONG_OBJECT",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10073,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 6,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10075/failures/wrong_object/wrong_object/attempt-02/actuation-probe.json",
+        "evidence_sha256": "5e3e9859b51e87f127d8db3db9649778bf38ae6dd9c264b95b7c1ece50d5a70b",
+        "failure_type": "WRONG_OBJECT",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10075,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 2,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10077/failures/empty_grasp/empty_grasp/attempt-02/actuation-probe.json",
+        "evidence_sha256": "9b1e63206f764bd7199b44dc402a4644927f1054c940ab77ebe65f66a89add76",
+        "failure_type": "EMPTY_GRASP",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10077,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 6,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10077/failures/wrong_object/wrong_object/attempt-01/actuation-probe.json",
+        "evidence_sha256": "2b2be154a79af8f5b8cfb6b969bbee316e3e32dad5a40860d8c4745429c2e14f",
+        "failure_type": "WRONG_OBJECT",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10077,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 6,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10079/failures/wrong_object/wrong_object/attempt-01/actuation-probe.json",
+        "evidence_sha256": "4e5d366dff29c737bf27be23758ba2f102dcf23f9271f7e0e23b0e001b2f7a35",
+        "failure_type": "WRONG_OBJECT",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10079,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 2,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10081/failures/empty_grasp/empty_grasp/attempt-01/actuation-probe.json",
+        "evidence_sha256": "c69dfd939d279e438833ea116cbf8b8cbdbe73b3ef62d7f336accf0f95c37c9d",
+        "failure_type": "EMPTY_GRASP",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10081,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 6,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10081/failures/wrong_object/wrong_object/attempt-01/actuation-probe.json",
+        "evidence_sha256": "c8c0bd575c118a91ec469d6c0e079fcdcb19235a6ee9625275bdbf28702a21af",
+        "failure_type": "WRONG_OBJECT",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10081,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 6,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10083/failures/wrong_object/wrong_object/attempt-01/actuation-probe.json",
+        "evidence_sha256": "7a2b386142c59c9ae529611cdfd7c402d351c3becf200e8f0c9c0ab781ca888f",
+        "failure_type": "WRONG_OBJECT",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10083,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 2,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10085/failures/empty_grasp/empty_grasp/attempt-02/actuation-probe.json",
+        "evidence_sha256": "b1e2d505a6c867649e62faf355dc8636324561e79d5e73ee305f3af2ccbaaa61",
+        "failure_type": "EMPTY_GRASP",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10085,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 6,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10085/failures/wrong_object/wrong_object/attempt-02/actuation-probe.json",
+        "evidence_sha256": "11380f67ce2f6c86655cb850499b8e7f2bb7fa7b9e8b57386a02d08167a456b7",
+        "failure_type": "WRONG_OBJECT",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10085,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 6,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10087/failures/wrong_object/wrong_object/attempt-01/actuation-probe.json",
+        "evidence_sha256": "a0442431bcf8ec35089ccba9cd0f6fae9b4345f7621db7a73e441b1000ef6576",
+        "failure_type": "WRONG_OBJECT",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10087,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 2,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10091/failures/empty_grasp/empty_grasp/attempt-01/actuation-probe.json",
+        "evidence_sha256": "8997324829551a0e270522018e208ea7a8c367bf0fed436b8c4076a1b8cac322",
+        "failure_type": "EMPTY_GRASP",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10091,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      },
+      {
+        "collision_gates_checked": 2,
+        "collision_or_safety_violations": 0,
+        "evidence_path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/scene-10095/failures/empty_grasp/empty_grasp/attempt-01/actuation-probe.json",
+        "evidence_sha256": "5278c70e72539807dfce879e982eccd1a92f324f927cf1282cae55f56850f86b",
+        "failure_type": "EMPTY_GRASP",
+        "privileged_truth_policy_input": false,
+        "public_predicate_results_checked": 2,
+        "scene_seed": 10095,
+        "strict_physical_public_predicate_passed": true,
+        "teacher_used": false
+      }
+    ],
+    "records_audited": 150,
+    "schema_version": "M2CS3AcceptedEvidenceAuditV1",
+    "status": "PASS",
+    "strict_physical_public_predicates_passed": 150,
+    "teacher_used": false
+  },
+  "base_dataset": {
+    "path": "/Users/gl/tzb-qrm-lite/artifacts/m2b/dataset-v2.jsonl",
+    "readonly": true,
+    "sha256": "c24e34493ba2226c1aa691c1b1c43993fbecdff5ad74b291e08c4913efc71362"
+  },
+  "code_revision_histogram": {
+    "1e32fa89c8b1ef403a52f1b2c8326942b72092e6e88f50e8f780eff1c08c6094": 281,
+    "3c914922546ec9ff5925c8134b183bf35f327d0239a40f5469fd35739fc2e0d7": 10,
+    "4ec1b929d06d4dc9b51e663e336e1af7a50176247c0f7c8ac9bf4e64abff80bd": 6,
+    "971a32246765378157cc346ec0f274be256c7cb53c5458761797fc5b98caea84": 1,
+    "bfd54b2c70ed9c2d892be88335217d7cf734104bb6594fed19d1dae57d619453": 6,
+    "e4b91e36bb3c8496a539b3ce405bedf279e90b19242df83529e489cdcb13c434": 8
+  },
+  "collection_rejection_counts": {
+    "EMPTY_GRASP": 32,
+    "INFRASTRUCTURE": 2,
+    "RELEASE_FAILURE": 5,
+    "WRONG_OBJECT": 29
+  },
+  "collection_rejection_records": [
+    {
+      "failure_type": "WRONG_OBJECT",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10000,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "EMPTY_GRASP",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10002,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "EMPTY_GRASP",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10004,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "EMPTY_GRASP",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10006,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "WRONG_OBJECT",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10012,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "EMPTY_GRASP",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10014,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "WRONG_OBJECT",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10014,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "EMPTY_GRASP",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10024,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "WRONG_OBJECT",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10026,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "WRONG_OBJECT",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10036,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "EMPTY_GRASP",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10038,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "WRONG_OBJECT",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10038,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "RELEASE_FAILURE",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10038,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "WRONG_OBJECT",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10040,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "EMPTY_GRASP",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10042,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "EMPTY_GRASP",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10046,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "WRONG_OBJECT",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10046,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "WRONG_OBJECT",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10050,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "EMPTY_GRASP",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10054,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "WRONG_OBJECT",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10058,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "EMPTY_GRASP",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10060,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "WRONG_OBJECT",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10060,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "EMPTY_GRASP",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10066,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "WRONG_OBJECT",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10070,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": null,
+      "reason": "source or stage did not reach a failure attempt",
+      "scene_seed": 10001,
+      "status": "STAGE_FAILED"
+    },
+    {
+      "failure_type": "WRONG_OBJECT",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10003,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "EMPTY_GRASP",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10007,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "WRONG_OBJECT",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10009,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "WRONG_OBJECT",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10011,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "WRONG_OBJECT",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10017,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "EMPTY_GRASP",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10019,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "EMPTY_GRASP",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10021,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "WRONG_OBJECT",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10025,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "WRONG_OBJECT",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10027,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": null,
+      "reason": "source or stage did not reach a failure attempt",
+      "scene_seed": 10029,
+      "status": "STAGE_FAILED"
+    },
+    {
+      "failure_type": "EMPTY_GRASP",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10031,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "WRONG_OBJECT",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10031,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "RELEASE_FAILURE",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10031,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "WRONG_OBJECT",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10033,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "RELEASE_FAILURE",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10035,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "EMPTY_GRASP",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10037,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "EMPTY_GRASP",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10039,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "WRONG_OBJECT",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10041,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "EMPTY_GRASP",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10043,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "EMPTY_GRASP",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10045,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "WRONG_OBJECT",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10045,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "EMPTY_GRASP",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10047,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "EMPTY_GRASP",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10049,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "WRONG_OBJECT",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10049,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "RELEASE_FAILURE",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10049,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "WRONG_OBJECT",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10051,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "EMPTY_GRASP",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10055,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "EMPTY_GRASP",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10059,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "WRONG_OBJECT",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10059,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "RELEASE_FAILURE",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10059,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "WRONG_OBJECT",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10061,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "WRONG_OBJECT",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10065,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "EMPTY_GRASP",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10067,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "WRONG_OBJECT",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10067,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "EMPTY_GRASP",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10069,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "WRONG_OBJECT",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10069,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "EMPTY_GRASP",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10071,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "EMPTY_GRASP",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10075,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "EMPTY_GRASP",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10079,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "EMPTY_GRASP",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10083,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "EMPTY_GRASP",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10087,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "EMPTY_GRASP",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10089,
+      "status": "PARTIAL"
+    },
+    {
+      "failure_type": "EMPTY_GRASP",
+      "reason": "frozen physical/public acceptance predicate did not pass",
+      "scene_seed": 10093,
+      "status": "PARTIAL"
+    }
+  ],
+  "collection_rejections": 68,
+  "counts_by_split": {
+    "test": {
+      "EMPTY_GRASP": 8,
+      "RELEASE_FAILURE": 9,
+      "WRONG_OBJECT": 8
+    },
+    "train": {
+      "EMPTY_GRASP": 81,
+      "RELEASE_FAILURE": 90,
+      "WRONG_OBJECT": 80
+    },
+    "val": {
+      "EMPTY_GRASP": 12,
+      "RELEASE_FAILURE": 12,
+      "WRONG_OBJECT": 12
+    }
+  },
+  "dataset_version": "isaac-industrial-v3-headroom",
+  "episodes_quarantined": 0,
+  "episodes_valid": 312,
+  "evidence_freeze": {
+    "evidence_tree_readonly": true,
+    "files_hashed": 5404,
+    "host": "root@labserver",
+    "ledger": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/evidence-sha256.txt",
+    "ledger_sha256": "0b1142aaf802378f719a32aa28fa671447f97231067b55e27a07fa4749306f8f",
+    "remote_root": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1",
+    "report_path": "reports/m2c-s3-evidence-freeze.json",
+    "report_sha256": "bb21eea0064637b985f2df7a832e2f8b6c0d0a6c60360e4380ec70c04bdf9c00"
+  },
+  "failure_counts": {
+    "EMPTY_GRASP": 101,
+    "RELEASE_FAILURE": 111,
+    "WRONG_OBJECT": 100
+  },
+  "fourth_class": {
+    "failure_type": "PATH_BLOCKED",
+    "human_adr_required_before_model_label_or_q_b": true,
+    "model_training_eligible": false,
+    "new_skill_label_created": false,
+    "path": "artifacts/m2c/path-blocked-raw-v1.jsonl",
+    "raw_records": 3,
+    "sha256": "704cc5790ca6c5f0694664195130585b7420660b6c99b29afc342b83ef5908d5",
+    "successful_recoveries": 1
+  },
+  "frozen_base_episodes": 162,
+  "full_class_coverage_gate_passed": true,
+  "new_accepted_counts": {
+    "EMPTY_GRASP": 50,
+    "RELEASE_FAILURE": 50,
+    "WRONG_OBJECT": 50
+  },
+  "new_accepted_episodes": 150,
+  "output_path": "artifacts/m2c/dataset-v3.jsonl",
+  "output_sha256": "48924a208c0ab417384f09bbef45073a10f58c9aac16cc64089409288401f35b",
+  "plan": {
+    "path": "/Users/gl/tzb-qrm-lite/configs/m2c_s3_collection_plan.json",
+    "plan_sha256": "614eba27ff1d9dae70d6c55ab4788c729b9433516d4a9ce04bb8ca24c2da7555",
+    "sha256": "df9da45c184895f1d703e0fff30c2802df705deb47aca4e2503e0f7e63f2d658"
+  },
+  "privileged_truth_policy_input": false,
+  "q_b_training_or_evaluation_executed": false,
+  "quarantine_path": "artifacts/m2c/dataset-v3-quarantine.jsonl",
+  "quarantine_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "schema_version": "M2CS3DatasetReportV1",
+  "split_counts": {
+    "test": 25,
+    "train": 251,
+    "val": 36
+  },
+  "split_group_leakage": [],
+  "status": "PASS_S3_FULL_CLASS_COVERAGE",
+  "successful_recovery_counts": {
+    "EMPTY_GRASP": 101,
+    "RELEASE_FAILURE": 111,
+    "WRONG_OBJECT": 100
+  },
+  "task_report": {
+    "blockers": [
+      "Q-B is forbidden until a separate human expressivity ADR is committed."
+    ],
+    "changed_or_generated_files": [
+      "artifacts/m2c/dataset-v3.jsonl",
+      "artifacts/m2c/dataset-v3-quarantine.jsonl",
+      "artifacts/m2c/path-blocked-raw-v1.jsonl",
+      "reports/m2c-s3-evidence-freeze.json",
+      "reports/m2c-s3-dataset-v3.json",
+      "reports/m2c-s3-dataset-v3.md"
+    ],
+    "failures": {
+      "collection_attempts_rejected": 68,
+      "packaging_quarantine": 0
+    },
+    "next_command": "sed -n '1,240p' docs/decisions/M2C-QB-EXPRESSIVITY-PREREG.md",
+    "tests": [
+      {
+        "checks": [
+          "full class coverage",
+          "150/150 strict physical/public acceptance re-audit",
+          "recursive collision/safety gate audit",
+          "strict episode validation",
+          "accepted-evidence SHA binding",
+          "zero packaging quarantine",
+          "split-group leakage"
+        ],
+        "name": "S3 frozen-evidence dataset gates",
+        "status": "PASS"
+      }
+    ]
+  },
+  "teacher_kill_rule_events": [],
+  "teacher_used": false,
+  "unique_scene_groups": 150,
+  "worker_status_snapshots": [
+    {
+      "accepted_counts": {
+        "EMPTY_GRASP": 25,
+        "RELEASE_FAILURE": 25,
+        "WRONG_OBJECT": 25
+      },
+      "host": "root@labserver",
+      "path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/worker-status.json",
+      "privileged_truth_policy_input": false,
+      "record_count": 99,
+      "schema_version": "M2BFailureEvidenceWorkerStatusV1",
+      "sha256": "bb7e28fd7c4cc11898c4eb4a119781910accd81a3de4c1cb461a3a0861641b60",
+      "status": "COMPLETE_ACCEPTED_TARGET",
+      "teacher_used": false
+    },
+    {
+      "accepted_counts": {
+        "EMPTY_GRASP": 25,
+        "RELEASE_FAILURE": 25,
+        "WRONG_OBJECT": 25
+      },
+      "host": "root@labserver",
+      "path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/worker-status.json",
+      "privileged_truth_policy_input": false,
+      "record_count": 119,
+      "schema_version": "M2BFailureEvidenceWorkerStatusV1",
+      "sha256": "c901a29dfdf512838a5c58c90bf3b29b24ce97a84d264ac42e84848c96573141",
+      "status": "COMPLETE_ACCEPTED_TARGET",
+      "teacher_used": false
+    }
+  ],
+  "world_model_mainline_replaced": false
+}

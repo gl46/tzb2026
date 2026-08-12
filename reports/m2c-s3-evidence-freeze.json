@@ -1,0 +1,47 @@
+{
+  "accepted_counts": {
+    "EMPTY_GRASP": 50,
+    "RELEASE_FAILURE": 50,
+    "WRONG_OBJECT": 50
+  },
+  "evidence_tree_readonly": true,
+  "files_hashed": 5404,
+  "host": "root@labserver",
+  "ledger": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/evidence-sha256.txt",
+  "ledger_sha256": "0b1142aaf802378f719a32aa28fa671447f97231067b55e27a07fa4749306f8f",
+  "privileged_truth_policy_input": false,
+  "remote_root": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1",
+  "schema_version": "M2CS3EvidenceFreezeV1",
+  "status": "PASS",
+  "teacher_kill_rule_events": [],
+  "teacher_used": false,
+  "worker_status_snapshots": [
+    {
+      "accepted_counts": {
+        "EMPTY_GRASP": 25,
+        "RELEASE_FAILURE": 25,
+        "WRONG_OBJECT": 25
+      },
+      "path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/worker-status.json",
+      "privileged_truth_policy_input": false,
+      "record_count": 99,
+      "sha256": "bb7e28fd7c4cc11898c4eb4a119781910accd81a3de4c1cb461a3a0861641b60",
+      "status": "COMPLETE_ACCEPTED_TARGET",
+      "teacher_used": false
+    },
+    {
+      "accepted_counts": {
+        "EMPTY_GRASP": 25,
+        "RELEASE_FAILURE": 25,
+        "WRONG_OBJECT": 25
+      },
+      "path": "/var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/worker-status.json",
+      "privileged_truth_policy_input": false,
+      "record_count": 119,
+      "sha256": "c901a29dfdf512838a5c58c90bf3b29b24ce97a84d264ac42e84848c96573141",
+      "status": "COMPLETE_ACCEPTED_TARGET",
+      "teacher_used": false
+    }
+  ],
+  "world_model_mainline_replaced": false
+}
