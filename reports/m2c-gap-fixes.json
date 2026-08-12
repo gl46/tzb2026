@@ -1,0 +1,70 @@
+{
+  "schema_version": "M2CGapFixAuditV1",
+  "completed_at": "2026-08-12T08:08:09+08:00",
+  "stage_interval": "S3_COLLECTION_RUNNING",
+  "status": "REVIEW_COMPLETE_WITH_ONE_OPEN_CODE_FINDING",
+  "items": [
+    {
+      "id": "PERCEPTION_GATE_NO_GO_EXIT",
+      "status": "FIXED_AND_VERIFIED",
+      "path": "scripts/evaluate_isaac_m1b_perception_gate.py",
+      "commit": "2c72ff0885a5a65fe20ad563022592e38ef87cb7",
+      "result": "A measured NO_GO now returns process exit code 1; GO and audit-only pending states return 0.",
+      "test": "tests/unit/test_isaac_m1b_perception_gate_exit.py"
+    },
+    {
+      "id": "DETACH_GATE_REPORT_WORDING",
+      "status": "DOCUMENTATION_AMBIGUITY_RETAINED_AS_FINDING",
+      "path": "scripts/isaac_m1b_actuation_probe.py",
+      "source_sha256": "1e32fa89c8b1ef403a52f1b2c8326942b72092e6e88f50e8f780eff1c08c6094",
+      "b0_source_unchanged": true,
+      "actual_predicate": {
+        "attachment_absent_after_detach": true,
+        "minimum_hand_motion_m": 0.02,
+        "minimum_hand_object_relative_change_m": 0.02,
+        "collision_gate_required": true
+      },
+      "finding": "The historic Markdown calls the object's absolute post-detach displacement 'detached motion' without stating that it is diagnostic rather than the acceptance threshold. The executable gate and machine evidence use hand motion and hand/object relative change. No threshold was relaxed, and the frozen B0 source was not edited."
+    },
+    {
+      "id": "DYNAMIC_WORLD_POSE_FROM_USD_XFORM_CACHE",
+      "status": "OPEN_FINDING_NOT_USED_FOR_S3_ACCEPTANCE",
+      "path": "scripts/isaac_m1b_dataset_benchmark.py",
+      "source_sha256": "800a103035c87089367f64d8b7c191ef626f33aab709b59aa05b08efbf3050b1",
+      "introduced_by_commit": "5984298e22e14c76414aa49dbae059a33369e0a8",
+      "finding": "_world_pose_xyzw reads UsdGeom.XformCache().GetLocalToWorldTransform for dynamic robot and cylinder poses after the timeline starts. That can return the authored transform instead of the live PhysX pose.",
+      "affected_outputs": [
+        "end_effector_pose_world_xyzw",
+        "perfect_object_poses_world_xyzw",
+        "final_end_effector_pose_world_xyzw"
+      ],
+      "scope_boundary": "S3 physical sample acceptance and recovery metrics come from isaac_m1b_actuation_probe.py, whose _live_pose reads RigidPrim.get_world_poses from the PhysX tensor backend. The affected benchmark fields are not used to accept S3 samples.",
+      "required_follow_up": "Before a future dynamic dataset benchmark is accepted, replace the helper with a live PhysX pose reader and verify movement on Isaac Sim. Do not reinterpret old authored-pose records as live motion evidence."
+    },
+    {
+      "id": "TILTED_CYLINDER_SUPPORT_Z",
+      "status": "ALREADY_FIXED_AND_VERIFIED",
+      "path": "scripts/generate_industrial_scenes.py",
+      "source_sha256": "e9f9e20106a05dbec24453ce39422d57aa212709567fb7eba7f8d9beb03cd6c5",
+      "fix_commit": "872e7c31257973b11e3d0575d9c134a9629ce840",
+      "result": "cylinder_pose computes vertical support from projected half-length plus projected radius and adds the spawn clearance; tilted cylinders no longer reuse the upright half-length offset.",
+      "test": "tests/unit/test_m1b_alpha_perception.py::test_random_scene_generator_makes_seed_specific_six_to_twelve_part_scenes"
+    }
+  ],
+  "verification": {
+    "focused_tests": "35 passed",
+    "full_pytest": "410 passed",
+    "ruff": "PASS",
+    "git_diff_check": "PASS",
+    "b0_probe_sha256_matches_freeze": true
+  },
+  "teacher_used": false,
+  "teacher_kill_rule_events": [],
+  "privileged_truth_policy_input": false,
+  "failures": [],
+  "blockers": [
+    "The dynamic benchmark live-pose defect remains open and requires an Isaac runtime verification before affected outputs can be accepted.",
+    "Q-B remains forbidden until a separate human expressivity ADR is committed."
+  ],
+  "next_command": "ssh root@labserver 'python3 -m json.tool /var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/worker-status.json'"
+}
