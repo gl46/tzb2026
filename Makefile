@@ -1,7 +1,7 @@
 PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,python3)
 export PYTHONPATH := src:scripts
 
-.PHONY: doctor test validate sim-smoke constrained-pick-place empty-grasp-failures record-constrained-episode moveit-plan-smoke baseline teacher-audit bakeoff-prepare m0-report m0-audit status m2a-doctor isaac-contract isaac-benchmark isaac-pilot isaac-validate isaac-sync qrm-beta-train qrm-beta-eval qrm-beta-closed-loop shadow-isaac lingbot-prep m2a-status m2b-audit m2b-export-schemas m2b-generate-failures m2b-generate-residuals m2b-pack-evidence-pilot m2b-dataset m2b-coarse-dataset m2b-coarse-gate m2b-residual-pilot m2b-residual-dataset m2b-residual-training-dataset m2b-physical-gates m2b-train m2b-map-validate m2b-run-prospective-preflights m2b-merge-preflight-shards m2b-preflight-manifest m2b-map-prospective m2b-run-matched-closed-loop m2b-closed-loop m2b-merge-closed-loop-shards m2b-summarize-matched-closed-loop m2b-status m2c-freeze m2c-s1 m2c-s2-domain m2c-s2-domain-v2 m2c-s2-domain-v3 m2c-s2-domain-v4 m2c-s3-source
+.PHONY: doctor test validate sim-smoke constrained-pick-place empty-grasp-failures record-constrained-episode moveit-plan-smoke baseline teacher-audit bakeoff-prepare m0-report m0-audit status m2a-doctor isaac-contract isaac-benchmark isaac-pilot isaac-validate isaac-sync qrm-beta-train qrm-beta-eval qrm-beta-closed-loop shadow-isaac lingbot-prep m2a-status m2b-audit m2b-export-schemas m2b-generate-failures m2b-generate-residuals m2b-pack-evidence-pilot m2b-dataset m2b-coarse-dataset m2b-coarse-gate m2b-residual-pilot m2b-residual-dataset m2b-residual-training-dataset m2b-physical-gates m2b-train m2b-map-validate m2b-run-prospective-preflights m2b-merge-preflight-shards m2b-preflight-manifest m2b-map-prospective m2b-run-matched-closed-loop m2b-closed-loop m2b-merge-closed-loop-shards m2b-summarize-matched-closed-loop m2b-status m2c-freeze m2c-s1 m2c-s2-domain m2c-s2-domain-v2 m2c-s2-domain-v3 m2c-s2-domain-v4 m2c-s3-source m2c-s3-dataset
 doctor:
 	$(PYTHON) -m xh_agent.diagnostics.doctor --local --output reports/hardware-local.json
 	$(PYTHON) -m xh_agent.diagnostics.doctor --remote node2 --user gl --output reports/hardware-remote-node2.json
@@ -228,3 +228,11 @@ m2c-s3-source:
 	M2B_EVIDENCE_READONLY=1 $(PYTHON) scripts/m2c/build_s3_collection_plan.py \
 		--output-root "$${M2C_EVIDENCE_ROOT:-/Users/gl/tzb-m2c-evidence}/m2c-s3/source-v1" \
 		--manifest configs/m2c_s3_collection_plan.json
+m2c-s3-dataset:
+	M2B_EVIDENCE_READONLY=1 $(PYTHON) scripts/m2c/build_s3_dataset.py \
+		--worker-status /var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/worker-status.json \
+		--worker-status /var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker1/worker-status.json \
+		--output artifacts/m2c/dataset-v3.jsonl \
+		--quarantine artifacts/m2c/dataset-v3-quarantine.jsonl \
+		--fourth-class-output artifacts/m2c/path-blocked-raw-v1.jsonl \
+		--report reports/m2c-s3-dataset-v3.json
