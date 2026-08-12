@@ -1,0 +1,11 @@
+{
+  "schema_version": "M2CS3PublicCategoryVocabularyInputManifestV1",
+  "evidence_files": [
+    {
+      "path": "artifacts/m2c/dataset-v3.jsonl",
+      "sha256": "48924a208c0ab417384f09bbef45073a10f58c9aac16cc64089409288401f35b"
+    }
+  ],
+  "teacher_used": false,
+  "privileged_truth_policy_input": false
+}

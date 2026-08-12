@@ -1,0 +1,36 @@
+{
+  "adr_path": "docs/decisions/ADR-0021-m2c-public-semantic-candidate-contract.md",
+  "category_attribute_matches": 4614,
+  "collection_or_training_executed": false,
+  "declared_attributes": [
+    "red",
+    "yellow"
+  ],
+  "evidence_files_verified": 1,
+  "files": [
+    {
+      "category_attribute_matches": 4614,
+      "observations_audited": 1872,
+      "path": "artifacts/m2c/dataset-v3.jsonl",
+      "records_audited": 312,
+      "sha256": "48924a208c0ab417384f09bbef45073a10f58c9aac16cc64089409288401f35b",
+      "size_bytes": 6972428,
+      "tracks_audited": 20615
+    }
+  ],
+  "manifest_path": "configs/m2c_s3_public_category_vocabulary_audit.json",
+  "manifest_sha256": "2931a67168dbdcfb6eb055ee489c54cbf989ac2140ab578bdbf4bee988dec9a8",
+  "observations_audited": 1872,
+  "privileged_truth_policy_input": false,
+  "public_adapter_path": "scripts/m2b/build_coarse_training_v2.py",
+  "public_adapter_projection": "PublicTrackSnapshotV2.category + ':' + visual_color -> PerceptionTrackV1.category",
+  "public_adapter_sha256": "81f19e6c0317b49577a74a62bac4ca3144c4854e391f58da135018f68d411f89",
+  "raw_category_and_visual_color_remain_distinct": true,
+  "records_audited": 312,
+  "schema_version": "M2CS3PublicCategoryVocabularyAuditV1",
+  "status": "PASS_CATEGORY_CARRIES_DECLARED_ATTRIBUTE_VOCABULARY",
+  "task_spec_target_track_id_read": false,
+  "teacher_used": false,
+  "tracks_audited": 20615,
+  "visual_color_promoted_as_standalone_category": false
+}
