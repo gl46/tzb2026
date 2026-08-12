@@ -9,6 +9,8 @@ from copy import deepcopy
 import hashlib
 import json
 from pathlib import Path
+import shlex
+import subprocess
 from typing import Any
 
 from m2b.build_dataset_v2 import (
@@ -117,6 +119,25 @@ def validate_evidence_freeze(
         "files_hashed": int(freeze.get("files_hashed", 0)),
         "evidence_tree_readonly": True,
     }
+
+
+def verify_remote_evidence_ledger(host: str, freeze: dict[str, Any]) -> None:
+    ledger = str(freeze["ledger"])
+    expected_ledger_sha256 = str(freeze["ledger_sha256"])
+    if remote_sha256(host, ledger) != expected_ledger_sha256:
+        raise ValueError("remote S3 evidence ledger SHA-256 changed after freeze")
+    root = str(freeze["remote_root"])
+    command = (
+        f"cd {shlex.quote(root)} && sha256sum --check --strict {shlex.quote(Path(ledger).name)}"
+    )
+    completed = subprocess.run(
+        ["ssh", "-o", "BatchMode=yes", host, command],
+        capture_output=True,
+        text=True,
+    )
+    if completed.returncode != 0:
+        detail = completed.stderr.strip() or completed.stdout.strip()
+        raise ValueError(f"remote S3 evidence ledger verification failed: {detail}")
 
 
 def load_jsonl(path: Path) -> list[dict[str, Any]]:
@@ -488,7 +509,8 @@ def main() -> int:
             host=args.host,
             worker_status_snapshots=worker_status_snapshots,
         )
-    except (OSError, ValueError) as error:
+        verify_remote_evidence_ledger(args.host, evidence_freeze)
+    except (OSError, ValueError, subprocess.SubprocessError) as error:
         raise SystemExit(str(error)) from error
     evidence, rejected = accepted_evidence(statuses)
     additions, package_quarantine = package(evidence, host=args.host)

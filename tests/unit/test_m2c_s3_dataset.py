@@ -13,6 +13,7 @@ from m2c.build_s3_dataset import (
     load_jsonl,
     merge_episodes,
     validate_evidence_freeze,
+    verify_remote_evidence_ledger,
     write_outputs,
 )
 
@@ -190,6 +191,43 @@ def test_evidence_freeze_rejects_changed_worker_status(tmp_path: Path) -> None:
         assert "differs" in str(error)
     else:
         raise AssertionError("changed worker status was accepted")
+
+
+def test_remote_evidence_ledger_rechecks_digest_and_tree(monkeypatch) -> None:
+    calls = []
+    monkeypatch.setattr(
+        s3_dataset,
+        "remote_sha256",
+        lambda host, path: EVIDENCE_FREEZE["ledger_sha256"],
+    )
+
+    class Completed:
+        returncode = 0
+        stdout = "all files OK"
+        stderr = ""
+
+    def fake_run(command, **kwargs):
+        calls.append((command, kwargs))
+        return Completed()
+
+    monkeypatch.setattr(s3_dataset.subprocess, "run", fake_run)
+
+    verify_remote_evidence_ledger("root@labserver", EVIDENCE_FREEZE)
+
+    assert len(calls) == 1
+    assert calls[0][0][:4] == ["ssh", "-o", "BatchMode=yes", "root@labserver"]
+    assert "sha256sum --check --strict evidence-sha256.txt" in calls[0][0][4]
+
+
+def test_remote_evidence_ledger_rejects_digest_drift(monkeypatch) -> None:
+    monkeypatch.setattr(s3_dataset, "remote_sha256", lambda host, path: "d" * 64)
+
+    try:
+        verify_remote_evidence_ledger("root@labserver", EVIDENCE_FREEZE)
+    except ValueError as error:
+        assert "changed after freeze" in str(error)
+    else:
+        raise AssertionError("changed remote ledger was accepted")
 
 
 def test_merge_promotes_version_and_deduplicates_evidence() -> None:
