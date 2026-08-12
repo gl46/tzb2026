@@ -174,13 +174,28 @@ def main() -> int:
         and len(primary_interval) == 2
     )
 
-    present = [report for report in (s0, s1, s2, s3, s4, s5, s6) if report]
-    teacher_free = bool(present and all(report.get("teacher_used") is False for report in present))
+    required_boundary_reports = [s0, s1, s2, s3, s4, s6]
+    if not d2_triggered:
+        required_boundary_reports.append(s5)
+    present = [report for report in required_boundary_reports if report]
+    boundary_reports_complete = len(present) == len(required_boundary_reports)
+    teacher_violation = any(report.get("teacher_used") is True for report in present)
+    privileged_truth_violation = any(
+        report.get("privileged_truth_policy_input") is True for report in present
+    )
+    world_model_violation = any(
+        report.get("world_model_mainline_replaced") is True for report in present
+    )
+    teacher_free = bool(
+        boundary_reports_complete and all(report.get("teacher_used") is False for report in present)
+    )
     no_privileged_policy_input = bool(
-        present and all(report.get("privileged_truth_policy_input") is False for report in present)
+        boundary_reports_complete
+        and all(report.get("privileged_truth_policy_input") is False for report in present)
     )
     world_model_preserved = bool(
-        present and all(report.get("world_model_mainline_replaced") is False for report in present)
+        boundary_reports_complete
+        and all(report.get("world_model_mainline_replaced") is False for report in present)
     )
     tests = (verification or {}).get("tests") or {}
     verification_ready = bool(
@@ -288,12 +303,12 @@ def main() -> int:
         "d2_triggered": d2_triggered,
         "d3_triggered": d3_triggered,
         "system_verdict": system_verdict,
-        "teacher_used": not teacher_free,
+        "teacher_used": teacher_violation,
         "teacher_states": TEACHER_STATES,
         "teacher_kill_rules": TEACHER_KILL_RULES,
         "teacher_kill_rule_events": [],
-        "privileged_truth_policy_input": not no_privileged_policy_input,
-        "world_model_mainline_replaced": not world_model_preserved,
+        "privileged_truth_policy_input": privileged_truth_violation,
+        "world_model_mainline_replaced": world_model_violation,
         "tests_passed": int(tests.get("passed", 0)),
         "tests_failed": tests.get("failed"),
         "feature_branch": feature_branch,
@@ -315,13 +330,27 @@ def main() -> int:
             f"- `pure_model_success_episodes`: `{strict_pure_count}`",
             f"- `fc_gain_over_b0`: `{fc_gain}`; 95% CI `{primary_interval}`",
             f"- S6 keys / executed model decisions: {status['matched_keys']} / {status['model_decisions_executed']}",
-            "- Teacher used: no" if teacher_free else "- Teacher boundary: FAIL",
-            "- Privileged simulator truth in policy input: no"
-            if no_privileged_policy_input
-            else "- Privileged-truth boundary: FAIL",
-            "- World-model mainline replaced: no"
-            if world_model_preserved
-            else "- World-model boundary: FAIL",
+            (
+                "- Teacher used: no"
+                if teacher_free
+                else "- Teacher boundary: FAIL"
+                if teacher_violation
+                else "- Teacher boundary: INCOMPLETE"
+            ),
+            (
+                "- Privileged simulator truth in policy input: no"
+                if no_privileged_policy_input
+                else "- Privileged-truth boundary: FAIL"
+                if privileged_truth_violation
+                else "- Privileged-truth boundary: INCOMPLETE"
+            ),
+            (
+                "- World-model mainline replaced: no"
+                if world_model_preserved
+                else "- World-model boundary: FAIL"
+                if world_model_violation
+                else "- World-model boundary: INCOMPLETE"
+            ),
             "",
             "## Completion gates",
             "",
@@ -362,12 +391,12 @@ def main() -> int:
             "confidence_interval": primary_interval,
         },
         "pure_model_success_episodes": strict_pure_count,
-        "teacher_used": not teacher_free,
+        "teacher_used": teacher_violation,
         "teacher_states": TEACHER_STATES,
         "teacher_kill_rules": TEACHER_KILL_RULES,
         "teacher_kill_rule_events": [],
-        "privileged_truth_policy_input": not no_privileged_policy_input,
-        "world_model_mainline_replaced": not world_model_preserved,
+        "privileged_truth_policy_input": privileged_truth_violation,
+        "world_model_mainline_replaced": world_model_violation,
         "honest_limitations": limitations,
         "task_report": {
             "changed_files": changed_files,

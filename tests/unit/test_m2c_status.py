@@ -145,6 +145,10 @@ def test_status_fails_closed_when_terminal_evidence_is_missing(tmp_path: Path) -
     assert payload["goal_complete"] is False
     assert payload["fc_gain_over_b0"] is None
     assert payload["pure_model_success_episodes"] is None
+    assert payload["teacher_used"] is False
+    assert payload["privileged_truth_policy_input"] is False
+    assert payload["world_model_mainline_replaced"] is False
+    assert payload["completion_gates"]["teacher_free"] is False
     assert payload["next_command"] == "M2B_EVIDENCE_READONLY=1 make m2c-s3-dataset"
     for name in (
         "m2c-status.md",
@@ -206,3 +210,19 @@ def test_status_rejects_underpowered_or_unsafe_s6(tmp_path: Path) -> None:
     assert completed.returncode == 2
     assert payload["goal_complete"] is False
     assert payload["completion_gates"]["s6_formal_four_method_matched_evaluation"] is False
+
+
+def test_status_distinguishes_teacher_violation_from_missing_evidence(
+    tmp_path: Path,
+) -> None:
+    reports = tmp_path / "reports"
+    reports.mkdir()
+    complete_fixtures(reports)
+    s3_path = reports / "m2c-s3-dataset-v3.json"
+    s3 = json.loads(s3_path.read_text())
+    s3["teacher_used"] = True
+    s3_path.write_text(json.dumps(s3))
+    completed, payload = run_status(reports)
+    assert completed.returncode == 2
+    assert payload["teacher_used"] is True
+    assert payload["completion_gates"]["teacher_free"] is False
