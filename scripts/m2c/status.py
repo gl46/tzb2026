@@ -117,12 +117,28 @@ def main() -> int:
     )
     failure_counts = (s3 or {}).get("failure_counts") or {}
     recovery_counts = (s3 or {}).get("successful_recovery_counts") or {}
+    s3_freeze = (s3 or {}).get("evidence_freeze") or {}
+    s3_worker_snapshots = (s3 or {}).get("worker_status_snapshots") or []
+    s3_evidence_frozen = bool(
+        s3_freeze.get("evidence_tree_readonly") is True
+        and len(str(s3_freeze.get("ledger_sha256", ""))) == 64
+        and int(s3_freeze.get("files_hashed", 0)) > 0
+        and len(s3_worker_snapshots) == 2
+        and all(
+            snapshot.get("status") == "COMPLETE_ACCEPTED_TARGET"
+            and snapshot.get("teacher_used") is False
+            and snapshot.get("privileged_truth_policy_input") is False
+            and len(str(snapshot.get("sha256", ""))) == 64
+            for snapshot in s3_worker_snapshots
+        )
+    )
     s3_ready = bool(
         s3
         and s3.get("status") == "PASS_S3_FULL_CLASS_COVERAGE"
         and s3.get("full_class_coverage_gate_passed") is True
         and int(s3.get("episodes_quarantined", 0)) == 0
         and not s3.get("split_group_leakage")
+        and s3_evidence_frozen
         and all(
             int(failure_counts.get(failure, 0)) >= 100
             and int(recovery_counts.get(failure, 0)) >= 50
@@ -224,7 +240,7 @@ def main() -> int:
         "s0_b0_and_m2b_freeze": "S0 B0/M2B freeze is missing or no longer matches",
         "s1_delivery_evidence": "S1 delivery evidence is missing or failing",
         "s2_q_a_headroom_and_recoverability": "S2 Q-A has not proved both B0 headroom and physical recoverability",
-        "s3_full_class_coverage": "S3 has not passed 100 failures / 50 recoveries per class with zero quarantine and no split leakage",
+        "s3_full_class_coverage": "S3 has not passed 100 failures / 50 recoveries per class with zero quarantine, no split leakage, and two ledger-bound completed worker snapshots",
         "s4_q_b_governed_disposition": "S4 lacks a human-ADR-governed Q-B execution and strict pure-model/D2 disposition",
         "s5_residual_closed_loop_or_d2_disposition": "S5 has neither a measured residual difference nor a valid D2/D3 disposition",
         "s6_formal_four_method_matched_evaluation": "S6 lacks 30 four-method keys, 50 physical model decisions, paired FC-vs-B0 CI, or zero violations",

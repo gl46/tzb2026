@@ -80,6 +80,20 @@ def complete_fixtures(reports: Path, *, pure: int = 2) -> None:
             successful_recovery_counts=counts,
             split_group_leakage=[],
             output_sha256="a" * 64,
+            evidence_freeze={
+                "evidence_tree_readonly": True,
+                "ledger_sha256": "d" * 64,
+                "files_hashed": 400,
+            },
+            worker_status_snapshots=[
+                {
+                    "status": "COMPLETE_ACCEPTED_TARGET",
+                    "sha256": digest * 64,
+                    "teacher_used": False,
+                    "privileged_truth_policy_input": False,
+                }
+                for digest in ("e", "f")
+            ],
         ),
     )
     write(
@@ -210,6 +224,23 @@ def test_status_rejects_underpowered_or_unsafe_s6(tmp_path: Path) -> None:
     assert completed.returncode == 2
     assert payload["goal_complete"] is False
     assert payload["completion_gates"]["s6_formal_four_method_matched_evaluation"] is False
+
+
+def test_status_rejects_s3_without_frozen_evidence_ledger(tmp_path: Path) -> None:
+    reports = tmp_path / "reports"
+    reports.mkdir()
+    complete_fixtures(reports)
+    s3_path = reports / "m2c-s3-dataset-v3.json"
+    s3 = json.loads(s3_path.read_text())
+    s3["evidence_freeze"]["evidence_tree_readonly"] = False
+    s3["worker_status_snapshots"][1]["status"] = "RUNNING_OR_PARTIAL"
+    s3_path.write_text(json.dumps(s3))
+
+    completed, payload = run_status(reports)
+
+    assert completed.returncode == 2
+    assert payload["goal_complete"] is False
+    assert payload["completion_gates"]["s3_full_class_coverage"] is False
 
 
 def test_status_distinguishes_teacher_violation_from_missing_evidence(
