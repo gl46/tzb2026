@@ -10,6 +10,8 @@ from pathlib import Path
 import subprocess
 from typing import Any
 
+from terminal_evidence import verify_terminal_evidence
+
 
 PROJECT = Path(__file__).resolve().parents[2]
 MANDATORY_FAILURES = ("EMPTY_GRASP", "WRONG_OBJECT", "RELEASE_FAILURE")
@@ -72,19 +74,6 @@ def display_path(path: Path) -> str:
         return str(path.resolve().relative_to(PROJECT.resolve()))
     except ValueError:
         return path.name
-
-
-def primary_gain(s6: dict[str, Any] | None) -> float | None:
-    primary = (s6 or {}).get("primary_metric") or {}
-    value = primary.get("estimate")
-    if primary.get("name") != "fc_gain_over_b0" or value is None:
-        return None
-    return float(value)
-
-
-def pure_count(s4: dict[str, Any] | None) -> int | None:
-    value = (s4 or {}).get("pure_model_success_episodes")
-    return int(value) if value is not None else None
 
 
 def main() -> int:
@@ -151,19 +140,14 @@ def main() -> int:
         and s3_evidence_audit.get("counts_by_failure")
         == {failure: 50 for failure in MANDATORY_FAILURES}
         and int(s3_evidence_audit.get("evidence_sha256_matches", -1)) == 150
-        and int(
-            s3_evidence_audit.get("strict_physical_public_predicates_passed", -1)
-        )
-        == 150
-        and int(s3_evidence_audit.get("public_predicate_results_checked", -1))
-        == 300
+        and int(s3_evidence_audit.get("strict_physical_public_predicates_passed", -1)) == 150
+        and int(s3_evidence_audit.get("public_predicate_results_checked", -1)) == 300
         and int(s3_evidence_audit.get("collision_gates_checked", -1)) >= 550
         and int(s3_evidence_audit.get("collision_or_safety_violations", -1)) == 0
         and len(s3_evidence_audit.get("records", [])) == 150
         and s3_evidence_audit.get("teacher_used") is False
         and s3_evidence_audit.get("privileged_truth_policy_input") is False
-        and s3_evidence_audit.get("acceptance_predicate")
-        == S3_ACCEPTANCE_PREDICATE
+        and s3_evidence_audit.get("acceptance_predicate") == S3_ACCEPTANCE_PREDICATE
         and all(
             int(failure_counts.get(failure, 0)) >= 100
             and int(recovery_counts.get(failure, 0)) >= 50
@@ -171,49 +155,31 @@ def main() -> int:
         )
     )
 
-    strict_pure_count = pure_count(s4)
-    d2_triggered = bool(s4 and s4.get("d2_triggered") is True)
-    q_b_governed = bool(
-        s4
-        and s4.get("human_expressivity_adr_committed") is True
-        and s4.get("q_b_training_executed") is True
-        and s4.get("q_b_evaluation_executed") is True
+    terminal = verify_terminal_evidence(
+        PROJECT,
+        s4=s4,
+        s5=s5,
+        s6=s6,
+        verification=verification,
+        d2_summary_claimed=bool(s4 and s4.get("d2_triggered") is True),
     )
-    s4_ready = bool(
-        q_b_governed
-        and strict_pure_count is not None
-        and (strict_pure_count >= 1 or d2_triggered)
-        and s4.get("status") in {"PASS_Q_B_PURE_MODEL_RECOVERY", "D2_GO_QRM_COARSE_ONLY"}
+    s4_metrics = terminal["s4"].metrics
+    strict_pure_count = (
+        int(s4_metrics["pure_model_success_episodes"])
+        if terminal["s4"].passed and s4_metrics.get("pure_model_success_episodes") is not None
+        else None
     )
-    d3_triggered = bool(s5 and s5.get("d3_triggered") is True)
-    s5_ready = bool(
-        d2_triggered
-        or (
-            s5
-            and s5.get("residual_closed_loop_executed") is True
-            and (s5.get("measurable_difference_observed") is True or d3_triggered)
-            and s5.get("status")
-            in {
-                "PASS_MEASURABLE_RESIDUAL_DIFFERENCE",
-                "D3_GO_QRM_COARSE_ONLY",
-            }
-        )
+    d2_triggered = bool(terminal["s4"].passed and s4_metrics.get("d2_triggered") is True)
+    s4_ready = terminal["s4"].passed
+    s5_ready = terminal["s5"].passed
+    d3_triggered = bool(
+        terminal["s5"].passed and terminal["s5"].metrics.get("d3_triggered") is True
     )
 
-    primary = (s6 or {}).get("primary_metric") or {}
+    s6_metrics = terminal["s6"].metrics
+    primary = s6_metrics.get("primary_metric") or {}
     primary_interval = primary.get("interval")
-    s6_ready = bool(
-        s6
-        and s6.get("status") == "PASS_M2C_S6_FORMAL_MATCHED_EVALUATION"
-        and s6.get("formal_evaluation_ready") is True
-        and int(s6.get("complete_matched_keys", 0)) >= 30
-        and int(s6.get("qrm_model_decisions_executed", 0)) >= 50
-        and int(s6.get("collision_or_safety_violations", -1)) == 0
-        and primary.get("name") == "fc_gain_over_b0"
-        and primary.get("estimate") is not None
-        and isinstance(primary_interval, list)
-        and len(primary_interval) == 2
-    )
+    s6_ready = terminal["s6"].passed
 
     required_boundary_reports = [s0, s1, s2, s3, s4, s6]
     if not d2_triggered:
@@ -238,15 +204,8 @@ def main() -> int:
         boundary_reports_complete
         and all(report.get("world_model_mainline_replaced") is False for report in present)
     )
-    tests = (verification or {}).get("tests") or {}
-    verification_ready = bool(
-        verification
-        and verification.get("status") == "PASS"
-        and int(tests.get("passed", 0)) > 0
-        and int(tests.get("failed", -1)) == 0
-        and verification.get("b0_freeze_recheck_passed") is True
-        and verification.get("m2b_evidence_readonly") is True
-    )
+    tests = terminal["final"].metrics
+    verification_ready = terminal["final"].passed
 
     gates = {
         "s0_b0_and_m2b_freeze": s0_ready,
@@ -275,10 +234,18 @@ def main() -> int:
         "final_verification_passed": "final tests, B0 freeze recheck, or M2B read-only verification is missing or failing",
     }
     blockers = [blocker_by_gate[name] for name, passed in gates.items() if not passed]
+    terminal_evidence_blockers = [
+        blocker for name in ("s4", "s5", "s6", "final") for blocker in terminal[name].blockers
+    ]
+    blockers.extend(terminal_evidence_blockers)
     if not s3_ready:
         next_command = "M2B_EVIDENCE_READONLY=1 make m2c-s3-dataset"
     elif not s4_ready:
-        next_command = "sed -n '1,240p' docs/decisions/M2C-QB-EXPRESSIVITY-PREREG.md"
+        next_command = (
+            "sed -n '1,260p' docs/decisions/M2C-S4-PUBLIC-CANDIDATE-ADR-REQUEST.md "
+            "&& sed -n '1,320p' "
+            "docs/decisions/M2C-S4-EXACT-PLAN-PRIMITIVE-ADR-REQUEST.md"
+        )
     elif not s5_ready:
         next_command = "make m2c-s5"
     elif not s6_ready:
@@ -286,7 +253,13 @@ def main() -> int:
     else:
         next_command = "make m2c-status"
 
-    fc_gain = primary_gain(s6)
+    fc_gain = (
+        float(primary["estimate"])
+        if s6_ready
+        and primary.get("name") == "fc_gain_over_b0"
+        and primary.get("estimate") is not None
+        else None
+    )
     goal_complete = not blockers
     if (
         goal_complete
@@ -306,6 +279,11 @@ def main() -> int:
         for item in (gap_fixes or {}).get("items", [])
         if str(item.get("status", "")).startswith("OPEN_FINDING")
     ]
+    limitations.append(
+        "The 9/1 source-level hard-freeze guard relies on the host OS clock and current "
+        "entrypoints; host operations must prevent clock rollback and revoke execution of "
+        "separately copied historical S2 probe files."
+    )
     if strict_pure_count == 0:
         limitations.append(
             "No successful episode completed every recovery decision under model ownership; D2 keeps the conclusion COARSE_ONLY."
@@ -337,9 +315,9 @@ def main() -> int:
         "pure_model_success_episodes": strict_pure_count,
         "fc_gain_over_b0": fc_gain,
         "fc_gain_over_b0_confidence_interval": primary_interval,
-        "matched_keys": int((s6 or {}).get("complete_matched_keys", 0)),
-        "model_decisions_executed": int((s6 or {}).get("qrm_model_decisions_executed", 0)),
-        "collision_or_safety_violations": (s6 or {}).get("collision_or_safety_violations"),
+        "matched_keys": int(s6_metrics.get("complete_matched_keys", 0)),
+        "model_decisions_executed": int(s6_metrics.get("qrm_model_decisions_executed", 0)),
+        "collision_or_safety_violations": s6_metrics.get("collision_or_safety_violations"),
         "d1_triggered": bool(s2_decision.get("d1_triggered")),
         "d2_triggered": d2_triggered,
         "d3_triggered": d3_triggered,
@@ -350,8 +328,8 @@ def main() -> int:
         "teacher_kill_rule_events": [],
         "privileged_truth_policy_input": privileged_truth_violation,
         "world_model_mainline_replaced": world_model_violation,
-        "tests_passed": int(tests.get("passed", 0)),
-        "tests_failed": tests.get("failed"),
+        "tests_passed": int(tests.get("tests_passed", 0)),
+        "tests_failed": tests.get("tests_failed"),
         "feature_branch": feature_branch,
         "commits": commits,
         "honest_limitations": limitations,
@@ -442,8 +420,8 @@ def main() -> int:
         "task_report": {
             "changed_files": changed_files,
             "tests": {
-                "passed": int(tests.get("passed", 0)),
-                "failed": tests.get("failed"),
+                "passed": int(tests.get("tests_passed", 0)),
+                "failed": tests.get("tests_failed"),
             },
             "failures": (verification or {}).get("failures", []),
             "blockers": blockers,
@@ -477,7 +455,7 @@ def main() -> int:
             "",
             "- Changed files:",
             *[f"  - `{path}`" for path in changed_files],
-            f"- Tests: {int(tests.get('passed', 0))} passed, {tests.get('failed')} failed",
+            f"- Tests: {int(tests.get('tests_passed', 0))} passed, {tests.get('tests_failed')} failed",
             "- Failures:",
             *([f"  - {item}" for item in (verification or {}).get("failures", [])] or ["  - none"]),
             "- Blockers:",

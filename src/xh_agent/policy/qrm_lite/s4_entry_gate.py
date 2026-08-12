@@ -122,22 +122,22 @@ RUNTIME_BINDINGS: dict[str, str] = {
         "b6c4e29486941c54a8b4d6c069bd95a625751fff1f17900581ec9b8e0c613ae6"
     ),
     "scripts/m2c/train_qwen_coarse_v2.py": (
-        "50bea653d34225d6ca17f06b2229ef711784a667f51078153ab75d359e632304"
+        "8b25a36448c57b9744c98c00675978c6ead86ac72cb4840b7ffe224dc9011c76"
     ),
     "scripts/m2c/evaluate_qwen_coarse_v2.py": (
-        "e4c184add71febbd892c193760779986318234bd582c3b041ce0cb2146fc1182"
+        "ca7de0fac0c143d917c449fb9aba18e8ab26312fd81a401585815a8a89ccd422"
     ),
     "scripts/m2c/serve_qwen_coarse_v2.py": (
-        "7284f140df5d1eabf6c515f53ab1b1b0f3c8985564bc5469f90101f9fb31b960"
+        "a470329f373874472280842356c5febcf7300ff5b421dd79709e6d09d7996c05"
     ),
     "scripts/m2c/run_formal_model_owned_chain.py": (
-        "0594a01e9054ab356c9891e300bd220f70dd9011b7c201c898d9227b54a35c5a"
+        "e8059b184d0cbdb5f3e037ef9c0c71fa2d468d1972e7c20dff252221ca14d6aa"
     ),
     "scripts/m2c/formal_isaac_v4_backend.py": (
-        "1b5161893e9cb38682d1ebcea5c13082ec7a5b58aa0eec91db3ab793c2165058"
+        "73ada118846c4392c73aa3f0459195e71a1d54378c549487e1ef3504bc4d79bf"
     ),
     "scripts/m2c/serve_formal_isaac_endpoint.py": (
-        "00779bc64cf7efa6e8cba7633b5ca6e645cbb54118bcfa19338187c66df0febf"
+        "72294ec73cb56a467f85f5e82a6f831c9e9dc72de0f8d87aeb48b9beb4bc7c2d"
     ),
     "src/xh_agent/policy/qrm_lite/backbone.py": (
         "291fe17515e86c75b944849972583f0af4c7c8f2fb5dd0161fe2e34d1ab02375"
@@ -152,10 +152,13 @@ RUNTIME_BINDINGS: dict[str, str] = {
         "674e494f24288d8faadedbebb6f2bbd8c6b79c8075bbae0c9c0cce08447a1705"
     ),
     "src/xh_agent/policy/qrm_lite/formal_isaac_endpoint_v2.py": (
-        "d7df51b7ebd2736ebe29a8127c56f232e37cbffc951643216267219af1d43891"
+        "ce11aa23efd271e85bd6ada98ee336f37bb77319be6cd8a6b0a1059f42dc3c9b"
     ),
     "src/xh_agent/policy/qrm_lite/formal_public_role_selector_v2.py": (
         "4e853dcb86c2bb51a9ca58f8441199e10d85366657669087e5b26a3aaf8a93a4"
+    ),
+    "src/xh_agent/policy/qrm_lite/m2c_hard_freeze.py": (
+        "36cac68c45242337bd181afaa5898cb257c643e5245037e72602b9d6fbea3dd9"
     ),
     "src/xh_agent/policy/qrm_lite/model_owned_chain_v2.py": (
         "fd76aebd3d319dd30857a721e89bcb028ae144d4d60b6d761d2d8e04f8614444"
@@ -185,6 +188,7 @@ LOCAL_TEST_NODE_IDS: tuple[str, ...] = (
     "tests/unit/test_m2c_qwen_coarse_v2.py",
     "tests/unit/test_m2c_formal_split_runner_v2.py",
     "tests/unit/test_m2c_formal_isaac_endpoint_v2.py",
+    "tests/unit/test_m2c_hard_freeze.py",
 )
 
 

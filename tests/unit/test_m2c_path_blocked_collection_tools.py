@@ -285,6 +285,11 @@ def test_worker_dry_run_is_exact_single_key_scripted_public_chain(tmp_path: Path
     derived_source = derived.read_text(encoding="utf-8")
     assert 'm2b_wrong_regrasp.get("follow_error_m", float("inf"))' not in derived_source
     assert 'np.isfinite(float(m2b_wrong_regrasp["follow_error_m"]))' in derived_source
+    assert "from xh_agent.policy.qrm_lite.m2c_hard_freeze import" in derived_source
+    assert "require_pre_freeze(" in derived_source
+    assert derived_source.index("require_pre_freeze(") < derived_source.index(
+        "from isaacsim import SimulationApp"
+    )
     assert hashlib.sha256(derived.read_bytes()).hexdigest() == receipt["derived_probe_sha256"]
     job = json.loads((derived.parent / "collection-job-v2.json").read_text())
     assert job["training_executed"] is False

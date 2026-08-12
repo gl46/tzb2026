@@ -59,6 +59,10 @@ from xh_agent.policy.qrm_lite.backbone import (
     Qwen35Backbone,
 )
 from xh_agent.policy.qrm_lite.contracts import CoarseIntentV2
+from xh_agent.policy.qrm_lite.m2c_hard_freeze import (
+    M2CExperimentAction,
+    require_pre_freeze,
+)
 from xh_agent.policy.qrm_lite.runtime_adapter_v2 import (
     build_runtime_skill_request_v2,
 )
@@ -144,6 +148,7 @@ def coarse_intent_from_prediction(
 
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
+    require_pre_freeze(M2CExperimentAction.Q_B_EVALUATION)
     _validate_args(args)
     for path in (args.output, args.report):
         if path.exists():

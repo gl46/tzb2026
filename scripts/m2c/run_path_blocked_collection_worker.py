@@ -28,6 +28,10 @@ from m2c.package_path_blocked_collection import (
     sha256_file,
 )
 from xh_agent.data.isaac_m1b import M1B_URDF_SHA256
+from xh_agent.policy.qrm_lite.m2c_hard_freeze import (
+    M2CExperimentAction,
+    require_pre_freeze,
+)
 
 
 ISAAC_IMAGE = "nvcr.io/nvidia/isaac-sim:6.0.1"
@@ -330,6 +334,12 @@ def prepare_job(args: argparse.Namespace) -> tuple[dict[str, Any], list[str], li
 
 
 def run(args: argparse.Namespace) -> dict[str, Any]:
+    # Dry-run is create-only planning, not a read-only audit: it derives a
+    # probe and writes a job receipt.  The hard freeze forbids new experiment
+    # artifacts as well as physical execution.
+    require_pre_freeze(
+        M2CExperimentAction.SMOKE if args.role == "SMOKE" else M2CExperimentAction.ISAAC_COLLECTION
+    )
     receipt, stage_cmd, probe_cmd = prepare_job(args)
     job_root = args.output_root / args.role.lower() / args.matched_key
     if args.dry_run:

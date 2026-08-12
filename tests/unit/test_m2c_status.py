@@ -5,6 +5,8 @@ from pathlib import Path
 import subprocess
 import sys
 
+from m2c.terminal_evidence import verify_final
+
 
 def run_status(reports: Path) -> tuple[subprocess.CompletedProcess[str], dict]:
     output = reports / "m2c-status.json"
@@ -198,43 +200,40 @@ def test_status_fails_closed_when_terminal_evidence_is_missing(tmp_path: Path) -
         assert (reports / name).is_file()
 
 
-def test_status_completes_only_with_every_m2c_gate(tmp_path: Path) -> None:
+def test_status_rejects_synthetic_terminal_summaries(tmp_path: Path) -> None:
     reports = tmp_path / "reports"
     reports.mkdir()
     complete_fixtures(reports)
     completed, payload = run_status(reports)
-    assert completed.returncode == 0
-    assert payload["goal_complete"] is True
-    assert payload["status"] == "PASS_WITH_LIMITATIONS"
-    assert payload["pure_model_success_episodes"] == 2
-    assert payload["fc_gain_over_b0"] == 0.2
-    assert payload["fc_gain_over_b0_confidence_interval"] == [0.05, 0.35]
-    assert payload["model_decisions_executed"] == 90
+    assert completed.returncode == 2
+    assert payload["goal_complete"] is False
+    assert payload["status"] == "PARTIAL"
+    assert payload["pure_model_success_episodes"] is None
+    assert payload["fc_gain_over_b0"] is None
+    assert payload["fc_gain_over_b0_confidence_interval"] is None
+    assert payload["model_decisions_executed"] == 0
     assert payload["teacher_used"] is False
-    assert payload["system_verdict"] == "GO_QRM_MODEL_OWNED_RECOVERY"
+    assert payload["system_verdict"] == "EVIDENCE_PENDING"
+    assert any("S4 terminal evidence failed closed" in item for item in payload["blockers"])
+    assert any("S5 terminal evidence failed closed" in item for item in payload["blockers"])
+    assert any("S6 terminal evidence failed closed" in item for item in payload["blockers"])
+    assert any("final verification failed closed" in item for item in payload["blockers"])
 
 
-def test_d2_allows_s5_skip_but_not_q_b_governance_skip(tmp_path: Path) -> None:
+def test_synthetic_d2_does_not_skip_s5_or_complete(tmp_path: Path) -> None:
     reports = tmp_path / "reports"
     reports.mkdir()
     complete_fixtures(reports, pure=0)
     completed, payload = run_status(reports)
-    assert completed.returncode == 0
-    assert payload["goal_complete"] is True
-    assert payload["d2_triggered"] is True
-    assert payload["system_verdict"] == "GO_QRM_COARSE_ONLY"
-
-    s4_path = reports / "m2c-s4-model-owned-recovery.json"
-    s4 = json.loads(s4_path.read_text())
-    s4["human_expressivity_adr_committed"] = False
-    s4_path.write_text(json.dumps(s4))
-    blocked, blocked_payload = run_status(reports)
-    assert blocked.returncode == 2
-    assert blocked_payload["goal_complete"] is False
-    assert blocked_payload["completion_gates"]["s4_q_b_governed_disposition"] is False
+    assert completed.returncode == 2
+    assert payload["goal_complete"] is False
+    assert payload["d2_triggered"] is False
+    assert payload["system_verdict"] == "EVIDENCE_PENDING"
+    assert payload["completion_gates"]["s4_q_b_governed_disposition"] is False
+    assert payload["completion_gates"]["s5_residual_closed_loop_or_d2_disposition"] is False
 
 
-def test_status_rejects_underpowered_or_unsafe_s6(tmp_path: Path) -> None:
+def test_status_rejects_summary_only_underpowered_or_unsafe_s6(tmp_path: Path) -> None:
     reports = tmp_path / "reports"
     reports.mkdir()
     complete_fixtures(reports)
@@ -247,6 +246,8 @@ def test_status_rejects_underpowered_or_unsafe_s6(tmp_path: Path) -> None:
     assert completed.returncode == 2
     assert payload["goal_complete"] is False
     assert payload["completion_gates"]["s6_formal_four_method_matched_evaluation"] is False
+    assert payload["matched_keys"] == 0
+    assert payload["collision_or_safety_violations"] is None
 
 
 def test_status_rejects_s3_without_frozen_evidence_ledger(tmp_path: Path) -> None:
@@ -299,3 +300,29 @@ def test_status_distinguishes_teacher_violation_from_missing_evidence(
     assert completed.returncode == 2
     assert payload["teacher_used"] is True
     assert payload["completion_gates"]["teacher_free"] is False
+
+
+def test_final_verifier_rejects_pytest_selection_flags() -> None:
+    head = subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        capture_output=True,
+        check=True,
+        text=True,
+    ).stdout.strip()
+    result = verify_final(
+        Path.cwd(),
+        {
+            "status": "PASS",
+            "tests": {"passed": 1, "failed": 0},
+            "terminal_evidence": {
+                "schema_version": "M2CFinalVerificationBindingV1",
+                "checked_head_commit": head,
+                "full_test_command": [sys.executable, "-m", "pytest", "-q", "-k", "smoke"],
+                "junit": {"path": "/absent/junit.xml", "sha256": "0" * 64},
+                "b0_freeze_manifest_sha256": "0" * 64,
+                "m2b_artifact_index_sha256": "0" * 64,
+            },
+        },
+    )
+    assert result.passed is False
+    assert any("complete pytest suite" in blocker for blocker in result.blockers)

@@ -46,6 +46,10 @@ from xh_agent.policy.qrm_lite.formal_split_runner_v2 import (
     verify_inference_request,
 )
 from xh_agent.policy.qrm_lite.public_tracks_v2 import canonical_track_slots
+from xh_agent.policy.qrm_lite.m2c_hard_freeze import (
+    M2CExperimentAction,
+    require_pre_freeze,
+)
 
 
 @dataclass
@@ -265,6 +269,9 @@ def serve(runtime: Runtime, args: argparse.Namespace) -> None:
                 self.send_error(404)
                 return
             try:
+                # A service created before the cutoff must not accept a new
+                # inference cycle after it.  This is independent of startup.
+                require_pre_freeze(M2CExperimentAction.Q_B_EVALUATION)
                 length = int(self.headers.get("Content-Length", "0"))
                 if not 0 < length <= args.max_request_bytes:
                     raise ValueError("formal inference request size is invalid")
@@ -298,6 +305,9 @@ def write_binding_create_only(path: Path, binding: QwenBundleRuntimeBindingV2) -
 
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
+    # Startup-check loads the real model and creates a binding, so it is not a
+    # read-only/status exception to the experiment freeze.
+    require_pre_freeze(M2CExperimentAction.FORMAL_MODEL_SERVICE)
     runtime = load_runtime(args)
     write_binding_create_only(args.binding_output, runtime.binding)
     if args.startup_check_only:

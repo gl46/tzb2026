@@ -70,6 +70,26 @@ from xh_agent.policy.qrm_lite.public_tracks_v2 import canonical_track_slots
     )
     source = _replace_once(
         source,
+        "from isaacsim import SimulationApp\n",
+        """from xh_agent.policy.qrm_lite.m2c_hard_freeze import (
+    M2CExperimentAction,
+    require_pre_freeze,
+)
+
+# This guard lives inside the derived probe, before Kit/SimulationApp starts,
+# so a probe generated before 9/1 cannot be invoked directly after the hard
+# freeze to bypass the collection worker.
+require_pre_freeze(
+    M2CExperimentAction.SMOKE
+    if ARGS.m2c_chain_role == "SMOKE"
+    else M2CExperimentAction.ISAAC_COLLECTION
+)
+
+from isaacsim import SimulationApp
+""",
+    )
+    source = _replace_once(
+        source,
         "def _execute_m2b_public_regrasp(\n",
         r"""def _m2c_now_ns() -> int:
     return int(

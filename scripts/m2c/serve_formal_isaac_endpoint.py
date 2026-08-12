@@ -33,6 +33,10 @@ from xh_agent.policy.qrm_lite.formal_split_runner_v2 import (
     sha256_file,
 )
 from xh_agent.policy.qrm_lite.skill_registry_v2 import load_registry_v2
+from xh_agent.policy.qrm_lite.m2c_hard_freeze import (
+    M2CExperimentAction,
+    require_pre_freeze,
+)
 
 
 FORMAL_PATHS = frozenset(
@@ -178,6 +182,7 @@ class _Server(ThreadingHTTPServer):
 
 def main() -> int:
     args = parse_args()
+    require_pre_freeze(M2CExperimentAction.FORMAL_ISAAC_SERVICE)
     binding = _read_binding(args.endpoint_binding)
     _validate_deployment(args, binding)
     secret = read_hmac_secret(args.hmac_key_file)

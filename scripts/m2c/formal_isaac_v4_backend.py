@@ -55,6 +55,10 @@ from xh_agent.policy.qrm_lite.formal_split_runner_v2 import (
     validate_isaac_execute_request_mapping_v2,
 )
 from xh_agent.policy.qrm_lite.model_owned_chain_v2 import PhysicalSkillReceiptV2
+from xh_agent.policy.qrm_lite.m2c_hard_freeze import (
+    M2CExperimentAction,
+    require_pre_freeze,
+)
 from xh_agent.policy.qrm_lite.public_tracks_v2 import canonical_track_slots
 from xh_agent.policy.qrm_lite.skill_registry_v2 import RuntimeSkillRegistryV2
 
@@ -163,6 +167,10 @@ class FormalIsaacV4BackendV2:
         public_role_selector_sha256: str,
         stage_sha256: str,
     ) -> None:
+        # Defense in depth: this class can be instantiated directly under
+        # Isaac Python, bypassing the HTTP service entrypoint.  Reject before
+        # resolving inputs or importing the frozen probe (which starts Kit).
+        require_pre_freeze(M2CExperimentAction.FORMAL_ISAAC_SERVICE)
         self.frozen_v4_probe_path = frozen_v4_probe_path.resolve()
         self.stage_path = stage_path.resolve()
         self.sdf_path = sdf_path.resolve()

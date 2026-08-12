@@ -39,6 +39,10 @@ from xh_agent.policy.qrm_lite.formal_split_runner_v2 import (
     sign_wire_message,
     verify_wire_message,
 )
+from xh_agent.policy.qrm_lite.m2c_hard_freeze import (
+    M2CExperimentAction,
+    require_pre_freeze,
+)
 from xh_agent.policy.qrm_lite.skill_registry_v2 import RuntimeSkillRegistryV2
 
 
@@ -183,6 +187,9 @@ class FormalIsaacEndpointStateMachineV2:
             if self._poisoned:
                 raise RuntimeError("Isaac session is poisoned after an audit/backend failure")
             try:
+                # Re-check every API operation.  A service/session started
+                # before midnight cannot capture or actuate after the freeze.
+                require_pre_freeze(M2CExperimentAction.Q_B_EVALUATION)
                 self.audit.append(
                     "WIRE_REQUEST_RECEIVED",
                     {"path": path, "signed_wire": dict(raw)},

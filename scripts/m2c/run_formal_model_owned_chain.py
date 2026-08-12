@@ -59,6 +59,10 @@ from xh_agent.policy.qrm_lite.formal_split_runner_v2 import (
     verify_inference_response,
     verify_wire_message,
 )
+from xh_agent.policy.qrm_lite.m2c_hard_freeze import (
+    M2CExperimentAction,
+    require_pre_freeze,
+)
 from xh_agent.policy.qrm_lite.executed_intent_history_v2 import (
     PublicExecutedIntentHistoryItemV2,
 )
@@ -566,6 +570,8 @@ def publish_create_only(output: Path, payload: Mapping[str, Any]) -> None:
 
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
+    if not args.contract_check_only:
+        require_pre_freeze(M2CExperimentAction.Q_B_EVALUATION)
     bundle, endpoint = validate_configuration(args)
     if args.contract_check_only:
         print(

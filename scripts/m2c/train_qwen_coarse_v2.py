@@ -70,6 +70,10 @@ from xh_agent.policy.qrm_lite.backbone import (
     DEFAULT_REVISION,
     Qwen35Backbone,
 )
+from xh_agent.policy.qrm_lite.m2c_hard_freeze import (
+    M2CExperimentAction,
+    require_pre_freeze,
+)
 
 
 WALL_BUDGET_ERROR = "M2C Qwen seed exceeded its six-hour whole-run budget"
@@ -849,6 +853,10 @@ def _run_real_pipeline(
 
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
+    # The historical ``--dry-run`` performs a real five-sample gradient
+    # update and publishes a checkpoint bundle.  It is small, but it is still
+    # training and therefore cannot bypass the 9/1 experiment freeze.
+    require_pre_freeze(M2CExperimentAction.TRAINING)
     _validate_args(args)
     whole_run_started = time.monotonic()
     whole_run_deadline = _wall_budget_deadline(
