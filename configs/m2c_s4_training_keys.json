@@ -1,0 +1,1329 @@
+{
+  "exclusions": {
+    "all_s6_keys": true,
+    "all_v4_keys": true,
+    "frozen_s3_path_blocked_raw_v1": "evaluator-only; contains V4 keys; zero training labels"
+  },
+  "layout_contract": {
+    "anchor_jitter_x_m": [
+      -0.005,
+      0.0,
+      0.005
+    ],
+    "anchor_xy_m": [
+      -0.11,
+      0.13
+    ],
+    "b0_or_gate_changes": false,
+    "blocker_distance_m": 0.04,
+    "destination_cell": "BIN_CELL_3",
+    "destination_cell_index": 3,
+    "exactly_six_objects_required": true,
+    "object_geometry_mass_material_and_dynamics": "unchanged M2B",
+    "offline_materialization_required": true,
+    "retained_blocker_distance_m": 0.062,
+    "source": "accepted M2C V4 geometry family"
+  },
+  "manifest_sha256": "f5dc3566d028821f5df48afd07f133ea94af21fae21ec8bd5be63644893145e2",
+  "physical_prerequisite_smoke_keys": [
+    {
+      "anchor_xy_m": [
+        -0.115,
+        0.13
+      ],
+      "blocker_distance_m": 0.04,
+      "blocker_selector_policy_input": "visual_color=red,top_z_band=0.02m,world_x=max",
+      "destination_cell": "BIN_CELL_3",
+      "failure_seed": 150547,
+      "failure_type": "PATH_BLOCKED",
+      "layout_family": "M2C_V4_ACCEPTED_BLOCKER_GEOMETRY",
+      "matched_key": "m2c-s4-s6-ab99bcd76d83c0a066fab67a90277fc4c2468b781c386267a0b101b457895173",
+      "offline_geometry_admission": {
+        "minimum_surface_gap_m": 0.009999999999999995,
+        "part_count": 6,
+        "scripted_blocker_clearance_m": 0.02136871616134165,
+        "scripted_blocker_clearance_ok": true,
+        "target_clearance_after_relocation_m": 0.04616848030597954,
+        "target_clearance_after_relocation_ok": true,
+        "target_clearance_before_m": 0.002710215501577809,
+        "target_clearance_before_ok": false
+      },
+      "offline_scene_materialized_during_selection": true,
+      "outcome_observed_during_selection": false,
+      "retained_blocker_distance_m": 0.062,
+      "role": "SMOKE",
+      "scene_seed": 15054,
+      "sdf_sha256": "2bd5a27d6d3a2ff42152024e4fbd9a68749840c153f3fe68e5b27085e58b1615",
+      "split": "val",
+      "supervision_sha256": "885fcc954baecc1f52c7c1e5a5462324480a264a75497c3772b44352f5845519",
+      "target_selector_policy_input": "visual_color=yellow,top_z_band=0.02m,world_x=max"
+    },
+    {
+      "anchor_xy_m": [
+        -0.11,
+        0.13
+      ],
+      "blocker_distance_m": 0.04,
+      "blocker_selector_policy_input": "visual_color=red,top_z_band=0.02m,world_x=max",
+      "destination_cell": "BIN_CELL_3",
+      "failure_seed": 150757,
+      "failure_type": "PATH_BLOCKED",
+      "layout_family": "M2C_V4_ACCEPTED_BLOCKER_GEOMETRY",
+      "matched_key": "m2c-s4-s6-6a7fadfc2e7cdedfcf1497d3b94692fa2eb43d7401864a992673e09423dc1a3e",
+      "offline_geometry_admission": {
+        "minimum_surface_gap_m": 0.009999999999999995,
+        "part_count": 6,
+        "scripted_blocker_clearance_m": 0.02136871616134165,
+        "scripted_blocker_clearance_ok": true,
+        "target_clearance_after_relocation_m": 0.04616848030597954,
+        "target_clearance_after_relocation_ok": true,
+        "target_clearance_before_m": 0.002710215501577809,
+        "target_clearance_before_ok": false
+      },
+      "offline_scene_materialized_during_selection": true,
+      "outcome_observed_during_selection": false,
+      "retained_blocker_distance_m": 0.062,
+      "role": "SMOKE",
+      "scene_seed": 15075,
+      "sdf_sha256": "769d539378a899420e55c172a34c01cfaef19c1a83fe3eded3f7a4ba190c825d",
+      "split": "val",
+      "supervision_sha256": "5f546e3fae7e1a0a8613368ea0714d719eb9b0adb93b00ffe61ff2cf7817accc",
+      "target_selector_policy_input": "visual_color=yellow,top_z_band=0.02m,world_x=max"
+    },
+    {
+      "anchor_xy_m": [
+        -0.105,
+        0.13
+      ],
+      "blocker_distance_m": 0.04,
+      "blocker_selector_policy_input": "visual_color=red,top_z_band=0.02m,world_x=max",
+      "destination_cell": "BIN_CELL_3",
+      "failure_seed": 150767,
+      "failure_type": "PATH_BLOCKED",
+      "layout_family": "M2C_V4_ACCEPTED_BLOCKER_GEOMETRY",
+      "matched_key": "m2c-s4-s6-c35e559a1dca9a48fe4abe15795ba324d76d39f9ae896c31b8a7a624f2bf3d82",
+      "offline_geometry_admission": {
+        "minimum_surface_gap_m": 0.009999999999999995,
+        "part_count": 6,
+        "scripted_blocker_clearance_m": 0.02136871616134165,
+        "scripted_blocker_clearance_ok": true,
+        "target_clearance_after_relocation_m": 0.04616848030597954,
+        "target_clearance_after_relocation_ok": true,
+        "target_clearance_before_m": 0.002710215501577809,
+        "target_clearance_before_ok": false
+      },
+      "offline_scene_materialized_during_selection": true,
+      "outcome_observed_during_selection": false,
+      "retained_blocker_distance_m": 0.062,
+      "role": "SMOKE",
+      "scene_seed": 15076,
+      "sdf_sha256": "e30efb66aef4ff948e48551cb26d03990c14b6bb25813b9a8fd6e8b7c9831cf7",
+      "split": "val",
+      "supervision_sha256": "7a8d3386d298f0540c412d6bcd5e86b3835f37e9713d8c04d85edd83be93e301",
+      "target_selector_policy_input": "visual_color=yellow,top_z_band=0.02m,world_x=max"
+    }
+  ],
+  "privileged_truth_policy_input": false,
+  "s6_evaluation_key_digest": "87b651f5cab5b60b3c5b36011615949e189200940f1c5d0d57850dda6a7dadf6",
+  "schema_version": "M2CS4TrainingAndSmokeKeyManifestV1",
+  "selection_implementation": {
+    "path": "scripts/m2c/build_s4_key_manifests.py",
+    "sha256": "1845906128dc66149588442c48dad760502048f110c185ff9c8bd94d21102845"
+  },
+  "selection_protocol": {
+    "candidate_order": "ascending seed, required generator split, exactly six objects, all offline accepted-family geometry gates pass",
+    "evaluation_key_count": 30,
+    "evaluation_seed_range_half_open": [
+      20000,
+      24000
+    ],
+    "smoke_key_count": 3,
+    "smoke_seed_range_half_open": [
+      15000,
+      16000
+    ],
+    "training_key_count": 36,
+    "training_seed_range_half_open": [
+      12000,
+      15000
+    ]
+  },
+  "selection_uses_rollout_outcomes": false,
+  "source_bindings": {
+    "configs/m2c_headroom_domain_v4.json": "4e78c044b68b11c1d871ecb90e65c7e2dfc616c8971abb89cb9969d2d48f738b",
+    "docs/decisions/ADR-0020-m2c-coarse-intent-v2-model-owned-chain.md": "5a0aecc1c31a1aca7a48150ec0792df13aa041c5e0802382b9c1432a012598c3",
+    "docs/decisions/M2C-S6-MATCHED-EVALUATION-PREREG.md": "01786e2c40d18a82c75a32d20dce4755f7ee9f0f00b05b623f8bdd7672462dae",
+    "robot_ws/src/xh_sim/worlds/industrial_cylinder_v1.sdf": "1eea1b34b832d858ba9a4adec775018e807061b54cb1afff19d710d848ad926d",
+    "scripts/generate_industrial_scenes.py": "e9f9e20106a05dbec24453ce39422d57aa212709567fb7eba7f8d9beb03cd6c5",
+    "scripts/m2c/build_final_headroom_domain.py": "cbfa3e88cd184138b91681db53a124646d10b4b90bf1b470866a83d66dd3da7a",
+    "scripts/m2c/s4_scene_family.py": "07361871ca695a59a12b17877eddf15c6807fdf38f4e1a7067be15a4e2060fa6",
+    "src/xh_agent/grasp/free_gap.py": "2d85ddf87611d8593f4a4abc76d1e34a6aed2e805437c7a55f7b4f77184a5cd0"
+  },
+  "status": "FROZEN_BEFORE_COLLECTION_TRAINING_OR_EVALUATION",
+  "teacher_used": false,
+  "training_keys": [
+    {
+      "anchor_xy_m": [
+        -0.115,
+        0.13
+      ],
+      "blocker_distance_m": 0.04,
+      "blocker_selector_policy_input": "visual_color=red,top_z_band=0.02m,world_x=max",
+      "destination_cell": "BIN_CELL_3",
+      "failure_seed": 120007,
+      "failure_type": "PATH_BLOCKED",
+      "layout_family": "M2C_V4_ACCEPTED_BLOCKER_GEOMETRY",
+      "matched_key": "m2c-s4-s6-4962a57684c57e8aafaeef69aa747485dff6907c87f83bee63ede1ea91bf7a6c",
+      "offline_geometry_admission": {
+        "minimum_surface_gap_m": 0.009999999999999995,
+        "part_count": 6,
+        "scripted_blocker_clearance_m": 0.02136871616134165,
+        "scripted_blocker_clearance_ok": true,
+        "target_clearance_after_relocation_m": 0.04616848030597954,
+        "target_clearance_after_relocation_ok": true,
+        "target_clearance_before_m": 0.002710215501577809,
+        "target_clearance_before_ok": false
+      },
+      "offline_scene_materialized_during_selection": true,
+      "outcome_observed_during_selection": false,
+      "retained_blocker_distance_m": 0.062,
+      "role": "TRAIN",
+      "scene_seed": 12000,
+      "sdf_sha256": "2bd5a27d6d3a2ff42152024e4fbd9a68749840c153f3fe68e5b27085e58b1615",
+      "split": "train",
+      "supervision_sha256": "ae6b6229f3ece836afe02a5b0878bdce131e84e6d7e4edcc55de4a89b28a02a9",
+      "target_selector_policy_input": "visual_color=yellow,top_z_band=0.02m,world_x=max"
+    },
+    {
+      "anchor_xy_m": [
+        -0.11,
+        0.13
+      ],
+      "blocker_distance_m": 0.04,
+      "blocker_selector_policy_input": "visual_color=red,top_z_band=0.02m,world_x=max",
+      "destination_cell": "BIN_CELL_3",
+      "failure_seed": 120057,
+      "failure_type": "PATH_BLOCKED",
+      "layout_family": "M2C_V4_ACCEPTED_BLOCKER_GEOMETRY",
+      "matched_key": "m2c-s4-s6-6a2da6182be05c10358e9f88221133ef922ee644b86f13ba1d9d96a66060380b",
+      "offline_geometry_admission": {
+        "minimum_surface_gap_m": 0.009999999999999995,
+        "part_count": 6,
+        "scripted_blocker_clearance_m": 0.02136871616134165,
+        "scripted_blocker_clearance_ok": true,
+        "target_clearance_after_relocation_m": 0.04616848030597954,
+        "target_clearance_after_relocation_ok": true,
+        "target_clearance_before_m": 0.002710215501577809,
+        "target_clearance_before_ok": false
+      },
+      "offline_scene_materialized_during_selection": true,
+      "outcome_observed_during_selection": false,
+      "retained_blocker_distance_m": 0.062,
+      "role": "TRAIN",
+      "scene_seed": 12005,
+      "sdf_sha256": "769d539378a899420e55c172a34c01cfaef19c1a83fe3eded3f7a4ba190c825d",
+      "split": "train",
+      "supervision_sha256": "c956f28306028ffaefa3cf85d3a804673a67435283506e82c638e098e565ba51",
+      "target_selector_policy_input": "visual_color=yellow,top_z_band=0.02m,world_x=max"
+    },
+    {
+      "anchor_xy_m": [
+        -0.105,
+        0.13
+      ],
+      "blocker_distance_m": 0.04,
+      "blocker_selector_policy_input": "visual_color=red,top_z_band=0.02m,world_x=max",
+      "destination_cell": "BIN_CELL_3",
+      "failure_seed": 120087,
+      "failure_type": "PATH_BLOCKED",
+      "layout_family": "M2C_V4_ACCEPTED_BLOCKER_GEOMETRY",
+      "matched_key": "m2c-s4-s6-4fa521ea25328b9effeec7d9e8167d02093e70ec06db929d557f6d07956e1a2c",
+      "offline_geometry_admission": {
+        "minimum_surface_gap_m": 0.009999999999999995,
+        "part_count": 6,
+        "scripted_blocker_clearance_m": 0.02136871616134165,
+        "scripted_blocker_clearance_ok": true,
+        "target_clearance_after_relocation_m": 0.04616848030597954,
+        "target_clearance_after_relocation_ok": true,
+        "target_clearance_before_m": 0.002710215501577809,
+        "target_clearance_before_ok": false
+      },
+      "offline_scene_materialized_during_selection": true,
+      "outcome_observed_during_selection": false,
+      "retained_blocker_distance_m": 0.062,
+      "role": "TRAIN",
+      "scene_seed": 12008,
+      "sdf_sha256": "e30efb66aef4ff948e48551cb26d03990c14b6bb25813b9a8fd6e8b7c9831cf7",
+      "split": "train",
+      "supervision_sha256": "e8c1a795f1b3d8a108df282c7494cdd3e62a38e96ce0815cc518d5cb29869c1e",
+      "target_selector_policy_input": "visual_color=yellow,top_z_band=0.02m,world_x=max"
+    },
+    {
+      "anchor_xy_m": [
+        -0.115,
+        0.13
+      ],
+      "blocker_distance_m": 0.04,
+      "blocker_selector_policy_input": "visual_color=red,top_z_band=0.02m,world_x=max",
+      "destination_cell": "BIN_CELL_3",
+      "failure_seed": 120297,
+      "failure_type": "PATH_BLOCKED",
+      "layout_family": "M2C_V4_ACCEPTED_BLOCKER_GEOMETRY",
+      "matched_key": "m2c-s4-s6-132ad80b24303252253206f686d58aef08b8033a6344af334a3fcc4470bafc13",
+      "offline_geometry_admission": {
+        "minimum_surface_gap_m": 0.009999999999999995,
+        "part_count": 6,
+        "scripted_blocker_clearance_m": 0.02136871616134165,
+        "scripted_blocker_clearance_ok": true,
+        "target_clearance_after_relocation_m": 0.04616848030597954,
+        "target_clearance_after_relocation_ok": true,
+        "target_clearance_before_m": 0.002710215501577809,
+        "target_clearance_before_ok": false
+      },
+      "offline_scene_materialized_during_selection": true,
+      "outcome_observed_during_selection": false,
+      "retained_blocker_distance_m": 0.062,
+      "role": "TRAIN",
+      "scene_seed": 12029,
+      "sdf_sha256": "2bd5a27d6d3a2ff42152024e4fbd9a68749840c153f3fe68e5b27085e58b1615",
+      "split": "train",
+      "supervision_sha256": "e7a539449d166726dbf38988ac3452ce29d1a5d36c58176a1d036f651eb9b21e",
+      "target_selector_policy_input": "visual_color=yellow,top_z_band=0.02m,world_x=max"
+    },
+    {
+      "anchor_xy_m": [
+        -0.11,
+        0.13
+      ],
+      "blocker_distance_m": 0.04,
+      "blocker_selector_policy_input": "visual_color=red,top_z_band=0.02m,world_x=max",
+      "destination_cell": "BIN_CELL_3",
+      "failure_seed": 120507,
+      "failure_type": "PATH_BLOCKED",
+      "layout_family": "M2C_V4_ACCEPTED_BLOCKER_GEOMETRY",
+      "matched_key": "m2c-s4-s6-2f4e8e0a4a2fc5f2d74e4d9ad0a5e01dec5c1033173604beb22e281f71782bf2",
+      "offline_geometry_admission": {
+        "minimum_surface_gap_m": 0.009999999999999995,
+        "part_count": 6,
+        "scripted_blocker_clearance_m": 0.02136871616134165,
+        "scripted_blocker_clearance_ok": true,
+        "target_clearance_after_relocation_m": 0.04616848030597954,
+        "target_clearance_after_relocation_ok": true,
+        "target_clearance_before_m": 0.002710215501577809,
+        "target_clearance_before_ok": false
+      },
+      "offline_scene_materialized_during_selection": true,
+      "outcome_observed_during_selection": false,
+      "retained_blocker_distance_m": 0.062,
+      "role": "TRAIN",
+      "scene_seed": 12050,
+      "sdf_sha256": "769d539378a899420e55c172a34c01cfaef19c1a83fe3eded3f7a4ba190c825d",
+      "split": "train",
+      "supervision_sha256": "165ff26a0835a610b50f5f13ebbc507bb3c07cd4ef38ac9dd11acfd28567574c",
+      "target_selector_policy_input": "visual_color=yellow,top_z_band=0.02m,world_x=max"
+    },
+    {
+      "anchor_xy_m": [
+        -0.105,
+        0.13
+      ],
+      "blocker_distance_m": 0.04,
+      "blocker_selector_policy_input": "visual_color=red,top_z_band=0.02m,world_x=max",
+      "destination_cell": "BIN_CELL_3",
+      "failure_seed": 120717,
+      "failure_type": "PATH_BLOCKED",
+      "layout_family": "M2C_V4_ACCEPTED_BLOCKER_GEOMETRY",
+      "matched_key": "m2c-s4-s6-f52e1d21780c29607fe7cef68462582c48a9f2c550465c52047fa45fd3b1fa17",
+      "offline_geometry_admission": {
+        "minimum_surface_gap_m": 0.009999999999999995,
+        "part_count": 6,
+        "scripted_blocker_clearance_m": 0.02136871616134165,
+        "scripted_blocker_clearance_ok": true,
+        "target_clearance_after_relocation_m": 0.04616848030597954,
+        "target_clearance_after_relocation_ok": true,
+        "target_clearance_before_m": 0.002710215501577809,
+        "target_clearance_before_ok": false
+      },
+      "offline_scene_materialized_during_selection": true,
+      "outcome_observed_during_selection": false,
+      "retained_blocker_distance_m": 0.062,
+      "role": "TRAIN",
+      "scene_seed": 12071,
+      "sdf_sha256": "e30efb66aef4ff948e48551cb26d03990c14b6bb25813b9a8fd6e8b7c9831cf7",
+      "split": "train",
+      "supervision_sha256": "43440499b5fb763c1a9fd7eb1487e998d2b18fe5f0b9bc351df7796338cc6435",
+      "target_selector_policy_input": "visual_color=yellow,top_z_band=0.02m,world_x=max"
+    },
+    {
+      "anchor_xy_m": [
+        -0.115,
+        0.13
+      ],
+      "blocker_distance_m": 0.04,
+      "blocker_selector_policy_input": "visual_color=red,top_z_band=0.02m,world_x=max",
+      "destination_cell": "BIN_CELL_3",
+      "failure_seed": 120867,
+      "failure_type": "PATH_BLOCKED",
+      "layout_family": "M2C_V4_ACCEPTED_BLOCKER_GEOMETRY",
+      "matched_key": "m2c-s4-s6-1888a71f26673a96f002910f75e090e9ce070a403ce223f53e31d4aa45267d83",
+      "offline_geometry_admission": {
+        "minimum_surface_gap_m": 0.009999999999999995,
+        "part_count": 6,
+        "scripted_blocker_clearance_m": 0.02136871616134165,
+        "scripted_blocker_clearance_ok": true,
+        "target_clearance_after_relocation_m": 0.04616848030597954,
+        "target_clearance_after_relocation_ok": true,
+        "target_clearance_before_m": 0.002710215501577809,
+        "target_clearance_before_ok": false
+      },
+      "offline_scene_materialized_during_selection": true,
+      "outcome_observed_during_selection": false,
+      "retained_blocker_distance_m": 0.062,
+      "role": "TRAIN",
+      "scene_seed": 12086,
+      "sdf_sha256": "2bd5a27d6d3a2ff42152024e4fbd9a68749840c153f3fe68e5b27085e58b1615",
+      "split": "train",
+      "supervision_sha256": "a5937c9d81f176ab1102f436aa4486a3003cc31d179c086992cb78636e903d22",
+      "target_selector_policy_input": "visual_color=yellow,top_z_band=0.02m,world_x=max"
+    },
+    {
+      "anchor_xy_m": [
+        -0.11,
+        0.13
+      ],
+      "blocker_distance_m": 0.04,
+      "blocker_selector_policy_input": "visual_color=red,top_z_band=0.02m,world_x=max",
+      "destination_cell": "BIN_CELL_3",
+      "failure_seed": 120917,
+      "failure_type": "PATH_BLOCKED",
+      "layout_family": "M2C_V4_ACCEPTED_BLOCKER_GEOMETRY",
+      "matched_key": "m2c-s4-s6-5b8e56c563afc5b4d941c8d17a120cab4d57c0aeffd68eb6fd20d97ff0a38deb",
+      "offline_geometry_admission": {
+        "minimum_surface_gap_m": 0.009999999999999995,
+        "part_count": 6,
+        "scripted_blocker_clearance_m": 0.02136871616134165,
+        "scripted_blocker_clearance_ok": true,
+        "target_clearance_after_relocation_m": 0.04616848030597954,
+        "target_clearance_after_relocation_ok": true,
+        "target_clearance_before_m": 0.002710215501577809,
+        "target_clearance_before_ok": false
+      },
+      "offline_scene_materialized_during_selection": true,
+      "outcome_observed_during_selection": false,
+      "retained_blocker_distance_m": 0.062,
+      "role": "TRAIN",
+      "scene_seed": 12091,
+      "sdf_sha256": "769d539378a899420e55c172a34c01cfaef19c1a83fe3eded3f7a4ba190c825d",
+      "split": "train",
+      "supervision_sha256": "18bc1ed9cce54ae43bdc2a9dd9ded6a7e36d416e87281036ccae6fed866a6097",
+      "target_selector_policy_input": "visual_color=yellow,top_z_band=0.02m,world_x=max"
+    },
+    {
+      "anchor_xy_m": [
+        -0.105,
+        0.13
+      ],
+      "blocker_distance_m": 0.04,
+      "blocker_selector_policy_input": "visual_color=red,top_z_band=0.02m,world_x=max",
+      "destination_cell": "BIN_CELL_3",
+      "failure_seed": 121097,
+      "failure_type": "PATH_BLOCKED",
+      "layout_family": "M2C_V4_ACCEPTED_BLOCKER_GEOMETRY",
+      "matched_key": "m2c-s4-s6-2254c8eaf1e913d14e19fecda4d2cab332ead3d08c1084e1581ef33fb45fb4a0",
+      "offline_geometry_admission": {
+        "minimum_surface_gap_m": 0.009999999999999995,
+        "part_count": 6,
+        "scripted_blocker_clearance_m": 0.02136871616134165,
+        "scripted_blocker_clearance_ok": true,
+        "target_clearance_after_relocation_m": 0.04616848030597954,
+        "target_clearance_after_relocation_ok": true,
+        "target_clearance_before_m": 0.002710215501577809,
+        "target_clearance_before_ok": false
+      },
+      "offline_scene_materialized_during_selection": true,
+      "outcome_observed_during_selection": false,
+      "retained_blocker_distance_m": 0.062,
+      "role": "TRAIN",
+      "scene_seed": 12109,
+      "sdf_sha256": "e30efb66aef4ff948e48551cb26d03990c14b6bb25813b9a8fd6e8b7c9831cf7",
+      "split": "train",
+      "supervision_sha256": "6d46a05d50b61a2b816fe024f3c37a59497cf573d9e9342555691ecd4886844e",
+      "target_selector_policy_input": "visual_color=yellow,top_z_band=0.02m,world_x=max"
+    },
+    {
+      "anchor_xy_m": [
+        -0.115,
+        0.13
+      ],
+      "blocker_distance_m": 0.04,
+      "blocker_selector_policy_input": "visual_color=red,top_z_band=0.02m,world_x=max",
+      "destination_cell": "BIN_CELL_3",
+      "failure_seed": 121437,
+      "failure_type": "PATH_BLOCKED",
+      "layout_family": "M2C_V4_ACCEPTED_BLOCKER_GEOMETRY",
+      "matched_key": "m2c-s4-s6-47409cfba791cc436557e20aec69fd0bb2bcef7d6cb5c48331ff742f90da7869",
+      "offline_geometry_admission": {
+        "minimum_surface_gap_m": 0.009999999999999995,
+        "part_count": 6,
+        "scripted_blocker_clearance_m": 0.02136871616134165,
+        "scripted_blocker_clearance_ok": true,
+        "target_clearance_after_relocation_m": 0.04616848030597954,
+        "target_clearance_after_relocation_ok": true,
+        "target_clearance_before_m": 0.002710215501577809,
+        "target_clearance_before_ok": false
+      },
+      "offline_scene_materialized_during_selection": true,
+      "outcome_observed_during_selection": false,
+      "retained_blocker_distance_m": 0.062,
+      "role": "TRAIN",
+      "scene_seed": 12143,
+      "sdf_sha256": "2bd5a27d6d3a2ff42152024e4fbd9a68749840c153f3fe68e5b27085e58b1615",
+      "split": "train",
+      "supervision_sha256": "6cbb22162af4afe5ee3741c334dcfb94ebda8181c30eb00a760f8c7832631c25",
+      "target_selector_policy_input": "visual_color=yellow,top_z_band=0.02m,world_x=max"
+    },
+    {
+      "anchor_xy_m": [
+        -0.11,
+        0.13
+      ],
+      "blocker_distance_m": 0.04,
+      "blocker_selector_policy_input": "visual_color=red,top_z_band=0.02m,world_x=max",
+      "destination_cell": "BIN_CELL_3",
+      "failure_seed": 121697,
+      "failure_type": "PATH_BLOCKED",
+      "layout_family": "M2C_V4_ACCEPTED_BLOCKER_GEOMETRY",
+      "matched_key": "m2c-s4-s6-a43e239fbf1ae465f18bb88950fbbccce2ac72f865369426296996bdee4bc4ab",
+      "offline_geometry_admission": {
+        "minimum_surface_gap_m": 0.009999999999999995,
+        "part_count": 6,
+        "scripted_blocker_clearance_m": 0.02136871616134165,
+        "scripted_blocker_clearance_ok": true,
+        "target_clearance_after_relocation_m": 0.04616848030597954,
+        "target_clearance_after_relocation_ok": true,
+        "target_clearance_before_m": 0.002710215501577809,
+        "target_clearance_before_ok": false
+      },
+      "offline_scene_materialized_during_selection": true,
+      "outcome_observed_during_selection": false,
+      "retained_blocker_distance_m": 0.062,
+      "role": "TRAIN",
+      "scene_seed": 12169,
+      "sdf_sha256": "769d539378a899420e55c172a34c01cfaef19c1a83fe3eded3f7a4ba190c825d",
+      "split": "train",
+      "supervision_sha256": "3d46bf9fdea976a808659b1dbc257a166aa74dd9a6f127fb1187d23225e6b4d6",
+      "target_selector_policy_input": "visual_color=yellow,top_z_band=0.02m,world_x=max"
+    },
+    {
+      "anchor_xy_m": [
+        -0.105,
+        0.13
+      ],
+      "blocker_distance_m": 0.04,
+      "blocker_selector_policy_input": "visual_color=red,top_z_band=0.02m,world_x=max",
+      "destination_cell": "BIN_CELL_3",
+      "failure_seed": 121737,
+      "failure_type": "PATH_BLOCKED",
+      "layout_family": "M2C_V4_ACCEPTED_BLOCKER_GEOMETRY",
+      "matched_key": "m2c-s4-s6-520286918bf3c2fc2d804b48e9486608ebd6960e55dae6af2aab73f55348f19d",
+      "offline_geometry_admission": {
+        "minimum_surface_gap_m": 0.009999999999999995,
+        "part_count": 6,
+        "scripted_blocker_clearance_m": 0.02136871616134165,
+        "scripted_blocker_clearance_ok": true,
+        "target_clearance_after_relocation_m": 0.04616848030597954,
+        "target_clearance_after_relocation_ok": true,
+        "target_clearance_before_m": 0.002710215501577809,
+        "target_clearance_before_ok": false
+      },
+      "offline_scene_materialized_during_selection": true,
+      "outcome_observed_during_selection": false,
+      "retained_blocker_distance_m": 0.062,
+      "role": "TRAIN",
+      "scene_seed": 12173,
+      "sdf_sha256": "e30efb66aef4ff948e48551cb26d03990c14b6bb25813b9a8fd6e8b7c9831cf7",
+      "split": "train",
+      "supervision_sha256": "7b45d1828eb4e9f99033712be38c48c83c07bee8d104651768315e394b22ee6b",
+      "target_selector_policy_input": "visual_color=yellow,top_z_band=0.02m,world_x=max"
+    },
+    {
+      "anchor_xy_m": [
+        -0.115,
+        0.13
+      ],
+      "blocker_distance_m": 0.04,
+      "blocker_selector_policy_input": "visual_color=red,top_z_band=0.02m,world_x=max",
+      "destination_cell": "BIN_CELL_3",
+      "failure_seed": 122027,
+      "failure_type": "PATH_BLOCKED",
+      "layout_family": "M2C_V4_ACCEPTED_BLOCKER_GEOMETRY",
+      "matched_key": "m2c-s4-s6-f60b2bda69b207c2ed86f26884bf5c11ad2593a4c5b0d3eb53c0c6614a571ffd",
+      "offline_geometry_admission": {
+        "minimum_surface_gap_m": 0.009999999999999995,
+        "part_count": 6,
+        "scripted_blocker_clearance_m": 0.02136871616134165,
+        "scripted_blocker_clearance_ok": true,
+        "target_clearance_after_relocation_m": 0.04616848030597954,
+        "target_clearance_after_relocation_ok": true,
+        "target_clearance_before_m": 0.002710215501577809,
+        "target_clearance_before_ok": false
+      },
+      "offline_scene_materialized_during_selection": true,
+      "outcome_observed_during_selection": false,
+      "retained_blocker_distance_m": 0.062,
+      "role": "TRAIN",
+      "scene_seed": 12202,
+      "sdf_sha256": "2bd5a27d6d3a2ff42152024e4fbd9a68749840c153f3fe68e5b27085e58b1615",
+      "split": "train",
+      "supervision_sha256": "6bc233b3fca54b3ec1b53659006bf2a939594f1d27fb75e31c444de0040bce69",
+      "target_selector_policy_input": "visual_color=yellow,top_z_band=0.02m,world_x=max"
+    },
+    {
+      "anchor_xy_m": [
+        -0.11,
+        0.13
+      ],
+      "blocker_distance_m": 0.04,
+      "blocker_selector_policy_input": "visual_color=red,top_z_band=0.02m,world_x=max",
+      "destination_cell": "BIN_CELL_3",
+      "failure_seed": 122057,
+      "failure_type": "PATH_BLOCKED",
+      "layout_family": "M2C_V4_ACCEPTED_BLOCKER_GEOMETRY",
+      "matched_key": "m2c-s4-s6-ef496fad18efdfdd27d58763f783b21bab39f64a69dfaa6555b3d6cdf5a7c681",
+      "offline_geometry_admission": {
+        "minimum_surface_gap_m": 0.009999999999999995,
+        "part_count": 6,
+        "scripted_blocker_clearance_m": 0.02136871616134165,
+        "scripted_blocker_clearance_ok": true,
+        "target_clearance_after_relocation_m": 0.04616848030597954,
+        "target_clearance_after_relocation_ok": true,
+        "target_clearance_before_m": 0.002710215501577809,
+        "target_clearance_before_ok": false
+      },
+      "offline_scene_materialized_during_selection": true,
+      "outcome_observed_during_selection": false,
+      "retained_blocker_distance_m": 0.062,
+      "role": "TRAIN",
+      "scene_seed": 12205,
+      "sdf_sha256": "769d539378a899420e55c172a34c01cfaef19c1a83fe3eded3f7a4ba190c825d",
+      "split": "train",
+      "supervision_sha256": "79d7f2eb18958d1d9fde30c9866de69892bc10469f9362d713500027246ac56a",
+      "target_selector_policy_input": "visual_color=yellow,top_z_band=0.02m,world_x=max"
+    },
+    {
+      "anchor_xy_m": [
+        -0.105,
+        0.13
+      ],
+      "blocker_distance_m": 0.04,
+      "blocker_selector_policy_input": "visual_color=red,top_z_band=0.02m,world_x=max",
+      "destination_cell": "BIN_CELL_3",
+      "failure_seed": 122237,
+      "failure_type": "PATH_BLOCKED",
+      "layout_family": "M2C_V4_ACCEPTED_BLOCKER_GEOMETRY",
+      "matched_key": "m2c-s4-s6-0c049228ada196448e6718c68c165d7c5db09897751d06362b6d9da85e0b4fb9",
+      "offline_geometry_admission": {
+        "minimum_surface_gap_m": 0.009999999999999995,
+        "part_count": 6,
+        "scripted_blocker_clearance_m": 0.02136871616134165,
+        "scripted_blocker_clearance_ok": true,
+        "target_clearance_after_relocation_m": 0.04616848030597954,
+        "target_clearance_after_relocation_ok": true,
+        "target_clearance_before_m": 0.002710215501577809,
+        "target_clearance_before_ok": false
+      },
+      "offline_scene_materialized_during_selection": true,
+      "outcome_observed_during_selection": false,
+      "retained_blocker_distance_m": 0.062,
+      "role": "TRAIN",
+      "scene_seed": 12223,
+      "sdf_sha256": "e30efb66aef4ff948e48551cb26d03990c14b6bb25813b9a8fd6e8b7c9831cf7",
+      "split": "train",
+      "supervision_sha256": "9a7f100d4f56a10fff25d9d175974b9e0984429ea98e08834707a9040564f1c2",
+      "target_selector_policy_input": "visual_color=yellow,top_z_band=0.02m,world_x=max"
+    },
+    {
+      "anchor_xy_m": [
+        -0.115,
+        0.13
+      ],
+      "blocker_distance_m": 0.04,
+      "blocker_selector_policy_input": "visual_color=red,top_z_band=0.02m,world_x=max",
+      "destination_cell": "BIN_CELL_3",
+      "failure_seed": 122257,
+      "failure_type": "PATH_BLOCKED",
+      "layout_family": "M2C_V4_ACCEPTED_BLOCKER_GEOMETRY",
+      "matched_key": "m2c-s4-s6-da5792d6dd40067ce1ff0ae6fd7411b37d041971e5ecf1de010f08355d8ade32",
+      "offline_geometry_admission": {
+        "minimum_surface_gap_m": 0.009999999999999995,
+        "part_count": 6,
+        "scripted_blocker_clearance_m": 0.02136871616134165,
+        "scripted_blocker_clearance_ok": true,
+        "target_clearance_after_relocation_m": 0.04616848030597954,
+        "target_clearance_after_relocation_ok": true,
+        "target_clearance_before_m": 0.002710215501577809,
+        "target_clearance_before_ok": false
+      },
+      "offline_scene_materialized_during_selection": true,
+      "outcome_observed_during_selection": false,
+      "retained_blocker_distance_m": 0.062,
+      "role": "TRAIN",
+      "scene_seed": 12225,
+      "sdf_sha256": "2bd5a27d6d3a2ff42152024e4fbd9a68749840c153f3fe68e5b27085e58b1615",
+      "split": "train",
+      "supervision_sha256": "f69a13d7a4ef4d4bcac945ac1f271399884f8a62026aa3a6c675ef2badc4a225",
+      "target_selector_policy_input": "visual_color=yellow,top_z_band=0.02m,world_x=max"
+    },
+    {
+      "anchor_xy_m": [
+        -0.11,
+        0.13
+      ],
+      "blocker_distance_m": 0.04,
+      "blocker_selector_policy_input": "visual_color=red,top_z_band=0.02m,world_x=max",
+      "destination_cell": "BIN_CELL_3",
+      "failure_seed": 122287,
+      "failure_type": "PATH_BLOCKED",
+      "layout_family": "M2C_V4_ACCEPTED_BLOCKER_GEOMETRY",
+      "matched_key": "m2c-s4-s6-f78b9c9e9c1bc300c33ba980f362c418e54f72e9141efa39db1a89529c98bd8c",
+      "offline_geometry_admission": {
+        "minimum_surface_gap_m": 0.009999999999999995,
+        "part_count": 6,
+        "scripted_blocker_clearance_m": 0.02136871616134165,
+        "scripted_blocker_clearance_ok": true,
+        "target_clearance_after_relocation_m": 0.04616848030597954,
+        "target_clearance_after_relocation_ok": true,
+        "target_clearance_before_m": 0.002710215501577809,
+        "target_clearance_before_ok": false
+      },
+      "offline_scene_materialized_during_selection": true,
+      "outcome_observed_during_selection": false,
+      "retained_blocker_distance_m": 0.062,
+      "role": "TRAIN",
+      "scene_seed": 12228,
+      "sdf_sha256": "769d539378a899420e55c172a34c01cfaef19c1a83fe3eded3f7a4ba190c825d",
+      "split": "train",
+      "supervision_sha256": "722f3eae9f9b005606bb02c3395622c29b6d47490940da2ae20072404ad2964e",
+      "target_selector_policy_input": "visual_color=yellow,top_z_band=0.02m,world_x=max"
+    },
+    {
+      "anchor_xy_m": [
+        -0.105,
+        0.13
+      ],
+      "blocker_distance_m": 0.04,
+      "blocker_selector_policy_input": "visual_color=red,top_z_band=0.02m,world_x=max",
+      "destination_cell": "BIN_CELL_3",
+      "failure_seed": 122337,
+      "failure_type": "PATH_BLOCKED",
+      "layout_family": "M2C_V4_ACCEPTED_BLOCKER_GEOMETRY",
+      "matched_key": "m2c-s4-s6-43fb64437222443ca50fd651bebc39e7c9afe245f3a84651f21928c8c983a046",
+      "offline_geometry_admission": {
+        "minimum_surface_gap_m": 0.009999999999999995,
+        "part_count": 6,
+        "scripted_blocker_clearance_m": 0.02136871616134165,
+        "scripted_blocker_clearance_ok": true,
+        "target_clearance_after_relocation_m": 0.04616848030597954,
+        "target_clearance_after_relocation_ok": true,
+        "target_clearance_before_m": 0.002710215501577809,
+        "target_clearance_before_ok": false
+      },
+      "offline_scene_materialized_during_selection": true,
+      "outcome_observed_during_selection": false,
+      "retained_blocker_distance_m": 0.062,
+      "role": "TRAIN",
+      "scene_seed": 12233,
+      "sdf_sha256": "e30efb66aef4ff948e48551cb26d03990c14b6bb25813b9a8fd6e8b7c9831cf7",
+      "split": "train",
+      "supervision_sha256": "1ef9bd4d111ca8f90842448a956c5f1e32383f13d64cf4598f53d1ce3af76077",
+      "target_selector_policy_input": "visual_color=yellow,top_z_band=0.02m,world_x=max"
+    },
+    {
+      "anchor_xy_m": [
+        -0.115,
+        0.13
+      ],
+      "blocker_distance_m": 0.04,
+      "blocker_selector_policy_input": "visual_color=red,top_z_band=0.02m,world_x=max",
+      "destination_cell": "BIN_CELL_3",
+      "failure_seed": 122457,
+      "failure_type": "PATH_BLOCKED",
+      "layout_family": "M2C_V4_ACCEPTED_BLOCKER_GEOMETRY",
+      "matched_key": "m2c-s4-s6-3fc241e8a85d2b366b7ee5a08359c5919d6ff824fac4a69224b1f571a1c40397",
+      "offline_geometry_admission": {
+        "minimum_surface_gap_m": 0.009999999999999995,
+        "part_count": 6,
+        "scripted_blocker_clearance_m": 0.02136871616134165,
+        "scripted_blocker_clearance_ok": true,
+        "target_clearance_after_relocation_m": 0.04616848030597954,
+        "target_clearance_after_relocation_ok": true,
+        "target_clearance_before_m": 0.002710215501577809,
+        "target_clearance_before_ok": false
+      },
+      "offline_scene_materialized_during_selection": true,
+      "outcome_observed_during_selection": false,
+      "retained_blocker_distance_m": 0.062,
+      "role": "TRAIN",
+      "scene_seed": 12245,
+      "sdf_sha256": "2bd5a27d6d3a2ff42152024e4fbd9a68749840c153f3fe68e5b27085e58b1615",
+      "split": "train",
+      "supervision_sha256": "2bf6fbb8c00c3d66b97dd7e02a8b06b3bf499b4800683b3ca4770d2ea40502fd",
+      "target_selector_policy_input": "visual_color=yellow,top_z_band=0.02m,world_x=max"
+    },
+    {
+      "anchor_xy_m": [
+        -0.11,
+        0.13
+      ],
+      "blocker_distance_m": 0.04,
+      "blocker_selector_policy_input": "visual_color=red,top_z_band=0.02m,world_x=max",
+      "destination_cell": "BIN_CELL_3",
+      "failure_seed": 122467,
+      "failure_type": "PATH_BLOCKED",
+      "layout_family": "M2C_V4_ACCEPTED_BLOCKER_GEOMETRY",
+      "matched_key": "m2c-s4-s6-cc6d252a3ca28ec7e343633d8e88b6c29431d25aac45eac9d4255ff01a2f5aba",
+      "offline_geometry_admission": {
+        "minimum_surface_gap_m": 0.009999999999999995,
+        "part_count": 6,
+        "scripted_blocker_clearance_m": 0.02136871616134165,
+        "scripted_blocker_clearance_ok": true,
+        "target_clearance_after_relocation_m": 0.04616848030597954,
+        "target_clearance_after_relocation_ok": true,
+        "target_clearance_before_m": 0.002710215501577809,
+        "target_clearance_before_ok": false
+      },
+      "offline_scene_materialized_during_selection": true,
+      "outcome_observed_during_selection": false,
+      "retained_blocker_distance_m": 0.062,
+      "role": "TRAIN",
+      "scene_seed": 12246,
+      "sdf_sha256": "769d539378a899420e55c172a34c01cfaef19c1a83fe3eded3f7a4ba190c825d",
+      "split": "train",
+      "supervision_sha256": "84e891e43feadbf6b61e391f702d0d60242503d52bd6b80c55d471d534a684c6",
+      "target_selector_policy_input": "visual_color=yellow,top_z_band=0.02m,world_x=max"
+    },
+    {
+      "anchor_xy_m": [
+        -0.105,
+        0.13
+      ],
+      "blocker_distance_m": 0.04,
+      "blocker_selector_policy_input": "visual_color=red,top_z_band=0.02m,world_x=max",
+      "destination_cell": "BIN_CELL_3",
+      "failure_seed": 122497,
+      "failure_type": "PATH_BLOCKED",
+      "layout_family": "M2C_V4_ACCEPTED_BLOCKER_GEOMETRY",
+      "matched_key": "m2c-s4-s6-5b6081d198f91c3576b73d9a08524cd7e707b21960fc632850132598afaffd53",
+      "offline_geometry_admission": {
+        "minimum_surface_gap_m": 0.009999999999999995,
+        "part_count": 6,
+        "scripted_blocker_clearance_m": 0.02136871616134165,
+        "scripted_blocker_clearance_ok": true,
+        "target_clearance_after_relocation_m": 0.04616848030597954,
+        "target_clearance_after_relocation_ok": true,
+        "target_clearance_before_m": 0.002710215501577809,
+        "target_clearance_before_ok": false
+      },
+      "offline_scene_materialized_during_selection": true,
+      "outcome_observed_during_selection": false,
+      "retained_blocker_distance_m": 0.062,
+      "role": "TRAIN",
+      "scene_seed": 12249,
+      "sdf_sha256": "e30efb66aef4ff948e48551cb26d03990c14b6bb25813b9a8fd6e8b7c9831cf7",
+      "split": "train",
+      "supervision_sha256": "8d0e83948865762fe17d4553c27226f6bf26a56a2c574e6b07f58c701d43b049",
+      "target_selector_policy_input": "visual_color=yellow,top_z_band=0.02m,world_x=max"
+    },
+    {
+      "anchor_xy_m": [
+        -0.115,
+        0.13
+      ],
+      "blocker_distance_m": 0.04,
+      "blocker_selector_policy_input": "visual_color=red,top_z_band=0.02m,world_x=max",
+      "destination_cell": "BIN_CELL_3",
+      "failure_seed": 122667,
+      "failure_type": "PATH_BLOCKED",
+      "layout_family": "M2C_V4_ACCEPTED_BLOCKER_GEOMETRY",
+      "matched_key": "m2c-s4-s6-b20882b488721835858321c75537fd146d9cca8412b9df74c0d9d98fd04bd743",
+      "offline_geometry_admission": {
+        "minimum_surface_gap_m": 0.009999999999999995,
+        "part_count": 6,
+        "scripted_blocker_clearance_m": 0.02136871616134165,
+        "scripted_blocker_clearance_ok": true,
+        "target_clearance_after_relocation_m": 0.04616848030597954,
+        "target_clearance_after_relocation_ok": true,
+        "target_clearance_before_m": 0.002710215501577809,
+        "target_clearance_before_ok": false
+      },
+      "offline_scene_materialized_during_selection": true,
+      "outcome_observed_during_selection": false,
+      "retained_blocker_distance_m": 0.062,
+      "role": "TRAIN",
+      "scene_seed": 12266,
+      "sdf_sha256": "2bd5a27d6d3a2ff42152024e4fbd9a68749840c153f3fe68e5b27085e58b1615",
+      "split": "train",
+      "supervision_sha256": "46e2c0e5b05207008c9e08ea23592a69776c05e9982abce79e9ba6649aaa13e3",
+      "target_selector_policy_input": "visual_color=yellow,top_z_band=0.02m,world_x=max"
+    },
+    {
+      "anchor_xy_m": [
+        -0.11,
+        0.13
+      ],
+      "blocker_distance_m": 0.04,
+      "blocker_selector_policy_input": "visual_color=red,top_z_band=0.02m,world_x=max",
+      "destination_cell": "BIN_CELL_3",
+      "failure_seed": 122677,
+      "failure_type": "PATH_BLOCKED",
+      "layout_family": "M2C_V4_ACCEPTED_BLOCKER_GEOMETRY",
+      "matched_key": "m2c-s4-s6-005c4c6b5482e216820333a7ab35c188b86f9fd9a67b193e145e4d9a380e1ba0",
+      "offline_geometry_admission": {
+        "minimum_surface_gap_m": 0.009999999999999995,
+        "part_count": 6,
+        "scripted_blocker_clearance_m": 0.02136871616134165,
+        "scripted_blocker_clearance_ok": true,
+        "target_clearance_after_relocation_m": 0.04616848030597954,
+        "target_clearance_after_relocation_ok": true,
+        "target_clearance_before_m": 0.002710215501577809,
+        "target_clearance_before_ok": false
+      },
+      "offline_scene_materialized_during_selection": true,
+      "outcome_observed_during_selection": false,
+      "retained_blocker_distance_m": 0.062,
+      "role": "TRAIN",
+      "scene_seed": 12267,
+      "sdf_sha256": "769d539378a899420e55c172a34c01cfaef19c1a83fe3eded3f7a4ba190c825d",
+      "split": "train",
+      "supervision_sha256": "d6781f388441d600119680d157124317d5a9ca6a6004996f150e67216f641b18",
+      "target_selector_policy_input": "visual_color=yellow,top_z_band=0.02m,world_x=max"
+    },
+    {
+      "anchor_xy_m": [
+        -0.105,
+        0.13
+      ],
+      "blocker_distance_m": 0.04,
+      "blocker_selector_policy_input": "visual_color=red,top_z_band=0.02m,world_x=max",
+      "destination_cell": "BIN_CELL_3",
+      "failure_seed": 122687,
+      "failure_type": "PATH_BLOCKED",
+      "layout_family": "M2C_V4_ACCEPTED_BLOCKER_GEOMETRY",
+      "matched_key": "m2c-s4-s6-7c566df6b28199b789d671ebb5e61d49c1fd378222fa3a9c7837c21db4d729b7",
+      "offline_geometry_admission": {
+        "minimum_surface_gap_m": 0.009999999999999995,
+        "part_count": 6,
+        "scripted_blocker_clearance_m": 0.02136871616134165,
+        "scripted_blocker_clearance_ok": true,
+        "target_clearance_after_relocation_m": 0.04616848030597954,
+        "target_clearance_after_relocation_ok": true,
+        "target_clearance_before_m": 0.002710215501577809,
+        "target_clearance_before_ok": false
+      },
+      "offline_scene_materialized_during_selection": true,
+      "outcome_observed_during_selection": false,
+      "retained_blocker_distance_m": 0.062,
+      "role": "TRAIN",
+      "scene_seed": 12268,
+      "sdf_sha256": "e30efb66aef4ff948e48551cb26d03990c14b6bb25813b9a8fd6e8b7c9831cf7",
+      "split": "train",
+      "supervision_sha256": "92afcc49aaca0ce53637974f29fa83dfb746ffc18ab6fe937ae554e3b7a0fc85",
+      "target_selector_policy_input": "visual_color=yellow,top_z_band=0.02m,world_x=max"
+    },
+    {
+      "anchor_xy_m": [
+        -0.115,
+        0.13
+      ],
+      "blocker_distance_m": 0.04,
+      "blocker_selector_policy_input": "visual_color=red,top_z_band=0.02m,world_x=max",
+      "destination_cell": "BIN_CELL_3",
+      "failure_seed": 122727,
+      "failure_type": "PATH_BLOCKED",
+      "layout_family": "M2C_V4_ACCEPTED_BLOCKER_GEOMETRY",
+      "matched_key": "m2c-s4-s6-f4b59aba9d765e4d08e6c1e0f3c31484fbb3141678bce9b5e6d4fb6bdff7a7dd",
+      "offline_geometry_admission": {
+        "minimum_surface_gap_m": 0.009999999999999995,
+        "part_count": 6,
+        "scripted_blocker_clearance_m": 0.02136871616134165,
+        "scripted_blocker_clearance_ok": true,
+        "target_clearance_after_relocation_m": 0.04616848030597954,
+        "target_clearance_after_relocation_ok": true,
+        "target_clearance_before_m": 0.002710215501577809,
+        "target_clearance_before_ok": false
+      },
+      "offline_scene_materialized_during_selection": true,
+      "outcome_observed_during_selection": false,
+      "retained_blocker_distance_m": 0.062,
+      "role": "TRAIN",
+      "scene_seed": 12272,
+      "sdf_sha256": "2bd5a27d6d3a2ff42152024e4fbd9a68749840c153f3fe68e5b27085e58b1615",
+      "split": "train",
+      "supervision_sha256": "6d3601676d2defaff6bed8c6006039a5041ae0b650628f5a8e0ddf11f3f15d90",
+      "target_selector_policy_input": "visual_color=yellow,top_z_band=0.02m,world_x=max"
+    },
+    {
+      "anchor_xy_m": [
+        -0.11,
+        0.13
+      ],
+      "blocker_distance_m": 0.04,
+      "blocker_selector_policy_input": "visual_color=red,top_z_band=0.02m,world_x=max",
+      "destination_cell": "BIN_CELL_3",
+      "failure_seed": 122837,
+      "failure_type": "PATH_BLOCKED",
+      "layout_family": "M2C_V4_ACCEPTED_BLOCKER_GEOMETRY",
+      "matched_key": "m2c-s4-s6-2ccaf3c7411bede8d2fcb3c545fd2bf62743736544c9f3cb243ad26807bc9f49",
+      "offline_geometry_admission": {
+        "minimum_surface_gap_m": 0.009999999999999995,
+        "part_count": 6,
+        "scripted_blocker_clearance_m": 0.02136871616134165,
+        "scripted_blocker_clearance_ok": true,
+        "target_clearance_after_relocation_m": 0.04616848030597954,
+        "target_clearance_after_relocation_ok": true,
+        "target_clearance_before_m": 0.002710215501577809,
+        "target_clearance_before_ok": false
+      },
+      "offline_scene_materialized_during_selection": true,
+      "outcome_observed_during_selection": false,
+      "retained_blocker_distance_m": 0.062,
+      "role": "TRAIN",
+      "scene_seed": 12283,
+      "sdf_sha256": "769d539378a899420e55c172a34c01cfaef19c1a83fe3eded3f7a4ba190c825d",
+      "split": "train",
+      "supervision_sha256": "ae9e2d51f178b8465ae61f52cb65dfbb5b82be618cfad775ffa9f2f20264f3d9",
+      "target_selector_policy_input": "visual_color=yellow,top_z_band=0.02m,world_x=max"
+    },
+    {
+      "anchor_xy_m": [
+        -0.105,
+        0.13
+      ],
+      "blocker_distance_m": 0.04,
+      "blocker_selector_policy_input": "visual_color=red,top_z_band=0.02m,world_x=max",
+      "destination_cell": "BIN_CELL_3",
+      "failure_seed": 123247,
+      "failure_type": "PATH_BLOCKED",
+      "layout_family": "M2C_V4_ACCEPTED_BLOCKER_GEOMETRY",
+      "matched_key": "m2c-s4-s6-300d0da16d875642076c7680b5cb737339db99966aa99cb1435ba664986e6670",
+      "offline_geometry_admission": {
+        "minimum_surface_gap_m": 0.009999999999999995,
+        "part_count": 6,
+        "scripted_blocker_clearance_m": 0.02136871616134165,
+        "scripted_blocker_clearance_ok": true,
+        "target_clearance_after_relocation_m": 0.04616848030597954,
+        "target_clearance_after_relocation_ok": true,
+        "target_clearance_before_m": 0.002710215501577809,
+        "target_clearance_before_ok": false
+      },
+      "offline_scene_materialized_during_selection": true,
+      "outcome_observed_during_selection": false,
+      "retained_blocker_distance_m": 0.062,
+      "role": "TRAIN",
+      "scene_seed": 12324,
+      "sdf_sha256": "e30efb66aef4ff948e48551cb26d03990c14b6bb25813b9a8fd6e8b7c9831cf7",
+      "split": "train",
+      "supervision_sha256": "204eec8d3229336555b4aabfe83fcff32e11a7e73ba4250a682d0c89a82ab59f",
+      "target_selector_policy_input": "visual_color=yellow,top_z_band=0.02m,world_x=max"
+    },
+    {
+      "anchor_xy_m": [
+        -0.115,
+        0.13
+      ],
+      "blocker_distance_m": 0.04,
+      "blocker_selector_policy_input": "visual_color=red,top_z_band=0.02m,world_x=max",
+      "destination_cell": "BIN_CELL_3",
+      "failure_seed": 123277,
+      "failure_type": "PATH_BLOCKED",
+      "layout_family": "M2C_V4_ACCEPTED_BLOCKER_GEOMETRY",
+      "matched_key": "m2c-s4-s6-32dbd4f4c8e0f7ad5bb9ebad6dd5698875f7b02ede8a9458dce04cffeddaac63",
+      "offline_geometry_admission": {
+        "minimum_surface_gap_m": 0.009999999999999995,
+        "part_count": 6,
+        "scripted_blocker_clearance_m": 0.02136871616134165,
+        "scripted_blocker_clearance_ok": true,
+        "target_clearance_after_relocation_m": 0.04616848030597954,
+        "target_clearance_after_relocation_ok": true,
+        "target_clearance_before_m": 0.002710215501577809,
+        "target_clearance_before_ok": false
+      },
+      "offline_scene_materialized_during_selection": true,
+      "outcome_observed_during_selection": false,
+      "retained_blocker_distance_m": 0.062,
+      "role": "TRAIN",
+      "scene_seed": 12327,
+      "sdf_sha256": "2bd5a27d6d3a2ff42152024e4fbd9a68749840c153f3fe68e5b27085e58b1615",
+      "split": "train",
+      "supervision_sha256": "cafce4a87c1a12ebe0468e34993a5d9f334ddc08852c3a6f3bf3dd76d7c5234a",
+      "target_selector_policy_input": "visual_color=yellow,top_z_band=0.02m,world_x=max"
+    },
+    {
+      "anchor_xy_m": [
+        -0.11,
+        0.13
+      ],
+      "blocker_distance_m": 0.04,
+      "blocker_selector_policy_input": "visual_color=red,top_z_band=0.02m,world_x=max",
+      "destination_cell": "BIN_CELL_3",
+      "failure_seed": 123297,
+      "failure_type": "PATH_BLOCKED",
+      "layout_family": "M2C_V4_ACCEPTED_BLOCKER_GEOMETRY",
+      "matched_key": "m2c-s4-s6-8b301962f4940a2c22e813f3d936dd25f33b97327f74874bee8395b936bb950e",
+      "offline_geometry_admission": {
+        "minimum_surface_gap_m": 0.009999999999999995,
+        "part_count": 6,
+        "scripted_blocker_clearance_m": 0.02136871616134165,
+        "scripted_blocker_clearance_ok": true,
+        "target_clearance_after_relocation_m": 0.04616848030597954,
+        "target_clearance_after_relocation_ok": true,
+        "target_clearance_before_m": 0.002710215501577809,
+        "target_clearance_before_ok": false
+      },
+      "offline_scene_materialized_during_selection": true,
+      "outcome_observed_during_selection": false,
+      "retained_blocker_distance_m": 0.062,
+      "role": "TRAIN",
+      "scene_seed": 12329,
+      "sdf_sha256": "769d539378a899420e55c172a34c01cfaef19c1a83fe3eded3f7a4ba190c825d",
+      "split": "train",
+      "supervision_sha256": "4ea9457c08bb113acd15c191e25d9e1de09434c13c94ff95aba67b62c38b4ffe",
+      "target_selector_policy_input": "visual_color=yellow,top_z_band=0.02m,world_x=max"
+    },
+    {
+      "anchor_xy_m": [
+        -0.105,
+        0.13
+      ],
+      "blocker_distance_m": 0.04,
+      "blocker_selector_policy_input": "visual_color=red,top_z_band=0.02m,world_x=max",
+      "destination_cell": "BIN_CELL_3",
+      "failure_seed": 123487,
+      "failure_type": "PATH_BLOCKED",
+      "layout_family": "M2C_V4_ACCEPTED_BLOCKER_GEOMETRY",
+      "matched_key": "m2c-s4-s6-3a77b4725369668256314931b811ab4f1d562763fbc92cc59cac9e5469205466",
+      "offline_geometry_admission": {
+        "minimum_surface_gap_m": 0.009999999999999995,
+        "part_count": 6,
+        "scripted_blocker_clearance_m": 0.02136871616134165,
+        "scripted_blocker_clearance_ok": true,
+        "target_clearance_after_relocation_m": 0.04616848030597954,
+        "target_clearance_after_relocation_ok": true,
+        "target_clearance_before_m": 0.002710215501577809,
+        "target_clearance_before_ok": false
+      },
+      "offline_scene_materialized_during_selection": true,
+      "outcome_observed_during_selection": false,
+      "retained_blocker_distance_m": 0.062,
+      "role": "TRAIN",
+      "scene_seed": 12348,
+      "sdf_sha256": "e30efb66aef4ff948e48551cb26d03990c14b6bb25813b9a8fd6e8b7c9831cf7",
+      "split": "train",
+      "supervision_sha256": "2a0c33c7911a0c3f3eb5937936883a2b2e5459bf29fdab5f82d59189c91c340c",
+      "target_selector_policy_input": "visual_color=yellow,top_z_band=0.02m,world_x=max"
+    },
+    {
+      "anchor_xy_m": [
+        -0.115,
+        0.13
+      ],
+      "blocker_distance_m": 0.04,
+      "blocker_selector_policy_input": "visual_color=red,top_z_band=0.02m,world_x=max",
+      "destination_cell": "BIN_CELL_3",
+      "failure_seed": 123497,
+      "failure_type": "PATH_BLOCKED",
+      "layout_family": "M2C_V4_ACCEPTED_BLOCKER_GEOMETRY",
+      "matched_key": "m2c-s4-s6-15290dc3f201f8bc4730f17deaefecd0f2e5f444f8917197e26904c94c20d98b",
+      "offline_geometry_admission": {
+        "minimum_surface_gap_m": 0.009999999999999995,
+        "part_count": 6,
+        "scripted_blocker_clearance_m": 0.02136871616134165,
+        "scripted_blocker_clearance_ok": true,
+        "target_clearance_after_relocation_m": 0.04616848030597954,
+        "target_clearance_after_relocation_ok": true,
+        "target_clearance_before_m": 0.002710215501577809,
+        "target_clearance_before_ok": false
+      },
+      "offline_scene_materialized_during_selection": true,
+      "outcome_observed_during_selection": false,
+      "retained_blocker_distance_m": 0.062,
+      "role": "TRAIN",
+      "scene_seed": 12349,
+      "sdf_sha256": "2bd5a27d6d3a2ff42152024e4fbd9a68749840c153f3fe68e5b27085e58b1615",
+      "split": "train",
+      "supervision_sha256": "0443ab9992a799db2f4fac2860e07df3184d22bb5e6a47c07868e523e73f451b",
+      "target_selector_policy_input": "visual_color=yellow,top_z_band=0.02m,world_x=max"
+    },
+    {
+      "anchor_xy_m": [
+        -0.11,
+        0.13
+      ],
+      "blocker_distance_m": 0.04,
+      "blocker_selector_policy_input": "visual_color=red,top_z_band=0.02m,world_x=max",
+      "destination_cell": "BIN_CELL_3",
+      "failure_seed": 123647,
+      "failure_type": "PATH_BLOCKED",
+      "layout_family": "M2C_V4_ACCEPTED_BLOCKER_GEOMETRY",
+      "matched_key": "m2c-s4-s6-9cf889725adf3b48f2940195c7371fa5d374526c6f0c8c148c97973c66ef181b",
+      "offline_geometry_admission": {
+        "minimum_surface_gap_m": 0.009999999999999995,
+        "part_count": 6,
+        "scripted_blocker_clearance_m": 0.02136871616134165,
+        "scripted_blocker_clearance_ok": true,
+        "target_clearance_after_relocation_m": 0.04616848030597954,
+        "target_clearance_after_relocation_ok": true,
+        "target_clearance_before_m": 0.002710215501577809,
+        "target_clearance_before_ok": false
+      },
+      "offline_scene_materialized_during_selection": true,
+      "outcome_observed_during_selection": false,
+      "retained_blocker_distance_m": 0.062,
+      "role": "TRAIN",
+      "scene_seed": 12364,
+      "sdf_sha256": "769d539378a899420e55c172a34c01cfaef19c1a83fe3eded3f7a4ba190c825d",
+      "split": "train",
+      "supervision_sha256": "d4721004680141796b49d0b59e3534d402e2bd0dd77bfb59976a738a9145e0e9",
+      "target_selector_policy_input": "visual_color=yellow,top_z_band=0.02m,world_x=max"
+    },
+    {
+      "anchor_xy_m": [
+        -0.105,
+        0.13
+      ],
+      "blocker_distance_m": 0.04,
+      "blocker_selector_policy_input": "visual_color=red,top_z_band=0.02m,world_x=max",
+      "destination_cell": "BIN_CELL_3",
+      "failure_seed": 123677,
+      "failure_type": "PATH_BLOCKED",
+      "layout_family": "M2C_V4_ACCEPTED_BLOCKER_GEOMETRY",
+      "matched_key": "m2c-s4-s6-9ffadbcf77d363431fe5eb44ac5649f2ca646c514e2893b775e2dd89f45b8655",
+      "offline_geometry_admission": {
+        "minimum_surface_gap_m": 0.009999999999999995,
+        "part_count": 6,
+        "scripted_blocker_clearance_m": 0.02136871616134165,
+        "scripted_blocker_clearance_ok": true,
+        "target_clearance_after_relocation_m": 0.04616848030597954,
+        "target_clearance_after_relocation_ok": true,
+        "target_clearance_before_m": 0.002710215501577809,
+        "target_clearance_before_ok": false
+      },
+      "offline_scene_materialized_during_selection": true,
+      "outcome_observed_during_selection": false,
+      "retained_blocker_distance_m": 0.062,
+      "role": "TRAIN",
+      "scene_seed": 12367,
+      "sdf_sha256": "e30efb66aef4ff948e48551cb26d03990c14b6bb25813b9a8fd6e8b7c9831cf7",
+      "split": "train",
+      "supervision_sha256": "699b0231e5b4b236ea9ed946e800b72bbd758144662d272987fa296fa845ac85",
+      "target_selector_policy_input": "visual_color=yellow,top_z_band=0.02m,world_x=max"
+    },
+    {
+      "anchor_xy_m": [
+        -0.115,
+        0.13
+      ],
+      "blocker_distance_m": 0.04,
+      "blocker_selector_policy_input": "visual_color=red,top_z_band=0.02m,world_x=max",
+      "destination_cell": "BIN_CELL_3",
+      "failure_seed": 123847,
+      "failure_type": "PATH_BLOCKED",
+      "layout_family": "M2C_V4_ACCEPTED_BLOCKER_GEOMETRY",
+      "matched_key": "m2c-s4-s6-f3d77683218885aecb0d9114a59ea22927a6f38293d892ac2f16f5e281b36a94",
+      "offline_geometry_admission": {
+        "minimum_surface_gap_m": 0.009999999999999995,
+        "part_count": 6,
+        "scripted_blocker_clearance_m": 0.02136871616134165,
+        "scripted_blocker_clearance_ok": true,
+        "target_clearance_after_relocation_m": 0.04616848030597954,
+        "target_clearance_after_relocation_ok": true,
+        "target_clearance_before_m": 0.002710215501577809,
+        "target_clearance_before_ok": false
+      },
+      "offline_scene_materialized_during_selection": true,
+      "outcome_observed_during_selection": false,
+      "retained_blocker_distance_m": 0.062,
+      "role": "TRAIN",
+      "scene_seed": 12384,
+      "sdf_sha256": "2bd5a27d6d3a2ff42152024e4fbd9a68749840c153f3fe68e5b27085e58b1615",
+      "split": "train",
+      "supervision_sha256": "057156c34aab5f08acdb239ea8db2b879573a01326147a49d12711afb5f3e7f4",
+      "target_selector_policy_input": "visual_color=yellow,top_z_band=0.02m,world_x=max"
+    },
+    {
+      "anchor_xy_m": [
+        -0.11,
+        0.13
+      ],
+      "blocker_distance_m": 0.04,
+      "blocker_selector_policy_input": "visual_color=red,top_z_band=0.02m,world_x=max",
+      "destination_cell": "BIN_CELL_3",
+      "failure_seed": 124057,
+      "failure_type": "PATH_BLOCKED",
+      "layout_family": "M2C_V4_ACCEPTED_BLOCKER_GEOMETRY",
+      "matched_key": "m2c-s4-s6-c8eb04064150367cdc1545a61d88e76cee73923f49398822236f9616be473363",
+      "offline_geometry_admission": {
+        "minimum_surface_gap_m": 0.009999999999999995,
+        "part_count": 6,
+        "scripted_blocker_clearance_m": 0.02136871616134165,
+        "scripted_blocker_clearance_ok": true,
+        "target_clearance_after_relocation_m": 0.04616848030597954,
+        "target_clearance_after_relocation_ok": true,
+        "target_clearance_before_m": 0.002710215501577809,
+        "target_clearance_before_ok": false
+      },
+      "offline_scene_materialized_during_selection": true,
+      "outcome_observed_during_selection": false,
+      "retained_blocker_distance_m": 0.062,
+      "role": "TRAIN",
+      "scene_seed": 12405,
+      "sdf_sha256": "769d539378a899420e55c172a34c01cfaef19c1a83fe3eded3f7a4ba190c825d",
+      "split": "train",
+      "supervision_sha256": "e514c8604f46d1d37da29908cb7325bbf2fe8b18188e4344f720d4a39611482a",
+      "target_selector_policy_input": "visual_color=yellow,top_z_band=0.02m,world_x=max"
+    },
+    {
+      "anchor_xy_m": [
+        -0.105,
+        0.13
+      ],
+      "blocker_distance_m": 0.04,
+      "blocker_selector_policy_input": "visual_color=red,top_z_band=0.02m,world_x=max",
+      "destination_cell": "BIN_CELL_3",
+      "failure_seed": 124067,
+      "failure_type": "PATH_BLOCKED",
+      "layout_family": "M2C_V4_ACCEPTED_BLOCKER_GEOMETRY",
+      "matched_key": "m2c-s4-s6-37e060baeb16d60aa791eafb640fb719311a73129097447e14760ea765ba82d7",
+      "offline_geometry_admission": {
+        "minimum_surface_gap_m": 0.009999999999999995,
+        "part_count": 6,
+        "scripted_blocker_clearance_m": 0.02136871616134165,
+        "scripted_blocker_clearance_ok": true,
+        "target_clearance_after_relocation_m": 0.04616848030597954,
+        "target_clearance_after_relocation_ok": true,
+        "target_clearance_before_m": 0.002710215501577809,
+        "target_clearance_before_ok": false
+      },
+      "offline_scene_materialized_during_selection": true,
+      "outcome_observed_during_selection": false,
+      "retained_blocker_distance_m": 0.062,
+      "role": "TRAIN",
+      "scene_seed": 12406,
+      "sdf_sha256": "e30efb66aef4ff948e48551cb26d03990c14b6bb25813b9a8fd6e8b7c9831cf7",
+      "split": "train",
+      "supervision_sha256": "f5d9df47225d8ed21e0febfed9e22b10c637f14b04de644450ae6e9efebee49c",
+      "target_selector_policy_input": "visual_color=yellow,top_z_band=0.02m,world_x=max"
+    }
+  ],
+  "v4_excluded_matched_keys": [
+    "m2c-headroom-v4-1cad17ac5f6796634510abb8250ff2e7a36c0f9e5735068fd089ea59e5c97258",
+    "m2c-headroom-v4-361948b69e40fb892ad46d49ffa625574bc56a8772b4c04bff008ab6918e49f5",
+    "m2c-headroom-v4-604aecfc01390011adfc3a39233fdd96cc318605ec3afd2873c73b4ad1f1d297"
+  ],
+  "v4_excluded_scene_seeds": [
+    9038,
+    9057,
+    9077
+  ],
+  "written_date_asia_shanghai": "2026-08-12"
+}
