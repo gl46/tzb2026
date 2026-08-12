@@ -1,8 +1,8 @@
 {
   "schema_version": "M2CGapFixAuditV1",
-  "completed_at": "2026-08-12T08:08:09+08:00",
-  "stage_interval": "S3_COLLECTION_RUNNING",
-  "status": "REVIEW_COMPLETE_WITH_ONE_OPEN_CODE_FINDING",
+  "completed_at": "2026-08-12T19:40:09+08:00",
+  "stage_interval": "AFTER_S3_FREEZE_BEFORE_HUMAN_ADR_GATED_S4",
+  "status": "REVIEW_COMPLETE_ALL_CODE_FINDINGS_FIXED_AND_VERIFIED",
   "items": [
     {
       "id": "PERCEPTION_GATE_NO_GO_EXIT",
@@ -28,18 +28,118 @@
     },
     {
       "id": "DYNAMIC_WORLD_POSE_FROM_USD_XFORM_CACHE",
-      "status": "OPEN_FINDING_NOT_USED_FOR_S3_ACCEPTANCE",
+      "status": "FIXED_AND_VERIFIED_ON_ISAAC_SIM_6_0_1",
       "path": "scripts/isaac_m1b_dataset_benchmark.py",
-      "source_sha256": "800a103035c87089367f64d8b7c191ef626f33aab709b59aa05b08efbf3050b1",
+      "pre_fix_source_sha256": "800a103035c87089367f64d8b7c191ef626f33aab709b59aa05b08efbf3050b1",
+      "fixed_source_sha256": "e153c0ce70e4fd3aef47b334cf1168ae107c88eb8e19ca493a174420d38116f8",
       "introduced_by_commit": "5984298e22e14c76414aa49dbae059a33369e0a8",
-      "finding": "_world_pose_xyzw reads UsdGeom.XformCache().GetLocalToWorldTransform for dynamic robot and cylinder poses after the timeline starts. That can return the authored transform instead of the live PhysX pose.",
+      "finding": "The pre-fix _world_pose_xyzw helper read UsdGeom.XformCache().GetLocalToWorldTransform after timeline start and could return authored transforms instead of live PhysX poses.",
+      "fix": "The benchmark now constructs RigidPrim views before physics initialization and reads hand/object poses with get_world_poses() from the PhysX tensor backend. Isaac wxyz quaternions are explicitly serialized into the existing xyzw protocol order.",
       "affected_outputs": [
         "end_effector_pose_world_xyzw",
         "perfect_object_poses_world_xyzw",
         "final_end_effector_pose_world_xyzw"
       ],
-      "scope_boundary": "S3 physical sample acceptance and recovery metrics come from isaac_m1b_actuation_probe.py, whose _live_pose reads RigidPrim.get_world_poses from the PhysX tensor backend. The affected benchmark fields are not used to accept S3 samples.",
-      "required_follow_up": "Before a future dynamic dataset benchmark is accepted, replace the helper with a live PhysX pose reader and verify movement on Isaac Sim. Do not reinterpret old authored-pose records as live motion evidence."
+      "runtime_pose_contract": {
+        "backend": "PHYSX_TENSOR_RIGID_PRIM_GET_WORLD_POSES",
+        "source_quaternion_order": "wxyz",
+        "serialized_quaternion_order": "xyzw",
+        "usd_authored_transform_used_after_timeline_start": false,
+        "pre_fix_records_reinterpreted_as_live_pose": false
+      },
+      "frozen_s3_boundary": {
+        "s3_stage_builder_sha256": "800a103035c87089367f64d8b7c191ef626f33aab709b59aa05b08efbf3050b1",
+        "s3_reports_or_dataset_rewritten": false,
+        "old_records_promoted_to_live_pose_evidence": false,
+        "reason": "S3 acceptance used isaac_m1b_actuation_probe.py RigidPrim live poses and remains bound to its frozen collection plan; this later benchmark repair does not reinterpret S3 history."
+      },
+      "isaac_verification": {
+        "host": "root@labserver",
+        "image": "nvcr.io/nvidia/isaac-sim:6.0.1",
+        "gpu": 1,
+        "scene": "scene-3100",
+        "dynamic": {
+          "status": "PASS",
+          "capture_mode": "DYNAMIC_STUDENT_DATASET",
+          "path": "/var/tmp/xh-data/isaac-industrial/m2c-live-pose-final-dynamic.N1dKy9",
+          "files_hashed": 81,
+          "ledger_sha256": "622c699e963b45f30bb18359f6aeba8ab6aa766706cc129969a0a1105ebe9ce1",
+          "writable_paths": 0,
+          "metrics_sha256": "5177f4aad8b96bdf617c0850d85b0ea9ce82eb54cfe7addcec09d413526659ae",
+          "runtime_frames_sha256": "b4b19c594ebab25b56a876f4b09ae2b5df8444fdb8f1cc5ca257fb5e2801121b",
+          "supervision_frames_sha256": "bdfa88f8c56c435277cb4fa92903d6258cdd61d5b9e7092c7f62386288dd6519",
+          "frames": 4,
+          "hand_unique_pose_count": 4,
+          "hand_first_last_position_delta_m": 0.011385748208677498,
+          "dynamic_object_unique_pose_count_each": 4,
+          "objects_moving_over_1mm": {
+            "cylinder_03": 0.029018735574731273,
+            "cylinder_06": 0.028995972405474645,
+            "cylinder_09": 0.029045335777544767
+          },
+          "all_pose_values_finite": true,
+          "transition_join": {
+            "status": "PASS",
+            "transitions": 3,
+            "transition_metrics_sha256": "1dd4276411b81c75d3709fd676d622c54c82a5129fc484cee4912c7987eafd82",
+            "episode_transitions_sha256": "d094ffce6e8e826c979367b684117c76f89bb2c633eb9de7f9d3f40d0417351c",
+            "teacher_response_nonnull": 0,
+            "policy_segmentation_uri_nonnull": 0
+          }
+        },
+        "static_perception": {
+          "status": "PASS",
+          "capture_mode": "CALIBRATION_ONLY_STATIC_PERCEPTION",
+          "path": "/var/tmp/xh-data/isaac-industrial/m2c-live-pose-final-static.ArBmng",
+          "files_hashed": 46,
+          "ledger_sha256": "7c11d8c4d8754da2902c660c9f61733bd6be89f75b968f6ff5cc96af697fd5c3",
+          "writable_paths": 0,
+          "metrics_sha256": "51b3d62137efdf2ab431f364edd76242053f3b15b20c44ce1265dc6d1ed36530",
+          "frames": 2,
+          "frozen_rigid_body_count": 9,
+          "training_eligible": false
+        },
+        "shadow_reset": {
+          "status": "PASS_AFTER_TWO_RETAINED_INFRASTRUCTURE_FAILURES",
+          "capture_mode": "SHADOW_COUNTERFACTUAL_EVAL_ONLY",
+          "path": "/var/tmp/xh-data/isaac-industrial/m2c-live-pose-final-shadow-last.YkSv67",
+          "files_hashed": 110,
+          "ledger_sha256": "82d44ddb63e52b49eb088b872f9bf333ab95b26ac943eacbae1d58a78c2bf10b",
+          "writable_paths": 0,
+          "metrics_sha256": "8c9e622c6544c083906929e2794285ef9a9b529b8f1ec0a28dc49ffee28725e5",
+          "frames": 6,
+          "reset_method": "TIMELINE_STOP_PLAY_PLUS_PUBLIC_ROBOT_STATE",
+          "candidate_order": [
+            "geometric_default",
+            "alternate_joint_probe",
+            "reobserve_hold"
+          ],
+          "profile_count": 3,
+          "frames_per_profile": 2,
+          "pairwise_final_hand_position_delta_m": [
+            0.007981164236028246,
+            0.018038652798805524,
+            0.012862913201903973
+          ],
+          "model_action_mapping_used": false,
+          "privileged_truth_policy_input": false,
+          "training_eligible": false
+        }
+      }
+    },
+    {
+      "id": "SHADOW_CANDIDATE_EXTRA_STRICT_FRAME_FIELD",
+      "status": "FIXED_AND_VERIFIED_BY_STRICT_TRANSITION_JOIN",
+      "path": "scripts/isaac_m1b_dataset_benchmark.py",
+      "introduced_by_commit": "6b38c7ce",
+      "finding": "The benchmark unconditionally wrote shadow_candidate into IsaacM1BRuntimeFrameV1 and IsaacM1BSupervisionFrameV1 even though both strict schemas forbid the field; dynamic transition assembly therefore failed closed even when its value was null.",
+      "fix": "Remove the frame-level extra field. Candidate identity remains in metrics.shadow_counterfactual.profiles, its only valid consumer; it is not inserted into policy-visible runtime or offline truth frame schemas.",
+      "verification": {
+        "runtime_frames_strict_schema_passed": true,
+        "supervision_frames_strict_schema_passed": true,
+        "dynamic_transitions_built": 3,
+        "shadow_profiles_preserved": 3
+      }
     },
     {
       "id": "TILTED_CYLINDER_SUPPORT_Z",
@@ -52,19 +152,80 @@
     }
   ],
   "verification": {
-    "focused_tests": "35 passed",
-    "full_pytest": "410 passed",
+    "focused_tests": "69 passed",
+    "full_pytest": "440 passed",
     "ruff": "PASS",
     "git_diff_check": "PASS",
-    "b0_probe_sha256_matches_freeze": true
+    "b0_freeze_recheck": {
+      "status": "PASS",
+      "b0_files_match_m2b": true,
+      "m2b_artifact_index_verified": "116/116",
+      "m2b_report_mismatches": 0,
+      "local_artifacts_match_m2b": true,
+      "m2b_evidence_readonly": true
+    },
+    "remote_isaac_modes": {
+      "dynamic": "PASS",
+      "static_perception": "PASS",
+      "shadow_reset": "PASS_AFTER_TWO_RETAINED_EXIT_139_ATTEMPTS"
+    }
   },
   "teacher_used": false,
   "teacher_kill_rule_events": [],
   "privileged_truth_policy_input": false,
-  "failures": [],
+  "world_model_mainline_replaced": false,
+  "q_b_training_or_evaluation_executed": false,
+  "failures": [
+    {
+      "kind": "INTERMEDIATE_STRICT_SCHEMA_FAILURE",
+      "result": "Fixed",
+      "detail": "The first dynamic transition join rejected frame-level shadow_candidate as an extra field; the final e153c0ce run removed it and built 3 strict transitions."
+    },
+    {
+      "kind": "ISAAC_NATIVE_INFRASTRUCTURE_FAILURE",
+      "result": "Retained; later controlled retry passed",
+      "exit_code": 139,
+      "metrics_present": false,
+      "path": "/var/tmp/xh-data/isaac-industrial/m2c-live-pose-final-shadow.roFT4D",
+      "run_log_sha256": "e9610c3db98e20adb32d3b43196a246d4af339bcf1087015f9a330a3df6ab349",
+      "ledger_sha256": "16ba02e89f088725f84794781e76f72dd81dd85661d19de6dcc201ffa55ad6ef"
+    },
+    {
+      "kind": "ISAAC_NATIVE_INFRASTRUCTURE_FAILURE",
+      "result": "Retained; final controlled retry passed",
+      "exit_code": 139,
+      "metrics_present": false,
+      "path": "/var/tmp/xh-data/isaac-industrial/m2c-live-pose-final-shadow-retry.OpQSER",
+      "run_log_sha256": "cb03a73d218c8a525d9af2fa0d18b3a0960a97668e6bbe44da7e7da3bca2dd24",
+      "ledger_sha256": "d378670a4576e3e2efcd34e1dc3d0db5af67017125ac2f68923f42c9b465a4b2"
+    }
+  ],
   "blockers": [
-    "The dynamic benchmark live-pose defect remains open and requires an Isaac runtime verification before affected outputs can be accepted.",
     "Q-B remains forbidden until a separate human expressivity ADR is committed."
   ],
-  "next_command": "ssh root@labserver 'python3 -m json.tool /var/tmp/xh-data/isaac-industrial/m2c/s3-failure-evidence-v1/worker0/worker-status.json'"
+  "task_report": {
+    "changed_files": [
+      "scripts/isaac_m1b_dataset_benchmark.py",
+      "tests/unit/test_isaac_m1b_scene.py",
+      "reports/m2c-gap-fixes.json",
+      "reports/m2c-gap-fixes.md"
+    ],
+    "tests": [
+      "69 focused tests passed",
+      "440 full-suite tests passed",
+      "Ruff passed",
+      "git diff --check passed",
+      "B0/M2B read-only freeze recheck passed",
+      "final-sha dynamic, static-perception, and shadow-reset Isaac modes passed"
+    ],
+    "failures": [
+      "One intermediate strict-schema failure was fixed and verified.",
+      "Two native Isaac/RTX shadow startups exited 139 without metrics; both immutable logs are retained, and the final controlled retry passed."
+    ],
+    "blockers": [
+      "Q-B requires a separate human expressivity ADR."
+    ],
+    "next_command": "sed -n '1,240p' docs/decisions/M2C-QB-EXPRESSIVITY-PREREG.md"
+  },
+  "next_command": "sed -n '1,240p' docs/decisions/M2C-QB-EXPRESSIVITY-PREREG.md"
 }

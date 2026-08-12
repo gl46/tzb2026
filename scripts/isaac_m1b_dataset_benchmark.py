@@ -167,7 +167,7 @@ import numpy as np
 import omni.replicator.core as rep
 import omni.timeline
 import omni.usd
-from isaacsim.core.experimental.prims import Articulation
+from isaacsim.core.experimental.prims import Articulation, RigidPrim
 from isaacsim.core.simulation_manager import SimulationManager
 from isaacsim.storage.native import get_assets_root_path
 from PIL import Image
@@ -775,22 +775,29 @@ def _numpy_values(values: Any) -> np.ndarray:
     return np.asarray(array, dtype=float).reshape(-1)
 
 
-def _world_pose_xyzw(stage: Usd.Stage, prim_path: str) -> list[float]:
-    prim = stage.GetPrimAtPath(prim_path)
-    if not prim.IsValid():
-        raise RuntimeError(f"missing pose prim: {prim_path}")
-    transform = UsdGeom.XformCache().GetLocalToWorldTransform(prim)
-    translation = transform.ExtractTranslation()
-    quaternion = transform.ExtractRotationQuat()
-    imaginary = quaternion.GetImaginary()
+def _live_world_pose_xyzw(prim: RigidPrim) -> list[float]:
+    """Read a live PhysX pose and serialize its quaternion as xyzw.
+
+    USD authored transforms are not a runtime state source after the timeline
+    starts. The Isaac experimental rigid-prim API reads the PhysX tensor
+    backend and returns quaternions in wxyz order.
+    """
+
+    positions, orientations_wxyz = prim.get_world_poses()
+    position = _numpy_values(positions)
+    orientation_wxyz = _numpy_values(orientations_wxyz)
+    if len(position) != 3 or len(orientation_wxyz) != 4:
+        raise RuntimeError(
+            "live PhysX pose must contain one xyz position and one wxyz quaternion"
+        )
     return [
-        float(translation[0]),
-        float(translation[1]),
-        float(translation[2]),
-        float(imaginary[0]),
-        float(imaginary[1]),
-        float(imaginary[2]),
-        float(quaternion.GetReal()),
+        float(position[0]),
+        float(position[1]),
+        float(position[2]),
+        float(orientation_wxyz[1]),
+        float(orientation_wxyz[2]),
+        float(orientation_wxyz[3]),
+        float(orientation_wxyz[0]),
     ]
 
 
@@ -976,6 +983,13 @@ def main() -> int:
         qrm_public_perception = None
 
     robot, home, dof_indices = _configure_articulation()
+    end_effector_live_pose = RigidPrim("/World/Robot/panda_hand")
+    dynamic_model_live_poses = {
+        model.name: RigidPrim(
+            f"/World/M1B/{model.name}/{model.links[0].name}"
+        )
+        for model in SCENE.dynamic_models
+    }
     SimulationManager.initialize_physics()
     omni.timeline.get_timeline_interface().play()
     simulation_app.update()
@@ -1145,20 +1159,17 @@ def main() -> int:
             "joint_names": list(PANDA_DOF_NAMES),
             "joint_position": dof_positions.tolist(),
             "joint_velocity": dof_velocities.tolist(),
-            "end_effector_pose_world_xyzw": _world_pose_xyzw(
-                stage,
-                "/World/Robot/panda_hand",
+            "end_effector_pose_world_xyzw": _live_world_pose_xyzw(
+                end_effector_live_pose
             ),
             "gripper_state": _gripper_state(dof_positions, dof_indices),
             "action_target_joint_position": action_target,
             "action_frequency_hz": 30.0,
             "action_normalization": "identity",
-            "shadow_candidate": shadow_candidate,
         }
         simulator_poses = {
-            model.name: _world_pose_xyzw(
-                stage,
-                f"/World/M1B/{model.name}/{model.links[0].name}",
+            model.name: _live_world_pose_xyzw(
+                dynamic_model_live_poses[model.name]
             )
             for model in SCENE.dynamic_models
         }
@@ -1184,7 +1195,6 @@ def main() -> int:
                 ),
             },
             "failure_injection": {},
-            "shadow_candidate": shadow_candidate,
             "simulator": "Isaac Sim",
             "simulator_version": "6.0.1",
         }
@@ -1323,9 +1333,8 @@ def main() -> int:
                         time.perf_counter() - shadow_rollout_started
                     ),
                     "final_joint_position": final_shadow_positions.tolist(),
-                    "final_end_effector_pose_world_xyzw": _world_pose_xyzw(
-                        stage,
-                        "/World/Robot/panda_hand",
+                    "final_end_effector_pose_world_xyzw": _live_world_pose_xyzw(
+                        end_effector_live_pose
                     ),
                     "semantic_pixel_counts": dict(
                         shadow_semantic_pixel_counts[shadow_candidate]
@@ -1420,6 +1429,13 @@ def main() -> int:
             "contains_render_products": False,
         },
         "privileged_truth_use": "OFFLINE_DATASET_LABEL_ONLY_NOT_POLICY_INPUT",
+        "runtime_pose_source": {
+            "backend": "PHYSX_TENSOR_RIGID_PRIM_GET_WORLD_POSES",
+            "source_quaternion_order": "wxyz",
+            "serialized_quaternion_order": "xyzw",
+            "usd_authored_transform_used_after_timeline_start": False,
+            "pre_fix_records_reinterpreted_as_live_pose": False,
+        },
         "static_perception_audit": {
             "enabled": ARGS.static_perception_audit,
             "frozen_rigid_body_paths": static_audit_frozen_paths,

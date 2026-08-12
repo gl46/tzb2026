@@ -460,6 +460,22 @@ def test_isaac_capture_writes_policy_and_truth_streams_with_metric_plane_depth()
     assert source.count("and not ARGS.shadow_rollout") >= 2
 
 
+def test_isaac_capture_reads_dynamic_poses_from_physx_tensor_backend() -> None:
+    source = (SCRIPTS / "isaac_m1b_dataset_benchmark.py").read_text()
+    assert "Articulation, RigidPrim" in source
+    assert "def _live_world_pose_xyzw(prim: RigidPrim)" in source
+    assert "positions, orientations_wxyz = prim.get_world_poses()" in source
+    assert "def _world_pose_xyzw(" not in source
+    assert "_world_pose_xyzw(stage" not in source
+    assert 'RigidPrim("/World/Robot/panda_hand")' in source
+    assert '"PHYSX_TENSOR_RIGID_PRIM_GET_WORLD_POSES"' in source
+    assert '"source_quaternion_order": "wxyz"' in source
+    assert '"serialized_quaternion_order": "xyzw"' in source
+    assert '"pre_fix_records_reinterpreted_as_live_pose": False' in source
+    assert '"shadow_candidate": shadow_candidate' not in source
+    assert '"candidate": shadow_candidate' in source
+
+
 def test_isaac_tolerance_probe_offsets_only_calibration_target_not_scene_truth() -> None:
     source = (SCRIPTS / "isaac_m1b_actuation_probe.py").read_text()
     assert '"--calibration-offset-xyz-m"' in source
