@@ -1254,6 +1254,43 @@ def _external_physical_evidence_blockers(
     return blockers
 
 
+def _formal_source_unlock_blockers() -> list[str]:
+    """List source/governance locks that exist before any physical receipt."""
+
+    blockers: list[str] = []
+    if FORMAL_PHYSICAL_RUNNER_BINDING is None:
+        blockers.extend(
+            [
+                "formal Qwen-to-Isaac runner is not independently reviewed, "
+                "real-Isaac contract-verified, and frozen",
+                "formal runner has no frozen host-local signing proxies; central "
+                "Qwen/Isaac HMAC-key custody remains source-level blocked",
+            ]
+        )
+    if FORMAL_DEPLOYMENT_CLOSURE_BINDING is None:
+        blockers.append(
+            "formal deployment has no frozen implementation commit, container image, "
+            "and complete transitive-import closure"
+        )
+    if FROZEN_B0_RUNTIME_WRAPPER_BINDING is None:
+        blockers.append(
+            "formal runtime fallback is not attributed to a frozen unchanged B0 wrapper"
+        )
+    if OFFLINE_WIRE_AUTHENTICATION_VERIFIER_BINDING is None:
+        blockers.extend(
+            [
+                "wire HMAC authenticity has no frozen offline verifier/public trust root receipt",
+                "offline attestation signing-key custody is not independently provisioned "
+                "and frozen",
+            ]
+        )
+    blockers.append(
+        "preregistered wire challenge has no frozen create-only consumption ledger; "
+        "single-use enforcement is not yet proven"
+    )
+    return blockers
+
+
 def _load_world_model_bundle(
     root: Path,
     raw: QwenWorldModelBundleReceiptV1,
@@ -1610,6 +1647,7 @@ def evaluate_s4_entry_gate(
         training_manifest,
         head_commit,
     )
+    source_unlock_blockers = _formal_source_unlock_blockers()
     static_blockers = list(
         dict.fromkeys(
             [
@@ -1628,7 +1666,16 @@ def evaluate_s4_entry_gate(
         and local_contract_tests_passed
         and physical_integration_receipt_passed
     )
-    blockers = list(dict.fromkeys([*static_blockers, *local_blockers, *physical_blockers]))
+    blockers = list(
+        dict.fromkeys(
+            [
+                *static_blockers,
+                *local_blockers,
+                *source_unlock_blockers,
+                *physical_blockers,
+            ]
+        )
+    )
     if not formal_evaluation_authorized:
         blockers.append("formal Q-B evaluation is blocked until every ADR section 7 layer passes")
 
