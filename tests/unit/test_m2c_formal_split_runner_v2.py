@@ -12,9 +12,11 @@ from pydantic import ValidationError
 from pydantic_core import ValidationError as PydanticCoreValidationError
 
 from m2c.run_formal_model_owned_chain import (
+    FORMAL_SPLIT_HMAC_PROXY_BINDING,
     HostPartialRunAuditV2,
     partial_failure_output_path,
     publish_create_only,
+    require_formal_split_hmac_proxy,
 )
 from xh_agent.policy.qrm_lite.formal_split_runner_v2 import (
     ExactExecutionPhaseGatesV2,
@@ -138,6 +140,7 @@ def _request(
     history = history or []
     return FormalInferenceRequestV2(
         run_id="run-1",
+        challenge_nonce="c" * 64,
         request_id=f"run-1-decision-{index}",
         decision_index=index,
         sent_at_ns=120,
@@ -271,6 +274,25 @@ def test_signed_request_binds_fresh_public_rgbd_and_rejects_tamper() -> None:
     tampered["payload"]["observation"]["perception_tracks"][0]["confidence"] = 0.1
     with pytest.raises(ValueError, match="SHA-256"):
         verify_inference_request(tampered, SECRET)
+
+
+def test_hmac_secret_reader_rejects_symlink_or_hardlink(tmp_path: Path) -> None:
+    from xh_agent.policy.qrm_lite.formal_split_runner_v2 import read_hmac_secret
+
+    secret = tmp_path / "secret"
+    secret.write_bytes(SECRET)
+    secret.chmod(0o600)
+    assert read_hmac_secret(secret) == SECRET
+
+    symlink = tmp_path / "secret-symlink"
+    symlink.symlink_to(secret)
+    with pytest.raises(ValueError, match="non-symlink regular file"):
+        read_hmac_secret(symlink)
+
+    hardlink = tmp_path / "secret-hardlink"
+    hardlink.hardlink_to(secret)
+    with pytest.raises(PermissionError, match="exactly one hard link"):
+        read_hmac_secret(secret)
 
 
 def test_isaac_wire_hmac_binds_message_type() -> None:
@@ -796,6 +818,12 @@ def test_publish_is_create_only_and_contract_tests_cannot_make_receipt(tmp_path:
     assert output.is_file()
     with pytest.raises(FileExistsError):
         publish_create_only(output, {"status": "OVERWRITE"})
+
+
+def test_real_runner_cannot_centralize_both_host_hmac_secrets() -> None:
+    assert FORMAL_SPLIT_HMAC_PROXY_BINDING is None
+    with pytest.raises(RuntimeError, match="central dual-HMAC-key custody is forbidden"):
+        require_formal_split_hmac_proxy()
 
 
 def test_partial_failure_audit_is_never_entry_evidence_and_preserves_active_wire(

@@ -35,3 +35,18 @@ independent evidence authority and may not be present in the repository,
 runner environment, model service, or Isaac service.  Until a human provisions
 and freezes both public trust roots and custody procedure, all signed
 attestations remain ineligible for formal entry.
+
+The current host runner prototype cannot satisfy that boundary because its
+wire-construction API would require both endpoint HMAC secrets in one process.
+The real execution path is therefore source-level blocked; contract-only
+validation remains available without reading either key.  Formal execution
+requires two reviewed, hash-frozen host-local signing/verification proxies (or
+an equivalently separated protocol) before the runner binding may be set.
+
+The manifest is a pre-registration, not a consumption ledger.  Before any
+formal attempt, each host and the evidence authority must also implement and
+freeze a create-only, append-only challenge-consumption receipt.  Consumption
+occurs at the first accepted start/request and remains consumed after partial,
+rejected, or unsuccessful execution.  Until those receipts are independently
+cross-checked by the entry gate, the nonces below are reserved but cannot be
+claimed to have machine-enforced single-use semantics.

@@ -18,8 +18,10 @@ import hashlib
 import hmac
 import json
 import math
+import os
 from pathlib import Path
 import re
+import stat
 from types import SimpleNamespace
 from typing import Any, Literal, Mapping, Sequence, TypeVar
 
@@ -193,13 +195,32 @@ def physical_receipt_sha256(receipt: PhysicalSkillReceiptV2) -> str:
 
 
 def read_hmac_secret(path: Path) -> bytes:
-    """Read a non-exported HMAC key and reject permissive key files."""
+    """Read one host-local HMAC key through a single non-following file descriptor."""
 
-    if not path.is_file():
-        raise FileNotFoundError(path)
-    if path.stat().st_mode & 0o077:
-        raise PermissionError("formal endpoint secret file must have mode 0600 or stricter")
-    secret = path.read_bytes()
+    flags = os.O_RDONLY | getattr(os, "O_CLOEXEC", 0) | getattr(os, "O_NOFOLLOW", 0)
+    try:
+        descriptor = os.open(path, flags)
+    except OSError as error:
+        raise ValueError("formal endpoint secret must be a non-symlink regular file") from error
+    try:
+        metadata = os.fstat(descriptor)
+        if not stat.S_ISREG(metadata.st_mode):
+            raise ValueError("formal endpoint secret is not a regular file")
+        if metadata.st_uid != os.geteuid():
+            raise PermissionError("formal endpoint secret is not owned by the current user")
+        if metadata.st_mode & 0o077:
+            raise PermissionError("formal endpoint secret file must have mode 0600 or stricter")
+        if metadata.st_nlink != 1:
+            raise PermissionError("formal endpoint secret file must have exactly one hard link")
+        chunks: list[bytes] = []
+        while True:
+            chunk = os.read(descriptor, 4096)
+            if not chunk:
+                break
+            chunks.append(chunk)
+        secret = b"".join(chunks)
+    finally:
+        os.close(descriptor)
     if len(secret) < 32:
         raise ValueError("formal endpoint HMAC key must contain at least 32 bytes")
     return secret
@@ -317,6 +338,7 @@ class FormalInferenceRequestV2(StrictModel):
     schema_version: Literal["FormalInferenceRequestV2"] = "FormalInferenceRequestV2"
     protocol: Literal[FORMAL_WIRE_PROTOCOL] = FORMAL_WIRE_PROTOCOL
     run_id: str = Field(min_length=1)
+    challenge_nonce: str = Field(pattern=SHA256_PATTERN)
     request_id: str = Field(min_length=1)
     decision_index: int = Field(ge=0, le=7)
     sent_at_ns: int = Field(gt=0)
@@ -499,6 +521,7 @@ class IsaacStartRequestV2(StrictModel):
     schema_version: Literal["IsaacStartRequestV2"] = "IsaacStartRequestV2"
     protocol: Literal[FORMAL_WIRE_PROTOCOL] = FORMAL_WIRE_PROTOCOL
     run_id: str = Field(min_length=1)
+    challenge_nonce: str = Field(pattern=SHA256_PATTERN)
     matched_key: str = Field(min_length=1)
     scene_seed: int = Field(ge=0)
     failure_seed: int = Field(ge=0)

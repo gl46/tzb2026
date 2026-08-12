@@ -12,6 +12,7 @@ import argparse
 import json
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+import threading
 from typing import Any
 
 from m2c.formal_isaac_v4_backend import (
@@ -150,6 +151,14 @@ class _Handler(BaseHTTPRequestHandler):
             )
             return
         self._json(200, response)
+        if self.path == FORMAL_ISAAC_FINALIZE_PATH:
+            # Stop only after the signed finalize response is on the socket.
+            # shutdown() must not execute on this request-handler thread.
+            threading.Thread(
+                target=self.server.shutdown,
+                name="m2c-isaac-graceful-stop",
+                daemon=True,
+            ).start()
 
     def log_message(self, format: str, *args: Any) -> None:
         self.endpoint.audit.append(

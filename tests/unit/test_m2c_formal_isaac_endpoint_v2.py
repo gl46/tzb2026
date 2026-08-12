@@ -295,6 +295,7 @@ class _ContractBackend:
 def _start_request(binding: IsaacEndpointBindingV2) -> IsaacStartRequestV2:
     return IsaacStartRequestV2(
         run_id="run-contract-only",
+        challenge_nonce="c" * 64,
         matched_key="key-contract-only",
         scene_seed=1,
         failure_seed=2,
@@ -434,6 +435,14 @@ def test_state_machine_requires_start_capture_execute_order_and_binds_capture(
             sign_wire_message("ISAAC_EXECUTE_REQUEST", wrong, SECRET).model_dump(mode="json"),
         )
     assert backend.execute_calls == 0
+
+
+def test_service_source_stops_only_after_successful_finalize_response() -> None:
+    source = (ROOT / "scripts/m2c/serve_formal_isaac_endpoint.py").read_text()
+    publish = source.index("self._json(200, response)")
+    finalized = source.index("if self.path == FORMAL_ISAAC_FINALIZE_PATH:")
+    shutdown = source.index("target=self.server.shutdown")
+    assert publish < finalized < shutdown
 
 
 def test_exactly_eight_cycles_share_one_session_and_finalize_once(tmp_path: Path) -> None:

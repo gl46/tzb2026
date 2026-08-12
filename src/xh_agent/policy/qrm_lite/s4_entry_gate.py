@@ -24,7 +24,19 @@ from xh_agent.policy.qrm_lite.model_owned_chain_v2 import (
     ModelOwnedChainValidationV2,
     validate_model_owned_chain_episode,
 )
+from xh_agent.policy.qrm_lite.offline_wire_auth_v1 import (
+    SignedHostWireAuthenticationReceiptV1,
+    canonical_envelope_set_sha256,
+    read_regular_file_once,
+    sha256_bytes as wire_sha256_bytes,
+    verify_receipt_signature as verify_wire_receipt_signature,
+)
 from xh_agent.policy.qrm_lite.formal_split_runner_v2 import (
+    FORMAL_INFERENCE_PATH,
+    FORMAL_ISAAC_CAPTURE_PATH,
+    FORMAL_ISAAC_EXECUTE_PATH,
+    FORMAL_ISAAC_FINALIZE_PATH,
+    FORMAL_ISAAC_START_PATH,
     IsaacCaptureRequestV2,
     IsaacCaptureResponseV2,
     IsaacEndpointBindingV2,
@@ -62,6 +74,10 @@ FROZEN_EVALUATION_MANIFEST_FILE_SHA256 = (
 FROZEN_EVALUATION_MANIFEST_CONTENT_SHA256 = (
     "0ce322d948dac851d7a26053af0207e563a69bb0127c462312cdad9badafe419"
 )
+FROZEN_WIRE_CHALLENGE_MANIFEST_PATH = "configs/m2c_s4_wire_challenges.json"
+FROZEN_WIRE_CHALLENGE_MANIFEST_FILE_SHA256 = (
+    "06d1811ea45ea24a8e817c38485746b3f4efb07b48c446cd3766008358e5b686"
+)
 B0_FREEZE_PATH = "configs/m2c_b0_freeze.json"
 B0_FREEZE_SHA256 = "4bec9104be849dfd8d71b32b537eb2b5d70ea4d8560b4bdd65b1d1019d3e8d04"
 
@@ -88,7 +104,7 @@ FROZEN_B0_RUNTIME_WRAPPER_BINDING: tuple[str, str] | None = None
 # HMAC keys remain only on node2/labserver.  Entry therefore needs a separately
 # frozen verifier with a public verification trust root; trusting a JSON claim
 # that "HMAC passed" would be equivalent to trusting the runner itself.
-OFFLINE_WIRE_AUTHENTICATION_VERIFIER_BINDING: tuple[str, str, str] | None = None
+OFFLINE_WIRE_AUTHENTICATION_VERIFIER_BINDING: dict[str, tuple[str, str, str, str]] | None = None
 QWEN_HEAD_TENSORS: tuple[str, ...] = (
     "skill_w",
     "skill_b",
@@ -128,16 +144,19 @@ RUNTIME_BINDINGS: dict[str, str] = {
         "ca7de0fac0c143d917c449fb9aba18e8ab26312fd81a401585815a8a89ccd422"
     ),
     "scripts/m2c/serve_qwen_coarse_v2.py": (
-        "a470329f373874472280842356c5febcf7300ff5b421dd79709e6d09d7996c05"
+        "f1f3448e6ee16747226c6a1e7bf61a08f985a1d3f1aebb739e9650c2596dd7a7"
     ),
     "scripts/m2c/run_formal_model_owned_chain.py": (
-        "e8059b184d0cbdb5f3e037ef9c0c71fa2d468d1972e7c20dff252221ca14d6aa"
+        "6fc21c237d3dff2c276cdd5a15c9c6379a6555d99cad65a76297cbd6089af59c"
+    ),
+    "scripts/m2c/verify_formal_wire_auth.py": (
+        "a6b48e7fd160109cfc81d9da594ca27f99dd43de9f1ce0d97cd291886c9203ab"
     ),
     "scripts/m2c/formal_isaac_v4_backend.py": (
         "73ada118846c4392c73aa3f0459195e71a1d54378c549487e1ef3504bc4d79bf"
     ),
     "scripts/m2c/serve_formal_isaac_endpoint.py": (
-        "72294ec73cb56a467f85f5e82a6f831c9e9dc72de0f8d87aeb48b9beb4bc7c2d"
+        "13a9fe4a4666161383c7149785a1035465ab9413e3742bd3b425f054b4f077c8"
     ),
     "src/xh_agent/policy/qrm_lite/backbone.py": (
         "291fe17515e86c75b944849972583f0af4c7c8f2fb5dd0161fe2e34d1ab02375"
@@ -149,7 +168,7 @@ RUNTIME_BINDINGS: dict[str, str] = {
         "e8d7587c11e23976732c80800481853b8a851eb0a78f40f40f47eb0fb04bb748"
     ),
     "src/xh_agent/policy/qrm_lite/formal_split_runner_v2.py": (
-        "674e494f24288d8faadedbebb6f2bbd8c6b79c8075bbae0c9c0cce08447a1705"
+        "85805eb73cb0febb1b2157db388d6d44a539442903f1833cb38ea33fc147e7f6"
     ),
     "src/xh_agent/policy/qrm_lite/formal_isaac_endpoint_v2.py": (
         "ce11aa23efd271e85bd6ada98ee336f37bb77319be6cd8a6b0a1059f42dc3c9b"
@@ -162,6 +181,9 @@ RUNTIME_BINDINGS: dict[str, str] = {
     ),
     "src/xh_agent/policy/qrm_lite/model_owned_chain_v2.py": (
         "fd76aebd3d319dd30857a721e89bcb028ae144d4d60b6d761d2d8e04f8614444"
+    ),
+    "src/xh_agent/policy/qrm_lite/offline_wire_auth_v1.py": (
+        "ba5dbfd65b58b4e504c03296e5c8dad8fe7b3d83f65a24664038cbb5eb3c423e"
     ),
     "src/xh_agent/policy/qrm_lite/models_q012_v2.py": (
         "5334fbee5750fd4df1f6b421eac0336ced98849aa68e1c6948986bdbb15f540c"
@@ -188,6 +210,8 @@ LOCAL_TEST_NODE_IDS: tuple[str, ...] = (
     "tests/unit/test_m2c_qwen_coarse_v2.py",
     "tests/unit/test_m2c_formal_split_runner_v2.py",
     "tests/unit/test_m2c_formal_isaac_endpoint_v2.py",
+    "tests/unit/test_m2c_qwen_service_audit.py",
+    "tests/unit/test_m2c_offline_wire_auth.py",
     "tests/unit/test_m2c_hard_freeze.py",
 )
 
@@ -376,32 +400,6 @@ class FormalTransitiveImportClosureManifestV1(StrictModel):
         return self
 
 
-class OfflineWireAuthenticationVerifierReceiptV1(StrictModel):
-    """Publicly verifiable attestation over every authenticated wire envelope.
-
-    The receipt deliberately contains neither endpoint HMAC key.  Its signature
-    is not accepted until a separately reviewed verifier and public trust root
-    are source-frozen in ``OFFLINE_WIRE_AUTHENTICATION_VERIFIER_BINDING``.
-    """
-
-    schema_version: Literal["M2COfflineWireAuthenticationVerifierReceiptV1"] = (
-        "M2COfflineWireAuthenticationVerifierReceiptV1"
-    )
-    verifier_implementation_path: str = Field(min_length=1)
-    verifier_implementation_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
-    verifier_public_key_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
-    formal_evidence_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
-    isaac_service_audit_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
-    isaac_session_audit_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
-    authenticated_envelope_count: Literal[52] = 52
-    qwen_hmac_envelopes_verified: Literal[16] = 16
-    isaac_hmac_envelopes_verified: Literal[36] = 36
-    all_hmac_valid: Literal[True] = True
-    verifier_signature: str = Field(min_length=1)
-    endpoint_hmac_secret_persisted: Literal[False] = False
-    teacher_used: Literal[False] = False
-
-
 class PhysicalIntegrationReceiptV2(StrictModel):
     """External receipt envelope emitted only by a real Isaac integration run."""
 
@@ -415,6 +413,7 @@ class PhysicalIntegrationReceiptV2(StrictModel):
     )
     host: str = Field(min_length=1)
     run_id: str = Field(min_length=1)
+    challenge_nonce: str = Field(pattern=r"^[0-9a-f]{64}$")
     collected_at_ns: int = Field(gt=0)
     matched_key: str = Field(min_length=1)
     scene_seed: int = Field(ge=0)
@@ -434,8 +433,12 @@ class PhysicalIntegrationReceiptV2(StrictModel):
     world_model_bundle: QwenWorldModelBundleReceiptV1
     formal_runner_evidence_path: str = Field(min_length=1)
     formal_runner_evidence_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
-    offline_wire_authentication_receipt_path: str = Field(min_length=1)
-    offline_wire_authentication_receipt_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    node2_wire_authentication_receipt_path: str = Field(min_length=1)
+    node2_wire_authentication_receipt_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    labserver_wire_authentication_receipt_path: str = Field(min_length=1)
+    labserver_wire_authentication_receipt_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    qwen_service_audit_path: str = Field(min_length=1)
+    qwen_service_audit_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
     isaac_session_audit_path: str = Field(min_length=1)
     isaac_session_audit_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
     isaac_service_audit_path: str = Field(min_length=1)
@@ -454,7 +457,7 @@ class PhysicalIntegrationReceiptV2(StrictModel):
 
 
 def _read_json(path: Path) -> Any:
-    return json.loads(path.read_text(encoding="utf-8"))
+    return json.loads(read_regular_file_once(path))
 
 
 def _resolve_path(root: Path, raw: str) -> Path:
@@ -470,6 +473,7 @@ def _file_binding_checks(root: Path) -> tuple[dict[str, bool], list[str]]:
         B0_FREEZE_PATH: B0_FREEZE_SHA256,
         FROZEN_KEY_MANIFEST_PATH: FROZEN_KEY_MANIFEST_FILE_SHA256,
         FROZEN_EVALUATION_MANIFEST_PATH: FROZEN_EVALUATION_MANIFEST_FILE_SHA256,
+        FROZEN_WIRE_CHALLENGE_MANIFEST_PATH: FROZEN_WIRE_CHALLENGE_MANIFEST_FILE_SHA256,
     }.items():
         path = root / relative
         actual = _sha256(path.read_bytes()) if path.is_file() else None
@@ -596,6 +600,7 @@ def _verify_formal_runner_evidence(
         "schema_version",
         "status",
         "run_id",
+        "challenge_nonce",
         "bundle",
         "isaac_endpoint_binding",
         "start_response",
@@ -628,6 +633,8 @@ def _verify_formal_runner_evidence(
     run_id = raw["run_id"]
     if run_id != receipt.run_id:
         raise ValueError("formal runner evidence run differs from physical receipt")
+    if raw["challenge_nonce"] != receipt.challenge_nonce:
+        raise ValueError("formal runner evidence challenge differs from physical receipt")
     bundle = QwenBundleRuntimeBindingV2.model_validate(raw["bundle"])
     if not _world_model_runtime_matches_receipt(bundle, receipt.world_model_bundle):
         raise ValueError("formal runner runtime bundle differs from trained bundle receipt")
@@ -706,6 +713,7 @@ def _verify_formal_runner_evidence(
                     endpoint.public_role_selector_sha256,
                 ),
                 (inference_request.payload.run_id, run_id),
+                (inference_request.payload.challenge_nonce, receipt.challenge_nonce),
                 (inference_request.payload.decision_index, index),
                 (inference_request.payload.executed_intent_history, history),
                 (
@@ -800,8 +808,15 @@ def _verify_formal_runner_evidence(
     return {"wire_cycles_verified": 8, "session_id": session_id}, episode, validation
 
 
-def _read_isaac_audit(path: Path, *, label: str) -> list[dict[str, Any]]:
-    lines = path.read_bytes().splitlines()
+def _read_isaac_audit(
+    source: Path | bytes,
+    *,
+    label: str,
+) -> list[dict[str, Any]]:
+    data = read_regular_file_once(source) if isinstance(source, Path) else source
+    if not data.endswith(b"\n"):
+        raise ValueError(f"{label} is not newline-terminated")
+    lines = data.splitlines()
     records = [json.loads(line) for line in lines]
     if not records or any(not isinstance(record, dict) for record in records):
         raise ValueError(f"{label} is empty or contains a non-object event")
@@ -825,15 +840,42 @@ def _read_isaac_audit(path: Path, *, label: str) -> list[dict[str, Any]]:
     return records
 
 
+def _read_qwen_audit(source: Path | bytes) -> list[dict[str, Any]]:
+    data = read_regular_file_once(source) if isinstance(source, Path) else source
+    if not data.endswith(b"\n"):
+        raise ValueError("Qwen service audit is not newline-terminated")
+    lines = data.splitlines()
+    records = [json.loads(line) for line in lines]
+    if not records or any(not isinstance(record, dict) for record in records):
+        raise ValueError("Qwen service audit is empty or contains a non-object event")
+    if any(
+        record.get("schema_version") != "FormalQwenAuditEventV2"
+        or record.get("sequence") != index
+        or json.dumps(
+            record,
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=True,
+            allow_nan=False,
+        ).encode("utf-8")
+        != lines[index - 1]
+        for index, record in enumerate(records, start=1)
+    ):
+        raise ValueError("Qwen service audit is not canonical contiguous V2 JSONL")
+    if any(record.get("event_type") == "WIRE_REQUEST_REJECTED" for record in records):
+        raise ValueError("Qwen service audit contains a rejected request")
+    return records
+
+
 def _verify_isaac_audits(
-    service_path: Path,
-    session_path: Path,
+    service_source: Path | bytes,
+    session_source: Path | bytes,
     *,
     evidence: dict[str, Any],
     receipt: PhysicalIntegrationReceiptV2,
 ) -> None:
-    service = _read_isaac_audit(service_path, label="Isaac service audit")
-    session = _read_isaac_audit(session_path, label="Isaac session audit")
+    service = _read_isaac_audit(service_source, label="Isaac service audit")
+    session = _read_isaac_audit(session_source, label="Isaac session audit")
     service_by_sequence = {record["sequence"]: record for record in service}
     if any(service_by_sequence.get(record["sequence"]) != record for record in session):
         raise ValueError("Isaac session audit is not an exact service-audit suffix")
@@ -868,6 +910,7 @@ def _verify_isaac_audits(
         value != expected
         for value, expected in (
             (start_request.run_id, receipt.run_id),
+            (start_request.challenge_nonce, receipt.challenge_nonce),
             (start_request.matched_key, receipt.matched_key),
             (start_request.scene_seed, receipt.scene_seed),
             (start_request.failure_seed, receipt.failure_seed),
@@ -922,6 +965,7 @@ def _verify_isaac_audits(
     ]
     if session_requests != expected_requests[1:] or session_responses != expected_responses:
         raise ValueError("Isaac session audit is incomplete or differs from service audit")
+    return service, session
 
 
 def _external_physical_evidence_blockers(
@@ -940,6 +984,10 @@ def _external_physical_evidence_blockers(
         blockers.append(
             "formal Qwen-to-Isaac runner is not independently reviewed, "
             "real-Isaac contract-verified, and frozen"
+        )
+        blockers.append(
+            "formal runner has no frozen host-local signing proxies; central "
+            "Qwen/Isaac HMAC-key custody remains source-level blocked"
         )
     else:
         frozen_runner_path, frozen_runner_sha256 = FORMAL_PHYSICAL_RUNNER_BINDING
@@ -981,6 +1029,41 @@ def _external_physical_evidence_blockers(
         blockers.append(
             "wire HMAC authenticity has no frozen offline verifier/public trust root receipt"
         )
+        blockers.append(
+            "offline attestation signing-key custody is not independently provisioned and frozen"
+        )
+    blockers.append(
+        "preregistered wire challenge has no frozen create-only consumption ledger; "
+        "single-use enforcement is not yet proven"
+    )
+
+    try:
+        challenge_manifest = _read_json(root / FROZEN_WIRE_CHALLENGE_MANIFEST_PATH)
+        if (
+            challenge_manifest.get("schema_version") != "M2CS4WireChallengeManifestV1"
+            or challenge_manifest.get("formal_q_b_evaluation_authorized") is not False
+            or challenge_manifest.get("teacher_used") is not False
+            or challenge_manifest.get("privileged_truth_policy_input") is not False
+        ):
+            raise ValueError("wire challenge manifest governance fields differ")
+        matches = [
+            item
+            for item in challenge_manifest.get("challenge_records", [])
+            if isinstance(item, dict)
+            and item.get("matched_key") == receipt.matched_key
+            and item.get("scene_seed") == receipt.scene_seed
+            and item.get("failure_seed") == receipt.failure_seed
+            and item.get("run_id") == receipt.run_id
+            and item.get("challenge_nonce") == receipt.challenge_nonce
+        ]
+        if len(matches) != 1:
+            blockers.append(
+                "formal physical receipt does not consume exactly one preregistered wire challenge"
+            )
+    except (OSError, json.JSONDecodeError, TypeError, ValueError) as error:
+        blockers.append(
+            f"wire challenge preregistration failed closed: {type(error).__name__}: {error}"
+        )
 
     evidence = {
         "runner implementation": (
@@ -991,9 +1074,17 @@ def _external_physical_evidence_blockers(
             receipt.formal_runner_evidence_path,
             receipt.formal_runner_evidence_sha256,
         ),
-        "offline wire authentication receipt": (
-            receipt.offline_wire_authentication_receipt_path,
-            receipt.offline_wire_authentication_receipt_sha256,
+        "node2 wire authentication receipt": (
+            receipt.node2_wire_authentication_receipt_path,
+            receipt.node2_wire_authentication_receipt_sha256,
+        ),
+        "labserver wire authentication receipt": (
+            receipt.labserver_wire_authentication_receipt_path,
+            receipt.labserver_wire_authentication_receipt_sha256,
+        ),
+        "Qwen service audit": (
+            receipt.qwen_service_audit_path,
+            receipt.qwen_service_audit_sha256,
         ),
         "Isaac session audit": (
             receipt.isaac_session_audit_path,
@@ -1012,22 +1103,21 @@ def _external_physical_evidence_blockers(
             receipt.deployment_closure.b0_runtime_wrapper_sha256,
         ),
     }
+    evidence_bytes: dict[str, bytes] = {}
     for label, (raw_path, expected_sha256) in evidence.items():
         try:
             path = _resolve_path(root, raw_path)
-        except FileNotFoundError:
+            payload = read_regular_file_once(path)
+        except (FileNotFoundError, OSError, ValueError):
             blockers.append(f"physical {label} file is absent")
             continue
-        actual = _sha256(path.read_bytes()) if path.is_file() else None
+        evidence_bytes[label] = payload
+        actual = _sha256(payload)
         if actual != expected_sha256:
             blockers.append(f"physical {label} SHA-256 mismatch: {actual} != {expected_sha256}")
     try:
-        manifest_path = _resolve_path(
-            root,
-            receipt.deployment_closure.transitive_import_manifest_path,
-        )
         closure_manifest = FormalTransitiveImportClosureManifestV1.model_validate(
-            _read_json(manifest_path)
+            json.loads(evidence_bytes["deployment import manifest"])
         )
         if (
             closure_manifest.implementation_commit
@@ -1044,14 +1134,14 @@ def _external_physical_evidence_blockers(
             **{
                 getattr(
                     IsaacEndpointBindingV2.model_validate(
-                        _read_json(_resolve_path(root, receipt.formal_runner_evidence_path))[
+                        json.loads(evidence_bytes["formal runner evidence"])[
                             "isaac_endpoint_binding"
                         ]
                     ),
                     path_field,
                 ): getattr(
                     IsaacEndpointBindingV2.model_validate(
-                        _read_json(_resolve_path(root, receipt.formal_runner_evidence_path))[
+                        json.loads(evidence_bytes["formal runner evidence"])[
                             "isaac_endpoint_binding"
                         ]
                     ),
@@ -1073,43 +1163,88 @@ def _external_physical_evidence_blockers(
     except (OSError, json.JSONDecodeError, ValidationError, ValueError, KeyError) as error:
         blockers.append(f"deployment import closure failed closed: {type(error).__name__}: {error}")
     try:
-        formal_path = _resolve_path(root, receipt.formal_runner_evidence_path)
-        formal_raw = _read_json(formal_path)
+        formal_raw = json.loads(evidence_bytes["formal runner evidence"])
         replay, episode, _ = _verify_formal_runner_evidence(formal_raw, receipt=receipt)
         if episode != receipt.episode:
             blockers.append(
                 "physical receipt episode differs from independently replayed wire episode"
             )
-        audit_path = _resolve_path(root, receipt.isaac_session_audit_path)
-        service_audit_path = _resolve_path(root, receipt.isaac_service_audit_path)
-        _verify_isaac_audits(
-            service_audit_path,
-            audit_path,
+        isaac_service, _ = _verify_isaac_audits(
+            evidence_bytes["Isaac service audit"],
+            evidence_bytes["Isaac session audit"],
             evidence=formal_raw,
             receipt=receipt,
         )
-        auth_path = _resolve_path(root, receipt.offline_wire_authentication_receipt_path)
-        auth = OfflineWireAuthenticationVerifierReceiptV1.model_validate(_read_json(auth_path))
-        if auth.formal_evidence_sha256 != receipt.formal_runner_evidence_sha256:
-            blockers.append("offline authentication receipt differs from formal evidence")
-        if (
-            auth.isaac_session_audit_sha256 != receipt.isaac_session_audit_sha256
-            or auth.isaac_service_audit_sha256 != receipt.isaac_service_audit_sha256
-        ):
-            blockers.append("offline authentication receipt differs from Isaac audits")
-        if OFFLINE_WIRE_AUTHENTICATION_VERIFIER_BINDING is not None:
-            verifier_path, verifier_sha, public_key_sha = (
-                OFFLINE_WIRE_AUTHENTICATION_VERIFIER_BINDING
-            )
+        qwen_service = _read_qwen_audit(evidence_bytes["Qwen service audit"])
+        auth_receipts = {
+            "NODE2_QWEN": SignedHostWireAuthenticationReceiptV1.model_validate(
+                json.loads(evidence_bytes["node2 wire authentication receipt"])
+            ),
+            "LABSERVER_ISAAC": SignedHostWireAuthenticationReceiptV1.model_validate(
+                json.loads(evidence_bytes["labserver wire authentication receipt"])
+            ),
+        }
+        if any(auth.core.host_role != role for role, auth in auth_receipts.items()):
+            blockers.append("offline authentication receipts swap or duplicate host roles")
+        for role, auth in auth_receipts.items():
             if (
-                auth.verifier_implementation_path,
-                auth.verifier_implementation_sha256,
-                auth.verifier_public_key_sha256,
-            ) != (verifier_path, verifier_sha, public_key_sha):
-                blockers.append("offline authentication verifier/trust root differs")
-            # This gate cannot safely invent signature semantics.  The binding
-            # stays unset until a reviewed verifier call is integrated here.
-            blockers.append("offline verifier signature execution is not implemented")
+                auth.core.run_id != receipt.run_id
+                or auth.core.challenge_nonce != receipt.challenge_nonce
+                or auth.core.formal_evidence_sha256 != receipt.formal_runner_evidence_sha256
+            ):
+                blockers.append(f"{role} authentication receipt differs from formal evidence")
+        node2 = auth_receipts["NODE2_QWEN"].core
+        labserver = auth_receipts["LABSERVER_ISAAC"].core
+        if node2.service_audit_sha256 != receipt.qwen_service_audit_sha256:
+            blockers.append("node2 authentication receipt differs from Qwen service audit")
+        if (
+            labserver.service_audit_sha256 != receipt.isaac_service_audit_sha256
+            or labserver.session_audit_sha256 != receipt.isaac_session_audit_sha256
+        ):
+            blockers.append("labserver authentication receipt differs from Isaac audits")
+        qwen_digest = canonical_envelope_set_sha256(
+            qwen_service,
+            expected_paths=[FORMAL_INFERENCE_PATH] * 8,
+        )
+        isaac_paths = [FORMAL_ISAAC_START_PATH]
+        for _ in range(8):
+            isaac_paths.extend((FORMAL_ISAAC_CAPTURE_PATH, FORMAL_ISAAC_EXECUTE_PATH))
+        isaac_paths.append(FORMAL_ISAAC_FINALIZE_PATH)
+        isaac_digest = canonical_envelope_set_sha256(
+            isaac_service,
+            expected_paths=isaac_paths,
+        )
+        if node2.envelope_set_sha256 != qwen_digest:
+            blockers.append("node2 authentication envelope-set digest differs")
+        if labserver.envelope_set_sha256 != isaac_digest:
+            blockers.append("labserver authentication envelope-set digest differs")
+        if OFFLINE_WIRE_AUTHENTICATION_VERIFIER_BINDING is not None:
+            if set(OFFLINE_WIRE_AUTHENTICATION_VERIFIER_BINDING) != set(auth_receipts):
+                blockers.append("offline authentication binding does not name both hosts")
+            else:
+                for role, auth in auth_receipts.items():
+                    verifier_path, verifier_sha, trust_path, trust_sha = (
+                        OFFLINE_WIRE_AUTHENTICATION_VERIFIER_BINDING[role]
+                    )
+                    if (
+                        auth.core.verifier_implementation_path,
+                        auth.core.verifier_implementation_sha256,
+                        auth.core.public_trust_root_sha256,
+                    ) != (verifier_path, verifier_sha, trust_sha):
+                        blockers.append(f"{role} authentication verifier/trust root differs")
+                        continue
+                    verifier_bytes = read_regular_file_once(_resolve_path(root, verifier_path))
+                    if wire_sha256_bytes(verifier_bytes) != verifier_sha:
+                        blockers.append(f"{role} authentication verifier SHA mismatch")
+                        continue
+                    trust_bytes = read_regular_file_once(_resolve_path(root, trust_path))
+                    if wire_sha256_bytes(trust_bytes) != trust_sha:
+                        blockers.append(f"{role} public authentication trust root SHA mismatch")
+                        continue
+                    verify_wire_receipt_signature(
+                        auth,
+                        allowed_signers_bytes=trust_bytes,
+                    )
         if replay["wire_cycles_verified"] != 8:
             blockers.append("formal evidence replay did not verify eight cycles")
     except (OSError, json.JSONDecodeError, ValidationError, ValueError, KeyError) as error:
@@ -1516,6 +1651,8 @@ def evaluate_s4_entry_gate(
             "training_key_manifest_content_sha256": FROZEN_KEY_MANIFEST_CONTENT_SHA256,
             "evaluation_key_manifest_file_sha256": (FROZEN_EVALUATION_MANIFEST_FILE_SHA256),
             "evaluation_key_manifest_content_sha256": (FROZEN_EVALUATION_MANIFEST_CONTENT_SHA256),
+            "wire_challenge_manifest_path": FROZEN_WIRE_CHALLENGE_MANIFEST_PATH,
+            "wire_challenge_manifest_file_sha256": (FROZEN_WIRE_CHALLENGE_MANIFEST_FILE_SHA256),
             "runtime_binding_sha256": RUNTIME_BINDINGS,
             "b0_freeze_sha256": B0_FREEZE_SHA256,
         },

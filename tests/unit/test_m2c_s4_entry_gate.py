@@ -35,6 +35,7 @@ from xh_agent.policy.qrm_lite.s4_entry_gate import (
     FROZEN_KEY_MANIFEST_CONTENT_SHA256,
     FROZEN_KEY_MANIFEST_FILE_SHA256,
     FROZEN_KEY_MANIFEST_PATH,
+    FROZEN_WIRE_CHALLENGE_MANIFEST_PATH,
     LOCAL_TEST_NODE_IDS,
     QWEN_HIDDEN_SIZE,
     QWEN_MODEL_ID,
@@ -307,13 +308,23 @@ def _physical_receipt(tmp_path: Path) -> Path:
     manifest = json.loads((ROOT / FROZEN_KEY_MANIFEST_PATH).read_text())
     b0_freeze = json.loads((ROOT / "configs/m2c_b0_freeze.json").read_text())
     key = manifest["physical_prerequisite_smoke_keys"][0]
+    challenge_manifest = json.loads((ROOT / FROZEN_WIRE_CHALLENGE_MANIFEST_PATH).read_text())
+    challenge = next(
+        item
+        for item in challenge_manifest["challenge_records"]
+        if item["matched_key"] == key["matched_key"]
+    )
     episode = ModelOwnedChainEpisodeV2.model_validate(_episode()).model_dump(mode="json")
     runner = tmp_path / "formal-qwen-isaac-runner.py"
     runner.write_text("# reviewed fixture runner bytes\n")
     arbitrary_evidence = tmp_path / "arbitrary-formal-evidence.json"
     _write(arbitrary_evidence, {"claimed_complete": True, "episode": episode})
-    arbitrary_auth = tmp_path / "arbitrary-authentication.json"
-    _write(arbitrary_auth, {"claimed_hmac_valid": True})
+    arbitrary_node2_auth = tmp_path / "arbitrary-node2-authentication.json"
+    _write(arbitrary_node2_auth, {"claimed_hmac_valid": True})
+    arbitrary_labserver_auth = tmp_path / "arbitrary-labserver-authentication.json"
+    _write(arbitrary_labserver_auth, {"claimed_hmac_valid": True})
+    arbitrary_qwen_audit = tmp_path / "arbitrary-qwen-audit.jsonl"
+    arbitrary_qwen_audit.write_text('{"claimed_qwen":true}\n')
     arbitrary_session_audit = tmp_path / "arbitrary-session-audit.jsonl"
     arbitrary_session_audit.write_text('{"claimed_append_only":true}\n')
     arbitrary_service_audit = tmp_path / "arbitrary-service-audit.jsonl"
@@ -328,7 +339,8 @@ def _physical_receipt(tmp_path: Path) -> Path:
         "execution_mode": "REAL_PHYSICS_NO_MOCKS",
         "test_model_provenance": "M2C_QWEN_V2_WORLD_MODEL_BUNDLE",
         "host": "labserver",
-        "run_id": "integration-run-001",
+        "run_id": challenge["run_id"],
+        "challenge_nonce": challenge["challenge_nonce"],
         "collected_at_ns": 10_000,
         "matched_key": key["matched_key"],
         "scene_seed": key["scene_seed"],
@@ -363,8 +375,12 @@ def _physical_receipt(tmp_path: Path) -> Path:
         "world_model_bundle": _trained_world_model_bundle(tmp_path),
         "formal_runner_evidence_path": str(arbitrary_evidence),
         "formal_runner_evidence_sha256": _sha256(arbitrary_evidence),
-        "offline_wire_authentication_receipt_path": str(arbitrary_auth),
-        "offline_wire_authentication_receipt_sha256": _sha256(arbitrary_auth),
+        "node2_wire_authentication_receipt_path": str(arbitrary_node2_auth),
+        "node2_wire_authentication_receipt_sha256": _sha256(arbitrary_node2_auth),
+        "labserver_wire_authentication_receipt_path": str(arbitrary_labserver_auth),
+        "labserver_wire_authentication_receipt_sha256": _sha256(arbitrary_labserver_auth),
+        "qwen_service_audit_path": str(arbitrary_qwen_audit),
+        "qwen_service_audit_sha256": _sha256(arbitrary_qwen_audit),
         "isaac_session_audit_path": str(arbitrary_session_audit),
         "isaac_session_audit_sha256": _sha256(arbitrary_session_audit),
         "isaac_service_audit_path": str(arbitrary_service_audit),
@@ -478,6 +494,9 @@ def test_missing_formal_runner_freeze_blocks_even_complete_bundle(tmp_path: Path
     assert any("transitive-import closure" in item for item in result["blockers"])
     assert any("frozen unchanged B0 wrapper" in item for item in result["blockers"])
     assert any("offline verifier/public trust root" in item for item in result["blockers"])
+    assert any("host-local signing proxies" in item for item in result["blockers"])
+    assert any("signing-key custody" in item for item in result["blockers"])
+    assert any("consumption ledger" in item for item in result["blockers"])
 
 
 def test_implementation_commit_may_be_ancestor_but_must_exist(tmp_path: Path) -> None:
@@ -559,6 +578,24 @@ def test_non_smoke_key_and_teacher_or_privileged_flags_fail_closed(
         )
         assert result["formal_q_b_evaluation_authorized"] is False
         assert result["physical_integration"]["status"] == "INVALID"
+
+
+def test_wire_challenge_must_match_preregistered_run_and_key(tmp_path: Path) -> None:
+    local = tmp_path / "local.json"
+    _local_receipt(local)
+    physical = _physical_receipt(tmp_path)
+    payload = json.loads(physical.read_text())
+    payload["challenge_nonce"] = "0" * 64
+    _write(physical, payload)
+
+    result = evaluate_s4_entry_gate(
+        ROOT,
+        local_receipt_path=local,
+        physical_receipt_path=physical,
+    )
+
+    assert result["formal_q_b_evaluation_authorized"] is False
+    assert any("preregistered wire challenge" in item for item in result["blockers"])
 
 
 def test_runtime_binding_or_bundle_hash_drift_blocks(tmp_path: Path, monkeypatch) -> None:

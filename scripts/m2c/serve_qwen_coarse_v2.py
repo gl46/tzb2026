@@ -13,11 +13,14 @@ import argparse
 from dataclasses import dataclass
 import io
 import json
+import os
 from pathlib import Path
+import stat
 import sys
 import threading
 import time
-from typing import Any
+from typing import Any, Callable, Mapping
+import uuid
 
 import numpy as np
 
@@ -36,8 +39,10 @@ from xh_agent.policy.qrm_lite.formal_split_runner_v2 import (
     QWEN_MODEL_ID,
     QWEN_MODEL_REVISION,
     FormalInferenceRequestV2,
+    FormalInferenceResponseV2,
     QwenBundleRuntimeBindingV2,
     build_inference_response_from_logits,
+    canonical_json_bytes,
     canonical_sha256,
     named_array_sha256,
     qwen_head_tensor_sha256,
@@ -61,6 +66,256 @@ class Runtime:
     head_hashes: dict[str, str]
     secret: bytes
     inference_lock: threading.Lock
+
+
+class AppendOnlyQwenAuditLogV2:
+    """Create-only, durable canonical journal for one Qwen service process."""
+
+    def __init__(self, root: Path) -> None:
+        if root.is_symlink():
+            raise ValueError("formal Qwen audit root may not be a symlink")
+        root.mkdir(parents=True, exist_ok=True)
+        if not root.is_dir() or root.is_symlink():
+            raise NotADirectoryError(root)
+        root_metadata = root.stat()
+        if (
+            root_metadata.st_uid != os.geteuid()
+            or root_metadata.st_mode & 0o022
+            or not stat.S_ISDIR(root_metadata.st_mode)
+        ):
+            raise PermissionError(
+                "formal Qwen audit root must be current-user and not group/world writable"
+            )
+        self.root = root
+        self.service_id = uuid.uuid4().hex
+        self.service_path = root / f"qwen-service-{self.service_id}.jsonl"
+        self._lock = threading.Lock()
+        self._sequence = 0
+        self._stopped = False
+        self._descriptor = self._create_exclusive(self.service_path)
+        self._identity = self._descriptor_identity()
+        self.append(
+            "SERVICE_STARTED",
+            {
+                "service_id": self.service_id,
+                "path": FORMAL_INFERENCE_PATH,
+                "expected_decisions": 8,
+                "teacher_used": False,
+                "privileged_truth_policy_input": False,
+            },
+        )
+
+    @staticmethod
+    def _open_flags(base: int) -> int:
+        flags = base
+        if hasattr(os, "O_CLOEXEC"):
+            flags |= os.O_CLOEXEC
+        if hasattr(os, "O_NOFOLLOW"):
+            flags |= os.O_NOFOLLOW
+        return flags
+
+    @classmethod
+    def _create_exclusive(cls, path: Path) -> int:
+        descriptor = os.open(
+            path,
+            cls._open_flags(os.O_WRONLY | os.O_APPEND | os.O_CREAT | os.O_EXCL),
+            0o600,
+        )
+        os.fsync(descriptor)
+        directory = os.open(path.parent, cls._open_flags(os.O_RDONLY))
+        try:
+            os.fsync(directory)
+        finally:
+            os.close(directory)
+        return descriptor
+
+    def _descriptor_identity(self) -> tuple[int, int, int, int, int]:
+        metadata = os.fstat(self._descriptor)
+        if (
+            not stat.S_ISREG(metadata.st_mode)
+            or metadata.st_uid != os.geteuid()
+            or metadata.st_mode & 0o077
+            or metadata.st_nlink != 1
+        ):
+            raise PermissionError("formal Qwen audit file identity/permissions changed")
+        return (
+            metadata.st_dev,
+            metadata.st_ino,
+            metadata.st_uid,
+            metadata.st_mode & 0o777,
+            metadata.st_nlink,
+        )
+
+    @staticmethod
+    def _write_all(descriptor: int, payload: bytes) -> None:
+        view = memoryview(payload)
+        while view:
+            written = os.write(descriptor, view)
+            if written <= 0:
+                raise OSError("formal Qwen audit append made no progress")
+            view = view[written:]
+
+    def append(self, event_type: str, payload: Mapping[str, Any]) -> None:
+        with self._lock:
+            if self._stopped:
+                raise RuntimeError("formal Qwen audit is already stopped")
+            sequence = self._sequence + 1
+            record = {
+                "schema_version": "FormalQwenAuditEventV2",
+                "sequence": sequence,
+                "recorded_at_ns": time.time_ns(),
+                "event_type": event_type,
+                "payload": dict(payload),
+            }
+            line = canonical_json_bytes(record) + b"\n"
+            if self._descriptor_identity() != self._identity:
+                raise RuntimeError("formal Qwen audit descriptor identity changed")
+            self._write_all(self._descriptor, line)
+            os.fsync(self._descriptor)
+            self._sequence = sequence
+
+    def stop(self, payload: Mapping[str, Any]) -> None:
+        with self._lock:
+            if self._stopped:
+                return
+        self.append("SERVICE_STOPPED", payload)
+        with self._lock:
+            self._stopped = True
+            os.close(self._descriptor)
+
+
+class FormalQwenServiceSessionV2:
+    """Serialize and durably attest one exact eight-decision model run."""
+
+    def __init__(
+        self,
+        *,
+        runtime: Runtime,
+        audit: AppendOnlyQwenAuditLogV2,
+        predictor: Callable[[Runtime, FormalInferenceRequestV2], FormalInferenceResponseV2]
+        | None = None,
+    ) -> None:
+        self.runtime = runtime
+        self.audit = audit
+        self._predictor = predictor or predict
+        self._lock = threading.Lock()
+        self.run_id: str | None = None
+        self.challenge_nonce: str | None = None
+        self.next_decision_index = 0
+        self.responses_committed = 0
+        self.completed = False
+        self.poisoned = False
+        self.rejections_recorded = 0
+        self.stopped = False
+
+    def handle(self, raw: Mapping[str, Any]) -> dict[str, Any]:
+        """Verify, infer, sign and journal one request before releasing it."""
+
+        with self._lock:
+            try:
+                # Preserve the exact received envelope before any validation.
+                self.audit.append(
+                    "WIRE_REQUEST_RECEIVED",
+                    {"path": FORMAL_INFERENCE_PATH, "signed_wire": dict(raw)},
+                )
+                # A service created before the cutoff may not infer after it.
+                require_pre_freeze(M2CExperimentAction.Q_B_EVALUATION)
+                if self.poisoned:
+                    raise RuntimeError("formal Qwen session is poisoned after a rejection")
+                if self.completed:
+                    raise RuntimeError("formal Qwen session already committed eight responses")
+                signed = verify_inference_request(raw, self.runtime.secret)
+                request = signed.payload
+                if request.decision_index != self.next_decision_index:
+                    raise ValueError("formal Qwen decision index is not the exact 0..7 sequence")
+                if self.run_id is None:
+                    if request.decision_index != 0:
+                        raise ValueError("formal Qwen first decision must be zero")
+                    self.run_id = request.run_id
+                    self.challenge_nonce = request.challenge_nonce
+                elif request.run_id != self.run_id:
+                    raise ValueError("formal Qwen request crossed the locked run_id")
+                elif request.challenge_nonce != self.challenge_nonce:
+                    raise ValueError("formal Qwen request crossed the locked challenge nonce")
+                response_payload = self._predictor(self.runtime, request)
+                if (
+                    response_payload.run_id != request.run_id
+                    or response_payload.request_id != request.request_id
+                    or response_payload.decision_index != request.decision_index
+                    or response_payload.request_payload_sha256 != signed.payload_sha256
+                    or response_payload.bundle != self.runtime.binding
+                ):
+                    raise ValueError("formal Qwen response is not bound to the active request")
+                response = sign_inference_response(response_payload, self.runtime.secret)
+                dumped = response.model_dump(mode="json")
+                # The complete signed response is fsync'd before HTTP can expose it.
+                self.audit.append(
+                    "WIRE_RESPONSE_COMMITTED",
+                    {"path": FORMAL_INFERENCE_PATH, "signed_wire": dumped},
+                )
+                self.responses_committed += 1
+                self.next_decision_index += 1
+                if self.responses_committed == 8:
+                    self.audit.append(
+                        "SERVICE_COMPLETED",
+                        {
+                            "service_id": self.audit.service_id,
+                            "run_id": self.run_id,
+                            "responses_committed": 8,
+                            "formal_evidence_complete": True,
+                        },
+                    )
+                    self.completed = True
+                return dumped
+            except Exception as exc:
+                self.poisoned = True
+                self.rejections_recorded += 1
+                try:
+                    # Do not duplicate assets or exception strings outside the
+                    # already journaled signed envelope; never persist secrets.
+                    self.audit.append(
+                        "WIRE_REQUEST_REJECTED",
+                        {
+                            "path": FORMAL_INFERENCE_PATH,
+                            "error_type": type(exc).__name__,
+                            "formal_evidence_accepted": False,
+                        },
+                    )
+                except Exception:
+                    pass
+                raise
+
+    def reject_transport(self, *, path: str, error_type: str) -> None:
+        """Poison and attest a request that could not yield a JSON envelope."""
+
+        with self._lock:
+            self.poisoned = True
+            self.rejections_recorded += 1
+            self.audit.append(
+                "WIRE_REQUEST_REJECTED",
+                {
+                    "path": path,
+                    "error_type": error_type,
+                    "formal_evidence_accepted": False,
+                },
+            )
+
+    def stop(self) -> None:
+        with self._lock:
+            if self.stopped:
+                return
+            payload = {
+                "service_id": self.audit.service_id,
+                "run_id": self.run_id,
+                "responses_committed": self.responses_committed,
+                "completed": self.completed,
+                "poisoned": self.poisoned,
+                "rejections_recorded": self.rejections_recorded,
+                "teacher_used": False,
+                "privileged_truth_policy_input": False,
+            }
+            self.audit.stop(payload)
+            self.stopped = True
 
 
 def _resolve_materialized_model_snapshot(cache_dir: Path) -> Path:
@@ -102,6 +357,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--dtype", default="bfloat16")
     parser.add_argument("--hmac-key-file", type=Path, required=True)
     parser.add_argument("--binding-output", type=Path, required=True)
+    parser.add_argument("--audit-dir", type=Path, required=True)
     parser.add_argument("--bind-host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8765)
     parser.add_argument("--max-request-bytes", type=int, default=64 * 1024 * 1024)
@@ -248,8 +504,15 @@ def predict(runtime: Runtime, request: FormalInferenceRequestV2):
     )
 
 
-def serve(runtime: Runtime, args: argparse.Namespace) -> None:
+def serve(
+    runtime: Runtime,
+    args: argparse.Namespace,
+    audit: AppendOnlyQwenAuditLogV2,
+) -> None:
     from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+
+    session = FormalQwenServiceSessionV2(runtime=runtime, audit=audit)
+    server_holder: dict[str, ThreadingHTTPServer] = {}
 
     class Handler(BaseHTTPRequestHandler):
         server_version = "M2CQwenFormalV2"
@@ -266,20 +529,33 @@ def serve(runtime: Runtime, args: argparse.Namespace) -> None:
 
         def do_POST(self) -> None:  # noqa: N802 - stdlib handler API
             if self.path != FORMAL_INFERENCE_PATH:
+                try:
+                    session.reject_transport(path=self.path, error_type="UnknownEndpoint")
+                except Exception:
+                    pass
                 self.send_error(404)
                 return
             try:
-                # A service created before the cutoff must not accept a new
-                # inference cycle after it.  This is independent of startup.
+                # Preserve the per-request cutoff check even for malformed or
+                # oversized bodies that never reach authenticated dispatch.
                 require_pre_freeze(M2CExperimentAction.Q_B_EVALUATION)
                 length = int(self.headers.get("Content-Length", "0"))
                 if not 0 < length <= args.max_request_bytes:
                     raise ValueError("formal inference request size is invalid")
                 raw = json.loads(self.rfile.read(length))
-                signed = verify_inference_request(raw, runtime.secret)
-                response = sign_inference_response(predict(runtime, signed.payload), runtime.secret)
-                payload = response.model_dump_json().encode("utf-8")
+                if not isinstance(raw, dict):
+                    raise ValueError("formal inference request must be one JSON object")
+                response = session.handle(raw)
+                payload = canonical_json_bytes(response)
             except Exception as exc:
+                if "raw" not in locals() or not isinstance(raw, dict):
+                    try:
+                        session.reject_transport(
+                            path=self.path,
+                            error_type=type(exc).__name__,
+                        )
+                    except Exception:
+                        pass
                 # Fail closed without echoing request assets or secrets.
                 payload = json.dumps(
                     {"error": type(exc).__name__, "status": "REJECTED"},
@@ -292,9 +568,37 @@ def serve(runtime: Runtime, args: argparse.Namespace) -> None:
             self.send_header("Content-Length", str(len(payload)))
             self.end_headers()
             self.wfile.write(payload)
+            self.wfile.flush()
+            if self.path == FORMAL_INFERENCE_PATH and session.completed:
+                # shutdown() must run outside the handler thread.  It is
+                # scheduled only after the eighth authenticated response has
+                # been written, so SERVICE_STOPPED cannot precede publication.
+                threading.Thread(
+                    target=server_holder["server"].shutdown,
+                    name="m2c-qwen-graceful-stop",
+                    daemon=True,
+                ).start()
 
     server = ThreadingHTTPServer((args.bind_host, args.port), Handler)
-    server.serve_forever()
+    server_holder["server"] = server
+    print(
+        json.dumps(
+            {
+                "status": "READY_REAL_QWEN_INFERENCE",
+                "endpoint": FORMAL_INFERENCE_PATH,
+                "audit_service_path": str(audit.service_path),
+                "teacher_used": False,
+                "privileged_truth_policy_input": False,
+            },
+            sort_keys=True,
+        ),
+        flush=True,
+    )
+    try:
+        server.serve_forever()
+    finally:
+        server.server_close()
+        session.stop()
 
 
 def write_binding_create_only(path: Path, binding: QwenBundleRuntimeBindingV2) -> None:
@@ -310,12 +614,27 @@ def main(argv: list[str] | None = None) -> int:
     require_pre_freeze(M2CExperimentAction.FORMAL_MODEL_SERVICE)
     runtime = load_runtime(args)
     write_binding_create_only(args.binding_output, runtime.binding)
+    audit = AppendOnlyQwenAuditLogV2(args.audit_dir)
     if args.startup_check_only:
+        audit.stop(
+            {
+                "service_id": audit.service_id,
+                "run_id": None,
+                "responses_committed": 0,
+                "completed": False,
+                "poisoned": False,
+                "rejections_recorded": 0,
+                "startup_check_only": True,
+                "teacher_used": False,
+                "privileged_truth_policy_input": False,
+            }
+        )
         print(
             json.dumps(
                 {
                     "status": "READY_REAL_QWEN_INFERENCE",
                     "endpoint": FORMAL_INFERENCE_PATH,
+                    "audit_service_path": str(audit.service_path),
                     "binding": runtime.binding.model_dump(mode="json"),
                     "teacher_used": False,
                     "privileged_truth_policy_input": False,
@@ -325,7 +644,7 @@ def main(argv: list[str] | None = None) -> int:
             )
         )
         return 0
-    serve(runtime, args)
+    serve(runtime, args, audit)
     return 0
 
 

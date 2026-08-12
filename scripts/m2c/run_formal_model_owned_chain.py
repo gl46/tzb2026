@@ -73,6 +73,23 @@ from xh_agent.policy.qrm_lite.model_owned_chain_v2 import (
 from xh_agent.policy.qrm_lite.skill_registry_v2 import load_registry_v2
 
 
+WIRE_CHALLENGE_MANIFEST_SCHEMA = "M2CS4WireChallengeManifestV1"
+# The current prototype can construct both endpoint envelopes only by loading
+# both symmetric keys into this central process.  That violates the frozen
+# host-local key boundary, so the real path is source-level disabled until a
+# separately reviewed pair of host-local signing/verification proxies replaces
+# both key-file arguments.  Contract-only validation never reads either key.
+FORMAL_SPLIT_HMAC_PROXY_BINDING: tuple[str, str] | None = None
+
+
+def require_formal_split_hmac_proxy() -> tuple[str, str]:
+    raise RuntimeError(
+        "formal execution is blocked: host-local Qwen/Isaac signing proxies "
+        "are not implemented, reviewed, and frozen; central dual-HMAC-key "
+        "custody is forbidden"
+    )
+
+
 def partial_failure_output_path(formal_output: Path) -> Path:
     """Return a deterministic sidecar that can never look like entry evidence."""
 
@@ -166,6 +183,8 @@ class HostPartialRunAuditV2:
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="M2C formal split model-owned chain runner")
     parser.add_argument("--run-id", required=True)
+    parser.add_argument("--challenge-nonce", required=True)
+    parser.add_argument("--wire-challenge-manifest", type=Path, required=True)
     parser.add_argument("--matched-key", required=True)
     parser.add_argument("--scene-seed", type=int, required=True)
     parser.add_argument("--failure-seed", type=int, required=True)
@@ -216,11 +235,32 @@ def validate_configuration(
         args.bundle_root / BUNDLE_MANIFEST_NAME,
         args.qwen_runtime_binding,
         args.isaac_endpoint_binding,
+        args.wire_challenge_manifest,
     ):
         if not path.exists():
             raise FileNotFoundError(path)
     if not 0.0 < args.request_timeout_seconds <= 300.0:
         raise ValueError("formal request timeout must be in (0, 300] seconds")
+    challenge_manifest = _read_json(args.wire_challenge_manifest)
+    if (
+        challenge_manifest.get("schema_version") != WIRE_CHALLENGE_MANIFEST_SCHEMA
+        or challenge_manifest.get("formal_q_b_evaluation_authorized") is not False
+        or challenge_manifest.get("teacher_used") is not False
+        or challenge_manifest.get("privileged_truth_policy_input") is not False
+    ):
+        raise ValueError("formal wire challenge manifest governance differs")
+    challenge_matches = [
+        item
+        for item in challenge_manifest.get("challenge_records", [])
+        if isinstance(item, dict)
+        and item.get("run_id") == args.run_id
+        and item.get("challenge_nonce") == args.challenge_nonce
+        and item.get("matched_key") == args.matched_key
+        and item.get("scene_seed") == args.scene_seed
+        and item.get("failure_seed") == args.failure_seed
+    ]
+    if len(challenge_matches) != 1:
+        raise ValueError("formal runner does not consume exactly one preregistered challenge")
     heads, metadata, manifest = load_bundle(
         args.bundle_root,
         require_adapter=True,
@@ -249,9 +289,6 @@ def validate_configuration(
         raise ValueError("invalid Isaac endpoint binding")
     if args.qwen_endpoint.rstrip("/") == endpoint.endpoint_base_url.rstrip("/"):
         raise ValueError("Qwen and Isaac endpoints may not be the same service")
-    # Keys are opened before network or evidence mutation.  Missing/permissive keys fail closed.
-    read_hmac_secret(args.qwen_hmac_key_file)
-    read_hmac_secret(args.isaac_hmac_key_file)
     return bundle, endpoint
 
 
@@ -286,6 +323,10 @@ def run_real(
     endpoint: IsaacEndpointBindingV2,
     audit: HostPartialRunAuditV2 | None = None,
 ) -> dict[str, Any]:
+    # Defense in depth for direct imports: main() already checks this before
+    # loading the bundle, but no caller may bypass the split-key boundary by
+    # invoking run_real() itself.
+    require_formal_split_hmac_proxy()
     audit = audit or HostPartialRunAuditV2(
         run_id=args.run_id,
         matched_key=args.matched_key,
@@ -302,6 +343,7 @@ def run_real(
 
     start_request = IsaacStartRequestV2(
         run_id=args.run_id,
+        challenge_nonce=args.challenge_nonce,
         matched_key=args.matched_key,
         scene_seed=args.scene_seed,
         failure_seed=args.failure_seed,
@@ -379,6 +421,7 @@ def run_real(
             sent_at_ns = capture.observation.captured_at_ns + 1
         inference_request = FormalInferenceRequestV2(
             run_id=args.run_id,
+            challenge_nonce=args.challenge_nonce,
             request_id=f"{args.run_id}-decision-{decision_index}",
             decision_index=decision_index,
             sent_at_ns=sent_at_ns,
@@ -527,6 +570,7 @@ def run_real(
         "schema_version": "M2CFormalSplitRunnerEvidenceV2",
         "status": "COMPLETE_REAL_PHYSICAL_EPISODE",
         "run_id": args.run_id,
+        "challenge_nonce": args.challenge_nonce,
         "bundle": bundle.model_dump(mode="json"),
         "isaac_endpoint_binding": endpoint.model_dump(mode="json"),
         "start_response": start.model_dump(mode="json"),
@@ -572,6 +616,9 @@ def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     if not args.contract_check_only:
         require_pre_freeze(M2CExperimentAction.Q_B_EVALUATION)
+        # Fail before bundle loading, endpoint contact, evidence mutation, or
+        # reading either symmetric key.
+        require_formal_split_hmac_proxy()
     bundle, endpoint = validate_configuration(args)
     if args.contract_check_only:
         print(
