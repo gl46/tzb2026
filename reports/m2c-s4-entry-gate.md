@@ -1,7 +1,7 @@
 # M2C S4 Q-B entry gate
 
 - Status: **BLOCKED_FORMAL_Q_B_EVALUATION**
-- Checked Git HEAD: `b6def060326ae78235826cf8600dbe10f29c1a58`
+- Checked Git HEAD: `1a46ebf2c14077d03fb715b71eaf33bb56c9300d`
 - Required physical policy: trained Qwen V2 world-model bundle (LoRA adapter + skill/pointer/destination heads).
 - Structured Q0/Q1/Q2 checkpoint accepted as world model: `false`
 - Governance gate passed: `True`

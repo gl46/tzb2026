@@ -1,5 +1,5 @@
 {
-  "checked_implementation_commit": "b6def060326ae78235826cf8600dbe10f29c1a58",
+  "checked_implementation_commit": "1a46ebf2c14077d03fb715b71eaf33bb56c9300d",
   "command": [
     "python",
     "-m",
@@ -14,7 +14,8 @@
     "tests/unit/test_m2c_executed_intent_history_v2.py",
     "tests/unit/test_m2c_qwen_coarse_v2.py",
     "tests/unit/test_m2c_formal_split_runner_v2.py",
-    "tests/unit/test_m2c_formal_isaac_endpoint_v2.py"
+    "tests/unit/test_m2c_formal_isaac_endpoint_v2.py",
+    "tests/unit/test_m2c_hard_freeze.py"
   ],
   "evidence_origin": "LOCAL_CONTRACT_TESTS",
   "exit_code": 0,
@@ -28,7 +29,8 @@
     "tests/unit/test_m2c_executed_intent_history_v2.py",
     "tests/unit/test_m2c_qwen_coarse_v2.py",
     "tests/unit/test_m2c_formal_split_runner_v2.py",
-    "tests/unit/test_m2c_formal_isaac_endpoint_v2.py"
+    "tests/unit/test_m2c_formal_isaac_endpoint_v2.py",
+    "tests/unit/test_m2c_hard_freeze.py"
   ],
   "privileged_truth_policy_input": false,
   "runtime_binding_sha256": {
@@ -37,19 +39,20 @@
     "schemas/coarse-intent-v2.schema.json": "b30d6014b154738a42886f709b072f2e08a792a168570c17b2cf6d20a1c824fe",
     "schemas/runtime-skill-v2.schema.json": "122f397b422779af4825a202728ec41c8b7ca369591654bdbfb6dbe0de09dda1",
     "scripts/generate_industrial_scenes.py": "e9f9e20106a05dbec24453ce39422d57aa212709567fb7eba7f8d9beb03cd6c5",
-    "scripts/m2c/evaluate_qwen_coarse_v2.py": "e4c184add71febbd892c193760779986318234bd582c3b041ce0cb2146fc1182",
-    "scripts/m2c/formal_isaac_v4_backend.py": "1b5161893e9cb38682d1ebcea5c13082ec7a5b58aa0eec91db3ab793c2165058",
+    "scripts/m2c/evaluate_qwen_coarse_v2.py": "ca7de0fac0c143d917c449fb9aba18e8ab26312fd81a401585815a8a89ccd422",
+    "scripts/m2c/formal_isaac_v4_backend.py": "73ada118846c4392c73aa3f0459195e71a1d54378c549487e1ef3504bc4d79bf",
     "scripts/m2c/qwen_coarse_v2.py": "b6c4e29486941c54a8b4d6c069bd95a625751fff1f17900581ec9b8e0c613ae6",
-    "scripts/m2c/run_formal_model_owned_chain.py": "0594a01e9054ab356c9891e300bd220f70dd9011b7c201c898d9227b54a35c5a",
-    "scripts/m2c/serve_formal_isaac_endpoint.py": "00779bc64cf7efa6e8cba7633b5ca6e645cbb54118bcfa19338187c66df0febf",
-    "scripts/m2c/serve_qwen_coarse_v2.py": "7284f140df5d1eabf6c515f53ab1b1b0f3c8985564bc5469f90101f9fb31b960",
-    "scripts/m2c/train_qwen_coarse_v2.py": "50bea653d34225d6ca17f06b2229ef711784a667f51078153ab75d359e632304",
+    "scripts/m2c/run_formal_model_owned_chain.py": "e8059b184d0cbdb5f3e037ef9c0c71fa2d468d1972e7c20dff252221ca14d6aa",
+    "scripts/m2c/serve_formal_isaac_endpoint.py": "72294ec73cb56a467f85f5e82a6f831c9e9dc72de0f8d87aeb48b9beb4bc7c2d",
+    "scripts/m2c/serve_qwen_coarse_v2.py": "a470329f373874472280842356c5febcf7300ff5b421dd79709e6d09d7996c05",
+    "scripts/m2c/train_qwen_coarse_v2.py": "8b25a36448c57b9744c98c00675978c6ead86ac72cb4840b7ffe224dc9011c76",
     "src/xh_agent/policy/qrm_lite/backbone.py": "291fe17515e86c75b944849972583f0af4c7c8f2fb5dd0161fe2e34d1ab02375",
     "src/xh_agent/policy/qrm_lite/closed_loop_metrics.py": "a4cd355fd39c4f2b41d6886c973902ce12cea78b5b5f58f72ced5be9f51c5746",
     "src/xh_agent/policy/qrm_lite/executed_intent_history_v2.py": "e8d7587c11e23976732c80800481853b8a851eb0a78f40f40f47eb0fb04bb748",
-    "src/xh_agent/policy/qrm_lite/formal_isaac_endpoint_v2.py": "d7df51b7ebd2736ebe29a8127c56f232e37cbffc951643216267219af1d43891",
+    "src/xh_agent/policy/qrm_lite/formal_isaac_endpoint_v2.py": "ce11aa23efd271e85bd6ada98ee336f37bb77319be6cd8a6b0a1059f42dc3c9b",
     "src/xh_agent/policy/qrm_lite/formal_public_role_selector_v2.py": "4e853dcb86c2bb51a9ca58f8441199e10d85366657669087e5b26a3aaf8a93a4",
     "src/xh_agent/policy/qrm_lite/formal_split_runner_v2.py": "674e494f24288d8faadedbebb6f2bbd8c6b79c8075bbae0c9c0cce08447a1705",
+    "src/xh_agent/policy/qrm_lite/m2c_hard_freeze.py": "36cac68c45242337bd181afaa5898cb257c643e5245037e72602b9d6fbea3dd9",
     "src/xh_agent/policy/qrm_lite/model_owned_chain_v2.py": "fd76aebd3d319dd30857a721e89bcb028ae144d4d60b6d761d2d8e04f8614444",
     "src/xh_agent/policy/qrm_lite/models_q012_v2.py": "5334fbee5750fd4df1f6b421eac0336ced98849aa68e1c6948986bdbb15f540c",
     "src/xh_agent/policy/qrm_lite/public_tracks_v2.py": "0d3f04767fd218f8759d42d58e5507b5f2c2b835e8d6c8c873b086ff7e614f6b",
@@ -59,6 +62,6 @@
   "schema_version": "M2CS4LocalContractTestReceiptV2",
   "teacher_used": false,
   "tests_failed": 0,
-  "tests_passed": 173,
+  "tests_passed": 207,
   "tests_skipped": 0
 }
