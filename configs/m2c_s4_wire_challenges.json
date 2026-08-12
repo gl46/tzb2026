@@ -1,0 +1,38 @@
+{
+  "challenge_records": [
+    {
+      "challenge_nonce": "6d2f89579e9fca6164b3d0479c64e121fd2a7682d77dc5d7fc3984bd335d2957",
+      "failure_seed": 150547,
+      "matched_key": "m2c-s4-s6-ab99bcd76d83c0a066fab67a90277fc4c2468b781c386267a0b101b457895173",
+      "run_id": "m2c-s4-smoke-ab99bcd7-6d2f8957",
+      "scene_seed": 15054
+    },
+    {
+      "challenge_nonce": "129de3cf7af8e54aa86a7e49ecc76df693de23a1e8e65790a9bf8220eb8f9b05",
+      "failure_seed": 150757,
+      "matched_key": "m2c-s4-s6-6a7fadfc2e7cdedfcf1497d3b94692fa2eb43d7401864a992673e09423dc1a3e",
+      "run_id": "m2c-s4-smoke-6a7fadfc-129de3cf",
+      "scene_seed": 15075
+    },
+    {
+      "challenge_nonce": "3286b251a611f5c235c365004555b66e2d349492da476ce28f3fa6e4f9f52cb7",
+      "failure_seed": 150767,
+      "matched_key": "m2c-s4-s6-c35e559a1dca9a48fe4abe15795ba324d76d39f9ae896c31b8a7a624f2bf3d82",
+      "run_id": "m2c-s4-smoke-c35e559a-3286b251",
+      "scene_seed": 15076
+    }
+  ],
+  "formal_q_b_evaluation_authorized": false,
+  "generated_before_any_formal_q_b_physical_result": true,
+  "generated_on": "2026-08-13 Asia/Shanghai",
+  "nonce_encoding": "LOWERCASE_HEX_256_BIT",
+  "nonce_is_secret": false,
+  "purpose": "ONE_TIME_FORMAL_WIRE_ATTESTATION_REPLAY_DEFENSE",
+  "schema_version": "M2CS4WireChallengeManifestV1",
+  "source_key_manifest_commit": "5243ee346309c6b7e15270436bb9bbcab5f7e509",
+  "source_key_manifest_content_sha256": "f5dc3566d028821f5df48afd07f133ea94af21fae21ec8bd5be63644893145e2",
+  "source_key_manifest_file_sha256": "ca2162a898853ee04600aaf9246c121ac0604754638e497d1824b159c161fd94",
+  "source_key_manifest_path": "configs/m2c_s4_training_keys.json",
+  "teacher_used": false,
+  "privileged_truth_policy_input": false
+}
