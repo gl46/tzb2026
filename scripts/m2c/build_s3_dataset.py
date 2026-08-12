@@ -15,6 +15,7 @@ from m2b.build_dataset_v2 import (
     code_revision_histogram,
     package,
     remote_json,
+    remote_sha256,
 )
 from m2c.build_headroom_domain import DATASET_VERSION, PROJECT, sha256_file
 from xh_agent.data_engine.isaac.failure_rich import (
@@ -28,6 +29,32 @@ FULL_RECOVERY_MINIMUM = 50
 BASE_DATASET = PROJECT / "artifacts/m2b/dataset-v2.jsonl"
 BASE_DATASET_SHA256 = "c24e34493ba2226c1aa691c1b1c43993fbecdff5ad74b291e08c4913efc71362"
 DEFAULT_PLAN = PROJECT / "configs/m2c_s3_collection_plan.json"
+
+
+def load_stable_worker_status(
+    host: str,
+    path: str,
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Read one worker status and bind the exact stable remote bytes."""
+    digest_before = remote_sha256(host, path)
+    status = remote_json(host, path)
+    digest_after = remote_sha256(host, path)
+    if digest_before != digest_after:
+        raise ValueError(f"S3 worker status changed while being read: {path}")
+    if len(digest_after) != 64:
+        raise ValueError(f"S3 worker status SHA-256 is malformed: {path}")
+    snapshot = {
+        "host": host,
+        "path": path,
+        "sha256": digest_after,
+        "schema_version": status.get("schema_version"),
+        "status": status.get("status"),
+        "accepted_counts": status.get("accepted_counts", {}),
+        "record_count": len(status.get("records", [])),
+        "teacher_used": status.get("teacher_used"),
+        "privileged_truth_policy_input": status.get("privileged_truth_policy_input"),
+    }
+    return status, snapshot
 
 
 def load_jsonl(path: Path) -> list[dict[str, Any]]:
@@ -202,6 +229,7 @@ def write_outputs(
     additions: list[dict[str, Any]],
     package_quarantine: list[dict[str, Any]],
     collection_rejections: list[dict[str, object]],
+    worker_status_snapshots: list[dict[str, Any]],
     plan: dict[str, Any],
     output: Path,
     quarantine_path: Path,
@@ -255,6 +283,7 @@ def write_outputs(
         "collection_rejections": len(collection_rejections),
         "collection_rejection_counts": dict(sorted(rejections_by_failure.items())),
         "collection_rejection_records": collection_rejections,
+        "worker_status_snapshots": worker_status_snapshots,
         "code_revision_histogram": code_revision_histogram(merged),
         "base_dataset": {
             "path": str(BASE_DATASET),
@@ -317,7 +346,17 @@ def main() -> int:
     plan = json.loads(args.plan.read_text())
     if plan.get("schema_version") != "M2CS3CollectionPlanV1":
         raise SystemExit("unsupported M2C S3 collection plan")
-    statuses = [remote_json(args.host, path) for path in args.worker_status]
+    if len(set(args.worker_status)) != len(args.worker_status):
+        raise SystemExit("duplicate S3 worker-status path")
+    statuses = []
+    worker_status_snapshots = []
+    for path in args.worker_status:
+        try:
+            status, snapshot = load_stable_worker_status(args.host, path)
+        except ValueError as error:
+            raise SystemExit(str(error)) from error
+        statuses.append(status)
+        worker_status_snapshots.append(snapshot)
     for status in statuses:
         if status.get("status") != "COMPLETE_ACCEPTED_TARGET":
             raise SystemExit("S3 worker has not reached its frozen accepted target")
@@ -331,6 +370,7 @@ def main() -> int:
         additions=additions,
         package_quarantine=package_quarantine,
         collection_rejections=rejected,
+        worker_status_snapshots=worker_status_snapshots,
         plan=plan,
         output=args.output,
         quarantine_path=args.quarantine,

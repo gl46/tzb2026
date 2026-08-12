@@ -4,10 +4,12 @@ from copy import deepcopy
 import json
 from pathlib import Path
 
+import m2c.build_s3_dataset as s3_dataset
 from m2c.build_s3_dataset import (
     accepted_evidence,
     coverage_summary,
     fourth_class_records,
+    load_stable_worker_status,
     load_jsonl,
     merge_episodes,
     write_outputs,
@@ -17,6 +19,21 @@ from m2c.build_s3_dataset import (
 PROJECT = Path(__file__).resolve().parents[2]
 BASE = load_jsonl(PROJECT / "artifacts/m2b/dataset-v2.jsonl")
 PLAN = json.loads((PROJECT / "configs/m2c_s3_collection_plan.json").read_text())
+WORKER_STATUS_SNAPSHOT = {
+    "host": "root@labserver",
+    "path": "/remote/worker-status.json",
+    "sha256": "a" * 64,
+    "schema_version": "M2BFailureEvidenceWorkerStatusV1",
+    "status": "COMPLETE_ACCEPTED_TARGET",
+    "accepted_counts": {
+        "EMPTY_GRASP": 25,
+        "WRONG_OBJECT": 25,
+        "RELEASE_FAILURE": 25,
+    },
+    "record_count": 75,
+    "teacher_used": False,
+    "privileged_truth_policy_input": False,
+}
 
 
 def clone_episode(source: dict, *, index: int) -> dict:
@@ -61,6 +78,40 @@ def test_worker_status_extracts_accepted_and_records_rejections() -> None:
     assert evidence == [("EMPTY_GRASP", "/accepted.json")]
     assert len(rejected) == 2
     assert all(item["reason"] for item in rejected)
+
+
+def test_stable_worker_status_snapshot_binds_remote_bytes(monkeypatch) -> None:
+    payload = {
+        "schema_version": "M2BFailureEvidenceWorkerStatusV1",
+        "status": "COMPLETE_ACCEPTED_TARGET",
+        "accepted_counts": {"EMPTY_GRASP": 25},
+        "records": [{"accepted": True}],
+        "teacher_used": False,
+        "privileged_truth_policy_input": False,
+    }
+    hashes = iter(["b" * 64, "b" * 64])
+    monkeypatch.setattr(s3_dataset, "remote_sha256", lambda host, path: next(hashes))
+    monkeypatch.setattr(s3_dataset, "remote_json", lambda host, path: payload)
+
+    status, snapshot = load_stable_worker_status("root@labserver", "/status.json")
+
+    assert status is payload
+    assert snapshot["sha256"] == "b" * 64
+    assert snapshot["record_count"] == 1
+    assert snapshot["teacher_used"] is False
+
+
+def test_worker_status_snapshot_rejects_mid_read_change(monkeypatch) -> None:
+    hashes = iter(["b" * 64, "c" * 64])
+    monkeypatch.setattr(s3_dataset, "remote_sha256", lambda host, path: next(hashes))
+    monkeypatch.setattr(s3_dataset, "remote_json", lambda host, path: {})
+
+    try:
+        load_stable_worker_status("root@labserver", "/status.json")
+    except ValueError as error:
+        assert "changed while being read" in str(error)
+    else:
+        raise AssertionError("changing worker status was accepted")
 
 
 def test_merge_promotes_version_and_deduplicates_evidence() -> None:
@@ -126,6 +177,7 @@ def test_output_report_fails_closed_on_packaging_quarantine(
                 "reason": "frozen predicate rejected",
             }
         ],
+        worker_status_snapshots=[WORKER_STATUS_SNAPSHOT],
         plan=PLAN,
         output=tmp_path / "dataset.jsonl",
         quarantine_path=tmp_path / "quarantine.jsonl",
@@ -135,6 +187,7 @@ def test_output_report_fails_closed_on_packaging_quarantine(
     assert report["status"] == "IN_PROGRESS_S3_FULL_CLASS_COVERAGE"
     assert report["episodes_quarantined"] == 1
     assert report["collection_rejections"] == 1
+    assert report["worker_status_snapshots"] == [WORKER_STATUS_SNAPSHOT]
     assert report["fourth_class"]["model_training_eligible"] is False
 
 
@@ -159,6 +212,7 @@ def test_output_report_passes_full_gate_and_keeps_fourth_class_raw_only(
         additions=additions,
         package_quarantine=[],
         collection_rejections=[],
+        worker_status_snapshots=[WORKER_STATUS_SNAPSHOT],
         plan=PLAN,
         output=output,
         quarantine_path=quarantine,
@@ -174,6 +228,7 @@ def test_output_report_passes_full_gate_and_keeps_fourth_class_raw_only(
     }
     assert report["successful_recovery_counts"] == report["failure_counts"]
     assert report["episodes_quarantined"] == 0
+    assert report["worker_status_snapshots"] == [WORKER_STATUS_SNAPSHOT]
     assert quarantine.read_text() == ""
     assert len(load_jsonl(fourth)) == 3
     assert all(
