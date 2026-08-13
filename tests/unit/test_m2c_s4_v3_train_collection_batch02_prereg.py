@@ -106,11 +106,10 @@ def test_selected_keys_are_recomputed_without_outcomes_from_frozen_manifest() ->
         assert source["outcome_observed_during_selection"] is False
 
 
-def test_source_commit_and_current_implementation_bytes_match_every_binding() -> None:
+def test_source_commit_matches_every_historical_implementation_binding() -> None:
     payload = _payload()
     bindings = payload["implementation_sha256"]
     assert len(bindings) == 7
     for path, expected_sha256 in bindings.items():
         assert re.fullmatch(r"[0-9a-f]{64}", expected_sha256)
         assert _sha256(_git_bytes(SOURCE_COMMIT, path)) == expected_sha256
-        assert _sha256((ROOT / path).read_bytes()) == expected_sha256

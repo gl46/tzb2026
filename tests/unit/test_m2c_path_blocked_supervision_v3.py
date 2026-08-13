@@ -334,6 +334,7 @@ def _write_v3_package_fixture(tmp_path: Path) -> tuple[dict[str, Path], str]:
     ):
         raw.pop(field)
     raw["schema_version"] = "M2CPathBlockedProbeChainV3"
+    raw["collection_authorization_sha256"] = canonical_sha256({})
     evidence_root = tmp_path / "raw"
     evidence_root.mkdir(parents=True)
     captures: list[dict[str, object]] = []
@@ -362,6 +363,9 @@ def _write_v3_package_fixture(tmp_path: Path) -> tuple[dict[str, Path], str]:
         "status": "PASS",
         "not_policy_rollout": True,
         "actuation_probe_source_sha256": hashlib.sha256(derived.read_bytes()).hexdigest(),
+        # Unit-only downstream validation tests monkeypatch the authorization
+        # verifier. This value deliberately cannot represent real evidence.
+        "m2c_v3_collection_authorization": {},
         "m2b_public_rgbd": {
             "schema_version": "M2BPublicRGBDEvidenceV2",
             "captures": captures,
@@ -369,8 +373,12 @@ def _write_v3_package_fixture(tmp_path: Path) -> tuple[dict[str, Path], str]:
         },
         "m2c_path_blocked_physical_chain": raw,
     }
+    raw["collection_authorization_sha256"] = canonical_sha256(
+        payload["m2c_v3_collection_authorization"]
+    )
     probe = evidence_root / "actuation-probe.json"
     probe.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
+    (evidence_root / "console.log").write_text("unit-only authorization fixture\n")
     return {
         "evidence": evidence_root,
         "probe": probe,
@@ -379,7 +387,12 @@ def _write_v3_package_fixture(tmp_path: Path) -> tuple[dict[str, Path], str]:
     }, manifest.training_keys[0].matched_key
 
 
-def _package_v3(paths: dict[str, Path], matched_key: str) -> dict[str, object]:
+def _package_v3(
+    paths: dict[str, Path],
+    matched_key: str,
+    *,
+    contract_authorization_fixture: bool = False,
+) -> dict[str, object]:
     return package_collection(
         raw_probe_path=paths["probe"],
         evidence_root=paths["evidence"],
@@ -392,12 +405,49 @@ def _package_v3(paths: dict[str, Path], matched_key: str) -> dict[str, object]:
         derived_probe_path=paths["derived"],
         upstream_v4_probe_path=UPSTREAM,
         revision="V3",
+        collection_prereg_path=(
+            paths["evidence"] / "fixture-prereg.json" if contract_authorization_fixture else None
+        ),
+        collection_claim_path=(
+            paths["evidence"] / "fixture-claim.json" if contract_authorization_fixture else None
+        ),
     )
 
 
-def test_v3_package_collection_happy_path_and_real_tamper_negatives(tmp_path: Path) -> None:
+class _UnitPackagedAuthorization:
+    def model_dump(self, *, mode: str) -> dict[str, object]:
+        assert mode == "json"
+        return {
+            "schema_version": "UNIT_ONLY_PACKAGED_AUTHORIZATION",
+            "teacher_used": False,
+            "privileged_truth_policy_input": False,
+        }
+
+
+def test_v3_legacy_fixture_cannot_be_published_without_new_authorization(tmp_path: Path) -> None:
     paths, matched_key = _write_v3_package_fixture(tmp_path / "happy")
-    result = _package_v3(paths, matched_key)
+    with pytest.raises(ValueError, match="committed preregistration"):
+        _package_v3(paths, matched_key)
+    assert not paths["output"].exists()
+
+
+def test_v3_downstream_asset_and_capture_tamper_checks_remain_enforced(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # Production still requires a committed preregistration and exact ledger
+    # member. This fixture isolates the downstream package validation layer.
+    monkeypatch.setattr(
+        "m2c.package_path_blocked_collection.verify_packaging_authorization",
+        lambda **_kwargs: (None, None, _UnitPackagedAuthorization()),
+    )
+    monkeypatch.setattr(
+        "m2c.package_path_blocked_collection.require_v3_host_runtime_launcher",
+        lambda: None,
+    )
+
+    paths, matched_key = _write_v3_package_fixture(tmp_path / "happy")
+    result = _package_v3(paths, matched_key, contract_authorization_fixture=True)
     assert result["schema_version"] == "M2CPathBlockedCollectionReceiptV3"
     assert result["candidate_contract_revision"] == "PublicTrackCandidateV3"
     assert result["checkpoint_architecture_revision"] == "M2C_Q012_V3"
@@ -407,11 +457,11 @@ def test_v3_package_collection_happy_path_and_real_tamper_negatives(tmp_path: Pa
     rgb = next((paths["evidence"] / "rgb").glob("*.png"))
     rgb.write_bytes(b"tampered")
     with pytest.raises(ValueError, match="V3 RGB asset SHA-256 mismatch"):
-        _package_v3(paths, matched_key)
+        _package_v3(paths, matched_key, contract_authorization_fixture=True)
 
     paths, matched_key = _write_v3_package_fixture(tmp_path / "capture-tamper")
     payload = json.loads(paths["probe"].read_text())
     payload["m2b_public_rgbd"]["captures"][0]["label"] = "tampered-core"
     paths["probe"].write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
     with pytest.raises(ValueError, match="V3 capture receipt SHA-256 mismatch"):
-        _package_v3(paths, matched_key)
+        _package_v3(paths, matched_key, contract_authorization_fixture=True)

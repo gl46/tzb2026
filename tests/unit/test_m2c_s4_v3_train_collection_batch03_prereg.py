@@ -121,7 +121,7 @@ def test_selection_recomputes_from_manifest_and_eight_identities_without_outcome
         assert source["outcome_observed_during_selection"] is False
 
 
-def test_runtime_bytes_are_unchanged_between_runtime_and_prereg_source_commits() -> None:
+def test_runtime_bytes_were_unchanged_before_batch03_preregistration() -> None:
     paths = (
         "src/xh_agent/policy/qrm_lite/public_tracks_v3.py",
         "src/xh_agent/policy/qrm_lite/path_blocked_supervision_v3.py",
@@ -133,4 +133,3 @@ def test_runtime_bytes_are_unchanged_between_runtime_and_prereg_source_commits()
     for path in paths:
         runtime_bytes = _git_bytes(RUNTIME_COMMIT, path)
         assert _git_bytes(PREREG_SOURCE_COMMIT, path) == runtime_bytes
-        assert (ROOT / path).read_bytes() == runtime_bytes

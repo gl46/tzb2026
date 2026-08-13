@@ -1,25 +1,188 @@
 #!/usr/bin/env python3
 """Build or run one frozen M2C PATH_BLOCKED TRAIN/SMOKE collection job.
 
-The worker is deliberately single-key and create-only.  ``--dry-run`` emits
-the exact stage/probe commands without launching Docker.  A live run first
-builds a clean Isaac stage, then executes the derived public scripted chain;
-it never loads a model checkpoint and never counts as model-owned Q-B eval.
+The worker is deliberately single-key and create-only.  Historical V2
+``--dry-run`` emits exact commands without launching Docker; V3 dry-run is
+fail-closed because an executable probe must never exist outside a consumed
+preregistration.  A live run first builds a clean Isaac stage, then executes
+the derived public scripted chain; it never loads a model checkpoint and never
+counts as model-owned Q-B eval.
 """
 
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 from pathlib import Path
 import shlex
+import stat
 import subprocess
+import sys
 from typing import Any
 
-from m2c.derive_model_owned_chain_probe import derive_probe_bytes, derive_probe_bytes_v3
-from m2c.s4_scene_family import SCRIPTED_BLOCKER_ENTITY, TARGET_ENTITY
-from m2c.package_path_blocked_collection import (
+
+def _bootstrap_option(argv: list[str], name: str) -> str | None:
+    """Parse one non-repeatable long option without project imports."""
+
+    prefix = f"{name}="
+    matches: list[str] = []
+    index = 0
+    while index < len(argv):
+        value = argv[index]
+        if value.startswith(prefix):
+            candidate = value[len(prefix) :]
+            if not candidate:
+                raise RuntimeError(f"pre-import option {name} has an empty value")
+            matches.append(candidate)
+        elif value == name:
+            if index + 1 >= len(argv) or argv[index + 1].startswith("--"):
+                raise RuntimeError(f"pre-import option {name} lacks a value")
+            matches.append(argv[index + 1])
+            index += 1
+        index += 1
+    if len(matches) > 1:
+        raise RuntimeError(f"pre-import option {name} is repeated")
+    return matches[0] if matches else None
+
+
+def _bootstrap_git(root: Path, *args: str) -> bytes:
+    completed = subprocess.run(
+        ["git", "-C", str(root), *args],
+        check=False,
+        capture_output=True,
+    )
+    if completed.returncode != 0:
+        raise RuntimeError(f"pre-import git {' '.join(args)} failed")
+    return completed.stdout
+
+
+def _bootstrap_read_regular(path: Path) -> bytes:
+    flags = os.O_RDONLY | getattr(os, "O_CLOEXEC", 0) | getattr(os, "O_NOFOLLOW", 0)
+    descriptor = os.open(path, flags)
+    try:
+        info = os.fstat(descriptor)
+        if not stat.S_ISREG(info.st_mode) or info.st_nlink != 1:
+            raise RuntimeError("pre-import preregistration is not a single regular file")
+        chunks: list[bytes] = []
+        while True:
+            chunk = os.read(descriptor, 1024 * 1024)
+            if not chunk:
+                break
+            chunks.append(chunk)
+        return b"".join(chunks)
+    finally:
+        os.close(descriptor)
+
+
+def _preimport_v3_checkout_guard(*, project_root: Path, prereg_path: Path) -> None:
+    """Freeze the host import tree before any M2C project module executes."""
+
+    root = project_root.resolve(strict=True)
+    prereg = prereg_path.resolve(strict=True)
+    try:
+        relative = prereg.relative_to(root).as_posix()
+    except ValueError as error:
+        raise RuntimeError("pre-import preregistration escapes the project root") from error
+    raw = _bootstrap_read_regular(prereg)
+    try:
+        payload = json.loads(raw)
+    except (UnicodeDecodeError, json.JSONDecodeError) as error:
+        raise RuntimeError("pre-import preregistration is not strict JSON") from error
+    if not isinstance(payload, dict) or payload.get("repository_relative_path") != relative:
+        raise RuntimeError("pre-import preregistration path binding is invalid")
+    head = _bootstrap_git(root, "rev-parse", "HEAD").decode().strip()
+    introductions = (
+        _bootstrap_git(root, "log", "--diff-filter=A", "--format=%H", "--", relative)
+        .decode()
+        .splitlines()
+    )
+    if not introductions or head != introductions[0]:
+        raise RuntimeError("pre-import preregistration must be the current HEAD")
+    if _bootstrap_git(root, "show", f"HEAD:{relative}") != raw:
+        raise RuntimeError("pre-import preregistration differs from HEAD bytes")
+    changed = set(
+        _bootstrap_git(root, "diff-tree", "--no-commit-id", "--name-only", "-r", head)
+        .decode()
+        .splitlines()
+    )
+    if changed != {relative}:
+        raise RuntimeError("pre-import preregistration commit is not prereg-only")
+    if _bootstrap_git(
+        root,
+        "status",
+        "--porcelain=v1",
+        "-z",
+        "--untracked-files=all",
+    ):
+        raise RuntimeError("pre-import host checkout is not clean")
+    ignored_runtime = _bootstrap_git(
+        root,
+        "ls-files",
+        "--others",
+        "--ignored",
+        "--exclude-standard",
+        "-z",
+        "--",
+        "src/xh_agent",
+        "scripts/m2c",
+    )
+    if ignored_runtime:
+        raise RuntimeError("pre-import runtime roots contain ignored shadow bytes")
+    # Imports that follow are compiled only in memory; no unchecked bytecode
+    # may appear between this gate and the later full-tree replay.
+    sys.dont_write_bytecode = True
+
+
+def _run_cli_preimport_guard() -> None:
+    argv = sys.argv[1:]
+    revision = _bootstrap_option(argv, "--revision") or "V3"
+    if revision == "V2":
+        return
+    if not (
+        sys.flags.isolated
+        and sys.flags.no_site
+        and sys.flags.dont_write_bytecode
+        and sys.flags.safe_path
+    ):
+        raise RuntimeError("V3 CLI must use the project venv Python with -I -S -B")
+    project = _bootstrap_option(argv, "--project-root")
+    prereg = _bootstrap_option(argv, "--collection-prereg")
+    if not project or not prereg:
+        raise RuntimeError("V3 CLI requires project root and committed preregistration")
+    _preimport_v3_checkout_guard(
+        project_root=Path(project),
+        prereg_path=Path(prereg),
+    )
+    root = Path(project).resolve(strict=True)
+    venv_root = Path(sys.executable).absolute().parent.parent
+    site_packages = (
+        venv_root
+        / "lib"
+        / f"python{sys.version_info.major}.{sys.version_info.minor}"
+        / "site-packages"
+    )
+    if not site_packages.is_dir():
+        raise RuntimeError("V3 isolated host dependency directory is unavailable")
+    # Plain path insertion deliberately avoids site.addsitedir: no .pth or
+    # sitecustomize code executes. Project roots were just verified clean.
+    sys.path[:0] = [str(root / "scripts"), str(root / "src"), str(site_packages)]
+
+
+if __name__ == "__main__":
+    try:
+        _run_cli_preimport_guard()
+    except (OSError, RuntimeError) as error:
+        raise SystemExit(f"M2C V3 pre-import gate blocked: {error}") from error
+
+
+from m2c.derive_model_owned_chain_probe import (  # noqa: E402
+    derive_probe_bytes,
+    derive_probe_bytes_v3,
+)
+from m2c.s4_scene_family import SCRIPTED_BLOCKER_ENTITY, TARGET_ENTITY  # noqa: E402
+from m2c.package_path_blocked_collection import (  # noqa: E402
     DECISION_SOURCE,
     frozen_source_record,
     load_json_object,
@@ -27,13 +190,33 @@ from m2c.package_path_blocked_collection import (
     project_frozen_manifests,
     sha256_file,
 )
-from xh_agent.data.isaac_m1b import M1B_URDF_SHA256
-from xh_agent.policy.qrm_lite.m2c_hard_freeze import (
+from xh_agent.data.isaac_m1b import M1B_URDF_SHA256  # noqa: E402
+from xh_agent.policy.qrm_lite.m2c_hard_freeze import (  # noqa: E402
     M2CExperimentAction,
     require_pre_freeze,
 )
-from xh_agent.policy.qrm_lite.path_blocked_supervision_v3 import (
+from xh_agent.policy.qrm_lite.path_blocked_supervision_v3 import (  # noqa: E402
     load_v3_training_manifest,
+)
+from xh_agent.policy.qrm_lite.s4_v3_collection_authorization_v1 import (  # noqa: E402
+    CollectionAuthorizationError,
+    FROZEN_UPSTREAM_V4_PROBE_SHA256,
+    ResolvedCollectionPreregV1,
+    canonical_path_sha256,
+    canonical_sha256,
+    consume_collection_key,
+    consume_probe_launch,
+    issue_probe_start_capability,
+    load_committed_collection_prereg,
+    materialize_committed_source_snapshot,
+    probe_entry_broker_socket_path,
+    probe_entry_broker_token_path,
+    probe_start_capability_path,
+    require_v3_host_runtime_launcher,
+    resolve_docker_image_id,
+    start_probe_entry_broker,
+    terminalize_probe_launch,
+    verify_consumed_collection_key,
 )
 
 
@@ -77,6 +260,8 @@ def stage_command(
     args: argparse.Namespace,
     *,
     output: Path,
+    image_reference: str | None = None,
+    project_mount: Path | None = None,
 ) -> list[str]:
     return [
         "docker",
@@ -93,7 +278,7 @@ def stage_command(
         "-e",
         "PYTHONPATH=/workspace/project/src",
         "-v",
-        f"{args.project_root}:/workspace/project:ro",
+        f"{project_mount or args.project_root}:/workspace/project:ro",
         "-v",
         f"{args.source_root}:/workspace/source:ro",
         "-v",
@@ -102,7 +287,7 @@ def stage_command(
         "/workspace/project",
         "--entrypoint",
         "/isaac-sim/python.sh",
-        args.image,
+        image_reference or args.image,
         "scripts/isaac_m1b_dataset_benchmark.py",
         "--sdf",
         f"/workspace/source/{args.sdf.name}",
@@ -133,8 +318,18 @@ def probe_command(
     stage: Path,
     output: Path,
     source_record: dict[str, Any],
+    container_image_id: str | None = None,
+    collection_prereg: ResolvedCollectionPreregV1 | None = None,
+    collection_claim: Path | None = None,
+    collection_start_capability: Path | None = None,
+    collection_probe_entry_broker_socket: Path | None = None,
+    collection_probe_entry_token_file: Path | None = None,
+    source_snapshot_root: Path | None = None,
 ) -> list[str]:
-    return [
+    image_reference = (
+        container_image_id if _revision(args) == "V3" and container_image_id else args.image
+    )
+    command = [
         "docker",
         "run",
         "--rm",
@@ -162,7 +357,7 @@ def probe_command(
         "/workspace/project",
         "--entrypoint",
         "/isaac-sim/python.sh",
-        args.image,
+        image_reference,
         f"/workspace/derived/{derived_probe.name}",
         "--stage",
         f"/workspace/stage/{stage.name}",
@@ -211,6 +406,68 @@ def probe_command(
             else []
         ),
     ]
+    if _revision(args) == "V3":
+        if (
+            collection_prereg is None
+            or collection_claim is None
+            or collection_start_capability is None
+            or collection_probe_entry_broker_socket is None
+            or collection_probe_entry_token_file is None
+            or source_snapshot_root is None
+        ):
+            raise CollectionAuthorizationError("V3 probe command lacks collection authorization")
+        if container_image_id is None:
+            raise CollectionAuthorizationError("V3 probe command lacks the resolved image ID")
+        # The host creates the stage-bound capability after validating the
+        # stage. Claims, capabilities, broker socket, and one-shot token are
+        # all read-only to the container; only the host may publish receipts.
+        ledger_root = Path(collection_prereg.prereg.ledger_root)
+        command[command.index(f"{args.project_root}:/workspace/project:ro")] = (
+            f"{source_snapshot_root}:/workspace/project:ro"
+        )
+        command[command.index("-w") : command.index("-w")] = [
+            "-v",
+            f"{ledger_root}:{ledger_root}:ro",
+            "-v",
+            f"{Path(collection_probe_entry_broker_socket).parent}:"
+            f"{Path(collection_probe_entry_broker_socket).parent}:ro",
+        ]
+        command.extend(
+            [
+                "--m2c-collection-claim",
+                str(collection_claim),
+                "--m2c-probe-start-capability",
+                str(collection_start_capability),
+                "--m2c-probe-entry-broker-socket",
+                str(collection_probe_entry_broker_socket),
+                "--m2c-probe-entry-token-file",
+                str(collection_probe_entry_token_file),
+                "--m2c-source-snapshot-root",
+                "/workspace/project",
+                "--m2c-container-image-id",
+                container_image_id,
+                "--m2c-docker-command-sha256",
+                "0" * 64,
+                "--m2c-stage-metrics-sha256",
+                "0" * 64,
+                "--m2c-stage-command-sha256",
+                canonical_sha256(
+                    stage_command(
+                        args,
+                        output=stage.parent,
+                        image_reference=container_image_id,
+                        project_mount=source_snapshot_root,
+                    )
+                ),
+                "--m2c-job-root-sha256",
+                canonical_path_sha256(output.parent),
+                "--m2c-probe-output-root-sha256",
+                canonical_path_sha256(output),
+            ]
+        )
+        digest_index = command.index("--m2c-docker-command-sha256") + 1
+        command[digest_index] = canonical_sha256(command)
+    return command
 
 
 def stage_is_valid(
@@ -246,9 +503,107 @@ def _write_new(path: Path, payload: object) -> None:
         os.fsync(stream.fileno())
 
 
-def prepare_job(args: argparse.Namespace) -> tuple[dict[str, Any], list[str], list[str]]:
+def _run_probe_command(
+    command: list[str],
+    *,
+    container_name: str,
+    timeout_s: float,
+) -> subprocess.CompletedProcess[str]:
+    """Run one probe and prove a timed-out named container was removed."""
+
+    try:
+        return subprocess.run(
+            command,
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=timeout_s,
+        )
+    except subprocess.TimeoutExpired as error:
+        removal = subprocess.run(
+            ["docker", "rm", "-f", container_name],
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=30,
+        )
+        if removal.returncode != 0:
+            raise CollectionAuthorizationError(
+                "timed-out probe container could not be stopped and removed"
+            ) from error
+        stdout = (
+            error.stdout.decode(errors="replace")
+            if isinstance(error.stdout, bytes)
+            else (error.stdout or "")
+        )
+        stderr = (
+            error.stderr.decode(errors="replace")
+            if isinstance(error.stderr, bytes)
+            else (error.stderr or "")
+        )
+        return subprocess.CompletedProcess(
+            args=command,
+            returncode=124,
+            stdout=stdout,
+            stderr=stderr + "\nM2C_PROBE_TIMEOUT_TERMINALIZED\n",
+        )
+
+
+def _remove_named_container(*, container_name: str) -> None:
+    """Fail closed unless Docker proves a named experimental container is gone."""
+
+    removal = subprocess.run(
+        ["docker", "rm", "-f", container_name],
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=30,
+    )
+    if removal.returncode != 0:
+        raise CollectionAuthorizationError(
+            f"experimental container could not be stopped and removed: {container_name}"
+        )
+
+
+def _run_stage_command(
+    command: list[str],
+    *,
+    container_name: str,
+    timeout_s: float,
+) -> subprocess.CompletedProcess[str]:
+    """Run stage generation and contain timeout/spawn failures."""
+
+    try:
+        return subprocess.run(
+            command,
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=timeout_s,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        _remove_named_container(container_name=container_name)
+        raise
+
+
+def prepare_job(
+    args: argparse.Namespace,
+    *,
+    collection_prereg: ResolvedCollectionPreregV1 | None = None,
+    collection_claim: Path | None = None,
+    container_image_id: str | None = None,
+    derived_probe_bytes: bytes | None = None,
+    source_snapshot_root: Path | None = None,
+) -> tuple[dict[str, Any], list[str], list[str]]:
     """Fail closed on sources/key, derive the probe, and return exact commands."""
 
+    revision = _revision(args)
+    if revision == "V3" and (
+        collection_prereg is None or collection_claim is None or source_snapshot_root is None
+    ):
+        raise CollectionAuthorizationError(
+            "V3 collection requires a committed preregistration and consumed key claim"
+        )
     for root, label in (
         (args.project_root, "project root"),
         (args.source_root, "source root"),
@@ -270,8 +625,24 @@ def prepare_job(args: argparse.Namespace) -> tuple[dict[str, Any], list[str], li
         if not source.is_file():
             raise ValueError(f"{label} is missing: {source}")
 
-    revision = _revision(args)
     if revision == "V3":
+        expected_derived = derived_probe_bytes or derive_probe_bytes_v3(
+            args.upstream_v4_probe.read_bytes()
+        )
+        claim = verify_consumed_collection_key(
+            resolved=collection_prereg,
+            claim_path=collection_claim,
+            matched_key=args.matched_key,
+            source_sdf_sha256=sha256_file(args.sdf),
+            source_supervision_sha256=sha256_file(args.supervision),
+            source_urdf_sha256=sha256_file(args.urdf),
+            upstream_v4_probe_sha256=sha256_file(args.upstream_v4_probe),
+            derived_probe_sha256=hashlib.sha256(expected_derived).hexdigest(),
+            container_image_id=container_image_id,
+            role=args.role,
+            split="train",
+            declared_target_attribute="yellow",
+        )
         if args.role != "TRAIN":
             raise ValueError("ADR-0021 V3 collection authorizes TRAIN only; SMOKE is excluded")
         manifest = load_v3_training_manifest(args.training_keys)
@@ -324,24 +695,56 @@ def prepare_job(args: argparse.Namespace) -> tuple[dict[str, Any], list[str], li
     job_root.mkdir(parents=True, exist_ok=False)
     derived = job_root / "derived-path-blocked-probe.py"
     derived.write_bytes(
-        derive_probe_bytes_v3(args.upstream_v4_probe.read_bytes())
+        expected_derived
         if revision == "V3"
         else derive_probe_bytes(args.upstream_v4_probe.read_bytes())
     )
     derived.chmod(0o555)
+    if revision == "V3":
+        # The exact derived source is part of the consumed capability. It is
+        # checked again by the probe before Kit and by the packager.
+        if claim.derived_probe_sha256 != sha256_file(derived):
+            raise CollectionAuthorizationError("derived probe differs from consumed claim")
     stage_root = job_root / "stage"
     probe_root = job_root / "probe"
     stage_root.mkdir()
     probe_root.mkdir()
-    stage_root.chmod(0o777)
-    probe_root.chmod(0o777)
-    stage_cmd = stage_command(args, output=stage_root)
+    stage_root.chmod(0o700 if revision == "V3" else 0o777)
+    probe_root.chmod(0o700 if revision == "V3" else 0o777)
+    stage_cmd = stage_command(
+        args,
+        output=stage_root,
+        image_reference=container_image_id if revision == "V3" else None,
+        project_mount=source_snapshot_root if revision == "V3" else None,
+    )
+    collection_start = (
+        probe_start_capability_path(
+            resolved=collection_prereg,
+            claim_path=collection_claim,
+            matched_key=args.matched_key,
+        )
+        if revision == "V3"
+        else None
+    )
+    collection_probe_entry_broker = (
+        probe_entry_broker_socket_path(claim.consumption_id) if revision == "V3" else None
+    )
+    collection_probe_entry_token = (
+        probe_entry_broker_token_path(claim.consumption_id) if revision == "V3" else None
+    )
     probe_cmd = probe_command(
         args,
         derived_probe=derived,
         stage=stage_root / "m1b_physics_scene.usdc",
         output=probe_root,
         source_record=record,
+        collection_prereg=collection_prereg,
+        collection_claim=collection_claim,
+        collection_start_capability=collection_start,
+        collection_probe_entry_broker_socket=collection_probe_entry_broker,
+        collection_probe_entry_token_file=collection_probe_entry_token,
+        source_snapshot_root=source_snapshot_root,
+        container_image_id=container_image_id,
     )
     job_receipt: dict[str, Any] = {
         "schema_version": (
@@ -369,6 +772,9 @@ def prepare_job(args: argparse.Namespace) -> tuple[dict[str, Any], list[str], li
         "training_key_manifest_sha256": sha256_file(args.training_keys),
         "s6_key_manifest_sha256": sha256_file(args.s6_keys),
         "runtime_registry_sha256": sha256_file(args.runtime_registry),
+        "committed_source_snapshot": (
+            claim.committed_source_snapshot.model_dump(mode="json") if revision == "V3" else None
+        ),
         "stage_command": stage_cmd,
         "probe_command": probe_cmd,
         "stage_command_shell": shlex.join(stage_cmd),
@@ -378,6 +784,23 @@ def prepare_job(args: argparse.Namespace) -> tuple[dict[str, Any], list[str], li
         "training_executed": False,
         "evaluation_executed": False,
     }
+    if revision == "V3":
+        job_receipt["collection_authorization"] = {
+            "schema_version": "M2CS4V3JobAuthorizationBindingV1",
+            "prereg_repository_path": collection_prereg.prereg.repository_relative_path,
+            "prereg_file_sha256": collection_prereg.file_sha256,
+            "prereg_sha256": collection_prereg.prereg.prereg_sha256,
+            "prereg_introduced_commit": collection_prereg.introduced_commit,
+            "consumption_receipt_path": str(collection_claim),
+            "consumption_receipt_sha256": claim.receipt_sha256,
+            "consumption_id": claim.consumption_id,
+            "challenge_nonce": claim.challenge_nonce,
+            "committed_source_snapshot": claim.committed_source_snapshot.model_dump(mode="json"),
+            "teacher_used": False,
+            "privileged_truth_policy_input": False,
+            "model_rollout": False,
+            "formal_q_b_evaluation": False,
+        }
     _write_new(
         job_root / ("collection-job-v3.json" if revision == "V3" else "collection-job-v2.json"),
         job_receipt,
@@ -386,23 +809,91 @@ def prepare_job(args: argparse.Namespace) -> tuple[dict[str, Any], list[str], li
 
 
 def run(args: argparse.Namespace) -> dict[str, Any]:
-    # Dry-run is create-only planning, not a read-only audit: it derives a
-    # probe and writes a job receipt.  The hard freeze forbids new experiment
-    # artifacts as well as physical execution.
-    require_pre_freeze(
-        M2CExperimentAction.SMOKE if args.role == "SMOKE" else M2CExperimentAction.ISAAC_COLLECTION
+    revision = _revision(args)
+    collection_prereg: ResolvedCollectionPreregV1 | None = None
+    collection_claim: Path | None = None
+    container_image_id: str | None = None
+    derived_probe_bytes: bytes | None = None
+    source_snapshot_root: Path | None = None
+    if revision == "V3":
+        if args.collection_prereg is None or args.collection_ledger_root is None:
+            raise CollectionAuthorizationError(
+                "V3 collection has no active committed preregistration/ledger"
+            )
+        # This independent gate also protects programmatic callers that do
+        # not traverse the CLI pre-import checkout checks.  It intentionally
+        # remains blocked until an immutable pre-Python launcher and complete
+        # host dependency inventory have been reviewed and frozen.
+        require_v3_host_runtime_launcher()
+        collection_prereg = load_committed_collection_prereg(
+            project_root=args.project_root,
+            prereg_path=args.collection_prereg,
+        )
+        if Path(collection_prereg.prereg.ledger_root) != args.collection_ledger_root:
+            raise CollectionAuthorizationError(
+                "CLI ledger root differs from committed preregistration"
+            )
+        if args.image != collection_prereg.prereg.container_image:
+            raise CollectionAuthorizationError(
+                "CLI Isaac image differs from the preregistered image"
+            )
+        # Planning must not spend the one physical-attempt authorization or
+        # emit a directly executable probe.  Use explicit contract tests for
+        # dry validation; a V3 worker dry-run is intentionally unavailable.
+        if args.dry_run:
+            raise CollectionAuthorizationError(
+                "V3 dry-run is disabled because it would emit an executable unconsumed probe"
+            )
+        require_pre_freeze(M2CExperimentAction.ISAAC_COLLECTION)
+        if sha256_file(args.upstream_v4_probe) != FROZEN_UPSTREAM_V4_PROBE_SHA256:
+            raise CollectionAuthorizationError("upstream V4 probe identity is not frozen")
+        derived_probe_bytes = derive_probe_bytes_v3(args.upstream_v4_probe.read_bytes())
+        # Consume the one physical-attempt authorization before any Docker
+        # access or source-snapshot materialization.  The immutable image ID
+        # is already part of the human-visible preregistration; resolving the
+        # local tag after the claim is a fail-closed availability check and a
+        # failure never refunds or replaces the selected key.
+        container_image_id = collection_prereg.prereg.container_image_id
+        collection_claim = consume_collection_key(
+            resolved=collection_prereg,
+            matched_key=args.matched_key,
+            source_urdf_sha256=sha256_file(args.urdf),
+            upstream_v4_probe_sha256=sha256_file(args.upstream_v4_probe),
+            derived_probe_sha256=hashlib.sha256(derived_probe_bytes).hexdigest(),
+            container_image_id=container_image_id,
+        )
+        if resolve_docker_image_id(image=args.image) != container_image_id:
+            raise CollectionAuthorizationError(
+                "resolved Isaac image differs from the consumed claim"
+            )
+        source_snapshot_root = materialize_committed_source_snapshot(
+            project_root=args.project_root,
+            expected=collection_prereg.prereg.committed_source_snapshot,
+        )
+    else:
+        # V2 remains a historical helper and retains its original hard-freeze
+        # boundary.  It is not upgraded into the V3 authorization contract.
+        require_pre_freeze(
+            M2CExperimentAction.SMOKE
+            if args.role == "SMOKE"
+            else M2CExperimentAction.ISAAC_COLLECTION
+        )
+    receipt, stage_cmd, probe_cmd = prepare_job(
+        args,
+        collection_prereg=collection_prereg,
+        collection_claim=collection_claim,
+        container_image_id=container_image_id,
+        derived_probe_bytes=derived_probe_bytes,
+        source_snapshot_root=source_snapshot_root,
     )
-    receipt, stage_cmd, probe_cmd = prepare_job(args)
     job_root = args.output_root / args.role.lower() / args.matched_key
     if args.dry_run:
         return {**receipt, "job_root": str(job_root)}
 
-    stage_completed = subprocess.run(
+    stage_completed = _run_stage_command(
         stage_cmd,
-        capture_output=True,
-        text=True,
-        check=False,
-        timeout=args.stage_timeout_s,
+        container_name=f"{args.container_prefix}-stage",
+        timeout_s=args.stage_timeout_s,
     )
     (job_root / "stage" / "console.log").write_text(
         stage_completed.stdout + stage_completed.stderr,
@@ -415,18 +906,147 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         urdf=args.urdf,
     ):
         raise RuntimeError("Isaac stage builder failed its hash-bound acceptance gate")
-    probe_completed = subprocess.run(
-        probe_cmd,
-        capture_output=True,
-        text=True,
-        check=False,
-        timeout=args.probe_timeout_s,
-    )
-    (job_root / "probe" / "console.log").write_text(
-        probe_completed.stdout + probe_completed.stderr,
-        encoding="utf-8",
-    )
+    if revision == "V3":
+        assert collection_prereg is not None
+        assert collection_claim is not None
+        assert container_image_id is not None
+        stage_path = job_root / "stage" / "m1b_physics_scene.usdc"
+        metrics_path = job_root / "stage" / "metrics.json"
+        metrics_digest = sha256_file(metrics_path)
+        probe_cmd[probe_cmd.index("--m2c-stage-metrics-sha256") + 1] = metrics_digest
+        # The command digest is computed last over a representation with its
+        # own digest slot zeroed. This binds every Docker flag/mount/argument
+        # without a self-referential hash.
+        command_digest_index = probe_cmd.index("--m2c-docker-command-sha256") + 1
+        probe_cmd[command_digest_index] = "0" * 64
+        probe_cmd[command_digest_index] = canonical_sha256(probe_cmd)
+        python_argv = probe_cmd[probe_cmd.index(container_image_id) + 1 :]
+        command_digest_index = python_argv.index("--m2c-docker-command-sha256") + 1
+        command_digest = python_argv[command_digest_index]
+        issued_start = issue_probe_start_capability(
+            resolved=collection_prereg,
+            claim_path=collection_claim,
+            matched_key=args.matched_key,
+            failure_seed=int(receipt["failure_seed"]),
+            source_sdf_sha256=sha256_file(args.sdf),
+            source_supervision_sha256=sha256_file(args.supervision),
+            source_urdf_sha256=sha256_file(args.urdf),
+            upstream_v4_probe_sha256=sha256_file(args.upstream_v4_probe),
+            stage_usdc_sha256=sha256_file(stage_path),
+            stage_metrics_sha256=metrics_digest,
+            stage_command_sha256=canonical_sha256(stage_cmd),
+            derived_probe_sha256=str(receipt["derived_probe_sha256"]),
+            container_image_id=container_image_id,
+            probe_argv_sha256=canonical_sha256(python_argv),
+            docker_command_sha256=command_digest,
+            job_root_sha256=canonical_path_sha256(job_root),
+            probe_output_root_sha256=canonical_path_sha256(job_root / "probe"),
+            role=args.role,
+            split=str(receipt["split"]),
+            declared_target_attribute="yellow",
+            destination_cell=str(
+                next(
+                    item.destination_cell
+                    for item in collection_prereg.manifest.training_keys
+                    if item.matched_key == args.matched_key
+                )
+            ),
+        )
+        if (
+            str(issued_start.path) not in probe_cmd
+            or str(issued_start.broker_socket_path) not in probe_cmd
+            or str(issued_start.broker_token_path) not in probe_cmd
+        ):
+            raise CollectionAuthorizationError(
+                "probe command does not reference the issued one-shot capability"
+            )
+        # The stage is mounted read-only into the probe container. Remove host
+        # write bits after publishing the capability so the bytes cannot drift
+        # between host validation and the probe's pre-Kit rehash.
+        for stage_member in (stage_path, job_root / "stage" / "metrics.json"):
+            stage_member.chmod(0o400)
+        launch_path = consume_probe_launch(
+            resolved=collection_prereg,
+            claim_path=collection_claim,
+            matched_key=args.matched_key,
+        )
+        if not launch_path.is_file():
+            raise CollectionAuthorizationError("probe launch was not atomically consumed")
+        broker = start_probe_entry_broker(
+            resolved=collection_prereg,
+            claim_path=collection_claim,
+            matched_key=args.matched_key,
+            issued=issued_start,
+            accept_timeout_s=args.probe_timeout_s,
+        )
+    else:
+        broker = None
+    probe_console = job_root / "probe" / "console.log"
     raw_probe = job_root / "probe" / "actuation-probe.json"
+    probe_completed: subprocess.CompletedProcess[str] | None = None
+    probe_error: BaseException | None = None
+    containment_proven = False
+    try:
+        probe_completed = _run_probe_command(
+            probe_cmd,
+            container_name=f"{args.container_prefix}-probe",
+            timeout_s=args.probe_timeout_s,
+        )
+        containment_proven = True
+        probe_console.write_text(
+            probe_completed.stdout + probe_completed.stderr,
+            encoding="utf-8",
+        )
+    except BaseException as error:
+        probe_error = error
+        if revision == "V3":
+            try:
+                _remove_named_container(container_name=f"{args.container_prefix}-probe")
+                containment_proven = True
+            except BaseException as containment_error:
+                probe_error = CollectionAuthorizationError(
+                    "probe failed and container absence could not be proven"
+                )
+                probe_error.__cause__ = containment_error
+        probe_console.write_text(
+            f"M2C_PROBE_SPAWN_OR_CONTAINMENT_FAILURE: {type(error).__name__}\n",
+            encoding="utf-8",
+        )
+    finally:
+        if revision == "V3":
+            assert collection_prereg is not None
+            assert collection_claim is not None
+            assert broker is not None
+            cleanup_error: BaseException | None = None
+            try:
+                if containment_proven:
+                    terminalize_probe_launch(
+                        resolved=collection_prereg,
+                        claim_path=collection_claim,
+                        matched_key=args.matched_key,
+                        job_root=job_root,
+                        probe_output_root=job_root / "probe",
+                        returncode=(
+                            probe_completed.returncode if probe_completed is not None else 125
+                        ),
+                        console_path=probe_console,
+                        raw_probe_path=raw_probe,
+                    )
+            except BaseException as error:
+                cleanup_error = error
+            finally:
+                try:
+                    if broker.completed.is_set():
+                        broker.wait(timeout_s=5.0)
+                    else:
+                        broker.cancel(timeout_s=5.0)
+                except BaseException as error:
+                    cleanup_error = cleanup_error or error
+            if cleanup_error is not None:
+                probe_error = cleanup_error
+    if probe_error is not None:
+        raise probe_error
+    assert probe_completed is not None
     if probe_completed.returncode != 0 or not raw_probe.is_file():
         raise RuntimeError("Isaac PATH_BLOCKED probe failed or emitted no raw evidence")
     packaged = package_collection(
@@ -441,6 +1061,10 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         derived_probe_path=job_root / "derived-path-blocked-probe.py",
         upstream_v4_probe_path=args.upstream_v4_probe,
         revision=_revision(args),
+        collection_prereg_path=(
+            getattr(args, "collection_prereg", None) if revision == "V3" else None
+        ),
+        collection_claim_path=collection_claim,
     )
     return {
         **receipt,
@@ -470,6 +1094,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--stage-timeout-s", type=float, default=1200.0)
     parser.add_argument("--probe-timeout-s", type=float, default=5400.0)
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--collection-prereg", type=Path)
+    parser.add_argument("--collection-ledger-root", type=Path)
     parser.add_argument(
         "--training-keys",
         type=Path,

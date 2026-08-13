@@ -753,7 +753,56 @@ def derive_probe_bytes_v3(upstream: bytes) -> bytes:
         '    parser.add_argument("--m2c-failure-seed", type=int, required=True)\n',
         """    parser.add_argument("--m2c-failure-seed", type=int, required=True)
     parser.add_argument("--m2c-declared-target-attribute", required=True)
+    parser.add_argument("--m2c-collection-claim", type=Path, required=True)
+    parser.add_argument("--m2c-probe-start-capability", type=Path, required=True)
+    parser.add_argument("--m2c-probe-entry-broker-socket", type=Path, required=True)
+    parser.add_argument("--m2c-probe-entry-token-file", type=Path, required=True)
+    parser.add_argument("--m2c-source-snapshot-root", type=Path, required=True)
+    parser.add_argument("--m2c-container-image-id", required=True)
+    parser.add_argument("--m2c-docker-command-sha256", required=True)
+    parser.add_argument("--m2c-stage-metrics-sha256", required=True)
+    parser.add_argument("--m2c-stage-command-sha256", required=True)
+    parser.add_argument("--m2c-job-root-sha256", required=True)
+    parser.add_argument("--m2c-probe-output-root-sha256", required=True)
 """,
+    )
+    authorization = """M2C_V3_COLLECTION_AUTHORIZATION = authorize_probe_start(
+    claim_path=ARGS.m2c_collection_claim,
+    start_capability_path=ARGS.m2c_probe_start_capability,
+    probe_entry_broker_socket=ARGS.m2c_probe_entry_broker_socket,
+    probe_entry_token_file=ARGS.m2c_probe_entry_token_file,
+    source_snapshot_root=ARGS.m2c_source_snapshot_root,
+    matched_key=ARGS.m2c_matched_key,
+    failure_seed=ARGS.m2c_failure_seed,
+    source_sdf_sha256=sha256_file(ARGS.sdf),
+    source_supervision_sha256=sha256_file(ARGS.supervision),
+    source_urdf_sha256=sha256_file(ARGS.urdf),
+    upstream_v4_probe_sha256="6623b1ce1dc5b289e1166ce7a59ea742fa6de2c3595d4818ab65ef03f0553f87",
+    stage_usdc_sha256=sha256_file(ARGS.stage),
+    stage_metrics_sha256=ARGS.m2c_stage_metrics_sha256,
+    stage_command_sha256=ARGS.m2c_stage_command_sha256,
+    derived_probe_sha256=sha256_file(__file__),
+    container_image_id=ARGS.m2c_container_image_id,
+    probe_argv=__import__("sys").argv,
+    job_root_sha256=ARGS.m2c_job_root_sha256,
+    probe_output_root_sha256=ARGS.m2c_probe_output_root_sha256,
+    role=ARGS.m2c_chain_role,
+    split=ARGS.m2c_split,
+    declared_target_attribute=ARGS.m2c_declared_target_attribute,
+    destination_cell=f"BIN_CELL_{ARGS.m2c_scripted_safe_place_bin_cell}",
+).model_dump(mode="json")
+
+"""
+    source = _replace_once(
+        source,
+        "# This guard lives inside the derived probe, before Kit/SimulationApp starts,\n",
+        """from xh_agent.policy.qrm_lite.s4_v3_collection_authorization_v1 import (
+    authorize_probe_start,
+)
+
+# This guard lives inside the derived probe, before Kit/SimulationApp starts,
+"""
+        + authorization,
     )
     source = _replace_once(
         source,
@@ -801,8 +850,33 @@ def derive_probe_bytes_v3(upstream: bytes) -> bytes:
                 "declared_target_attribute": ARGS.m2c_declared_target_attribute,
                 "candidate_contract_revision": "PublicTrackCandidateV3",
                 "checkpoint_architecture_revision": "M2C_Q012_V3",
+                "collection_authorization_sha256": __import__("hashlib").sha256(
+                    json.dumps(
+                        M2C_V3_COLLECTION_AUTHORIZATION,
+                        sort_keys=True,
+                        separators=(",", ":"),
+                    ).encode()
+                ).hexdigest(),
 """,
     )
+    source = _replace_once(
+        source,
+        '            "m2c_path_blocked_physical_chain": {\n',
+        '            "m2c_v3_collection_authorization": M2C_V3_COLLECTION_AUTHORIZATION,\n'
+        '            "m2c_path_blocked_physical_chain": {\n',
+    )
+    # V3 is TRAIN-only, so the inherited role-aware hard-freeze call is
+    # exactly the required collection guard. Move authorization immediately
+    # after it instead of adding a duplicate gate or consuming before it.
+    guard = """require_pre_freeze(
+    M2CExperimentAction.SMOKE
+    if ARGS.m2c_chain_role == "SMOKE"
+    else M2CExperimentAction.ISAAC_COLLECTION
+)
+
+"""
+    source = _replace_once(source, authorization, "")
+    source = _replace_once(source, guard, guard + authorization)
     # ADR-0021 permits only new TRAIN collection.  The V3 worker separately
     # enforces TRAIN, but the derived executable also fails closed itself.
     source = source.replace(

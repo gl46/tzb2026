@@ -14,28 +14,180 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import stat
+import subprocess
+import sys
 import tempfile
 from typing import Any, Mapping
 
-from m2c.derive_model_owned_chain_probe import (
+
+def _bootstrap_option(argv: list[str], name: str) -> str | None:
+    prefix = f"{name}="
+    matches: list[str] = []
+    index = 0
+    while index < len(argv):
+        value = argv[index]
+        if value.startswith(prefix):
+            candidate = value[len(prefix) :]
+            if not candidate:
+                raise RuntimeError(f"pre-import option {name} has an empty value")
+            matches.append(candidate)
+        elif value == name:
+            if index + 1 >= len(argv) or argv[index + 1].startswith("--"):
+                raise RuntimeError(f"pre-import option {name} lacks a value")
+            matches.append(argv[index + 1])
+            index += 1
+        index += 1
+    if len(matches) > 1:
+        raise RuntimeError(f"pre-import option {name} is repeated")
+    return matches[0] if matches else None
+
+
+def _bootstrap_git(root: Path, *args: str) -> bytes:
+    completed = subprocess.run(
+        ["git", "-C", str(root), *args],
+        check=False,
+        capture_output=True,
+    )
+    if completed.returncode != 0:
+        raise RuntimeError(f"pre-import git {' '.join(args)} failed")
+    return completed.stdout
+
+
+def _bootstrap_read_regular(path: Path) -> bytes:
+    flags = os.O_RDONLY | getattr(os, "O_CLOEXEC", 0) | getattr(os, "O_NOFOLLOW", 0)
+    descriptor = os.open(path, flags)
+    try:
+        info = os.fstat(descriptor)
+        if not stat.S_ISREG(info.st_mode) or info.st_nlink != 1:
+            raise RuntimeError("pre-import preregistration is not a single regular file")
+        chunks: list[bytes] = []
+        while True:
+            chunk = os.read(descriptor, 1024 * 1024)
+            if not chunk:
+                break
+            chunks.append(chunk)
+        return b"".join(chunks)
+    finally:
+        os.close(descriptor)
+
+
+def _preimport_v3_checkout_guard(*, project_root: Path, prereg_path: Path) -> None:
+    root = project_root.resolve(strict=True)
+    prereg = prereg_path.resolve(strict=True)
+    try:
+        relative = prereg.relative_to(root).as_posix()
+    except ValueError as error:
+        raise RuntimeError("pre-import preregistration escapes the project root") from error
+    raw = _bootstrap_read_regular(prereg)
+    try:
+        payload = json.loads(raw)
+    except (UnicodeDecodeError, json.JSONDecodeError) as error:
+        raise RuntimeError("pre-import preregistration is not strict JSON") from error
+    if not isinstance(payload, dict) or payload.get("repository_relative_path") != relative:
+        raise RuntimeError("pre-import preregistration path binding is invalid")
+    head = _bootstrap_git(root, "rev-parse", "HEAD").decode().strip()
+    introductions = (
+        _bootstrap_git(root, "log", "--diff-filter=A", "--format=%H", "--", relative)
+        .decode()
+        .splitlines()
+    )
+    if not introductions or head != introductions[0]:
+        raise RuntimeError("pre-import preregistration must be the current HEAD")
+    if _bootstrap_git(root, "show", f"HEAD:{relative}") != raw:
+        raise RuntimeError("pre-import preregistration differs from HEAD bytes")
+    changed = set(
+        _bootstrap_git(root, "diff-tree", "--no-commit-id", "--name-only", "-r", head)
+        .decode()
+        .splitlines()
+    )
+    if changed != {relative}:
+        raise RuntimeError("pre-import preregistration commit is not prereg-only")
+    if _bootstrap_git(
+        root,
+        "status",
+        "--porcelain=v1",
+        "-z",
+        "--untracked-files=all",
+    ):
+        raise RuntimeError("pre-import host checkout is not clean")
+    if _bootstrap_git(
+        root,
+        "ls-files",
+        "--others",
+        "--ignored",
+        "--exclude-standard",
+        "-z",
+        "--",
+        "src/xh_agent",
+        "scripts/m2c",
+    ):
+        raise RuntimeError("pre-import runtime roots contain ignored shadow bytes")
+    sys.dont_write_bytecode = True
+
+
+def _run_cli_preimport_guard() -> None:
+    argv = sys.argv[1:]
+    if (_bootstrap_option(argv, "--revision") or "V3") == "V2":
+        return
+    if not (
+        sys.flags.isolated
+        and sys.flags.no_site
+        and sys.flags.dont_write_bytecode
+        and sys.flags.safe_path
+    ):
+        raise RuntimeError("V3 CLI must use the project venv Python with -I -S -B")
+    prereg = _bootstrap_option(argv, "--collection-prereg")
+    if not prereg:
+        raise RuntimeError("V3 CLI requires a committed preregistration")
+    root = Path(__file__).resolve().parents[2]
+    _preimport_v3_checkout_guard(
+        project_root=root,
+        prereg_path=Path(prereg),
+    )
+    venv_root = Path(sys.executable).absolute().parent.parent
+    site_packages = (
+        venv_root
+        / "lib"
+        / f"python{sys.version_info.major}.{sys.version_info.minor}"
+        / "site-packages"
+    )
+    if not site_packages.is_dir():
+        raise RuntimeError("V3 isolated host dependency directory is unavailable")
+    sys.path[:0] = [str(root / "scripts"), str(root / "src"), str(site_packages)]
+
+
+if __name__ == "__main__":
+    try:
+        _run_cli_preimport_guard()
+    except (OSError, RuntimeError) as error:
+        raise SystemExit(f"M2C V3 pre-import gate blocked: {error}") from error
+
+
+from m2c.derive_model_owned_chain_probe import (  # noqa: E402
     build_collection_manifests,
     derive_probe_bytes,
     derive_probe_bytes_v3,
 )
-from xh_agent.policy.qrm_lite.path_blocked_supervision_v2 import (
+from xh_agent.policy.qrm_lite.path_blocked_supervision_v2 import (  # noqa: E402
     FrozenPathBlockedCollectionManifestV2,
     FrozenS6ExclusionManifestV2,
     build_path_blocked_supervised_dataset,
     canonical_manifest_sha256,
     package_probe_payload,
 )
-from xh_agent.policy.qrm_lite.path_blocked_supervision_v3 import (
+from xh_agent.policy.qrm_lite.path_blocked_supervision_v3 import (  # noqa: E402
     M2CPathBlockedProbeChainV3,
     V3_MANIFEST_FILE_SHA256,
     build_path_blocked_supervised_dataset_v3,
     load_v3_training_manifest,
     package_probe_chain_v3,
     recompute_candidate_payload_v3,
+)
+from xh_agent.policy.qrm_lite.s4_v3_collection_authorization_v1 import (  # noqa: E402
+    read_regular_file_once,
+    require_v3_host_runtime_launcher,
+    verify_packaging_authorization,
 )
 
 
@@ -249,9 +401,25 @@ def package_collection(
     derived_probe_path: Path,
     upstream_v4_probe_path: Path,
     revision: str = "V2",
+    collection_prereg_path: Path | None = None,
+    collection_claim_path: Path | None = None,
 ) -> dict[str, Any]:
     """Validate and atomically publish one frozen TRAIN/SMOKE collection."""
 
+    if revision not in {"V2", "V3"}:
+        raise ValueError("collection revision must be V2 or V3")
+    # Authorization is a capability boundary, not another property of the
+    # evidence payload. Reject an unclaimed V3 request before probing input
+    # paths or the destination.
+    if revision == "V3" and (collection_prereg_path is None or collection_claim_path is None):
+        raise ValueError(
+            "V3 packaging requires the committed preregistration and consumed key claim"
+        )
+    if revision == "V3":
+        # Packaging is a second production entry point.  Do not let direct
+        # library calls bypass the immutable-host-runtime prerequisite that
+        # the worker CLI enforces before importing project modules.
+        require_v3_host_runtime_launcher()
     destination = output_root / role.lower() / matched_key
     if destination.exists():
         raise FileExistsError(f"refusing to overwrite packaged collection: {destination}")
@@ -265,8 +433,6 @@ def package_collection(
     ):
         if not path.is_file():
             raise FileNotFoundError(f"{label} does not exist: {path}")
-    if revision not in {"V2", "V3"}:
-        raise ValueError("collection revision must be V2 or V3")
     expected_derived_bytes = (
         derive_probe_bytes_v3(upstream_v4_probe_path.read_bytes())
         if revision == "V3"
@@ -333,7 +499,32 @@ def package_collection(
     ):
         raise ValueError("requested collection overlaps frozen S6")
 
-    raw_payload = load_json_object(raw_probe_path, label="raw probe")
+    raw_probe_bytes = read_regular_file_once(raw_probe_resolved)
+    packaged_authorization: dict[str, Any] | None = None
+    try:
+        raw_payload = json.loads(raw_probe_bytes)
+    except (UnicodeDecodeError, json.JSONDecodeError) as error:
+        raise ValueError("raw probe is not readable JSON") from error
+    if not isinstance(raw_payload, dict):
+        raise ValueError("raw probe must be a JSON object")
+    if revision == "V3":
+        raw_authorization = raw_payload.get("m2c_v3_collection_authorization")
+        if not isinstance(raw_authorization, dict):
+            raise ValueError("V3 raw probe lacks the collection authorization binding")
+        console_path = raw_probe_resolved.parent / "console.log"
+        console_bytes = read_regular_file_once(console_path)
+        _resolved_prereg, _claim, packaged_binding = verify_packaging_authorization(
+            project_root=Path(__file__).resolve().parents[2],
+            prereg_path=collection_prereg_path,
+            claim_path=collection_claim_path,
+            matched_key=matched_key,
+            raw_binding=raw_authorization,
+            raw_probe_sha256=hashlib.sha256(raw_probe_bytes).hexdigest(),
+            console_sha256=hashlib.sha256(console_bytes).hexdigest(),
+            job_root=raw_probe_resolved.parent.parent,
+            probe_output_root=raw_probe_resolved.parent,
+        )
+        packaged_authorization = packaged_binding.model_dump(mode="json")
     chain = raw_payload.get("m2c_path_blocked_physical_chain")
     if not isinstance(chain, Mapping):
         raise ValueError("raw probe lacks m2c_path_blocked_physical_chain")
@@ -349,6 +540,8 @@ def package_collection(
     if revision == "V3":
         if chain.get("schema_version") != "M2CPathBlockedProbeChainV3":
             raise ValueError("V3 package refuses V2 or unversioned probe evidence")
+        if chain.get("collection_authorization_sha256") != canonical_sha256(raw_authorization):
+            raise ValueError("V3 physical chain is not bound to the raw collection authorization")
         if chain.get("declared_target_attribute") != source_record["declared_target_attribute"]:
             raise ValueError("probe declared attribute differs from frozen TaskSpec selector")
         parsed_probe = M2CPathBlockedProbeChainV3.model_validate(chain)
@@ -393,7 +586,7 @@ def package_collection(
             s6_manifest=s6_manifest,
             runtime_registry_sha256=sha256_file(runtime_registry_path),
             source_evidence_uri="dataset://actuation-probe.json",
-            source_evidence_sha256=sha256_file(raw_probe_path),
+            source_evidence_sha256=hashlib.sha256(raw_probe_bytes).hexdigest(),
         )
         dataset = build_path_blocked_supervised_dataset_v3(
             packaged,
@@ -438,7 +631,7 @@ def package_collection(
     ) as temporary_text:
         temporary = Path(temporary_text)
         raw_copy = temporary / "actuation-probe.json"
-        raw_copy.write_bytes(raw_probe_path.read_bytes())
+        raw_copy.write_bytes(raw_probe_bytes)
         copied_assets: dict[str, str] = {}
         copied_receipts: dict[str, dict[str, str]] = {}
         for step in packaged.steps:
@@ -541,6 +734,8 @@ def package_collection(
             "training_executed": False,
             "evaluation_executed": False,
         }
+        if revision == "V3":
+            receipt["collection_authorization"] = packaged_authorization
         receipt_path = temporary / f"collection-receipt-{revision.lower()}.json"
         _write_json_new(receipt_path, receipt)
         _atomic_publish_directory(temporary, destination)
@@ -564,6 +759,8 @@ def main() -> int:
     parser.add_argument("--matched-key", required=True)
     parser.add_argument("--derived-probe", required=True, type=Path)
     parser.add_argument("--upstream-v4-probe", required=True, type=Path)
+    parser.add_argument("--collection-prereg", type=Path)
+    parser.add_argument("--collection-claim", type=Path)
     parser.add_argument(
         "--training-keys",
         type=Path,
@@ -592,6 +789,8 @@ def main() -> int:
         derived_probe_path=args.derived_probe,
         upstream_v4_probe_path=args.upstream_v4_probe,
         revision=args.revision,
+        collection_prereg_path=args.collection_prereg,
+        collection_claim_path=args.collection_claim,
     )
     print(json.dumps(result, sort_keys=True))
     return 0

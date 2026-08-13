@@ -269,6 +269,13 @@ class M2CPathBlockedProbeChainV3(StrictModel):
     declared_target_attribute: Literal["yellow"]
     candidate_contract_revision: Literal["PublicTrackCandidateV3"]
     checkpoint_architecture_revision: Literal["M2C_Q012_V3"]
+    # Historical V3 probes predate the execution-authorization ledger and
+    # remain parseable for audit. New packaging requires this digest and
+    # cross-checks it against the exact top-level raw authorization binding.
+    collection_authorization_sha256: str | None = Field(
+        default=None,
+        pattern=r"^[0-9a-f]{64}$",
+    )
     sdf_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
     supervision_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
     failure_observed_at_ns: int = Field(gt=0)

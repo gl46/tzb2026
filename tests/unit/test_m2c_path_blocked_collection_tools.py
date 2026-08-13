@@ -16,6 +16,7 @@ from m2c.package_path_blocked_collection import (
 from m2c.derive_model_owned_chain_probe import derive_probe_bytes
 from m2c.run_path_blocked_collection_worker import (
     prepare_job,
+    run,
     stage_is_valid,
     validate_frozen_scene_semantics,
 )
@@ -307,6 +308,67 @@ def test_worker_maps_selected_host_gpu_to_container_cuda_zero(tmp_path: Path) ->
     assert stage[stage.index("--gpus") + 1] == "device=1"
     assert probe[probe.index("--gpus") + 1] == "device=1"
     assert stage[stage.index("--physical-gpu-index") + 1] == "0"
+
+
+def test_live_programmatic_v2_reaches_packager_without_v3_namespace_fields(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    args = _worker_args(tmp_path)
+    args.dry_run = False
+
+    class Completed:
+        returncode = 0
+        stdout = ""
+        stderr = ""
+
+    monkeypatch.setattr(
+        "m2c.run_path_blocked_collection_worker.require_pre_freeze",
+        lambda *_args, **_kwargs: None,
+    )
+
+    subprocess_calls = 0
+
+    def subprocess_stub(*_args: object, **_kwargs: object) -> Completed:
+        nonlocal subprocess_calls
+        subprocess_calls += 1
+        if subprocess_calls == 2:
+            raw = (
+                args.output_root
+                / args.role.lower()
+                / args.matched_key
+                / "probe"
+                / "actuation-probe.json"
+            )
+            raw.write_text("{}\n")
+        return Completed()
+
+    monkeypatch.setattr(
+        "m2c.run_path_blocked_collection_worker.subprocess.run",
+        subprocess_stub,
+    )
+    monkeypatch.setattr(
+        "m2c.run_path_blocked_collection_worker.stage_is_valid",
+        lambda *_args, **_kwargs: True,
+    )
+    captured: dict[str, object] = {}
+
+    def package_stub(**kwargs: object) -> dict[str, object]:
+        captured.update(kwargs)
+        return {"status": "UNIT_ONLY"}
+
+    monkeypatch.setattr(
+        "m2c.run_path_blocked_collection_worker.package_collection",
+        package_stub,
+    )
+    # run() is create-only, so use a fresh output while reusing the exact
+    # source Namespace that predates V3 collection_prereg attributes.
+    args.output_root = tmp_path / "live-jobs"
+    result = run(args)
+    assert subprocess_calls == 2
+    assert result["package"]["status"] == "UNIT_ONLY"
+    assert captured["collection_prereg_path"] is None
+    assert captured["collection_claim_path"] is None
 
 
 def test_worker_rejects_role_key_or_frozen_source_hash_mismatch(tmp_path: Path) -> None:
