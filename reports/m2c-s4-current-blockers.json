@@ -1,0 +1,83 @@
+{
+  "schema_version": "M2CS4CurrentBlockersV1",
+  "status": "BLOCKED_UNMEASURED_HUMAN_DIRECTION_REQUIRED",
+  "reported_at": "2026-08-13T12:11:17+08:00",
+  "checked_head_commit": "e33f86a3cfeb43814faaec54ed13e07f177314ab",
+  "q_a_state": "PASSED",
+  "q_b_state": "UNMEASURED",
+  "pure_model_success_episodes": null,
+  "d1_triggered": false,
+  "d2_triggered": false,
+  "path_blocked_training": {
+    "frozen_v3_train_keys": 36,
+    "unique_train_keys_attempted": 11,
+    "raw_v3_eight_step_chains": 10,
+    "training_samples_eligible": 0,
+    "training_samples_packaged": 0,
+    "training_executed": false,
+    "model_rollout_executed": false,
+    "formal_q_b_evaluation_executed": false,
+    "batch_04_authorized": false,
+    "public_track_reidentification_change_authorized": false,
+    "source_reports": [
+      {
+        "path": "reports/m2c-s4-v3-path-blocked-train-collection.json",
+        "sha256": "c505ec6517d7a766768f72cd14fc49d1919cff234dc2d8fbee1877104b41480d"
+      },
+      {
+        "path": "reports/m2c-s4-v3-path-blocked-train-collection-batch03.json",
+        "sha256": "0fe177565b6d842fa6e1fc80a8d1e0822283d3557aeb41d56c36140e4dbacb57"
+      }
+    ]
+  },
+  "phase_2": {
+    "binding_addendum_generation_authorized": false,
+    "source_binding_application_authorized": false,
+    "formal_physical_runner_binding": null,
+    "formal_deployment_closure_binding": null,
+    "frozen_b0_runtime_wrapper_binding": null,
+    "offline_wire_authentication_verifier_binding": null,
+    "exact_plan_preflight_formal_execution_eligible": false,
+    "isaac_lula_production_query_callback_available": false,
+    "blockers": [
+      "COMPLETE_CONTINUOUS_SELF_COLLISION_QUERY_NOT_AVAILABLE",
+      "ACTIVE_SESSION_CONTACT_ATTACHMENT_CONTROLLER_ATTESTATION_NOT_AVAILABLE",
+      "REAL_EIGHT_SKILL_EXACT_PLAN_RECEIPTS_MISSING",
+      "ACTIVE_SESSION_UNCHANGED_B0_CALLABLE_MISSING",
+      "SIGNED_DEPLOYMENT_AND_WIRE_TRUST_ROOTS_MISSING",
+      "CONTAINER_AND_TRANSITIVE_IMPORT_CLOSURE_MISSING"
+    ],
+    "source_report": {
+      "path": "reports/m2c-s4-adr0022-phase2-unlock-audit.json",
+      "sha256": "940e32e8dffc87ab6ea6f37baf5213152354512ae02b2d324ae7a94545491515"
+    }
+  },
+  "human_decisions_required": [
+    {
+      "topic": "PUBLIC_TRACK_REIDENTIFICATION",
+      "request_path": "docs/decisions/M2C-S4-PUBLIC-TRACK-REID-ADR-REQUEST.md",
+      "request_sha256": "3ac9d5e30e9529df6e12d9914fa31b67243cd90ea490d5e3043d34f3260dfd59",
+      "status": "NOT_APPROVED",
+      "valid_choices": ["A", "B", "C"]
+    },
+    {
+      "topic": "ACTIVE_SESSION_B0_FALLBACK",
+      "request_path": "docs/decisions/M2C-S4-B0-ACTIVE-SESSION-FALLBACK-ADR-REQUEST.md",
+      "request_sha256": "bdb746ff21741eab6d9e3b2ecb463eb9c069383d9bbfa8dc9f2a247c107541c7",
+      "status": "NOT_APPROVED",
+      "valid_choices": ["A", "B", "C"]
+    }
+  ],
+  "governance": {
+    "teacher_used": false,
+    "privileged_truth_policy_input": false,
+    "b0_changed": false,
+    "safety_or_execution_gate_changed": false,
+    "existing_evidence_reinterpreted": false,
+    "additional_collection_executed_after_batch_03": false,
+    "training_executed": false,
+    "physical_smoke_executed": false,
+    "formal_q_b_evaluation_executed": false
+  },
+  "next_command": "Obtain accepted human selections for docs/decisions/M2C-S4-PUBLIC-TRACK-REID-ADR-REQUEST.md and docs/decisions/M2C-S4-B0-ACTIVE-SESSION-FALLBACK-ADR-REQUEST.md"
+}
