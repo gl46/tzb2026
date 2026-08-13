@@ -28,6 +28,7 @@ PUBLIC_TRACK_ASSOCIATION_GATE_M = 0.12
 PUBLIC_TRACK_AMBIGUITY_MARGIN_M = 0.02
 PUBLIC_TRACK_COST_QUANTUM_M = 0.000001
 PUBLIC_TRACK_MAX_CONSECUTIVE_UNMATCHED_CAPTURES = 2
+PUBLIC_TRACK_MAX_CURRENT_DETECTIONS = 8
 PUBLIC_TRACK_HAND_CARRY_SKILLS = frozenset({"GRASP", "LIFT", "MOVE", "REGRASP"})
 
 _COST_QUANTA_PER_METRE = 1_000_000
@@ -140,6 +141,101 @@ class PublicRobotProprioceptionV2(_StrictModel):
         return self
 
 
+def _canonical_sha256(payload: object) -> str:
+    return hashlib.sha256(
+        json.dumps(
+            payload,
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=False,
+            allow_nan=False,
+        ).encode("utf-8")
+    ).hexdigest()
+
+
+class PublicProprioceptionIntervalV2(_StrictModel):
+    """Externally scheduled, byte-bound coverage of two public captures.
+
+    The associator does not invent a sampling frequency.  Instead, the trusted
+    host freezes the exact expected ordered timestamps for the adjacent
+    capture interval and binds the full public sample list by canonical digest.
+    This proves complete coverage without turning a capture-provided
+    ``interval_complete`` boolean into authority.
+    """
+
+    schema_version: Literal["PublicProprioceptionIntervalV2"] = "PublicProprioceptionIntervalV2"
+    start_capture_timestamp_ns: int = Field(ge=0)
+    end_capture_timestamp_ns: int = Field(ge=0)
+    expected_sample_timestamps_ns: list[int] = Field(min_length=1)
+    samples: list[PublicRobotProprioceptionV2] = Field(min_length=1)
+    samples_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+
+    @model_validator(mode="after")
+    def interval_is_complete_and_bound(self) -> "PublicProprioceptionIntervalV2":
+        if self.end_capture_timestamp_ns < self.start_capture_timestamp_ns:
+            raise ValueError("public proprioception capture interval is reversed")
+        expected = self.expected_sample_timestamps_ns
+        if (
+            expected[0] != self.start_capture_timestamp_ns
+            or expected[-1] != self.end_capture_timestamp_ns
+            or any(after <= before for before, after in zip(expected, expected[1:]))
+        ):
+            raise ValueError("expected public proprioception schedule lacks exact endpoints")
+        observed = [sample.timestamp_ns for sample in self.samples]
+        if observed != expected:
+            raise ValueError("public proprioception samples do not cover the frozen schedule")
+        payload = [sample.model_dump(mode="json") for sample in self.samples]
+        if self.samples_sha256 != _canonical_sha256(payload):
+            raise ValueError("public proprioception sample digest mismatch")
+        return self
+
+
+class PublicProprioceptionCaptureBindingV2(_StrictModel):
+    schema_version: Literal["PublicProprioceptionCaptureBindingV2"] = (
+        "PublicProprioceptionCaptureBindingV2"
+    )
+    capture_timestamp_ns: int = Field(ge=0)
+    previous_capture_receipt_sha256: str | None = Field(
+        default=None,
+        pattern=r"^[0-9a-f]{64}$",
+    )
+    capture_receipt_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    expected_sample_timestamps_ns: list[int] = Field(min_length=1)
+    samples_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+
+
+class PublicProprioceptionJournalBindingV2(_StrictModel):
+    """Externally frozen authority for the complete capture/proprio journal."""
+
+    schema_version: Literal["PublicProprioceptionJournalBindingV2"] = (
+        "PublicProprioceptionJournalBindingV2"
+    )
+    protocol_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    source_implementation_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    captures: list[PublicProprioceptionCaptureBindingV2] = Field(min_length=1)
+    journal_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+
+    @model_validator(mode="after")
+    def journal_is_ordered_chained_and_bound(self) -> "PublicProprioceptionJournalBindingV2":
+        for index, item in enumerate(self.captures):
+            if index == 0:
+                if item.previous_capture_receipt_sha256 is not None:
+                    raise ValueError("first public journal capture has a predecessor")
+            elif (
+                item.previous_capture_receipt_sha256
+                != self.captures[index - 1].capture_receipt_sha256
+            ):
+                raise ValueError("public journal capture receipt chain differs")
+            if index and item.capture_timestamp_ns <= self.captures[index - 1].capture_timestamp_ns:
+                raise ValueError("public journal capture timestamps are not monotonic")
+        if len({item.capture_receipt_sha256 for item in self.captures}) != len(self.captures):
+            raise ValueError("public journal repeats a capture receipt")
+        expected = _canonical_sha256(self.model_dump(mode="json", exclude={"journal_sha256"}))
+        if self.journal_sha256 != expected:
+            raise ValueError("public proprioception journal digest mismatch")
+        return self
+
+
 class LastPhysicallyExecutedPublicSkillV2(_StrictModel):
     """Public skill name/times used only for HAND_CARRY eligibility."""
 
@@ -163,9 +259,16 @@ class PublicAssociationCaptureV2(_StrictModel):
     schema_version: Literal["PublicAssociationCaptureV2"] = "PublicAssociationCaptureV2"
     timestamp_ns: int = Field(ge=0)
     protocol: PublicAssociationProtocolV2
-    detections: list[PublicRGBDDetectionV2]
-    proprioception: list[PublicRobotProprioceptionV2] = Field(min_length=1)
+    previous_capture_receipt_sha256: str | None = Field(
+        default=None,
+        pattern=r"^[0-9a-f]{64}$",
+    )
+    detections: list[PublicRGBDDetectionV2] = Field(
+        max_length=PUBLIC_TRACK_MAX_CURRENT_DETECTIONS,
+    )
+    proprioception_interval: PublicProprioceptionIntervalV2
     last_physically_executed_public_skill: LastPhysicallyExecutedPublicSkillV2 | None = None
+    capture_receipt_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
 
     @model_validator(mode="after")
     def capture_fields_are_aligned(self) -> "PublicAssociationCaptureV2":
@@ -174,19 +277,21 @@ class PublicAssociationCaptureV2(_StrictModel):
                 raise ValueError("public detection timestamp differs from capture")
             if detection.frame_id != self.protocol.declared_camera_frame:
                 raise ValueError("public detection frame differs from declared camera frame")
-        timestamps = [sample.timestamp_ns for sample in self.proprioception]
-        if any(after <= before for before, after in zip(timestamps, timestamps[1:])):
-            raise ValueError("public proprioception timestamps must be strictly monotonic")
-        if timestamps[-1] != self.timestamp_ns:
-            raise ValueError("last public proprioception sample must align with capture")
+        interval = self.proprioception_interval
+        if interval.end_capture_timestamp_ns != self.timestamp_ns:
+            raise ValueError("public proprioception interval does not end at capture")
         if any(
-            sample.world_frame != self.protocol.declared_world_frame
-            for sample in self.proprioception
+            sample.world_frame != self.protocol.declared_world_frame for sample in interval.samples
         ):
             raise ValueError("public proprioception frame differs from declared world frame")
         skill = self.last_physically_executed_public_skill
         if skill is not None and skill.completed_at_ns > self.timestamp_ns:
             raise ValueError("last public skill completes after the capture")
+        expected_receipt = _canonical_sha256(
+            self.model_dump(mode="json", exclude={"capture_receipt_sha256"})
+        )
+        if self.capture_receipt_sha256 != expected_receipt:
+            raise ValueError("public association capture receipt SHA-256 mismatch")
         return self
 
 
@@ -261,10 +366,25 @@ class _ForcedIdentityAssignment:
 class PublicTrackAssociatorV2:
     """Deterministic ADR-0024 public association state machine."""
 
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        *,
+        expected_protocol: PublicAssociationProtocolV2,
+        expected_journal: PublicProprioceptionJournalBindingV2,
+    ) -> None:
+        if not isinstance(expected_protocol, PublicAssociationProtocolV2):
+            expected_protocol = PublicAssociationProtocolV2.model_validate(expected_protocol)
+        if not isinstance(expected_journal, PublicProprioceptionJournalBindingV2):
+            expected_journal = PublicProprioceptionJournalBindingV2.model_validate(expected_journal)
+        protocol_sha256 = _canonical_sha256(expected_protocol.model_dump(mode="json"))
+        if expected_journal.protocol_sha256 != protocol_sha256:
+            raise ValueError("public proprioception journal binds a different protocol")
         self._tracks: dict[str, _TrackState] = {}
-        self._protocol: PublicAssociationProtocolV2 | None = None
+        self._protocol = expected_protocol
+        self._expected_journal = expected_journal
+        self._journal_position = 0
         self._last_capture_timestamp_ns: int | None = None
+        self._last_capture_receipt_sha256: str | None = None
         self._last_end_effector_position_world_m: tuple[float, float, float] | None = None
         self._next_track_index = 0
         self._lock = threading.RLock()
@@ -275,6 +395,11 @@ class PublicTrackAssociatorV2:
 
         with self._lock:
             return tuple(sorted(self._tracks))
+
+    @property
+    def journal_complete(self) -> bool:
+        with self._lock:
+            return self._journal_position == len(self._expected_journal.captures)
 
     def associate(
         self,
@@ -300,17 +425,38 @@ class PublicTrackAssociatorV2:
         capture: PublicAssociationCaptureV2,
     ) -> list[PublicAssociatedTrackV2]:
         previous_timestamp = self._last_capture_timestamp_ns
+        if self._journal_position >= len(self._expected_journal.captures):
+            raise ValueError("public association capture exceeds frozen journal")
+        expected_capture = self._expected_journal.captures[self._journal_position]
+        interval = capture.proprioception_interval
+        actual_binding = PublicProprioceptionCaptureBindingV2(
+            capture_timestamp_ns=capture.timestamp_ns,
+            previous_capture_receipt_sha256=capture.previous_capture_receipt_sha256,
+            capture_receipt_sha256=capture.capture_receipt_sha256,
+            expected_sample_timestamps_ns=interval.expected_sample_timestamps_ns,
+            samples_sha256=interval.samples_sha256,
+        )
+        if actual_binding != expected_capture:
+            raise ValueError("public capture differs from external proprioception journal")
         if previous_timestamp is not None and capture.timestamp_ns <= previous_timestamp:
             raise ValueError("public association capture timestamp must be strictly monotonic")
-        if self._protocol is not None and capture.protocol != self._protocol:
+        if capture.protocol != self._protocol:
             raise ValueError("public association frame/unit/calibration binding changed")
 
         first_capture = previous_timestamp is None
         if first_capture:
-            if len(capture.proprioception) != 1:
+            if (
+                capture.previous_capture_receipt_sha256 is not None
+                or capture.proprioception_interval.start_capture_timestamp_ns
+                != capture.timestamp_ns
+                or len(capture.proprioception_interval.samples) != 1
+            ):
                 raise ValueError("first association capture requires one aligned proprio sample")
-        elif capture.proprioception[0].timestamp_ns != previous_timestamp:
-            raise ValueError("public proprioception interval must start at prior capture")
+        elif (
+            capture.previous_capture_receipt_sha256 != self._last_capture_receipt_sha256
+            or capture.proprioception_interval.start_capture_timestamp_ns != previous_timestamp
+        ):
+            raise ValueError("public capture/proprioception interval is not chained")
 
         skill = capture.last_physically_executed_public_skill
         if (
@@ -321,7 +467,8 @@ class PublicTrackAssociatorV2:
             raise ValueError("last public skill is outside the adjacent capture interval")
 
         current_ee = tuple(
-            float(value) for value in capture.proprioception[-1].end_effector_position_world_m
+            float(value)
+            for value in capture.proprioception_interval.samples[-1].end_effector_position_world_m
         )
         displacement = (0.0, 0.0, 0.0)
         if self._last_end_effector_position_world_m is not None:
@@ -336,7 +483,7 @@ class PublicTrackAssociatorV2:
             not first_capture
             and skill is not None
             and skill.skill_name in PUBLIC_TRACK_HAND_CARRY_SKILLS
-            and all(sample.gripper_closed for sample in capture.proprioception)
+            and all(sample.gripper_closed for sample in capture.proprioception_interval.samples)
         )
 
         detections = tuple(
@@ -438,10 +585,11 @@ class PublicTrackAssociatorV2:
         if overlap:  # pragma: no cover - protected by matching/allocation invariants
             raise AssertionError(f"public track state collision: {sorted(overlap)}")
         self._tracks = {**retained_states, **current_states}
-        self._protocol = capture.protocol
         self._last_capture_timestamp_ns = capture.timestamp_ns
+        self._last_capture_receipt_sha256 = capture.capture_receipt_sha256
         self._last_end_effector_position_world_m = current_ee
         self._next_track_index = next_track_index
+        self._journal_position += 1
         return [outputs_by_index[index] for index in range(len(detections))]
 
     def _build_edges(
@@ -634,11 +782,10 @@ def _ambiguous_detections(
 
     For each selected detection, every other admissible prior identity is
     forced in turn and the best remaining one-to-one assignment is solved.  A
-    same-cardinality alternative whose *forced identity edge cost* differs by
-    less than 0.02 m makes that detection ambiguous.  The comparison is per
-    detection as ADR-0024 specifies; global optimization determines whether
-    the alternative is an admissible identity assignment, rather than turning
-    unrelated edge improvements into or out of ambiguity.
+    same-cardinality alternative whose global total cost differs by less than
+    0.02 m makes that detection ambiguous.  The comparison is per detection as
+    ADR-0024 specifies, but both the selected and forced-alternative values are
+    complete global assignment costs.
     """
 
     ambiguous: set[int] = set()
@@ -656,7 +803,7 @@ def _ambiguous_detections(
             if forced is None or forced.assignment.cardinality != assignment.cardinality:
                 continue
             if (
-                abs(forced.forced_edge.cost_quanta - selected.cost_quanta)
+                abs(forced.assignment.total_cost_quanta - assignment.total_cost_quanta)
                 < _AMBIGUITY_MARGIN_QUANTA
             ):
                 ambiguous.add(selected.detection_index)
