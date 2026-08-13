@@ -441,10 +441,6 @@ def test_v3_downstream_asset_and_capture_tamper_checks_remain_enforced(
         "m2c.package_path_blocked_collection.verify_packaging_authorization",
         lambda **_kwargs: (None, None, _UnitPackagedAuthorization()),
     )
-    monkeypatch.setattr(
-        "m2c.package_path_blocked_collection.require_v3_host_runtime_launcher",
-        lambda: None,
-    )
 
     paths, matched_key = _write_v3_package_fixture(tmp_path / "happy")
     result = _package_v3(paths, matched_key, contract_authorization_fixture=True)

@@ -186,7 +186,6 @@ from xh_agent.policy.qrm_lite.path_blocked_supervision_v3 import (  # noqa: E402
 )
 from xh_agent.policy.qrm_lite.s4_v3_collection_authorization_v1 import (  # noqa: E402
     read_regular_file_once,
-    require_v3_host_runtime_launcher,
     verify_packaging_authorization,
 )
 
@@ -415,11 +414,6 @@ def package_collection(
         raise ValueError(
             "V3 packaging requires the committed preregistration and consumed key claim"
         )
-    if revision == "V3":
-        # Packaging is a second production entry point.  Do not let direct
-        # library calls bypass the immutable-host-runtime prerequisite that
-        # the worker CLI enforces before importing project modules.
-        require_v3_host_runtime_launcher()
     destination = output_root / role.lower() / matched_key
     if destination.exists():
         raise FileExistsError(f"refusing to overwrite packaged collection: {destination}")

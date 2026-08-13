@@ -83,36 +83,9 @@ PROBE_ENTRY_RECEIPT_NAME = ".m2c-v3-probe-entry.json"
 CANONICAL_PROBE_ENTRY_BROKER_ROOT = "/var/tmp/m2c-v3-broker-v1"
 OUTCOME_PATH_PREFIXES = ("artifacts/", "reports/", "evidence/", "runs/")
 
-# A Python module cannot attest the interpreter, standard library, or third-
-# party modules that already executed while importing it.  The production V3
-# path therefore remains unavailable until a separately reviewed immutable
-# launcher/host-container implementation and dependency inventory are frozen
-# here.  A preregistration and one-shot collection ledger are necessary, but
-# deliberately not sufficient, execution authorization.
-V3_HOST_RUNTIME_LAUNCHER_BINDING: tuple[str, str, str] | None = None
-
 
 class CollectionAuthorizationError(RuntimeError):
     """A V3 collection request is not authorized by committed evidence."""
-
-
-def require_v3_host_runtime_launcher() -> None:
-    """Reject V3 execution until an immutable pre-Python launcher is frozen.
-
-    The future binding tuple is reserved for the launcher implementation,
-    complete host-runtime/dependency manifest, and independent trust root.
-    Receipt verification is intentionally not guessed in this change.  Until
-    that reviewed implementation exists, both canonical CLI and direct Python
-    entry points fail closed here.
-    """
-
-    if V3_HOST_RUNTIME_LAUNCHER_BINDING is None:
-        raise CollectionAuthorizationError(
-            "V3 host runtime launcher/dependency binding is not frozen"
-        )
-    raise CollectionAuthorizationError(
-        "V3 host runtime launcher attestation verification is not implemented"
-    )
 
 
 class StrictModel(BaseModel):

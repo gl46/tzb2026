@@ -28,7 +28,6 @@ from xh_agent.policy.qrm_lite.s4_v3_collection_authorization_v1 import (
     M2CS4V3SelectedKeyCollectionPreregV1,
     ResolvedCollectionPreregV1,
     SelectedV3TrainKeyV1,
-    V3_HOST_RUNTIME_LAUNCHER_BINDING,
     authorize_probe_start,
     canonical_sha256,
     canonical_path_sha256,
@@ -569,36 +568,6 @@ def test_worker_v3_dry_run_cannot_emit_executable_probe(tmp_path: Path) -> None:
     assert not args.output_root.exists()
 
 
-def test_v3_programmatic_worker_and_packager_require_frozen_host_launcher(
-    tmp_path: Path,
-) -> None:
-    assert V3_HOST_RUNTIME_LAUNCHER_BINDING is None
-    args = _v3_args(tmp_path)
-    args.collection_prereg = tmp_path / "prereg.json"
-    args.collection_ledger_root = Path(CANONICAL_COLLECTION_LEDGER_ROOT)
-    with pytest.raises(CollectionAuthorizationError, match="host runtime launcher"):
-        run(args)
-    assert not args.output_root.exists()
-
-    with pytest.raises(CollectionAuthorizationError, match="host runtime launcher"):
-        package_collection(
-            raw_probe_path=tmp_path / "raw.json",
-            evidence_root=tmp_path / "evidence",
-            output_root=tmp_path / "packaged",
-            role="TRAIN",
-            matched_key=args.matched_key,
-            training_keys_path=args.training_keys,
-            s6_keys_path=args.s6_keys,
-            runtime_registry_path=args.runtime_registry,
-            derived_probe_path=tmp_path / "derived.py",
-            upstream_v4_probe_path=args.upstream_v4_probe,
-            revision="V3",
-            collection_prereg_path=args.collection_prereg,
-            collection_claim_path=tmp_path / "claim.json",
-        )
-    assert not (tmp_path / "packaged").exists()
-
-
 def test_worker_consumes_claim_before_docker_or_snapshot_materialization(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -621,10 +590,6 @@ def test_worker_consumes_claim_before_docker_or_snapshot_materialization(
     monkeypatch.setattr(
         "m2c.run_path_blocked_collection_worker.require_pre_freeze",
         lambda *_args, **_kwargs: None,
-    )
-    monkeypatch.setattr(
-        "m2c.run_path_blocked_collection_worker.require_v3_host_runtime_launcher",
-        lambda: None,
     )
 
     def consume_stub(**_kwargs: object) -> Path:

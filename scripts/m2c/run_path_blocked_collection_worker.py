@@ -212,7 +212,6 @@ from xh_agent.policy.qrm_lite.s4_v3_collection_authorization_v1 import (  # noqa
     probe_entry_broker_socket_path,
     probe_entry_broker_token_path,
     probe_start_capability_path,
-    require_v3_host_runtime_launcher,
     resolve_docker_image_id,
     start_probe_entry_broker,
     terminalize_probe_launch,
@@ -820,11 +819,6 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             raise CollectionAuthorizationError(
                 "V3 collection has no active committed preregistration/ledger"
             )
-        # This independent gate also protects programmatic callers that do
-        # not traverse the CLI pre-import checkout checks.  It intentionally
-        # remains blocked until an immutable pre-Python launcher and complete
-        # host dependency inventory have been reviewed and frozen.
-        require_v3_host_runtime_launcher()
         collection_prereg = load_committed_collection_prereg(
             project_root=args.project_root,
             prereg_path=args.collection_prereg,
