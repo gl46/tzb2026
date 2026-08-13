@@ -1,7 +1,7 @@
 # M2C Phase-2 formal exact-plan integration audit
 
 - Status: **BLOCKED_UNMEASURED_FORMAL_EXACT_PLAN_INTEGRATION**
-- Checked HEAD: `6cecc2864c24286841c7743bd0217570a762ce64`
+- Checked HEAD: `9777661643ca5af9732a35cb366e935a89b7263a`
 - Formal execution eligible: **false**
 - Physical execution / training by this audit: **false / false**
 
@@ -11,6 +11,15 @@ The ADR-0022/ADR-0024 exact-plan envelope, all-phase preflight coordinator,
 no-replan executor, and A3 float64 Bullet candidate exist.  The query-only
 deployment path also ran, but the frozen home state still has two fail-closed
 self-collision rejections.
+
+The A.3 coordinator now has a versioned ADR-0024 deployment authorization
+contract. It replaces the rescinded trusted-host signature prerequisite with
+byte-bound accepted-ADR/addendum/config, immutable Git/container/runtime
+closure, complete configuration, session-audit implementation, and host-local
+HMAC verifier bindings. A plan is exposed to the primitive bundle only after
+all phase evidence is replayed under that closure. Per-run session receipts and
+post-execution host HMAC replay remain mandatory. The V1 signing schema remains
+parseable for historical audit only and cannot authorize a new command.
 
 The versioned `FormalPublicObservationV4` transport now independently replays
 the approved V4 candidate and association bindings.  It is deliberately not
@@ -31,8 +40,9 @@ rejection stubs, and there is no production constructor for a bound
 - `FORMAL_PUBLIC_OBSERVATION_V4_NOT_IN_ACTIVE_WIRE_PROTOCOL`
 - `PRODUCTION_BOUND_PLAN_PROVIDER_NOT_IMPLEMENTED`
 - `FORMAL_BACKEND_EXACT_PLAN_CONSTRUCTION_AND_EXECUTION_STUBS`
-- `A3_STATIC_HOME_SELF_COLLISION_PREFLIGHT_REJECTED`
-- `FOUR_PRODUCTION_BINDINGS_UNSET`
+- `PLAN_SPECIFIC_A3_PREFLIGHT_AND_EIGHT_SKILL_EXECUTION_UNMEASURED`
+- `PHASE2_READINESS_VERIFIER_ADR0024_V2_MIGRATION_INCOMPLETE`
+- `TWO_ACTIVE_PRODUCTION_BINDINGS_UNSET`
 
 ## Safe implementation order
 
@@ -42,11 +52,12 @@ rejection stubs, and there is no production constructor for a bound
 4. `KEEP_BACKEND_TERMINAL_NO_PHYSICAL_EXECUTION_UNTIL_A3_AND_BINDINGS_PASS`
 
 This is a structural, unmeasured blocker—not a model failure and not a
-permission failure.  The four production bindings remain unset.  Teacher and
-privileged simulator truth were not used.
+permission failure. The two active production bindings remain unset; the two
+withdrawn compatibility sentinels remain `None`. Teacher and privileged
+simulator truth were not used.
 
 Verification: `.venv/bin/pytest -q tests/unit/test_m2c_*.py` ->
-**712 passed**, 0 failed.
+**741 passed**, 0 failed.
 
 Next command:
 

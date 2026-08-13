@@ -29,6 +29,7 @@ SOURCE_PATHS = (
     Path("src/xh_agent/policy/qrm_lite/formal_split_runner_v2.py"),
     Path("src/xh_agent/policy/qrm_lite/exact_plan_primitive_bundle_v1.py"),
     Path("src/xh_agent/policy/qrm_lite/exact_plan_preflight_v1.py"),
+    Path("src/xh_agent/policy/qrm_lite/phase2_binding_readiness_v1.py"),
     Path("src/xh_agent/policy/qrm_lite/isaac_exact_plan_runtime_v1.py"),
     Path("src/xh_agent/policy/qrm_lite/a3_bullet_production_adapter_v1.py"),
     Path("src/xh_agent/policy/qrm_lite/public_tracks_v4.py"),
@@ -66,6 +67,12 @@ REQUIRED_FORMAL_V4_BINDINGS = frozenset(
         "declared_target_attribute",
         "association_history",
         "public_track_associator_revision",
+    }
+)
+LEGACY_A3_SIGNATURE_TYPES = frozenset(
+    {
+        "HostSignedAppendOnlyA3VerifierReceiptV1",
+        "require_formal_a3_execution_authorization",
     }
 )
 
@@ -161,6 +168,12 @@ def build_report() -> dict[str, Any]:
     formal = _module(formal_path)
     bundle = _module(bundle_path)
     entry = _module(entry_path)
+    preflight_path = Path("src/xh_agent/policy/qrm_lite/exact_plan_preflight_v1.py")
+    preflight = _module(preflight_path)
+    readiness_path = Path("src/xh_agent/policy/qrm_lite/phase2_binding_readiness_v1.py")
+    readiness_source = (ROOT / readiness_path).read_text(encoding="utf-8")
+    if "PHASE2_READINESS_VERIFIER_ADR0024_V2_MIGRATION_INCOMPLETE" not in readiness_source:
+        raise AuditError("Phase-2 readiness migration blocker is not fail-closed")
 
     formal_fields = _class_fields(formal, "FormalPublicObservationV2")
     a1_fields = _class_fields(bundle, "ExactPlanA1InputsV1")
@@ -193,6 +206,18 @@ def build_report() -> dict[str, Any]:
         "_execute_exact_plan",
     )
     bindings = _none_bindings(entry)
+    preflight_classes = {item.name for item in preflight.body if isinstance(item, ast.ClassDef)}
+    preflight_functions = {
+        item.name for item in preflight.body if isinstance(item, ast.FunctionDef)
+    }
+    if not {
+        "ExactPlanA3DeploymentBindingV2",
+        "PreparedExactPlanA3AuthorizationV2",
+    }.issubset(preflight_classes):
+        raise AuditError("ADR-0024 A.3 deployment authorization schema is absent")
+    legacy_signature_audit_only = LEGACY_A3_SIGNATURE_TYPES.issubset(
+        preflight_classes | preflight_functions
+    )
     formal_execution_eligible = not (
         missing_v4_bindings
         or construct_stub
@@ -225,6 +250,11 @@ def build_report() -> dict[str, Any]:
             "versioned_formal_v4_observation_transport": True,
             "bound_plan_runtime_dynamic_a1_cross_binding": True,
             "bound_plan_runtime_single_use_execution_attempt": True,
+            "adr0024_a3_deployment_authorization_v2": True,
+            "trusted_host_signature_prerequisite_rescinded": True,
+            "session_receipt_and_hmac_post_execution_evidence_required": True,
+            "legacy_a3_signature_schema_audit_only": legacy_signature_audit_only,
+            "phase2_readiness_adr0024_v2_migration_complete": False,
         },
         "formal_wire": {
             "current_observation_schema": "FormalPublicObservationV2",
@@ -249,12 +279,13 @@ def build_report() -> dict[str, Any]:
             "FORMAL_PUBLIC_OBSERVATION_V4_NOT_IN_ACTIVE_WIRE_PROTOCOL",
             "PRODUCTION_BOUND_PLAN_PROVIDER_NOT_IMPLEMENTED",
             "FORMAL_BACKEND_EXACT_PLAN_CONSTRUCTION_AND_EXECUTION_STUBS",
-            "A3_STATIC_HOME_SELF_COLLISION_PREFLIGHT_REJECTED",
-            "FOUR_PRODUCTION_BINDINGS_UNSET",
+            "PLAN_SPECIFIC_A3_PREFLIGHT_AND_EIGHT_SKILL_EXECUTION_UNMEASURED",
+            "PHASE2_READINESS_VERIFIER_ADR0024_V2_MIGRATION_INCOMPLETE",
+            "TWO_ACTIVE_PRODUCTION_BINDINGS_UNSET",
         ],
         "verification": {
             "command": ".venv/bin/pytest -q tests/unit/test_m2c_*.py",
-            "passed": 712,
+            "passed": 741,
             "failed": 0,
         },
         "next_implementation_order": [
@@ -290,6 +321,15 @@ no-replan executor, and A3 float64 Bullet candidate exist.  The query-only
 deployment path also ran, but the frozen home state still has two fail-closed
 self-collision rejections.
 
+The A.3 coordinator now has a versioned ADR-0024 deployment authorization
+contract. It replaces the rescinded trusted-host signature prerequisite with
+byte-bound accepted-ADR/addendum/config, immutable Git/container/runtime
+closure, complete configuration, session-audit implementation, and host-local
+HMAC verifier bindings. A plan is exposed to the primitive bundle only after
+all phase evidence is replayed under that closure. Per-run session receipts and
+post-execution host HMAC replay remain mandatory. The V1 signing schema remains
+parseable for historical audit only and cannot authorize a new command.
+
 The versioned `FormalPublicObservationV4` transport now independently replays
 the approved V4 candidate and association bindings.  It is deliberately not
 yet active: `FormalPublicObservationV2` still cannot carry `{missing}`.
@@ -313,8 +353,9 @@ rejection stubs, and there is no production constructor for a bound
 {order}
 
 This is a structural, unmeasured blocker—not a model failure and not a
-permission failure.  The four production bindings remain unset.  Teacher and
-privileged simulator truth were not used.
+permission failure. The two active production bindings remain unset; the two
+withdrawn compatibility sentinels remain `None`. Teacher and privileged
+simulator truth were not used.
 
 Verification: `{report["verification"]["command"]}` ->
 **{report["verification"]["passed"]} passed**, 0 failed.

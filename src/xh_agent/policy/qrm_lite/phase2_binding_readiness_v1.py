@@ -1,9 +1,10 @@
 """Fail-closed ADR-0022 Phase-2 deployment/readiness verifier.
 
-This module is intentionally an evidence consumer, not a deployment tool.  It
-can render a binding addendum and a machine-readable binding proposal only
-after independently checking host-signed, byte-bound, real-Isaac evidence.
-It never edits ``s4_entry_gate.py`` and cannot set an unlock binding.
+This module is intentionally an evidence consumer, not a deployment tool. The
+historical V1 parser remains readable, but its B0-wrapper and signed-host
+requirements were superseded by ADR-0024. Public verification and rendering
+therefore fail closed until the V2 session/HMAC evidence schema is complete.
+The module never edits ``s4_entry_gate.py`` and cannot set an unlock binding.
 """
 
 from __future__ import annotations
@@ -49,6 +50,7 @@ from xh_agent.policy.qrm_lite.s4_entry_gate import FormalTransitiveImportClosure
 
 SCHEMA_VERSION = "M2CADR0022BindingAddendumReadinessV1"
 INDEX_SCHEMA = "M2CADR0022Phase2EvidenceIndexV1"
+ADR0024_V2_MIGRATION_BLOCKER = "PHASE2_READINESS_VERIFIER_ADR0024_V2_MIGRATION_INCOMPLETE"
 DEPLOYMENT_AUTH_NAMESPACE = "m2c-phase2-deployment-v1@xh-agent"
 ADR_PATH = "docs/decisions/ADR-0022-m2c-exact-plan-primitives-and-b0-wrapper.md"
 BUNDLE_PATH = "src/xh_agent/policy/qrm_lite/exact_plan_primitive_bundle_v1.py"
@@ -739,6 +741,16 @@ def _verify_b0_evidence(
 def verify_phase2_evidence(
     project: Path, evidence_index_path: Path
 ) -> tuple[Phase2EvidenceIndexV1, dict[str, Any]]:
+    # The V1 parser below is retained only so historical evidence remains
+    # inspectable. It still encodes the superseded signed-host and active-B0
+    # prerequisites, so it must never authorize a new ADR-0024 binding.
+    del project, evidence_index_path
+    raise ReadinessFailure(ADR0024_V2_MIGRATION_BLOCKER)
+
+
+def _verify_phase2_evidence_v1_historical(
+    project: Path, evidence_index_path: Path
+) -> tuple[Phase2EvidenceIndexV1, dict[str, Any]]:
     project = project.resolve()
     index_path = evidence_index_path.resolve()
     index = Phase2EvidenceIndexV1.model_validate(
@@ -927,10 +939,11 @@ def build_readiness_report(
             [
                 "PHASE2_EVIDENCE_INDEX_MISSING",
                 "REAL_EXACT_PLAN_EIGHT_SKILL_RECEIPTS_MISSING",
-                "ACTIVE_SESSION_UNCHANGED_B0_RECEIPT_MISSING",
-                "SIGNED_HOST_STARTUP_AND_DEPLOYMENT_ATTESTATION_MISSING",
-                "NODE2_LABSERVER_WIRE_TRUST_ROOTS_MISSING",
+                "FORMAL_V4_BOUND_PLAN_PROVIDER_EVIDENCE_MISSING",
+                "SESSION_BOUND_STARTUP_AND_DEPLOYMENT_EVIDENCE_MISSING",
+                "NODE2_LABSERVER_HOST_HMAC_RECEIPTS_MISSING",
                 "CONTAINER_TRANSITIVE_IMPORT_CLOSURE_MISSING",
+                ADR0024_V2_MIGRATION_BLOCKER,
             ]
         )
     else:
@@ -943,7 +956,12 @@ def build_readiness_report(
             ValueError,
             ReadinessFailure,
         ) as error:
-            blockers.append(f"PHASE2_EVIDENCE_FAILED_CLOSED:{type(error).__name__}:{error}")
+            if str(error) == ADR0024_V2_MIGRATION_BLOCKER:
+                blockers.append(ADR0024_V2_MIGRATION_BLOCKER)
+            else:
+                blockers.append(f"PHASE2_EVIDENCE_FAILED_CLOSED:{type(error).__name__}:{error}")
+        if ADR0024_V2_MIGRATION_BLOCKER not in "".join(blockers):
+            blockers.append(ADR0024_V2_MIGRATION_BLOCKER)
     ready = not blockers and verified is not None
     return (
         {
@@ -955,12 +973,12 @@ def build_readiness_report(
             "evidence_index_path": str(evidence_index_path) if evidence_index_path else None,
             "verified": verified,
             "blockers": blockers,
-            "required_trust_root_paths": [NODE2_TRUST_ROOT_PATH, LABSERVER_TRUST_ROOT_PATH],
+            "required_trust_root_paths": [],
             "required_real_evidence": [
-                "eight real-Isaac exact-plan/preflight/phase/bundle receipts in signed audit",
-                "real active-session unchanged-B0 invocation receipt in signed audit",
-                "node2 and labserver host-local HMAC verification receipts with Ed25519 signatures",
-                "strict Qwen/Isaac startup lifecycle and signed START request/response",
+                "eight real-Isaac exact-plan/preflight/phase/bundle receipts in session audit",
+                "formal V4 observations and production bound-plan provider replay",
+                "node2 and labserver host-local HMAC verification receipts",
+                "strict Qwen/Isaac startup lifecycle and HMAC-bound START request/response",
                 "immutable commit, container digest, complete transitive import and asset closure",
             ],
             "governance": {
@@ -977,6 +995,13 @@ def build_readiness_report(
 
 
 def render_binding_proposal(verified: Mapping[str, Any], *, addendum_sha256: str) -> bytes:
+    del verified, addendum_sha256
+    raise ReadinessFailure(ADR0024_V2_MIGRATION_BLOCKER)
+
+
+def _render_binding_proposal_v1_historical(
+    verified: Mapping[str, Any], *, addendum_sha256: str
+) -> bytes:
     proposal = {
         "schema_version": "M2CS4UnlockBindingProposalV1",
         "status": "EVIDENCE_VERIFIED_REQUIRES_SEPARATE_REVIEWED_SOURCE_COMMIT",
@@ -1001,6 +1026,11 @@ def render_binding_proposal(verified: Mapping[str, Any], *, addendum_sha256: str
 
 
 def render_binding_addendum(verified: Mapping[str, Any]) -> bytes:
+    del verified
+    raise ReadinessFailure(ADR0024_V2_MIGRATION_BLOCKER)
+
+
+def _render_binding_addendum_v1_historical(verified: Mapping[str, Any]) -> bytes:
     skills = ", ".join(f"`{skill}`" for skill in verified["exact_plan_skills_verified"])
     content = f"""# ADR-0022 Phase-2 binding addendum
 

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 from pathlib import Path
+import subprocess
 from typing import Any, Literal
 
 import pytest
@@ -11,6 +12,7 @@ from xh_agent.policy.qrm_lite.exact_plan_preflight_v1 import (
     canonical_non_actuating_state_sha256,
     ControllerCommandShapeV1,
     ControllerPreflightConfigurationV1,
+    ExactPlanA3DeploymentBindingV2,
     ExactPlanPreflightConfigurationV1,
     ExactPlanPreflightRejected,
     ExactPlanPreflightV1,
@@ -43,6 +45,7 @@ from xh_agent.policy.qrm_lite.formal_split_runner_v2 import (
     ExactExecutionPhaseGatesV2,
     ExactExecutionPhaseV2,
     ExactExecutionPlanV2,
+    canonical_json_bytes,
     canonical_sha256,
 )
 
@@ -157,6 +160,29 @@ def _configuration() -> ExactPlanPreflightConfigurationV1:
         callback_implementation_sha256="f" * 64,
         total_timeout_ns=10_000_000,
     )
+
+
+def _deployment_configuration(callback_sha256: str) -> ExactPlanPreflightConfigurationV1:
+    base = _configuration()
+    ik_payload = base.ik.model_dump(mode="json", exclude={"configuration_sha256"})
+    ik_payload.update(
+        algorithm_sha256=hashlib.sha256(b"IK_ALGORITHM").hexdigest(),
+        robot_description_sha256=hashlib.sha256(b"ROBOT_ASSET").hexdigest(),
+    )
+    ik = _with_digest(IKPreflightConfigurationV1, **ik_payload)
+    collision_payload = base.swept_collision.model_dump(
+        mode="json", exclude={"configuration_sha256"}
+    )
+    collision_payload["algorithm_sha256"] = hashlib.sha256(b"SWEPT_COLLISION_ALGORITHM").hexdigest()
+    collision = _with_digest(SweptCollisionConfigurationV1, **collision_payload)
+    payload = base.model_dump(mode="json", exclude={"configuration_sha256"})
+    payload.update(
+        ik=ik.model_dump(mode="json"),
+        swept_collision=collision.model_dump(mode="json"),
+        callback_implementation_sha256=callback_sha256,
+    )
+    payload["configuration_sha256"] = canonical_sha256(payload)
+    return ExactPlanPreflightConfigurationV1.model_validate(payload)
 
 
 def _gates() -> ExactExecutionPhaseGatesV2:
@@ -987,7 +1013,7 @@ def test_allowlist_digests_are_recomputed_before_callbacks(tmp_path: Path) -> No
     assert callbacks.path_calls == []
 
 
-def test_formal_execution_requires_real_host_signed_append_only_verifier(
+def test_legacy_formal_execution_authorization_is_superseded(
     tmp_path: Path,
 ) -> None:
     config = _configuration()
@@ -996,7 +1022,7 @@ def test_formal_execution_requires_real_host_signed_append_only_verifier(
         configuration=config,
         callbacks=_Callbacks(config),
     ).preflight_plan(plan)
-    with pytest.raises(ExactPlanPreflightRejected, match="is absent"):
+    with pytest.raises(ExactPlanPreflightRejected, match="superseded by ADR-0024"):
         require_formal_a3_execution_authorization(
             receipt,
             host_verifier_receipt=None,
@@ -1020,11 +1046,361 @@ def test_formal_execution_requires_real_host_signed_append_only_verifier(
         **payload,
         receipt_sha256=canonical_sha256(payload),
     )
-    with pytest.raises(ExactPlanPreflightRejected, match="not implemented/bound"):
+    with pytest.raises(ExactPlanPreflightRejected, match="superseded by ADR-0024"):
         require_formal_a3_execution_authorization(
             receipt,
             host_verifier_receipt=host_receipt,
         )
+
+
+def test_v2_deployment_binding_has_no_signature_or_launcher_fields() -> None:
+    schema = ExactPlanA3DeploymentBindingV2.model_json_schema()
+
+    assert "signature_armored" not in schema["properties"]
+    assert "signer_principal" not in schema["properties"]
+    assert "public_trust_root_sha256" not in schema["properties"]
+    assert schema["properties"]["trusted_host_signature_required"]["const"] is False
+    assert schema["properties"]["launcher_attestation_required"]["const"] is False
+    assert schema["properties"]["session_bound_execution_receipt_required"]["const"] is True
+    assert schema["properties"]["host_hmac_post_execution_replay_required"]["const"] is True
+
+
+def test_v2_deployment_binding_is_checked_before_query_callbacks(tmp_path: Path) -> None:
+    config = _configuration()
+    plan = _plan(tmp_path, configuration=config)
+    callbacks = _Callbacks(config)
+    payload = {
+        "schema_version": "ExactPlanA3DeploymentBindingV2",
+        "status": "ACCEPTED_PHASE2_BINDING_ADDENDUM",
+        "accepted_adr_sha256": ("62c14028df1ad91e4d3c4282c4775e33149292e9bcf10add2d505be8c7424689"),
+        "binding_addendum_sha256": "1" * 64,
+        "unlock_config_sha256": "2" * 64,
+        "immutable_commit": "3" * 40,
+        "container_image_digest": "sha256:" + "4" * 64,
+        "preflight_implementation_path": (
+            "src/xh_agent/policy/qrm_lite/exact_plan_preflight_v1.py"
+        ),
+        "preflight_implementation_sha256": "5" * 64,
+        "callback_implementation_path": "src/callback.py",
+        "callback_implementation_sha256": callbacks.implementation_sha256,
+        "complete_preflight_configuration_sha256": config.configuration_sha256,
+        "plan_source_bindings_sha256": canonical_sha256(plan.source_bindings),
+        "phase_schema_by_skill": tuple(
+            (skill, plan.phase_schema_sha256)
+            for skill in (
+                "GRASP",
+                "LIFT",
+                "MOVE",
+                "PLACE",
+                "RELEASE",
+                "REOBSERVE",
+                "REASSOCIATE_TARGET",
+                "REGRASP",
+            )
+        ),
+        "session_audit_implementation_sha256": "6" * 64,
+        "host_hmac_verifier_sha256": "7" * 64,
+        "entry_gate_sha256": "8" * 64,
+        "formal_physical_runner_binding": ("src/formal_runner.py", "9" * 64),
+        "formal_deployment_closure_binding": (
+            "3" * 40,
+            "sha256:" + "4" * 64,
+            "a" * 64,
+        ),
+        "frozen_b0_runtime_wrapper_binding": None,
+        "offline_wire_authentication_verifier_binding": None,
+        "reviewed_addendum_accepted": True,
+        "immutable_git_tree_required": True,
+        "session_bound_execution_receipt_required": True,
+        "host_hmac_post_execution_replay_required": True,
+        "trusted_host_signature_required": False,
+        "launcher_attestation_required": False,
+        "teacher_used": False,
+        "privileged_truth_policy_input": False,
+    }
+    binding = _receipt(
+        ExactPlanA3DeploymentBindingV2.model_construct(
+            **payload,
+            binding_sha256="0" * 64,
+        ),
+        "binding_sha256",
+    )
+    preflight = ExactPlanPreflightV1(
+        configuration=config,
+        callbacks=callbacks,
+        project_root=tmp_path,
+        deployment_binding=binding,
+    )
+
+    with pytest.raises(ExactPlanPreflightRejected, match="Git binding is unavailable"):
+        preflight.preflight_plan(plan)
+
+    assert callbacks.path_calls == []
+    assert callbacks.collision_calls == []
+    assert callbacks.attachment_calls == []
+
+
+def test_v2_deployment_binding_replays_all_phases_before_authorizing(
+    tmp_path: Path,
+) -> None:
+    root = tmp_path / "project"
+    root.mkdir()
+    subprocess.run(["git", "init", "-q"], cwd=root, check=True)
+    subprocess.run(
+        ["git", "config", "user.email", "m2c-test@example.invalid"], cwd=root, check=True
+    )
+    subprocess.run(["git", "config", "user.name", "M2C Test"], cwd=root, check=True)
+    callback_path = "src/callback.py"
+    callback_raw = b"query-only callback\n"
+    callback_sha = hashlib.sha256(callback_raw).hexdigest()
+    runner_path = "src/formal_runner.py"
+    runner_raw = b"formal runner\n"
+    runner_sha = hashlib.sha256(runner_raw).hexdigest()
+    config = _deployment_configuration(callback_sha)
+
+    source_bindings = {
+        "PRIMITIVE_ENTRYPOINT": b"PRIMITIVE_ENTRYPOINT",
+        "PREFLIGHT_IMPLEMENTATION": (
+            Path(__file__).parents[2] / "src/xh_agent/policy/qrm_lite/exact_plan_preflight_v1.py"
+        ).read_bytes(),
+        "EXECUTOR_IMPLEMENTATION": b"EXECUTOR_IMPLEMENTATION",
+        "TRANSITIVE_DEPENDENCY_MANIFEST": b"TRANSITIVE_DEPENDENCY_MANIFEST",
+        "ISAAC_RUNTIME": b"ISAAC_RUNTIME",
+        "IK_ALGORITHM": b"IK_ALGORITHM",
+        "JOINT_LIMIT_CONFIGURATION": canonical_json_bytes(
+            config.joint_limits.model_dump(mode="json", exclude={"configuration_sha256"})
+        ),
+        "SWEPT_COLLISION_ALGORITHM": b"SWEPT_COLLISION_ALGORITHM",
+        "ROBOT_ASSET": b"ROBOT_ASSET",
+        "CONTROLLER_CONFIGURATION": canonical_json_bytes(
+            config.controller.model_dump(mode="json", exclude={"configuration_sha256"})
+        ),
+        "SAFETY_CONFIGURATION": canonical_json_bytes(
+            config.safety.model_dump(mode="json", exclude={"configuration_sha256"})
+        ),
+        "SCENE_ASSET": b"SCENE_ASSET",
+    }
+    binding_paths: list[tuple[str, str]] = []
+    for index, role in enumerate(ROLES):
+        relative = f"bindings/source-{index}"
+        path = root / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(source_bindings[role])
+        binding_paths.append((relative, hashlib.sha256(source_bindings[role]).hexdigest()))
+
+    plan = _plan(root, configuration=config)
+    plan_raw = plan.model_dump(mode="json")
+    for item, (relative, digest) in zip(plan_raw["source_bindings"], binding_paths, strict=True):
+        item["path"] = relative
+        item["sha256"] = digest
+    plan_raw["inputs"]["immutable_commit"] = "0" * 40
+    plan_raw["bound_plan_sha256"] = canonical_sha256(
+        {key: value for key, value in plan_raw.items() if key != "bound_plan_sha256"}
+    )
+    plan = M2CExactPlanPrimitivePlanV1.model_validate(plan_raw)
+
+    project_files = {
+        "docs/decisions/ADR-0024-m2c-s4-unblock-directive.md": (
+            Path(__file__).parents[2] / "docs/decisions/ADR-0024-m2c-s4-unblock-directive.md"
+        ).read_bytes(),
+        "src/xh_agent/policy/qrm_lite/exact_plan_preflight_v1.py": source_bindings[
+            "PREFLIGHT_IMPLEMENTATION"
+        ],
+        callback_path: callback_raw,
+        "src/xh_agent/policy/qrm_lite/formal_isaac_endpoint_v2.py": b"session audit\n",
+        "src/xh_agent/policy/qrm_lite/offline_wire_auth_v1.py": b"hmac verifier\n",
+        runner_path: runner_raw,
+    }
+    for relative, raw in project_files.items():
+        path = root / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(raw)
+    subprocess.run(["git", "add", "."], cwd=root, check=True)
+    subprocess.run(["git", "commit", "-qm", "implementation"], cwd=root, check=True)
+    implementation_commit = subprocess.check_output(
+        ["git", "rev-parse", "HEAD"], cwd=root, text=True
+    ).strip()
+
+    plan_raw = plan.model_dump(mode="json")
+    plan_raw["inputs"]["immutable_commit"] = implementation_commit
+    plan_raw["bound_plan_sha256"] = canonical_sha256(
+        {key: value for key, value in plan_raw.items() if key != "bound_plan_sha256"}
+    )
+    plan = M2CExactPlanPrimitivePlanV1.model_validate(plan_raw)
+    addendum = root / "docs/decisions/ADR-0022-BINDING-ADDENDUM.md"
+    unlock = root / "configs/m2c_s4_unlock_bindings.json"
+    addendum.write_bytes(b"accepted binding addendum\n")
+    addendum_sha = hashlib.sha256(addendum.read_bytes()).hexdigest()
+    transitive_sha = dict((source.role, source.sha256) for source in plan.source_bindings)[
+        "TRANSITIVE_DEPENDENCY_MANIFEST"
+    ]
+    runner_binding = (runner_path, runner_sha)
+    closure_binding = (
+        implementation_commit,
+        plan.inputs.container_image_digest,
+        transitive_sha,
+    )
+    entry = root / "src/xh_agent/policy/qrm_lite/s4_entry_gate.py"
+    entry.write_text(
+        "FORMAL_PHYSICAL_RUNNER_BINDING = " + repr(runner_binding) + "\n"
+        "FORMAL_DEPLOYMENT_CLOSURE_BINDING = " + repr(closure_binding) + "\n"
+        "FROZEN_B0_RUNTIME_WRAPPER_BINDING = None\n"
+        "OFFLINE_WIRE_AUTHENTICATION_VERIFIER_BINDING = None\n"
+    )
+    entry_sha = hashlib.sha256(entry.read_bytes()).hexdigest()
+    unlock.parent.mkdir(parents=True, exist_ok=True)
+    unlock_payload = {
+        "schema_version": "M2CS4UnlockBindingV2",
+        "status": "APPLIED_TO_REVIEWED_SOURCE",
+        "adr_path": "docs/decisions/ADR-0024-m2c-s4-unblock-directive.md",
+        "binding_addendum_path": "docs/decisions/ADR-0022-BINDING-ADDENDUM.md",
+        "binding_addendum_sha256": addendum_sha,
+        "FORMAL_PHYSICAL_RUNNER_BINDING": list(runner_binding),
+        "FORMAL_DEPLOYMENT_CLOSURE_BINDING": list(closure_binding),
+        "FROZEN_B0_RUNTIME_WRAPPER_BINDING": None,
+        "OFFLINE_WIRE_AUTHENTICATION_VERIFIER_BINDING": None,
+        "applied_to_source": True,
+        "teacher_used": False,
+        "privileged_truth_policy_input": False,
+    }
+    unlock.write_bytes(canonical_json_bytes(unlock_payload))
+    subprocess.run(["git", "add", "."], cwd=root, check=True)
+    subprocess.run(["git", "commit", "-qm", "reviewed binding"], cwd=root, check=True)
+
+    callbacks = _Callbacks(config)
+    callbacks.implementation_sha256 = callback_sha
+    callbacks.implementation_path = callback_path
+    binding_payload = {
+        "schema_version": "ExactPlanA3DeploymentBindingV2",
+        "status": "ACCEPTED_PHASE2_BINDING_ADDENDUM",
+        "accepted_adr_sha256": hashlib.sha256(
+            project_files["docs/decisions/ADR-0024-m2c-s4-unblock-directive.md"]
+        ).hexdigest(),
+        "binding_addendum_sha256": addendum_sha,
+        "unlock_config_sha256": hashlib.sha256(unlock.read_bytes()).hexdigest(),
+        "immutable_commit": implementation_commit,
+        "container_image_digest": plan.inputs.container_image_digest,
+        "preflight_implementation_path": (
+            "src/xh_agent/policy/qrm_lite/exact_plan_preflight_v1.py"
+        ),
+        "preflight_implementation_sha256": hashlib.sha256(
+            source_bindings["PREFLIGHT_IMPLEMENTATION"]
+        ).hexdigest(),
+        "callback_implementation_path": callback_path,
+        "callback_implementation_sha256": callback_sha,
+        "complete_preflight_configuration_sha256": config.configuration_sha256,
+        "plan_source_bindings_sha256": canonical_sha256(plan.source_bindings),
+        "phase_schema_by_skill": tuple(
+            (skill, plan.phase_schema_sha256)
+            for skill in (
+                "GRASP",
+                "LIFT",
+                "MOVE",
+                "PLACE",
+                "RELEASE",
+                "REOBSERVE",
+                "REASSOCIATE_TARGET",
+                "REGRASP",
+            )
+        ),
+        "session_audit_implementation_sha256": hashlib.sha256(b"session audit\n").hexdigest(),
+        "host_hmac_verifier_sha256": hashlib.sha256(b"hmac verifier\n").hexdigest(),
+        "entry_gate_sha256": entry_sha,
+        "formal_physical_runner_binding": runner_binding,
+        "formal_deployment_closure_binding": closure_binding,
+        "frozen_b0_runtime_wrapper_binding": None,
+        "offline_wire_authentication_verifier_binding": None,
+        "reviewed_addendum_accepted": True,
+        "immutable_git_tree_required": True,
+        "session_bound_execution_receipt_required": True,
+        "host_hmac_post_execution_replay_required": True,
+        "trusted_host_signature_required": False,
+        "launcher_attestation_required": False,
+        "teacher_used": False,
+        "privileged_truth_policy_input": False,
+    }
+    binding = _receipt(
+        ExactPlanA3DeploymentBindingV2.model_construct(
+            **binding_payload,
+            binding_sha256="0" * 64,
+        ),
+        "binding_sha256",
+    )
+    preflight = ExactPlanPreflightV1(
+        configuration=config,
+        callbacks=callbacks,
+        project_root=root,
+        deployment_binding=binding,
+    )
+
+    result = preflight.verify_phase(plan, plan.phases[0])
+
+    assert result.phase_index == 0
+    assert callbacks.path_calls == [0, 1]
+    assert callbacks.collision_calls == [0, 1]
+    assert callbacks.attachment_calls == [0, 1]
+    authorization = preflight._authorizations[plan.bound_plan_sha256]
+    assert authorization.formal_execution_eligible is True
+    assert authorization.physical_execution_claimed is False
+    assert authorization.trusted_host_signature_required is False
+
+    callback_counts = (
+        tuple(callbacks.path_calls),
+        tuple(callbacks.collision_calls),
+        tuple(callbacks.attachment_calls),
+    )
+    canonical_entry = entry.read_bytes()
+    entry.write_text(
+        "FORMAL_PHYSICAL_RUNNER_BINDING = None\n"
+        "FORMAL_DEPLOYMENT_CLOSURE_BINDING = " + repr(closure_binding) + "\n"
+        "FROZEN_B0_RUNTIME_WRAPPER_BINDING = None\n"
+        "OFFLINE_WIRE_AUTHENTICATION_VERIFIER_BINDING = None\n"
+    )
+    subprocess.run(["git", "add", "."], cwd=root, check=True)
+    subprocess.run(["git", "commit", "-qm", "crossed entry binding"], cwd=root, check=True)
+    crossed_payload = binding.model_dump(mode="json")
+    crossed_payload["entry_gate_sha256"] = hashlib.sha256(entry.read_bytes()).hexdigest()
+    crossed_payload["binding_sha256"] = canonical_sha256(
+        {key: value for key, value in crossed_payload.items() if key != "binding_sha256"}
+    )
+    crossed_binding = ExactPlanA3DeploymentBindingV2.model_validate(crossed_payload)
+    with pytest.raises(ExactPlanPreflightRejected, match="entry source bindings"):
+        ExactPlanPreflightV1(
+            configuration=config,
+            callbacks=callbacks,
+            project_root=root,
+            deployment_binding=crossed_binding,
+        ).preflight_plan(plan)
+    assert callback_counts == (
+        tuple(callbacks.path_calls),
+        tuple(callbacks.collision_calls),
+        tuple(callbacks.attachment_calls),
+    )
+
+    entry.write_bytes(canonical_entry)
+    crossed_unlock = dict(unlock_payload)
+    crossed_unlock["status"] = "NOT_APPLIED"
+    unlock.write_bytes(canonical_json_bytes(crossed_unlock))
+    subprocess.run(["git", "add", "."], cwd=root, check=True)
+    subprocess.run(["git", "commit", "-qm", "crossed unlock config"], cwd=root, check=True)
+    crossed_payload = binding.model_dump(mode="json")
+    crossed_payload["unlock_config_sha256"] = hashlib.sha256(unlock.read_bytes()).hexdigest()
+    crossed_payload["binding_sha256"] = canonical_sha256(
+        {key: value for key, value in crossed_payload.items() if key != "binding_sha256"}
+    )
+    crossed_binding = ExactPlanA3DeploymentBindingV2.model_validate(crossed_payload)
+    with pytest.raises(ExactPlanPreflightRejected, match="unlock config differs"):
+        ExactPlanPreflightV1(
+            configuration=config,
+            callbacks=callbacks,
+            project_root=root,
+            deployment_binding=crossed_binding,
+        ).preflight_plan(plan)
+    assert callback_counts == (
+        tuple(callbacks.path_calls),
+        tuple(callbacks.collision_calls),
+        tuple(callbacks.attachment_calls),
+    )
 
 
 def test_gripper_terminal_must_equal_frozen_wire_target(tmp_path: Path) -> None:

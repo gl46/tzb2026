@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 """Replay ADR-0022 Phase-2 contract smoke without unlocking execution.
 
-Passing this audit proves only offline schema/provenance behavior.  It cannot
-replace a real Isaac planner/executor, an active-session unchanged-B0 entry
-point, deployment closure, host-held Ed25519 authority receipts, endpoint
-startup attestation, or physical validation of all eight skills.  The result
-is therefore deliberately ``BLOCKED`` while any source-level unlock binding
-remains unset or any of those real artifacts is absent.
+Passing this audit proves only offline schema/provenance behavior. It cannot
+replace a real Isaac planner/executor, deployment closure, session-bound
+host-local HMAC receipts, endpoint startup evidence, or physical validation
+of all eight skills. The result is deliberately ``BLOCKED`` while an active
+source binding remains unset or any of those real artifacts is absent.
 """
 
 from __future__ import annotations
@@ -71,11 +70,11 @@ UNLOCK_BINDING_NAMES = (
 )
 BLOCKERS = (
     "REAL_EXACT_PLAN_ISAAC_PLANNER_EXECUTOR_MISSING",
-    "ACTIVE_SESSION_UNCHANGED_B0_CALLABLE_MISSING",
     "DEPLOYMENT_CLOSURE_ASSETS_CONTAINER_MISSING",
-    "NODE2_LABSERVER_ED25519_AUTHORITIES_TRUST_RECEIPTS_MISSING",
-    "REAL_ENDPOINT_STARTUP_HOST_ATTESTATION_MISSING",
+    "NODE2_LABSERVER_HOST_HMAC_RECEIPTS_MISSING",
+    "REAL_ENDPOINT_STARTUP_SESSION_EVIDENCE_MISSING",
     "EIGHT_SKILL_PHYSICAL_PHASE_VALIDATION_MISSING",
+    "TWO_ACTIVE_PRODUCTION_BINDINGS_UNSET",
 )
 SOURCE_ROLES = (
     "PRIMITIVE_ENTRYPOINT",
@@ -641,10 +640,10 @@ def build_audit(project_root: Path) -> dict[str, Any]:
             "contract_fixture_counted_as_model_owned_physical_evidence": False,
         },
         "disposition": (
-            "Offline ADR-0022 contract smoke passed, but Phase-2 remains BLOCKED. "
-            "No source-level binding may be set until every listed real deployment, "
-            "host-authority, startup-attestation, and eight-skill physical-validation "
-            "artifact exists and is independently reviewed."
+            "Offline ADR-0022/ADR-0024 contract smoke passed, but Phase-2 remains "
+            "BLOCKED. No active source binding may be set until every listed real "
+            "deployment, session/HMAC, startup, and eight-skill physical-validation "
+            "artifact exists and is independently replayed."
         ),
     }
 
@@ -683,8 +682,8 @@ SMOKE, or Q-B evaluation was executed.
 
 {binding_lines}
 
-All four assignments were parsed directly from
-`{report["entry_gate"]["path"]}` and remain literal `None`.
+Both active bindings and both withdrawn compatibility sentinels were parsed
+directly from `{report["entry_gate"]["path"]}` and remain literal `None`.
 
 ## Blocking evidence still missing
 

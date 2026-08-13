@@ -39,7 +39,7 @@ def test_phase2_integration_audit_replays_current_fail_closed_sources() -> None:
     assert recorded["blockers"] == replayed["blockers"]
     assert recorded["verification"] == {
         "command": ".venv/bin/pytest -q tests/unit/test_m2c_*.py",
-        "passed": 712,
+        "passed": 741,
         "failed": 0,
     }
 
@@ -63,8 +63,16 @@ def test_audit_separates_implemented_contracts_from_missing_formal_path() -> Non
             "no_replan_phase_executor",
             "a3_float64_bullet_candidate",
             "query_only_deployment_path_completed",
+            "adr0024_a3_deployment_authorization_v2",
+            "trusted_host_signature_prerequisite_rescinded",
+            "session_receipt_and_hmac_post_execution_evidence_required",
+            "legacy_a3_signature_schema_audit_only",
         )
     )
+    assert (
+        report["implemented_contracts"]["phase2_readiness_adr0024_v2_migration_complete"] is False
+    )
+    assert "PHASE2_READINESS_VERIFIER_ADR0024_V2_MIGRATION_INCOMPLETE" in report["blockers"]
     assert report["implemented_contracts"]["query_only_static_state_preflight_clear"] is False
     assert report["formal_backend"] == {
         "construct_exact_plan_is_rejection_stub": True,

@@ -14,6 +14,8 @@ from xh_agent.policy.qrm_lite.phase2_binding_readiness_v1 import (
     _read_bound_files,
     build_readiness_report,
     read_regular_file_once,
+    render_binding_addendum,
+    render_binding_proposal,
 )
 
 
@@ -31,10 +33,11 @@ def test_missing_real_phase2_evidence_is_explicitly_blocked() -> None:
     assert report["blockers"] == [
         "PHASE2_EVIDENCE_INDEX_MISSING",
         "REAL_EXACT_PLAN_EIGHT_SKILL_RECEIPTS_MISSING",
-        "ACTIVE_SESSION_UNCHANGED_B0_RECEIPT_MISSING",
-        "SIGNED_HOST_STARTUP_AND_DEPLOYMENT_ATTESTATION_MISSING",
-        "NODE2_LABSERVER_WIRE_TRUST_ROOTS_MISSING",
+        "FORMAL_V4_BOUND_PLAN_PROVIDER_EVIDENCE_MISSING",
+        "SESSION_BOUND_STARTUP_AND_DEPLOYMENT_EVIDENCE_MISSING",
+        "NODE2_LABSERVER_HOST_HMAC_RECEIPTS_MISSING",
         "CONTAINER_TRANSITIVE_IMPORT_CLOSURE_MISSING",
+        "PHASE2_READINESS_VERIFIER_ADR0024_V2_MIGRATION_INCOMPLETE",
     ]
     assert report["governance"]["four_source_bindings_changed"] is False
     assert report["governance"]["training_executed"] is False
@@ -60,6 +63,13 @@ def test_generate_is_refused_and_creates_no_files_while_blocked(tmp_path: Path) 
 
     assert not addendum.exists()
     assert not proposal.exists()
+
+
+def test_historical_renderers_cannot_bypass_v2_migration_blocker() -> None:
+    with pytest.raises(ReadinessFailure, match="ADR0024_V2_MIGRATION_INCOMPLETE"):
+        render_binding_addendum({"fabricated": True})
+    with pytest.raises(ReadinessFailure, match="ADR0024_V2_MIGRATION_INCOMPLETE"):
+        render_binding_proposal({"fabricated": True}, addendum_sha256="a" * 64)
 
 
 def test_index_rejects_missing_artifact_role_before_reading_evidence() -> None:

@@ -60,7 +60,7 @@ def test_current_s4_blocker_report_replays_v3_and_v4_collection() -> None:
     report = json.loads(REPORT.read_bytes())
 
     assert report["schema_version"] == "M2CS4CurrentBlockersV2"
-    assert report["status"] == "BLOCKED_UNMEASURED_RAW_SCHEMA_AND_A3_STATIC_COLLISION"
+    assert report["status"] == ("BLOCKED_UNMEASURED_RAW_SCHEMA_AND_FORMAL_EXACT_PLAN_INTEGRATION")
     assert report["q_a_state"] == "PASSED"
     assert report["q_b_state"] == "UNMEASURED"
     assert report["pure_model_success_episodes"] is None
@@ -160,7 +160,10 @@ def test_phase2_query_only_evidence_remains_non_authorizing() -> None:
             "offline_wire_authentication_verifier_binding",
         )
     )
-    assert "A3_STATIC_HOME_SELF_COLLISION_PREFLIGHT_REJECTED" in phase2["blockers"]
+    assert "A3_STATIC_HOME_SELF_COLLISION_PREFLIGHT_REJECTED" not in phase2["blockers"]
+    assert "FORMAL_PUBLIC_OBSERVATION_V4_AND_BOUND_PLAN_PROVIDER_NOT_ACTIVE" in phase2["blockers"]
+    assert "TWO_ACTIVE_PRODUCTION_BINDINGS_UNSET" in phase2["blockers"]
+    assert "PHASE2_READINESS_VERIFIER_ADR0024_V2_MIGRATION_INCOMPLETE" in phase2["blockers"]
 
 
 def test_current_s4_report_preserves_governance_and_s6_freeze() -> None:

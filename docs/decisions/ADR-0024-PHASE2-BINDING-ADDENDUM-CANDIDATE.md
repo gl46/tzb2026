@@ -82,10 +82,21 @@ It completed all 76 child-pair queries with zero query failures: 74 were clear
 and two were fail-closed static collision rejections (hand-link7 and
 link2-link4). The comparison report is
 `reports/m2c-phase2-a3-query-only-deployment-comparison.json`. Thus the
-permission and native deployment path is closed, but the static A.3 preflight
-is not clear and formal execution remains ineligible. This finding is recorded
-as `A3_STATIC_HOME_SELF_COLLISION_PREFLIGHT_REJECTED`; it is not converted into
-an ACM exception, a reduced margin, or an execution authorization.
+permission and native deployment path is closed. The arbitrary frozen home
+state is not a universal capability gate: that specific state correctly
+rejects under A.3 and remains non-executable. It is not converted into an ACM
+exception, a reduced margin, or an execution authorization. Formal execution
+instead requires each actual bound plan to pass its complete plan-specific A.3
+replay before any command.
+
+The preflight coordinator now defines `ExactPlanA3DeploymentBindingV2`. It
+implements ADR-0024 section 4 directly: trusted-host signatures and launcher
+attestation are not prerequisites. The reviewed binding instead covers the
+accepted ADR, addendum and unlock config, immutable implementation commit and
+container, exact plan source set, complete A.3 configuration, query callback,
+session-audit implementation, and host-local HMAC verifier. A successful
+authorization still claims no physical action; the real session-bound phase
+and bundle receipts plus post-execution HMAC replay remain required evidence.
 
 ## B0 boundary
 
@@ -105,10 +116,13 @@ nor any safety/IK/collision/controller gate.
 ## Blocking evidence
 
 - `EIGHT_SKILL_REAL_ISAAC_PHASE_VALIDATION_MISSING`
+- `FORMAL_PUBLIC_OBSERVATION_V4_AND_BOUND_PLAN_PROVIDER_NOT_ACTIVE`
 - `IMMUTABLE_DEPLOYMENT_COMMIT_CONTAINER_IMPORT_ASSET_CLOSURE_MISSING`
 - `REAL_EXACT_PLAN_ISAAC_EXECUTOR_MISSING`
 - `REAL_QUERY_ONLY_FK_PROVIDER_DEPLOYMENT_BINDING_MISSING`
 - `REAL_SESSION_ENDPOINT_STARTUP_AND_HOST_HMAC_ATTESTATION_MISSING`
+- `PHASE2_READINESS_VERIFIER_ADR0024_V2_MIGRATION_INCOMPLETE`
+- `TWO_ACTIVE_PRODUCTION_BINDINGS_UNSET`
 
 No training, Isaac scene startup, physical action, SMOKE, Q-B, or S5/S6
 evaluation was performed while generating this candidate. No Teacher entered

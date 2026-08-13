@@ -19,11 +19,15 @@ zero physics steps, and zero scene mutation.
 
 from __future__ import annotations
 
+import ast
 import hashlib
+import json
 import math
 import os
 from pathlib import Path
+import re
 import stat
+import subprocess
 from typing import Any, Literal, Mapping, Protocol
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -52,6 +56,20 @@ EXPECTED_COMMAND_DIMENSIONS: Mapping[str, int] = {
     "PUBLIC_RGBD_CAPTURE": 0,
     "PUBLIC_TRACK_REASSOCIATION": 0,
 }
+ADR_0024_PATH = "docs/decisions/ADR-0024-m2c-s4-unblock-directive.md"
+ADR_0024_SHA256 = "62c14028df1ad91e4d3c4282c4775e33149292e9bcf10add2d505be8c7424689"
+PHASE2_BINDING_ADDENDUM_PATH = "docs/decisions/ADR-0022-BINDING-ADDENDUM.md"
+PHASE2_UNLOCK_CONFIG_PATH = "configs/m2c_s4_unlock_bindings.json"
+HOST_HMAC_VERIFIER_PATH = "src/xh_agent/policy/qrm_lite/offline_wire_auth_v1.py"
+PREFLIGHT_IMPLEMENTATION_PATH = "src/xh_agent/policy/qrm_lite/exact_plan_preflight_v1.py"
+SESSION_AUDIT_IMPLEMENTATION_PATH = "src/xh_agent/policy/qrm_lite/formal_isaac_endpoint_v2.py"
+ENTRY_GATE_PATH = "src/xh_agent/policy/qrm_lite/s4_entry_gate.py"
+_ENTRY_BINDING_NAMES = (
+    "FORMAL_PHYSICAL_RUNNER_BINDING",
+    "FORMAL_DEPLOYMENT_CLOSURE_BINDING",
+    "FROZEN_B0_RUNTIME_WRAPPER_BINDING",
+    "OFFLINE_WIRE_AUTHENTICATION_VERIFIER_BINDING",
+)
 
 
 class FrozenModel(BaseModel):
@@ -66,7 +84,7 @@ def _canonical_model_sha256(model: BaseModel, digest_field: str) -> str:
     return canonical_sha256(model.model_dump(mode="json", exclude={digest_field}))
 
 
-def _read_regular_file_sha256(path: Path) -> str:
+def _read_regular_file_once(path: Path) -> bytes:
     flags = os.O_RDONLY | getattr(os, "O_CLOEXEC", 0) | getattr(os, "O_NOFOLLOW", 0)
     descriptor = os.open(path, flags)
     try:
@@ -75,9 +93,9 @@ def _read_regular_file_sha256(path: Path) -> str:
             raise ExactPlanPreflightRejected(
                 f"preflight implementation is not a single-link regular file: {path}"
             )
-        digest = hashlib.sha256()
+        chunks: list[bytes] = []
         while chunk := os.read(descriptor, 1024 * 1024):
-            digest.update(chunk)
+            chunks.append(chunk)
         after = os.fstat(descriptor)
         identity_before = (
             before.st_dev,
@@ -95,9 +113,102 @@ def _read_regular_file_sha256(path: Path) -> str:
         )
         if identity_before != identity_after:
             raise ExactPlanPreflightRejected("preflight implementation changed while hashing")
-        return digest.hexdigest()
+        return b"".join(chunks)
     finally:
         os.close(descriptor)
+
+
+def _read_regular_file_sha256(path: Path) -> str:
+    return hashlib.sha256(_read_regular_file_once(path)).hexdigest()
+
+
+def _git_text(project_root: Path, *args: str) -> str:
+    try:
+        return subprocess.check_output(
+            ["git", *args],
+            cwd=project_root,
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip()
+    except (OSError, subprocess.CalledProcessError) as exc:
+        raise ExactPlanPreflightRejected("A.3 deployment Git binding is unavailable") from exc
+
+
+def _require_current_committed_file(
+    project_root: Path,
+    *,
+    commit: str,
+    relative_path: str,
+    expected_sha256: str,
+) -> bytes:
+    path = Path(relative_path)
+    if path.is_absolute() or ".." in path.parts:
+        raise ExactPlanPreflightRejected("A.3 deployment path escapes the project")
+    raw = _read_regular_file_once(project_root / path)
+    actual = hashlib.sha256(raw).hexdigest()
+    try:
+        committed = subprocess.check_output(
+            ["git", "show", f"{commit}:{path.as_posix()}"],
+            cwd=project_root,
+            stderr=subprocess.DEVNULL,
+        )
+    except (OSError, subprocess.CalledProcessError) as exc:
+        raise ExactPlanPreflightRejected(
+            f"A.3 deployment file is absent from immutable commit: {relative_path}"
+        ) from exc
+    if actual != expected_sha256 or hashlib.sha256(committed).hexdigest() != expected_sha256:
+        raise ExactPlanPreflightRejected(
+            f"A.3 deployment source differs from immutable commit: {relative_path}"
+        )
+    return raw
+
+
+def _strict_json_object(source: bytes) -> dict[str, object]:
+    def reject_duplicate_keys(pairs: list[tuple[str, object]]) -> dict[str, object]:
+        result: dict[str, object] = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError(f"duplicate key: {key}")
+            result[key] = value
+        return result
+
+    try:
+        value = json.loads(source, object_pairs_hook=reject_duplicate_keys)
+    except (UnicodeDecodeError, json.JSONDecodeError, ValueError) as exc:
+        raise ExactPlanPreflightRejected("Phase-2 unlock config is not strict JSON") from exc
+    if not isinstance(value, dict):
+        raise ExactPlanPreflightRejected("Phase-2 unlock config is not an object")
+    return value
+
+
+def _literal_assignments(source: bytes) -> dict[str, object]:
+    try:
+        tree = ast.parse(source, filename=ENTRY_GATE_PATH)
+    except (SyntaxError, UnicodeDecodeError) as exc:
+        raise ExactPlanPreflightRejected("formal entry gate source is not parseable") from exc
+    values: dict[str, object] = {}
+    counts = {name: 0 for name in _ENTRY_BINDING_NAMES}
+    for node in tree.body:
+        name: str | None = None
+        value: ast.expr | None = None
+        if isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name):
+            name, value = node.target.id, node.value
+        elif isinstance(node, ast.Assign) and len(node.targets) == 1:
+            target = node.targets[0]
+            if isinstance(target, ast.Name):
+                name, value = target.id, node.value
+        if name not in counts or value is None:
+            continue
+        counts[name] += 1
+        try:
+            values[name] = ast.literal_eval(value)
+        except (ValueError, TypeError) as exc:
+            raise ExactPlanPreflightRejected(
+                f"formal entry binding is not a literal: {name}"
+            ) from exc
+    if any(count != 1 for count in counts.values()):
+        raise ExactPlanPreflightRejected("formal entry binding assignment set is not exact")
+    return values
 
 
 class IKPreflightConfigurationV1(FrozenModel):
@@ -828,32 +939,144 @@ def require_formal_a3_execution_authorization(
     *,
     host_verifier_receipt: HostSignedAppendOnlyA3VerifierReceiptV1 | None,
 ) -> None:
-    """Always fail closed until a reviewed host-signature verifier is bound."""
+    """Reject the legacy signature gate superseded by accepted ADR-0024.
 
-    if audit_receipt.formal_execution_eligible:
-        raise ExactPlanPreflightRejected("unreviewed A.3 receipt claimed formal eligibility")
-    if host_verifier_receipt is None:
-        raise ExactPlanPreflightRejected("host-signed append-only A.3 verifier receipt is absent")
-    if (
-        host_verifier_receipt.bound_plan_sha256
-        != audit_receipt.standard_preflight_receipt.bound_plan_sha256
-        or host_verifier_receipt.a3_audit_receipt_sha256 != audit_receipt.receipt_sha256
-        or not host_verifier_receipt.verified_against_frozen_allowed_signer
-        or not host_verifier_receipt.append_only_lifecycle_verified
-        or not host_verifier_receipt.all_gate_evidence_precedes_execution_start
-    ):
-        raise ExactPlanPreflightRejected(
-            "host-signed append-only A.3 verifier receipt is invalid or crossed"
-        )
+    V1 remains parseable so old audit bytes keep their original meaning.  It
+    can never authorize a new command: ADR-0024 section 4 explicitly rescinds
+    trusted-host signing as a Phase-2 prerequisite.  New execution paths must
+    use :class:`ExactPlanA3DeploymentBindingV2` through
+    :class:`ExactPlanPreflightV1`.
+    """
+
+    del audit_receipt, host_verifier_receipt
     raise ExactPlanPreflightRejected(
-        "host A.3 verifier signature verification is not implemented/bound"
+        "legacy host-signed A.3 authorization is superseded by ADR-0024; "
+        "a V2 deployment binding is required"
     )
+
+
+class ExactPlanA3DeploymentBindingV2(FrozenModel):
+    """Reviewed deployment closure for consuming one A.3 audit receipt.
+
+    This is not a host attestation and contains no signature field.  It binds
+    the accepted human decision, reviewed addendum/config, exact runtime
+    sources, complete preflight configuration, immutable commit/image and the
+    existing session-audit/HMAC verifier implementation.  Per-run execution
+    receipts remain mandatory after a command; this binding only makes a
+    fully replayed *pre-command* gate result consumable by the primitive
+    bundle.
+    """
+
+    schema_version: Literal["ExactPlanA3DeploymentBindingV2"] = "ExactPlanA3DeploymentBindingV2"
+    status: Literal["ACCEPTED_PHASE2_BINDING_ADDENDUM"] = "ACCEPTED_PHASE2_BINDING_ADDENDUM"
+    accepted_adr_path: Literal[ADR_0024_PATH] = ADR_0024_PATH
+    accepted_adr_sha256: Literal[ADR_0024_SHA256] = ADR_0024_SHA256
+    binding_addendum_path: Literal[PHASE2_BINDING_ADDENDUM_PATH] = PHASE2_BINDING_ADDENDUM_PATH
+    binding_addendum_sha256: str = Field(pattern=SHA256_PATTERN)
+    unlock_config_path: Literal[PHASE2_UNLOCK_CONFIG_PATH] = PHASE2_UNLOCK_CONFIG_PATH
+    unlock_config_sha256: str = Field(pattern=SHA256_PATTERN)
+    immutable_commit: str = Field(pattern=r"^[0-9a-f]{40}$")
+    container_image_digest: str = Field(pattern=r"^sha256:[0-9a-f]{64}$")
+    preflight_implementation_path: str = Field(min_length=1)
+    preflight_implementation_sha256: str = Field(pattern=SHA256_PATTERN)
+    callback_implementation_path: str = Field(min_length=1)
+    callback_implementation_sha256: str = Field(pattern=SHA256_PATTERN)
+    complete_preflight_configuration_sha256: str = Field(pattern=SHA256_PATTERN)
+    plan_source_bindings_sha256: str = Field(pattern=SHA256_PATTERN)
+    phase_schema_by_skill: tuple[tuple[str, str], ...] = Field(min_length=8, max_length=8)
+    session_audit_implementation_path: Literal[SESSION_AUDIT_IMPLEMENTATION_PATH] = (
+        SESSION_AUDIT_IMPLEMENTATION_PATH
+    )
+    session_audit_implementation_sha256: str = Field(pattern=SHA256_PATTERN)
+    host_hmac_verifier_path: Literal[HOST_HMAC_VERIFIER_PATH] = HOST_HMAC_VERIFIER_PATH
+    host_hmac_verifier_sha256: str = Field(pattern=SHA256_PATTERN)
+    entry_gate_path: Literal[ENTRY_GATE_PATH] = ENTRY_GATE_PATH
+    entry_gate_sha256: str = Field(pattern=SHA256_PATTERN)
+    formal_physical_runner_binding: tuple[str, str]
+    formal_deployment_closure_binding: tuple[str, str, str]
+    frozen_b0_runtime_wrapper_binding: None = None
+    offline_wire_authentication_verifier_binding: None = None
+    reviewed_addendum_accepted: Literal[True] = True
+    immutable_git_tree_required: Literal[True] = True
+    session_bound_execution_receipt_required: Literal[True] = True
+    host_hmac_post_execution_replay_required: Literal[True] = True
+    trusted_host_signature_required: Literal[False] = False
+    launcher_attestation_required: Literal[False] = False
+    teacher_used: Literal[False] = False
+    privileged_truth_policy_input: Literal[False] = False
+    binding_sha256: str = Field(pattern=SHA256_PATTERN)
+
+    @model_validator(mode="after")
+    def exact_skill_set_and_digest(self) -> "ExactPlanA3DeploymentBindingV2":
+        runner_path, runner_sha256 = self.formal_physical_runner_binding
+        closure_commit, closure_image, closure_manifest = self.formal_deployment_closure_binding
+        if (
+            not runner_path
+            or Path(runner_path).is_absolute()
+            or ".." in Path(runner_path).parts
+            or re.fullmatch(SHA256_PATTERN, runner_sha256) is None
+            or closure_commit != self.immutable_commit
+            or closure_image != self.container_image_digest
+            or re.fullmatch(SHA256_PATTERN, closure_manifest) is None
+        ):
+            raise ValueError("A.3 active entry binding tuple is malformed or crossed")
+        skills = tuple(skill for skill, _ in self.phase_schema_by_skill)
+        expected = {
+            "GRASP",
+            "LIFT",
+            "MOVE",
+            "PLACE",
+            "RELEASE",
+            "REOBSERVE",
+            "REASSOCIATE_TARGET",
+            "REGRASP",
+        }
+        if len(skills) != len(set(skills)) or set(skills) != expected:
+            raise ValueError("A.3 deployment binding skill set differs")
+        if any(
+            re.fullmatch(SHA256_PATTERN, digest) is None for _, digest in self.phase_schema_by_skill
+        ):
+            raise ValueError("A.3 deployment binding phase schema digest is malformed")
+        if self.binding_sha256 != _canonical_model_sha256(self, "binding_sha256"):
+            raise ValueError("A.3 deployment binding digest differs")
+        return self
+
+
+class PreparedExactPlanA3AuthorizationV2(FrozenModel):
+    """Per-plan result of replaying gates under one reviewed deployment."""
+
+    schema_version: Literal["PreparedExactPlanA3AuthorizationV2"] = (
+        "PreparedExactPlanA3AuthorizationV2"
+    )
+    deployment_binding_sha256: str = Field(pattern=SHA256_PATTERN)
+    bound_plan_sha256: str = Field(pattern=SHA256_PATTERN)
+    a3_audit_receipt_sha256: str = Field(pattern=SHA256_PATTERN)
+    run_id: str = Field(min_length=1)
+    session_id: str = Field(min_length=1)
+    canonical_skill: str = Field(min_length=1)
+    phase_schema_sha256: str = Field(pattern=SHA256_PATTERN)
+    all_phases_replayed_before_any_command: Literal[True] = True
+    physical_execution_claimed: Literal[False] = False
+    session_bound_execution_receipt_required: Literal[True] = True
+    host_hmac_post_execution_replay_required: Literal[True] = True
+    trusted_host_signature_required: Literal[False] = False
+    formal_execution_eligible: Literal[True] = True
+    teacher_used: Literal[False] = False
+    privileged_truth_policy_input: Literal[False] = False
+    authorization_sha256: str = Field(pattern=SHA256_PATTERN)
+
+    @model_validator(mode="after")
+    def canonical(self) -> "PreparedExactPlanA3AuthorizationV2":
+        if self.authorization_sha256 != _canonical_model_sha256(self, "authorization_sha256"):
+            raise ValueError("prepared A.3 authorization digest differs")
+        return self
 
 
 class ExactPlanNonActuatingCallbacksV1(Protocol):
     """A real implementation may call Isaac/Lula query APIs only."""
 
     implementation_sha256: str
+    implementation_path: str
     ik_algorithm_sha256: str
     swept_collision_algorithm_sha256: str
     attachment_algorithm_sha256: str
@@ -906,11 +1129,16 @@ class ExactPlanPreflightV1:
         *,
         configuration: ExactPlanPreflightConfigurationV1,
         callbacks: ExactPlanNonActuatingCallbacksV1,
+        project_root: Path | None = None,
+        deployment_binding: ExactPlanA3DeploymentBindingV2 | None = None,
     ) -> None:
         self.configuration = configuration
         self.callbacks = callbacks
+        self.project_root = project_root.resolve() if project_root is not None else None
+        self.deployment_binding = deployment_binding
         self.implementation_sha256 = _read_regular_file_sha256(Path(__file__))
         self._cache: dict[str, ExactPlanA3AuditReceiptV1] = {}
+        self._authorizations: dict[str, PreparedExactPlanA3AuthorizationV2] = {}
         if getattr(callbacks, "non_actuating", None) is not True:
             raise ExactPlanPreflightRejected("preflight callback is not query-only")
         if callbacks.ik_algorithm_sha256 != configuration.ik.algorithm_sha256:
@@ -924,6 +1152,174 @@ class ExactPlanPreflightV1:
             raise ExactPlanPreflightRejected("attachment callback implementation digest differs")
         if callbacks.implementation_sha256 != configuration.callback_implementation_sha256:
             raise ExactPlanPreflightRejected("preflight callback implementation digest differs")
+
+    def _validate_deployment_binding(
+        self,
+        plan: M2CExactPlanPrimitivePlanV1,
+    ) -> ExactPlanA3DeploymentBindingV2:
+        binding = self.deployment_binding
+        project_root = self.project_root
+        if binding is None or project_root is None:
+            raise ExactPlanPreflightRejected(
+                "complete A.3 configuration is not bound by the Phase-2 addendum"
+            )
+        head = _git_text(project_root, "rev-parse", "HEAD")
+        try:
+            subprocess.run(
+                ["git", "merge-base", "--is-ancestor", binding.immutable_commit, head],
+                cwd=project_root,
+                check=True,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+        except (OSError, subprocess.CalledProcessError) as exc:
+            raise ExactPlanPreflightRejected(
+                "A.3 deployment commit is not an ancestor of current HEAD"
+            ) from exc
+        status = _git_text(
+            project_root,
+            "status",
+            "--porcelain=v1",
+            "--untracked-files=no",
+            "--",
+            binding.accepted_adr_path,
+            binding.binding_addendum_path,
+            binding.unlock_config_path,
+            binding.preflight_implementation_path,
+            binding.callback_implementation_path,
+            binding.session_audit_implementation_path,
+            binding.host_hmac_verifier_path,
+            binding.entry_gate_path,
+            binding.formal_physical_runner_binding[0],
+        )
+        if status:
+            raise ExactPlanPreflightRejected("A.3 deployment closure is dirty")
+        implementation_files = {
+            binding.accepted_adr_path: binding.accepted_adr_sha256,
+            binding.preflight_implementation_path: (binding.preflight_implementation_sha256),
+            binding.callback_implementation_path: binding.callback_implementation_sha256,
+            binding.session_audit_implementation_path: (
+                binding.session_audit_implementation_sha256
+            ),
+            binding.host_hmac_verifier_path: binding.host_hmac_verifier_sha256,
+            binding.formal_physical_runner_binding[0]: (binding.formal_physical_runner_binding[1]),
+        }
+        for relative_path, digest in implementation_files.items():
+            _require_current_committed_file(
+                project_root,
+                commit=binding.immutable_commit,
+                relative_path=relative_path,
+                expected_sha256=digest,
+            )
+        # The accepted addendum and generated unlock config necessarily land
+        # after the immutable implementation/evidence commit.  Verify their
+        # current bytes against the reviewed current HEAD rather than creating
+        # an impossible self-referential implementation commit.
+        current_files: dict[str, bytes] = {}
+        for relative_path, digest in {
+            binding.binding_addendum_path: binding.binding_addendum_sha256,
+            binding.unlock_config_path: binding.unlock_config_sha256,
+            binding.entry_gate_path: binding.entry_gate_sha256,
+        }.items():
+            current_files[relative_path] = _require_current_committed_file(
+                project_root,
+                commit=head,
+                relative_path=relative_path,
+                expected_sha256=digest,
+            )
+        entry_bindings = _literal_assignments(current_files[binding.entry_gate_path])
+        expected_entry_bindings: dict[str, object] = {
+            "FORMAL_PHYSICAL_RUNNER_BINDING": binding.formal_physical_runner_binding,
+            "FORMAL_DEPLOYMENT_CLOSURE_BINDING": binding.formal_deployment_closure_binding,
+            "FROZEN_B0_RUNTIME_WRAPPER_BINDING": None,
+            "OFFLINE_WIRE_AUTHENTICATION_VERIFIER_BINDING": None,
+        }
+        if entry_bindings != expected_entry_bindings:
+            raise ExactPlanPreflightRejected(
+                "formal entry source bindings differ from reviewed deployment"
+            )
+        unlock_config = _strict_json_object(current_files[binding.unlock_config_path])
+        expected_unlock_config: dict[str, object] = {
+            "schema_version": "M2CS4UnlockBindingV2",
+            "status": "APPLIED_TO_REVIEWED_SOURCE",
+            "adr_path": binding.accepted_adr_path,
+            "binding_addendum_path": binding.binding_addendum_path,
+            "binding_addendum_sha256": binding.binding_addendum_sha256,
+            "FORMAL_PHYSICAL_RUNNER_BINDING": list(binding.formal_physical_runner_binding),
+            "FORMAL_DEPLOYMENT_CLOSURE_BINDING": list(binding.formal_deployment_closure_binding),
+            "FROZEN_B0_RUNTIME_WRAPPER_BINDING": None,
+            "OFFLINE_WIRE_AUTHENTICATION_VERIFIER_BINDING": None,
+            "applied_to_source": True,
+            "teacher_used": False,
+            "privileged_truth_policy_input": False,
+        }
+        if unlock_config != expected_unlock_config:
+            raise ExactPlanPreflightRejected(
+                "Phase-2 unlock config differs from active entry bindings"
+            )
+        for source in plan.source_bindings:
+            _require_current_committed_file(
+                project_root,
+                commit=binding.immutable_commit,
+                relative_path=source.path,
+                expected_sha256=source.sha256,
+            )
+        role_hashes = {source.role: source.sha256 for source in plan.source_bindings}
+        if (
+            binding.preflight_implementation_path != PREFLIGHT_IMPLEMENTATION_PATH
+            or binding.preflight_implementation_sha256 != self.implementation_sha256
+            or getattr(self.callbacks, "implementation_path", None)
+            != binding.callback_implementation_path
+            or binding.callback_implementation_sha256 != self.callbacks.implementation_sha256
+            or binding.complete_preflight_configuration_sha256
+            != self.configuration.configuration_sha256
+            or binding.plan_source_bindings_sha256 != canonical_sha256(plan.source_bindings)
+            or plan.inputs.immutable_commit != binding.immutable_commit
+            or plan.inputs.container_image_digest != binding.container_image_digest
+            or binding.formal_deployment_closure_binding
+            != (
+                binding.immutable_commit,
+                binding.container_image_digest,
+                role_hashes.get("TRANSITIVE_DEPENDENCY_MANIFEST"),
+            )
+        ):
+            raise ExactPlanPreflightRejected(
+                "A.3 plan/configuration/runtime differs from reviewed deployment binding"
+            )
+        phase_schema = dict(binding.phase_schema_by_skill)
+        if phase_schema.get(plan.exact_execution_plan.canonical_skill) != plan.phase_schema_sha256:
+            raise ExactPlanPreflightRejected("A.3 phase schema is absent from deployment binding")
+        return binding
+
+    def _prepare_deployment_authorization(
+        self,
+        plan: M2CExactPlanPrimitivePlanV1,
+        audit_receipt: ExactPlanA3AuditReceiptV1,
+        binding: ExactPlanA3DeploymentBindingV2,
+    ) -> PreparedExactPlanA3AuthorizationV2:
+        replayed = strict_replay_a3_audit_receipt_v1(plan, audit_receipt)
+        payload: dict[str, Any] = {
+            "schema_version": "PreparedExactPlanA3AuthorizationV2",
+            "deployment_binding_sha256": binding.binding_sha256,
+            "bound_plan_sha256": plan.bound_plan_sha256,
+            "a3_audit_receipt_sha256": replayed.receipt_sha256,
+            "run_id": plan.inputs.run_id,
+            "session_id": plan.inputs.session_id,
+            "canonical_skill": plan.exact_execution_plan.canonical_skill,
+            "phase_schema_sha256": plan.phase_schema_sha256,
+            "all_phases_replayed_before_any_command": True,
+            "physical_execution_claimed": False,
+            "session_bound_execution_receipt_required": True,
+            "host_hmac_post_execution_replay_required": True,
+            "trusted_host_signature_required": False,
+            "formal_execution_eligible": True,
+            "teacher_used": False,
+            "privileged_truth_policy_input": False,
+        }
+        return PreparedExactPlanA3AuthorizationV2(
+            **payload,
+            authorization_sha256=canonical_sha256(payload),
+        )
 
     def _validate_plan_source_bindings(self, plan: M2CExactPlanPrimitivePlanV1) -> None:
         roles = {item.role: item.sha256 for item in plan.source_bindings}
@@ -1284,6 +1680,9 @@ class ExactPlanPreflightV1:
         if cached is not None:
             return cached
         self._validate_plan_source_bindings(plan)
+        deployment_binding: ExactPlanA3DeploymentBindingV2 | None = None
+        if self.deployment_binding is not None or self.project_root is not None:
+            deployment_binding = self._validate_deployment_binding(plan)
         try:
             snapshot = self.callbacks.snapshot_runtime(plan)
         except Exception as exc:
@@ -1471,7 +1870,16 @@ class ExactPlanPreflightV1:
             **audit_payload,
             receipt_sha256=canonical_sha256(audit_payload),
         )
+        authorization: PreparedExactPlanA3AuthorizationV2 | None = None
+        if deployment_binding is not None:
+            authorization = self._prepare_deployment_authorization(
+                plan,
+                audit_receipt,
+                deployment_binding,
+            )
         self._cache[plan.bound_plan_sha256] = audit_receipt
+        if authorization is not None:
+            self._authorizations[plan.bound_plan_sha256] = authorization
         return audit_receipt
 
     def verify_phase(
@@ -1482,7 +1890,8 @@ class ExactPlanPreflightV1:
         """Bundle-compatible adapter; first call validates the entire plan."""
 
         receipt = self.preflight_plan(plan)
-        if not receipt.formal_execution_eligible:
+        authorization = self._authorizations.get(plan.bound_plan_sha256)
+        if authorization is None or not authorization.formal_execution_eligible:
             raise ExactPlanPreflightRejected(
                 "complete A.3 configuration is not bound by the Phase-2 addendum"
             )
