@@ -29,6 +29,13 @@ def test_candidate_smoke_is_blocked_unmeasured_and_never_physical() -> None:
     assert all(item["status"] == "PASS_CONTRACT_ONLY" for item in report["contract_smokes"])
     assert report["a3_local_closure"]["status"] == "NOT_AVAILABLE"
     assert not report["a3_local_closure"]["formal_execution_eligible"]
+    assert report["a3_native_build_evidence"]["status"] == (
+        "PASS_QUERY_ONLY_NATIVE_BUILD_AND_GEOMETRY_REPLAY"
+    )
+    assert report["a3_native_build_evidence"]["builder_image_id"] == (
+        "sha256:ae10eb6cf7eda37d34e394079c7638fc153b3f12314206ad0cab6d0cddc9fc22"
+    )
+    assert not report["a3_native_build_evidence"]["formal_execution_eligible"]
     assert not report["governance"]["contract_smoke_is_physical_evidence"]
     assert not report["governance"]["teacher_used"]
 

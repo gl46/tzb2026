@@ -54,9 +54,12 @@ The candidate binds configuration digest
 - query timeout `5,000,000,000 ns`.
 
 The machine config binds the exact source and asset digests. The original STL
-bytes and pinned Bullet float64 runtime do not exist on this local Mac, so the
-capability receipt is explicitly `NOT_AVAILABLE`; no fixture may produce a
-production PASS.
+bytes and pinned Bullet float64 runtime were replayed in the independent
+query-only build report `reports/m2c-phase2-a3-native-build.json`. Builder image
+`sha256:ae10eb6c…` produced native module `916a6bd6…`; the controlled Panda
+URDF/SRDF and both STL files replay to exactly 14 collision children. This
+closes the asset/native-build availability blockers, but it is not physical
+evidence and does not make formal execution eligible.
 
 ## B0 boundary
 
@@ -77,8 +80,6 @@ nor any safety/IK/collision/controller gate.
 
 - `EIGHT_SKILL_REAL_ISAAC_PHASE_VALIDATION_MISSING`
 - `IMMUTABLE_DEPLOYMENT_COMMIT_CONTAINER_IMPORT_ASSET_CLOSURE_MISSING`
-- `ORIGINAL_LINK2_LINK4_STL_ASSETS_NOT_AVAILABLE_LOCALLY`
-- `PINNED_BULLET_FLOAT64_NATIVE_BUILD_AND_PACKAGE_RECEIPT_MISSING`
 - `REAL_EXACT_PLAN_ISAAC_EXECUTOR_MISSING`
 - `REAL_QUERY_ONLY_FK_PROVIDER_BINDING_MISSING`
 - `REAL_SESSION_ENDPOINT_STARTUP_AND_HOST_HMAC_ATTESTATION_MISSING`

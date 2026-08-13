@@ -1,0 +1,77 @@
+{
+  "controlled_panda_geometry_replay": {
+    "all_compounds_expanded": true,
+    "collision_child_count": 14,
+    "contract_test_only": false,
+    "formal_evidence": false,
+    "geometry_receipt_sha256": "6e25fd5f32e664fb28be6e0c1a4a426eaa851979336d600a487b08dd60ceff23",
+    "shape_counts": {
+      "BOX": 11,
+      "CONVEX_HULL": 2,
+      "CYLINDER": 1
+    },
+    "unknown_or_concave_shape_rejects": true
+  },
+  "evidence_claims": {
+    "formal_execution_eligible": false,
+    "isaac_started": false,
+    "native_build_completed": true,
+    "original_meshes_replayed": true,
+    "physical_execution_performed": false,
+    "privileged_truth_policy_input": false,
+    "production_binding_set": false,
+    "q_b_evaluation_performed": false,
+    "teacher_used": false,
+    "training_performed": false
+  },
+  "evidence_inventory": {
+    "canonical_path_sha256_map_digest": "3721096669b19d0666577a9a44666729d0103b4ff2606ef4091408ea65b35986",
+    "files": {
+      "build-stdout.json": "9d9df4d8a9aecc509b9806ba96e81ce00b2cf41ac330bdc6adf67c7e65da9d55",
+      "builder-image-id.txt": "6c3969ae1be706478b34e956dc1ad9bd911f91ec606571021da3a714efb89577",
+      "builder-readback.txt": "88bf430a05782837d3e8c9d5c0509309caee927a6b8b37dcc24c50384626f99b",
+      "docker-build.log": "5af63436fab47b535efe054d01982329ce38b4d19a4cc51131f9743473f96923",
+      "meshes/link2.stl": "370f7605a0fae3529db169ded50f52f171024aa792d4d773bc84197301f6a039",
+      "meshes/link4.stl": "0180ebb5772ec9840cb049750cffb29a9ddc90311752a16ea34757782ef9e48d",
+      "native/a3-bullet-build-manifest.json": "6065bb1cefcb01520c1196e157a6d95708a03f55df56fc4fa953708fd438ba67",
+      "native/compiler-inputs.json": "10cd6cd71e91e7b7ded8b4984ab99a8e6c625b4a18740a0714d23de29061fc7c",
+      "native/libm2c_a3_bullet_float64.so": "916a6bd694f7452cbc60c1ba6230aed1b5fa79e496212f7e4f317e71eae0251a",
+      "native/native-build-receipt.json": "39db568adce5b37c2191c1c43a3de77ba9aa6ab459fa4fb04200f374d97a5e23"
+    },
+    "regular_file_count": 10
+  },
+  "implementation_bindings": {
+    "docker/m2c-a3-bullet-builder/Dockerfile": "c48744fdaa19e157506ac9b5b2407efcca9ea690237afd718ccb487a0f00bbec",
+    "scripts/m2c/audit_phase2_a3_native_build.py": "f06d722a90654dabd220e5c7c3864e3edfcd0140e1bd812232f27614fc0d7a72",
+    "scripts/m2c/build_a3_bullet_native_closure.py": "63c2abfb3b8650bebf885493c3c33d8b0a50b5a326ffa71da29496562ddd7a25"
+  },
+  "native_build": {
+    "adapter_build_manifest_core_sha256": "d200a14e5f58d6e0cc20e988afb478dc20a67da1a85fd13e6a723aef7d97439d",
+    "adapter_build_manifest_file_sha256": "6065bb1cefcb01520c1196e157a6d95708a03f55df56fc4fa953708fd438ba67",
+    "build_receipt_sha256": "39db568adce5b37c2191c1c43a3de77ba9aa6ab459fa4fb04200f374d97a5e23",
+    "builder_image_id": "sha256:ae10eb6cf7eda37d34e394079c7638fc153b3f12314206ad0cab6d0cddc9fc22",
+    "compiler_inputs_sha256": "10cd6cd71e91e7b7ded8b4984ab99a8e6c625b4a18740a0714d23de29061fc7c",
+    "dynamic_needed": [
+      "libBulletCollision-float64.so.3.24",
+      "libLinearMath-float64.so.3.24",
+      "libc.so.6",
+      "libgcc_s.so.1",
+      "libm.so.6",
+      "libstdc++.so.6"
+    ],
+    "dynamic_runpath": "/usr/lib/x86_64-linux-gnu",
+    "native_shared_object_sha256": "916a6bd694f7452cbc60c1ba6230aed1b5fa79e496212f7e4f317e71eae0251a",
+    "native_shared_object_size_bytes": 32488,
+    "query_only": true,
+    "receipt_core_sha256": "668d8746c59ed3f44cb8ad890a562899c2ebf715623d503011dc6ee78025ad64"
+  },
+  "remaining_blockers": [
+    "EIGHT_SKILL_REAL_ISAAC_PHASE_VALIDATION_MISSING",
+    "IMMUTABLE_DEPLOYMENT_COMMIT_CONTAINER_IMPORT_ASSET_CLOSURE_MISSING",
+    "REAL_EXACT_PLAN_ISAAC_EXECUTOR_MISSING",
+    "REAL_QUERY_ONLY_FK_PROVIDER_BINDING_MISSING",
+    "REAL_SESSION_ENDPOINT_STARTUP_AND_HOST_HMAC_ATTESTATION_MISSING"
+  ],
+  "schema_version": "M2CPhase2A3NativeBuildAuditV1",
+  "status": "PASS_QUERY_ONLY_NATIVE_BUILD_AND_GEOMETRY_REPLAY"
+}

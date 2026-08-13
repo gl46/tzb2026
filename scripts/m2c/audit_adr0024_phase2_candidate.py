@@ -42,12 +42,14 @@ BINDING_NAMES = (
 EXPECTED_BLOCKERS = (
     "EIGHT_SKILL_REAL_ISAAC_PHASE_VALIDATION_MISSING",
     "IMMUTABLE_DEPLOYMENT_COMMIT_CONTAINER_IMPORT_ASSET_CLOSURE_MISSING",
-    "ORIGINAL_LINK2_LINK4_STL_ASSETS_NOT_AVAILABLE_LOCALLY",
-    "PINNED_BULLET_FLOAT64_NATIVE_BUILD_AND_PACKAGE_RECEIPT_MISSING",
     "REAL_EXACT_PLAN_ISAAC_EXECUTOR_MISSING",
     "REAL_QUERY_ONLY_FK_PROVIDER_BINDING_MISSING",
     "REAL_SESSION_ENDPOINT_STARTUP_AND_HOST_HMAC_ATTESTATION_MISSING",
 )
+NATIVE_BUILD_REPORT_PATH = Path("reports/m2c-phase2-a3-native-build.json")
+NATIVE_BUILD_REPORT_SHA256 = "1bd86c288199744f9870b0d0afd1c69e0c401cd42f98e1fbd8f6ceb09aa22df4"
+NATIVE_BUILD_IMAGE_ID = "sha256:ae10eb6cf7eda37d34e394079c7638fc153b3f12314206ad0cab6d0cddc9fc22"
+NATIVE_SHARED_OBJECT_SHA256 = "916a6bd694f7452cbc60c1ba6230aed1b5fa79e496212f7e4f317e71eae0251a"
 
 
 class CandidateAuditFailure(RuntimeError):
@@ -118,6 +120,7 @@ def load_candidate_config(project_root: Path) -> dict[str, Any]:
         "checkpoint_date_asia_shanghai",
         "accepted_adr",
         "source_bindings",
+        "native_build_evidence",
         "a3_numeric_configuration_sha256",
         "production_bindings",
         "b0_policy",
@@ -158,6 +161,33 @@ def load_candidate_config(project_root: Path) -> dict[str, Any]:
     }
     if candidate["b0_policy"] != expected_b0:
         raise CandidateAuditFailure("candidate B0/terminal policy differs")
+    native = candidate["native_build_evidence"]
+    if native != {
+        "report_path": NATIVE_BUILD_REPORT_PATH.as_posix(),
+        "report_sha256": NATIVE_BUILD_REPORT_SHA256,
+        "status": "PASS_QUERY_ONLY_NATIVE_BUILD_AND_GEOMETRY_REPLAY",
+        "builder_image_id": NATIVE_BUILD_IMAGE_ID,
+        "native_shared_object_sha256": NATIVE_SHARED_OBJECT_SHA256,
+        "formal_execution_eligible": False,
+    }:
+        raise CandidateAuditFailure("candidate native-build evidence binding differs")
+    native_report_raw = read_regular_file_once(project_root / NATIVE_BUILD_REPORT_PATH)
+    if _sha256(native_report_raw) != native["report_sha256"]:
+        raise CandidateAuditFailure("candidate native-build report SHA-256 differs")
+    try:
+        native_report = json.loads(native_report_raw)
+    except json.JSONDecodeError as exc:
+        raise CandidateAuditFailure("candidate native-build report is unreadable") from exc
+    if (
+        native_report.get("status") != native["status"]
+        or native_report.get("native_build", {}).get("builder_image_id")
+        != native["builder_image_id"]
+        or native_report.get("native_build", {}).get("native_shared_object_sha256")
+        != native["native_shared_object_sha256"]
+        or native_report.get("evidence_claims", {}).get("formal_execution_eligible") is not False
+        or native_report.get("remaining_blockers") != list(EXPECTED_BLOCKERS)
+    ):
+        raise CandidateAuditFailure("candidate native-build report claims differ")
     for path, expected in candidate["source_bindings"].items():
         if _sha256(read_regular_file_once(project_root / path)) != expected:
             raise CandidateAuditFailure(f"candidate source SHA-256 differs: {path}")
@@ -217,6 +247,7 @@ def build_audit(project_root: Path) -> dict[str, Any]:
         "entry_bindings": bindings,
         "contract_smokes": smokes,
         "a3_local_closure": closure.model_dump(mode="json"),
+        "a3_native_build_evidence": candidate["native_build_evidence"],
         "blockers": list(EXPECTED_BLOCKERS),
         "governance": candidate["evidence_claims"],
     }
