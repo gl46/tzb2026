@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import subprocess
 from pathlib import Path
 
 
@@ -11,6 +12,28 @@ REPORT = ROOT / "reports/m2c-s4-current-blockers.json"
 
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _git(*args: str) -> str:
+    return subprocess.check_output(["git", *args], cwd=ROOT, text=True).strip()
+
+
+def _recompute_collection_counts(
+    source_bindings: list[dict[str, str]],
+) -> tuple[int, int]:
+    matched_keys: set[str] = set()
+    raw_v3_eight_step_chains = 0
+    for binding in source_bindings:
+        source = json.loads((ROOT / binding["path"]).read_bytes())
+        assert source["observed_counts"]["training_samples_eligible"] == 0
+        assert source["observed_counts"]["training_samples_packaged"] == 0
+        for attempt in source["attempts"]:
+            matched_keys.add(attempt["identity"]["matched_key"])
+            evidence = attempt["classification_evidence"]
+            if evidence.get("chain_schema") == "M2CPathBlockedProbeChainV3":
+                assert evidence["physical_chain_steps"] == 8
+                raw_v3_eight_step_chains += 1
+    return len(matched_keys), raw_v3_eight_step_chains
 
 
 def test_current_s4_blocker_report_is_bound_and_unmeasured() -> None:
@@ -25,8 +48,15 @@ def test_current_s4_blocker_report_is_bound_and_unmeasured() -> None:
     assert report["d2_triggered"] is False
 
     training = report["path_blocked_training"]
-    assert training["unique_train_keys_attempted"] == 11
-    assert training["raw_v3_eight_step_chains"] == 10
+    assert {binding["path"] for binding in training["source_reports"]} == {
+        "reports/m2c-s4-v3-path-blocked-train-collection.json",
+        "reports/m2c-s4-v3-path-blocked-train-collection-batch03.json",
+    }
+    recomputed_unique_keys, recomputed_raw_chains = _recompute_collection_counts(
+        training["source_reports"]
+    )
+    assert training["unique_train_keys_attempted"] == recomputed_unique_keys == 11
+    assert training["raw_v3_eight_step_chains"] == recomputed_raw_chains == 10
     assert training["training_samples_eligible"] == 0
     assert training["training_samples_packaged"] == 0
     assert not any(
@@ -42,6 +72,24 @@ def test_current_s4_blocker_report_is_bound_and_unmeasured() -> None:
     for binding in training["source_reports"]:
         path = ROOT / binding["path"]
         assert _sha256(path) == binding["sha256"]
+
+    introduced_commit = _git(
+        "log",
+        "--diff-filter=A",
+        "--format=%H",
+        "--",
+        str(REPORT.relative_to(ROOT)),
+    ).splitlines()[0]
+    checked_commit = report["checked_head_commit"]
+    assert checked_commit in _git("show", "-s", "--format=%P", introduced_commit).split()
+    assert (
+        subprocess.run(
+            ["git", "merge-base", "--is-ancestor", checked_commit, introduced_commit],
+            cwd=ROOT,
+            check=False,
+        ).returncode
+        == 0
+    )
 
 
 def test_phase2_and_human_decisions_remain_fail_closed() -> None:
@@ -63,10 +111,25 @@ def test_phase2_and_human_decisions_remain_fail_closed() -> None:
     )
     source = phase2["source_report"]
     assert _sha256(ROOT / source["path"]) == source["sha256"]
+    assert {binding["path"] for binding in phase2["source_bindings"]} == {
+        "src/xh_agent/policy/qrm_lite/exact_plan_preflight_v1.py",
+        "src/xh_agent/policy/qrm_lite/isaac_lula_non_actuating_callbacks_v1.py",
+    }
+    for binding in phase2["source_bindings"]:
+        path = ROOT / binding["path"]
+        assert _sha256(path) == binding["sha256"]
+        checked_bytes = subprocess.check_output(
+            ["git", "show", f"{report['checked_head_commit']}:{binding['path']}"],
+            cwd=ROOT,
+        )
+        assert hashlib.sha256(checked_bytes).hexdigest() == binding["sha256"]
+    assert phase2["blockers"][0] == ("SOURCE_AUDIT_PRODUCTION_QUERY_CALLBACK_NOT_AVAILABLE")
+    assert "COMPLETE_CONTINUOUS_SELF_COLLISION_QUERY_NOT_AVAILABLE" not in phase2["blockers"]
 
     assert {item["topic"] for item in report["human_decisions_required"]} == {
         "PUBLIC_TRACK_REIDENTIFICATION",
         "ACTIVE_SESSION_B0_FALLBACK",
+        "A3_CONTINUOUS_SELF_COLLISION",
     }
     for decision in report["human_decisions_required"]:
         assert decision["status"] == "NOT_APPROVED"

@@ -39,9 +39,20 @@
     "offline_wire_authentication_verifier_binding": null,
     "exact_plan_preflight_formal_execution_eligible": false,
     "isaac_lula_production_query_callback_available": false,
+    "source_bindings": [
+      {
+        "role": "EXACT_PLAN_PREFLIGHT_IMPLEMENTATION",
+        "path": "src/xh_agent/policy/qrm_lite/exact_plan_preflight_v1.py",
+        "sha256": "a177efa148111aa004bb2780378f58ae4d33762474ecbdbaae38a4a70be84713"
+      },
+      {
+        "role": "ISAAC_LULA_QUERY_GATEWAY_IMPLEMENTATION",
+        "path": "src/xh_agent/policy/qrm_lite/isaac_lula_non_actuating_callbacks_v1.py",
+        "sha256": "8572c0a3a35a1791dbf8c55707eaf75fa90558ea06d6e0deda490616651ac492"
+      }
+    ],
     "blockers": [
-      "COMPLETE_CONTINUOUS_SELF_COLLISION_QUERY_NOT_AVAILABLE",
-      "ACTIVE_SESSION_CONTACT_ATTACHMENT_CONTROLLER_ATTESTATION_NOT_AVAILABLE",
+      "SOURCE_AUDIT_PRODUCTION_QUERY_CALLBACK_NOT_AVAILABLE",
       "REAL_EIGHT_SKILL_EXACT_PLAN_RECEIPTS_MISSING",
       "ACTIVE_SESSION_UNCHANGED_B0_CALLABLE_MISSING",
       "SIGNED_DEPLOYMENT_AND_WIRE_TRUST_ROOTS_MISSING",
@@ -66,6 +77,13 @@
       "request_sha256": "bdb746ff21741eab6d9e3b2ecb463eb9c069383d9bbfa8dc9f2a247c107541c7",
       "status": "NOT_APPROVED",
       "valid_choices": ["A", "B", "C"]
+    },
+    {
+      "topic": "A3_CONTINUOUS_SELF_COLLISION",
+      "request_path": "docs/decisions/M2C-S4-A3-CONTINUOUS-SELF-COLLISION-ADR-REQUEST.md",
+      "request_sha256": "7f0dc91d250d75b69095bed651328d6c3ba5a923b803a5ae8b56ff30c2fb977c",
+      "status": "NOT_APPROVED",
+      "valid_choices": ["A", "B", "C"]
     }
   ],
   "governance": {
@@ -79,5 +97,5 @@
     "physical_smoke_executed": false,
     "formal_q_b_evaluation_executed": false
   },
-  "next_command": "Obtain accepted human selections for docs/decisions/M2C-S4-PUBLIC-TRACK-REID-ADR-REQUEST.md and docs/decisions/M2C-S4-B0-ACTIVE-SESSION-FALLBACK-ADR-REQUEST.md"
+  "next_command": "Obtain accepted human selections for docs/decisions/M2C-S4-PUBLIC-TRACK-REID-ADR-REQUEST.md, docs/decisions/M2C-S4-B0-ACTIVE-SESSION-FALLBACK-ADR-REQUEST.md, and docs/decisions/M2C-S4-A3-CONTINUOUS-SELF-COLLISION-ADR-REQUEST.md"
 }
