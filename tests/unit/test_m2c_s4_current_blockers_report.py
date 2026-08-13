@@ -1,10 +1,10 @@
 from __future__ import annotations
 
+import ast
 import hashlib
 import json
 import subprocess
 from pathlib import Path
-
 
 ROOT = Path(__file__).resolve().parents[2]
 REPORT = ROOT / "reports/m2c-s4-current-blockers.json"
@@ -73,18 +73,22 @@ def test_current_s4_blocker_report_is_bound_and_unmeasured() -> None:
         path = ROOT / binding["path"]
         assert _sha256(path) == binding["sha256"]
 
-    introduced_commit = _git(
+    report_commit = _git(
         "log",
-        "--diff-filter=A",
+        "-1",
         "--format=%H",
         "--",
         str(REPORT.relative_to(ROOT)),
-    ).splitlines()[0]
+    )
     checked_commit = report["checked_head_commit"]
-    assert checked_commit in _git("show", "-s", "--format=%P", introduced_commit).split()
+    current_head = _git("rev-parse", "HEAD")
+    assert (
+        checked_commit == current_head
+        or checked_commit in _git("show", "-s", "--format=%P", report_commit).split()
+    )
     assert (
         subprocess.run(
-            ["git", "merge-base", "--is-ancestor", checked_commit, introduced_commit],
+            ["git", "merge-base", "--is-ancestor", checked_commit, current_head],
             cwd=ROOT,
             check=False,
         ).returncode
@@ -135,6 +139,63 @@ def test_phase2_and_human_decisions_remain_fail_closed() -> None:
         assert decision["status"] == "NOT_APPROVED"
         assert decision["valid_choices"] == ["A", "B", "C"]
         assert _sha256(ROOT / decision["request_path"]) == decision["request_sha256"]
+
+
+def _literal_assignment(path: Path, name: str) -> object:
+    tree = ast.parse(path.read_text())
+    matches = [
+        node.value
+        for node in tree.body
+        if isinstance(node, (ast.Assign, ast.AnnAssign))
+        and (
+            (
+                isinstance(node, ast.Assign)
+                and any(
+                    isinstance(target, ast.Name) and target.id == name for target in node.targets
+                )
+            )
+            or (
+                isinstance(node, ast.AnnAssign)
+                and isinstance(node.target, ast.Name)
+                and node.target.id == name
+            )
+        )
+    ]
+    assert len(matches) == 1
+    return ast.literal_eval(matches[0])
+
+
+def test_v3_collection_authorization_remains_unavailable_without_new_prereg() -> None:
+    report = json.loads(REPORT.read_bytes())
+    training = report["path_blocked_training"]
+    authorization = training["authorization_contract"]
+    source = ROOT / authorization["path"]
+
+    assert training["batch_04_authorized"] is False
+    assert training["collection_execution_authorized"] is False
+    assert training["active_selected_key_preregistration_present"] is False
+    assert training["host_runtime_launcher_binding"] is None
+    assert authorization["introduced_commit"] == report["checked_head_commit"]
+    assert _sha256(source) == authorization["sha256"]
+    checked_bytes = subprocess.check_output(
+        ["git", "show", f"{report['checked_head_commit']}:{authorization['path']}"],
+        cwd=ROOT,
+    )
+    assert hashlib.sha256(checked_bytes).hexdigest() == authorization["sha256"]
+    assert _literal_assignment(source, "V3_HOST_RUNTIME_LAUNCHER_BINDING") is None
+    assert not any(
+        json.loads(path.read_bytes()).get("schema_version")
+        == "M2CS4V3SelectedKeyCollectionPreregV1"
+        for path in (ROOT / "configs").glob("*.json")
+    )
+    assert not any(
+        authorization[field]
+        for field in (
+            "canonical_cli_authorized",
+            "programmatic_worker_authorized",
+            "programmatic_packager_authorized",
+        )
+    )
 
 
 def test_current_s4_blocker_report_preserves_project_boundaries() -> None:

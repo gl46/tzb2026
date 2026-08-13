@@ -1,7 +1,7 @@
 # M2C S4 current blockers
 
 - Status: **BLOCKED_UNMEASURED_HUMAN_DIRECTION_REQUIRED**
-- Checked HEAD: `e33f86a3cfeb43814faaec54ed13e07f177314ab`
+- Checked HEAD: `2ec9fde20804b43de8819497452b826d42285ee7`
 - Q-A: **PASSED**
 - Q-B: **UNMEASURED**
 - `pure_model_success_episodes`: **null**, not zero
@@ -24,6 +24,21 @@ Scene 16073 exposed a public-track association limitation after a physically
 successful lift; its frozen public predicate still returned false. The physical
 receipt cannot backfill public success. A fourth batch or a changed tracker is
 not authorized by current bytes.
+
+The V3 collection worker and packager now require an exact committed,
+outcome-blind selected-key preregistration; a create-only global claim; an
+immutable Git-tree snapshot and image ID; a stage-bound host capability; and
+the claim→launch→one-shot broker entry→terminal→raw→package receipt chain.
+Historical V2 and Batch-02/03 evidence remain replayable without being
+reinterpreted. There is no active selected-key preregistration for Batch-04.
+
+An additional production lock remains intentionally unset:
+`V3_HOST_RUNTIME_LAUNCHER_BINDING=None`. Python code cannot attest the
+interpreter and dependencies that executed before its own import, so both the
+canonical V3 CLI and direct programmatic worker/packager calls fail closed
+until a separately reviewed immutable pre-Python launcher or host container,
+complete dependency inventory, and verifier are frozen. This hardening commit
+is `2ec9fde20804b43de8819497452b826d42285ee7`; it authorizes no collection.
 
 Human direction is required on
 `docs/decisions/M2C-S4-PUBLIC-TRACK-REID-ADR-REQUEST.md` (A/B/C). Option A
@@ -72,15 +87,21 @@ config was generated.
 - Privileged simulator truth as policy input: **false**.
 - B0, M2B evidence, safety/IK/collision/controller/schema gates: unchanged.
 - Additional collection after Batch-03: **false**.
+- Active Batch-04 preregistration / host-runtime launcher binding: **absent /
+  null**.
 - Training / physical SMOKE / formal Q-B evaluation: **false / false / false**.
-- Related contract regression: **102 passed**.
+- V3 authorization/history regression: **56 passed**; S4 entry regression:
+  **12 passed**.
 - Failures: no product-test failure; the outcome is a deliberate fail-closed
-  blocker.
+  blocker. The broader M2C run has two failures and five setup errors caused
+  only by a separate uncommitted S6 preregistration SHA drift (`2d5e…` actual
+  versus frozen `01786…`); those files are outside this report update.
 
 Next command:
 
 ```bash
 sed -n '1,280p' docs/decisions/M2C-S4-PUBLIC-TRACK-REID-ADR-REQUEST.md && \
   sed -n '1,260p' docs/decisions/M2C-S4-B0-ACTIVE-SESSION-FALLBACK-ADR-REQUEST.md && \
-  sed -n '1,360p' docs/decisions/M2C-S4-A3-CONTINUOUS-SELF-COLLISION-ADR-REQUEST.md
+  sed -n '1,360p' docs/decisions/M2C-S4-A3-CONTINUOUS-SELF-COLLISION-ADR-REQUEST.md && \
+  sed -n '1,140p' src/xh_agent/policy/qrm_lite/s4_v3_collection_authorization_v1.py
 ```

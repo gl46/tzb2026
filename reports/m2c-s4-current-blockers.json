@@ -1,8 +1,8 @@
 {
   "schema_version": "M2CS4CurrentBlockersV1",
   "status": "BLOCKED_UNMEASURED_HUMAN_DIRECTION_REQUIRED",
-  "reported_at": "2026-08-13T12:11:17+08:00",
-  "checked_head_commit": "e33f86a3cfeb43814faaec54ed13e07f177314ab",
+  "reported_at": "2026-08-13T18:23:14+08:00",
+  "checked_head_commit": "2ec9fde20804b43de8819497452b826d42285ee7",
   "q_a_state": "PASSED",
   "q_b_state": "UNMEASURED",
   "pure_model_success_episodes": null,
@@ -19,6 +19,18 @@
     "formal_q_b_evaluation_executed": false,
     "batch_04_authorized": false,
     "public_track_reidentification_change_authorized": false,
+    "collection_execution_authorized": false,
+    "active_selected_key_preregistration_present": false,
+    "host_runtime_launcher_binding": null,
+    "authorization_contract": {
+      "path": "src/xh_agent/policy/qrm_lite/s4_v3_collection_authorization_v1.py",
+      "sha256": "39e24090bb683b859d7593ec47f3a20bf0d3c8ca9aeee16e558f3c5942c88d74",
+      "introduced_commit": "2ec9fde20804b43de8819497452b826d42285ee7",
+      "canonical_cli_authorized": false,
+      "programmatic_worker_authorized": false,
+      "programmatic_packager_authorized": false,
+      "reason": "IMMUTABLE_HOST_RUNTIME_LAUNCHER_AND_DEPENDENCY_BINDING_MISSING"
+    },
     "source_reports": [
       {
         "path": "reports/m2c-s4-v3-path-blocked-train-collection.json",
@@ -97,5 +109,5 @@
     "physical_smoke_executed": false,
     "formal_q_b_evaluation_executed": false
   },
-  "next_command": "Obtain accepted human selections for docs/decisions/M2C-S4-PUBLIC-TRACK-REID-ADR-REQUEST.md, docs/decisions/M2C-S4-B0-ACTIVE-SESSION-FALLBACK-ADR-REQUEST.md, and docs/decisions/M2C-S4-A3-CONTINUOUS-SELF-COLLISION-ADR-REQUEST.md"
+  "next_command": "Review the three NOT_APPROVED S4 ADR requests and the immutable-host-runtime launcher blocker; do not create Batch04, set bindings, collect, or train"
 }
