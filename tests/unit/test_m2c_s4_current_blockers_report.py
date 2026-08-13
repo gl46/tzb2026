@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import ast
 import hashlib
 import json
 import subprocess
@@ -40,7 +39,7 @@ def test_current_s4_blocker_report_is_bound_and_unmeasured() -> None:
     report = json.loads(REPORT.read_bytes())
 
     assert report["schema_version"] == "M2CS4CurrentBlockersV1"
-    assert report["status"] == "BLOCKED_UNMEASURED_HUMAN_DIRECTION_REQUIRED"
+    assert report["status"] == ("BLOCKED_UNMEASURED_IMPLEMENTATION_AND_EVIDENCE_REQUIRED")
     assert report["q_a_state"] == "PASSED"
     assert report["q_b_state"] == "UNMEASURED"
     assert report["pure_model_success_episodes"] is None
@@ -66,9 +65,9 @@ def test_current_s4_blocker_report_is_bound_and_unmeasured() -> None:
             "model_rollout_executed",
             "formal_q_b_evaluation_executed",
             "batch_04_authorized",
-            "public_track_reidentification_change_authorized",
         )
     )
+    assert training["public_track_reidentification_change_authorized"] is True
     for binding in training["source_reports"]:
         path = ROOT / binding["path"]
         assert _sha256(path) == binding["sha256"]
@@ -96,7 +95,7 @@ def test_current_s4_blocker_report_is_bound_and_unmeasured() -> None:
     )
 
 
-def test_phase2_and_human_decisions_remain_fail_closed() -> None:
+def test_phase2_remains_fail_closed_after_human_decisions_are_resolved() -> None:
     report = json.loads(REPORT.read_bytes())
     phase2 = report["phase_2"]
 
@@ -104,6 +103,8 @@ def test_phase2_and_human_decisions_remain_fail_closed() -> None:
     assert phase2["source_binding_application_authorized"] is False
     assert phase2["exact_plan_preflight_formal_execution_eligible"] is False
     assert phase2["isaac_lula_production_query_callback_available"] is False
+    assert phase2["frozen_b0_runtime_wrapper_precondition_withdrawn"] is True
+    assert phase2["trusted_host_signing_receipt_precondition_withdrawn"] is True
     assert all(
         phase2[field] is None
         for field in (
@@ -130,39 +131,27 @@ def test_phase2_and_human_decisions_remain_fail_closed() -> None:
     assert phase2["blockers"][0] == ("SOURCE_AUDIT_PRODUCTION_QUERY_CALLBACK_NOT_AVAILABLE")
     assert "COMPLETE_CONTINUOUS_SELF_COLLISION_QUERY_NOT_AVAILABLE" not in phase2["blockers"]
 
-    assert {item["topic"] for item in report["human_decisions_required"]} == {
+    assert {item["topic"] for item in report["human_decisions_resolved"]} == {
         "PUBLIC_TRACK_REIDENTIFICATION",
         "ACTIVE_SESSION_B0_FALLBACK",
         "A3_CONTINUOUS_SELF_COLLISION",
     }
-    for decision in report["human_decisions_required"]:
-        assert decision["status"] == "NOT_APPROVED"
-        assert decision["valid_choices"] == ["A", "B", "C"]
+    selected = {
+        decision["topic"]: decision["selected_option"]
+        for decision in report["human_decisions_resolved"]
+    }
+    assert selected == {
+        "PUBLIC_TRACK_REIDENTIFICATION": "A",
+        "ACTIVE_SESSION_B0_FALLBACK": "B",
+        "A3_CONTINUOUS_SELF_COLLISION": "A",
+    }
+    for decision in report["human_decisions_resolved"]:
+        assert decision["status"] == "ACCEPTED_BY_ADR_0024"
         assert _sha256(ROOT / decision["request_path"]) == decision["request_sha256"]
-
-
-def _literal_assignment(path: Path, name: str) -> object:
-    tree = ast.parse(path.read_text())
-    matches = [
-        node.value
-        for node in tree.body
-        if isinstance(node, (ast.Assign, ast.AnnAssign))
-        and (
-            (
-                isinstance(node, ast.Assign)
-                and any(
-                    isinstance(target, ast.Name) and target.id == name for target in node.targets
-                )
-            )
-            or (
-                isinstance(node, ast.AnnAssign)
-                and isinstance(node.target, ast.Name)
-                and node.target.id == name
-            )
-        )
-    ]
-    assert len(matches) == 1
-    return ast.literal_eval(matches[0])
+    directive = report["governing_directive"]
+    assert directive["status"] == "ACCEPTED_HUMAN_DECISION"
+    assert _sha256(ROOT / directive["path"]) == directive["sha256"]
+    assert directive["acceptance_commit"] == "48676d0a59c8adc4e759f9ee21566d97b9a44363"
 
 
 def test_v3_collection_authorization_remains_unavailable_without_new_prereg() -> None:
@@ -174,15 +163,15 @@ def test_v3_collection_authorization_remains_unavailable_without_new_prereg() ->
     assert training["batch_04_authorized"] is False
     assert training["collection_execution_authorized"] is False
     assert training["active_selected_key_preregistration_present"] is False
-    assert training["host_runtime_launcher_binding"] is None
-    assert authorization["introduced_commit"] == report["checked_head_commit"]
+    assert training["host_runtime_launcher_precondition_required"] is False
+    assert authorization["binding_commit"] == report["checked_head_commit"]
     assert _sha256(source) == authorization["sha256"]
     checked_bytes = subprocess.check_output(
         ["git", "show", f"{report['checked_head_commit']}:{authorization['path']}"],
         cwd=ROOT,
     )
     assert hashlib.sha256(checked_bytes).hexdigest() == authorization["sha256"]
-    assert _literal_assignment(source, "V3_HOST_RUNTIME_LAUNCHER_BINDING") is None
+    assert "V3_HOST_RUNTIME_LAUNCHER_BINDING" not in source.read_text()
     assert not any(
         json.loads(path.read_bytes()).get("schema_version")
         == "M2CS4V3SelectedKeyCollectionPreregV1"

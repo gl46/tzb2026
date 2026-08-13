@@ -1,7 +1,7 @@
 # M2C S4 current blockers
 
-- Status: **BLOCKED_UNMEASURED_HUMAN_DIRECTION_REQUIRED**
-- Checked HEAD: `2ec9fde20804b43de8819497452b826d42285ee7`
+- Status: **BLOCKED_UNMEASURED_IMPLEMENTATION_AND_EVIDENCE_REQUIRED**
+- Checked HEAD: `d47f3055ca54f84d46e30f44745b279740179fe7`
 - Q-A: **PASSED**
 - Q-B: **UNMEASURED**
 - `pure_model_success_episodes`: **null**, not zero
@@ -32,19 +32,17 @@ the claim→launch→one-shot broker entry→terminal→raw→package receipt ch
 Historical V2 and Batch-02/03 evidence remain replayable without being
 reinterpreted. There is no active selected-key preregistration for Batch-04.
 
-An additional production lock remains intentionally unset:
-`V3_HOST_RUNTIME_LAUNCHER_BINDING=None`. Python code cannot attest the
-interpreter and dependencies that executed before its own import, so both the
-canonical V3 CLI and direct programmatic worker/packager calls fail closed
-until a separately reviewed immutable pre-Python launcher or host container,
-complete dependency inventory, and verifier are frozen. This hardening commit
-is `2ec9fde20804b43de8819497452b826d42285ee7`; it authorizes no collection.
+ADR-0024 §4 sets the accepted project evidence bar and explicitly rescinds the
+`V3_HOST_RUNTIME_LAUNCHER_BINDING` precondition. The code-level binding and its
+direct-call lock have therefore been removed rather than silently retained.
+Collection is still unavailable because there is no active outcome-blind
+selected-key preregistration; ADR-0024 §5 permits creating Batch-04 only after
+the V4 associator contract passes local tests.
 
-Human direction is required on
-`docs/decisions/M2C-S4-PUBLIC-TRACK-REID-ADR-REQUEST.md` (A/B/C). Option A
-requires a complete, outcome-independent PublicTrackAssociatorV2 contract and
-then a separate wholly-new TRAIN-key preregistration; option B stops PATH; C
-must be equally complete. Code may not infer a choice or numeric thresholds.
+ADR-0024 selects Option A for public re-identification and freezes its complete
+input, hypothesis, assignment, ambiguity and lifecycle contract. The remaining
+work is implementation and local verification, followed by a separate wholly
+new outcome-blind Batch-04 preregistration; old evidence remains unchanged.
 
 ## ADR-0022 Phase-2 entry
 
@@ -65,19 +63,20 @@ or host evidence. Phase-2 therefore records the single source-audit finding
 `SOURCE_AUDIT_PRODUCTION_QUERY_CALLBACK_NOT_AVAILABLE`, without inferring
 backend-specific capability claims for which no artifact is bound.
 
-The continuous self-collision geometry and subdivision boundary is a separate
-human decision. The post-implementation audit request
-`docs/decisions/M2C-S4-A3-CONTINUOUS-SELF-COLLISION-ADR-REQUEST.md` offers
-A/B/C and remains `NOT APPROVED`; it authorizes no code, geometry replacement,
-source binding, deployment, or execution.
+ADR-0024 selects A3 Option A with bounded delegation. The implementation must
+record every numeric value and source in the Phase-2 binding addendum and stay
+within the human-set conservative bounds; it does not weaken executor geometry
+or existing evidence.
 
-The frozen M2B B0 has no callable that can continue the already-evolved formal
-Isaac session. Starting its standalone runner creates a different episode, and
-reassembling low-level helpers would be a new B0 implementation. Human
-direction is required on
-`docs/decisions/M2C-S4-B0-ACTIVE-SESSION-FALLBACK-ADR-REQUEST.md` (A/B/C).
+ADR-0024 selects active-session B0 Option B: every invalid pointer/mapping/cell
+or preflight rejection terminates with `NO_PHYSICAL_EXECUTION`, stays in the
+denominator and cannot count strict-pure. The fallback wrapper/A.5 requirement
+is withdrawn; the independent B0 comparison arm remains byte-identical.
 
-All four source bindings remain literal `None`; no binding addendum or unlock
+The accepted directive removes the B0-wrapper and trusted-host-signature
+preconditions, but does not fabricate the still-missing exact-plan execution
+and deployment evidence. The entry-gate schema update, contract smoke, binding
+addendum and remaining source bindings are therefore still pending. No unlock
 config was generated.
 
 ## Boundaries and verification
@@ -87,21 +86,19 @@ config was generated.
 - Privileged simulator truth as policy input: **false**.
 - B0, M2B evidence, safety/IK/collision/controller/schema gates: unchanged.
 - Additional collection after Batch-03: **false**.
-- Active Batch-04 preregistration / host-runtime launcher binding: **absent /
-  null**.
+- Active Batch-04 preregistration / extra host-runtime launcher precondition:
+  **absent / not required by ADR-0024**.
 - Training / physical SMOKE / formal Q-B evaluation: **false / false / false**.
-- V3 authorization/history regression: **56 passed**; S4 entry regression:
-  **12 passed**.
+- V3 authorization/history regression after applying ADR-0024 §4: **55
+  passed**.
 - Failures: no product-test failure; the outcome is a deliberate fail-closed
-  blocker. The broader M2C run has two failures and five setup errors caused
-  only by a separate uncommitted S6 preregistration SHA drift (`2d5e…` actual
-  versus frozen `01786…`); those files are outside this report update.
+  blocker. The S6 preregistration was restored to its frozen `01786e2c…`
+  bytes; its focused 10-test replay and the 555-test M2C suite are green.
 
 Next command:
 
 ```bash
-sed -n '1,280p' docs/decisions/M2C-S4-PUBLIC-TRACK-REID-ADR-REQUEST.md && \
-  sed -n '1,260p' docs/decisions/M2C-S4-B0-ACTIVE-SESSION-FALLBACK-ADR-REQUEST.md && \
-  sed -n '1,360p' docs/decisions/M2C-S4-A3-CONTINUOUS-SELF-COLLISION-ADR-REQUEST.md && \
-  sed -n '1,140p' src/xh_agent/policy/qrm_lite/s4_v3_collection_authorization_v1.py
+PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:scripts .venv/bin/python -m pytest \
+  -q -p no:cacheprovider tests/unit/test_m2c_public_track_associator_v2.py \
+  tests/unit/test_m2c_public_tracks_v4.py
 ```
