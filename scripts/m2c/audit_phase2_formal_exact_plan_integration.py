@@ -34,6 +34,7 @@ SOURCE_PATHS = (
     Path("src/xh_agent/policy/qrm_lite/public_tracks_v4.py"),
     Path("src/xh_agent/policy/qrm_lite/path_blocked_supervision_v4.py"),
     Path("src/xh_agent/policy/qrm_lite/formal_public_observation_v4.py"),
+    Path("src/xh_agent/policy/qrm_lite/formal_exact_plan_runtime_v1.py"),
     Path("src/xh_agent/policy/qrm_lite/s4_entry_gate.py"),
     Path("configs/m2c_adr0024_phase2_binding_candidate.json"),
     Path("docs/decisions/ADR-0024-PHASE2-BINDING-ADDENDUM-CANDIDATE.md"),
@@ -222,6 +223,8 @@ def build_report() -> dict[str, Any]:
                 "query_only_static_state_preflight_clear"
             ],
             "versioned_formal_v4_observation_transport": True,
+            "bound_plan_runtime_dynamic_a1_cross_binding": True,
+            "bound_plan_runtime_single_use_execution_attempt": True,
         },
         "formal_wire": {
             "current_observation_schema": "FormalPublicObservationV2",
@@ -244,19 +247,19 @@ def build_report() -> dict[str, Any]:
         "privileged_truth_policy_input": False,
         "blockers": [
             "FORMAL_PUBLIC_OBSERVATION_V4_NOT_IN_ACTIVE_WIRE_PROTOCOL",
-            "FORMAL_BOUND_PLAN_PROVIDER_NOT_IMPLEMENTED",
+            "PRODUCTION_BOUND_PLAN_PROVIDER_NOT_IMPLEMENTED",
             "FORMAL_BACKEND_EXACT_PLAN_CONSTRUCTION_AND_EXECUTION_STUBS",
             "A3_STATIC_HOME_SELF_COLLISION_PREFLIGHT_REJECTED",
             "FOUR_PRODUCTION_BINDINGS_UNSET",
         ],
         "verification": {
             "command": ".venv/bin/pytest -q tests/unit/test_m2c_*.py",
-            "passed": 703,
+            "passed": 712,
             "failed": 0,
         },
         "next_implementation_order": [
             "PLUMB_VERSIONED_V4_OBSERVATION_THROUGH_CAPTURE_AND_INFERENCE_WIRE",
-            "ADD_BOUND_PLAN_PROVIDER_OVER_RECOMPUTABLE_V4_AND_MAPPING_INPUTS",
+            "IMPLEMENT_PRODUCTION_BOUND_PLAN_PROVIDER_OVER_V4_AND_MAPPING_INPUTS",
             "INTEGRATE_FULL_PLAN_PREFLIGHT_BEFORE_ANY_COMMAND",
             "KEEP_BACKEND_TERMINAL_NO_PHYSICAL_EXECUTION_UNTIL_A3_AND_BINDINGS_PASS",
         ],
@@ -292,6 +295,11 @@ the approved V4 candidate and association bindings.  It is deliberately not
 yet active: `FormalPublicObservationV2` still cannot carry `{missing}`.
 Consequently the A.1 public candidate digest cannot be independently
 recomputed from the **current active** wire.
+The separate `FormalExactPlanRuntimeV1` now cross-binds a complete externally
+provided A.1--A.4 envelope to V4 RGB-D/candidates, inference response, mapping,
+and execution parameters; it runs whole-plan preflight and consumes a prepared
+plan before the executor call.  It does not generate waypoints and has no
+production provider, so it cannot authorize execution by itself.
 The real backend's plan-construction and execution methods remain deliberate
 rejection stubs, and there is no production constructor for a bound
 `M2CExactPlanPrimitivePlanV1`.

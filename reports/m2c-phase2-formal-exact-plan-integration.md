@@ -1,7 +1,7 @@
 # M2C Phase-2 formal exact-plan integration audit
 
 - Status: **BLOCKED_UNMEASURED_FORMAL_EXACT_PLAN_INTEGRATION**
-- Checked HEAD: `1daf6c1cba033a7d45893dcf3d6225dacd517f86`
+- Checked HEAD: `6cecc2864c24286841c7743bd0217570a762ce64`
 - Formal execution eligible: **false**
 - Physical execution / training by this audit: **false / false**
 
@@ -17,6 +17,11 @@ the approved V4 candidate and association bindings.  It is deliberately not
 yet active: `FormalPublicObservationV2` still cannot carry `association_history`, `candidate_payload`, `candidate_payload_sha256`, `declared_target_attribute`, `public_track_associator_revision`.
 Consequently the A.1 public candidate digest cannot be independently
 recomputed from the **current active** wire.
+The separate `FormalExactPlanRuntimeV1` now cross-binds a complete externally
+provided A.1--A.4 envelope to V4 RGB-D/candidates, inference response, mapping,
+and execution parameters; it runs whole-plan preflight and consumes a prepared
+plan before the executor call.  It does not generate waypoints and has no
+production provider, so it cannot authorize execution by itself.
 The real backend's plan-construction and execution methods remain deliberate
 rejection stubs, and there is no production constructor for a bound
 `M2CExactPlanPrimitivePlanV1`.
@@ -24,7 +29,7 @@ rejection stubs, and there is no production constructor for a bound
 ## Blockers
 
 - `FORMAL_PUBLIC_OBSERVATION_V4_NOT_IN_ACTIVE_WIRE_PROTOCOL`
-- `FORMAL_BOUND_PLAN_PROVIDER_NOT_IMPLEMENTED`
+- `PRODUCTION_BOUND_PLAN_PROVIDER_NOT_IMPLEMENTED`
 - `FORMAL_BACKEND_EXACT_PLAN_CONSTRUCTION_AND_EXECUTION_STUBS`
 - `A3_STATIC_HOME_SELF_COLLISION_PREFLIGHT_REJECTED`
 - `FOUR_PRODUCTION_BINDINGS_UNSET`
@@ -32,7 +37,7 @@ rejection stubs, and there is no production constructor for a bound
 ## Safe implementation order
 
 1. `PLUMB_VERSIONED_V4_OBSERVATION_THROUGH_CAPTURE_AND_INFERENCE_WIRE`
-2. `ADD_BOUND_PLAN_PROVIDER_OVER_RECOMPUTABLE_V4_AND_MAPPING_INPUTS`
+2. `IMPLEMENT_PRODUCTION_BOUND_PLAN_PROVIDER_OVER_V4_AND_MAPPING_INPUTS`
 3. `INTEGRATE_FULL_PLAN_PREFLIGHT_BEFORE_ANY_COMMAND`
 4. `KEEP_BACKEND_TERMINAL_NO_PHYSICAL_EXECUTION_UNTIL_A3_AND_BINDINGS_PASS`
 
@@ -41,7 +46,7 @@ permission failure.  The four production bindings remain unset.  Teacher and
 privileged simulator truth were not used.
 
 Verification: `.venv/bin/pytest -q tests/unit/test_m2c_*.py` ->
-**703 passed**, 0 failed.
+**712 passed**, 0 failed.
 
 Next command:
 
