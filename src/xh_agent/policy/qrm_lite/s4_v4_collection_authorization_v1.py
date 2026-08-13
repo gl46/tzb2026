@@ -342,13 +342,18 @@ def _source_snapshot_payloads(
     return identity, payloads
 
 
-def _materialized_snapshot_inventory(snapshot_root: Path) -> list[dict[str, Any]]:
+def _materialized_snapshot_inventory(
+    snapshot_root: Path,
+    *,
+    allowed_owner_uids: frozenset[int] | None = None,
+) -> list[dict[str, Any]]:
     root_info = snapshot_root.lstat()
     root = snapshot_root.resolve(strict=True)
+    owners = allowed_owner_uids or frozenset({os.geteuid()})
     if (
         not stat.S_ISDIR(root_info.st_mode)
         or stat.S_ISLNK(root_info.st_mode)
-        or root_info.st_uid != os.geteuid()
+        or root_info.st_uid not in owners
         or stat.S_IMODE(root_info.st_mode) != 0o555
     ):
         raise CollectionAuthorizationError("source snapshot root is not a real directory")
@@ -357,10 +362,10 @@ def _materialized_snapshot_inventory(snapshot_root: Path) -> list[dict[str, Any]
         relative = path.relative_to(root).as_posix()
         info = path.lstat()
         if stat.S_ISDIR(info.st_mode):
-            if info.st_uid != os.geteuid() or stat.S_IMODE(info.st_mode) != 0o555:
+            if info.st_uid not in owners or stat.S_IMODE(info.st_mode) != 0o555:
                 raise CollectionAuthorizationError("source snapshot directory mode is not frozen")
             continue
-        if not stat.S_ISREG(info.st_mode) or info.st_uid != os.geteuid() or info.st_nlink != 1:
+        if not stat.S_ISREG(info.st_mode) or info.st_uid not in owners or info.st_nlink != 1:
             raise CollectionAuthorizationError("source snapshot contains a non-regular file")
         mode = stat.S_IMODE(info.st_mode)
         if mode not in {0o444, 0o555}:
@@ -382,10 +387,17 @@ def verify_materialized_source_snapshot(
     expected: CommittedSourceSnapshotV1,
     *,
     require_content_addressed_name: bool = True,
+    allow_root_owned_read_only_mount: bool = False,
 ) -> None:
     """Replay the complete materialized tree before Kit/SimulationApp starts."""
 
-    entries = _materialized_snapshot_inventory(snapshot_root)
+    allowed_owner_uids = frozenset(
+        {os.geteuid(), 0} if allow_root_owned_read_only_mount else {os.geteuid()}
+    )
+    entries = _materialized_snapshot_inventory(
+        snapshot_root,
+        allowed_owner_uids=allowed_owner_uids,
+    )
     if (
         (
             require_content_addressed_name
@@ -1401,6 +1413,11 @@ def bind_consumed_claim_to_raw_session(
         source_snapshot_root,
         claim.committed_source_snapshot,
         require_content_addressed_name=False,
+        # The host-created immutable snapshot is root-owned 0555/0444 and is
+        # mounted read-only into the frozen image, whose runtime UID is 1234.
+        # All bytes are still replayed here; only that exact owner boundary is
+        # accepted for this container-side verification call.
+        allow_root_owned_read_only_mount=True,
     )
     return M2CS4V4RawClaimBindingV1(
         schema_version="M2CS4V4RawClaimBindingV1",

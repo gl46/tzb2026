@@ -192,6 +192,18 @@ def test_v4_authorization_surface_ends_at_claim_bound_raw_verification() -> None
         assert forbidden not in source
 
 
+def test_v4_snapshot_owner_exception_is_scoped_to_container_claim_binding() -> None:
+    source = Path(v4_auth.__file__).read_text()
+    assert source.count("allow_root_owned_read_only_mount=True") == 1
+    binding = source[source.index("def bind_consumed_claim_to_raw_session(") :]
+    assert "allow_root_owned_read_only_mount=True" in binding
+    host_materializer = source[source.index("def materialize_committed_source_snapshot(") :]
+    assert (
+        "allow_root_owned_read_only_mount=True"
+        not in host_materializer.split("def bind_consumed_claim_to_raw_session(")[0]
+    )
+
+
 def test_v4_create_only_claim_rejects_duplicate(tmp_path: Path, monkeypatch) -> None:
     manifest = _manifest()
     key = manifest.training_keys[0]
