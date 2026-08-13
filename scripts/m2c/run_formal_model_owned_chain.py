@@ -72,29 +72,13 @@ from xh_agent.policy.qrm_lite.model_owned_chain_v2 import (
 )
 from xh_agent.policy.qrm_lite.offline_wire_auth_v1 import (
     CANONICAL_WIRE_CHALLENGE_CONSUMPTION_ROOT,
-    WireChallengeConsumptionReceiptV1,
     consume_wire_challenge_create_only,
-    read_regular_file_once as read_wire_evidence_once,
-    sha256_bytes as wire_sha256_bytes,
+    load_consumed_wire_challenge_from_canonical_ledger,
 )
 from xh_agent.policy.qrm_lite.skill_registry_v2 import load_registry_v2
 
 
 WIRE_CHALLENGE_MANIFEST_SCHEMA = "M2CS4WireChallengeManifestV1"
-# The current prototype can construct both endpoint envelopes only by loading
-# both symmetric keys into this central process.  That violates the frozen
-# host-local key boundary, so the real path is source-level disabled until a
-# separately reviewed pair of host-local signing/verification proxies replaces
-# both key-file arguments.  Contract-only validation never reads either key.
-FORMAL_SPLIT_HMAC_PROXY_BINDING: tuple[str, str] | None = None
-
-
-def require_formal_split_hmac_proxy() -> tuple[str, str]:
-    raise RuntimeError(
-        "formal execution is blocked: host-local Qwen/Isaac signing proxies "
-        "are not implemented, reviewed, and frozen; central dual-HMAC-key "
-        "custody is forbidden"
-    )
 
 
 def partial_failure_output_path(formal_output: Path) -> Path:
@@ -339,14 +323,20 @@ def run_real(
     *,
     bundle: QwenBundleRuntimeBindingV2,
     endpoint: IsaacEndpointBindingV2,
-    challenge_consumption: WireChallengeConsumptionReceiptV1,
-    challenge_consumption_receipt_sha256: str,
     audit: HostPartialRunAuditV2 | None = None,
 ) -> dict[str, Any]:
-    # Defense in depth for direct imports: main() already checks this before
-    # loading the bundle, but no caller may bypass the split-key boundary by
-    # invoking run_real() itself.
-    require_formal_split_hmac_proxy()
+    # A caller cannot inject an in-memory/self-authored consumption receipt.
+    # Re-read the immutable canonical ledger before keys or endpoint contact.
+    consumption_path, challenge_consumption, challenge_consumption_receipt_sha256 = (
+        load_consumed_wire_challenge_from_canonical_ledger(
+            ledger_directory=args.challenge_consumption_ledger,
+            challenge_nonce=args.challenge_nonce,
+            run_id=args.run_id,
+            matched_key=args.matched_key,
+            scene_seed=args.scene_seed,
+            failure_seed=args.failure_seed,
+        )
+    )
     audit = audit or HostPartialRunAuditV2(
         run_id=args.run_id,
         matched_key=args.matched_key,
@@ -354,6 +344,9 @@ def run_real(
         failure_seed=args.failure_seed,
         bundle=bundle.model_dump(mode="json"),
         isaac_endpoint_binding=endpoint.model_dump(mode="json"),
+        challenge_consumption_receipt_path=str(consumption_path),
+        challenge_consumption_receipt_sha256=challenge_consumption_receipt_sha256,
+        challenge_consumption_id=challenge_consumption.consumption_id,
     )
     qwen_secret = read_hmac_secret(args.qwen_hmac_key_file)
     isaac_secret = read_hmac_secret(args.isaac_hmac_key_file)
@@ -638,9 +631,6 @@ def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     if not args.contract_check_only:
         require_pre_freeze(M2CExperimentAction.Q_B_EVALUATION)
-        # Fail before bundle loading, endpoint contact, evidence mutation, or
-        # reading either symmetric key.
-        require_formal_split_hmac_proxy()
     bundle, endpoint = validate_configuration(args)
     if args.contract_check_only:
         print(
@@ -666,7 +656,16 @@ def main(argv: list[str] | None = None) -> int:
         failure_seed=args.failure_seed,
         consumed_at_ns=time.time_ns(),
     )
-    consumption_receipt_sha256 = wire_sha256_bytes(read_wire_evidence_once(consumption_path))
+    consumption_path, consumption, consumption_receipt_sha256 = (
+        load_consumed_wire_challenge_from_canonical_ledger(
+            ledger_directory=args.challenge_consumption_ledger,
+            challenge_nonce=args.challenge_nonce,
+            run_id=args.run_id,
+            matched_key=args.matched_key,
+            scene_seed=args.scene_seed,
+            failure_seed=args.failure_seed,
+        )
+    )
     audit = HostPartialRunAuditV2(
         run_id=args.run_id,
         matched_key=args.matched_key,
@@ -683,8 +682,6 @@ def main(argv: list[str] | None = None) -> int:
             args,
             bundle=bundle,
             endpoint=endpoint,
-            challenge_consumption=consumption,
-            challenge_consumption_receipt_sha256=(audit.challenge_consumption_receipt_sha256),
             audit=audit,
         )
     except Exception as exc:

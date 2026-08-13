@@ -12,11 +12,10 @@ from pydantic import ValidationError
 from pydantic_core import ValidationError as PydanticCoreValidationError
 
 from m2c.run_formal_model_owned_chain import (
-    FORMAL_SPLIT_HMAC_PROXY_BINDING,
     HostPartialRunAuditV2,
     partial_failure_output_path,
     publish_create_only,
-    require_formal_split_hmac_proxy,
+    run_real,
 )
 from xh_agent.policy.qrm_lite.formal_split_runner_v2 import (
     ExactExecutionPhaseGatesV2,
@@ -820,10 +819,45 @@ def test_publish_is_create_only_and_contract_tests_cannot_make_receipt(tmp_path:
         publish_create_only(output, {"status": "OVERWRITE"})
 
 
-def test_real_runner_cannot_centralize_both_host_hmac_secrets() -> None:
-    assert FORMAL_SPLIT_HMAC_PROXY_BINDING is None
-    with pytest.raises(RuntimeError, match="central dual-HMAC-key custody is forbidden"):
-        require_formal_split_hmac_proxy()
+def test_adr0024_does_not_add_a_split_proxy_unlock_binding() -> None:
+    import m2c.run_formal_model_owned_chain as runner
+
+    assert not hasattr(runner, "FORMAL_SPLIT_HMAC_PROXY_BINDING")
+    assert not hasattr(runner, "require_formal_split_hmac_proxy")
+
+
+def test_run_real_reloads_canonical_ledger_before_keys_or_endpoint(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    class Args:
+        challenge_consumption_ledger = Path("/canonical-ledger")
+        challenge_nonce = "c" * 64
+        run_id = "run"
+        matched_key = "key"
+        scene_seed = 1
+        failure_seed = 2
+
+    calls: list[str] = []
+
+    def absent_ledger(**_: object) -> object:
+        calls.append("ledger")
+        raise FileNotFoundError("no canonical receipt")
+
+    monkeypatch.setattr(
+        "m2c.run_formal_model_owned_chain.load_consumed_wire_challenge_from_canonical_ledger",
+        absent_ledger,
+    )
+    monkeypatch.setattr(
+        "m2c.run_formal_model_owned_chain.read_hmac_secret",
+        lambda _: calls.append("secret"),
+    )
+    monkeypatch.setattr(
+        "m2c.run_formal_model_owned_chain._post_json",
+        lambda *_args, **_kwargs: calls.append("endpoint"),
+    )
+    with pytest.raises(FileNotFoundError, match="canonical"):
+        run_real(Args(), bundle=_bundle(), endpoint=object())  # type: ignore[arg-type]
+    assert calls == ["ledger"]
 
 
 def test_partial_failure_audit_is_never_entry_evidence_and_preserves_active_wire(

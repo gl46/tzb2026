@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 import subprocess
 
@@ -18,6 +19,7 @@ from xh_agent.policy.qrm_lite.offline_wire_auth_v1 import (
     _read_canonical_audit,
     _wire_events,
     consume_wire_challenge_create_only,
+    load_consumed_wire_challenge_from_canonical_ledger,
     sign_core,
     verify_receipt_signature,
     wire_challenge_consumption_id,
@@ -183,6 +185,100 @@ def test_challenge_consumption_is_create_only_and_tamper_rejected(
     with pytest.raises(ValidationError, match="not canonical"):
         WireChallengeConsumptionReceiptV1.model_validate(tampered)
     assert CANONICAL_WIRE_CHALLENGE_CONSUMPTION_ROOT.startswith("/var/lib/")
+
+
+@pytest.mark.parametrize("failure", ["write", "file_fsync", "directory_fsync"])
+def test_consumption_failure_leaves_permanent_tombstone(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, failure: str
+) -> None:
+    import xh_agent.policy.qrm_lite.offline_wire_auth_v1 as auth
+
+    ledger = tmp_path / "ledger"
+    monkeypatch.setattr(auth, "CANONICAL_WIRE_CHALLENGE_CONSUMPTION_ROOT", str(ledger))
+    challenge = "7" * 64
+    manifest = tmp_path / "manifest.json"
+    manifest.write_text(
+        json.dumps(
+            {
+                "schema_version": "M2CS4WireChallengeManifestV1",
+                "challenge_records": [
+                    {
+                        "run_id": "run",
+                        "challenge_nonce": challenge,
+                        "matched_key": "key",
+                        "scene_seed": 1,
+                        "failure_seed": 2,
+                    }
+                ],
+                "formal_q_b_evaluation_authorized": False,
+                "teacher_used": False,
+                "privileged_truth_policy_input": False,
+            },
+            sort_keys=True,
+        )
+    )
+    real_write, real_fsync = os.write, os.fsync
+    calls = {"fsync": 0}
+
+    def broken_write(descriptor: int, payload: object) -> int:
+        if failure == "write":
+            raise OSError("short write failure")
+        return real_write(descriptor, payload)  # type: ignore[arg-type]
+
+    def broken_fsync(descriptor: int) -> None:
+        calls["fsync"] += 1
+        if (failure == "directory_fsync" and calls["fsync"] == 1) or (
+            failure == "file_fsync" and calls["fsync"] == 2
+        ):
+            raise OSError("fsync failure")
+        real_fsync(descriptor)
+
+    monkeypatch.setattr(auth.os, "write", broken_write)
+    monkeypatch.setattr(auth.os, "fsync", broken_fsync)
+    with pytest.raises(OSError):
+        consume_wire_challenge_create_only(
+            ledger_directory=ledger,
+            challenge_manifest_path=manifest,
+            run_id="run",
+            challenge_nonce=challenge,
+            matched_key="key",
+            scene_seed=1,
+            failure_seed=2,
+            consumed_at_ns=1,
+        )
+    tombstone = ledger / f"consumed-{challenge}.json"
+    assert tombstone.exists()
+    monkeypatch.setattr(auth.os, "write", real_write)
+    monkeypatch.setattr(auth.os, "fsync", real_fsync)
+    with pytest.raises(FileExistsError):
+        consume_wire_challenge_create_only(
+            ledger_directory=ledger,
+            challenge_manifest_path=manifest,
+            run_id="run",
+            challenge_nonce=challenge,
+            matched_key="key",
+            scene_seed=1,
+            failure_seed=2,
+            consumed_at_ns=2,
+        )
+
+
+def test_canonical_ledger_reload_rejects_direct_fake_receipt(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import xh_agent.policy.qrm_lite.offline_wire_auth_v1 as auth
+
+    ledger = tmp_path / "ledger"
+    monkeypatch.setattr(auth, "CANONICAL_WIRE_CHALLENGE_CONSUMPTION_ROOT", str(ledger))
+    with pytest.raises(FileNotFoundError):
+        load_consumed_wire_challenge_from_canonical_ledger(
+            ledger_directory=ledger,
+            challenge_nonce="8" * 64,
+            run_id="run",
+            matched_key="key",
+            scene_seed=1,
+            failure_seed=2,
+        )
 
 
 def test_signer_rejects_symlink_private_key(tmp_path: Path) -> None:

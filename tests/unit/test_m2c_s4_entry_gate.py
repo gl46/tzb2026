@@ -42,6 +42,9 @@ from xh_agent.policy.qrm_lite.s4_entry_gate import (
     QWEN_MODEL_REVISION,
     RUNTIME_BINDINGS,
     _commit_binding_blockers,
+    _require_consumed_before_host_requests,
+    _require_exact_isaac_lifecycle,
+    _require_exact_qwen_lifecycle,
     canonical_qwen_head_tensor_hashes,
     evaluate_s4_entry_gate,
 )
@@ -526,6 +529,35 @@ def test_entry_uses_unsigned_hmac_receipt_and_requires_consumption_binding() -> 
     fields = PhysicalIntegrationReceiptV2.model_fields
     assert "challenge_consumption_receipt_path" in fields
     assert "challenge_consumption_receipt_sha256" in fields
+
+
+def test_consumption_time_must_precede_both_hosts_first_wire_request() -> None:
+    qwen = [{"event_type": "WIRE_REQUEST_RECEIVED", "recorded_at_ns": 100}]
+    isaac = [{"event_type": "WIRE_REQUEST_RECEIVED", "recorded_at_ns": 200}]
+    _require_consumed_before_host_requests(99, qwen_service=qwen, isaac_service=isaac)
+    with pytest.raises(ValueError, match="not consumed before"):
+        _require_consumed_before_host_requests(100, qwen_service=qwen, isaac_service=isaac)
+    with pytest.raises(ValueError, match="not consumed before"):
+        _require_consumed_before_host_requests(200, qwen_service=qwen, isaac_service=isaac)
+
+
+def test_offline_entry_rejects_nonexact_host_lifecycles() -> None:
+    with pytest.raises(ValueError, match="Qwen service audit lifecycle"):
+        _require_exact_qwen_lifecycle(
+            [
+                {
+                    "event_type": "SERVICE_STARTED",
+                    "payload": {"service_id": "fixture"},
+                },
+                {"event_type": "UNAUTHENTICATED_EXTRA", "payload": {}},
+            ],
+            run_id="run",
+        )
+    with pytest.raises(ValueError, match="Isaac service audit lifecycle"):
+        _require_exact_isaac_lifecycle(
+            [{"event_type": "SERVICE_STARTED", "payload": {}}],
+            [{"event_type": "SESSION_AUDIT_CREATED", "payload": {}}],
+        )
 
 
 def test_implementation_commit_may_be_ancestor_but_must_exist(tmp_path: Path) -> None:

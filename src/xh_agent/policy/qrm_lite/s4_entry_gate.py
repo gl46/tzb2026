@@ -151,7 +151,7 @@ RUNTIME_BINDINGS: dict[str, str] = {
         "f1f3448e6ee16747226c6a1e7bf61a08f985a1d3f1aebb739e9650c2596dd7a7"
     ),
     "scripts/m2c/run_formal_model_owned_chain.py": (
-        "46ddacecc585bc99efba31a94482c51545c5a82ef3e8e26eaa809b37b203781f"
+        "65e4d686e007682df126483936425f92c5ffe818a51c2bb70c6ddd25c3ce4ec8"
     ),
     "scripts/m2c/verify_formal_wire_auth.py": (
         "bfd8e049432269b119be2bdb951f42d4e613f6896ef10c90ae817364a92ceb3d"
@@ -187,7 +187,7 @@ RUNTIME_BINDINGS: dict[str, str] = {
         "fd76aebd3d319dd30857a721e89bcb028ae144d4d60b6d761d2d8e04f8614444"
     ),
     "src/xh_agent/policy/qrm_lite/offline_wire_auth_v1.py": (
-        "094800945b945378dc7a937e66ecbe1c2d8a71dbf19ed2b6b78cec6b85a4a767"
+        "17068bb82f3bc203ea050cc0d136b6984b3abe9c5ec810626d18def8a24465ac"
     ),
     "src/xh_agent/policy/qrm_lite/models_q012_v2.py": (
         "5334fbee5750fd4df1f6b421eac0336ced98849aa68e1c6948986bdbb15f540c"
@@ -886,6 +886,124 @@ def _read_qwen_audit(source: Path | bytes) -> list[dict[str, Any]]:
     return records
 
 
+def _first_wire_request_time(records: list[dict[str, Any]], *, label: str) -> int:
+    values = [
+        item.get("recorded_at_ns")
+        for item in records
+        if item.get("event_type") == "WIRE_REQUEST_RECEIVED"
+    ]
+    if not values or any(not isinstance(value, int) or value <= 0 for value in values):
+        raise ValueError(f"{label} lacks positive wire-request timestamps")
+    return values[0]
+
+
+def _require_consumed_before_host_requests(
+    consumed_at_ns: int,
+    *,
+    qwen_service: list[dict[str, Any]],
+    isaac_service: list[dict[str, Any]],
+) -> None:
+    if not (
+        consumed_at_ns < _first_wire_request_time(qwen_service, label="Qwen service audit")
+        and consumed_at_ns < _first_wire_request_time(isaac_service, label="Isaac service audit")
+    ):
+        raise ValueError("wire challenge was not consumed before both hosts' first request")
+
+
+def _require_exact_qwen_lifecycle(records: list[dict[str, Any]], *, run_id: str) -> None:
+    expected = [
+        "SERVICE_STARTED",
+        *[
+            event
+            for _ in range(8)
+            for event in ("WIRE_REQUEST_RECEIVED", "WIRE_RESPONSE_COMMITTED")
+        ],
+        "SERVICE_COMPLETED",
+        "SERVICE_STOPPED",
+    ]
+    if [item.get("event_type") for item in records] != expected:
+        raise ValueError("Qwen service audit lifecycle is not the exact eight-cycle structure")
+    started = records[0].get("payload", {})
+    service_id = started.get("service_id")
+    if (
+        not isinstance(service_id, str)
+        or started
+        != {
+            "service_id": service_id,
+            "path": FORMAL_INFERENCE_PATH,
+            "expected_decisions": 8,
+            "teacher_used": False,
+            "privileged_truth_policy_input": False,
+        }
+        or records[-2].get("payload")
+        != {
+            "service_id": service_id,
+            "run_id": run_id,
+            "responses_committed": 8,
+            "formal_evidence_complete": True,
+        }
+        or records[-1].get("payload")
+        != {
+            "service_id": service_id,
+            "run_id": run_id,
+            "responses_committed": 8,
+            "completed": True,
+            "poisoned": False,
+            "rejections_recorded": 0,
+            "teacher_used": False,
+            "privileged_truth_policy_input": False,
+        }
+    ):
+        raise ValueError("Qwen service lifecycle payload differs")
+
+
+def _require_exact_isaac_lifecycle(
+    service: list[dict[str, Any]],
+    session: list[dict[str, Any]],
+) -> None:
+    cycle_events = []
+    for _ in range(8):
+        cycle_events.extend(("WIRE_REQUEST_RECEIVED", "WIRE_RESPONSE_COMMITTED", "HTTP_ACCESS"))
+        cycle_events.extend(
+            (
+                "WIRE_REQUEST_RECEIVED",
+                "EXACT_EXECUTION_PLAN_EXECUTED",
+                "WIRE_RESPONSE_COMMITTED",
+                "HTTP_ACCESS",
+            )
+        )
+    expected_service = [
+        "SERVICE_STARTED",
+        "HTTP_SERVER_READY",
+        "WIRE_REQUEST_RECEIVED",
+        "SESSION_AUDIT_CREATED",
+        "ISAAC_START_ACCEPTED_FOR_BACKEND",
+        "WIRE_RESPONSE_COMMITTED",
+        "HTTP_ACCESS",
+        *cycle_events,
+        "WIRE_REQUEST_RECEIVED",
+        "WIRE_RESPONSE_COMMITTED",
+        "HTTP_ACCESS",
+        "SERVICE_STOPPED",
+    ]
+    if [item.get("event_type") for item in service] != expected_service:
+        raise ValueError("Isaac service audit lifecycle is not the exact eight-cycle structure")
+    session_start = expected_service.index("SESSION_AUDIT_CREATED")
+    if [item.get("event_type") for item in session] != expected_service[session_start:]:
+        raise ValueError("Isaac session audit lifecycle is not the exact service suffix")
+    if service[0].get("payload") != {
+        "service_id": service[0].get("payload", {}).get("service_id"),
+        "formal_evidence": False,
+        "physical_execution_performed": False,
+    }:
+        raise ValueError("Isaac service start lifecycle payload differs")
+    ready = service[1].get("payload", {})
+    if ready.get("formal_execution_started") is not False:
+        raise ValueError("Isaac HTTP readiness lifecycle payload differs")
+    if service[-1].get("payload") != {"clean_shutdown": True}:
+        raise ValueError("Isaac service stop lifecycle payload differs")
+
+
 def _verify_isaac_audits(
     service_source: Path | bytes,
     session_source: Path | bytes,
@@ -992,6 +1110,29 @@ def _verify_isaac_audits(
     ]
     if session_requests != expected_requests[1:] or session_responses != expected_responses:
         raise ValueError("Isaac session audit is incomplete or differs from service audit")
+    _require_exact_isaac_lifecycle(service, session)
+    accepted = next(
+        item for item in service if item.get("event_type") == "ISAAC_START_ACCEPTED_FOR_BACKEND"
+    )
+    if accepted.get("payload") != {"request": start_request.model_dump(mode="json")}:
+        raise ValueError("Isaac backend-start lifecycle event differs from signed start request")
+    exact_events = [
+        item for item in service if item.get("event_type") == "EXACT_EXECUTION_PLAN_EXECUTED"
+    ]
+    expected_exact_events = [
+        {
+            "decision_index": index,
+            "exact_execution_plan_sha256": cycle["execute_response"]["payload"][
+                "exact_execution_plan_sha256"
+            ],
+            "phase_count": len(
+                cycle["execute_response"]["payload"]["exact_execution_plan"]["phases"]
+            ),
+        }
+        for index, cycle in enumerate(evidence["wire_cycles"])
+    ]
+    if [item.get("payload") for item in exact_events] != expected_exact_events:
+        raise ValueError("Isaac exact-plan lifecycle events differ from signed responses")
     return service, session
 
 
@@ -1030,6 +1171,7 @@ def _external_physical_evidence_blockers(
             blockers.append("formal deployment commit/image differs from frozen closure")
         if closure.transitive_import_manifest_sha256 != manifest_sha:
             blockers.append("formal deployment transitive-import manifest differs")
+    consumption: WireChallengeConsumptionReceiptV1 | None = None
     try:
         b0_freeze = _read_json(root / B0_FREEZE_PATH)
         exact_b0 = {item["path"]: item["sha256"] for item in b0_freeze["b0_files"]}
@@ -1233,6 +1375,14 @@ def _external_physical_evidence_blockers(
             receipt=receipt,
         )
         qwen_service = _read_qwen_audit(evidence_bytes["Qwen service audit"])
+        _require_exact_qwen_lifecycle(qwen_service, run_id=receipt.run_id)
+        if consumption is None:
+            raise ValueError("wire challenge consumption receipt is absent")
+        _require_consumed_before_host_requests(
+            consumption.consumed_at_ns,
+            qwen_service=qwen_service,
+            isaac_service=isaac_service,
+        )
         auth_receipts = {
             "NODE2_QWEN": HostWireHMACVerificationReceiptV2.model_validate(
                 json.loads(evidence_bytes["node2 wire authentication receipt"])

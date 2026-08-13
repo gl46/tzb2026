@@ -221,6 +221,19 @@ def wire_challenge_consumption_path(ledger_directory: Path, challenge_nonce: str
     return ledger_directory / f"consumed-{challenge_nonce}.json"
 
 
+def _fsync_directory(path: Path) -> None:
+    flags = os.O_RDONLY | getattr(os, "O_CLOEXEC", 0) | getattr(os, "O_NOFOLLOW", 0)
+    flags |= getattr(os, "O_DIRECTORY", 0)
+    descriptor = os.open(path, flags)
+    try:
+        metadata = os.fstat(descriptor)
+        if not stat.S_ISDIR(metadata.st_mode):
+            raise NotADirectoryError(path)
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)
+
+
 def consume_wire_challenge_create_only(
     *,
     ledger_directory: Path,
@@ -292,6 +305,10 @@ def consume_wire_challenge_create_only(
     )
     descriptor = os.open(path, flags, 0o400)
     try:
+        # Persist the exclusive name before writing.  From this point onward
+        # every failure leaves a permanent tombstone, so the challenge can
+        # never be retried after an ambiguous durability outcome.
+        _fsync_directory(ledger_directory)
         view = memoryview(payload)
         while view:
             written = os.write(descriptor, view)
@@ -299,15 +316,55 @@ def consume_wire_challenge_create_only(
                 raise OSError("wire challenge consumption write made no progress")
             view = view[written:]
         os.fsync(descriptor)
-    except Exception:
-        try:
-            path.unlink()
-        except OSError:
-            pass
-        raise
     finally:
         os.close(descriptor)
+    _fsync_directory(ledger_directory)
     return path, receipt
+
+
+def load_consumed_wire_challenge_from_canonical_ledger(
+    *,
+    ledger_directory: Path,
+    challenge_nonce: str,
+    run_id: str,
+    matched_key: str,
+    scene_seed: int,
+    failure_seed: int,
+) -> tuple[Path, WireChallengeConsumptionReceiptV1, str]:
+    """Re-read one immutable canonical ledger receipt before endpoint contact."""
+
+    canonical_root = Path(CANONICAL_WIRE_CHALLENGE_CONSUMPTION_ROOT).resolve()
+    if ledger_directory.resolve() != canonical_root:
+        raise ValueError("wire challenge consumption ledger root is not canonical")
+    path = wire_challenge_consumption_path(ledger_directory, challenge_nonce)
+    metadata = path.stat(follow_symlinks=False)
+    if (
+        path.is_symlink()
+        or not stat.S_ISREG(metadata.st_mode)
+        or metadata.st_uid != os.geteuid()
+        or metadata.st_nlink != 1
+        or metadata.st_mode & 0o277
+    ):
+        raise PermissionError(
+            "wire challenge consumption receipt is not immutable private evidence"
+        )
+    raw = read_regular_file_once(path)
+    receipt = WireChallengeConsumptionReceiptV1.model_validate(
+        _parse_json_object(raw, label="wire challenge consumption receipt")
+    )
+    if raw != canonical_json_bytes(receipt) + b"\n":
+        raise ValueError("wire challenge consumption receipt is not canonical JSON")
+    expected = (run_id, challenge_nonce, matched_key, scene_seed, failure_seed)
+    observed = (
+        receipt.run_id,
+        receipt.challenge_nonce,
+        receipt.matched_key,
+        receipt.scene_seed,
+        receipt.failure_seed,
+    )
+    if observed != expected:
+        raise ValueError("wire challenge consumption receipt differs from requested run")
+    return path, receipt, sha256_bytes(raw)
 
 
 def read_regular_file_once(path: Path, *, require_private: bool = False) -> bytes:
