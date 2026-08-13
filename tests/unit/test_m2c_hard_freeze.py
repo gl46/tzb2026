@@ -80,17 +80,33 @@ def test_invalid_system_clock_fails_closed(
         require_pre_freeze(M2CExperimentAction.Q_B_EVALUATION)
 
 
-def test_unavailable_required_timezone_fails_closed(
+def test_fixed_timezone_construction_failure_fails_closed(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     from xh_agent.policy.qrm_lite import m2c_hard_freeze
 
-    def unavailable(_name: str) -> object:
-        raise m2c_hard_freeze.ZoneInfoNotFoundError("missing")
+    def unavailable(*_args: object, **_kwargs: object) -> object:
+        raise RuntimeError("fixed timezone unavailable")
 
-    monkeypatch.setattr(m2c_hard_freeze, "ZoneInfo", unavailable)
+    monkeypatch.setattr(m2c_hard_freeze, "timezone", unavailable)
     with pytest.raises(M2CHardFreezeError, match="M2C_HARD_FREEZE_CLOCK_INVALID"):
         require_pre_freeze(M2CExperimentAction.S6_EXECUTION)
+
+
+def test_guard_does_not_require_external_iana_tzdata(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from xh_agent.policy.qrm_lite import m2c_hard_freeze
+
+    monkeypatch.setenv("PYTHONTZPATH", "/definitely/missing")
+    monkeypatch.setenv("TZ", "Invalid/Timezone")
+    monkeypatch.setattr(
+        m2c_hard_freeze.time,
+        "time_ns",
+        lambda: M2C_HARD_FREEZE_UNIX_NS - 1,
+    )
+    result = require_pre_freeze(M2CExperimentAction.ISAAC_COLLECTION)
+    assert result.isoformat() == "2026-08-31T23:59:59.999999+08:00"
 
 
 def test_all_current_real_m2c_entrypoints_call_the_shared_guard() -> None:

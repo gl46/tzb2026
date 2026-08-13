@@ -8,10 +8,9 @@ timestamp.  The sole production decision is made from ``time.time_ns()``.
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 import time
-from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 
 M2C_TIMEZONE_NAME = "Asia/Shanghai"
@@ -35,17 +34,23 @@ class M2CHardFreezeError(RuntimeError):
 
 
 def _freeze_datetime() -> datetime:
+    """Construct the frozen +08:00 boundary without a host tzdata dependency.
+
+    The experiment boundary is a single already-approved instant, not a rule
+    that needs historical or future daylight-saving transitions.  Isaac Sim's
+    minimal Python runtime does not ship the IANA ``tzdata`` package, so using
+    ``ZoneInfo("Asia/Shanghai")`` made the guard reject every pre-freeze run
+    before Kit startup.  A named, fixed +08:00 offset expresses the exact same
+    approved 2026 instant and remains independent of environment/configuration.
+    """
+
     try:
-        timezone = ZoneInfo(M2C_TIMEZONE_NAME)
-    except ZoneInfoNotFoundError as exc:
-        raise M2CHardFreezeError(
-            "M2C_HARD_FREEZE_CLOCK_INVALID:Asia/Shanghai timezone data unavailable"
-        ) from exc
+        shanghai = timezone(timedelta(hours=8), name=M2C_TIMEZONE_NAME)
     except Exception as exc:
         raise M2CHardFreezeError(
-            "M2C_HARD_FREEZE_CLOCK_INVALID:Asia/Shanghai timezone data unavailable"
+            "M2C_HARD_FREEZE_CLOCK_INVALID:fixed Asia/Shanghai offset unavailable"
         ) from exc
-    freeze = datetime(2026, 9, 1, 0, 0, 0, tzinfo=timezone)
+    freeze = datetime(2026, 9, 1, 0, 0, 0, tzinfo=shanghai)
     if freeze.isoformat() != M2C_HARD_FREEZE_LOCAL_ISO:
         raise M2CHardFreezeError("M2C_HARD_FREEZE_CLOCK_INVALID:Asia/Shanghai offset mismatch")
     if int(freeze.timestamp() * 1_000_000_000) != M2C_HARD_FREEZE_UNIX_NS:

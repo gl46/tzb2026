@@ -177,7 +177,7 @@ RUNTIME_BINDINGS: dict[str, str] = {
         "4e853dcb86c2bb51a9ca58f8441199e10d85366657669087e5b26a3aaf8a93a4"
     ),
     "src/xh_agent/policy/qrm_lite/m2c_hard_freeze.py": (
-        "36cac68c45242337bd181afaa5898cb257c643e5245037e72602b9d6fbea3dd9"
+        "91c2a6fdb2c1f95e8638e9c08b3ac2977fe39229dcff5f2fa85239c918fe1b09"
     ),
     "src/xh_agent/policy/qrm_lite/model_owned_chain_v2.py": (
         "fd76aebd3d319dd30857a721e89bcb028ae144d4d60b6d761d2d8e04f8614444"
