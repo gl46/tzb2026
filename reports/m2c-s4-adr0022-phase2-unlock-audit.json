@@ -1,0 +1,118 @@
+{
+  "accepted_adr": {
+    "path": "docs/decisions/ADR-0022-m2c-exact-plan-primitives-and-b0-wrapper.md",
+    "sha256": "4538eb980b66dc0945d1f016325f6c3c5679c87b97b9986e25253e67a2cc3ef1",
+    "status": "ACCEPTED_BUT_PHASE_2_BINDING_ADDENDUM_REQUIRED"
+  },
+  "blockers": [
+    "REAL_EXACT_PLAN_ISAAC_PLANNER_EXECUTOR_MISSING",
+    "ACTIVE_SESSION_UNCHANGED_B0_CALLABLE_MISSING",
+    "DEPLOYMENT_CLOSURE_ASSETS_CONTAINER_MISSING",
+    "NODE2_LABSERVER_ED25519_AUTHORITIES_TRUST_RECEIPTS_MISSING",
+    "REAL_ENDPOINT_STARTUP_HOST_ATTESTATION_MISSING",
+    "EIGHT_SKILL_PHYSICAL_PHASE_VALIDATION_MISSING"
+  ],
+  "contract_smoke_is_physical_evidence": false,
+  "contract_smoke_status": "PASS_CONTRACT_ONLY",
+  "contract_smokes": [
+    {
+      "bound_plan_sha256": "53eca37dc5209bce2884d880d9f4ac41670b8e08d55a6a7d4d9716b2e4c46ce5",
+      "executed_phase_indices": [
+        0,
+        1
+      ],
+      "executor_independent_digest_checks": 1,
+      "formal_evidence": false,
+      "name": "EXACT_PLAN_DIGEST_IDENTITY",
+      "real_isaac": false,
+      "status": "PASS_CONTRACT_ONLY"
+    },
+    {
+      "all_phases_preflighted_before_execution": true,
+      "formal_evidence": false,
+      "frozen_model_mutation_rejected": true,
+      "gate_implementation_hashes_bound": true,
+      "name": "ALL_PHASE_GATE_IMMUTABILITY",
+      "real_isaac": false,
+      "status": "PASS_CONTRACT_ONLY"
+    },
+    {
+      "executed_phase_indices": [
+        0
+      ],
+      "formal_evidence": false,
+      "later_phase_executed": false,
+      "name": "MID_PLAN_FAILURE_NO_REPLAN",
+      "real_isaac": false,
+      "runtime_retry_selected": false,
+      "status": "PASS_CONTRACT_ONLY",
+      "terminated_without_replan": true
+    },
+    {
+      "active_formal_session_compatible": false,
+      "execution_source": "NO_PHYSICAL_EXECUTION",
+      "fallback_status": "NO_PHYSICAL_EXECUTION",
+      "false_physical_b0_attribution_rejected": true,
+      "formal_evidence": false,
+      "freeze_manifest_sha256": "4bec9104be849dfd8d71b32b537eb2b5d70ea4d8560b4bdd65b1d1019d3e8d04",
+      "frozen_source_count": 12,
+      "legacy_runner_starts_new_isaac_process": true,
+      "name": "FROZEN_B0_DIGEST_AND_ATTRIBUTION",
+      "physical_execution_performed": false,
+      "probe_sha256": "1e32fa89c8b1ef403a52f1b2c8326942b72092e6e88f50e8f780eff1c08c6094",
+      "pure_model_success_eligible": false,
+      "runner_sha256": "7e68c9f18b26bedaa600e642ca59339da9a99739bc2770d8aed3f87c53e98865",
+      "status": "PASS_CONTRACT_ONLY"
+    }
+  ],
+  "disposition": "Offline ADR-0022 contract smoke passed, but Phase-2 remains BLOCKED. No source-level binding may be set until every listed real deployment, host-authority, startup-attestation, and eight-skill physical-validation artifact exists and is independently reviewed.",
+  "entry_gate": {
+    "all_four_bindings_literal_none": true,
+    "bindings": {
+      "FORMAL_DEPLOYMENT_CLOSURE_BINDING": null,
+      "FORMAL_PHYSICAL_RUNNER_BINDING": null,
+      "FROZEN_B0_RUNTIME_WRAPPER_BINDING": null,
+      "OFFLINE_WIRE_AUTHENTICATION_VERIFIER_BINDING": null
+    },
+    "path": "src/xh_agent/policy/qrm_lite/s4_entry_gate.py",
+    "sha256": "eb138d8c62dde188e32abda4d2cdcab0c1b66ec40cf5a955065c041a10ccb025"
+  },
+  "frozen_sources": [
+    {
+      "path": "docs/decisions/ADR-0022-m2c-exact-plan-primitives-and-b0-wrapper.md",
+      "sha256": "4538eb980b66dc0945d1f016325f6c3c5679c87b97b9986e25253e67a2cc3ef1",
+      "status": "MATCH"
+    },
+    {
+      "path": "src/xh_agent/policy/qrm_lite/exact_plan_primitive_bundle_v1.py",
+      "sha256": "5d1b497533312bb269e2abc37e445f980029a07a3b85b062559a8ed278f53c8a",
+      "status": "MATCH"
+    },
+    {
+      "path": "src/xh_agent/policy/qrm_lite/frozen_b0_fallback_wrapper_v1.py",
+      "sha256": "5e2df2329725c79ec073c3ec34b87158787411d386b9ba13d0d4bc1d790642b8",
+      "status": "MATCH"
+    }
+  ],
+  "governance": {
+    "addendum_or_unlock_config_generated": false,
+    "b0_modified": false,
+    "binding_changed": false,
+    "contract_fixture_counted_as_model_owned_physical_evidence": false,
+    "formal_smoke_executed": false,
+    "isaac_executed": false,
+    "privileged_truth_policy_input": false,
+    "q_b_evaluation_executed": false,
+    "safety_gate_weakened": false,
+    "teacher_used": false,
+    "training_executed": false
+  },
+  "phase_2_files": {
+    "binding_addendum_present": false,
+    "generated_by_this_audit": false,
+    "unlock_config_present": false
+  },
+  "schema_version": "M2CADR0022Phase2UnlockAuditV1",
+  "status": "BLOCKED",
+  "unlock_authorized": false
+}
