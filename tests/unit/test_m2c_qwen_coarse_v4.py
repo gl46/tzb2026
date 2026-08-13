@@ -15,11 +15,13 @@ from m2c.qwen_coarse_v4 import (
     checkpoint_binding_for_numpy_heads_v4,
     index_executed_histories_v4,
     initialize_numpy_heads_v4,
+    load_bundle_v4,
     load_training_packages_v4,
     qwen_coarse_v4_prompt,
     run_offline_contract_smoke_v4,
     validate_head_checkpoint_binding_v4,
     validate_key_manifests_v4,
+    write_bundle_manifest_v4,
 )
 from test_m2c_v4_collection_plumbing import _manifest, _raw_bundle
 from xh_agent.policy.qrm_lite.path_blocked_collection_v4 import (
@@ -307,3 +309,72 @@ def test_v4_checkpoint_binding_is_exact_and_cross_revision_safe() -> None:
     logits = heads.logits(np.zeros(8), [True, False, False, False, False, False, False, False])
     assert np.isneginf(logits[1][1:8]).all()
     assert np.isfinite(logits[1][8])
+
+
+def test_v4_bundle_round_trip_binds_adapter_heads_data_and_s6(tmp_path: Path) -> None:
+    samples, report = load_training_packages_v4(
+        [_package(tmp_path / "evidence")],
+        training_manifest_path=TRAINING_KEYS,
+        evaluation_manifest_path=EVALUATION_KEYS,
+    )
+    output = tmp_path / "trained"
+    adapter = output / "adapter"
+    adapter.mkdir(parents=True)
+    (adapter / "adapter_model.safetensors").write_bytes(b"fixture-adapter")
+    heads = initialize_numpy_heads_v4(hidden_size=8, seed=7)
+    manifest = write_bundle_manifest_v4(
+        output,
+        heads=heads,
+        model_id="Qwen/Qwen3.5-2B",
+        model_revision="frozen-revision",
+        failure_context="on",
+        dataset_report=report,
+        seed=7,
+        optimizer_steps=len(samples),
+    )
+    loaded = load_bundle_v4(output, expected_bundle_sha256=manifest.bundle_sha256)
+    assert loaded.manifest.training_dataset_sha256 == report.combined_dataset_sha256
+    assert loaded.manifest.train_samples == 8
+    assert np.array_equal(loaded.heads.skill_w, heads.skill_w)
+
+    (adapter / "adapter_model.safetensors").write_bytes(b"substituted")
+    with pytest.raises(ValueError, match="adapter tree SHA-256 mismatch"):
+        load_bundle_v4(output, expected_bundle_sha256=manifest.bundle_sha256)
+
+
+def test_v4_bundle_refuses_zero_step_and_external_digest_substitution(tmp_path: Path) -> None:
+    _, report = load_training_packages_v4(
+        [_package(tmp_path / "evidence")],
+        training_manifest_path=TRAINING_KEYS,
+        evaluation_manifest_path=EVALUATION_KEYS,
+    )
+    output = tmp_path / "trained"
+    adapter = output / "adapter"
+    adapter.mkdir(parents=True)
+    (adapter / "adapter.json").write_text("{}")
+    heads = initialize_numpy_heads_v4(hidden_size=8, seed=7)
+    with pytest.raises(ValueError, match="at least one optimizer step"):
+        write_bundle_manifest_v4(
+            output,
+            heads=heads,
+            model_id="Qwen/Qwen3.5-2B",
+            model_revision="frozen-revision",
+            failure_context="off",
+            dataset_report=report,
+            seed=7,
+            optimizer_steps=0,
+        )
+    manifest = write_bundle_manifest_v4(
+        output,
+        heads=heads,
+        model_id="Qwen/Qwen3.5-2B",
+        model_revision="frozen-revision",
+        failure_context="off",
+        dataset_report=report,
+        seed=7,
+        optimizer_steps=8,
+    )
+    with pytest.raises(ValueError, match="external expected digest"):
+        load_bundle_v4(output, expected_bundle_sha256="0" * 64)
+    assert manifest.physical_evaluation_executed is False
+    assert manifest.teacher_used is False

@@ -49,7 +49,10 @@ from xh_agent.policy.qrm_lite.path_blocked_supervision_v2 import (
 )
 from xh_agent.policy.qrm_lite.path_blocked_supervision_v4 import (
     M2CQ012CheckpointBindingV4,
+    M2CQ012DeploymentManifestV4,
     M2CQ012TensorBindingV4,
+    canonical_checkpoint_binding_sha256_v4,
+    load_m2c_q012_checkpoint_v4,
     recompute_candidate_payload_v4,
 )
 from xh_agent.policy.qrm_lite.public_tracks_v4 import (
@@ -73,6 +76,9 @@ HEAD_TENSOR_NAMES = (
     "skill_b",
     "skill_w",
 )
+HEAD_CHECKPOINT_NAME = "qwen_coarse_v4_heads.npz"
+HEAD_DEPLOYMENT_NAME = "qwen_coarse_v4_checkpoint_deployment.json"
+BUNDLE_MANIFEST_NAME = "qwen_coarse_v4_bundle.json"
 
 
 class StrictModel(BaseModel):
@@ -135,6 +141,70 @@ class M2CQwenCoarseV4OfflineSmokeV1(StrictModel):
     checkpoint_written: Literal[False] = False
     teacher_used: Literal[False] = False
     privileged_truth_policy_input: Literal[False] = False
+
+
+class M2CQwenCoarseV4BundleManifestV1(StrictModel):
+    schema_version: Literal["M2CQwenCoarseV4BundleManifestV1"] = "M2CQwenCoarseV4BundleManifestV1"
+    status: Literal["TRAINED_QWEN_LORA_M2C_Q012_V4"]
+    architecture_revision: Literal["M2C_Q012_V4"] = "M2C_Q012_V4"
+    public_observation_revision: Literal["PathBlockedPublicObservationV4"] = (
+        "PathBlockedPublicObservationV4"
+    )
+    public_track_associator_revision: Literal["PublicTrackAssociatorV2"] = "PublicTrackAssociatorV2"
+    public_track_candidate_revision: Literal["PublicTrackCandidateV4"] = "PublicTrackCandidateV4"
+    model_id: str = Field(min_length=1)
+    model_revision: str = Field(min_length=1)
+    failure_context: Literal["on", "off"]
+    adapter_relative_path: Literal["adapter"] = "adapter"
+    adapter_tree_sha256: str = Field(pattern=SHA256_PATTERN)
+    head_checkpoint_relative_path: Literal["qwen_coarse_v4_heads.npz"] = HEAD_CHECKPOINT_NAME
+    head_checkpoint_sha256: str = Field(pattern=SHA256_PATTERN)
+    head_deployment_relative_path: Literal["qwen_coarse_v4_checkpoint_deployment.json"] = (
+        HEAD_DEPLOYMENT_NAME
+    )
+    head_deployment: M2CQ012DeploymentManifestV4
+    head_deployment_file_sha256: str = Field(pattern=SHA256_PATTERN)
+    training_dataset_sha256: str = Field(pattern=SHA256_PATTERN)
+    training_manifest_file_sha256: str = Field(pattern=SHA256_PATTERN)
+    training_manifest_sha256: str = Field(pattern=SHA256_PATTERN)
+    s6_manifest_file_sha256: str = Field(pattern=SHA256_PATTERN)
+    s6_manifest_sha256: str = Field(pattern=SHA256_PATTERN)
+    seed: int
+    train_samples: int = Field(gt=0)
+    train_episodes: int = Field(gt=0)
+    optimizer_steps: int = Field(gt=0)
+    training_complete: Literal[True]
+    physical_evaluation_executed: Literal[False]
+    teacher_used: Literal[False]
+    privileged_truth_policy_input: Literal[False]
+    bundle_sha256: str = Field(pattern=SHA256_PATTERN)
+
+    @classmethod
+    def _content_sha256(cls, payload: dict[str, object]) -> str:
+        return canonical_sha256(
+            {key: value for key, value in payload.items() if key != "bundle_sha256"}
+        )
+
+    @staticmethod
+    def _deployment_file_bytes(deployment: M2CQ012DeploymentManifestV4) -> bytes:
+        return (
+            json.dumps(
+                deployment.model_dump(mode="json"),
+                indent=2,
+                sort_keys=True,
+            )
+            + "\n"
+        ).encode("utf-8")
+
+    def model_post_init(self, _context: object) -> None:
+        if self.head_checkpoint_sha256 != self.head_deployment.checkpoint_file_sha256:
+            raise ValueError("V4 bundle checkpoint differs from deployment binding")
+        if self.head_deployment_file_sha256 != sha256_bytes(
+            self._deployment_file_bytes(self.head_deployment)
+        ):
+            raise ValueError("V4 bundle deployment file SHA-256 mismatch")
+        if self.bundle_sha256 != self._content_sha256(self.model_dump(mode="json")):
+            raise ValueError("V4 bundle canonical SHA-256 mismatch")
 
 
 M2CQwenCoarseV4TrainingSample = M2CPathBlockedSupervisedStepV4
@@ -694,6 +764,12 @@ class NumpyThreeHeadsV4:
         return skill, pointer, destination
 
 
+@dataclass(frozen=True)
+class LoadedM2CQwenCoarseV4Bundle:
+    manifest: M2CQwenCoarseV4BundleManifestV1
+    heads: NumpyThreeHeadsV4
+
+
 def initialize_numpy_heads_v4(hidden_size: int, seed: int) -> NumpyThreeHeadsV4:
     if hidden_size <= 0:
         raise ValueError("V4 hidden size must be positive")
@@ -762,6 +838,182 @@ def validate_head_checkpoint_binding_v4(
         tensor = tensors[name]
         if tensor.shape != shape or tensor.dtype not in {"float32", "float64"}:
             raise ValueError(f"V4 coarse-head checkpoint tensor layout differs: {name}")
+
+
+def _write_new_file(path: Path, payload: bytes, *, mode: int = 0o600) -> None:
+    flags = (
+        os.O_WRONLY
+        | os.O_CREAT
+        | os.O_EXCL
+        | getattr(os, "O_CLOEXEC", 0)
+        | getattr(os, "O_NOFOLLOW", 0)
+    )
+    descriptor = os.open(path, flags, mode)
+    try:
+        offset = 0
+        while offset < len(payload):
+            written = os.write(descriptor, payload[offset:])
+            if written <= 0:
+                raise OSError("short write while publishing V4 bundle")
+            offset += written
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)
+    directory = os.open(
+        path.parent,
+        os.O_RDONLY | getattr(os, "O_CLOEXEC", 0) | getattr(os, "O_DIRECTORY", 0),
+    )
+    try:
+        os.fsync(directory)
+    finally:
+        os.close(directory)
+
+
+def sha256_tree_v4(path: Path) -> str:
+    root = path.resolve(strict=True)
+    if not root.is_dir() or path.is_symlink():
+        raise ValueError("V4 adapter root is not a real directory")
+    files = sorted(item for item in root.rglob("*") if item.is_file())
+    if not files:
+        raise ValueError("V4 adapter tree is empty")
+    digest = hashlib.sha256()
+    for item in files:
+        if item.is_symlink():
+            raise ValueError("V4 adapter tree contains a symlink")
+        info = item.stat(follow_symlinks=False)
+        if not stat.S_ISREG(info.st_mode) or info.st_nlink != 1:
+            raise ValueError("V4 adapter tree contains a non-regular or linked file")
+        relative = item.relative_to(root).as_posix()
+        digest.update(relative.encode("utf-8"))
+        digest.update(b"\0")
+        digest.update(hashlib.sha256(_read_regular_file_once(item)).digest())
+    return digest.hexdigest()
+
+
+def save_numpy_head_checkpoint_v4(
+    path: Path,
+    heads: NumpyThreeHeadsV4,
+) -> tuple[M2CQ012CheckpointBindingV4, M2CQ012DeploymentManifestV4, bytes]:
+    binding = checkpoint_binding_for_numpy_heads_v4(heads)
+    buffer = __import__("io").BytesIO()
+    np.savez(
+        buffer,
+        metadata_json=np.asarray(
+            json.dumps(binding.model_dump(mode="json"), separators=(",", ":"))
+        ),
+        **heads.tensors(),
+    )
+    checkpoint_bytes = buffer.getvalue()
+    _write_new_file(path, checkpoint_bytes)
+    deployment_payload: dict[str, object] = {
+        "schema_version": "M2CQ012DeploymentManifestV4",
+        "architecture_revision": "M2C_Q012_V4",
+        "checkpoint_file_sha256": sha256_bytes(checkpoint_bytes),
+        "checkpoint_binding_sha256": canonical_checkpoint_binding_sha256_v4(binding),
+    }
+    deployment_payload["deployment_manifest_sha256"] = canonical_sha256(deployment_payload)
+    deployment = M2CQ012DeploymentManifestV4.model_validate(deployment_payload)
+    return binding, deployment, checkpoint_bytes
+
+
+def write_bundle_manifest_v4(
+    output_root: Path,
+    *,
+    heads: NumpyThreeHeadsV4,
+    model_id: str,
+    model_revision: str,
+    failure_context: Literal["on", "off"],
+    dataset_report: M2CQwenCoarseV4DatasetLoadReportV1,
+    seed: int,
+    optimizer_steps: int,
+) -> M2CQwenCoarseV4BundleManifestV1:
+    if optimizer_steps <= 0:
+        raise ValueError("V4 trained bundle requires at least one optimizer step")
+    if not output_root.is_dir():
+        raise FileNotFoundError("V4 output staging root does not exist")
+    adapter_sha256 = sha256_tree_v4(output_root / "adapter")
+    _, deployment, checkpoint_bytes = save_numpy_head_checkpoint_v4(
+        output_root / HEAD_CHECKPOINT_NAME,
+        heads,
+    )
+    deployment_bytes = M2CQwenCoarseV4BundleManifestV1._deployment_file_bytes(deployment)
+    _write_new_file(output_root / HEAD_DEPLOYMENT_NAME, deployment_bytes)
+    payload: dict[str, object] = {
+        "schema_version": "M2CQwenCoarseV4BundleManifestV1",
+        "status": "TRAINED_QWEN_LORA_M2C_Q012_V4",
+        "architecture_revision": "M2C_Q012_V4",
+        "public_observation_revision": "PathBlockedPublicObservationV4",
+        "public_track_associator_revision": "PublicTrackAssociatorV2",
+        "public_track_candidate_revision": "PublicTrackCandidateV4",
+        "model_id": model_id,
+        "model_revision": model_revision,
+        "failure_context": failure_context,
+        "adapter_relative_path": "adapter",
+        "adapter_tree_sha256": adapter_sha256,
+        "head_checkpoint_relative_path": HEAD_CHECKPOINT_NAME,
+        "head_checkpoint_sha256": sha256_bytes(checkpoint_bytes),
+        "head_deployment_relative_path": HEAD_DEPLOYMENT_NAME,
+        "head_deployment": deployment.model_dump(mode="json"),
+        "head_deployment_file_sha256": sha256_bytes(deployment_bytes),
+        "training_dataset_sha256": dataset_report.combined_dataset_sha256,
+        "training_manifest_file_sha256": (
+            dataset_report.key_manifest_audit.training_manifest_file_sha256
+        ),
+        "training_manifest_sha256": dataset_report.key_manifest_audit.training_manifest_sha256,
+        "s6_manifest_file_sha256": dataset_report.key_manifest_audit.s6_manifest_file_sha256,
+        "s6_manifest_sha256": dataset_report.key_manifest_audit.s6_manifest_sha256,
+        "seed": seed,
+        "train_samples": dataset_report.rows_total,
+        "train_episodes": dataset_report.eligible_episodes,
+        "optimizer_steps": optimizer_steps,
+        "training_complete": True,
+        "physical_evaluation_executed": False,
+        "teacher_used": False,
+        "privileged_truth_policy_input": False,
+    }
+    payload["bundle_sha256"] = M2CQwenCoarseV4BundleManifestV1._content_sha256(payload)
+    manifest = M2CQwenCoarseV4BundleManifestV1.model_validate(payload)
+    manifest_bytes = (
+        json.dumps(manifest.model_dump(mode="json"), indent=2, sort_keys=True) + "\n"
+    ).encode("utf-8")
+    _write_new_file(output_root / BUNDLE_MANIFEST_NAME, manifest_bytes)
+    return manifest
+
+
+def load_bundle_v4(
+    output_root: Path,
+    *,
+    expected_bundle_sha256: str,
+) -> LoadedM2CQwenCoarseV4Bundle:
+    manifest = M2CQwenCoarseV4BundleManifestV1.model_validate_json(
+        _read_regular_file_once(output_root / BUNDLE_MANIFEST_NAME)
+    )
+    if manifest.bundle_sha256 != expected_bundle_sha256:
+        raise ValueError("V4 bundle differs from external expected digest")
+    if sha256_tree_v4(output_root / manifest.adapter_relative_path) != manifest.adapter_tree_sha256:
+        raise ValueError("V4 adapter tree SHA-256 mismatch")
+    deployment_raw = _read_regular_file_once(output_root / manifest.head_deployment_relative_path)
+    if sha256_bytes(deployment_raw) != manifest.head_deployment_file_sha256:
+        raise ValueError("V4 deployment file SHA-256 mismatch")
+    if M2CQ012DeploymentManifestV4.model_validate_json(deployment_raw) != manifest.head_deployment:
+        raise ValueError("V4 deployment file differs from bundle manifest")
+    loaded = load_m2c_q012_checkpoint_v4(
+        output_root / manifest.head_checkpoint_relative_path,
+        expected_deployment=manifest.head_deployment,
+        expected_deployment_manifest_sha256=(manifest.head_deployment.deployment_manifest_sha256),
+    )
+    arrays = loaded.tensors
+    hidden_size = int(arrays["skill_w"].shape[0])
+    validate_head_checkpoint_binding_v4(loaded.binding, hidden_size=hidden_size)
+    heads = NumpyThreeHeadsV4(
+        skill_w=arrays["skill_w"],
+        skill_b=arrays["skill_b"],
+        pointer_w=arrays["pointer_w"],
+        pointer_b=arrays["pointer_b"],
+        destination_w=arrays["destination_w"],
+        destination_b=arrays["destination_b"],
+    )
+    return LoadedM2CQwenCoarseV4Bundle(manifest=manifest, heads=heads)
 
 
 def run_offline_contract_smoke_v4(
