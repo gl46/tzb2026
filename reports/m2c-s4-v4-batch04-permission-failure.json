@@ -1,0 +1,129 @@
+{
+  "attempts": [
+    {
+      "attempt_id": "batch04-01",
+      "classification": "PRE_KIT_STAGE_OUTPUT_PERMISSION_FAILURE",
+      "consumed_at_ns": 1786630819100433436,
+      "consumption_id": "a46a8fb104b5c5254e8bd27fa81ebd9c0027b62a30f7ab44129ee4140ccb4fd2",
+      "evidence_file_sha256": {
+        "ledger/claim-00000000.json": "9c03c7bcc2b409b3eb16d40c3e422a5a2c93def3af58a4c75619cb9a7ae26dc7",
+        "raw/train/m2c-s4-v4-train-1efc461c22a16dec293861fa30da66202db57c8bfc02151c502134db711603fd/collection-job-v4.json": "0551fb329726f8e4d67e58da9e870e9b1ebaf2e81d3696617947dee57d925766",
+        "raw/train/m2c-s4-v4-train-1efc461c22a16dec293861fa30da66202db57c8bfc02151c502134db711603fd/derived-path-blocked-probe.py": "85d4223ea10137f4ece8b0457f071fce9f8fad4931971837ea52938b01dbc781",
+        "raw/train/m2c-s4-v4-train-1efc461c22a16dec293861fa30da66202db57c8bfc02151c502134db711603fd/stage/console.log": "d08f705d24b44b1df8f5a4c4ff31fae572dde35abf5d22ad04deb75a14d012fa"
+      },
+      "formal_q_b_evaluation": false,
+      "identity": {
+        "failure_seed": 190007,
+        "matched_key": "m2c-s4-v4-train-1efc461c22a16dec293861fa30da66202db57c8bfc02151c502134db711603fd",
+        "scene_seed": 19000,
+        "sdf_sha256": "2bd5a27d6d3a2ff42152024e4fbd9a68749840c153f3fe68e5b27085e58b1615",
+        "supervision_sha256": "714f770fb1d0a0e05f19ec80c97b63c5e25c4e0a55356fc208efcbd50a54efa6"
+      },
+      "model_rollout": false,
+      "physical_action_executed": false,
+      "privileged_truth_policy_input": false,
+      "probe_launched": false,
+      "teacher_used": false,
+      "training_sample_eligible": false,
+      "training_sample_packaged": false
+    },
+    {
+      "attempt_id": "batch04-02",
+      "classification": "PRE_KIT_STAGE_OUTPUT_PERMISSION_FAILURE",
+      "consumed_at_ns": 1786630969826281504,
+      "consumption_id": "c9fdeb4f715dd6db6e1eee1d1608a35f1687a8e9c7855f0c37cf0e581e2f794a",
+      "evidence_file_sha256": {
+        "ledger/claim-00000001.json": "61d4ab63522ea251ac3d9daef6347665e8c3adc54a7f0bca4b8c8c13ed11a6a0",
+        "raw/train/m2c-s4-v4-train-256120a659ca77312713af923a99982e83c160485e9abfeba0c51bb5aedb5d7e/collection-job-v4.json": "6b5985350e04639e4e694c85f757ea581e5ca36827d7158e78422130ed6b96e7",
+        "raw/train/m2c-s4-v4-train-256120a659ca77312713af923a99982e83c160485e9abfeba0c51bb5aedb5d7e/derived-path-blocked-probe.py": "85d4223ea10137f4ece8b0457f071fce9f8fad4931971837ea52938b01dbc781",
+        "raw/train/m2c-s4-v4-train-256120a659ca77312713af923a99982e83c160485e9abfeba0c51bb5aedb5d7e/stage/console.log": "95ecb53aebfb59e9ced75c67407100876bb1be26cd10c5940addee0207cdb7d3"
+      },
+      "formal_q_b_evaluation": false,
+      "identity": {
+        "failure_seed": 190017,
+        "matched_key": "m2c-s4-v4-train-256120a659ca77312713af923a99982e83c160485e9abfeba0c51bb5aedb5d7e",
+        "scene_seed": 19001,
+        "sdf_sha256": "769d539378a899420e55c172a34c01cfaef19c1a83fe3eded3f7a4ba190c825d",
+        "supervision_sha256": "8c3e054916f041bed44b966e05bd9de7ae9020c4c24c75fecf9ea0dc01d237e6"
+      },
+      "model_rollout": false,
+      "physical_action_executed": false,
+      "privileged_truth_policy_input": false,
+      "probe_launched": false,
+      "teacher_used": false,
+      "training_sample_eligible": false,
+      "training_sample_packaged": false
+    },
+    {
+      "attempt_id": "batch04-03",
+      "classification": "PRE_KIT_STAGE_OUTPUT_PERMISSION_FAILURE",
+      "consumed_at_ns": 1786631026086407605,
+      "consumption_id": "d108a603379c316c1522f5d52af9d43e6159b3f63d3ffdfe15c2f11f4e5a5054",
+      "evidence_file_sha256": {
+        "ledger/claim-00000002.json": "db14eb918ab91d8599ea2340e46868600d15a1e4c9d36e2f4893cd29458c16af",
+        "raw/train/m2c-s4-v4-train-f94e0cdcd01c244ce2f1f1a9174fa8c46bc5a62d3ddffaffe8b70cc50a42e9fe/collection-job-v4.json": "4db0fe29b9e04de5601af82928ed8f6f03e3aff08a88a9d01e330b18926a39bc",
+        "raw/train/m2c-s4-v4-train-f94e0cdcd01c244ce2f1f1a9174fa8c46bc5a62d3ddffaffe8b70cc50a42e9fe/derived-path-blocked-probe.py": "85d4223ea10137f4ece8b0457f071fce9f8fad4931971837ea52938b01dbc781",
+        "raw/train/m2c-s4-v4-train-f94e0cdcd01c244ce2f1f1a9174fa8c46bc5a62d3ddffaffe8b70cc50a42e9fe/stage/console.log": "75d9fb240ab56461e1a63706c0e3c7ef95a9d94d4b1ce73a6bdb9ce5f7ba2662"
+      },
+      "formal_q_b_evaluation": false,
+      "identity": {
+        "failure_seed": 190107,
+        "matched_key": "m2c-s4-v4-train-f94e0cdcd01c244ce2f1f1a9174fa8c46bc5a62d3ddffaffe8b70cc50a42e9fe",
+        "scene_seed": 19010,
+        "sdf_sha256": "e30efb66aef4ff948e48551cb26d03990c14b6bb25813b9a8fd6e8b7c9831cf7",
+        "supervision_sha256": "298365b0d3c08b0cdb1c5a41388c679e64f9d0aca1a20696c2880c2e6e739cf3"
+      },
+      "model_rollout": false,
+      "physical_action_executed": false,
+      "privileged_truth_policy_input": false,
+      "probe_launched": false,
+      "teacher_used": false,
+      "training_sample_eligible": false,
+      "training_sample_packaged": false
+    }
+  ],
+  "audit_implementation": {
+    "path": "scripts/m2c/audit_s4_v4_batch04_permission_failure.py",
+    "sha256": "77ee58cb7a146ffa01691dee86d84b45d788ecab8a8a7f55fa8f968cb312defa"
+  },
+  "batch_preregistration": {
+    "introduced_commit": "2d00f9148eb3bbb96c169e4604835a8bf1aff0c7",
+    "path": "docs/decisions/M2C-S4-V4-TRAIN-COLLECTION-BATCH-04-PREREG.json",
+    "prereg_sha256": "12d7d72068e4281287dcac2c32c6e578530a57639270d019ef4a3bf8efe3d80a",
+    "sha256": "38af63f0b9b5db7ff47b44f04fded448c912fc9a99391be8042c1597e25ebed7"
+  },
+  "evidence_inventory": {
+    "canonical_path_sha256_map_digest": "3e0f98b8892dc22c24439886942ec0e4a4a90cb2b04e34fcde03f42c44f9ca55",
+    "regular_file_count": 12
+  },
+  "formal_q_b_evaluation_executed": false,
+  "observed_counts": {
+    "consumed_unique_train_keys": 3,
+    "physical_actions": 0,
+    "probe_launches": 0,
+    "stage_builder_invocations": 3,
+    "stage_permission_failures": 3,
+    "training_samples_eligible": 0,
+    "training_samples_packaged": 0
+  },
+  "permission_fix": {
+    "batch04_retried": false,
+    "commit": "f4f135aec11dc9131db1c030889ee35560f8f876",
+    "replacement_authorized": false,
+    "worker_path": "scripts/m2c/run_path_blocked_collection_worker.py",
+    "worker_sha256": "a917ef22639210fc749e11675d6293cb415beee86aa5c733daf4a68a3ad2678c"
+  },
+  "privileged_truth_policy_input": false,
+  "pure_model_success_episodes": null,
+  "root_cause": {
+    "classification": "HOST_OUTPUT_DIRECTORY_OWNED_BY_ROOT_MODE_0700",
+    "exact_failure": "M1B_ISAAC_DATASET_FAIL PermissionError: [Errno 13] Permission denied: '/workspace/output/policy_rgbd/rgb'",
+    "frozen_image_runtime_gid": 1234,
+    "frozen_image_runtime_uid": 1234,
+    "frozen_image_runtime_user": "isaac-sim"
+  },
+  "schema_version": "M2CS4V4Batch04InfrastructureFailureAuditV1",
+  "status": "BLOCKED_PRE_KIT_STAGE_OUTPUT_PERMISSION_FAILURE",
+  "teacher_used": false,
+  "training_executed": false
+}
