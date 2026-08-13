@@ -17,7 +17,7 @@ import shlex
 import subprocess
 from typing import Any
 
-from m2c.derive_model_owned_chain_probe import derive_probe_bytes
+from m2c.derive_model_owned_chain_probe import derive_probe_bytes, derive_probe_bytes_v3
 from m2c.s4_scene_family import SCRIPTED_BLOCKER_ENTITY, TARGET_ENTITY
 from m2c.package_path_blocked_collection import (
     DECISION_SOURCE,
@@ -32,11 +32,20 @@ from xh_agent.policy.qrm_lite.m2c_hard_freeze import (
     M2CExperimentAction,
     require_pre_freeze,
 )
+from xh_agent.policy.qrm_lite.path_blocked_supervision_v3 import (
+    load_v3_training_manifest,
+)
 
 
 ISAAC_IMAGE = "nvcr.io/nvidia/isaac-sim:6.0.1"
 TASK_TARGET_PUBLIC_COLOR = "yellow"
 BLOCKER_PUBLIC_COLOR = "red"
+
+
+def _revision(args: argparse.Namespace) -> str:
+    # Programmatic V2 callers predate the CLI revision flag; preserving that
+    # default keeps historical evidence semantics unchanged.
+    return str(getattr(args, "revision", "V2"))
 
 
 def _validate_direct_source(path: Path, root: Path, *, label: str) -> None:
@@ -193,6 +202,14 @@ def probe_command(
         str(source_record["failure_seed"]),
         "--m2c-decision-source",
         DECISION_SOURCE,
+        *(
+            [
+                "--m2c-declared-target-attribute",
+                str(source_record["declared_target_attribute"]),
+            ]
+            if _revision(args) == "V3"
+            else []
+        ),
     ]
 
 
@@ -253,20 +270,43 @@ def prepare_job(args: argparse.Namespace) -> tuple[dict[str, Any], list[str], li
         if not source.is_file():
             raise ValueError(f"{label} is missing: {source}")
 
-    training, _s6, collection, s6 = project_frozen_manifests(
-        args.training_keys,
-        args.s6_keys,
-        args.runtime_registry,
-    )
-    record = frozen_source_record(training, role=args.role, matched_key=args.matched_key)
-    if int(record["scene_seed"]) in {9038, 9057, 9077} or any(
-        key.matched_key == args.matched_key or key.scene_seed == int(record["scene_seed"])
-        for key in s6.keys
-    ):
-        raise ValueError("worker request overlaps V4 or frozen S6")
-    collection_matches = [key for key in collection.keys if key.matched_key == args.matched_key]
-    if len(collection_matches) != 1 or collection_matches[0].collection_role != args.role:
-        raise ValueError("worker key is not exactly once in projected collection manifest")
+    revision = _revision(args)
+    if revision == "V3":
+        if args.role != "TRAIN":
+            raise ValueError("ADR-0021 V3 collection authorizes TRAIN only; SMOKE is excluded")
+        manifest = load_v3_training_manifest(args.training_keys)
+        matches = [item for item in manifest.training_keys if item.matched_key == args.matched_key]
+        if len(matches) != 1:
+            raise ValueError("worker key is not exactly once in frozen V3 TRAIN manifest")
+        record = matches[0].model_dump(mode="json")
+        # Independently load the S6 identities; this is additional to the
+        # manifest's source/exclusion binding.
+        s6_payload = load_json_object(args.s6_keys, label="S6 key manifest")
+        s6_records = s6_payload.get("evaluation_keys", [])
+        if any(
+            isinstance(item, dict)
+            and (
+                item.get("matched_key") == args.matched_key
+                or int(item.get("scene_seed", -1)) == int(record["scene_seed"])
+            )
+            for item in s6_records
+        ) or int(record["scene_seed"]) in {9038, 9057, 9077}:
+            raise ValueError("worker request overlaps V4 or frozen S6")
+    else:
+        training, _s6, collection, s6 = project_frozen_manifests(
+            args.training_keys,
+            args.s6_keys,
+            args.runtime_registry,
+        )
+        record = frozen_source_record(training, role=args.role, matched_key=args.matched_key)
+        if int(record["scene_seed"]) in {9038, 9057, 9077} or any(
+            key.matched_key == args.matched_key or key.scene_seed == int(record["scene_seed"])
+            for key in s6.keys
+        ):
+            raise ValueError("worker request overlaps V4 or frozen S6")
+        collection_matches = [key for key in collection.keys if key.matched_key == args.matched_key]
+        if len(collection_matches) != 1 or collection_matches[0].collection_role != args.role:
+            raise ValueError("worker key is not exactly once in projected collection manifest")
     if sha256_file(args.sdf) != record["sdf_sha256"]:
         raise ValueError("SDF SHA-256 differs from frozen key")
     if sha256_file(args.supervision) != record["supervision_sha256"]:
@@ -283,7 +323,11 @@ def prepare_job(args: argparse.Namespace) -> tuple[dict[str, Any], list[str], li
         raise FileExistsError(f"refusing to overwrite collection job: {job_root}")
     job_root.mkdir(parents=True, exist_ok=False)
     derived = job_root / "derived-path-blocked-probe.py"
-    derived.write_bytes(derive_probe_bytes(args.upstream_v4_probe.read_bytes()))
+    derived.write_bytes(
+        derive_probe_bytes_v3(args.upstream_v4_probe.read_bytes())
+        if revision == "V3"
+        else derive_probe_bytes(args.upstream_v4_probe.read_bytes())
+    )
     derived.chmod(0o555)
     stage_root = job_root / "stage"
     probe_root = job_root / "probe"
@@ -300,7 +344,12 @@ def prepare_job(args: argparse.Namespace) -> tuple[dict[str, Any], list[str], li
         source_record=record,
     )
     job_receipt: dict[str, Any] = {
-        "schema_version": "M2CPathBlockedCollectionJobV2",
+        "schema_version": (
+            "M2CPathBlockedCollectionJobV3" if revision == "V3" else "M2CPathBlockedCollectionJobV2"
+        ),
+        "collection_contract_revision": revision,
+        "candidate_contract_revision": ("PublicTrackCandidateV3" if revision == "V3" else None),
+        "checkpoint_architecture_revision": ("M2C_Q012_V3" if revision == "V3" else "M2C_Q012_V2"),
         "status": "DRY_RUN_NOT_EXECUTED" if args.dry_run else "PREPARED_NOT_EXECUTED",
         "matched_key": args.matched_key,
         "scene_seed": record["scene_seed"],
@@ -329,7 +378,10 @@ def prepare_job(args: argparse.Namespace) -> tuple[dict[str, Any], list[str], li
         "training_executed": False,
         "evaluation_executed": False,
     }
-    _write_new(job_root / "collection-job-v2.json", job_receipt)
+    _write_new(
+        job_root / ("collection-job-v3.json" if revision == "V3" else "collection-job-v2.json"),
+        job_receipt,
+    )
     return job_receipt, stage_cmd, probe_cmd
 
 
@@ -388,6 +440,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         runtime_registry_path=args.runtime_registry,
         derived_probe_path=job_root / "derived-path-blocked-probe.py",
         upstream_v4_probe_path=args.upstream_v4_probe,
+        revision=_revision(args),
     )
     return {
         **receipt,
@@ -409,6 +462,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--output-root", required=True, type=Path)
     parser.add_argument("--packaged-output-root", required=True, type=Path)
     parser.add_argument("--role", choices=("TRAIN", "SMOKE"), required=True)
+    parser.add_argument("--revision", choices=("V2", "V3"), default="V3")
     parser.add_argument("--matched-key", required=True)
     parser.add_argument("--gpu", type=int, default=0)
     parser.add_argument("--image", default=ISAAC_IMAGE)
@@ -419,7 +473,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--training-keys",
         type=Path,
-        default=project / "configs/m2c_s4_training_keys.json",
+        default=project / "configs/m2c_s4_v3_training_keys.json",
     )
     parser.add_argument(
         "--s6-keys",

@@ -734,8 +734,91 @@ def _execute_m2b_public_regrasp(
     return source.encode("utf-8")
 
 
-def derive_probe_file(upstream: Path, output: Path) -> str:
-    derived = derive_probe_bytes(upstream.read_bytes())
+def derive_probe_bytes_v3(upstream: bytes) -> bytes:
+    """Derive the ADR-0021 TRAIN-only probe without reinterpreting V2 bytes."""
+
+    source = derive_probe_bytes(upstream).decode("utf-8")
+    source = _replace_once(
+        source,
+        "from xh_agent.policy.qrm_lite.public_tracks_v2 import canonical_track_slots\n",
+        """from xh_agent.policy.qrm_lite.public_tracks_v3 import (
+    build_public_track_candidates_v3,
+    canonical_candidate_payload_v3,
+    canonical_candidate_sha256_v3,
+)
+""",
+    )
+    source = _replace_once(
+        source,
+        '    parser.add_argument("--m2c-failure-seed", type=int, required=True)\n',
+        """    parser.add_argument("--m2c-failure-seed", type=int, required=True)
+    parser.add_argument("--m2c-declared-target-attribute", required=True)
+""",
+    )
+    source = _replace_once(
+        source,
+        '    slots = canonical_track_slots(public_tracks)\n    observation = {\n        "schema_version": "PathBlockedPublicObservationV2",\n',
+        """    candidates = build_public_track_candidates_v3(
+        public_tracks,
+        declared_target_attribute=ARGS.m2c_declared_target_attribute,
+    )
+    candidate_payload = canonical_candidate_payload_v3(candidates)
+    observation = {
+        "schema_version": "PathBlockedPublicObservationV3",
+""",
+    )
+    source = _replace_once(
+        source,
+        """        "canonical_slots": [
+            track.track_id if track is not None else None
+            for track in slots.tracks
+        ],
+""",
+        """        "declared_target_attribute": ARGS.m2c_declared_target_attribute,
+        "candidate_payload": candidate_payload,
+        "candidate_payload_sha256": canonical_candidate_sha256_v3(candidates),
+        "task_target_track_id_used_for_candidates": False,
+""",
+    )
+    source = _replace_once(
+        source,
+        '    slots = [track for track in observation["canonical_slots"] if track is not None]\n',
+        """    slots = [
+        candidate["track_id"]
+        for candidate in observation["candidate_payload"]["candidates"]
+    ]
+""",
+    )
+    source = _replace_once(
+        source,
+        '        "schema_version": "PathBlockedPhysicalStepEvidenceV2",\n',
+        '        "schema_version": "PathBlockedPhysicalStepEvidenceV3",\n',
+    )
+    source = _replace_once(
+        source,
+        '                "schema_version": "M2CPathBlockedProbeChainV2",\n',
+        """                "schema_version": "M2CPathBlockedProbeChainV3",
+                "declared_target_attribute": ARGS.m2c_declared_target_attribute,
+                "candidate_contract_revision": "PublicTrackCandidateV3",
+                "checkpoint_architecture_revision": "M2C_Q012_V3",
+""",
+    )
+    # ADR-0021 permits only new TRAIN collection.  The V3 worker separately
+    # enforces TRAIN, but the derived executable also fails closed itself.
+    source = source.replace(
+        'parser.add_argument(\n        "--m2c-chain-role", choices=("TRAIN", "SMOKE"), required=True\n    )',
+        'parser.add_argument(\n        "--m2c-chain-role", choices=("TRAIN",), required=True\n    )',
+        1,
+    )
+    return source.encode("utf-8")
+
+
+def derive_probe_file(upstream: Path, output: Path, *, revision: str = "V2") -> str:
+    derived = (
+        derive_probe_bytes_v3(upstream.read_bytes())
+        if revision == "V3"
+        else derive_probe_bytes(upstream.read_bytes())
+    )
     output.write_bytes(derived)
     output.chmod(0o555)
     return sha256_bytes(derived)
@@ -836,10 +919,11 @@ def main() -> int:
     parser.add_argument("--runtime-registry", type=Path)
     parser.add_argument("--collection-manifest-output", type=Path)
     parser.add_argument("--s6-exclusion-output", type=Path)
+    parser.add_argument("--revision", choices=("V2", "V3"), default="V2")
     args = parser.parse_args()
     if args.output.exists():
         raise FileExistsError(f"refusing to overwrite derived probe: {args.output}")
-    probe_sha256 = derive_probe_file(args.upstream, args.output)
+    probe_sha256 = derive_probe_file(args.upstream, args.output, revision=args.revision)
     manifest_paths = (
         args.training_keys,
         args.evaluation_keys,

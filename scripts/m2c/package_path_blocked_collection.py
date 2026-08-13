@@ -17,13 +17,25 @@ from pathlib import Path
 import tempfile
 from typing import Any, Mapping
 
-from m2c.derive_model_owned_chain_probe import build_collection_manifests, derive_probe_bytes
+from m2c.derive_model_owned_chain_probe import (
+    build_collection_manifests,
+    derive_probe_bytes,
+    derive_probe_bytes_v3,
+)
 from xh_agent.policy.qrm_lite.path_blocked_supervision_v2 import (
     FrozenPathBlockedCollectionManifestV2,
     FrozenS6ExclusionManifestV2,
     build_path_blocked_supervised_dataset,
     canonical_manifest_sha256,
     package_probe_payload,
+)
+from xh_agent.policy.qrm_lite.path_blocked_supervision_v3 import (
+    M2CPathBlockedProbeChainV3,
+    V3_MANIFEST_FILE_SHA256,
+    build_path_blocked_supervised_dataset_v3,
+    load_v3_training_manifest,
+    package_probe_chain_v3,
+    recompute_candidate_payload_v3,
 )
 
 
@@ -236,6 +248,7 @@ def package_collection(
     runtime_registry_path: Path,
     derived_probe_path: Path,
     upstream_v4_probe_path: Path,
+    revision: str = "V2",
 ) -> dict[str, Any]:
     """Validate and atomically publish one frozen TRAIN/SMOKE collection."""
 
@@ -252,7 +265,13 @@ def package_collection(
     ):
         if not path.is_file():
             raise FileNotFoundError(f"{label} does not exist: {path}")
-    expected_derived_bytes = derive_probe_bytes(upstream_v4_probe_path.read_bytes())
+    if revision not in {"V2", "V3"}:
+        raise ValueError("collection revision must be V2 or V3")
+    expected_derived_bytes = (
+        derive_probe_bytes_v3(upstream_v4_probe_path.read_bytes())
+        if revision == "V3"
+        else derive_probe_bytes(upstream_v4_probe_path.read_bytes())
+    )
     if derived_probe_path.read_bytes() != expected_derived_bytes:
         raise ValueError("derived probe source does not exactly derive from frozen V4")
     expected_probe_source_sha256 = hashlib.sha256(expected_derived_bytes).hexdigest()
@@ -269,27 +288,45 @@ def package_collection(
     ) or evidence_root_resolved.is_relative_to(output_resolved):
         raise ValueError("packaged output root must be separate from raw evidence root")
 
-    (
-        training_keys,
-        _s6_keys,
-        collection_manifest,
-        s6_manifest,
-    ) = project_frozen_manifests(
-        training_keys_path,
-        s6_keys_path,
-        runtime_registry_path,
-    )
-    source_record = frozen_source_record(
-        training_keys,
-        role=role,
-        matched_key=matched_key,
-    )
-    collection_key = f"{matched_key}-collection"
-    collection_matches = [
-        key for key in collection_manifest.keys if key.collection_key == collection_key
-    ]
-    if len(collection_matches) != 1 or collection_matches[0].collection_role != role:
-        raise ValueError("projected collection manifest does not contain the exact role key")
+    if revision == "V3":
+        if role != "TRAIN":
+            raise ValueError("ADR-0021 V3 packaging accepts TRAIN only")
+        training_manifest_v3 = load_v3_training_manifest(training_keys_path)
+        source_matches = [
+            item for item in training_manifest_v3.training_keys if item.matched_key == matched_key
+        ]
+        if len(source_matches) != 1:
+            raise ValueError("V3 package key is not exactly once in frozen TRAIN manifest")
+        source_record = source_matches[0].model_dump(mode="json")
+        # Reuse the strict frozen S6 projection only; old collection keys are
+        # never accepted as V3 training keys.
+        _old_training, _s6_keys, _old_collection, s6_manifest = project_frozen_manifests(
+            Path(__file__).resolve().parents[2] / "configs/m2c_s4_training_keys.json",
+            s6_keys_path,
+            runtime_registry_path,
+        )
+    else:
+        (
+            training_keys,
+            _s6_keys,
+            collection_manifest,
+            s6_manifest,
+        ) = project_frozen_manifests(
+            training_keys_path,
+            s6_keys_path,
+            runtime_registry_path,
+        )
+        source_record = frozen_source_record(
+            training_keys,
+            role=role,
+            matched_key=matched_key,
+        )
+        collection_key = f"{matched_key}-collection"
+        collection_matches = [
+            key for key in collection_manifest.keys if key.collection_key == collection_key
+        ]
+        if len(collection_matches) != 1 or collection_matches[0].collection_role != role:
+            raise ValueError("projected collection manifest does not contain the exact role key")
     if any(
         key.matched_key == matched_key or key.scene_seed == int(source_record["scene_seed"])
         for key in s6_manifest.keys
@@ -309,34 +346,88 @@ def package_collection(
     if raw_payload.get("actuation_probe_source_sha256") != expected_probe_source_sha256:
         raise ValueError("raw probe executing source SHA-256 differs from derived probe")
 
-    packaged = package_probe_payload(
-        raw_payload,
-        probe_evidence_path=raw_probe_path,
-        evidence_root=evidence_root,
-        source_evidence_uri="dataset://actuation-probe.json",
-        collection_manifest=collection_manifest,
-        collection_manifest_path=None,
-        s6_manifest=s6_manifest,
-        s6_manifest_path=None,
-        runtime_registry_path=runtime_registry_path,
-        expected_sdf_sha256=str(source_record["sdf_sha256"]),
-        expected_supervision_sha256=str(source_record["supervision_sha256"]),
-    )
-    dataset = build_path_blocked_supervised_dataset(
-        [packaged],
-        collection_manifest=collection_manifest,
-        s6_manifest=s6_manifest,
-    )
+    if revision == "V3":
+        if chain.get("schema_version") != "M2CPathBlockedProbeChainV3":
+            raise ValueError("V3 package refuses V2 or unversioned probe evidence")
+        if chain.get("declared_target_attribute") != source_record["declared_target_attribute"]:
+            raise ValueError("probe declared attribute differs from frozen TaskSpec selector")
+        parsed_probe = M2CPathBlockedProbeChainV3.model_validate(chain)
+        public_rgbd = raw_payload.get("m2b_public_rgbd")
+        raw_captures = public_rgbd.get("captures") if isinstance(public_rgbd, Mapping) else None
+        if not isinstance(raw_captures, list):
+            raise ValueError("V3 package requires the top-level public RGB-D capture journal")
+        for step in parsed_probe.steps:
+            expected_payload, expected_hash = recompute_candidate_payload_v3(step.observation)
+            if step.observation.candidate_payload.model_dump(mode="json") != expected_payload:
+                raise ValueError("host recomputation rejects probe V3 candidate slots")
+            if step.observation.candidate_payload_sha256 != expected_hash:
+                raise ValueError("host recomputation rejects probe V3 candidate hash")
+            for kind, uri, expected_asset_hash in (
+                ("RGB", step.observation.rgb_uri, step.observation.rgb_sha256),
+                ("depth", step.observation.depth_uri, step.observation.depth_sha256),
+            ):
+                actual_asset_hash = sha256_file(
+                    (evidence_root_resolved / _dataset_relative_path(uri, label=kind)).resolve(
+                        strict=True
+                    )
+                )
+                if actual_asset_hash != expected_asset_hash:
+                    raise ValueError(f"V3 {kind} asset SHA-256 mismatch")
+            captures = [
+                item
+                for item in raw_captures
+                if isinstance(item, Mapping)
+                and item.get("timestamp_ns") == step.observation.captured_at_ns
+                and item.get("rgb_uri") == step.observation.rgb_uri
+                and item.get("depth_uri") == step.observation.depth_uri
+                and item.get("rgb_sha256") == step.observation.rgb_sha256
+                and item.get("depth_sha256") == step.observation.depth_sha256
+            ]
+            if len(captures) != 1:
+                raise ValueError("V3 observation does not bind exactly one public capture")
+            if canonical_sha256(captures[0]) != step.observation.capture_receipt_sha256:
+                raise ValueError("V3 capture receipt SHA-256 mismatch")
+        packaged = package_probe_chain_v3(
+            chain,
+            training_manifest=training_manifest_v3,
+            s6_manifest=s6_manifest,
+            runtime_registry_sha256=sha256_file(runtime_registry_path),
+            source_evidence_uri="dataset://actuation-probe.json",
+            source_evidence_sha256=sha256_file(raw_probe_path),
+        )
+        dataset = build_path_blocked_supervised_dataset_v3(
+            packaged,
+            training_manifest=training_manifest_v3,
+            s6_manifest=s6_manifest,
+        )
+    else:
+        packaged = package_probe_payload(
+            raw_payload,
+            probe_evidence_path=raw_probe_path,
+            evidence_root=evidence_root,
+            source_evidence_uri="dataset://actuation-probe.json",
+            collection_manifest=collection_manifest,
+            collection_manifest_path=None,
+            s6_manifest=s6_manifest,
+            s6_manifest_path=None,
+            runtime_registry_path=runtime_registry_path,
+            expected_sdf_sha256=str(source_record["sdf_sha256"]),
+            expected_supervision_sha256=str(source_record["supervision_sha256"]),
+        )
+        dataset = build_path_blocked_supervised_dataset(
+            [packaged],
+            collection_manifest=collection_manifest,
+            s6_manifest=s6_manifest,
+        )
     if dataset.status != "PASS":
         raise ValueError(f"supervised dataset did not pass: {dataset.status}")
-    validation = dataset.episode_validations
+    validation = dataset.validation if revision == "V3" else dataset.episode_validations[0]
     if (
-        len(validation) != 1
-        or not validation[0].physical_evidence_valid
-        or validation[0].steps_validated != EXPECTED_STEP_COUNT
+        not validation.physical_evidence_valid
+        or validation.steps_validated != EXPECTED_STEP_COUNT
         or len(dataset.samples) != EXPECTED_STEP_COUNT
-        or (role == "TRAIN" and not validation[0].model_training_eligible)
-        or (role == "SMOKE" and validation[0].model_training_eligible)
+        or (role == "TRAIN" and not validation.model_training_eligible)
+        or (role == "SMOKE" and validation.model_training_eligible)
     ):
         raise ValueError("packaged collection failed the strict eight-step role gate")
 
@@ -365,7 +456,11 @@ def package_collection(
                 destination_asset.parent.mkdir(parents=True, exist_ok=True)
                 if not destination_asset.exists():
                     destination_asset.write_bytes(source.read_bytes())
-                copied_assets[f"{step.decision_index}:{kind}"] = sha256_file(destination_asset)
+                copied_hash = sha256_file(destination_asset)
+                expected_hash = getattr(step.observation, f"{kind}_sha256")
+                if copied_hash != expected_hash:
+                    raise ValueError(f"copied step {step.decision_index} {kind} SHA-256 mismatch")
+                copied_assets[f"{step.decision_index}:{kind}"] = copied_hash
             receipt_payload = step.physical_receipts[0].model_dump(mode="json")
             receipt_relative = _dataset_relative_path(
                 step.physical_receipts[0].receipt_uri,
@@ -381,19 +476,23 @@ def package_collection(
                 "file_sha256": sha256_file(receipt_output),
                 "canonical_receipt_sha256": step.physical_receipts[0].receipt_sha256,
             }
-        packaged_path = temporary / "packaged-physical-chain-v2.json"
-        samples_path = temporary / "supervised-steps-v2.json"
-        collection_manifest_path = temporary / "collection-manifest-v2.json"
+        packaged_path = temporary / f"packaged-physical-chain-{revision.lower()}.json"
+        samples_path = temporary / f"supervised-steps-{revision.lower()}.json"
+        collection_manifest_path = temporary / f"collection-manifest-{revision.lower()}.json"
         s6_manifest_path = temporary / "s6-exclusion-manifest-v2.json"
         _write_json_new(packaged_path, packaged.model_dump(mode="json"))
         _write_json_new(samples_path, dataset.model_dump(mode="json"))
         _write_json_new(
             collection_manifest_path,
-            collection_manifest.model_dump(mode="json"),
+            (
+                training_manifest_v3.model_dump(mode="json")
+                if revision == "V3"
+                else collection_manifest.model_dump(mode="json")
+            ),
         )
         _write_json_new(s6_manifest_path, s6_manifest.model_dump(mode="json"))
         receipt: dict[str, Any] = {
-            "schema_version": "M2CPathBlockedCollectionReceiptV2",
+            "schema_version": f"M2CPathBlockedCollectionReceipt{revision}",
             "status": "PASS_SCRIPTED_PUBLIC_PHYSICAL_SUPERVISION",
             "matched_key": matched_key,
             "scene_seed": source_record["scene_seed"],
@@ -414,7 +513,18 @@ def package_collection(
             "packaged_physical_chain_sha256": sha256_file(packaged_path),
             "supervised_dataset_file_sha256": sha256_file(samples_path),
             "dataset_sha256": dataset.dataset_sha256,
-            "collection_manifest_sha256": canonical_manifest_sha256(collection_manifest),
+            "collection_manifest_sha256": (
+                training_manifest_v3.manifest_sha256
+                if revision == "V3"
+                else canonical_manifest_sha256(collection_manifest)
+            ),
+            "collection_manifest_file_sha256": (
+                V3_MANIFEST_FILE_SHA256 if revision == "V3" else sha256_file(training_keys_path)
+            ),
+            "candidate_contract_revision": ("PublicTrackCandidateV3" if revision == "V3" else None),
+            "checkpoint_architecture_revision": (
+                "M2C_Q012_V3" if revision == "V3" else "M2C_Q012_V2"
+            ),
             "s6_exclusion_manifest_sha256": canonical_manifest_sha256(s6_manifest),
             "frozen_training_key_manifest_file_sha256": sha256_file(training_keys_path),
             "frozen_s6_key_manifest_file_sha256": sha256_file(s6_keys_path),
@@ -431,13 +541,15 @@ def package_collection(
             "training_executed": False,
             "evaluation_executed": False,
         }
-        receipt_path = temporary / "collection-receipt-v2.json"
+        receipt_path = temporary / f"collection-receipt-{revision.lower()}.json"
         _write_json_new(receipt_path, receipt)
         _atomic_publish_directory(temporary, destination)
     return {
         **receipt,
         "output": str(destination),
-        "collection_receipt_sha256": sha256_file(destination / "collection-receipt-v2.json"),
+        "collection_receipt_sha256": sha256_file(
+            destination / f"collection-receipt-{revision.lower()}.json"
+        ),
     }
 
 
@@ -448,13 +560,14 @@ def main() -> int:
     parser.add_argument("--evidence-root", required=True, type=Path)
     parser.add_argument("--output-root", required=True, type=Path)
     parser.add_argument("--role", choices=("TRAIN", "SMOKE"), required=True)
+    parser.add_argument("--revision", choices=("V2", "V3"), default="V3")
     parser.add_argument("--matched-key", required=True)
     parser.add_argument("--derived-probe", required=True, type=Path)
     parser.add_argument("--upstream-v4-probe", required=True, type=Path)
     parser.add_argument(
         "--training-keys",
         type=Path,
-        default=project / "configs/m2c_s4_training_keys.json",
+        default=project / "configs/m2c_s4_v3_training_keys.json",
     )
     parser.add_argument(
         "--s6-keys",
@@ -478,6 +591,7 @@ def main() -> int:
         runtime_registry_path=args.runtime_registry,
         derived_probe_path=args.derived_probe,
         upstream_v4_probe_path=args.upstream_v4_probe,
+        revision=args.revision,
     )
     print(json.dumps(result, sort_keys=True))
     return 0

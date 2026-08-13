@@ -33,6 +33,41 @@ def records_for_role(
     }[role]  # type: ignore[return-value]
 
 
+def records_for_v3_train(
+    training: dict[str, object],
+    *,
+    limit: int | None = None,
+) -> list[dict[str, object]]:
+    """Select the create-only ADR-0021 TRAIN sources; SMOKE is unauthorized."""
+
+    if (
+        training.get("schema_version") != "M2CS4V3TrainingKeyManifestV1"
+        or training.get("status") != "FROZEN_TRAIN_ONLY_BEFORE_ANY_V3_COLLECTION"
+        or training.get("train_only") is not True
+        or training.get("smoke_collection_authorized") is not False
+        or training.get("evaluation_collection_authorized") is not False
+        or training.get("teacher_used") is not False
+        or training.get("privileged_truth_policy_input") is not False
+    ):
+        raise ValueError("V3 source materialization requires the frozen TRAIN-only manifest")
+    records = training.get("training_keys")
+    if not isinstance(records, list) or len(records) != 36:
+        raise ValueError("V3 source manifest must contain exactly 36 TRAIN keys")
+    if any(
+        not isinstance(record, dict)
+        or record.get("role") != "TRAIN"
+        or record.get("split") != "train"
+        or record.get("candidate_contract_revision") != "PublicTrackCandidateV3"
+        or record.get("teacher_used") is not False
+        or record.get("privileged_truth_policy_input") is not False
+        for record in records
+    ):
+        raise ValueError("V3 source manifest contains a non-TRAIN or forbidden key")
+    if limit is not None and not 1 <= limit <= len(records):
+        raise ValueError("V3 materialization limit must be in [1, 36]")
+    return records[:limit] if limit is not None else records  # type: ignore[return-value]
+
+
 def materialize(
     records: list[dict[str, object]],
     *,
@@ -104,12 +139,24 @@ def main() -> int:
         default=PROJECT / "configs/m2c_s6_evaluation_keys.json",
     )
     parser.add_argument("--role", choices=("TRAIN", "SMOKE", "EVALUATION"), required=True)
+    parser.add_argument(
+        "--v3-train-only",
+        action="store_true",
+        help="consume M2CS4V3TrainingKeyManifestV1; role must be TRAIN",
+    )
+    parser.add_argument("--limit", type=int)
     parser.add_argument("--output-root", type=Path, required=True)
     args = parser.parse_args()
     training = json.loads(args.training_manifest.read_text())
     evaluation = json.loads(args.evaluation_manifest.read_text())
+    if args.v3_train_only and args.role != "TRAIN":
+        parser.error("--v3-train-only authorizes role TRAIN only")
     receipt = materialize(
-        records_for_role(training, evaluation, args.role),
+        (
+            records_for_v3_train(training, limit=args.limit)
+            if args.v3_train_only
+            else records_for_role(training, evaluation, args.role)
+        ),
         output_root=args.output_root,
     )
     print(json.dumps({"status": receipt["status"], "scenes": len(receipt["records"])}))
