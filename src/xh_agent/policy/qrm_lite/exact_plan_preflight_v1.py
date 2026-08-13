@@ -386,7 +386,7 @@ class NonActuatingJointSampleV1(FrozenModel):
     estimated_abs_efforts: tuple[float, ...]
     end_effector_world_m: tuple[float, float, float]
     end_effector_world_wxyz: tuple[float, float, float, float]
-    gripper_position_m: float | None = None
+    gripper_position_m: float = Field(ge=0.0)
     ik_applicable: bool
     ik_converged: bool
     ik_position_residual_m: float = Field(ge=0.0)
@@ -403,14 +403,57 @@ class NonActuatingJointSampleV1(FrozenModel):
             *self.end_effector_world_wxyz,
             self.ik_position_residual_m,
             self.ik_orientation_residual_rad,
-            *(() if self.gripper_position_m is None else (self.gripper_position_m,)),
+            self.gripper_position_m,
         )
         if not all(math.isfinite(float(value)) for value in values):
             raise ValueError("joint-path sample contains NaN/Inf")
         norm = math.sqrt(sum(value * value for value in self.end_effector_world_wxyz))
         if not math.isclose(norm, 1.0, rel_tol=0.0, abs_tol=1e-6):
             raise ValueError("joint-path sample orientation is not normalized wxyz")
+        if self.state_sha256 != canonical_non_actuating_state_sha256(self):
+            raise ValueError("joint-path sample state digest differs")
         return self
+
+
+def non_actuating_physical_state_payload(
+    sample: NonActuatingJointSampleV1 | Mapping[str, Any],
+) -> dict[str, Any]:
+    """Canonical physical state shared by adjacent preflight phases.
+
+    Gate metadata (sample index, IK iterations/residuals, and estimated effort)
+    remains covered by the enclosing path digest, but is intentionally not a
+    physical-state identity: applicability and effort estimates can differ
+    when the next command kind changes at the same robot state.
+    """
+
+    if isinstance(sample, BaseModel):
+        value = sample.model_dump(mode="json")
+    else:
+        value = dict(sample)
+    return {
+        "schema_version": "NonActuatingPhysicalStateV1",
+        "joint_positions": value["joint_positions"],
+        "end_effector_world_m": value["end_effector_world_m"],
+        "end_effector_world_wxyz": value["end_effector_world_wxyz"],
+        "gripper_position_m": value.get("gripper_position_m"),
+    }
+
+
+def canonical_non_actuating_state_sha256(
+    sample: NonActuatingJointSampleV1 | Mapping[str, Any],
+) -> str:
+    """Return the canonical digest of one query-only physical state."""
+
+    return canonical_sha256(non_actuating_physical_state_payload(sample))
+
+
+def _same_non_actuating_physical_state(
+    left: NonActuatingJointSampleV1,
+    right: NonActuatingJointSampleV1,
+) -> bool:
+    return left.state_sha256 == right.state_sha256 and non_actuating_physical_state_payload(
+        left
+    ) == non_actuating_physical_state_payload(right)
 
 
 class NonActuatingPhasePathV1(FrozenModel):
@@ -736,9 +779,75 @@ class ExactPlanA3AuditReceiptV1(FrozenModel):
             expected_state = item.path.terminal_state_sha256
             expected_attachment_present = transition.attachment_present_after
             expected_attachment_sha256 = transition.attachment_sha256_after
+        for previous, current in zip(evidence, evidence[1:]):
+            if not _same_non_actuating_physical_state(
+                previous.path.samples[-1],
+                current.path.samples[0],
+            ):
+                raise ValueError("A.3 aggregate evidence broke physical-state continuity")
         if self.receipt_sha256 != _canonical_model_sha256(self, "receipt_sha256"):
             raise ValueError("A.3 audit receipt digest differs")
         return self
+
+
+class HostSignedAppendOnlyA3VerifierReceiptV1(FrozenModel):
+    """Schema reserved for a real host verifier; no producer exists here.
+
+    A Phase-2 implementation must verify this receipt against the separately
+    frozen host signer and append-only audit before it can authorize formal
+    execution.  This non-actuating module neither owns a signing key nor
+    invents such proof.
+    """
+
+    schema_version: Literal["HostSignedAppendOnlyA3VerifierReceiptV1"] = (
+        "HostSignedAppendOnlyA3VerifierReceiptV1"
+    )
+    bound_plan_sha256: str = Field(pattern=SHA256_PATTERN)
+    a3_audit_receipt_sha256: str = Field(pattern=SHA256_PATTERN)
+    run_id: str = Field(min_length=1)
+    session_id: str = Field(min_length=1)
+    challenge_nonce: str = Field(min_length=32)
+    append_only_audit_sha256: str = Field(pattern=SHA256_PATTERN)
+    verifier_key_id: str = Field(min_length=1)
+    signature_algorithm: Literal["ED25519"] = "ED25519"
+    signature_base64: str = Field(min_length=1)
+    verified_against_frozen_allowed_signer: bool
+    append_only_lifecycle_verified: bool
+    all_gate_evidence_precedes_execution_start: bool
+    receipt_sha256: str = Field(pattern=SHA256_PATTERN)
+
+    @model_validator(mode="after")
+    def canonical(self) -> "HostSignedAppendOnlyA3VerifierReceiptV1":
+        if self.receipt_sha256 != _canonical_model_sha256(self, "receipt_sha256"):
+            raise ValueError("host A.3 verifier receipt digest differs")
+        return self
+
+
+def require_formal_a3_execution_authorization(
+    audit_receipt: ExactPlanA3AuditReceiptV1,
+    *,
+    host_verifier_receipt: HostSignedAppendOnlyA3VerifierReceiptV1 | None,
+) -> None:
+    """Always fail closed until a reviewed host-signature verifier is bound."""
+
+    if audit_receipt.formal_execution_eligible:
+        raise ExactPlanPreflightRejected("unreviewed A.3 receipt claimed formal eligibility")
+    if host_verifier_receipt is None:
+        raise ExactPlanPreflightRejected("host-signed append-only A.3 verifier receipt is absent")
+    if (
+        host_verifier_receipt.bound_plan_sha256
+        != audit_receipt.standard_preflight_receipt.bound_plan_sha256
+        or host_verifier_receipt.a3_audit_receipt_sha256 != audit_receipt.receipt_sha256
+        or not host_verifier_receipt.verified_against_frozen_allowed_signer
+        or not host_verifier_receipt.append_only_lifecycle_verified
+        or not host_verifier_receipt.all_gate_evidence_precedes_execution_start
+    ):
+        raise ExactPlanPreflightRejected(
+            "host-signed append-only A.3 verifier receipt is invalid or crossed"
+        )
+    raise ExactPlanPreflightRejected(
+        "host A.3 verifier signature verification is not implemented/bound"
+    )
 
 
 class ExactPlanNonActuatingCallbacksV1(Protocol):
@@ -832,6 +941,23 @@ class ExactPlanPreflightV1:
                 "preflight algorithm/configuration differs from plan source bindings"
             )
 
+    @staticmethod
+    def _validate_phase_allowlist_digests(phase: ExactPlanPhaseContractV1) -> None:
+        wire = phase.phase
+        if (
+            phase.allowed_robot_links_sha256 != canonical_sha256(wire.allowed_robot_contact_paths)
+            or phase.allowed_environment_paths_sha256
+            # ExactExecutionPhaseV2 has no environment-path tuple.  Its exact
+            # representable value is therefore the empty tuple; a later wire
+            # revision must add an explicit tuple before allowing any entry.
+            != canonical_sha256(())
+            or phase.allowed_external_contact_paths_sha256
+            != canonical_sha256(wire.allowed_external_contact_paths)
+        ):
+            raise ExactPlanPreflightRejected(
+                "phase allowlist digest differs from immutable wire tuples"
+            )
+
     def _validate_snapshot(
         self,
         plan: M2CExactPlanPrimitivePlanV1,
@@ -895,10 +1021,11 @@ class ExactPlanPreflightV1:
             or path.gripper_limit_configuration_sha256 != config.gripper_limits.configuration_sha256
             or path.effort_estimator_sha256 != config.joint_limits.effort_estimator_sha256
             or path.query_duration_ns
-            > (
+            > min(
+                phase.timeout_ns,
                 config.gripper_limits.timeout_ns_per_phase
                 if wire.command == "GRIPPER_POSITION"
-                else config.ik.timeout_ns_per_phase
+                else config.ik.timeout_ns_per_phase,
             )
             or len(path.samples) != expected_sample_count
             or tuple(item.sample_index for item in path.samples)
@@ -912,6 +1039,7 @@ class ExactPlanPreflightV1:
         width = len(limits.joint_names)
         cartesian = wire.command == "CARTESIAN_POSE"
         gripper = wire.command == "GRIPPER_POSITION"
+        initial_gripper_position = path.samples[0].gripper_position_m
         for sample in path.samples:
             if (
                 len(sample.joint_positions) != width
@@ -923,11 +1051,8 @@ class ExactPlanPreflightV1:
                 or sample.ik_orientation_residual_rad
                 > (config.ik.maximum_orientation_residual_rad if cartesian else 0.0)
                 or sample.iterations > (config.ik.maximum_iterations_per_sample if cartesian else 0)
-                or (gripper != (sample.gripper_position_m is not None))
             ):
-                raise ExactPlanPreflightRejected(
-                    "IK/gripper sample is missing, inapplicable, or failed"
-                )
+                raise ExactPlanPreflightRejected("IK sample is inapplicable, incomplete, or failed")
             if any(
                 position < lower or position > upper
                 for position, lower, upper in zip(
@@ -954,15 +1079,17 @@ class ExactPlanPreflightV1:
                 )
             ):
                 raise ExactPlanPreflightRejected("workspace gate rejected path")
-            if gripper:
-                assert sample.gripper_position_m is not None
-                gripper_limits = config.gripper_limits
-                if not (
-                    gripper_limits.minimum_position_m
-                    <= sample.gripper_position_m
-                    <= gripper_limits.maximum_position_m
-                ):
-                    raise ExactPlanPreflightRejected("gripper position limit rejected path")
+            gripper_limits = config.gripper_limits
+            if not (
+                gripper_limits.minimum_position_m
+                <= sample.gripper_position_m
+                <= gripper_limits.maximum_position_m
+            ):
+                raise ExactPlanPreflightRejected("gripper position limit rejected path")
+            if not gripper and sample.gripper_position_m != initial_gripper_position:
+                raise ExactPlanPreflightRejected(
+                    "non-gripper phase changes the physical gripper state"
+                )
         if cartesian:
             terminal = path.samples[-1]
             assert wire.goal_position_world_m is not None
@@ -999,7 +1126,6 @@ class ExactPlanPreflightV1:
                 )
         elif gripper:
             terminal_gripper_position = path.samples[-1].gripper_position_m
-            assert terminal_gripper_position is not None
             assert wire.gripper_position_m is not None
             if (
                 abs(terminal_gripper_position - wire.gripper_position_m)
@@ -1021,15 +1147,12 @@ class ExactPlanPreflightV1:
                 )
             ):
                 raise ExactPlanPreflightRejected("joint velocity limit rejected sampled path")
-            if gripper:
-                assert previous.gripper_position_m is not None
-                assert current.gripper_position_m is not None
-                gripper_velocity = (
-                    abs(current.gripper_position_m - previous.gripper_position_m)
-                    * config.gripper_limits.sample_rate_hz
-                )
-                if gripper_velocity > config.gripper_limits.maximum_velocity_m_per_s:
-                    raise ExactPlanPreflightRejected("gripper velocity limit rejected sampled path")
+            gripper_velocity = (
+                abs(current.gripper_position_m - previous.gripper_position_m)
+                * config.gripper_limits.sample_rate_hz
+            )
+            if gripper_velocity > config.gripper_limits.maximum_velocity_m_per_s:
+                raise ExactPlanPreflightRejected("gripper velocity limit rejected sampled path")
 
     def _validate_collision(
         self,
@@ -1048,7 +1171,7 @@ class ExactPlanPreflightV1:
             or collision.path_sha256 != path.path_sha256
             or collision.algorithm_sha256 != config.algorithm_sha256
             or collision.configuration_sha256 != config.configuration_sha256
-            or collision.query_duration_ns > config.timeout_ns_per_phase
+            or collision.query_duration_ns > min(phase.timeout_ns, config.timeout_ns_per_phase)
             or len(collision.segments) != expected_segments
             or tuple(item.segment_index for item in collision.segments)
             != tuple(range(expected_segments))
@@ -1106,7 +1229,7 @@ class ExactPlanPreflightV1:
             or transition.attachment_sha256_before != expected_attachment_sha256
             or transition.algorithm_sha256 != config.algorithm_sha256
             or transition.configuration_sha256 != config.configuration_sha256
-            or transition.query_duration_ns > config.timeout_ns_per_phase
+            or transition.query_duration_ns > min(phase.timeout_ns, config.timeout_ns_per_phase)
         ):
             raise ExactPlanPreflightRejected(
                 "attachment/contact query is incomplete, crossed, or uses the wrong transition"
@@ -1196,6 +1319,7 @@ class ExactPlanPreflightV1:
         total_query_ns = 0
         for phase in plan.phases:
             wire = phase.phase
+            self._validate_phase_allowlist_digests(phase)
             if (
                 phase.command_rate_hz != self.configuration.controller.required_rate_hz
                 or phase.command_dimensions != EXPECTED_COMMAND_DIMENSIONS[wire.command]
@@ -1370,3 +1494,127 @@ class ExactPlanPreflightV1:
         if result.phase_sha256 != phase.phase_sha256:
             raise ExactPlanPreflightRejected("requested phase differs from cached full preflight")
         return result
+
+
+def strict_replay_a3_audit_receipt_v1(
+    plan: M2CExactPlanPrimitivePlanV1,
+    audit_receipt: ExactPlanA3AuditReceiptV1,
+) -> ExactPlanA3AuditReceiptV1:
+    """Independently replay every A.3 predicate over immutable evidence.
+
+    This is an offline integrity verifier, not an authenticity oracle.  A
+    successful return means the supplied canonical samples satisfy the bound
+    limits/gates when replayed; formal execution still requires the separately
+    frozen host signer and append-only lifecycle verifier, which this module
+    deliberately cannot provide.
+    """
+
+    try:
+        plan = M2CExactPlanPrimitivePlanV1.model_validate(plan.model_dump(mode="json"))
+        audit_receipt = ExactPlanA3AuditReceiptV1.model_validate(
+            audit_receipt.model_dump(mode="json")
+        )
+    except ValueError as exc:
+        raise ExactPlanPreflightRejected(
+            "offline replay evidence is not canonical and complete"
+        ) from exc
+
+    configuration_receipt = audit_receipt.configuration_receipt
+    configuration = configuration_receipt.complete_preflight_configuration
+    if (
+        audit_receipt.standard_preflight_receipt.bound_plan_sha256 != plan.bound_plan_sha256
+        or configuration_receipt.bound_plan_sha256 != plan.bound_plan_sha256
+        or audit_receipt.runtime_snapshot.bound_plan_sha256 != plan.bound_plan_sha256
+        or configuration_receipt.plan_source_bindings_sha256
+        != canonical_sha256(plan.source_bindings)
+    ):
+        raise ExactPlanPreflightRejected("offline replay crossed plan/source bindings")
+
+    # Construct only the pure validation surface.  No callback object exists
+    # in replay mode, so replay cannot query or mutate Isaac.
+    replay = object.__new__(ExactPlanPreflightV1)
+    replay.configuration = configuration
+    replay.implementation_sha256 = _read_regular_file_sha256(Path(__file__))
+    replay._validate_plan_source_bindings(plan)
+    replay._validate_snapshot(plan, audit_receipt.runtime_snapshot)
+
+    expected_initial_attachment = {
+        "MOVE": True,
+        "LIFT": True,
+        "PLACE": True,
+        "RELEASE": True,
+        "GRASP": False,
+        "REGRASP": False,
+        "REOBSERVE": False,
+        "REASSOCIATE_TARGET": False,
+    }.get(plan.exact_execution_plan.canonical_skill)
+    if (
+        expected_initial_attachment is None
+        or audit_receipt.runtime_snapshot.active_attachment_present != expected_initial_attachment
+    ):
+        raise ExactPlanPreflightRejected(
+            "offline replay initial attachment differs from canonical skill"
+        )
+
+    evidence = audit_receipt.phase_audit_evidence
+    if len(evidence) != len(plan.phases):
+        raise ExactPlanPreflightRejected("offline replay phase evidence is incomplete")
+    start_state_sha256 = plan.inputs.preplan_state_sha256
+    attachment_present = audit_receipt.runtime_snapshot.active_attachment_present
+    attachment_sha256 = audit_receipt.runtime_snapshot.active_attachment_sha256
+    expected_results: list[ExactPlanPhasePreflightV1] = []
+    total_query_ns = 0
+    previous_terminal: NonActuatingJointSampleV1 | None = None
+    for index, (phase, item) in enumerate(zip(plan.phases, evidence)):
+        wire = phase.phase
+        if wire.phase_index != index:
+            raise ExactPlanPreflightRejected("offline replay phase order differs")
+        replay._validate_phase_allowlist_digests(phase)
+        if (
+            phase.command_rate_hz != configuration.controller.required_rate_hz
+            or phase.command_dimensions != EXPECTED_COMMAND_DIMENSIONS[wire.command]
+        ):
+            raise ExactPlanPreflightRejected("offline replay controller shape/rate differs")
+        path = item.path
+        if previous_terminal is not None and not _same_non_actuating_physical_state(
+            previous_terminal,
+            path.samples[0],
+        ):
+            raise ExactPlanPreflightRejected("offline replay physical-state continuity differs")
+        replay._validate_path(plan, phase, path, start_state_sha256)
+        replay._validate_collision(plan, phase, path, item.swept_collision)
+        attachment_present, attachment_sha256 = replay._validate_attachment_transition(
+            plan,
+            phase,
+            path,
+            item.attachment_transition,
+            expected_attachment_present=attachment_present,
+            expected_attachment_sha256=attachment_sha256,
+        )
+        total_query_ns += (
+            path.query_duration_ns
+            + item.swept_collision.query_duration_ns
+            + item.attachment_transition.query_duration_ns
+        )
+        if total_query_ns > configuration.total_timeout_ns:
+            raise ExactPlanPreflightRejected("offline replay complete timeout exceeded")
+        expected_result = ExactPlanPhasePreflightV1(
+            bound_plan_sha256=plan.bound_plan_sha256,
+            phase_index=wire.phase_index,
+            phase_sha256=phase.phase_sha256,
+            preplan_state_sha256=plan.inputs.preplan_state_sha256,
+            ik_algorithm_sha256=configuration.ik.algorithm_sha256,
+            limits_configuration_sha256=configuration.joint_limits.configuration_sha256,
+            swept_collision_algorithm_sha256=configuration.swept_collision.algorithm_sha256,
+            controller_configuration_sha256=configuration.controller.configuration_sha256,
+            safety_configuration_sha256=configuration.safety.configuration_sha256,
+        )
+        if item.preflight_result != expected_result:
+            raise ExactPlanPreflightRejected("offline replay PASS projection differs")
+        expected_results.append(expected_result)
+        start_state_sha256 = path.terminal_state_sha256
+        previous_terminal = path.samples[-1]
+
+    if tuple(expected_results) != audit_receipt.standard_preflight_receipt.phase_results:
+        raise ExactPlanPreflightRejected("offline replay standard receipt differs")
+    return audit_receipt

@@ -8,12 +8,14 @@ import pytest
 
 from xh_agent.policy.qrm_lite.exact_plan_preflight_v1 import (
     AttachmentPreflightConfigurationV1,
+    canonical_non_actuating_state_sha256,
     ControllerCommandShapeV1,
     ControllerPreflightConfigurationV1,
     ExactPlanPreflightConfigurationV1,
     ExactPlanPreflightRejected,
     ExactPlanPreflightV1,
     GripperLimitConfigurationV1,
+    HostSignedAppendOnlyA3VerifierReceiptV1,
     IKPreflightConfigurationV1,
     IsaacLulaStartupIntrospectionReceiptV1,
     JointLimitConfigurationV1,
@@ -27,6 +29,8 @@ from xh_agent.policy.qrm_lite.exact_plan_preflight_v1 import (
     SweptCollisionConfigurationV1,
     SweptCollisionPairV1,
     SweptCollisionSegmentV1,
+    require_formal_a3_execution_authorization,
+    strict_replay_a3_audit_receipt_v1,
 )
 from xh_agent.policy.qrm_lite.exact_plan_primitive_bundle_v1 import (
     ExactGraspGeometryV1,
@@ -234,7 +238,7 @@ def _contract(phase: ExactExecutionPhaseV2) -> ExactPlanPhaseContractV1:
             else "NONE"
         ),
         convergence_tolerance_m=0.002,
-        timeout_ns=1_000_000,
+        timeout_ns=500_000,
         allowed_robot_links_sha256=canonical_sha256(phase.allowed_robot_contact_paths),
         allowed_environment_paths_sha256=canonical_sha256(()),
         allowed_external_contact_paths_sha256=canonical_sha256(
@@ -253,6 +257,23 @@ def _plan(
     grasp_geometry: ExactGraspGeometryV1 | None = None,
 ) -> M2CExactPlanPrimitivePlanV1:
     phases = phases or (_pose(0, 0.1), _pose(1, 0.12))
+    first_phase = phases[0]
+    preplan_state_sha256 = canonical_non_actuating_state_sha256(
+        {
+            "joint_positions": (0.0, 0.0),
+            "end_effector_world_m": (
+                first_phase.goal_position_world_m
+                if first_phase.goal_position_world_m is not None
+                else (0.1, 0.0, 0.5)
+            ),
+            "end_effector_world_wxyz": (
+                first_phase.orientation_world_wxyz
+                if first_phase.orientation_world_wxyz is not None
+                else (1.0, 0.0, 0.0, 0.0)
+            ),
+            "gripper_position_m": 0.04,
+        }
+    )
     wire = ExactExecutionPlanV2(
         run_id="run",
         session_id="session",
@@ -332,7 +353,7 @@ def _plan(
             runtime_action=wire.runtime_action,
             target_track_id=wire.target_track_id,
             resolved_execution_parameters_sha256=wire.execution_parameters_sha256,
-            preplan_state_sha256="4" * 64,
+            preplan_state_sha256=preplan_state_sha256,
             preplan_state_dimensions=2,
             preplan_state_units="rad",
             preplan_state_timestamp_ns=100,
@@ -362,6 +383,29 @@ def _receipt(model: Any, field: str):
     dumped = model.model_dump(mode="json")
     dumped[field] = canonical_sha256(model.model_dump(mode="json", exclude={field}))
     return type(model).model_validate(dumped)
+
+
+def _rehash_dict(payload: dict[str, Any], field: str) -> None:
+    payload[field] = canonical_sha256(
+        {key: value for key, value in payload.items() if key != field}
+    )
+
+
+def _rehash_a3_phase(
+    receipt: Any,
+    dumped: dict[str, Any],
+    phase_index: int,
+):
+    phase = dumped["phase_audit_evidence"][phase_index]
+    path = phase["path"]
+    _rehash_dict(path, "path_sha256")
+    phase["swept_collision"]["path_sha256"] = path["path_sha256"]
+    _rehash_dict(phase["swept_collision"], "receipt_sha256")
+    phase["attachment_transition"]["path_sha256"] = path["path_sha256"]
+    _rehash_dict(phase["attachment_transition"], "receipt_sha256")
+    _rehash_dict(phase, "evidence_sha256")
+    _rehash_dict(dumped, "receipt_sha256")
+    return type(receipt).model_validate(dumped)
 
 
 def _grasp_plan(
@@ -430,6 +474,10 @@ class _Callbacks:
         self.fail_attachment_phase: int | None = None
         self.attachment_calls: list[int] = []
         self.initial_attachment_override: bool | None = None
+        self.last_terminal_sample: NonActuatingJointSampleV1 | None = None
+        self.path_timeout = False
+        self.collision_timeout = False
+        self.attachment_timeout = False
 
     def snapshot_runtime(self, plan: M2CExactPlanPrimitivePlanV1):
         model = PreflightRuntimeSnapshotV1.model_construct(
@@ -505,8 +553,13 @@ class _Callbacks:
             else 1
         )
         samples = []
+        phase_start = self.last_terminal_sample
         for sample_index in range(sample_count):
-            joint_a = 0.01 * (index * 3 + sample_index)
+            joint_a = (
+                phase_start.joint_positions[0] + 0.01 * sample_index
+                if phase_start is not None
+                else 0.01 * sample_index
+            )
             if self.velocity_violation and index == 0 and sample_index == 1:
                 joint_a = 1.0
             if self.position_violation and index == 0 and sample_index == 1:
@@ -514,19 +567,22 @@ class _Callbacks:
             effort = 11.0 if self.effort_violation and index == 0 else 1.0
             x = (
                 2.0
-                if self.workspace_violation and index == 0
+                if self.workspace_violation and index == 0 and sample_index == 1
                 else float(wire.goal_position_world_m[0])
                 if wire.goal_position_world_m is not None
                 else 0.1
             )
             if self.terminal_pose_mismatch and index == 0 and sample_index == sample_count - 1:
                 x += 0.1
-            gripper_position_m = None
+            start_gripper_position_m = (
+                phase_start.gripper_position_m if phase_start is not None else 0.04
+            )
+            gripper_position_m = start_gripper_position_m
             if wire.command == "GRIPPER_POSITION":
                 assert wire.gripper_position_m is not None
-                gripper_position_m = wire.gripper_position_m - 0.01 * (
-                    sample_count - 1 - sample_index
-                )
+                gripper_position_m = start_gripper_position_m + (
+                    wire.gripper_position_m - start_gripper_position_m
+                ) * (sample_index / (sample_count - 1))
                 if self.gripper_velocity_violation and sample_index == 1:
                     gripper_position_m = 0.08
                 if self.gripper_position_violation and sample_index == 1:
@@ -534,7 +590,7 @@ class _Callbacks:
                 if self.gripper_target_mismatch and sample_index == sample_count - 1:
                     gripper_position_m += 0.005
             cartesian = wire.command == "CARTESIAN_POSE"
-            sample = NonActuatingJointSampleV1(
+            sample = NonActuatingJointSampleV1.model_construct(
                 sample_index=sample_index,
                 joint_positions=(joint_a, 0.0),
                 estimated_abs_efforts=(effort, 1.0),
@@ -546,12 +602,27 @@ class _Callbacks:
                 ik_position_residual_m=0.001 if cartesian else 0.0,
                 ik_orientation_residual_rad=0.001 if cartesian else 0.0,
                 iterations=3 if cartesian else 0,
-                state_sha256=hashlib.sha256(f"{index}:{sample_index}".encode()).hexdigest(),
+                state_sha256="0" * 64,
+            )
+            sample = sample.model_copy(
+                update={"state_sha256": canonical_non_actuating_state_sha256(sample)}
             )
             samples.append(sample)
-        samples[0] = samples[0].model_copy(update={"state_sha256": start_state_sha256})
+        if phase_start is not None:
+            samples[0] = samples[0].model_copy(
+                update={
+                    "joint_positions": phase_start.joint_positions,
+                    "end_effector_world_m": phase_start.end_effector_world_m,
+                    "end_effector_world_wxyz": phase_start.end_effector_world_wxyz,
+                    "gripper_position_m": phase_start.gripper_position_m,
+                }
+            )
+            samples[0] = samples[0].model_copy(
+                update={"state_sha256": canonical_non_actuating_state_sha256(samples[0])}
+            )
         if self.missing_sample and index == 0:
             samples.pop()
+        self.last_terminal_sample = samples[-1]
         model = NonActuatingPhasePathV1.model_construct(
             bound_plan_sha256=plan.bound_plan_sha256,
             phase_index=index,
@@ -566,7 +637,7 @@ class _Callbacks:
             joint_limit_configuration_sha256=(configuration.joint_limits.configuration_sha256),
             gripper_limit_configuration_sha256=(configuration.gripper_limits.configuration_sha256),
             effort_estimator_sha256=configuration.joint_limits.effort_estimator_sha256,
-            query_duration_ns=100,
+            query_duration_ns=(phase.timeout_ns + 1 if self.path_timeout else 100),
             query_only=True,
             articulation_target_writes=0,
             simulation_steps=0,
@@ -611,7 +682,7 @@ class _Callbacks:
             algorithm_sha256=configuration.swept_collision.algorithm_sha256,
             configuration_sha256=configuration.swept_collision.configuration_sha256,
             segments=segments,
-            query_duration_ns=100,
+            query_duration_ns=(phase.timeout_ns + 1 if self.collision_timeout else 100),
             query_only=True,
             articulation_target_writes=0,
             simulation_steps=0,
@@ -686,7 +757,7 @@ class _Callbacks:
             complete=True,
             algorithm_sha256=configuration.attachment.algorithm_sha256,
             configuration_sha256=configuration.attachment.configuration_sha256,
-            query_duration_ns=100,
+            query_duration_ns=(phase.timeout_ns + 1 if self.attachment_timeout else 100),
             query_only=True,
             articulation_target_writes=0,
             simulation_steps=0,
@@ -771,6 +842,189 @@ def test_aggregate_phase_evidence_schema_tamper_is_rejected(tmp_path: Path) -> N
 
     with pytest.raises(ValueError, match="ExactPlanA3PhaseAuditEvidenceV1"):
         type(receipt).model_validate(dumped)
+
+
+def test_sample_state_digest_is_recomputed_from_physical_state() -> None:
+    sample = NonActuatingJointSampleV1.model_construct(
+        sample_index=0,
+        joint_positions=(0.0, 0.0),
+        estimated_abs_efforts=(0.0, 0.0),
+        end_effector_world_m=(0.1, 0.0, 0.5),
+        end_effector_world_wxyz=(1.0, 0.0, 0.0, 0.0),
+        gripper_position_m=0.04,
+        ik_applicable=True,
+        ik_converged=True,
+        ik_position_residual_m=0.0,
+        ik_orientation_residual_rad=0.0,
+        iterations=1,
+        state_sha256="0" * 64,
+    )
+    dumped = sample.model_dump(mode="json")
+    dumped["state_sha256"] = canonical_non_actuating_state_sha256(dumped)
+    canonical = NonActuatingJointSampleV1.model_validate(dumped)
+    tampered = canonical.model_dump(mode="json")
+    tampered["gripper_position_m"] = 0.03
+
+    with pytest.raises(ValueError, match="state digest differs"):
+        NonActuatingJointSampleV1.model_validate(tampered)
+
+
+def test_strict_offline_replay_rejects_rehashed_joint_limit_tamper(
+    tmp_path: Path,
+) -> None:
+    config = _configuration()
+    plan = _plan(tmp_path, configuration=config)
+    receipt = ExactPlanPreflightV1(
+        configuration=config,
+        callbacks=_Callbacks(config),
+    ).preflight_plan(plan)
+    assert strict_replay_a3_audit_receipt_v1(plan, receipt) == receipt
+    dumped = receipt.model_dump(mode="json")
+    sample = dumped["phase_audit_evidence"][0]["path"]["samples"][1]
+    sample["joint_positions"][0] = 3.0
+    sample["state_sha256"] = canonical_non_actuating_state_sha256(sample)
+    tampered = _rehash_a3_phase(receipt, dumped, 0)
+
+    with pytest.raises(ExactPlanPreflightRejected, match="joint position limit"):
+        strict_replay_a3_audit_receipt_v1(plan, tampered)
+
+
+def test_strict_offline_replay_rejects_rehashed_collision_tamper(
+    tmp_path: Path,
+) -> None:
+    config = _configuration()
+    plan = _plan(tmp_path, configuration=config)
+    receipt = ExactPlanPreflightV1(
+        configuration=config,
+        callbacks=_Callbacks(config),
+    ).preflight_plan(plan)
+    dumped = receipt.model_dump(mode="json")
+    dumped["phase_audit_evidence"][0]["swept_collision"]["segments"][0]["collision_pairs"] = [
+        {"path0": "/World/Robot/panda_hand", "path1": "/World/Unsafe/wall"}
+    ]
+    tampered = _rehash_a3_phase(receipt, dumped, 0)
+
+    with pytest.raises(ExactPlanPreflightRejected, match="outside frozen phase allowlists"):
+        strict_replay_a3_audit_receipt_v1(plan, tampered)
+
+
+@pytest.mark.parametrize(
+    ("field", "message"),
+    [
+        ("controller_ready", "controller readiness"),
+        ("collision_world_ready", "safety/contact/attachment monitor"),
+    ],
+)
+def test_strict_offline_replay_rejects_rehashed_runtime_gate_tamper(
+    tmp_path: Path,
+    field: str,
+    message: str,
+) -> None:
+    config = _configuration()
+    plan = _plan(tmp_path, configuration=config)
+    receipt = ExactPlanPreflightV1(
+        configuration=config,
+        callbacks=_Callbacks(config),
+    ).preflight_plan(plan)
+    dumped = receipt.model_dump(mode="json")
+    dumped["runtime_snapshot"][field] = False
+    _rehash_dict(dumped["runtime_snapshot"], "snapshot_sha256")
+    _rehash_dict(dumped, "receipt_sha256")
+    tampered = type(receipt).model_validate(dumped)
+
+    with pytest.raises(ExactPlanPreflightRejected, match=message):
+        strict_replay_a3_audit_receipt_v1(plan, tampered)
+
+
+def test_strict_offline_replay_rejects_rehashed_attachment_transition(
+    tmp_path: Path,
+) -> None:
+    config = _configuration()
+    plan = _plan(tmp_path, configuration=config, phases=(_pose(0, 0.1),))
+    receipt = ExactPlanPreflightV1(
+        configuration=config,
+        callbacks=_Callbacks(config),
+    ).preflight_plan(plan)
+    dumped = receipt.model_dump(mode="json")
+    transition = dumped["phase_audit_evidence"][0]["attachment_transition"]
+    transition["attachment_present_after"] = False
+    transition["attachment_sha256_after"] = None
+    tampered = _rehash_a3_phase(receipt, dumped, 0)
+
+    with pytest.raises(ExactPlanPreflightRejected, match="changes attachment"):
+        strict_replay_a3_audit_receipt_v1(plan, tampered)
+
+
+@pytest.mark.parametrize(
+    "failure",
+    ["path_timeout", "collision_timeout", "attachment_timeout"],
+)
+def test_each_query_is_bounded_by_phase_and_configuration_timeout(
+    tmp_path: Path,
+    failure: str,
+) -> None:
+    config = _configuration()
+    plan = _plan(tmp_path, configuration=config)
+    callbacks = _Callbacks(config)
+    setattr(callbacks, failure, True)
+
+    with pytest.raises(ExactPlanPreflightRejected):
+        ExactPlanPreflightV1(configuration=config, callbacks=callbacks).preflight_plan(plan)
+
+
+def test_allowlist_digests_are_recomputed_before_callbacks(tmp_path: Path) -> None:
+    config = _configuration()
+    plan = _plan(tmp_path, configuration=config)
+    tampered_phase = plan.phases[0].model_copy(update={"allowed_robot_links_sha256": "0" * 64})
+    provisional = plan.model_copy(update={"phases": (tampered_phase, *plan.phases[1:])})
+    dumped = provisional.model_dump(mode="json")
+    dumped["bound_plan_sha256"] = canonical_sha256(provisional.semantic_payload())
+    tampered = M2CExactPlanPrimitivePlanV1.model_validate(dumped)
+    callbacks = _Callbacks(config)
+
+    with pytest.raises(ExactPlanPreflightRejected, match="allowlist digest"):
+        ExactPlanPreflightV1(configuration=config, callbacks=callbacks).preflight_plan(tampered)
+    assert callbacks.path_calls == []
+
+
+def test_formal_execution_requires_real_host_signed_append_only_verifier(
+    tmp_path: Path,
+) -> None:
+    config = _configuration()
+    plan = _plan(tmp_path, configuration=config)
+    receipt = ExactPlanPreflightV1(
+        configuration=config,
+        callbacks=_Callbacks(config),
+    ).preflight_plan(plan)
+    with pytest.raises(ExactPlanPreflightRejected, match="is absent"):
+        require_formal_a3_execution_authorization(
+            receipt,
+            host_verifier_receipt=None,
+        )
+    payload = {
+        "schema_version": "HostSignedAppendOnlyA3VerifierReceiptV1",
+        "bound_plan_sha256": plan.bound_plan_sha256,
+        "a3_audit_receipt_sha256": receipt.receipt_sha256,
+        "run_id": plan.inputs.run_id,
+        "session_id": plan.inputs.session_id,
+        "challenge_nonce": "n" * 32,
+        "append_only_audit_sha256": "a" * 64,
+        "verifier_key_id": "unbound-test-key",
+        "signature_algorithm": "ED25519",
+        "signature_base64": "not-a-real-signature",
+        "verified_against_frozen_allowed_signer": True,
+        "append_only_lifecycle_verified": True,
+        "all_gate_evidence_precedes_execution_start": True,
+    }
+    host_receipt = HostSignedAppendOnlyA3VerifierReceiptV1(
+        **payload,
+        receipt_sha256=canonical_sha256(payload),
+    )
+    with pytest.raises(ExactPlanPreflightRejected, match="not implemented/bound"):
+        require_formal_a3_execution_authorization(
+            receipt,
+            host_verifier_receipt=host_receipt,
+        )
 
 
 def test_gripper_terminal_must_equal_frozen_wire_target(tmp_path: Path) -> None:
