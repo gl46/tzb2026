@@ -76,6 +76,11 @@ AUTHORITATIVE_PRIOR_ATTEMPT_SOURCES = {
         "M2CS4V4Batch04InfrastructureFailureAuditV1",
         3,
     ),
+    "reports/m2c-s4-v4-batch06-snapshot-owner-failure.json": (
+        "415364cb1478f812da42c9aa4c81f47690348ae53ab9d067d0950c3a19ac9d68",
+        "M2CS4V4Batch06SnapshotOwnerFailureAuditV1",
+        1,
+    ),
 }
 CANONICAL_COLLECTION_LEDGER_ROOT = (
     "/var/tmp/xh-data/isaac-industrial/m2c/s4-v4-collection-authorization-ledger-v1"
@@ -845,8 +850,8 @@ def load_committed_collection_prereg(
             raise CollectionAuthorizationError(
                 "prior attempt source has the wrong unique-key count"
             )
-    if len(prior_keys) != 14:
-        raise CollectionAuthorizationError("prior attempt inventory must contain 14 unique keys")
+    if len(prior_keys) != 15:
+        raise CollectionAuthorizationError("prior attempt inventory must contain 15 unique keys")
     expected: list[SelectedV4TrainKeyV1] = []
     selected_sdfs: set[str] = set()
     for item in manifest.training_keys:

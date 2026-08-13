@@ -1,0 +1,85 @@
+{
+  "attempts": [
+    {
+      "attempt_id": "batch06-01",
+      "classification": "PRE_KIT_SOURCE_SNAPSHOT_OWNER_FALSE_REJECTION",
+      "consumed_at_ns": 1786633726817531370,
+      "consumption_id": "32bb1c66eaf79029f65c972e0ce607c8a9a1f40b2370832cf1f25727f0e891d9",
+      "evidence_file_sha256": {
+        "canonical_claim": "60abcca8698bd224ca14946756c12e7232be306433c7d8f275a236f1fb460e20",
+        "derived": "85d4223ea10137f4ece8b0457f071fce9f8fad4931971837ea52938b01dbc781",
+        "job": "7dc4aba70b97197f1a06a1f69ffb7bdad069b4aa8b6c96116554c00d7380cad5",
+        "probe_console": "81f7c00bbb4a6e3c94b8605fb919da0c13d3592562f15adec8526170d3fe3e50",
+        "projected_claim": "60abcca8698bd224ca14946756c12e7232be306433c7d8f275a236f1fb460e20",
+        "stage_console": "b3dc418928e074434e635b13362f5c2f54b539068748c4d687a96af81f4acf94",
+        "stage_metrics": "983d1c7db8b411d94c6072a93a9c6cdbd6ee78c587e1a9f8b8d2d50795c29a1d"
+      },
+      "formal_q_b_evaluation": false,
+      "identity": {
+        "failure_seed": 190127,
+        "matched_key": "m2c-s4-v4-train-ac4e384814330034fbf1caf277188d4f9b6d856f824147b20a2005931a16affc",
+        "scene_seed": 19012,
+        "sdf_sha256": "2bd5a27d6d3a2ff42152024e4fbd9a68749840c153f3fe68e5b27085e58b1615",
+        "supervision_sha256": "9abfd7bdde467761788665ad167b29ff4a6a15ad154443a694f2af9e9baaf9b9"
+      },
+      "model_rollout": false,
+      "physical_action_executed": false,
+      "privileged_truth_policy_input": false,
+      "probe_process_invoked": true,
+      "probe_simulation_app_started": false,
+      "stage_acceptance_passed": true,
+      "stage_simulation_app_started": true,
+      "teacher_used": false,
+      "training_sample_eligible": false,
+      "training_sample_packaged": false
+    }
+  ],
+  "audit_implementation": {
+    "path": "scripts/m2c/audit_s4_v4_batch06_snapshot_owner_failure.py",
+    "sha256": "2f4eef83ba353d9842aa5775ac94e38f7573c12405024d6ce125a7e0f8022a37"
+  },
+  "batch_preregistration": {
+    "introduced_commit": "d4a69834baada1807f1831f5c1866378df732b06",
+    "path": "docs/decisions/M2C-S4-V4-TRAIN-COLLECTION-BATCH-06-PREREG.json",
+    "prereg_sha256": "d226677c3864dd78a729e88ba75eaa6cc2afd3f39323eafc1654802353b2e956",
+    "sha256": "72c022add19327ce886cd4996b69748711eee6f8202a68e120abdb4baefea600"
+  },
+  "evidence_inventory": {
+    "canonical_path_sha256_map_digest": "5ed94e2f1700e1d3f4e71fa07a11fcdcb5c0ccfeeb3b03ab8c456d85b1b5d1a5",
+    "regular_file_count": 35
+  },
+  "fix": {
+    "commit": "e69819bd10c782067b5ad4ca7ae2a201f8e0e201",
+    "failed_key_retried": false,
+    "path": "src/xh_agent/policy/qrm_lite/s4_v4_collection_authorization_v1.py",
+    "sha256": "dd9ff4d9d29f6ca3917b8048e4f506064b304b9ad177e8a7210444a48a7bbb6c"
+  },
+  "formal_q_b_evaluation_executed": false,
+  "observed_counts": {
+    "consumed_unique_train_keys": 1,
+    "physical_actions": 0,
+    "probe_process_invocations": 1,
+    "probe_simulation_app_starts": 0,
+    "stage_acceptance_passes": 1,
+    "stage_simulation_app_starts": 1,
+    "training_samples_eligible": 0,
+    "training_samples_packaged": 0
+  },
+  "privileged_truth_policy_input": false,
+  "pure_model_success_episodes": null,
+  "root_cause": {
+    "classification": "ROOT_OWNED_READ_ONLY_SNAPSHOT_REJECTED_BY_CONTAINER_UID_CHECK",
+    "failure": "xh_agent.policy.qrm_lite.s4_v4_collection_authorization_v1.CollectionAuthorizationError: source snapshot root is not a real directory",
+    "frozen_image_runtime_uid": 1234,
+    "host_snapshot_owner_uid": 0,
+    "snapshot_directory_mode": "0555",
+    "snapshot_file_modes": [
+      "0444",
+      "0555"
+    ]
+  },
+  "schema_version": "M2CS4V4Batch06SnapshotOwnerFailureAuditV1",
+  "status": "BLOCKED_PRE_KIT_SOURCE_SNAPSHOT_OWNER_FALSE_REJECTION",
+  "teacher_used": false,
+  "training_executed": false
+}
