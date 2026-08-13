@@ -17,29 +17,50 @@ def _git(*args: str) -> str:
     return subprocess.check_output(["git", *args], cwd=ROOT, text=True).strip()
 
 
-def _recompute_collection_counts(
-    source_bindings: list[dict[str, str]],
-) -> tuple[int, int]:
-    matched_keys: set[str] = set()
-    raw_v3_eight_step_chains = 0
-    for binding in source_bindings:
-        source = json.loads((ROOT / binding["path"]).read_bytes())
+def _load_binding(binding: dict[str, str]) -> dict[str, object]:
+    path = ROOT / binding["path"]
+    assert _sha256(path) == binding["sha256"]
+    return json.loads(path.read_bytes())
+
+
+def _v3_counts(bindings: list[dict[str, str]]) -> tuple[int, int]:
+    keys: set[str] = set()
+    chains = 0
+    for binding in bindings:
+        source = _load_binding(binding)
         assert source["observed_counts"]["training_samples_eligible"] == 0
         assert source["observed_counts"]["training_samples_packaged"] == 0
         for attempt in source["attempts"]:
-            matched_keys.add(attempt["identity"]["matched_key"])
+            keys.add(attempt["identity"]["matched_key"])
             evidence = attempt["classification_evidence"]
             if evidence.get("chain_schema") == "M2CPathBlockedProbeChainV3":
                 assert evidence["physical_chain_steps"] == 8
-                raw_v3_eight_step_chains += 1
-    return len(matched_keys), raw_v3_eight_step_chains
+                chains += 1
+    return len(keys), chains
 
 
-def test_current_s4_blocker_report_is_bound_and_unmeasured() -> None:
+def _v4_counts(bindings: list[dict[str, str]]) -> tuple[int, int, int, int]:
+    keys: set[str] = set()
+    chains = physical_receipts = safety_violations = 0
+    for binding in bindings:
+        source = _load_binding(binding)
+        counts = source["observed_counts"]
+        assert counts["training_samples_eligible"] == 0
+        assert counts["training_samples_packaged"] == 0
+        for attempt in source["attempts"]:
+            keys.add(attempt["identity"]["matched_key"])
+            if attempt.get("raw_chain_schema") == "M2CPathBlockedRawProbeChainV4":
+                chains += 1
+                physical_receipts += attempt["physical_skill_receipts"]
+                safety_violations += attempt["collision_or_safety_violations"]
+    return len(keys), chains, physical_receipts, safety_violations
+
+
+def test_current_s4_blocker_report_replays_v3_and_v4_collection() -> None:
     report = json.loads(REPORT.read_bytes())
 
-    assert report["schema_version"] == "M2CS4CurrentBlockersV1"
-    assert report["status"] == ("BLOCKED_UNMEASURED_IMPLEMENTATION_AND_EVIDENCE_REQUIRED")
+    assert report["schema_version"] == "M2CS4CurrentBlockersV2"
+    assert report["status"] == "BLOCKED_UNMEASURED_RAW_SCHEMA_AND_A3_STATIC_COLLISION"
     assert report["q_a_state"] == "PASSED"
     assert report["q_b_state"] == "UNMEASURED"
     assert report["pure_model_success_episodes"] is None
@@ -47,15 +68,17 @@ def test_current_s4_blocker_report_is_bound_and_unmeasured() -> None:
     assert report["d2_triggered"] is False
 
     training = report["path_blocked_training"]
-    assert {binding["path"] for binding in training["source_reports"]} == {
-        "reports/m2c-s4-v3-path-blocked-train-collection.json",
-        "reports/m2c-s4-v3-path-blocked-train-collection-batch03.json",
-    }
-    recomputed_unique_keys, recomputed_raw_chains = _recompute_collection_counts(
-        training["source_reports"]
-    )
-    assert training["unique_train_keys_attempted"] == recomputed_unique_keys == 11
-    assert training["raw_v3_eight_step_chains"] == recomputed_raw_chains == 10
+    v3_bindings = training["source_reports"][:2]
+    v4_bindings = training["source_reports"][2:]
+    assert _v3_counts(v3_bindings) == (11, 10)
+    assert _v4_counts(v4_bindings) == (8, 1, 8, 0)
+    assert training["unique_v3_train_keys_attempted"] == 11
+    assert training["unique_v4_train_keys_consumed"] == 8
+    assert training["unique_train_keys_consumed_total"] == 19
+    assert training["raw_v3_eight_step_chains"] == 10
+    assert training["raw_v4_eight_step_chains"] == 1
+    assert training["physical_skill_receipts_v4"] == 8
+    assert training["collision_or_safety_violations_v4"] == 0
     assert training["training_samples_eligible"] == 0
     assert training["training_samples_packaged"] == 0
     assert not any(
@@ -64,47 +87,70 @@ def test_current_s4_blocker_report_is_bound_and_unmeasured() -> None:
             "training_executed",
             "model_rollout_executed",
             "formal_q_b_evaluation_executed",
-            "batch_04_authorized",
+            "active_selected_key_preregistration_present",
+            "collection_execution_authorized",
         )
     )
-    assert training["public_track_reidentification_change_authorized"] is True
-    for binding in training["source_reports"]:
-        path = ROOT / binding["path"]
-        assert _sha256(path) == binding["sha256"]
 
-    report_commit = _git(
-        "log",
-        "-1",
-        "--format=%H",
-        "--",
-        str(REPORT.relative_to(ROOT)),
-    )
+    permission = training["permission_issue_resolution"]
+    assert permission["resolved_for_observed_batch08_path"] is True
+    assert permission["batch04_stage_output_permission_failures"] == 3
+    assert training["batch_04_preregistered_and_consumed"] is True
+    assert training["latest_completed_batch"] == "BATCH_08"
+
+    report_commit = _git("log", "-1", "--format=%H", "--", str(REPORT.relative_to(ROOT)))
     checked_commit = report["checked_head_commit"]
     current_head = _git("rev-parse", "HEAD")
     assert (
         checked_commit == current_head
         or checked_commit in _git("show", "-s", "--format=%P", report_commit).split()
     )
-    assert (
-        subprocess.run(
-            ["git", "merge-base", "--is-ancestor", checked_commit, current_head],
-            cwd=ROOT,
-            check=False,
-        ).returncode
-        == 0
+
+
+def test_raw_detection_capacity_decision_remains_fail_closed() -> None:
+    report = json.loads(REPORT.read_bytes())
+    training = report["path_blocked_training"]
+    pending = training["pending_schema_decision"]
+    request_path = ROOT / pending["path"]
+
+    assert _sha256(request_path) == pending["sha256"]
+    assert pending["status"] == "POST_OUTCOME_NOT_APPROVED"
+    assert pending["selected_option"] is None
+    assert pending["max_raw_public_detections"] is None
+    assert pending["observed_maximum_is_not_numeric_authority"] is True
+    assert pending["offline_replay_authorized"] is False
+    assert pending["new_collection_authorized"] is False
+    assert pending["training_authorized"] is False
+    assert training["raw_detection_capacity_decision_required"] is True
+
+    batch08 = _load_binding(training["source_reports"][-1])
+    raw_attempt = next(
+        attempt for attempt in batch08["attempts"] if attempt.get("raw_probe_sha256")
     )
+    assert raw_attempt["raw_capture_detection_counts"] == [7, 13, 11, 7, 8, 9, 10, 10]
+    assert raw_attempt["raw_chain_final_task_success"] is False
+    assert raw_attempt["host_replay_passed"] is False
+    assert raw_attempt["training_sample_packaged"] is False
 
 
-def test_phase2_remains_fail_closed_after_human_decisions_are_resolved() -> None:
+def test_phase2_query_only_evidence_remains_non_authorizing() -> None:
     report = json.loads(REPORT.read_bytes())
     phase2 = report["phase_2"]
 
-    assert phase2["binding_addendum_generation_authorized"] is False
-    assert phase2["source_binding_application_authorized"] is False
-    assert phase2["exact_plan_preflight_formal_execution_eligible"] is False
-    assert phase2["isaac_lula_production_query_callback_available"] is False
-    assert phase2["frozen_b0_runtime_wrapper_precondition_withdrawn"] is True
-    assert phase2["trusted_host_signing_receipt_precondition_withdrawn"] is True
+    candidate = _load_binding(phase2["candidate_config"])
+    addendum = phase2["candidate_addendum"]
+    assert _sha256(ROOT / addendum["path"]) == addendum["sha256"]
+    comparison = _load_binding(phase2["query_only_comparison_report"])
+
+    assert candidate["status"] == "CONTRACT_SMOKE_ONLY_BLOCKED_UNMEASURED"
+    assert comparison["status"] == "PASS_DEPLOYMENT_QUERY_REPLAY_BLOCKED_STATIC_HOME_COLLISION"
+    assert phase2["query_only_deployment_path_completed"] is True
+    assert phase2["query_only_static_state_preflight_clear"] is False
+    assert phase2["query_only_clear_child_pairs"] == 74
+    assert phase2["query_only_collision_rejections"] == 2
+    assert phase2["query_only_query_failures"] == 0
+    assert phase2["formal_execution_eligible"] is False
+    assert phase2["remaining_rejected_pairs"] == comparison["after"]["remaining_rejected_pairs"]
     assert all(
         phase2[field] is None
         for field in (
@@ -114,89 +160,35 @@ def test_phase2_remains_fail_closed_after_human_decisions_are_resolved() -> None
             "offline_wire_authentication_verifier_binding",
         )
     )
-    source = phase2["source_report"]
-    assert _sha256(ROOT / source["path"]) == source["sha256"]
-    assert {binding["path"] for binding in phase2["source_bindings"]} == {
-        "src/xh_agent/policy/qrm_lite/exact_plan_preflight_v1.py",
-        "src/xh_agent/policy/qrm_lite/isaac_lula_non_actuating_callbacks_v1.py",
-    }
-    for binding in phase2["source_bindings"]:
-        path = ROOT / binding["path"]
-        assert _sha256(path) == binding["sha256"]
-        checked_bytes = subprocess.check_output(
-            ["git", "show", f"{report['checked_head_commit']}:{binding['path']}"],
-            cwd=ROOT,
-        )
-        assert hashlib.sha256(checked_bytes).hexdigest() == binding["sha256"]
-    assert phase2["blockers"][0] == ("SOURCE_AUDIT_PRODUCTION_QUERY_CALLBACK_NOT_AVAILABLE")
-    assert "COMPLETE_CONTINUOUS_SELF_COLLISION_QUERY_NOT_AVAILABLE" not in phase2["blockers"]
-
-    assert {item["topic"] for item in report["human_decisions_resolved"]} == {
-        "PUBLIC_TRACK_REIDENTIFICATION",
-        "ACTIVE_SESSION_B0_FALLBACK",
-        "A3_CONTINUOUS_SELF_COLLISION",
-    }
-    selected = {
-        decision["topic"]: decision["selected_option"]
-        for decision in report["human_decisions_resolved"]
-    }
-    assert selected == {
-        "PUBLIC_TRACK_REIDENTIFICATION": "A",
-        "ACTIVE_SESSION_B0_FALLBACK": "B",
-        "A3_CONTINUOUS_SELF_COLLISION": "A",
-    }
-    for decision in report["human_decisions_resolved"]:
-        assert decision["status"] == "ACCEPTED_BY_ADR_0024"
-        assert _sha256(ROOT / decision["request_path"]) == decision["request_sha256"]
-    directive = report["governing_directive"]
-    assert directive["status"] == "ACCEPTED_HUMAN_DECISION"
-    assert _sha256(ROOT / directive["path"]) == directive["sha256"]
-    assert directive["acceptance_commit"] == "48676d0a59c8adc4e759f9ee21566d97b9a44363"
+    assert "A3_STATIC_HOME_SELF_COLLISION_PREFLIGHT_REJECTED" in phase2["blockers"]
 
 
-def test_v3_collection_authorization_remains_unavailable_without_new_prereg() -> None:
+def test_current_s4_report_preserves_governance_and_s6_freeze() -> None:
     report = json.loads(REPORT.read_bytes())
-    training = report["path_blocked_training"]
-    authorization = training["authorization_contract"]
-    source = ROOT / authorization["path"]
-
-    assert training["batch_04_authorized"] is False
-    assert training["collection_execution_authorized"] is False
-    assert training["active_selected_key_preregistration_present"] is False
-    assert training["host_runtime_launcher_precondition_required"] is False
-    assert authorization["binding_commit"] == report["checked_head_commit"]
-    assert _sha256(source) == authorization["sha256"]
-    checked_bytes = subprocess.check_output(
-        ["git", "show", f"{report['checked_head_commit']}:{authorization['path']}"],
-        cwd=ROOT,
-    )
-    assert hashlib.sha256(checked_bytes).hexdigest() == authorization["sha256"]
-    assert "V3_HOST_RUNTIME_LAUNCHER_BINDING" not in source.read_text()
-    assert not any(
-        json.loads(path.read_bytes()).get("schema_version")
-        == "M2CS4V3SelectedKeyCollectionPreregV1"
-        for path in (ROOT / "configs").glob("*.json")
-    )
-    assert not any(
-        authorization[field]
-        for field in (
-            "canonical_cli_authorized",
-            "programmatic_worker_authorized",
-            "programmatic_packager_authorized",
-        )
-    )
-
-
-def test_current_s4_blocker_report_preserves_project_boundaries() -> None:
-    governance = json.loads(REPORT.read_bytes())["governance"]
+    governance = report["governance"]
     assert governance == {
         "teacher_used": False,
         "privileged_truth_policy_input": False,
         "b0_changed": False,
-        "safety_or_execution_gate_changed": False,
+        "production_safety_or_execution_gate_changed": False,
+        "a3_contract_candidate_changed_under_adr0024": True,
         "existing_evidence_reinterpreted": False,
-        "additional_collection_executed_after_batch_03": False,
+        "additional_collection_executed_after_batch_03": True,
+        "scripted_public_physical_supervision_collection_executed": True,
         "training_executed": False,
-        "physical_smoke_executed": False,
+        "phase2_physical_smoke_executed": False,
         "formal_q_b_evaluation_executed": False,
+    }
+    assert report["verification"]["s6_evaluation_manifest_sha256"] == _sha256(
+        ROOT / "configs/m2c_s6_evaluation_keys.json"
+    )
+    assert report["verification"]["s6_and_entry_focused_tests"] == 33
+    assert report["verification"]["s6_and_entry_focused_tests_passed"] is True
+
+    directive = report["governing_directive"]
+    assert _sha256(ROOT / directive["path"]) == directive["sha256"]
+    assert directive["status"] == "ACCEPTED_HUMAN_DECISION"
+    assert {item["selected_option"] for item in report["human_decisions_resolved"]} == {
+        "A",
+        "B",
     }
