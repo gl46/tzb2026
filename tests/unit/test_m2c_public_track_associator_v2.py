@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+from pathlib import Path
 
 import pytest
 from pydantic import ValidationError
@@ -10,7 +11,9 @@ import xh_agent.perception.public_track_associator_v2 as association
 from xh_agent.perception.public_track_associator_v2 import (
     LastPhysicallyExecutedPublicSkillV2,
     PublicAssociationCaptureV2,
+    PublicAssociationDeploymentBindingV2,
     PublicAssociationProtocolV2,
+    PublicAssociationSessionReceiptV2,
     PublicBBoxOrMaskV2,
     PublicDetectionAttributesV2,
     PublicProprioceptionCaptureBindingV2,
@@ -166,10 +169,56 @@ def journal(
     return PublicProprioceptionJournalBindingV2.model_validate(payload)
 
 
+def deployment() -> PublicAssociationDeploymentBindingV2:
+    payload: dict[str, object] = {
+        "schema_version": "PublicAssociationDeploymentBindingV2",
+        "associator_revision": "PublicTrackAssociatorV2",
+        "associator_implementation_sha256": hashlib.sha256(
+            Path(association.__file__).read_bytes()
+        ).hexdigest(),
+        "capture_source_implementation_sha256": "1" * 64,
+        "protocol": protocol().model_dump(mode="json"),
+        "protocol_sha256": canonical(protocol().model_dump(mode="json")),
+        "assignment_objective": (
+            "MAXIMUM_CARDINALITY_THEN_MINIMUM_TOTAL_QUANTIZED_COST_THEN_LEXICOGRAPHIC_V2"
+        ),
+        "association_gate_m": 0.12,
+        "ambiguity_margin_m": 0.02,
+        "cost_quantum_m": 0.000001,
+        "max_consecutive_unmatched_captures": 2,
+        "max_current_detections": 8,
+    }
+    payload["deployment_binding_sha256"] = canonical(payload)
+    return PublicAssociationDeploymentBindingV2.model_validate(payload)
+
+
+def session_receipt(
+    frozen_journal: PublicProprioceptionJournalBindingV2,
+    frozen_deployment: PublicAssociationDeploymentBindingV2,
+) -> PublicAssociationSessionReceiptV2:
+    payload: dict[str, object] = {
+        "schema_version": "PublicAssociationSessionReceiptV2",
+        "deployment_binding_sha256": frozen_deployment.deployment_binding_sha256,
+        "capture_source_implementation_sha256": "1" * 64,
+        "proprioception_journal_sha256": frozen_journal.journal_sha256,
+        "capture_count": len(frozen_journal.captures),
+        "first_capture_receipt_sha256": frozen_journal.captures[0].capture_receipt_sha256,
+        "final_capture_receipt_sha256": frozen_journal.captures[-1].capture_receipt_sha256,
+    }
+    payload["session_receipt_sha256"] = canonical(payload)
+    return PublicAssociationSessionReceiptV2.model_validate(payload)
+
+
 def associator(captures: list[PublicAssociationCaptureV2]) -> PublicTrackAssociatorV2:
+    frozen_journal = journal(captures)
+    frozen_deployment = deployment()
+    frozen_session = session_receipt(frozen_journal, frozen_deployment)
     return PublicTrackAssociatorV2(
-        expected_protocol=protocol(),
-        expected_journal=journal(captures),
+        expected_deployment=frozen_deployment,
+        expected_deployment_binding_sha256=(frozen_deployment.deployment_binding_sha256),
+        expected_journal=frozen_journal,
+        expected_session_receipt=frozen_session,
+        expected_session_receipt_sha256=frozen_session.session_receipt_sha256,
     )
 
 
@@ -184,6 +233,51 @@ def test_external_protocol_and_complete_journal_are_mandatory() -> None:
     assert tracker.journal_complete
     with pytest.raises(ValueError, match="exceeds frozen journal"):
         tracker.associate(second)
+
+
+def test_deployment_implementation_and_session_have_independent_trust_roots() -> None:
+    first = make_capture(10, [0.0])
+    frozen_journal = journal([first])
+    frozen_deployment = deployment()
+    frozen_session = session_receipt(frozen_journal, frozen_deployment)
+    common = {
+        "expected_deployment": frozen_deployment,
+        "expected_deployment_binding_sha256": (frozen_deployment.deployment_binding_sha256),
+        "expected_journal": frozen_journal,
+        "expected_session_receipt": frozen_session,
+        "expected_session_receipt_sha256": frozen_session.session_receipt_sha256,
+    }
+    with pytest.raises(ValueError, match="external expected digest"):
+        PublicTrackAssociatorV2(**{**common, "expected_deployment_binding_sha256": "0" * 64})
+    changed = frozen_deployment.model_dump(mode="json")
+    changed["associator_implementation_sha256"] = "0" * 64
+    changed["deployment_binding_sha256"] = canonical(
+        {key: value for key, value in changed.items() if key != "deployment_binding_sha256"}
+    )
+    changed_deployment = PublicAssociationDeploymentBindingV2.model_validate(changed)
+    with pytest.raises(ValueError, match="external expected digest"):
+        PublicTrackAssociatorV2(
+            **{
+                **common,
+                "expected_deployment": changed_deployment,
+            }
+        )
+    with pytest.raises(ValueError, match="implementation differs"):
+        PublicTrackAssociatorV2(
+            **{
+                **common,
+                "expected_deployment": changed_deployment,
+                "expected_deployment_binding_sha256": (
+                    changed_deployment.deployment_binding_sha256
+                ),
+                "expected_session_receipt": session_receipt(frozen_journal, changed_deployment),
+                "expected_session_receipt_sha256": session_receipt(
+                    frozen_journal, changed_deployment
+                ).session_receipt_sha256,
+            }
+        )
+    with pytest.raises(ValueError, match="session differs from external"):
+        PublicTrackAssociatorV2(**{**common, "expected_session_receipt_sha256": "0" * 64})
 
 
 def test_external_journal_rejects_self_consistent_but_unbound_schedule() -> None:
@@ -292,6 +386,45 @@ def test_forced_alternative_uses_global_total_cost_not_edge_cost() -> None:
         detections=detections,
         edges=edges,
     ) == {0, 1}
+
+
+def test_ambiguity_rejects_same_prior_reassigned_to_another_detection() -> None:
+    detections = (
+        association._Detection(0, detection(20, 0.0), (0.0, 0.0, 0.5)),
+        association._Detection(1, detection(20, 0.01), (0.01, 0.0, 0.5)),
+    )
+    edges = {
+        ("track-a", 0): association._Edge("track-a", 0, 10_000, "STATIC"),
+        ("track-a", 1): association._Edge("track-a", 1, 15_000, "STATIC"),
+    }
+    chosen = association._solve_assignment(
+        priors=("track-a",),
+        detections=detections,
+        edges=edges,
+    )
+    assert association._ambiguous_detections(
+        assignment=chosen,
+        priors=("track-a",),
+        detections=detections,
+        edges=edges,
+    ) == {0, 1}
+
+
+def test_assignment_requires_maximum_cardinality_before_minimum_cost() -> None:
+    detections = (
+        association._Detection(0, detection(20, 0.0), (0.0, 0.0, 0.5)),
+        association._Detection(1, detection(20, 0.1), (0.1, 0.0, 0.5)),
+    )
+    chosen = association._solve_assignment(
+        priors=("track-a", "track-b"),
+        detections=detections,
+        edges={
+            ("track-a", 0): association._Edge("track-a", 0, 0, "STATIC"),
+            ("track-b", 1): association._Edge("track-b", 1, 120_000, "STATIC"),
+        },
+    )
+    assert chosen.cardinality == 2
+    assert chosen.total_cost_quanta == 120_000
 
 
 def test_two_unmatched_captures_expire_and_never_emit_prior() -> None:

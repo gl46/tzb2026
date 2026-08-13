@@ -9,12 +9,14 @@ Nothing here upgrades or reinterprets V1/V2/V3 evidence.
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 import hashlib
 import io
 import json
 import os
 from pathlib import Path
 import stat
+from types import MappingProxyType
 from typing import Literal, Mapping
 
 import numpy as np
@@ -23,7 +25,8 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 from xh_agent.perception.public_track_associator_v2 import (
     PublicAssociatedTrackV2,
     PublicAssociationCaptureV2,
-    PublicAssociationProtocolV2,
+    PublicAssociationDeploymentBindingV2,
+    PublicAssociationSessionReceiptV2,
     PublicProprioceptionJournalBindingV2,
     PublicTrackAssociatorV2,
 )
@@ -36,7 +39,7 @@ from xh_agent.policy.qrm_lite.public_tracks_v4 import (
 
 
 class _StrictModel(BaseModel):
-    model_config = ConfigDict(extra="forbid", validate_assignment=True)
+    model_config = ConfigDict(extra="forbid", validate_assignment=True, frozen=True)
 
 
 def _canonical_sha256(payload: object) -> str:
@@ -63,7 +66,7 @@ class PublicTrackCandidatePayloadV4(_StrictModel):
     checkpoint_architecture_revision: Literal["M2C_Q012_V4"]
     candidate_count_bound: Literal[8]
     recapture_policy: Literal["NONE"]
-    candidates: list[PublicTrackCandidateEntryV4] = Field(max_length=8)
+    candidates: list[PublicTrackCandidateEntryV4] = Field(min_length=1, max_length=8)
     valid_mask: list[bool] = Field(min_length=8, max_length=8)
     teacher_used: Literal[False]
     privileged_truth_policy_input: Literal[False]
@@ -132,6 +135,38 @@ class PathBlockedPublicObservationV4(_StrictModel):
             or final.capture.capture_receipt_sha256 != self.capture_receipt_sha256
         ):
             raise ValueError("V4 observation does not bind final association capture")
+        if not final.capture.detections or not final.associated_tracks:
+            raise ValueError("V4 final observation has no current public detection")
+        return self
+
+
+class PublicDeclaredTargetAttributeBindingV4(_StrictModel):
+    """Independent public TaskSpec-selector receipt for one declared token.
+
+    This binding contains no target track identity.  The caller must freeze
+    its canonical digest outside the observation before loading any V4
+    candidate payload.
+    """
+
+    schema_version: Literal["PublicDeclaredTargetAttributeBindingV4"] = (
+        "PublicDeclaredTargetAttributeBindingV4"
+    )
+    declared_target_attribute: str = Field(min_length=1, pattern=r"^[a-z0-9_-]+$")
+    public_target_selector: str = Field(
+        min_length=1,
+        pattern=r"^visual_color=[a-z0-9_-]+$",
+    )
+    selector_source_implementation_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    task_spec_public_receipt_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    binding_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+
+    @model_validator(mode="after")
+    def selector_and_token_are_exactly_bound(self) -> "PublicDeclaredTargetAttributeBindingV4":
+        if self.public_target_selector != f"visual_color={self.declared_target_attribute}":
+            raise ValueError("public target selector differs from declared attribute token")
+        expected = _canonical_sha256(self.model_dump(mode="json", exclude={"binding_sha256"}))
+        if self.binding_sha256 != expected:
+            raise ValueError("public declared target attribute binding digest mismatch")
         return self
 
 
@@ -165,12 +200,30 @@ class M2CQ012CheckpointBindingV4(_StrictModel):
         return self
 
 
-class LoadedM2CQ012CheckpointV4(BaseModel):
-    model_config = ConfigDict(arbitrary_types_allowed=True, frozen=True)
+class M2CQ012DeploymentManifestV4(_StrictModel):
+    """Externally frozen checkpoint file and metadata binding."""
 
+    schema_version: Literal["M2CQ012DeploymentManifestV4"] = "M2CQ012DeploymentManifestV4"
+    architecture_revision: Literal["M2C_Q012_V4"] = "M2C_Q012_V4"
+    checkpoint_file_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    checkpoint_binding_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    deployment_manifest_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+
+    @model_validator(mode="after")
+    def manifest_is_self_consistent(self) -> "M2CQ012DeploymentManifestV4":
+        expected = _canonical_sha256(
+            self.model_dump(mode="json", exclude={"deployment_manifest_sha256"})
+        )
+        if self.deployment_manifest_sha256 != expected:
+            raise ValueError("V4 checkpoint deployment manifest digest mismatch")
+        return self
+
+
+@dataclass(frozen=True)
+class LoadedM2CQ012CheckpointV4:
     file_sha256: str
     binding: M2CQ012CheckpointBindingV4
-    tensors: dict[str, np.ndarray]
+    tensors: Mapping[str, np.ndarray]
 
 
 def associated_tracks_to_perception_tracks_v4(
@@ -204,9 +257,27 @@ def recompute_candidate_payload_v4(
 def validate_public_observation_replay_v4(
     observation: PathBlockedPublicObservationV4,
     *,
-    expected_protocol: PublicAssociationProtocolV2,
+    expected_deployment: PublicAssociationDeploymentBindingV2,
+    expected_deployment_binding_sha256: str,
     expected_journal: PublicProprioceptionJournalBindingV2,
+    expected_session_receipt: PublicAssociationSessionReceiptV2,
+    expected_session_receipt_sha256: str,
+    expected_attribute_binding: PublicDeclaredTargetAttributeBindingV4,
+    expected_attribute_binding_sha256: str,
 ) -> PathBlockedPublicObservationV4:
+    expected_deployment = PublicAssociationDeploymentBindingV2.model_validate(
+        expected_deployment.model_dump(mode="json")
+        if isinstance(expected_deployment, PublicAssociationDeploymentBindingV2)
+        else expected_deployment
+    )
+    expected_attribute_binding = PublicDeclaredTargetAttributeBindingV4.model_validate(
+        expected_attribute_binding.model_dump(mode="json")
+        if isinstance(expected_attribute_binding, PublicDeclaredTargetAttributeBindingV4)
+        else expected_attribute_binding
+    )
+    if expected_deployment.deployment_binding_sha256 != expected_deployment_binding_sha256:
+        raise ValueError("public association deployment differs from external expected digest")
+    expected_protocol = expected_deployment.protocol
     if (
         observation.camera_frame != expected_protocol.declared_camera_frame
         or observation.position_units != expected_protocol.metric_units
@@ -214,8 +285,11 @@ def validate_public_observation_replay_v4(
     ):
         raise ValueError("V4 observation differs from external protocol binding")
     associator = PublicTrackAssociatorV2(
-        expected_protocol=expected_protocol,
+        expected_deployment=expected_deployment,
+        expected_deployment_binding_sha256=expected_deployment_binding_sha256,
         expected_journal=expected_journal,
+        expected_session_receipt=expected_session_receipt,
+        expected_session_receipt_sha256=expected_session_receipt_sha256,
     )
     replayed: list[PublicAssociatedTrackV2] = []
     for position, frame in enumerate(observation.association_history):
@@ -227,6 +301,13 @@ def validate_public_observation_replay_v4(
     expected_tracks = associated_tracks_to_perception_tracks_v4(replayed)
     if observation.perception_tracks != expected_tracks:
         raise ValueError("V4 observation tracks differ from association replay")
+    if expected_attribute_binding.binding_sha256 != expected_attribute_binding_sha256:
+        raise ValueError("V4 declared attribute differs from external expected digest")
+    if (
+        observation.declared_target_attribute
+        != expected_attribute_binding.declared_target_attribute
+    ):
+        raise ValueError("V4 declared attribute differs from public TaskSpec receipt")
     expected_payload, expected_sha = recompute_candidate_payload_v4(observation)
     if observation.candidate_payload.model_dump(mode="json") != expected_payload:
         raise ValueError("V4 candidates are not recomputable from replayed public tracks")
@@ -238,8 +319,13 @@ def validate_public_observation_replay_v4(
 def load_public_observation_v4(
     raw: str | bytes | Mapping[str, object],
     *,
-    expected_protocol: PublicAssociationProtocolV2,
+    expected_deployment: PublicAssociationDeploymentBindingV2,
+    expected_deployment_binding_sha256: str,
     expected_journal: PublicProprioceptionJournalBindingV2,
+    expected_session_receipt: PublicAssociationSessionReceiptV2,
+    expected_session_receipt_sha256: str,
+    expected_attribute_binding: PublicDeclaredTargetAttributeBindingV4,
+    expected_attribute_binding_sha256: str,
 ) -> PathBlockedPublicObservationV4:
     if isinstance(raw, (bytes, str)):
         observation = PathBlockedPublicObservationV4.model_validate_json(raw)
@@ -247,8 +333,13 @@ def load_public_observation_v4(
         observation = PathBlockedPublicObservationV4.model_validate(raw)
     return validate_public_observation_replay_v4(
         observation,
-        expected_protocol=expected_protocol,
+        expected_deployment=expected_deployment,
+        expected_deployment_binding_sha256=expected_deployment_binding_sha256,
         expected_journal=expected_journal,
+        expected_session_receipt=expected_session_receipt,
+        expected_session_receipt_sha256=expected_session_receipt_sha256,
+        expected_attribute_binding=expected_attribute_binding,
+        expected_attribute_binding_sha256=expected_attribute_binding_sha256,
     )
 
 
@@ -264,6 +355,20 @@ def canonical_checkpoint_binding_sha256_v4(
     binding: M2CQ012CheckpointBindingV4,
 ) -> str:
     return _canonical_sha256(binding.model_dump(mode="json"))
+
+
+def canonical_attribute_binding_sha256_v4(
+    binding: PublicDeclaredTargetAttributeBindingV4,
+) -> str:
+    return _canonical_sha256(binding.model_dump(mode="json", exclude={"binding_sha256"}))
+
+
+def canonical_checkpoint_deployment_sha256_v4(
+    manifest: M2CQ012DeploymentManifestV4,
+) -> str:
+    return _canonical_sha256(
+        manifest.model_dump(mode="json", exclude={"deployment_manifest_sha256"})
+    )
 
 
 def _read_regular_checkpoint_once(path: Path) -> bytes:
@@ -295,13 +400,21 @@ def _read_regular_checkpoint_once(path: Path) -> bytes:
 def load_m2c_q012_checkpoint_v4(
     path: Path,
     *,
-    expected_file_sha256: str,
+    expected_deployment: M2CQ012DeploymentManifestV4,
+    expected_deployment_manifest_sha256: str,
 ) -> LoadedM2CQ012CheckpointV4:
     """Read once, then validate metadata before exposing any tensor."""
 
+    expected_deployment = M2CQ012DeploymentManifestV4.model_validate(
+        expected_deployment.model_dump(mode="json")
+        if isinstance(expected_deployment, M2CQ012DeploymentManifestV4)
+        else expected_deployment
+    )
+    if expected_deployment.deployment_manifest_sha256 != expected_deployment_manifest_sha256:
+        raise ValueError("V4 checkpoint deployment differs from external expected digest")
     raw = _read_regular_checkpoint_once(path)
     actual_file_sha256 = hashlib.sha256(raw).hexdigest()
-    if actual_file_sha256 != expected_file_sha256:
+    if actual_file_sha256 != expected_deployment.checkpoint_file_sha256:
         raise ValueError("V4 checkpoint file SHA-256 mismatch")
     with np.load(io.BytesIO(raw), allow_pickle=False) as payload:
         if "metadata_json" not in payload.files:
@@ -310,6 +423,11 @@ def load_m2c_q012_checkpoint_v4(
         if metadata_raw.shape != ():
             raise ValueError("V4 checkpoint metadata_json must be scalar")
         binding = load_checkpoint_binding_v4(str(metadata_raw.item()))
+        if (
+            canonical_checkpoint_binding_sha256_v4(binding)
+            != expected_deployment.checkpoint_binding_sha256
+        ):
+            raise ValueError("V4 checkpoint metadata differs from deployment manifest")
         expected_names = {item.name for item in binding.tensors}
         actual_names = set(payload.files) - {"metadata_json"}
         if actual_names != expected_names:
@@ -323,9 +441,11 @@ def load_m2c_q012_checkpoint_v4(
                 raise ValueError(f"V4 checkpoint tensor is invalid: {tensor.name}")
             if hashlib.sha256(value.tobytes(order="C")).hexdigest() != tensor.sha256:
                 raise ValueError(f"V4 checkpoint tensor SHA-256 differs: {tensor.name}")
-            arrays[tensor.name] = value.copy()
+            immutable = value.copy()
+            immutable.setflags(write=False)
+            arrays[tensor.name] = immutable
     return LoadedM2CQ012CheckpointV4(
         file_sha256=actual_file_sha256,
         binding=binding,
-        tensors=arrays,
+        tensors=MappingProxyType(arrays),
     )

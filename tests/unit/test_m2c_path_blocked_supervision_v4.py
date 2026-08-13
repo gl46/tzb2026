@@ -5,14 +5,18 @@ import hashlib
 import json
 import os
 from pathlib import Path
+from types import MappingProxyType
 
 import numpy as np
 import pytest
 from pydantic import ValidationError
 
+import xh_agent.perception.public_track_associator_v2 as association
 from xh_agent.perception.public_track_associator_v2 import (
     PublicAssociationCaptureV2,
+    PublicAssociationDeploymentBindingV2,
     PublicAssociationProtocolV2,
+    PublicAssociationSessionReceiptV2,
     PublicBBoxOrMaskV2,
     PublicDetectionAttributesV2,
     PublicProprioceptionCaptureBindingV2,
@@ -24,14 +28,17 @@ from xh_agent.perception.public_track_associator_v2 import (
 )
 from xh_agent.policy.qrm_lite.path_blocked_supervision_v4 import (
     M2CQ012CheckpointBindingV4,
+    M2CQ012DeploymentManifestV4,
     M2CQ012TensorBindingV4,
     PublicAssociationReplayFrameV4,
+    PublicDeclaredTargetAttributeBindingV4,
     associated_tracks_to_perception_tracks_v4,
     canonical_checkpoint_binding_sha256_v4,
     load_checkpoint_binding_v4,
     load_m2c_q012_checkpoint_v4,
     load_public_observation_v4,
 )
+from xh_agent.policy.qrm_lite.contracts import PerceptionTrackV1
 from xh_agent.policy.qrm_lite.public_tracks_v4 import (
     build_public_track_candidates_v4,
     canonical_candidate_payload_v4,
@@ -168,10 +175,64 @@ def journal(
     return PublicProprioceptionJournalBindingV2.model_validate(payload)
 
 
+def deployment() -> PublicAssociationDeploymentBindingV2:
+    payload: dict[str, object] = {
+        "schema_version": "PublicAssociationDeploymentBindingV2",
+        "associator_revision": "PublicTrackAssociatorV2",
+        "associator_implementation_sha256": hashlib.sha256(
+            Path(association.__file__).read_bytes()
+        ).hexdigest(),
+        "capture_source_implementation_sha256": "1" * 64,
+        "protocol": protocol().model_dump(mode="json"),
+        "protocol_sha256": canonical_sha256(protocol().model_dump(mode="json")),
+        "assignment_objective": (
+            "MAXIMUM_CARDINALITY_THEN_MINIMUM_TOTAL_QUANTIZED_COST_THEN_LEXICOGRAPHIC_V2"
+        ),
+        "association_gate_m": 0.12,
+        "ambiguity_margin_m": 0.02,
+        "cost_quantum_m": 0.000001,
+        "max_consecutive_unmatched_captures": 2,
+        "max_current_detections": 8,
+    }
+    payload["deployment_binding_sha256"] = canonical_sha256(payload)
+    return PublicAssociationDeploymentBindingV2.model_validate(payload)
+
+
+def session_receipt(
+    frozen_journal: PublicProprioceptionJournalBindingV2,
+    frozen_deployment: PublicAssociationDeploymentBindingV2,
+) -> PublicAssociationSessionReceiptV2:
+    payload: dict[str, object] = {
+        "schema_version": "PublicAssociationSessionReceiptV2",
+        "deployment_binding_sha256": frozen_deployment.deployment_binding_sha256,
+        "capture_source_implementation_sha256": "1" * 64,
+        "proprioception_journal_sha256": frozen_journal.journal_sha256,
+        "capture_count": len(frozen_journal.captures),
+        "first_capture_receipt_sha256": frozen_journal.captures[0].capture_receipt_sha256,
+        "final_capture_receipt_sha256": frozen_journal.captures[-1].capture_receipt_sha256,
+    }
+    payload["session_receipt_sha256"] = canonical_sha256(payload)
+    return PublicAssociationSessionReceiptV2.model_validate(payload)
+
+
+def attribute_binding(attribute: str = "yellow") -> PublicDeclaredTargetAttributeBindingV4:
+    payload: dict[str, object] = {
+        "schema_version": "PublicDeclaredTargetAttributeBindingV4",
+        "declared_target_attribute": attribute,
+        "public_target_selector": f"visual_color={attribute}",
+        "selector_source_implementation_sha256": "2" * 64,
+        "task_spec_public_receipt_sha256": "3" * 64,
+    }
+    payload["binding_sha256"] = canonical_sha256(payload)
+    return PublicDeclaredTargetAttributeBindingV4.model_validate(payload)
+
+
 def observation_bundle() -> tuple[
     dict[str, object],
-    PublicAssociationProtocolV2,
+    PublicAssociationDeploymentBindingV2,
     PublicProprioceptionJournalBindingV2,
+    PublicAssociationSessionReceiptV2,
+    PublicDeclaredTargetAttributeBindingV4,
 ]:
     first = capture(100, [(0.0, "yellow", 0.8), (0.3, "blue", 0.95)])
     second = capture(
@@ -180,9 +241,15 @@ def observation_bundle() -> tuple[
         previous=first,
     )
     frozen_journal = journal([first, second])
+    frozen_deployment = deployment()
+    frozen_session = session_receipt(frozen_journal, frozen_deployment)
+    frozen_attribute = attribute_binding()
     associator = PublicTrackAssociatorV2(
-        expected_protocol=protocol(),
+        expected_deployment=frozen_deployment,
+        expected_deployment_binding_sha256=frozen_deployment.deployment_binding_sha256,
         expected_journal=frozen_journal,
+        expected_session_receipt=frozen_session,
+        expected_session_receipt_sha256=frozen_session.session_receipt_sha256,
     )
     frames: list[PublicAssociationReplayFrameV4] = []
     for item in (first, second):
@@ -225,16 +292,37 @@ def observation_bundle() -> tuple[
         "privileged_truth_policy_input": False,
         "task_target_track_id_used_for_candidates": False,
     }
-    return payload, protocol(), frozen_journal
+    return payload, frozen_deployment, frozen_journal, frozen_session, frozen_attribute
 
 
 def load_observation(payload: dict[str, object]):  # noqa: ANN202
-    _, expected_protocol, expected_journal = observation_bundle()
+    _, frozen_deployment, frozen_journal, frozen_session, frozen_attribute = observation_bundle()
     return load_public_observation_v4(
         payload,
-        expected_protocol=expected_protocol,
-        expected_journal=expected_journal,
+        **observation_kwargs(
+            frozen_deployment,
+            frozen_journal,
+            frozen_session,
+            frozen_attribute,
+        ),
     )
+
+
+def observation_kwargs(
+    frozen_deployment: PublicAssociationDeploymentBindingV2,
+    frozen_journal: PublicProprioceptionJournalBindingV2,
+    frozen_session: PublicAssociationSessionReceiptV2,
+    frozen_attribute: PublicDeclaredTargetAttributeBindingV4,
+) -> dict[str, object]:
+    return {
+        "expected_deployment": frozen_deployment,
+        "expected_deployment_binding_sha256": (frozen_deployment.deployment_binding_sha256),
+        "expected_journal": frozen_journal,
+        "expected_session_receipt": frozen_session,
+        "expected_session_receipt_sha256": frozen_session.session_receipt_sha256,
+        "expected_attribute_binding": frozen_attribute,
+        "expected_attribute_binding_sha256": frozen_attribute.binding_sha256,
+    }
 
 
 def tensor_sha256(value: np.ndarray) -> str:
@@ -284,12 +372,28 @@ def save_checkpoint(
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def checkpoint_deployment(
+    *,
+    file_sha256: str,
+    binding: M2CQ012CheckpointBindingV4,
+) -> M2CQ012DeploymentManifestV4:
+    payload: dict[str, object] = {
+        "schema_version": "M2CQ012DeploymentManifestV4",
+        "architecture_revision": "M2C_Q012_V4",
+        "checkpoint_file_sha256": file_sha256,
+        "checkpoint_binding_sha256": canonical_checkpoint_binding_sha256_v4(binding),
+    }
+    payload["deployment_manifest_sha256"] = canonical_sha256(payload)
+    return M2CQ012DeploymentManifestV4.model_validate(payload)
+
+
 def test_v4_observation_replays_complete_history_before_candidates() -> None:
-    payload, expected_protocol, expected_journal = observation_bundle()
+    payload, frozen_deployment, frozen_journal, frozen_session, frozen_attribute = (
+        observation_bundle()
+    )
     observation = load_public_observation_v4(
         payload,
-        expected_protocol=expected_protocol,
-        expected_journal=expected_journal,
+        **observation_kwargs(frozen_deployment, frozen_journal, frozen_session, frozen_attribute),
     )
     assert len(observation.association_history) == 2
     assert observation.public_track_associator_revision == "PublicTrackAssociatorV2"
@@ -300,14 +404,16 @@ def test_v4_observation_replays_complete_history_before_candidates() -> None:
 
 
 def test_v4_observation_rejects_omitted_or_forged_replay_history() -> None:
-    payload, expected_protocol, expected_journal = observation_bundle()
+    payload, frozen_deployment, frozen_journal, frozen_session, frozen_attribute = (
+        observation_bundle()
+    )
+    kwargs = observation_kwargs(frozen_deployment, frozen_journal, frozen_session, frozen_attribute)
     omitted = copy.deepcopy(payload)
     omitted["association_history"] = omitted["association_history"][1:]  # type: ignore[index]
     with pytest.raises(ValueError, match="external proprioception journal"):
         load_public_observation_v4(
             omitted,
-            expected_protocol=expected_protocol,
-            expected_journal=expected_journal,
+            **kwargs,
         )
 
     forged = copy.deepcopy(payload)
@@ -317,13 +423,15 @@ def test_v4_observation_rejects_omitted_or_forged_replay_history() -> None:
     with pytest.raises(ValueError, match="association replay differs at frame 0"):
         load_public_observation_v4(
             forged,
-            expected_protocol=expected_protocol,
-            expected_journal=expected_journal,
+            **kwargs,
         )
 
 
 def test_v4_observation_rejects_external_binding_and_projection_tamper() -> None:
-    payload, expected_protocol, expected_journal = observation_bundle()
+    payload, frozen_deployment, frozen_journal, frozen_session, frozen_attribute = (
+        observation_bundle()
+    )
+    kwargs = observation_kwargs(frozen_deployment, frozen_journal, frozen_session, frozen_attribute)
     changed_transform = [*IDENTITY_TRANSFORM]
     changed_transform[3] = 0.01
     changed_protocol = PublicAssociationProtocolV2(
@@ -334,11 +442,17 @@ def test_v4_observation_rejects_external_binding_and_projection_tamper() -> None
             json.dumps(changed_transform, separators=(",", ":")).encode("ascii")
         ).hexdigest(),
     )
-    with pytest.raises(ValueError, match="external protocol binding"):
+    changed_raw = frozen_deployment.model_dump(mode="json")
+    changed_raw["protocol"] = changed_protocol.model_dump(mode="json")
+    changed_raw["protocol_sha256"] = canonical_sha256(changed_raw["protocol"])
+    changed_raw["deployment_binding_sha256"] = canonical_sha256(
+        {key: value for key, value in changed_raw.items() if key != "deployment_binding_sha256"}
+    )
+    changed_deployment = PublicAssociationDeploymentBindingV2.model_validate(changed_raw)
+    with pytest.raises(ValueError, match="external expected digest"):
         load_public_observation_v4(
             payload,
-            expected_protocol=changed_protocol,
-            expected_journal=expected_journal,
+            **{**kwargs, "expected_deployment": changed_deployment},
         )
 
     tampered = copy.deepcopy(payload)
@@ -346,8 +460,7 @@ def test_v4_observation_rejects_external_binding_and_projection_tamper() -> None
     with pytest.raises(ValueError, match="tracks differ from association replay"):
         load_public_observation_v4(
             tampered,
-            expected_protocol=expected_protocol,
-            expected_journal=expected_journal,
+            **kwargs,
         )
 
     tampered = copy.deepcopy(payload)
@@ -355,8 +468,7 @@ def test_v4_observation_rejects_external_binding_and_projection_tamper() -> None
     with pytest.raises(ValueError, match="not recomputable"):
         load_public_observation_v4(
             tampered,
-            expected_protocol=expected_protocol,
-            expected_journal=expected_journal,
+            **kwargs,
         )
 
 
@@ -377,7 +489,9 @@ def test_v4_observation_rejects_cross_revision_and_forbidden_flags(
     path: tuple[str, ...],
     bad_value: object,
 ) -> None:
-    payload, expected_protocol, expected_journal = observation_bundle()
+    payload, frozen_deployment, frozen_journal, frozen_session, frozen_attribute = (
+        observation_bundle()
+    )
     target = payload
     for key in path[:-1]:
         target = target[key]  # type: ignore[index,assignment]
@@ -385,20 +499,55 @@ def test_v4_observation_rejects_cross_revision_and_forbidden_flags(
     with pytest.raises(ValidationError):
         load_public_observation_v4(
             payload,
-            expected_protocol=expected_protocol,
-            expected_journal=expected_journal,
+            **observation_kwargs(
+                frozen_deployment, frozen_journal, frozen_session, frozen_attribute
+            ),
         )
 
 
 def test_v4_observation_forbids_identity_truth_and_extra_fields() -> None:
-    payload, expected_protocol, expected_journal = observation_bundle()
+    payload, frozen_deployment, frozen_journal, frozen_session, frozen_attribute = (
+        observation_bundle()
+    )
     payload["task_target_track_id"] = "track-secret"
     with pytest.raises(ValidationError, match="Extra inputs are not permitted"):
         load_public_observation_v4(
             payload,
-            expected_protocol=expected_protocol,
-            expected_journal=expected_journal,
+            **observation_kwargs(
+                frozen_deployment, frozen_journal, frozen_session, frozen_attribute
+            ),
         )
+
+
+def test_v4_observation_requires_independently_frozen_attribute_and_nonempty_final() -> None:
+    payload, frozen_deployment, frozen_journal, frozen_session, frozen_attribute = (
+        observation_bundle()
+    )
+    kwargs = observation_kwargs(frozen_deployment, frozen_journal, frozen_session, frozen_attribute)
+    tampered = copy.deepcopy(payload)
+    tampered["declared_target_attribute"] = "blue"
+    candidates = build_public_track_candidates_v4(
+        [
+            PerceptionTrackV1.model_validate(item)
+            for item in tampered["perception_tracks"]  # type: ignore[union-attr]
+        ],
+        declared_target_attribute="blue",
+    )
+    tampered["candidate_payload"] = canonical_candidate_payload_v4(candidates)
+    tampered["candidate_payload_sha256"] = canonical_candidate_sha256_v4(candidates)
+    with pytest.raises(ValueError, match="public TaskSpec receipt"):
+        load_public_observation_v4(tampered, **kwargs)
+
+    with pytest.raises(ValueError, match="external expected digest"):
+        load_public_observation_v4(
+            payload,
+            **{**kwargs, "expected_attribute_binding_sha256": "0" * 64},
+        )
+
+    empty = copy.deepcopy(payload)
+    empty["association_history"][-1]["capture"]["detections"] = []  # type: ignore[index]
+    with pytest.raises((ValidationError, ValueError)):
+        load_public_observation_v4(empty, **kwargs)
 
 
 def test_checkpoint_loader_binds_file_metadata_inventory_and_tensors(tmp_path: Path) -> None:
@@ -409,11 +558,58 @@ def test_checkpoint_loader_binds_file_metadata_inventory_and_tensors(tmp_path: P
     binding = checkpoint_binding(arrays)
     path = tmp_path / "checkpoint.npz"
     file_sha256 = save_checkpoint(path, arrays, binding)
-    loaded = load_m2c_q012_checkpoint_v4(path, expected_file_sha256=file_sha256)
+    frozen_deployment = checkpoint_deployment(file_sha256=file_sha256, binding=binding)
+    loaded = load_m2c_q012_checkpoint_v4(
+        path,
+        expected_deployment=frozen_deployment,
+        expected_deployment_manifest_sha256=(frozen_deployment.deployment_manifest_sha256),
+    )
     assert loaded.binding == binding
     assert loaded.file_sha256 == file_sha256
     assert np.array_equal(loaded.tensors["encoder_weight"], arrays["encoder_weight"])
+    assert isinstance(loaded.tensors, MappingProxyType)
+    with pytest.raises(ValueError, match="read-only"):
+        loaded.tensors["encoder_weight"][0, 0] = 9.0
+    with pytest.raises(TypeError):
+        loaded.tensors["new"] = np.asarray([1.0])  # type: ignore[index]
     assert len(canonical_checkpoint_binding_sha256_v4(binding)) == 64
+
+    substituted = checkpoint_deployment(file_sha256=file_sha256, binding=binding)
+    with pytest.raises(ValueError, match="external expected digest"):
+        load_m2c_q012_checkpoint_v4(
+            path,
+            expected_deployment=substituted,
+            expected_deployment_manifest_sha256="0" * 64,
+        )
+
+
+def test_checkpoint_deployment_rejects_self_consistent_metadata_substitution(
+    tmp_path: Path,
+) -> None:
+    arrays = {"pointer_bias": np.asarray([0.0] * 9, dtype=np.float32)}
+    original_binding = checkpoint_binding(arrays)
+    path = tmp_path / "checkpoint.npz"
+    file_sha256 = save_checkpoint(path, arrays, original_binding)
+    frozen_deployment = checkpoint_deployment(
+        file_sha256=file_sha256,
+        binding=original_binding,
+    )
+
+    substituted_arrays = {"pointer_bias": np.asarray([1.0] * 9, dtype=np.float32)}
+    substituted_binding = checkpoint_binding(substituted_arrays)
+    substituted_path = tmp_path / "substituted.npz"
+    save_checkpoint(substituted_path, substituted_arrays, substituted_binding)
+    substituted_file_sha = hashlib.sha256(substituted_path.read_bytes()).hexdigest()
+    substituted_manifest = checkpoint_deployment(
+        file_sha256=substituted_file_sha,
+        binding=substituted_binding,
+    )
+    with pytest.raises(ValueError, match="external expected digest"):
+        load_m2c_q012_checkpoint_v4(
+            substituted_path,
+            expected_deployment=substituted_manifest,
+            expected_deployment_manifest_sha256=(frozen_deployment.deployment_manifest_sha256),
+        )
 
 
 def test_checkpoint_file_hash_is_checked_before_npz_parse(
@@ -430,8 +626,17 @@ def test_checkpoint_file_hash_is_checked_before_npz_parse(
         raise AssertionError("np.load must not run before the external file digest passes")
 
     monkeypatch.setattr(np, "load", forbidden_load)
+    dummy_binding = checkpoint_binding({"pointer_bias": np.asarray([0.0] * 9, dtype=np.float32)})
+    frozen_deployment = checkpoint_deployment(
+        file_sha256="0" * 64,
+        binding=dummy_binding,
+    )
     with pytest.raises(ValueError, match="file SHA-256 mismatch"):
-        load_m2c_q012_checkpoint_v4(path, expected_file_sha256="0" * 64)
+        load_m2c_q012_checkpoint_v4(
+            path,
+            expected_deployment=frozen_deployment,
+            expected_deployment_manifest_sha256=(frozen_deployment.deployment_manifest_sha256),
+        )
     assert not called
 
 
@@ -443,8 +648,13 @@ def test_checkpoint_metadata_and_tensor_tamper_fail_closed(tmp_path: Path) -> No
     tampered_arrays["pointer_bias"][0] = 1.0
     path = tmp_path / "tensor-tamper.npz"
     file_sha256 = save_checkpoint(path, tampered_arrays, binding)
+    frozen_deployment = checkpoint_deployment(file_sha256=file_sha256, binding=binding)
     with pytest.raises(ValueError, match="tensor SHA-256 differs"):
-        load_m2c_q012_checkpoint_v4(path, expected_file_sha256=file_sha256)
+        load_m2c_q012_checkpoint_v4(
+            path,
+            expected_deployment=frozen_deployment,
+            expected_deployment_manifest_sha256=frozen_deployment.deployment_manifest_sha256,
+        )
 
     path = tmp_path / "inventory-tamper.npz"
     file_sha256 = save_checkpoint(
@@ -452,16 +662,26 @@ def test_checkpoint_metadata_and_tensor_tamper_fail_closed(tmp_path: Path) -> No
         {**arrays, "unexpected": np.asarray([1.0], dtype=np.float32)},
         binding,
     )
+    frozen_deployment = checkpoint_deployment(file_sha256=file_sha256, binding=binding)
     with pytest.raises(ValueError, match="inventory differs"):
-        load_m2c_q012_checkpoint_v4(path, expected_file_sha256=file_sha256)
+        load_m2c_q012_checkpoint_v4(
+            path,
+            expected_deployment=frozen_deployment,
+            expected_deployment_manifest_sha256=frozen_deployment.deployment_manifest_sha256,
+        )
 
     raw = binding.model_dump(mode="json")
     raw["metadata_sha256"] = "f" * 64
     path = tmp_path / "metadata-tamper.npz"
     np.savez(path, metadata_json=np.asarray(json.dumps(raw)), **arrays)
     file_sha256 = hashlib.sha256(path.read_bytes()).hexdigest()
+    frozen_deployment = checkpoint_deployment(file_sha256=file_sha256, binding=binding)
     with pytest.raises(ValidationError, match="metadata digest mismatch"):
-        load_m2c_q012_checkpoint_v4(path, expected_file_sha256=file_sha256)
+        load_m2c_q012_checkpoint_v4(
+            path,
+            expected_deployment=frozen_deployment,
+            expected_deployment_manifest_sha256=frozen_deployment.deployment_manifest_sha256,
+        )
 
 
 def test_checkpoint_guard_rejects_cross_revision_symlink_and_hardlink(tmp_path: Path) -> None:
@@ -487,11 +707,20 @@ def test_checkpoint_guard_rejects_cross_revision_symlink_and_hardlink(tmp_path: 
     binding = checkpoint_binding(arrays)
     original = tmp_path / "checkpoint.npz"
     file_sha256 = save_checkpoint(original, arrays, binding)
+    frozen_deployment = checkpoint_deployment(file_sha256=file_sha256, binding=binding)
     symlink = tmp_path / "symlink.npz"
     symlink.symlink_to(original)
     with pytest.raises(OSError):
-        load_m2c_q012_checkpoint_v4(symlink, expected_file_sha256=file_sha256)
+        load_m2c_q012_checkpoint_v4(
+            symlink,
+            expected_deployment=frozen_deployment,
+            expected_deployment_manifest_sha256=frozen_deployment.deployment_manifest_sha256,
+        )
     hardlink = tmp_path / "hardlink.npz"
     os.link(original, hardlink)
     with pytest.raises(ValueError, match="single-link regular file"):
-        load_m2c_q012_checkpoint_v4(hardlink, expected_file_sha256=file_sha256)
+        load_m2c_q012_checkpoint_v4(
+            hardlink,
+            expected_deployment=frozen_deployment,
+            expected_deployment_manifest_sha256=frozen_deployment.deployment_manifest_sha256,
+        )

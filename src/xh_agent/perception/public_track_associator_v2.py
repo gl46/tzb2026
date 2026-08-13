@@ -17,6 +17,9 @@ from dataclasses import dataclass
 import hashlib
 import json
 import math
+import os
+from pathlib import Path
+import stat
 import threading
 from typing import Literal, Sequence
 
@@ -30,6 +33,9 @@ PUBLIC_TRACK_COST_QUANTUM_M = 0.000001
 PUBLIC_TRACK_MAX_CONSECUTIVE_UNMATCHED_CAPTURES = 2
 PUBLIC_TRACK_MAX_CURRENT_DETECTIONS = 8
 PUBLIC_TRACK_HAND_CARRY_SKILLS = frozenset({"GRASP", "LIFT", "MOVE", "REGRASP"})
+PUBLIC_TRACK_ASSIGNMENT_OBJECTIVE = (
+    "MAXIMUM_CARDINALITY_THEN_MINIMUM_TOTAL_QUANTIZED_COST_THEN_LEXICOGRAPHIC_V2"
+)
 
 _COST_QUANTA_PER_METRE = 1_000_000
 _ASSOCIATION_GATE_QUANTA = 120_000
@@ -110,6 +116,47 @@ class PublicAssociationProtocolV2(_StrictModel):
         return self
 
 
+class PublicAssociationDeploymentBindingV2(_StrictModel):
+    """Externally frozen implementation, protocol, and algorithm contract.
+
+    ``deployment_binding_sha256`` is checked again against an independently
+    supplied expected digest by ``PublicTrackAssociatorV2``.  The nested
+    protocol therefore cannot be replaced together with a caller-authored
+    journal, and the associator source on disk must match the deployment
+    manifest before any capture is consumed.
+    """
+
+    schema_version: Literal["PublicAssociationDeploymentBindingV2"] = (
+        "PublicAssociationDeploymentBindingV2"
+    )
+    associator_revision: Literal["PublicTrackAssociatorV2"] = PUBLIC_TRACK_ASSOCIATOR_REVISION
+    associator_implementation_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    capture_source_implementation_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    protocol: PublicAssociationProtocolV2
+    protocol_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    assignment_objective: Literal[
+        "MAXIMUM_CARDINALITY_THEN_MINIMUM_TOTAL_QUANTIZED_COST_THEN_LEXICOGRAPHIC_V2"
+    ] = PUBLIC_TRACK_ASSIGNMENT_OBJECTIVE
+    association_gate_m: Literal[0.12] = PUBLIC_TRACK_ASSOCIATION_GATE_M
+    ambiguity_margin_m: Literal[0.02] = PUBLIC_TRACK_AMBIGUITY_MARGIN_M
+    cost_quantum_m: Literal[0.000001] = PUBLIC_TRACK_COST_QUANTUM_M
+    max_consecutive_unmatched_captures: Literal[2] = PUBLIC_TRACK_MAX_CONSECUTIVE_UNMATCHED_CAPTURES
+    max_current_detections: Literal[8] = PUBLIC_TRACK_MAX_CURRENT_DETECTIONS
+    deployment_binding_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+
+    @model_validator(mode="after")
+    def deployment_is_self_consistent(self) -> "PublicAssociationDeploymentBindingV2":
+        protocol_sha256 = _canonical_sha256(self.protocol.model_dump(mode="json"))
+        if self.protocol_sha256 != protocol_sha256:
+            raise ValueError("public association deployment protocol digest mismatch")
+        expected = _canonical_sha256(
+            self.model_dump(mode="json", exclude={"deployment_binding_sha256"})
+        )
+        if self.deployment_binding_sha256 != expected:
+            raise ValueError("public association deployment binding digest mismatch")
+        return self
+
+
 class PublicRobotProprioceptionV2(_StrictModel):
     """One public, time-aligned robot proprioception sample."""
 
@@ -151,6 +198,56 @@ def _canonical_sha256(payload: object) -> str:
             allow_nan=False,
         ).encode("utf-8")
     ).hexdigest()
+
+
+def _read_implementation_sha256(path: Path) -> str:
+    """Hash one immutable regular-file snapshot without following symlinks."""
+
+    flags = os.O_RDONLY | getattr(os, "O_CLOEXEC", 0) | getattr(os, "O_NOFOLLOW", 0)
+    descriptor = os.open(path, flags)
+    try:
+        before = os.fstat(descriptor)
+        if not stat.S_ISREG(before.st_mode):
+            raise ValueError("public association implementation must be a regular file")
+        digest = hashlib.sha256()
+        while True:
+            chunk = os.read(descriptor, 1024 * 1024)
+            if not chunk:
+                break
+            digest.update(chunk)
+        after = os.fstat(descriptor)
+        if (before.st_dev, before.st_ino, before.st_size, before.st_mtime_ns) != (
+            after.st_dev,
+            after.st_ino,
+            after.st_size,
+            after.st_mtime_ns,
+        ):
+            raise ValueError("public association implementation changed while being read")
+        return digest.hexdigest()
+    finally:
+        os.close(descriptor)
+
+
+def public_track_associator_implementation_sha256_v2() -> str:
+    """Return the running V2 source digest for an external manifest builder."""
+
+    return _read_implementation_sha256(Path(__file__))
+
+
+def canonical_deployment_binding_sha256_v2(
+    binding: PublicAssociationDeploymentBindingV2,
+) -> str:
+    """Return the canonical digest that an external deployment must freeze."""
+
+    return _canonical_sha256(binding.model_dump(mode="json", exclude={"deployment_binding_sha256"}))
+
+
+def canonical_session_receipt_sha256_v2(
+    receipt: PublicAssociationSessionReceiptV2,
+) -> str:
+    """Return the canonical digest that the independent host must freeze."""
+
+    return _canonical_sha256(receipt.model_dump(mode="json", exclude={"session_receipt_sha256"}))
 
 
 class PublicProprioceptionIntervalV2(_StrictModel):
@@ -233,6 +330,34 @@ class PublicProprioceptionJournalBindingV2(_StrictModel):
         expected = _canonical_sha256(self.model_dump(mode="json", exclude={"journal_sha256"}))
         if self.journal_sha256 != expected:
             raise ValueError("public proprioception journal digest mismatch")
+        return self
+
+
+class PublicAssociationSessionReceiptV2(_StrictModel):
+    """Independent host receipt binding one capture session to deployment.
+
+    Receipt fields are validation-only.  They are never passed to edge
+    construction, hypothesis eligibility, assignment, or ambiguity logic.
+    """
+
+    schema_version: Literal["PublicAssociationSessionReceiptV2"] = (
+        "PublicAssociationSessionReceiptV2"
+    )
+    deployment_binding_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    capture_source_implementation_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    proprioception_journal_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    capture_count: int = Field(ge=1)
+    first_capture_receipt_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    final_capture_receipt_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    session_receipt_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+
+    @model_validator(mode="after")
+    def session_receipt_is_bound(self) -> "PublicAssociationSessionReceiptV2":
+        expected = _canonical_sha256(
+            self.model_dump(mode="json", exclude={"session_receipt_sha256"})
+        )
+        if self.session_receipt_sha256 != expected:
+            raise ValueError("public association session receipt digest mismatch")
         return self
 
 
@@ -355,32 +480,69 @@ class _Assignment:
         return len(self.edges)
 
 
-@dataclass(frozen=True)
-class _ForcedIdentityAssignment:
-    """Best assignment under one required detection/prior identity."""
-
-    assignment: _Assignment
-    forced_edge: _Edge
-
-
 class PublicTrackAssociatorV2:
     """Deterministic ADR-0024 public association state machine."""
 
     def __init__(
         self,
         *,
-        expected_protocol: PublicAssociationProtocolV2,
+        expected_deployment: PublicAssociationDeploymentBindingV2,
+        expected_deployment_binding_sha256: str,
         expected_journal: PublicProprioceptionJournalBindingV2,
+        expected_session_receipt: PublicAssociationSessionReceiptV2,
+        expected_session_receipt_sha256: str,
     ) -> None:
-        if not isinstance(expected_protocol, PublicAssociationProtocolV2):
-            expected_protocol = PublicAssociationProtocolV2.model_validate(expected_protocol)
-        if not isinstance(expected_journal, PublicProprioceptionJournalBindingV2):
-            expected_journal = PublicProprioceptionJournalBindingV2.model_validate(expected_journal)
-        protocol_sha256 = _canonical_sha256(expected_protocol.model_dump(mode="json"))
-        if expected_journal.protocol_sha256 != protocol_sha256:
+        expected_deployment = PublicAssociationDeploymentBindingV2.model_validate(
+            expected_deployment.model_dump(mode="json")
+            if isinstance(expected_deployment, PublicAssociationDeploymentBindingV2)
+            else expected_deployment
+        )
+        expected_journal = PublicProprioceptionJournalBindingV2.model_validate(
+            expected_journal.model_dump(mode="json")
+            if isinstance(expected_journal, PublicProprioceptionJournalBindingV2)
+            else expected_journal
+        )
+        expected_session_receipt = PublicAssociationSessionReceiptV2.model_validate(
+            expected_session_receipt.model_dump(mode="json")
+            if isinstance(expected_session_receipt, PublicAssociationSessionReceiptV2)
+            else expected_session_receipt
+        )
+        if expected_deployment.deployment_binding_sha256 != expected_deployment_binding_sha256:
+            raise ValueError("public association deployment differs from external expected digest")
+        actual_implementation_sha256 = public_track_associator_implementation_sha256_v2()
+        if expected_deployment.associator_implementation_sha256 != actual_implementation_sha256:
+            raise ValueError("public association implementation differs from deployment")
+        if expected_journal.protocol_sha256 != expected_deployment.protocol_sha256:
             raise ValueError("public proprioception journal binds a different protocol")
+        if (
+            expected_journal.source_implementation_sha256
+            != expected_deployment.capture_source_implementation_sha256
+        ):
+            raise ValueError("public capture source implementation differs from deployment")
+        if expected_session_receipt.session_receipt_sha256 != expected_session_receipt_sha256:
+            raise ValueError("public association session differs from external expected digest")
+        first_capture = expected_journal.captures[0]
+        final_capture = expected_journal.captures[-1]
+        expected_session_fields = (
+            expected_deployment.deployment_binding_sha256,
+            expected_deployment.capture_source_implementation_sha256,
+            expected_journal.journal_sha256,
+            len(expected_journal.captures),
+            first_capture.capture_receipt_sha256,
+            final_capture.capture_receipt_sha256,
+        )
+        actual_session_fields = (
+            expected_session_receipt.deployment_binding_sha256,
+            expected_session_receipt.capture_source_implementation_sha256,
+            expected_session_receipt.proprioception_journal_sha256,
+            expected_session_receipt.capture_count,
+            expected_session_receipt.first_capture_receipt_sha256,
+            expected_session_receipt.final_capture_receipt_sha256,
+        )
+        if actual_session_fields != expected_session_fields:
+            raise ValueError("public association session receipt does not bind frozen journal")
         self._tracks: dict[str, _TrackState] = {}
-        self._protocol = expected_protocol
+        self._protocol = expected_deployment.protocol
         self._expected_journal = expected_journal
         self._journal_position = 0
         self._last_capture_timestamp_ns: int | None = None
@@ -741,36 +903,6 @@ def _solve_assignment(
     return visit(0, 0)
 
 
-def _solve_assignment_forced_identity(
-    *,
-    priors: tuple[str, ...],
-    detections: Sequence[_Detection],
-    edges: dict[tuple[str, int], _Edge],
-    prior_track_id: str,
-    detection_index: int,
-) -> _ForcedIdentityAssignment | None:
-    forced_edge = edges.get((prior_track_id, detection_index))
-    if forced_edge is None:
-        return None
-    remaining_priors = tuple(item for item in priors if item != prior_track_id)
-    remaining_detections = tuple(item for item in detections if item.input_index != detection_index)
-    suffix = _solve_assignment(
-        priors=remaining_priors,
-        detections=remaining_detections,
-        edges=edges,
-    )
-    combined_edges = (forced_edge, *suffix.edges)
-    by_index = {item.input_index: item for item in detections}
-    return _ForcedIdentityAssignment(
-        forced_edge=forced_edge,
-        assignment=_Assignment(
-            edges=combined_edges,
-            total_cost_quanta=forced_edge.cost_quanta + suffix.total_cost_quanta,
-            lexicographic_key=_assignment_key(combined_edges, by_index),
-        ),
-    )
-
-
 def _ambiguous_detections(
     *,
     assignment: _Assignment,
@@ -780,34 +912,41 @@ def _ambiguous_detections(
 ) -> set[int]:
     """Reject any global identity alternative within the frozen margin.
 
-    For each selected detection, every other admissible prior identity is
-    forced in turn and the best remaining one-to-one assignment is solved.  A
-    same-cardinality alternative whose global total cost differs by less than
-    0.02 m makes that detection ambiguous.  The comparison is per detection as
-    ADR-0024 specifies, but both the selected and forced-alternative values are
-    complete global assignment costs.
+    Each selected identity edge is forbidden in turn and the complete global
+    assignment is solved again.  This enumerates both ways an identity can
+    change: another prior can take the same detection, or the same prior can
+    take another detection.  If the best same-cardinality alternative is
+    within the strict 0.02 m margin, every detection whose assigned identity
+    changes between the two global assignments is implicated and receives no
+    prior ID.
     """
 
     ambiguous: set[int] = set()
     for selected in assignment.edges:
-        for alternative_prior in priors:
-            if alternative_prior == selected.prior_track_id:
-                continue
-            forced = _solve_assignment_forced_identity(
-                priors=priors,
-                detections=detections,
-                edges=edges,
-                prior_track_id=alternative_prior,
-                detection_index=selected.detection_index,
+        alternative = _solve_assignment(
+            priors=priors,
+            detections=detections,
+            edges=edges,
+            forbidden_edge=(selected.prior_track_id, selected.detection_index),
+        )
+        if alternative.cardinality != assignment.cardinality:
+            continue
+        if alternative.total_cost_quanta - assignment.total_cost_quanta >= _AMBIGUITY_MARGIN_QUANTA:
+            continue
+        selected_identity_by_detection = {
+            edge.detection_index: edge.prior_track_id for edge in assignment.edges
+        }
+        alternative_identity_by_detection = {
+            edge.detection_index: edge.prior_track_id for edge in alternative.edges
+        }
+        ambiguous.update(
+            detection_index
+            for detection_index in (
+                selected_identity_by_detection.keys() | alternative_identity_by_detection.keys()
             )
-            if forced is None or forced.assignment.cardinality != assignment.cardinality:
-                continue
-            if (
-                abs(forced.assignment.total_cost_quanta - assignment.total_cost_quanta)
-                < _AMBIGUITY_MARGIN_QUANTA
-            ):
-                ambiguous.add(selected.detection_index)
-                break
+            if selected_identity_by_detection.get(detection_index)
+            != alternative_identity_by_detection.get(detection_index)
+        )
     return ambiguous
 
 
