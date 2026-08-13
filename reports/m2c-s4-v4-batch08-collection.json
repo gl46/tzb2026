@@ -1,0 +1,205 @@
+{
+  "attempts": [
+    {
+      "attempt_id": "batch08-01",
+      "classification": "ISAAC_STAGE_PROCESS_EXIT_139",
+      "consumed_at_ns": 1786636013938318951,
+      "consumption_id": "d51a05828aa7f8c4d61bc23c416efb5006584a3e2d303c2fbaf9cb433b66b8a0",
+      "evidence_file_sha256": {
+        "canonical_claim": "b51c0d242e019321011d4df173762ad6eb24d43f4685fce664ecda1999e6a47f",
+        "derived_probe": "5ce42344184749b3fff627b3a25cd161ef215b155fe7aaafe63b2b30710bc8d1",
+        "job": "49e13d05b1695ac594bd1d53f6871368334bf278a0f9247b7d9b974ddef24dd2",
+        "projected_claim": "b51c0d242e019321011d4df173762ad6eb24d43f4685fce664ecda1999e6a47f",
+        "stage_console": "59ff729267935f254687e443751e60196810ac0959084ec50b4ae2dc161f9352",
+        "stage_usdc": "7830cd417784105682cb5ce965f9b8de020ef1a94fb484851cbae7080ac5e638"
+      },
+      "formal_q_b_evaluation": false,
+      "identity": {
+        "failure_seed": 190647,
+        "matched_key": "m2c-s4-v4-train-abda09520069d449719cef056bbb648b20e6bb2e7ae3d5acb80423a2d65af4d3",
+        "scene_seed": 19064,
+        "sdf_sha256": "e30efb66aef4ff948e48551cb26d03990c14b6bb25813b9a8fd6e8b7c9831cf7",
+        "supervision_sha256": "066f134157dbda1309e39a0aa1a5dd2a7e30cb2de12409d6ff0f01f2c3edcab6"
+      },
+      "model_rollout": false,
+      "physical_action_executed": false,
+      "privileged_truth_policy_input": false,
+      "probe_process_invoked": false,
+      "stage_acceptance_passed": false,
+      "stage_simulation_app_started": true,
+      "teacher_used": false,
+      "training_sample_eligible": false,
+      "training_sample_packaged": false
+    },
+    {
+      "attempt_id": "batch08-02",
+      "classification": "ISAAC_STAGE_PROCESS_EXIT_139",
+      "consumed_at_ns": 1786636173476280042,
+      "consumption_id": "14dbe05fa47b08b5ff968f379c08fec90737d1f9e7c534931a60f24c0158495a",
+      "evidence_file_sha256": {
+        "canonical_claim": "5f47f05001ad1693e806113cf1909059fbfc35a38cf3cf262a57d9b6618ade42",
+        "derived_probe": "5ce42344184749b3fff627b3a25cd161ef215b155fe7aaafe63b2b30710bc8d1",
+        "job": "13cdea9cfea027ba173282d4298cc6105e50deff719de5bd7458fcb96039cb4c",
+        "projected_claim": "5f47f05001ad1693e806113cf1909059fbfc35a38cf3cf262a57d9b6618ade42",
+        "stage_console": "7bdd256cb9da3403af1dabfe3aea60f284e410bdbeea07e9eab12af497d42d26",
+        "stage_usdc": "4c54f1c5e00244aa98742962aa30aea2b2e1bbcdf309e1f9d3d6c07d2235958f"
+      },
+      "formal_q_b_evaluation": false,
+      "identity": {
+        "failure_seed": 190707,
+        "matched_key": "m2c-s4-v4-train-59b8bc5b2bbdb28eb5d2ac6ac7726066f0196f8f281e5a7eb9260a51c0c5cda8",
+        "scene_seed": 19070,
+        "sdf_sha256": "2bd5a27d6d3a2ff42152024e4fbd9a68749840c153f3fe68e5b27085e58b1615",
+        "supervision_sha256": "fa05b772b1411d1639bf7826401b4e7a409eda7dba27ce9ec3231495618ba1ef"
+      },
+      "model_rollout": false,
+      "physical_action_executed": false,
+      "privileged_truth_policy_input": false,
+      "probe_process_invoked": false,
+      "stage_acceptance_passed": false,
+      "stage_simulation_app_started": true,
+      "teacher_used": false,
+      "training_sample_eligible": false,
+      "training_sample_packaged": false
+    },
+    {
+      "attempt_id": "batch08-03",
+      "classification": "RAW_CHAIN_COMPLETE_HOST_SCHEMA_CAPACITY_REJECTED",
+      "collision_or_safety_violations": 0,
+      "consumed_at_ns": 1786636344509798563,
+      "consumption_id": "873fc044b5dbe6d6449cb1228b7e6f58fbddcc4821fb35c54a889e17f11338e6",
+      "evidence_file_sha256": {
+        "canonical_claim": "f7b58e46355cc217a3160d692d1657daa8049ff5fe216fe0d48eb6bf6fca26ce",
+        "derived_probe": "5ce42344184749b3fff627b3a25cd161ef215b155fe7aaafe63b2b30710bc8d1",
+        "job": "e5bad86168c8f59351b989ba45ad1ca013e7e3d8344c4b245dd7235120827283",
+        "probe_console": "10b3ea9ca2dda71fb578afdce0723aec1e82be6b82e9d9acfc075a05f8f2c470",
+        "projected_claim": "f7b58e46355cc217a3160d692d1657daa8049ff5fe216fe0d48eb6bf6fca26ce",
+        "raw_probe": "9f3144467f247131240c5e152a8317e578e69c4c29192e0b64e4ddb78e5fef89",
+        "stage_console": "5caaf38e3f10f12eea795718ab146cef66c5336e53af631f4e7af4933873398b",
+        "stage_metrics": "2a48a7008b0738c86c99b05650a90b2de89277ec243d72a3fc5a0ec45f17e8ce",
+        "stage_usdc": "808ae1f503bf38235581866da174c0e1a94fde67ecd78d5237a8de227982f416"
+      },
+      "final_controller_gate": "REJECTED",
+      "final_execution_status": "CONTACT_GATE_REJECTED",
+      "formal_q_b_evaluation": false,
+      "host_replay_passed": false,
+      "identity": {
+        "failure_seed": 190837,
+        "matched_key": "m2c-s4-v4-train-dc5715316cad6e42faf074a9b6715f76e2df7bd0d267c3cf88037fdc5f8c50a7",
+        "scene_seed": 19083,
+        "sdf_sha256": "769d539378a899420e55c172a34c01cfaef19c1a83fe3eded3f7a4ba190c825d",
+        "supervision_sha256": "a2125ff96e56fd00c8814728805f4a22c84d9ead825e6d0d5ee319cb0fe001f2"
+      },
+      "model_rollout": false,
+      "physical_action_executed": true,
+      "physical_skill_receipts": 8,
+      "privileged_truth_policy_input": false,
+      "probe_process_invoked": true,
+      "probe_simulation_app_started": true,
+      "raw_capture_detection_counts": [
+        7,
+        13,
+        11,
+        7,
+        8,
+        9,
+        10,
+        10
+      ],
+      "raw_chain_final_task_success": false,
+      "raw_chain_schema": "M2CPathBlockedRawProbeChainV4",
+      "raw_probe_sha256": "9f3144467f247131240c5e152a8317e578e69c4c29192e0b64e4ddb78e5fef89",
+      "schema_capacity_rejections": [
+        {
+          "actual_detection_count": 13,
+          "capture_index": 1,
+          "schema_max_detection_count": 8,
+          "validation_error_type": "too_long"
+        },
+        {
+          "actual_detection_count": 11,
+          "capture_index": 2,
+          "schema_max_detection_count": 8,
+          "validation_error_type": "too_long"
+        },
+        {
+          "actual_detection_count": 9,
+          "capture_index": 5,
+          "schema_max_detection_count": 8,
+          "validation_error_type": "too_long"
+        },
+        {
+          "actual_detection_count": 10,
+          "capture_index": 6,
+          "schema_max_detection_count": 8,
+          "validation_error_type": "too_long"
+        },
+        {
+          "actual_detection_count": 10,
+          "capture_index": 7,
+          "schema_max_detection_count": 8,
+          "validation_error_type": "too_long"
+        }
+      ],
+      "stage_acceptance_passed": true,
+      "stage_simulation_app_started": true,
+      "teacher_used": false,
+      "training_sample_eligible": false,
+      "training_sample_packaged": false
+    }
+  ],
+  "audit_implementation": {
+    "path": "scripts/m2c/audit_s4_v4_batch08_collection.py",
+    "sha256": "767377b30227a1ee2d5f07870cd8d366631e01afc418d2cd7293159b82e42d4b"
+  },
+  "batch_preregistration": {
+    "introduced_commit": "b90d573e2cbd977c13e96fb97365a66efc235eb9",
+    "path": "docs/decisions/M2C-S4-V4-TRAIN-COLLECTION-BATCH-08-PREREG.json",
+    "prereg_sha256": "574294d2f1284a5e30ccb7cb3dc392781305d3c951865d5d00721bc7618286a0",
+    "sha256": "7cbfaf50519957a213a71eb740116cbe1e85df822dd9dfb7d53def9b26e0d827"
+  },
+  "evidence_inventory": {
+    "canonical_path_sha256_map_digest": "d817b514f1c1f9129d037989080d024f8348b9466714a74e8058a08761927df7",
+    "regular_file_count": 69
+  },
+  "formal_q_b_evaluation_executed": false,
+  "observed_counts": {
+    "collision_or_safety_violations": 0,
+    "consumed_unique_train_keys": 3,
+    "host_replay_passes": 0,
+    "physical_skill_receipts": 8,
+    "probe_process_invocations": 1,
+    "raw_physical_chains": 1,
+    "stage_acceptance_passes": 1,
+    "stage_process_exit_139": 2,
+    "training_samples_eligible": 0,
+    "training_samples_packaged": 0
+  },
+  "privileged_truth_policy_input": false,
+  "pure_model_success_episodes": null,
+  "root_cause": {
+    "classification": "RAW_PUBLIC_DETECTION_COUNT_EXCEEDS_FROZEN_SCHEMA_BOUND",
+    "collection_contract_path": "src/xh_agent/policy/qrm_lite/path_blocked_collection_v4.py",
+    "collection_contract_sha256": "1bb916b375e9ac3336911a11e96d11506709b285ac74d8f7579a8cfb5bccd887",
+    "final_candidate_count_bound_changed": false,
+    "first_rejected_actual_detection_count": 13,
+    "first_rejected_capture_index": 1,
+    "permission_failure": false,
+    "raw_capture_detection_counts": [
+      7,
+      13,
+      11,
+      7,
+      8,
+      9,
+      10,
+      10
+    ],
+    "requires_human_schema_gate_decision": true,
+    "schema_max_raw_detections": 8
+  },
+  "schema_version": "M2CS4V4Batch08CollectionAuditV1",
+  "status": "BLOCKED_RAW_DETECTION_CAPACITY_SCHEMA_DECISION_REQUIRED",
+  "teacher_used": false,
+  "training_executed": false
+}

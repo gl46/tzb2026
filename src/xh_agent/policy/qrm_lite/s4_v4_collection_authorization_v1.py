@@ -86,6 +86,11 @@ AUTHORITATIVE_PRIOR_ATTEMPT_SOURCES = {
         "M2CS4V4Batch07PreTimelineProprioFailureAuditV1",
         1,
     ),
+    "reports/m2c-s4-v4-batch08-collection.json": (
+        "226761a056c6c3a127784019147e49b3e6e301f72d4b9711e222cd7c939a2894",
+        "M2CS4V4Batch08CollectionAuditV1",
+        3,
+    ),
 }
 CANONICAL_COLLECTION_LEDGER_ROOT = (
     "/var/tmp/xh-data/isaac-industrial/m2c/s4-v4-collection-authorization-ledger-v1"
