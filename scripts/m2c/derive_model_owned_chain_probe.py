@@ -997,6 +997,13 @@ def _m2c_now_ns() -> int:
 def _m2c_v4_record_proprioception_sample() -> None:
     if "M2C_V4_PUBLIC_ROBOT" not in globals():
         return
+    # The upstream probe intentionally performs one Kit update before
+    # timeline play so contact-report USD edits are visible to PhysX.  Isaac's
+    # articulation exists at that point, but its tensor entity is not valid
+    # until play + initialize_physics.  This update is not a public control
+    # sample and must not query DOF state.
+    if not M2C_V4_PUBLIC_ROBOT.is_physics_tensor_entity_valid():
+        return
     timestamp_ns = _m2c_now_ns()
     if M2C_V4_PROPRIOCEPTION_JOURNAL and int(
         M2C_V4_PROPRIOCEPTION_JOURNAL[-1]["timestamp_ns"]

@@ -79,6 +79,12 @@ def test_v4_derived_probe_is_raw_only_and_compiles() -> None:
     assert "build_public_track_candidates_v3" not in source
     assert "M2C_V4_RAW_ASSOCIATION_CAPTURES = []" in source
     assert "bind_consumed_claim_to_raw_session" in source
+    recorder = source[source.index("def _m2c_v4_record_proprioception_sample()") :]
+    recorder = recorder[: recorder.index("def _m2c_capture(")]
+    assert recorder.index("is_physics_tensor_entity_valid()") < recorder.index("_m2c_now_ns()")
+    assert recorder.index("is_physics_tensor_entity_valid()") < recorder.index(
+        "_m2c_v4_public_proprioception(timestamp_ns=timestamp_ns)"
+    )
     assert "authorize_probe_start" not in source
     assert "probe-entry-broker" not in source
     assert "probe-entry-token" not in source
