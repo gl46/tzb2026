@@ -1,0 +1,125 @@
+{
+  "blockers": [
+    "FORMAL_PUBLIC_OBSERVATION_V4_BINDING_NOT_IN_WIRE_PROTOCOL",
+    "FORMAL_BOUND_PLAN_PROVIDER_NOT_IMPLEMENTED",
+    "FORMAL_BACKEND_EXACT_PLAN_CONSTRUCTION_AND_EXECUTION_STUBS",
+    "A3_STATIC_HOME_SELF_COLLISION_PREFLIGHT_REJECTED",
+    "FOUR_PRODUCTION_BINDINGS_UNSET"
+  ],
+  "checked_head_commit": "142768a1c01e64bd1c132035466139e31799311f",
+  "formal_backend": {
+    "construct_exact_plan_is_rejection_stub": true,
+    "execute_exact_plan_is_rejection_stub": true,
+    "production_bound_plan_constructor_calls": []
+  },
+  "formal_execution_eligible": false,
+  "formal_wire": {
+    "a1_digest_fields_present": [
+      "canonical_public_tracks_sha256",
+      "depth_sha256",
+      "preplan_state_sha256",
+      "rgb_sha256",
+      "runtime_mapping_sha256",
+      "signed_model_inference_response_sha256"
+    ],
+    "current_observation_schema": "FormalPublicObservationV2",
+    "missing_adr0024_v4_bindings": [
+      "association_history",
+      "candidate_payload",
+      "candidate_payload_sha256",
+      "declared_target_attribute",
+      "public_track_associator_revision"
+    ],
+    "v4_candidate_digest_recomputable_from_current_wire": false
+  },
+  "implemented_contracts": {
+    "a3_float64_bullet_candidate": true,
+    "all_phase_preflight_coordinator": true,
+    "exact_plan_a1_a4_envelope": true,
+    "no_replan_phase_executor": true,
+    "query_only_deployment_path_completed": true,
+    "query_only_static_state_preflight_clear": false
+  },
+  "next_command": ".venv/bin/pytest -q tests/unit/test_m2c_phase2_formal_exact_plan_integration.py",
+  "next_implementation_order": [
+    "ADD_VERSIONED_FORMAL_V4_PUBLIC_OBSERVATION_BINDING",
+    "ADD_BOUND_PLAN_PROVIDER_OVER_RECOMPUTABLE_V4_AND_MAPPING_INPUTS",
+    "INTEGRATE_FULL_PLAN_PREFLIGHT_BEFORE_ANY_COMMAND",
+    "KEEP_BACKEND_TERMINAL_NO_PHYSICAL_EXECUTION_UNTIL_A3_AND_BINDINGS_PASS"
+  ],
+  "physical_execution_performed_by_this_audit": false,
+  "privileged_truth_policy_input": false,
+  "production_bindings": {
+    "FORMAL_DEPLOYMENT_CLOSURE_BINDING": null,
+    "FORMAL_PHYSICAL_RUNNER_BINDING": null,
+    "FROZEN_B0_RUNTIME_WRAPPER_BINDING": null,
+    "OFFLINE_WIRE_AUTHENTICATION_VERIFIER_BINDING": null
+  },
+  "schema_version": "M2CPhase2FormalExactPlanIntegrationAuditV1",
+  "source_bindings": [
+    {
+      "path": "docs/decisions/ADR-0022-m2c-exact-plan-primitives-and-b0-wrapper.md",
+      "sha256": "4538eb980b66dc0945d1f016325f6c3c5679c87b97b9986e25253e67a2cc3ef1"
+    },
+    {
+      "path": "docs/decisions/ADR-0024-m2c-s4-unblock-directive.md",
+      "sha256": "62c14028df1ad91e4d3c4282c4775e33149292e9bcf10add2d505be8c7424689"
+    },
+    {
+      "path": "scripts/m2c/formal_isaac_v4_backend.py",
+      "sha256": "73ada118846c4392c73aa3f0459195e71a1d54378c549487e1ef3504bc4d79bf"
+    },
+    {
+      "path": "src/xh_agent/policy/qrm_lite/formal_split_runner_v2.py",
+      "sha256": "affbec7bfa2462c58ef093196c367eda98472f1ca349ba7b98d71796798b7c06"
+    },
+    {
+      "path": "src/xh_agent/policy/qrm_lite/exact_plan_primitive_bundle_v1.py",
+      "sha256": "e4f7318a26eb52ab44e4d221fe54f1b8ec4a1a8e1befbbb897dd51e8d442fae7"
+    },
+    {
+      "path": "src/xh_agent/policy/qrm_lite/exact_plan_preflight_v1.py",
+      "sha256": "a177efa148111aa004bb2780378f58ae4d33762474ecbdbaae38a4a70be84713"
+    },
+    {
+      "path": "src/xh_agent/policy/qrm_lite/isaac_exact_plan_runtime_v1.py",
+      "sha256": "57712a3d573f35dc3acb656e8533bb01789200501d2d7bee20450e91223e8dbe"
+    },
+    {
+      "path": "src/xh_agent/policy/qrm_lite/a3_bullet_production_adapter_v1.py",
+      "sha256": "aa9a96309a3381b1dce8cf1b43e3322c4ae968d558bc1bef394b56a6c307c807"
+    },
+    {
+      "path": "src/xh_agent/policy/qrm_lite/public_tracks_v4.py",
+      "sha256": "f4d10f6e9f4544b8d6fa9ee5b862e4ccc780b41ca6318cde37d0b1d3e03304c9"
+    },
+    {
+      "path": "src/xh_agent/policy/qrm_lite/path_blocked_supervision_v4.py",
+      "sha256": "a22837d4f4198e2b7558cf6591819ab352ff01dad87567c47d3c5515ac78a2b5"
+    },
+    {
+      "path": "src/xh_agent/policy/qrm_lite/s4_entry_gate.py",
+      "sha256": "4ede20b7e14004a095a64f151f641e464c7e95dbe7666feb68642523d9803dfb"
+    },
+    {
+      "path": "configs/m2c_adr0024_phase2_binding_candidate.json",
+      "sha256": "0c1702ff67519748fff48995500195f0eb3db1ee0c67b3af8607fc480903cb36"
+    },
+    {
+      "path": "docs/decisions/ADR-0024-PHASE2-BINDING-ADDENDUM-CANDIDATE.md",
+      "sha256": "f7ff7265f4c7e8ed75dcf69572c0d9ac9ea6940f4772cb84a3e585b0322659d1"
+    },
+    {
+      "path": "reports/m2c-s4-current-blockers.json",
+      "sha256": "daa1c8eb65fe62246ce6b7aeeb056b4208137e1924d7945284b1d72ba89369cc"
+    }
+  ],
+  "status": "BLOCKED_UNMEASURED_FORMAL_EXACT_PLAN_INTEGRATION",
+  "teacher_used": false,
+  "training_performed_by_this_audit": false,
+  "verification": {
+    "command": ".venv/bin/pytest -q tests/unit/test_m2c_*.py",
+    "failed": 0,
+    "passed": 693
+  }
+}
