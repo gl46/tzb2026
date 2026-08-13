@@ -1,0 +1,104 @@
+{
+  "comparison": {
+    "collision_link_count": 12,
+    "maximum_orientation_error_rad": 5.147892387644517e-16,
+    "maximum_translation_error_m": 2.5438405243138006e-16,
+    "orientation_tolerance_rad": 1e-12,
+    "row_count": 144,
+    "state_count": 12,
+    "translation_tolerance_m": 1e-12,
+    "worst_orientation": {
+      "link_path": "/World/Robot/panda_hand",
+      "state_index": 9
+    },
+    "worst_translation": {
+      "link_path": "/World/Robot/panda_rightfinger",
+      "state_index": 6
+    }
+  },
+  "evidence_claims": {
+    "formal_execution_eligible": false,
+    "isaac_started": false,
+    "physical_execution_performed": false,
+    "privileged_truth_policy_input": false,
+    "production_binding_set": false,
+    "q_b_evaluation_performed": false,
+    "teacher_used": false,
+    "training_performed": false
+  },
+  "evidence_inventory": {
+    "canonical_path_sha256_map_digest": "825d76a802e9c71412b1b52759634f8284d366ed0257112ed6a5232e7e6386c5",
+    "files": {
+      "build_controlled_panda_fk_kdl_evidence.py": "18ef1b6d5f2fe760e84385d6ef13f4e15a103289a2aad64b2c0d078c20bee9eb",
+      "controlled_panda_fk_kdl_verifier_v1": "5499dfb0f28218ed310fec5918c44ee679c37204705c7f680353ac8dce626edf",
+      "controlled_panda_fk_kdl_verifier_v1.cpp": "f843ff93a1b5a91ee99f0af6551b2cd3483b2cfd052945fde522e31c8ae62076",
+      "evidence-manifest.json": "4c030c30369a7806cba7e3dec705352ea5698b2647312ac668ecd270d56416e2",
+      "kdl-transforms.csv": "50a85a2c53fea4da9ed1f268f83a1458719ff72cd77992a86a6523c545008d2e",
+      "panda_controlled.urdf": "6678ff409d60f074283805879f53edaa939ead34f97a5a961ee67f6229b44ba8"
+    },
+    "regular_file_count": 6
+  },
+  "independent_verifier": {
+    "binary_sha256": "5499dfb0f28218ed310fec5918c44ee679c37204705c7f680353ac8dce626edf",
+    "compile_command": [
+      "/usr/bin/x86_64-linux-gnu-g++-11",
+      "-std=c++17",
+      "-O2",
+      "-fno-fast-math",
+      "-ffp-contract=off",
+      "-I/usr/include/eigen3",
+      "-I/opt/ros/jazzy/include/kdl_parser",
+      "-I/opt/ros/jazzy/include/urdf",
+      "-I/opt/ros/jazzy/include/urdfdom_headers",
+      "-I/opt/ros/jazzy/include/rcutils",
+      "-I/opt/ros/jazzy/include/ament_index_cpp",
+      "-I/opt/ros/jazzy/include/rcpputils",
+      "-I/opt/ros/jazzy/include/class_loader",
+      "/tmp/m2c-fk-kdl-evidence-v6/output/controlled_panda_fk_kdl_verifier_v1.cpp",
+      "-L/opt/ros/jazzy/lib",
+      "-Wl,-rpath,/opt/ros/jazzy/lib",
+      "-Wl,-z,defs",
+      "-Wl,-z,now",
+      "-Wl,-z,relro",
+      "-lkdl_parser",
+      "-lorocos-kdl",
+      "-o",
+      "/tmp/m2c-fk-kdl-evidence-v6/output/controlled_panda_fk_kdl_verifier_v1"
+    ],
+    "compiler": {
+      "path": "/usr/bin/x86_64-linux-gnu-g++-11",
+      "sha256": "f844ef5aa5bf42cf748cb98fede125791729c6e0c4f640709736104771413fac",
+      "version": "x86_64-linux-gnu-g++-11 (Ubuntu 11.4.0-9ubuntu1) 11.4.0"
+    },
+    "host": "node2",
+    "kdl_parser_library": {
+      "path": "/opt/ros/jazzy/lib/libkdl_parser.so",
+      "sha256": "3eeabbfcc1a565dd02d04739a05fd126381df77523d0dfbe1dcb10e23061cad5"
+    },
+    "orocos_kdl_library": {
+      "path": "/usr/lib/x86_64-linux-gnu/liborocos-kdl.so.1.5.1",
+      "sha256": "c826b6c210d0ab1fcdfb64503fabbe7158e85103fb7a91d03eee881d5206a5ba"
+    },
+    "orocos_kdl_version": "1.5.1",
+    "path": "scripts/m2c/controlled_panda_fk_kdl_verifier_v1.cpp",
+    "sha256": "f843ff93a1b5a91ee99f0af6551b2cd3483b2cfd052945fde522e31c8ae62076"
+  },
+  "provider": {
+    "articulation_target_writes": 0,
+    "configuration_sha256": "0567b222f22d2676b8b118e5583df186e2c71e06c2f57f3f1af72d736dd460df",
+    "path": "src/xh_agent/policy/qrm_lite/controlled_panda_fk_v1.py",
+    "query_only": true,
+    "scene_mutations": 0,
+    "sha256": "33d735905ecc132edae9c3a5f4d780518a328cd30518c0f897b1b0dda579b541",
+    "simulation_steps": 0
+  },
+  "remaining_blockers": [
+    "EIGHT_SKILL_REAL_ISAAC_PHASE_VALIDATION_MISSING",
+    "IMMUTABLE_DEPLOYMENT_COMMIT_CONTAINER_IMPORT_ASSET_CLOSURE_MISSING",
+    "REAL_EXACT_PLAN_ISAAC_EXECUTOR_MISSING",
+    "REAL_QUERY_ONLY_FK_PROVIDER_DEPLOYMENT_BINDING_MISSING",
+    "REAL_SESSION_ENDPOINT_STARTUP_AND_HOST_HMAC_ATTESTATION_MISSING"
+  ],
+  "schema_version": "M2CControlledPandaFKKDLComparisonAuditV1",
+  "status": "PASS_QUERY_ONLY_FK_MATCHES_INDEPENDENT_NODE2_KDL"
+}

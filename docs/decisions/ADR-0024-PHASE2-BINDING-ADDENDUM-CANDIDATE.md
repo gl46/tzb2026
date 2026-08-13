@@ -61,6 +61,16 @@ URDF/SRDF and both STL files replay to exactly 14 collision children. This
 closes the asset/native-build availability blockers, but it is not physical
 evidence and does not make formal execution eligible.
 
+The controlled-Panda read-only FK implementation is complete at the
+contract/equivalence layer. A separately compiled node2 verifier using ROS
+Jazzy `kdl_parser` and Orocos KDL 1.5.1 compared 12 frozen states across all
+12 collision-bearing link frames (144 transforms). Maximum translation error
+was `2.5438405243138006e-16 m`; maximum relative-quaternion orientation error
+was `5.147892387644517e-16 rad`, both below the frozen `1e-12` tolerances.
+The exact report is `reports/m2c-phase2-a3-controlled-panda-fk.json`. This
+closes provider implementation/numeric equivalence, not its immutable
+deployment/session binding.
+
 ## B0 boundary
 
 `FrozenB0FallbackWrapperV1` and ADR-0022 A.5 are withdrawn by accepted
@@ -81,7 +91,7 @@ nor any safety/IK/collision/controller gate.
 - `EIGHT_SKILL_REAL_ISAAC_PHASE_VALIDATION_MISSING`
 - `IMMUTABLE_DEPLOYMENT_COMMIT_CONTAINER_IMPORT_ASSET_CLOSURE_MISSING`
 - `REAL_EXACT_PLAN_ISAAC_EXECUTOR_MISSING`
-- `REAL_QUERY_ONLY_FK_PROVIDER_BINDING_MISSING`
+- `REAL_QUERY_ONLY_FK_PROVIDER_DEPLOYMENT_BINDING_MISSING`
 - `REAL_SESSION_ENDPOINT_STARTUP_AND_HOST_HMAC_ATTESTATION_MISSING`
 
 No training, Isaac scene startup, physical action, SMOKE, Q-B, or S5/S6

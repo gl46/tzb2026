@@ -36,6 +36,11 @@ def test_candidate_smoke_is_blocked_unmeasured_and_never_physical() -> None:
         "sha256:ae10eb6cf7eda37d34e394079c7638fc153b3f12314206ad0cab6d0cddc9fc22"
     )
     assert not report["a3_native_build_evidence"]["formal_execution_eligible"]
+    assert report["a3_read_only_fk_evidence"]["status"] == (
+        "PASS_QUERY_ONLY_FK_MATCHES_INDEPENDENT_NODE2_KDL"
+    )
+    assert report["a3_read_only_fk_evidence"]["comparison_row_count"] == 144
+    assert not report["a3_read_only_fk_evidence"]["formal_execution_eligible"]
     assert not report["governance"]["contract_smoke_is_physical_evidence"]
     assert not report["governance"]["teacher_used"]
 

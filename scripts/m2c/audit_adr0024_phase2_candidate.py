@@ -43,6 +43,13 @@ EXPECTED_BLOCKERS = (
     "EIGHT_SKILL_REAL_ISAAC_PHASE_VALIDATION_MISSING",
     "IMMUTABLE_DEPLOYMENT_COMMIT_CONTAINER_IMPORT_ASSET_CLOSURE_MISSING",
     "REAL_EXACT_PLAN_ISAAC_EXECUTOR_MISSING",
+    "REAL_QUERY_ONLY_FK_PROVIDER_DEPLOYMENT_BINDING_MISSING",
+    "REAL_SESSION_ENDPOINT_STARTUP_AND_HOST_HMAC_ATTESTATION_MISSING",
+)
+NATIVE_BUILD_RECORDED_BLOCKERS = (
+    "EIGHT_SKILL_REAL_ISAAC_PHASE_VALIDATION_MISSING",
+    "IMMUTABLE_DEPLOYMENT_COMMIT_CONTAINER_IMPORT_ASSET_CLOSURE_MISSING",
+    "REAL_EXACT_PLAN_ISAAC_EXECUTOR_MISSING",
     "REAL_QUERY_ONLY_FK_PROVIDER_BINDING_MISSING",
     "REAL_SESSION_ENDPOINT_STARTUP_AND_HOST_HMAC_ATTESTATION_MISSING",
 )
@@ -50,6 +57,11 @@ NATIVE_BUILD_REPORT_PATH = Path("reports/m2c-phase2-a3-native-build.json")
 NATIVE_BUILD_REPORT_SHA256 = "1bd86c288199744f9870b0d0afd1c69e0c401cd42f98e1fbd8f6ceb09aa22df4"
 NATIVE_BUILD_IMAGE_ID = "sha256:ae10eb6cf7eda37d34e394079c7638fc153b3f12314206ad0cab6d0cddc9fc22"
 NATIVE_SHARED_OBJECT_SHA256 = "916a6bd694f7452cbc60c1ba6230aed1b5fa79e496212f7e4f317e71eae0251a"
+FK_REPORT_PATH = Path("reports/m2c-phase2-a3-controlled-panda-fk.json")
+FK_REPORT_SHA256 = "fffc79564a60921398034913b13261e11d462b7dafdfe075f6b5558ff73379bb"
+FK_PROVIDER_PATH = Path("src/xh_agent/policy/qrm_lite/controlled_panda_fk_v1.py")
+FK_PROVIDER_SHA256 = "33d735905ecc132edae9c3a5f4d780518a328cd30518c0f897b1b0dda579b541"
+FK_CONFIGURATION_SHA256 = "0567b222f22d2676b8b118e5583df186e2c71e06c2f57f3f1af72d736dd460df"
 
 
 class CandidateAuditFailure(RuntimeError):
@@ -121,6 +133,7 @@ def load_candidate_config(project_root: Path) -> dict[str, Any]:
         "accepted_adr",
         "source_bindings",
         "native_build_evidence",
+        "read_only_fk_evidence",
         "a3_numeric_configuration_sha256",
         "production_bindings",
         "b0_policy",
@@ -171,6 +184,18 @@ def load_candidate_config(project_root: Path) -> dict[str, Any]:
         "formal_execution_eligible": False,
     }:
         raise CandidateAuditFailure("candidate native-build evidence binding differs")
+    fk = candidate["read_only_fk_evidence"]
+    if fk != {
+        "report_path": FK_REPORT_PATH.as_posix(),
+        "report_sha256": FK_REPORT_SHA256,
+        "status": "PASS_QUERY_ONLY_FK_MATCHES_INDEPENDENT_NODE2_KDL",
+        "provider_implementation_sha256": FK_PROVIDER_SHA256,
+        "provider_configuration_sha256": FK_CONFIGURATION_SHA256,
+        "comparison_state_count": 12,
+        "comparison_row_count": 144,
+        "formal_execution_eligible": False,
+    }:
+        raise CandidateAuditFailure("candidate read-only FK evidence binding differs")
     native_report_raw = read_regular_file_once(project_root / NATIVE_BUILD_REPORT_PATH)
     if _sha256(native_report_raw) != native["report_sha256"]:
         raise CandidateAuditFailure("candidate native-build report SHA-256 differs")
@@ -185,9 +210,26 @@ def load_candidate_config(project_root: Path) -> dict[str, Any]:
         or native_report.get("native_build", {}).get("native_shared_object_sha256")
         != native["native_shared_object_sha256"]
         or native_report.get("evidence_claims", {}).get("formal_execution_eligible") is not False
-        or native_report.get("remaining_blockers") != list(EXPECTED_BLOCKERS)
+        or native_report.get("remaining_blockers") != list(NATIVE_BUILD_RECORDED_BLOCKERS)
     ):
         raise CandidateAuditFailure("candidate native-build report claims differ")
+    fk_report_raw = read_regular_file_once(project_root / FK_REPORT_PATH)
+    if _sha256(fk_report_raw) != fk["report_sha256"]:
+        raise CandidateAuditFailure("candidate FK report SHA-256 differs")
+    try:
+        fk_report = json.loads(fk_report_raw)
+    except json.JSONDecodeError as exc:
+        raise CandidateAuditFailure("candidate FK report is unreadable") from exc
+    if (
+        fk_report.get("status") != fk["status"]
+        or fk_report.get("provider", {}).get("sha256") != fk["provider_implementation_sha256"]
+        or fk_report.get("provider", {}).get("configuration_sha256")
+        != fk["provider_configuration_sha256"]
+        or fk_report.get("comparison", {}).get("state_count") != fk["comparison_state_count"]
+        or fk_report.get("comparison", {}).get("row_count") != fk["comparison_row_count"]
+        or fk_report.get("evidence_claims", {}).get("formal_execution_eligible") is not False
+    ):
+        raise CandidateAuditFailure("candidate FK report claims differ")
     for path, expected in candidate["source_bindings"].items():
         if _sha256(read_regular_file_once(project_root / path)) != expected:
             raise CandidateAuditFailure(f"candidate source SHA-256 differs: {path}")
@@ -248,6 +290,7 @@ def build_audit(project_root: Path) -> dict[str, Any]:
         "contract_smokes": smokes,
         "a3_local_closure": closure.model_dump(mode="json"),
         "a3_native_build_evidence": candidate["native_build_evidence"],
+        "a3_read_only_fk_evidence": candidate["read_only_fk_evidence"],
         "blockers": list(EXPECTED_BLOCKERS),
         "governance": candidate["evidence_claims"],
     }
