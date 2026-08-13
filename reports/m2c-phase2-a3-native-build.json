@@ -4,7 +4,7 @@
     "collision_child_count": 14,
     "contract_test_only": false,
     "formal_evidence": false,
-    "geometry_receipt_sha256": "6e25fd5f32e664fb28be6e0c1a4a426eaa851979336d600a487b08dd60ceff23",
+    "geometry_receipt_sha256": "5999cadbb00027519a82a3ef91655e08e2f82ad51ec1fb5d983d9e87656a1ef7",
     "shape_counts": {
       "BOX": 11,
       "CONVEX_HULL": 2,
@@ -25,32 +25,32 @@
     "training_performed": false
   },
   "evidence_inventory": {
-    "canonical_path_sha256_map_digest": "3721096669b19d0666577a9a44666729d0103b4ff2606ef4091408ea65b35986",
+    "canonical_path_sha256_map_digest": "4d5a6b84a3ed5f3659b07c465ac98a96884859a9f042636c0eb93afc1582ab74",
     "files": {
-      "build-stdout.json": "9d9df4d8a9aecc509b9806ba96e81ce00b2cf41ac330bdc6adf67c7e65da9d55",
-      "builder-image-id.txt": "6c3969ae1be706478b34e956dc1ad9bd911f91ec606571021da3a714efb89577",
-      "builder-readback.txt": "88bf430a05782837d3e8c9d5c0509309caee927a6b8b37dcc24c50384626f99b",
-      "docker-build.log": "5af63436fab47b535efe054d01982329ce38b4d19a4cc51131f9743473f96923",
+      "build-stdout.json": "138d0d41a14ab3d81f08791dd21a3f1e275c1b693d311f65875242e53b58652a",
+      "builder-image-id.txt": "f2c3d9bde450119c197c15248679ea9b2592df89dd536f4e279b3af3c5fe86b4",
+      "builder-readback.txt": "998c37af9d3c0b03763cea1fd2feb5706a3dac8411638e87acaf2daca6e26d40",
+      "docker-build.log": "3c052ea6b5c048c4c26a91ff79337aea74ff4f26270f8d1d43e18c12786892d9",
       "meshes/link2.stl": "370f7605a0fae3529db169ded50f52f171024aa792d4d773bc84197301f6a039",
       "meshes/link4.stl": "0180ebb5772ec9840cb049750cffb29a9ddc90311752a16ea34757782ef9e48d",
-      "native/a3-bullet-build-manifest.json": "6065bb1cefcb01520c1196e157a6d95708a03f55df56fc4fa953708fd438ba67",
-      "native/compiler-inputs.json": "10cd6cd71e91e7b7ded8b4984ab99a8e6c625b4a18740a0714d23de29061fc7c",
-      "native/libm2c_a3_bullet_float64.so": "916a6bd694f7452cbc60c1ba6230aed1b5fa79e496212f7e4f317e71eae0251a",
-      "native/native-build-receipt.json": "39db568adce5b37c2191c1c43a3de77ba9aa6ab459fa4fb04200f374d97a5e23"
+      "native/a3-bullet-build-manifest.json": "6285988b8aea7f5e3bdff0f3b215e483ff59a350cff5ff7aaf4a638bb12c65e3",
+      "native/compiler-inputs.json": "7f4f3e47272f4d5557063a026dbfa713caa69eec39ecdf9e27aeb4aa88e11875",
+      "native/libm2c_a3_bullet_float64.so": "2231cee659b15875fc0bed011f339ac9962168981d228f3f08c6189929ce9c23",
+      "native/native-build-receipt.json": "20753793c3a6c3f7f534a7b4f0a42c96c1a746d28ef7b72b4c3f6325733a4842"
     },
     "regular_file_count": 10
   },
   "implementation_bindings": {
     "docker/m2c-a3-bullet-builder/Dockerfile": "c48744fdaa19e157506ac9b5b2407efcca9ea690237afd718ccb487a0f00bbec",
     "scripts/m2c/audit_phase2_a3_native_build.py": "f06d722a90654dabd220e5c7c3864e3edfcd0140e1bd812232f27614fc0d7a72",
-    "scripts/m2c/build_a3_bullet_native_closure.py": "63c2abfb3b8650bebf885493c3c33d8b0a50b5a326ffa71da29496562ddd7a25"
+    "scripts/m2c/build_a3_bullet_native_closure.py": "a3330a24645f1e9bc945267ea4f4a8fa1689a3c47b5e25010644e11c6ed2a7fc"
   },
   "native_build": {
-    "adapter_build_manifest_core_sha256": "d200a14e5f58d6e0cc20e988afb478dc20a67da1a85fd13e6a723aef7d97439d",
-    "adapter_build_manifest_file_sha256": "6065bb1cefcb01520c1196e157a6d95708a03f55df56fc4fa953708fd438ba67",
-    "build_receipt_sha256": "39db568adce5b37c2191c1c43a3de77ba9aa6ab459fa4fb04200f374d97a5e23",
-    "builder_image_id": "sha256:ae10eb6cf7eda37d34e394079c7638fc153b3f12314206ad0cab6d0cddc9fc22",
-    "compiler_inputs_sha256": "10cd6cd71e91e7b7ded8b4984ab99a8e6c625b4a18740a0714d23de29061fc7c",
+    "adapter_build_manifest_core_sha256": "b55e6f15c4a7c933115bd25df03a3b6db2e0d51b4f33ff43eca16118da8fc2b0",
+    "adapter_build_manifest_file_sha256": "6285988b8aea7f5e3bdff0f3b215e483ff59a350cff5ff7aaf4a638bb12c65e3",
+    "build_receipt_sha256": "20753793c3a6c3f7f534a7b4f0a42c96c1a746d28ef7b72b4c3f6325733a4842",
+    "builder_image_id": "sha256:01d3c57bde2ce5ff1655ab5739d0729ae7ea035be2ac56bd391a4357e3c4307e",
+    "compiler_inputs_sha256": "7f4f3e47272f4d5557063a026dbfa713caa69eec39ecdf9e27aeb4aa88e11875",
     "dynamic_needed": [
       "libBulletCollision-float64.so.3.24",
       "libLinearMath-float64.so.3.24",
@@ -60,10 +60,10 @@
       "libstdc++.so.6"
     ],
     "dynamic_runpath": "/usr/lib/x86_64-linux-gnu",
-    "native_shared_object_sha256": "916a6bd694f7452cbc60c1ba6230aed1b5fa79e496212f7e4f317e71eae0251a",
+    "native_shared_object_sha256": "2231cee659b15875fc0bed011f339ac9962168981d228f3f08c6189929ce9c23",
     "native_shared_object_size_bytes": 32488,
     "query_only": true,
-    "receipt_core_sha256": "668d8746c59ed3f44cb8ad890a562899c2ebf715623d503011dc6ee78025ad64"
+    "receipt_core_sha256": "dbac0c2dd3e23b64eb40a7db7219a73bfcc7d96137c25a10b44ebb42b11a4212"
   },
   "remaining_blockers": [
     "EIGHT_SKILL_REAL_ISAAC_PHASE_VALIDATION_MISSING",

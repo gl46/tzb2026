@@ -14,7 +14,7 @@ from m2c.audit_phase2_a3_native_build import (
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-EVIDENCE_ROOT = Path("/Users/gl/tzb-m2c-evidence/m2c-phase2-a3-native-build-v3")
+EVIDENCE_ROOT = Path("/Users/gl/tzb-m2c-evidence/m2c-phase2-a3-native-build-v5")
 
 
 @pytest.mark.skipif(not EVIDENCE_ROOT.is_dir(), reason="external A.3 evidence is absent")
@@ -24,10 +24,10 @@ def test_real_native_build_and_geometry_evidence_replays_without_execution() -> 
     assert report["status"] == "PASS_QUERY_ONLY_NATIVE_BUILD_AND_GEOMETRY_REPLAY"
     assert report["evidence_inventory"]["regular_file_count"] == 10
     assert report["native_build"]["builder_image_id"] == (
-        "sha256:ae10eb6cf7eda37d34e394079c7638fc153b3f12314206ad0cab6d0cddc9fc22"
+        "sha256:01d3c57bde2ce5ff1655ab5739d0729ae7ea035be2ac56bd391a4357e3c4307e"
     )
     assert report["native_build"]["native_shared_object_sha256"] == (
-        "916a6bd694f7452cbc60c1ba6230aed1b5fa79e496212f7e4f317e71eae0251a"
+        "2231cee659b15875fc0bed011f339ac9962168981d228f3f08c6189929ce9c23"
     )
     assert report["controlled_panda_geometry_replay"]["collision_child_count"] == 14
     assert report["controlled_panda_geometry_replay"]["shape_counts"] == {

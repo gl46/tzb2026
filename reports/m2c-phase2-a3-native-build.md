@@ -1,12 +1,12 @@
 # M2C Phase-2 A.3 native build audit
 
 - Status: `PASS_QUERY_ONLY_NATIVE_BUILD_AND_GEOMETRY_REPLAY`
-- Builder image ID: `sha256:ae10eb6cf7eda37d34e394079c7638fc153b3f12314206ad0cab6d0cddc9fc22`
-- Native shared object SHA-256: `916a6bd694f7452cbc60c1ba6230aed1b5fa79e496212f7e4f317e71eae0251a`
-- Native build receipt file SHA-256: `39db568adce5b37c2191c1c43a3de77ba9aa6ab459fa4fb04200f374d97a5e23`
-- Adapter build manifest file SHA-256: `6065bb1cefcb01520c1196e157a6d95708a03f55df56fc4fa953708fd438ba67`
-- Complete compiler-input manifest SHA-256: `10cd6cd71e91e7b7ded8b4984ab99a8e6c625b4a18740a0714d23de29061fc7c`
-- Controlled-Panda geometry receipt SHA-256: `6e25fd5f32e664fb28be6e0c1a4a426eaa851979336d600a487b08dd60ceff23`
+- Builder image ID: `sha256:01d3c57bde2ce5ff1655ab5739d0729ae7ea035be2ac56bd391a4357e3c4307e`
+- Native shared object SHA-256: `2231cee659b15875fc0bed011f339ac9962168981d228f3f08c6189929ce9c23`
+- Native build receipt file SHA-256: `20753793c3a6c3f7f534a7b4f0a42c96c1a746d28ef7b72b4c3f6325733a4842`
+- Adapter build manifest file SHA-256: `6285988b8aea7f5e3bdff0f3b215e483ff59a350cff5ff7aaf4a638bb12c65e3`
+- Complete compiler-input manifest SHA-256: `7f4f3e47272f4d5557063a026dbfa713caa69eec39ecdf9e27aeb4aa88e11875`
+- Controlled-Panda geometry receipt SHA-256: `5999cadbb00027519a82a3ef91655e08e2f82ad51ec1fb5d983d9e87656a1ef7`
 - Teacher used: **false**
 - Privileged truth used as policy input: **false**
 - Isaac started: **false**
@@ -27,6 +27,11 @@ libraries were copied from node2 into an isolated build context. The resulting
 builder image ran with `--network none --read-only`; only the create-only
 output directory was writable. This closes the original asset/native-build
 availability blockers without widening host permissions.
+
+This v5 rebuild binds the corrected per-shape Bullet 3.24 shipped margins:
+`0.0055074 m` for the largest governed Panda box, `0.008 m` for its cylinder,
+and `0.04 m` for convex hulls. The separate outward padding remains exactly
+`0.002 m`; no penetration, contact, ambiguity, or fail-closed gate was relaxed.
 
 ## Replay result
 
@@ -51,5 +56,5 @@ not authorize a Phase-2 binding.
 ## One next command
 
 ```bash
-PYTHONPATH=src:scripts .venv/bin/python scripts/m2c/audit_phase2_a3_native_build.py --project-root . --evidence-root /Users/gl/tzb-m2c-evidence/m2c-phase2-a3-native-build-v3 --expected-json reports/m2c-phase2-a3-native-build.json
+PYTHONPATH=src:scripts .venv/bin/python scripts/m2c/audit_phase2_a3_native_build.py --project-root . --evidence-root /Users/gl/tzb-m2c-evidence/m2c-phase2-a3-native-build-v5 --expected-json reports/m2c-phase2-a3-native-build.json
 ```

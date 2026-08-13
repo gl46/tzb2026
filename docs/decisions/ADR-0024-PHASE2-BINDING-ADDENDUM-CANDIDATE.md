@@ -40,12 +40,14 @@ entry readiness.
 ## A.3 delegated numeric configuration
 
 The candidate binds configuration digest
-`1193e1bfab421cc69373e6e41b350c26e69a4a07ca17e66f92271aea365427d0`:
+`a8a041e7054442cbb8b1b8102a474331430015ed58dd2aae9c61339ec9a5883f`:
 
 - Bullet 3.24 scalar ABI `float64`; `BT_USE_DOUBLE_PRECISION`, no fast-math;
 - hull construction tolerance `1e-7 m`;
 - outward-only post-construction padding `0.002 m`;
-- box/cylinder/hull margin `0.04 m`, never smaller than shipped default;
+- box margin `0.0055074 m`, cylinder margin `0.008 m`, and convex-hull margin
+  `0.04 m`, each no smaller than Bullet 3.24's shipped default for the exact
+  governed Panda shape type;
 - allowed penetration `0.0 m` and contact rejection threshold `0.001 m`;
 - TOI interval `[0,1]`, rejection-biased comparison tolerance `1e-7`;
 - native/declared maximum iterations `64`; exhaustion rejects;
@@ -56,7 +58,7 @@ The candidate binds configuration digest
 The machine config binds the exact source and asset digests. The original STL
 bytes and pinned Bullet float64 runtime were replayed in the independent
 query-only build report `reports/m2c-phase2-a3-native-build.json`. Builder image
-`sha256:ae10eb6c…` produced native module `916a6bd6…`; the controlled Panda
+`sha256:01d3c57b…` produced native module `2231cee6…`; the controlled Panda
 URDF/SRDF and both STL files replay to exactly 14 collision children. This
 closes the asset/native-build availability blockers, but it is not physical
 evidence and does not make formal execution eligible.

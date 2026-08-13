@@ -11,10 +11,10 @@
     "docs/decisions/ADR-0024-m2c-s4-unblock-directive.md": "62c14028df1ad91e4d3c4282c4775e33149292e9bcf10add2d505be8c7424689",
     "robot_ws/src/xh_sim/config/m1a_panda.srdf": "80948370d547cb320e49d42ffc0467e082112c09f2984700b489def88526a386",
     "robot_ws/src/xh_sim/urdf/panda_controlled.urdf": "6678ff409d60f074283805879f53edaa939ead34f97a5a961ee67f6229b44ba8",
-    "src/xh_agent/policy/qrm_lite/a3_bullet_native_adapter_v1.cpp": "4399fe9ecf61658caca1875fc4a3271fb5ee9a40c144a68963f0e3e4319ee331",
-    "src/xh_agent/policy/qrm_lite/a3_bullet_production_adapter_v1.py": "f7ccd5e8b609d9e2c70976209f19593829aaa0e79a943a2559542358ef996646",
+    "src/xh_agent/policy/qrm_lite/a3_bullet_native_adapter_v1.cpp": "5de2750b6704e30eef1955d3e7f60692cc424777f23024aa064410585331c900",
+    "src/xh_agent/policy/qrm_lite/a3_bullet_production_adapter_v1.py": "5b47f621219d3905c0021e037597978585117f281cc1ba870bd94b21395df38f",
     "src/xh_agent/policy/qrm_lite/a3_bullet_self_ccd_v1.cpp": "48a1caa8d2f1c8fcb76a504377f399223018a26925c03f1d549db9bab833506f",
-    "src/xh_agent/policy/qrm_lite/a3_bullet_self_ccd_v1.py": "fb9d06e6256fd2ca9deaaa3e0397e6d406cb6ca0b3cabe4ae93d5f5566676131",
+    "src/xh_agent/policy/qrm_lite/a3_bullet_self_ccd_v1.py": "6f694e489be5a58943042ba4b0596f1837bc358f73f85c35bc793435a98103ac",
     "src/xh_agent/policy/qrm_lite/controlled_panda_fk_v1.py": "33d735905ecc132edae9c3a5f4d780518a328cd30518c0f897b1b0dda579b541",
     "src/xh_agent/policy/qrm_lite/exact_plan_preflight_v1.py": "a177efa148111aa004bb2780378f58ae4d33762474ecbdbaae38a4a70be84713",
     "src/xh_agent/policy/qrm_lite/exact_plan_primitive_bundle_v1.py": "e4f7318a26eb52ab44e4d221fe54f1b8ec4a1a8e1befbbb897dd51e8d442fae7",
@@ -22,10 +22,10 @@
   },
   "native_build_evidence": {
     "report_path": "reports/m2c-phase2-a3-native-build.json",
-    "report_sha256": "1bd86c288199744f9870b0d0afd1c69e0c401cd42f98e1fbd8f6ceb09aa22df4",
+    "report_sha256": "725c33bc8380ea5941542046b335b3a3512118b35b7427a119c809fa181af36b",
     "status": "PASS_QUERY_ONLY_NATIVE_BUILD_AND_GEOMETRY_REPLAY",
-    "builder_image_id": "sha256:ae10eb6cf7eda37d34e394079c7638fc153b3f12314206ad0cab6d0cddc9fc22",
-    "native_shared_object_sha256": "916a6bd694f7452cbc60c1ba6230aed1b5fa79e496212f7e4f317e71eae0251a",
+    "builder_image_id": "sha256:01d3c57bde2ce5ff1655ab5739d0729ae7ea035be2ac56bd391a4357e3c4307e",
+    "native_shared_object_sha256": "2231cee659b15875fc0bed011f339ac9962168981d228f3f08c6189929ce9c23",
     "formal_execution_eligible": false
   },
   "read_only_fk_evidence": {
@@ -38,7 +38,7 @@
     "comparison_row_count": 144,
     "formal_execution_eligible": false
   },
-  "a3_numeric_configuration_sha256": "1193e1bfab421cc69373e6e41b350c26e69a4a07ca17e66f92271aea365427d0",
+  "a3_numeric_configuration_sha256": "a8a041e7054442cbb8b1b8102a474331430015ed58dd2aae9c61339ec9a5883f",
   "production_bindings": {
     "FORMAL_PHYSICAL_RUNNER_BINDING": null,
     "FORMAL_DEPLOYMENT_CLOSURE_BINDING": null,

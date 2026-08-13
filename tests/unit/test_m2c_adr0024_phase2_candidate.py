@@ -33,7 +33,7 @@ def test_candidate_smoke_is_blocked_unmeasured_and_never_physical() -> None:
         "PASS_QUERY_ONLY_NATIVE_BUILD_AND_GEOMETRY_REPLAY"
     )
     assert report["a3_native_build_evidence"]["builder_image_id"] == (
-        "sha256:ae10eb6cf7eda37d34e394079c7638fc153b3f12314206ad0cab6d0cddc9fc22"
+        "sha256:01d3c57bde2ce5ff1655ab5739d0729ae7ea035be2ac56bd391a4357e3c4307e"
     )
     assert not report["a3_native_build_evidence"]["formal_execution_eligible"]
     assert report["a3_read_only_fk_evidence"]["status"] == (
