@@ -40,14 +40,16 @@ entry readiness.
 ## A.3 delegated numeric configuration
 
 The candidate binds configuration digest
-`a8a041e7054442cbb8b1b8102a474331430015ed58dd2aae9c61339ec9a5883f`:
+`8c6ba840339bca5a84ccd805b0c068439d59812eb0c3ecc9bdd809f1341d4bb5`:
 
 - Bullet 3.24 scalar ABI `float64`; `BT_USE_DOUBLE_PRECISION`, no fast-math;
 - hull construction tolerance `1e-7 m`;
 - outward-only post-construction padding `0.002 m`;
-- box margin `0.0055074 m`, cylinder margin `0.008 m`, and convex-hull margin
-  `0.04 m`, each no smaller than Bullet 3.24's shipped default for the exact
-  governed Panda shape type;
+- primitive margins reproduce Bullet 3.24's shipped `setSafeMargin` formula
+  per concrete shape instance; the exact governed-Panda maxima are
+  `0.0055074 m` for boxes and `0.008 m` for the cylinder, while each convex
+  hull uses the shipped `0.04 m`; every payload independently proves it is no
+  smaller than its actual constructor default;
 - allowed penetration `0.0 m` and contact rejection threshold `0.001 m`;
 - TOI interval `[0,1]`, rejection-biased comparison tolerance `1e-7`;
 - native/declared maximum iterations `64`; exhaustion rejects;

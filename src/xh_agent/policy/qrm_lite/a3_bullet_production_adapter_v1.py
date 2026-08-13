@@ -38,11 +38,9 @@ from xh_agent.policy.qrm_lite.a3_bullet_self_ccd_v1 import (
     A3RigidTransformV1,
     A3SelfCollisionRejected,
     A3SelfCollisionWorldV1,
-    BULLET_CONVEX_HULL_SHIPPED_MARGIN_M,
-    CONTROLLED_PANDA_BOX_SHIPPED_MARGIN_MAX_M,
-    CONTROLLED_PANDA_CYLINDER_SHIPPED_MARGIN_MAX_M,
     EXPECTED_BULLET_FLOAT64_COLLISION_SHA256,
     EXPECTED_BULLET_FLOAT64_LINEAR_MATH_SHA256,
+    bullet_shipped_margin_for_shape_v1,
     canonical_a3_bullet_numeric_configuration_v1,
 )
 from xh_agent.policy.qrm_lite.formal_split_runner_v2 import (
@@ -247,11 +245,7 @@ class A3ShapePayloadV1(FrozenModel):
         ):
             raise ValueError("A.3 shape parameters differ")
         is_hull = self.shape_kind == "CONVEX_HULL"
-        required_margin = {
-            "BOX": CONTROLLED_PANDA_BOX_SHIPPED_MARGIN_MAX_M,
-            "CYLINDER": CONTROLLED_PANDA_CYLINDER_SHIPPED_MARGIN_MAX_M,
-            "CONVEX_HULL": BULLET_CONVEX_HULL_SHIPPED_MARGIN_M,
-        }[self.shape_kind]
+        required_margin = bullet_shipped_margin_for_shape_v1(self.shape_kind, self.shape_parameters)
         if self.collision_margin_m < required_margin:
             raise ValueError("A.3 shape margin is below the governed shipped value")
         if is_hull:
@@ -297,6 +291,10 @@ class A3ControlledPandaGeometryReceiptV1(FrozenModel):
             item.payload_sha256 for item in self.shape_payloads
         ):
             raise ValueError("A.3 child/payload digest binding differs")
+        if tuple(item.collision_margin_m for item in self.children) != tuple(
+            item.collision_margin_m for item in self.shape_payloads
+        ):
+            raise ValueError("A.3 child/payload margin binding differs")
         canonical_acm = tuple(sorted(tuple(sorted(pair)) for pair in self.acm_link_pairs))
         if canonical_acm != self.acm_link_pairs or len(canonical_acm) != len(set(canonical_acm)):
             raise ValueError("A.3 ACM is not unique canonical order")
@@ -381,6 +379,8 @@ class A3AttachedObjectGeometryV1(FrozenModel):
             or any(len(item.transforms) != self.executor_state_count for item in self.transforms)
             or tuple(item.shape_parameters_sha256 for item in self.children)
             != tuple(item.payload_sha256 for item in self.shape_payloads)
+            or tuple(item.collision_margin_m for item in self.children)
+            != tuple(item.collision_margin_m for item in self.shape_payloads)
         ):
             raise ValueError("A.3 attached-object child/payload/transform coverage differs")
         canonical_touch = tuple(
@@ -545,11 +545,7 @@ def _shape_payload(
         "decoded_vertices_xyz_m": vertices,
         "hull_construction_tolerance_m": configuration.convex_hull_construction_tolerance_m,
         "outward_padding_m": configuration.convex_hull_outward_padding_m,
-        "collision_margin_m": {
-            "BOX": configuration.box_collision_margin_m,
-            "CYLINDER": configuration.cylinder_collision_margin_m,
-            "CONVEX_HULL": configuration.convex_hull_collision_margin_m,
-        }[shape_kind],
+        "collision_margin_m": bullet_shipped_margin_for_shape_v1(shape_kind, parameters),
         "every_decoded_stl_vertex_retained": shape_kind == "CONVEX_HULL",
         "conservative_outer_envelope": True,
         "geometry_equality_claimed": False,

@@ -258,6 +258,10 @@ def build_report(project_root: Path, evidence_root: Path) -> dict[str, Any]:
             "geometry_receipt_sha256": geometry.receipt_sha256,
             "collision_child_count": len(geometry.children),
             "shape_counts": shape_counts,
+            "per_shape_collision_margins_m": {
+                f"{item.link_path}#{item.child_index}": item.collision_margin_m
+                for item in geometry.shape_payloads
+            },
             "all_compounds_expanded": geometry.all_compounds_expanded,
             "unknown_or_concave_shape_rejects": geometry.unknown_or_concave_shape_rejects,
             "contract_test_only": geometry.contract_test_only,

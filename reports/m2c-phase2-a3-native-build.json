@@ -4,7 +4,23 @@
     "collision_child_count": 14,
     "contract_test_only": false,
     "formal_evidence": false,
-    "geometry_receipt_sha256": "5999cadbb00027519a82a3ef91655e08e2f82ad51ec1fb5d983d9e87656a1ef7",
+    "geometry_receipt_sha256": "a74f647faeeba297c54cc3e290d5c2576c2b14f605d50754701aab9887544c01",
+    "per_shape_collision_margins_m": {
+      "/World/Robot/panda_hand#0": 0.003165,
+      "/World/Robot/panda_leftfinger#0": 0.00104,
+      "/World/Robot/panda_leftfinger#1": 0.0010500000000000002,
+      "/World/Robot/panda_link0#0": 0.008,
+      "/World/Robot/panda_link1#0": 0.0055074,
+      "/World/Robot/panda_link2#0": 0.04,
+      "/World/Robot/panda_link3#0": 0.0025000000000000005,
+      "/World/Robot/panda_link4#0": 0.04,
+      "/World/Robot/panda_link5#0": 0.003,
+      "/World/Robot/panda_link6#0": 0.0025000000000000005,
+      "/World/Robot/panda_link7#0": 0.0025000000000000005,
+      "/World/Robot/panda_link8#0": 0.002,
+      "/World/Robot/panda_rightfinger#0": 0.00104,
+      "/World/Robot/panda_rightfinger#1": 0.0010500000000000002
+    },
     "shape_counts": {
       "BOX": 11,
       "CONVEX_HULL": 2,
@@ -42,7 +58,7 @@
   },
   "implementation_bindings": {
     "docker/m2c-a3-bullet-builder/Dockerfile": "c48744fdaa19e157506ac9b5b2407efcca9ea690237afd718ccb487a0f00bbec",
-    "scripts/m2c/audit_phase2_a3_native_build.py": "f06d722a90654dabd220e5c7c3864e3edfcd0140e1bd812232f27614fc0d7a72",
+    "scripts/m2c/audit_phase2_a3_native_build.py": "f3e6484b93af71a576af0b9380a755931e344850f6b72b93de49efbbc1b18c56",
     "scripts/m2c/build_a3_bullet_native_closure.py": "a3330a24645f1e9bc945267ea4f4a8fa1689a3c47b5e25010644e11c6ed2a7fc"
   },
   "native_build": {

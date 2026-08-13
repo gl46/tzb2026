@@ -161,6 +161,29 @@ def test_shape_payload_retains_every_hull_vertex_and_rejects_omission() -> None:
         A3ShapePayloadV1.model_validate(tampered)
 
 
+def test_primitive_payload_uses_exact_instance_shipped_margin() -> None:
+    data = {
+        "schema_version": "A3ShapePayloadV1",
+        "link_path": "/World/Robot/panda_hand",
+        "child_index": 0,
+        "shape_kind": "BOX",
+        "shape_parameters": (0.0633, 0.2044, 0.0919),
+        "decoded_vertices_xyz_m": (),
+        "hull_construction_tolerance_m": 1e-7,
+        "outward_padding_m": 0.002,
+        "collision_margin_m": 0.003165,
+        "every_decoded_stl_vertex_retained": False,
+        "conservative_outer_envelope": True,
+        "geometry_equality_claimed": False,
+    }
+    payload = A3ShapePayloadV1(**data, payload_sha256=canonical_sha256(data))
+    assert payload.collision_margin_m == pytest.approx(0.003165)
+
+    too_small = dict(data, collision_margin_m=0.003164999)
+    with pytest.raises(ValueError, match="below"):
+        A3ShapePayloadV1(**too_small, payload_sha256=canonical_sha256(too_small))
+
+
 def test_controlled_panda_parser_rejects_mesh_hash_before_geometry_claim(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:

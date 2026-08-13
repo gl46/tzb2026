@@ -35,6 +35,11 @@ def test_real_native_build_and_geometry_evidence_replays_without_execution() -> 
         "CYLINDER": 1,
         "CONVEX_HULL": 2,
     }
+    margins = report["controlled_panda_geometry_replay"]["per_shape_collision_margins_m"]
+    assert margins["/World/Robot/panda_hand#0"] == pytest.approx(0.003165)
+    assert margins["/World/Robot/panda_link5#0"] == pytest.approx(0.003)
+    assert margins["/World/Robot/panda_link7#0"] == pytest.approx(0.0025)
+    assert margins["/World/Robot/panda_link2#0"] == pytest.approx(0.04)
     assert report["remaining_blockers"] == list(EXPECTED_BLOCKERS)
     assert not report["evidence_claims"]["isaac_started"]
     assert not report["evidence_claims"]["physical_execution_performed"]

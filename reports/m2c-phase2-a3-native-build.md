@@ -6,7 +6,10 @@
 - Native build receipt file SHA-256: `20753793c3a6c3f7f534a7b4f0a42c96c1a746d28ef7b72b4c3f6325733a4842`
 - Adapter build manifest file SHA-256: `6285988b8aea7f5e3bdff0f3b215e483ff59a350cff5ff7aaf4a638bb12c65e3`
 - Complete compiler-input manifest SHA-256: `7f4f3e47272f4d5557063a026dbfa713caa69eec39ecdf9e27aeb4aa88e11875`
-- Controlled-Panda geometry receipt SHA-256: `5999cadbb00027519a82a3ef91655e08e2f82ad51ec1fb5d983d9e87656a1ef7`
+- Controlled-Panda geometry receipt SHA-256: `a74f647faeeba297c54cc3e290d5c2576c2b14f605d50754701aab9887544c01`
+- The report records all 14 per-shape Bullet 3.24 constructor margins; each
+  primitive uses its own `setSafeMargin` value rather than the governed-type
+  maximum, while both convex hulls retain `0.04 m`.
 - Teacher used: **false**
 - Privileged truth used as policy input: **false**
 - Isaac started: **false**

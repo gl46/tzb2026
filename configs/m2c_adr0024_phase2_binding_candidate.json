@@ -12,9 +12,9 @@
     "robot_ws/src/xh_sim/config/m1a_panda.srdf": "80948370d547cb320e49d42ffc0467e082112c09f2984700b489def88526a386",
     "robot_ws/src/xh_sim/urdf/panda_controlled.urdf": "6678ff409d60f074283805879f53edaa939ead34f97a5a961ee67f6229b44ba8",
     "src/xh_agent/policy/qrm_lite/a3_bullet_native_adapter_v1.cpp": "5de2750b6704e30eef1955d3e7f60692cc424777f23024aa064410585331c900",
-    "src/xh_agent/policy/qrm_lite/a3_bullet_production_adapter_v1.py": "5b47f621219d3905c0021e037597978585117f281cc1ba870bd94b21395df38f",
+    "src/xh_agent/policy/qrm_lite/a3_bullet_production_adapter_v1.py": "aa9a96309a3381b1dce8cf1b43e3322c4ae968d558bc1bef394b56a6c307c807",
     "src/xh_agent/policy/qrm_lite/a3_bullet_self_ccd_v1.cpp": "48a1caa8d2f1c8fcb76a504377f399223018a26925c03f1d549db9bab833506f",
-    "src/xh_agent/policy/qrm_lite/a3_bullet_self_ccd_v1.py": "6f694e489be5a58943042ba4b0596f1837bc358f73f85c35bc793435a98103ac",
+    "src/xh_agent/policy/qrm_lite/a3_bullet_self_ccd_v1.py": "0fd2808d8861c368864ee76251073b2c124e5db16632234f5e87b061b87bf527",
     "src/xh_agent/policy/qrm_lite/controlled_panda_fk_v1.py": "33d735905ecc132edae9c3a5f4d780518a328cd30518c0f897b1b0dda579b541",
     "src/xh_agent/policy/qrm_lite/exact_plan_preflight_v1.py": "a177efa148111aa004bb2780378f58ae4d33762474ecbdbaae38a4a70be84713",
     "src/xh_agent/policy/qrm_lite/exact_plan_primitive_bundle_v1.py": "e4f7318a26eb52ab44e4d221fe54f1b8ec4a1a8e1befbbb897dd51e8d442fae7",
@@ -22,7 +22,7 @@
   },
   "native_build_evidence": {
     "report_path": "reports/m2c-phase2-a3-native-build.json",
-    "report_sha256": "725c33bc8380ea5941542046b335b3a3512118b35b7427a119c809fa181af36b",
+    "report_sha256": "3c3d238e4dea260508bdb5b8bc70882c819005c1d1ff631c8510d78202e29047",
     "status": "PASS_QUERY_ONLY_NATIVE_BUILD_AND_GEOMETRY_REPLAY",
     "builder_image_id": "sha256:01d3c57bde2ce5ff1655ab5739d0729ae7ea035be2ac56bd391a4357e3c4307e",
     "native_shared_object_sha256": "2231cee659b15875fc0bed011f339ac9962168981d228f3f08c6189929ce9c23",
@@ -38,7 +38,7 @@
     "comparison_row_count": 144,
     "formal_execution_eligible": false
   },
-  "a3_numeric_configuration_sha256": "a8a041e7054442cbb8b1b8102a474331430015ed58dd2aae9c61339ec9a5883f",
+  "a3_numeric_configuration_sha256": "8c6ba840339bca5a84ccd805b0c068439d59812eb0c3ecc9bdd809f1341d4bb5",
   "production_bindings": {
     "FORMAL_PHYSICAL_RUNNER_BINDING": null,
     "FORMAL_DEPLOYMENT_CLOSURE_BINDING": null,

@@ -22,6 +22,7 @@ from xh_agent.policy.qrm_lite.a3_bullet_self_ccd_v1 import (
     CONTROLLED_PANDA_CYLINDER_SHIPPED_MARGIN_MAX_M,
     EXPECTED_BULLET_FLOAT64_COLLISION_SHA256,
     EXPECTED_BULLET_FLOAT64_LINEAR_MATH_SHA256,
+    bullet_shipped_margin_for_shape_v1,
     build_child_pair_ccd_request_v1,
     canonical_a3_bullet_numeric_configuration_v1,
     decode_binary_stl_vertices_v1,
@@ -176,6 +177,9 @@ def test_numeric_configuration_is_within_every_adr0024_bound() -> None:
     config = canonical_a3_bullet_numeric_configuration_v1()
 
     assert config.scalar_abi == "float64"
+    assert (
+        config.primitive_collision_margin_policy == "BULLET_3_24_SHIPPED_DEFAULT_PER_SHAPE_INSTANCE"
+    )
     assert config.convex_hull_construction_tolerance_m <= 1e-6
     assert config.convex_hull_outward_padding_m >= 0.002
     assert config.box_collision_margin_m == CONTROLLED_PANDA_BOX_SHIPPED_MARGIN_MAX_M
@@ -187,6 +191,21 @@ def test_numeric_configuration_is_within_every_adr0024_bound() -> None:
     assert config.maximum_ccd_iterations >= 32
     assert config.iteration_exhaustion_rejects
     assert len(config.provenance) == 15
+
+
+@pytest.mark.parametrize(
+    ("kind", "parameters", "expected"),
+    [
+        ("BOX", (0.0633, 0.2044, 0.0919), 0.003165),
+        ("BOX", (0.04, 0.04, 0.04), 0.002),
+        ("CYLINDER", (0.08, 0.2), 0.008),
+        ("CONVEX_HULL", (1.0,), 0.04),
+    ],
+)
+def test_bullet_shipped_margin_is_recomputed_per_shape_instance(
+    kind: str, parameters: tuple[float, ...], expected: float
+) -> None:
+    assert bullet_shipped_margin_for_shape_v1(kind, parameters) == pytest.approx(expected)
 
 
 @pytest.mark.parametrize(
