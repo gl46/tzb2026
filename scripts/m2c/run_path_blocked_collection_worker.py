@@ -225,6 +225,9 @@ from xh_agent.policy.qrm_lite import s4_v4_collection_authorization_v1 as v4_aut
 
 
 ISAAC_IMAGE = "nvcr.io/nvidia/isaac-sim:6.0.1"
+V4_ISAAC_RUNTIME_USER = "isaac-sim"
+V4_ISAAC_RUNTIME_UID = 1234
+V4_ISAAC_RUNTIME_GID = 1234
 TASK_TARGET_PUBLIC_COLOR = "yellow"
 BLOCKER_PUBLIC_COLOR = "red"
 
@@ -609,6 +612,75 @@ def _run_stage_command(
         raise
 
 
+def _require_v4_image_runtime_user(*, image_reference: str) -> None:
+    """Bind writable output ownership to the frozen Isaac image user."""
+
+    completed = subprocess.run(
+        [
+            "docker",
+            "image",
+            "inspect",
+            "--format",
+            "{{.Config.User}}",
+            image_reference,
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    values = completed.stdout.splitlines()
+    if completed.returncode != 0 or len(values) != 1 or values[0].strip() != V4_ISAAC_RUNTIME_USER:
+        raise CollectionAuthorizationError("frozen V4 Isaac image runtime user is not isaac-sim")
+
+
+def _prepare_v4_container_output_directory(
+    path: Path,
+    *,
+    owner_uid: int = V4_ISAAC_RUNTIME_UID,
+    owner_gid: int = V4_ISAAC_RUNTIME_GID,
+) -> None:
+    """Create one private output mount writable by the frozen image user."""
+
+    path.mkdir()
+    os.chown(path, owner_uid, owner_gid)
+    path.chmod(0o700)
+    info = path.stat(follow_symlinks=False)
+    if (
+        not stat.S_ISDIR(info.st_mode)
+        or stat.S_IMODE(info.st_mode) != 0o700
+        or info.st_uid != owner_uid
+        or info.st_gid != owner_gid
+    ):
+        raise CollectionAuthorizationError(
+            "V4 container output directory ownership or mode is unsafe"
+        )
+
+
+def _seal_v4_container_output_directory(path: Path) -> None:
+    """Make a completed V4 container output tree host-read-only."""
+
+    root = path.resolve(strict=True)
+    allowed_owners = {os.geteuid(), V4_ISAAC_RUNTIME_UID}
+    directories = [root]
+    for member in root.rglob("*"):
+        info = member.stat(follow_symlinks=False)
+        if stat.S_ISLNK(info.st_mode) or info.st_uid not in allowed_owners:
+            raise CollectionAuthorizationError(
+                "V4 container output contains unsafe ownership or a symlink"
+            )
+        if stat.S_ISDIR(info.st_mode):
+            directories.append(member)
+        elif stat.S_ISREG(info.st_mode) and info.st_nlink == 1:
+            member.chmod(0o400)
+        else:
+            raise CollectionAuthorizationError(
+                "V4 container output contains a special or multiply-linked file"
+            )
+    for directory in sorted(directories, key=lambda item: len(item.parts), reverse=True):
+        directory.chmod(0o500)
+
+
 def prepare_job(
     args: argparse.Namespace,
     *,
@@ -737,10 +809,14 @@ def prepare_job(
             raise CollectionAuthorizationError("derived probe differs from consumed claim")
     stage_root = job_root / "stage"
     probe_root = job_root / "probe"
-    stage_root.mkdir()
-    probe_root.mkdir()
-    stage_root.chmod(0o700 if protected else 0o777)
-    probe_root.chmod(0o700 if protected else 0o777)
+    if revision == "V4":
+        _prepare_v4_container_output_directory(stage_root)
+        _prepare_v4_container_output_directory(probe_root)
+    else:
+        stage_root.mkdir()
+        probe_root.mkdir()
+        stage_root.chmod(0o700 if protected else 0o777)
+        probe_root.chmod(0o700 if protected else 0o777)
     stage_cmd = stage_command(
         args,
         output=stage_root,
@@ -802,6 +878,17 @@ def prepare_job(
         "runtime_registry_sha256": sha256_file(args.runtime_registry),
         "committed_source_snapshot": (
             claim.committed_source_snapshot.model_dump(mode="json") if protected else None
+        ),
+        "container_runtime_identity": (
+            {
+                "user": V4_ISAAC_RUNTIME_USER,
+                "uid": V4_ISAAC_RUNTIME_UID,
+                "gid": V4_ISAAC_RUNTIME_GID,
+                "writable_output_mode": "0700",
+                "completed_output_mode": "0500_DIRECTORIES_0400_FILES",
+            }
+            if revision == "V4"
+            else None
         ),
         "stage_command": stage_cmd,
         "probe_command": probe_cmd,
@@ -908,6 +995,8 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             raise CollectionAuthorizationError(
                 "resolved Isaac image differs from the consumed claim"
             )
+        if revision == "V4":
+            _require_v4_image_runtime_user(image_reference=container_image_id)
         materialize_snapshot = (
             v4_auth.materialize_committed_source_snapshot
             if revision == "V4"
@@ -946,6 +1035,8 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         stage_completed.stdout + stage_completed.stderr,
         encoding="utf-8",
     )
+    if revision == "V4":
+        _seal_v4_container_output_directory(job_root / "stage")
     if stage_completed.returncode != 0 or not stage_is_valid(
         job_root / "stage",
         sdf=args.sdf,
@@ -1096,6 +1187,11 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
                     cleanup_error = cleanup_error or error
             if cleanup_error is not None:
                 probe_error = cleanup_error
+    if revision == "V4":
+        try:
+            _seal_v4_container_output_directory(job_root / "probe")
+        except BaseException as error:
+            probe_error = probe_error or error
     if probe_error is not None:
         raise probe_error
     assert probe_completed is not None

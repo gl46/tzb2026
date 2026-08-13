@@ -4,13 +4,16 @@ import copy
 from dataclasses import dataclass
 import hashlib
 import json
+import os
 from pathlib import Path
+import stat
 
 import pytest
 
 from m2c.build_s4_v4_training_manifest import build_manifest
 from m2c.derive_model_owned_chain_probe import derive_probe_bytes_v4
 from m2c.package_path_blocked_collection import package_collection
+from m2c import run_path_blocked_collection_worker as worker
 from m2c.run_path_blocked_collection_worker import parse_args
 from xh_agent.policy.qrm_lite.path_blocked_collection_v4 import (
     M2CS4V4TrainingKeyManifestV1,
@@ -91,6 +94,59 @@ def test_v4_worker_has_no_launcher_or_broker_precondition() -> None:
     assert "v4_auth.start_probe_entry_broker" not in run_body
     assert "v4_auth.consume_probe_launch" not in run_body
     assert "v4_auth.terminalize_probe_launch" not in run_body
+
+
+def test_v4_output_mount_uses_frozen_image_uid_and_is_resealed(tmp_path: Path) -> None:
+    output = tmp_path / "container-output"
+    worker._prepare_v4_container_output_directory(
+        output,
+        owner_uid=os.geteuid(),
+        owner_gid=os.getegid(),
+    )
+    assert stat.S_IMODE(output.stat().st_mode) == 0o700
+    payload = output / "payload.json"
+    payload.write_text("{}\n")
+    nested = output / "nested"
+    nested.mkdir()
+    (nested / "receipt.json").write_text("{}\n")
+
+    worker._seal_v4_container_output_directory(output)
+
+    assert stat.S_IMODE(output.stat().st_mode) == 0o500
+    assert stat.S_IMODE(nested.stat().st_mode) == 0o500
+    assert stat.S_IMODE(payload.stat().st_mode) == 0o400
+    assert stat.S_IMODE((nested / "receipt.json").stat().st_mode) == 0o400
+    assert worker.V4_ISAAC_RUNTIME_USER == "isaac-sim"
+    assert (worker.V4_ISAAC_RUNTIME_UID, worker.V4_ISAAC_RUNTIME_GID) == (1234, 1234)
+
+
+def test_v4_runtime_user_is_read_from_exact_image(monkeypatch: pytest.MonkeyPatch) -> None:
+    calls: list[list[str]] = []
+
+    class Completed:
+        returncode = 0
+        stdout = "isaac-sim\n"
+
+    def run_stub(command: list[str], **_kwargs: object) -> Completed:
+        calls.append(command)
+        return Completed()
+
+    monkeypatch.setattr(worker.subprocess, "run", run_stub)
+    worker._require_v4_image_runtime_user(image_reference="sha256:" + "1" * 64)
+    assert calls == [
+        [
+            "docker",
+            "image",
+            "inspect",
+            "--format",
+            "{{.Config.User}}",
+            "sha256:" + "1" * 64,
+        ]
+    ]
+
+    Completed.stdout = "root\n"
+    with pytest.raises(worker.CollectionAuthorizationError, match="runtime user"):
+        worker._require_v4_image_runtime_user(image_reference="sha256:" + "1" * 64)
 
 
 def test_v4_authorization_surface_ends_at_claim_bound_raw_verification() -> None:
