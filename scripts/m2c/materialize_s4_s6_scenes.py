@@ -9,6 +9,9 @@ import json
 from pathlib import Path
 
 from m2c.s4_scene_family import materialize_scene
+from xh_agent.policy.qrm_lite.path_blocked_collection_v4 import (
+    load_v4_training_manifest,
+)
 
 
 PROJECT = Path(__file__).resolve().parents[2]
@@ -33,45 +36,75 @@ def records_for_role(
     }[role]  # type: ignore[return-value]
 
 
-def records_for_v3_train(
+def records_for_versioned_train(
     training: dict[str, object],
     *,
+    revision: str,
     limit: int | None = None,
 ) -> list[dict[str, object]]:
-    """Select the create-only ADR-0021 TRAIN sources; SMOKE is unauthorized."""
+    """Select one exact versioned TRAIN family; SMOKE remains unauthorized."""
 
+    expected = {
+        "V3": (
+            "M2CS4V3TrainingKeyManifestV1",
+            "FROZEN_TRAIN_ONLY_BEFORE_ANY_V3_COLLECTION",
+            "PublicTrackCandidateV3",
+            "M2C_Q012_V3",
+        ),
+        "V4": (
+            "M2CS4V4TrainingKeyManifestV1",
+            "FROZEN_TRAIN_ONLY_BEFORE_ANY_V4_COLLECTION",
+            "PublicTrackCandidateV4",
+            "M2C_Q012_V4",
+        ),
+    }.get(revision)
+    if expected is None:
+        raise ValueError("versioned source materialization revision must be V3 or V4")
+    schema, status, candidate_revision, checkpoint_revision = expected
     if (
-        training.get("schema_version") != "M2CS4V3TrainingKeyManifestV1"
-        or training.get("status") != "FROZEN_TRAIN_ONLY_BEFORE_ANY_V3_COLLECTION"
+        training.get("schema_version") != schema
+        or training.get("status") != status
         or training.get("train_only") is not True
         or training.get("smoke_collection_authorized") is not False
         or training.get("evaluation_collection_authorized") is not False
         or training.get("teacher_used") is not False
         or training.get("privileged_truth_policy_input") is not False
     ):
-        raise ValueError("V3 source materialization requires the frozen TRAIN-only manifest")
+        raise ValueError(f"{revision} source materialization requires its frozen TRAIN manifest")
     records = training.get("training_keys")
     if not isinstance(records, list) or len(records) != 36:
-        raise ValueError("V3 source manifest must contain exactly 36 TRAIN keys")
+        raise ValueError(f"{revision} source manifest must contain exactly 36 TRAIN keys")
     if any(
         not isinstance(record, dict)
         or record.get("role") != "TRAIN"
         or record.get("split") != "train"
-        or record.get("candidate_contract_revision") != "PublicTrackCandidateV3"
+        or record.get("candidate_contract_revision") != candidate_revision
+        or record.get("checkpoint_architecture_revision") != checkpoint_revision
         or record.get("teacher_used") is not False
         or record.get("privileged_truth_policy_input") is not False
         for record in records
     ):
-        raise ValueError("V3 source manifest contains a non-TRAIN or forbidden key")
+        raise ValueError(f"{revision} source manifest contains a non-TRAIN or forbidden key")
     if limit is not None and not 1 <= limit <= len(records):
-        raise ValueError("V3 materialization limit must be in [1, 36]")
+        raise ValueError(f"{revision} materialization limit must be in [1, 36]")
     return records[:limit] if limit is not None else records  # type: ignore[return-value]
+
+
+def records_for_v3_train(
+    training: dict[str, object],
+    *,
+    limit: int | None = None,
+) -> list[dict[str, object]]:
+    """Compatibility wrapper preserving the exact historical V3 contract."""
+
+    return records_for_versioned_train(training, revision="V3", limit=limit)
 
 
 def materialize(
     records: list[dict[str, object]],
     *,
     output_root: Path,
+    collection_authorization_status: str | None = None,
 ) -> dict[str, object]:
     if output_root.exists():
         raise FileExistsError(f"refusing to overwrite scene source root: {output_root}")
@@ -111,7 +144,7 @@ def materialize(
                 "supervision_sha256": record["supervision_sha256"],
             }
         )
-    receipt = {
+    receipt: dict[str, object] = {
         "schema_version": "M2CS4S6SceneMaterializationReceiptV1",
         "status": "MATERIALIZED_OFFLINE_NO_ISAAC_EXECUTION",
         "records": written,
@@ -120,6 +153,8 @@ def materialize(
         "teacher_used": False,
         "privileged_truth_policy_input": False,
     }
+    if collection_authorization_status is not None:
+        receipt["collection_authorization_status"] = collection_authorization_status
     (output_root / "materialization-receipt.json").write_text(
         json.dumps(receipt, indent=2, sort_keys=True) + "\n"
     )
@@ -144,20 +179,38 @@ def main() -> int:
         action="store_true",
         help="consume M2CS4V3TrainingKeyManifestV1; role must be TRAIN",
     )
+    parser.add_argument(
+        "--v4-train-only",
+        action="store_true",
+        help="consume M2CS4V4TrainingKeyManifestV1; role must be TRAIN",
+    )
     parser.add_argument("--limit", type=int)
     parser.add_argument("--output-root", type=Path, required=True)
     args = parser.parse_args()
-    training = json.loads(args.training_manifest.read_text())
+    training = (
+        load_v4_training_manifest(args.training_manifest).model_dump(mode="json")
+        if args.v4_train_only
+        else json.loads(args.training_manifest.read_text())
+    )
     evaluation = json.loads(args.evaluation_manifest.read_text())
-    if args.v3_train_only and args.role != "TRAIN":
-        parser.error("--v3-train-only authorizes role TRAIN only")
+    if args.v3_train_only and args.v4_train_only:
+        parser.error("choose exactly one versioned TRAIN-only mode")
+    if (args.v3_train_only or args.v4_train_only) and args.role != "TRAIN":
+        parser.error("versioned TRAIN-only modes authorize role TRAIN only")
     receipt = materialize(
         (
-            records_for_v3_train(training, limit=args.limit)
-            if args.v3_train_only
+            records_for_versioned_train(
+                training,
+                revision="V4" if args.v4_train_only else "V3",
+                limit=args.limit,
+            )
+            if args.v3_train_only or args.v4_train_only
             else records_for_role(training, evaluation, args.role)
         ),
         output_root=args.output_root,
+        collection_authorization_status=(
+            "NOT_AUTHORIZED_FOR_COLLECTION" if args.v4_train_only else None
+        ),
     )
     print(json.dumps({"status": receipt["status"], "scenes": len(receipt["records"])}))
     return 0

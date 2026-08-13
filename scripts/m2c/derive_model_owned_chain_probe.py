@@ -887,12 +887,355 @@ def derive_probe_bytes_v3(upstream: bytes) -> bytes:
     return source.encode("utf-8")
 
 
-def derive_probe_file(upstream: Path, output: Path, *, revision: str = "V2") -> str:
-    derived = (
-        derive_probe_bytes_v3(upstream.read_bytes())
-        if revision == "V3"
-        else derive_probe_bytes(upstream.read_bytes())
+def derive_probe_bytes_v4(upstream: bytes) -> bytes:
+    """Derive ADR-0024 V4 raw capture-history collection plumbing.
+
+    The Isaac process records only unassociated public RGB-D detections,
+    ordered public robot-proprioception samples, the last physically executed
+    public skill, and exact public frame/calibration fields.  It intentionally
+    does not assign V2 identities: the host packager independently constructs
+    the journal, replays ``PublicTrackAssociatorV2``, and builds V4 K=8 slots.
+    """
+
+    source = derive_probe_bytes_v3(upstream).decode("utf-8")
+    source = _replace_once(
+        source,
+        "from xh_agent.policy.qrm_lite.public_tracks_v3 import (\n"
+        "    build_public_track_candidates_v3,\n"
+        "    canonical_candidate_payload_v3,\n"
+        "    canonical_candidate_sha256_v3,\n"
+        ")\n",
+        """from xh_agent.perception.public_track_associator_v2 import (
+    PublicAssociationProtocolV2,
+    PublicBBoxOrMaskV2,
+    PublicDetectionAttributesV2,
+    PublicRGBDDetectionV2,
+    PublicRobotProprioceptionV2,
+)
+""",
     )
+    source = _replace_once(
+        source,
+        "from xh_agent.policy.qrm_lite.s4_v3_collection_authorization_v1 import (\n"
+        "    authorize_probe_start,\n"
+        ")\n",
+        """from xh_agent.policy.qrm_lite.s4_v4_collection_authorization_v1 import (
+    bind_consumed_claim_to_raw_session,
+)
+""",
+    )
+    source = source.replace(
+        '    parser.add_argument("--m2c-probe-start-capability", type=Path, required=True)\n'
+        '    parser.add_argument("--m2c-probe-entry-broker-socket", type=Path, required=True)\n'
+        '    parser.add_argument("--m2c-probe-entry-token-file", type=Path, required=True)\n',
+        "",
+        1,
+    )
+    authorization_start = source.index("M2C_V3_COLLECTION_AUTHORIZATION = authorize_probe_start(")
+    authorization_end = source.index(
+        ').model_dump(mode="json")\n\n',
+        authorization_start,
+    ) + len(').model_dump(mode="json")\n\n')
+    source = (
+        source[:authorization_start]
+        + """M2C_V3_COLLECTION_AUTHORIZATION = bind_consumed_claim_to_raw_session(
+    claim_path=ARGS.m2c_collection_claim,
+    source_snapshot_root=ARGS.m2c_source_snapshot_root,
+    matched_key=ARGS.m2c_matched_key,
+    failure_seed=ARGS.m2c_failure_seed,
+    source_sdf_sha256=sha256_file(ARGS.sdf),
+    source_supervision_sha256=sha256_file(ARGS.supervision),
+    source_urdf_sha256=sha256_file(ARGS.urdf),
+    upstream_v4_probe_sha256="6623b1ce1dc5b289e1166ce7a59ea742fa6de2c3595d4818ab65ef03f0553f87",
+    derived_probe_sha256=sha256_file(__file__),
+    container_image_id=ARGS.m2c_container_image_id,
+    role=ARGS.m2c_chain_role,
+    split=ARGS.m2c_split,
+    declared_target_attribute=ARGS.m2c_declared_target_attribute,
+    destination_cell=f"BIN_CELL_{ARGS.m2c_scripted_safe_place_bin_cell}",
+).model_dump(mode="json")
+
+"""
+        + source[authorization_end:]
+    )
+    source = source.replace("M2C_V3_COLLECTION_AUTHORIZATION", "M2C_V4_COLLECTION_AUTHORIZATION")
+    source = _replace_once(
+        source,
+        "def _m2c_now_ns() -> int:\n",
+        """M2C_V4_PROPRIOCEPTION_JOURNAL: list[dict[str, object]] = []
+M2C_V4_LAST_EXECUTED_PUBLIC_SKILL: dict[str, object] | None = None
+
+
+def _m2c_now_ns() -> int:
+""",
+    )
+    source = _replace_once(
+        source,
+        "def _m2c_capture(\n",
+        """def _m2c_v4_public_proprioception(
+    *,
+    timestamp_ns: int,
+) -> dict[str, object]:
+    position, orientation_wxyz = _live_pose(M2C_V4_PUBLIC_HAND_PRIM)
+    finger_positions = _array_or_list(M2C_V4_PUBLIC_ROBOT.get_dof_positions())[0][-2:]
+    width_m = float(sum(float(value) for value in finger_positions))
+    return PublicRobotProprioceptionV2(
+        timestamp_ns=timestamp_ns,
+        world_frame="world",
+        end_effector_position_world_m=[float(value) for value in position],
+        end_effector_orientation_world_xyzw=[
+            float(orientation_wxyz[1]),
+            float(orientation_wxyz[2]),
+            float(orientation_wxyz[3]),
+            float(orientation_wxyz[0]),
+        ],
+        gripper_width_m=width_m,
+        gripper_closed=bool(width_m <= 0.002),
+    ).model_dump(mode="json")
+
+
+def _m2c_v4_record_proprioception_sample() -> None:
+    if "M2C_V4_PUBLIC_ROBOT" not in globals():
+        return
+    timestamp_ns = _m2c_now_ns()
+    if M2C_V4_PROPRIOCEPTION_JOURNAL and int(
+        M2C_V4_PROPRIOCEPTION_JOURNAL[-1]["timestamp_ns"]
+    ) == timestamp_ns:
+        return
+    M2C_V4_PROPRIOCEPTION_JOURNAL.append(
+        _m2c_v4_public_proprioception(timestamp_ns=timestamp_ns)
+    )
+
+
+def _m2c_capture(
+""",
+    )
+    capture_start = source.index("def _m2c_capture(\n")
+    selector_start = source.index("\n\ndef _m2c_select_public_track(\n", capture_start)
+    replacement = r"""def _m2c_capture(
+    runtime: dict[str, Any],
+    *,
+    step_index: int,
+    skill: str,
+) -> tuple[list[Any], dict[str, object]]:
+    tracks = _capture_m2b_public_rgbd(
+        runtime, label=f"m2c_step_{step_index:02d}_{skill.lower()}"
+    )
+    capture = runtime["captures"][-1]
+    timestamp_ns = int(capture["timestamp_ns"])
+    _m2c_v4_record_proprioception_sample()
+    interval_start_ns = (
+        timestamp_ns
+        if not M2C_V4_RAW_ASSOCIATION_CAPTURES
+        else int(M2C_V4_RAW_ASSOCIATION_CAPTURES[-1]["timestamp_ns"])
+    )
+    interval_samples = [
+        sample
+        for sample in M2C_V4_PROPRIOCEPTION_JOURNAL
+        if interval_start_ns <= int(sample["timestamp_ns"]) <= timestamp_ns
+    ]
+    if not interval_samples or int(interval_samples[-1]["timestamp_ns"]) != timestamp_ns:
+        raise RuntimeError("V4 public proprioception journal lacks the capture endpoint")
+    if not M2C_V4_RAW_ASSOCIATION_CAPTURES:
+        interval_samples = [interval_samples[-1]]
+    detections = []
+    for result in runtime["last_unassociated_public_results"]:
+        detections.append(
+            PublicRGBDDetectionV2(
+                timestamp_ns=timestamp_ns,
+                frame_id="m2b_policy_rgbd_optical",
+                category=result.category,
+                attributes=PublicDetectionAttributesV2(
+                    visual_color=result.attributes.get("visual_color")
+                ),
+                position_3d=[float(value) for value in result.position_3d],
+                confidence=float(result.confidence),
+                bbox_or_mask=PublicBBoxOrMaskV2(
+                    x=int(result.bbox_or_mask.x),
+                    y=int(result.bbox_or_mask.y),
+                    width=int(result.bbox_or_mask.width),
+                    height=int(result.bbox_or_mask.height),
+                ),
+                visibility=float(result.visibility),
+                covariance_or_quality={
+                    str(key): float(value)
+                    for key, value in result.covariance_or_quality.items()
+                },
+            ).model_dump(mode="json")
+        )
+    raw_capture = {
+        "schema_version": "M2CV4RawPublicAssociationCaptureV1",
+        "timestamp_ns": timestamp_ns,
+        "camera_frame": "m2b_policy_rgbd_optical",
+        "world_frame": "world",
+        "position_units": "m",
+        "camera_to_world_row_major": [
+            float(value) for value in runtime["camera_to_world_optical"]
+        ],
+        "detections": detections,
+        "proprioception_interval": interval_samples,
+        "last_physically_executed_public_skill": M2C_V4_LAST_EXECUTED_PUBLIC_SKILL,
+        "rgb_uri": capture["rgb_uri"],
+        "depth_uri": capture["depth_uri"],
+        "rgb_sha256": capture["rgb_sha256"],
+        "depth_sha256": capture["depth_sha256"],
+    }
+    raw_capture_receipt_sha256 = __import__("hashlib").sha256(
+        json.dumps(raw_capture, sort_keys=True, separators=(",", ":")).encode()
+    ).hexdigest()
+    M2C_V4_RAW_ASSOCIATION_CAPTURES.append(raw_capture)
+    observation = {
+        "schema_version": "PathBlockedRawPublicObservationV4",
+        "observation_id": f"{ARGS.m2c_matched_key}-observation-{step_index}",
+        "captured_at_ns": timestamp_ns,
+        "source": "PUBLIC_RGBD",
+        "fresh": True,
+        "rgb_uri": capture["rgb_uri"],
+        "depth_uri": capture["depth_uri"],
+        "rgb_sha256": capture["rgb_sha256"],
+        "depth_sha256": capture["depth_sha256"],
+        "capture_receipt_sha256": raw_capture_receipt_sha256,
+        "association_capture_index": len(M2C_V4_RAW_ASSOCIATION_CAPTURES) - 1,
+        "declared_target_attribute": ARGS.m2c_declared_target_attribute,
+        "teacher_used": False,
+        "privileged_truth_policy_input": False,
+        "task_target_track_id_used_for_candidates": False,
+    }
+    return tracks, observation"""
+    source = source[:capture_start] + replacement + source[selector_start:]
+    # Capture the geometric detector outputs before the legacy V1 tracker can
+    # influence V4 evidence. The legacy snapshots are retained only for the
+    # inherited scripted physical selector, never as V4 model input.
+    source = _replace_once(
+        source,
+        "    snapshots = snapshots_from_perception_results(\n"
+        "        public_results,\n"
+        '        runtime["camera_to_world_optical"],\n'
+        "    )\n",
+        """    runtime["last_unassociated_public_results"] = public_results
+    snapshots = snapshots_from_perception_results(
+        public_results,
+        runtime["camera_to_world_optical"],
+    )
+""",
+    )
+    source = _replace_once(
+        source,
+        "def main() -> int:\n",
+        """def main() -> int:
+    global M2C_V4_PUBLIC_ROBOT
+    global M2C_V4_PUBLIC_HAND_PRIM
+    global M2C_V4_RAW_ASSOCIATION_CAPTURES
+    global M2C_V4_PROPRIOCEPTION_JOURNAL
+    global M2C_V4_LAST_EXECUTED_PUBLIC_SKILL
+    M2C_V4_RAW_ASSOCIATION_CAPTURES = []
+    M2C_V4_PROPRIOCEPTION_JOURNAL = []
+    M2C_V4_LAST_EXECUTED_PUBLIC_SKILL = None
+""",
+    )
+    source = _replace_once(
+        source,
+        "    target_object_prim = RigidPrim(target_object_path)\n",
+        """    target_object_prim = RigidPrim(target_object_path)
+    M2C_V4_PUBLIC_ROBOT = robot
+    M2C_V4_PUBLIC_HAND_PRIM = hand_prim
+""",
+    )
+    # Record every public 60 Hz control update, including gripper motion, so
+    # whole-interval HAND_CARRY eligibility is replayable without a claimed
+    # completeness boolean.
+    instrumented_lines: list[str] = []
+    for line in source.splitlines(keepends=True):
+        instrumented_lines.append(line)
+        if line.lstrip() == "simulation_app.update()\n":
+            indentation = line[: len(line) - len(line.lstrip())]
+            instrumented_lines.append(indentation + "_m2c_v4_record_proprioception_sample()\n")
+    source = "".join(instrumented_lines)
+    source = _replace_once(
+        source,
+        "def _m2c_receipt(\n",
+        """def _m2c_v4_mark_last_skill(*, skill: str, started_at_ns: int, completed_at_ns: int) -> None:
+    global M2C_V4_LAST_EXECUTED_PUBLIC_SKILL
+    M2C_V4_LAST_EXECUTED_PUBLIC_SKILL = {
+        "schema_version": "LastPhysicallyExecutedPublicSkillV2",
+        "skill_name": skill,
+        "started_at_ns": started_at_ns,
+        "completed_at_ns": completed_at_ns,
+    }
+
+
+def _m2c_receipt(
+""",
+    )
+    source = _replace_once(
+        source,
+        '    digest = __import__("hashlib").sha256(\n',
+        """    _m2c_v4_mark_last_skill(
+        skill=skill,
+        started_at_ns=started_at_ns,
+        completed_at_ns=completed_at_ns,
+    )
+    digest = __import__("hashlib").sha256(
+""",
+    )
+    # Raw V4 steps deliberately contain no tracker-generated pointer. The host
+    # replay injects V4 observations/pointers before schema validation.
+    step_start = source.index("def _m2c_step(\n")
+    next_function = source.index("\n\ndef _execute_m2b_public_regrasp(\n", step_start)
+    step_replacement = r"""def _m2c_step(
+    *,
+    step_index: int,
+    skill: str,
+    observation: dict[str, object],
+    target_track_id: str | None,
+    destination_cell: str | None,
+    receipt: dict[str, object],
+) -> dict[str, object]:
+    return {
+        "schema_version": "PathBlockedRawPhysicalStepEvidenceV4",
+        "decision_index": step_index,
+        "observation": observation,
+        "scripted_public_selector_color": (
+            ARGS.m2b_injected_public_grasp_color
+            if step_index <= 4
+            else ARGS.m2b_task_target_public_color
+            if step_index >= 6
+            else None
+        ),
+        "destination_cell_label": destination_cell,
+        "physical_receipts": [receipt],
+        "label_source": "PUBLIC_RGBD_PHYSICAL_SUPERVISION",
+        "teacher_used": False,
+        "privileged_truth_policy_input": False,
+    }"""
+    source = source[:step_start] + step_replacement + source[next_function:]
+    source = source.replace(
+        '"schema_version": "M2CPathBlockedProbeChainV3",',
+        '"schema_version": "M2CPathBlockedRawProbeChainV4",',
+        1,
+    )
+    source = source.replace('"PublicTrackCandidateV3"', '"PublicTrackCandidateV4"')
+    source = source.replace('"M2C_Q012_V3"', '"M2C_Q012_V4"')
+    source = source.replace(
+        '            "m2c_v3_collection_authorization": M2C_V4_COLLECTION_AUTHORIZATION,\n',
+        '            "m2c_v4_collection_authorization": M2C_V4_COLLECTION_AUTHORIZATION,\n'
+        '            "m2c_v4_raw_association_captures": M2C_V4_RAW_ASSOCIATION_CAPTURES,\n',
+        1,
+    )
+    source = source.replace(
+        '"collection_authorization_sha256": __import__("hashlib").sha256(',
+        '"collection_authorization_sha256": __import__("hashlib").sha256(',
+        1,
+    )
+    return source.encode("utf-8")
+
+
+def derive_probe_file(upstream: Path, output: Path, *, revision: str = "V2") -> str:
+    derived = {
+        "V2": derive_probe_bytes,
+        "V3": derive_probe_bytes_v3,
+        "V4": derive_probe_bytes_v4,
+    }[revision](upstream.read_bytes())
     output.write_bytes(derived)
     output.chmod(0o555)
     return sha256_bytes(derived)
@@ -993,7 +1336,7 @@ def main() -> int:
     parser.add_argument("--runtime-registry", type=Path)
     parser.add_argument("--collection-manifest-output", type=Path)
     parser.add_argument("--s6-exclusion-output", type=Path)
-    parser.add_argument("--revision", choices=("V2", "V3"), default="V2")
+    parser.add_argument("--revision", choices=("V2", "V3", "V4"), default="V2")
     args = parser.parse_args()
     if args.output.exists():
         raise FileExistsError(f"refusing to overwrite derived probe: {args.output}")

@@ -137,8 +137,8 @@ def _preimport_v3_checkout_guard(*, project_root: Path, prereg_path: Path) -> No
 
 def _run_cli_preimport_guard() -> None:
     argv = sys.argv[1:]
-    revision = _bootstrap_option(argv, "--revision") or "V3"
-    if revision == "V2":
+    revision = _bootstrap_option(argv, "--revision") or "V4"
+    if revision in {"V2", "V4"}:
         return
     if not (
         sys.flags.isolated
@@ -180,6 +180,7 @@ if __name__ == "__main__":
 from m2c.derive_model_owned_chain_probe import (  # noqa: E402
     derive_probe_bytes,
     derive_probe_bytes_v3,
+    derive_probe_bytes_v4,
 )
 from m2c.s4_scene_family import SCRIPTED_BLOCKER_ENTITY, TARGET_ENTITY  # noqa: E402
 from m2c.package_path_blocked_collection import (  # noqa: E402
@@ -197,6 +198,9 @@ from xh_agent.policy.qrm_lite.m2c_hard_freeze import (  # noqa: E402
 )
 from xh_agent.policy.qrm_lite.path_blocked_supervision_v3 import (  # noqa: E402
     load_v3_training_manifest,
+)
+from xh_agent.policy.qrm_lite.path_blocked_collection_v4 import (  # noqa: E402
+    load_v4_training_manifest,
 )
 from xh_agent.policy.qrm_lite.s4_v3_collection_authorization_v1 import (  # noqa: E402
     CollectionAuthorizationError,
@@ -217,6 +221,7 @@ from xh_agent.policy.qrm_lite.s4_v3_collection_authorization_v1 import (  # noqa
     terminalize_probe_launch,
     verify_consumed_collection_key,
 )
+from xh_agent.policy.qrm_lite import s4_v4_collection_authorization_v1 as v4_auth  # noqa: E402
 
 
 ISAAC_IMAGE = "nvcr.io/nvidia/isaac-sim:6.0.1"
@@ -325,9 +330,8 @@ def probe_command(
     collection_probe_entry_token_file: Path | None = None,
     source_snapshot_root: Path | None = None,
 ) -> list[str]:
-    image_reference = (
-        container_image_id if _revision(args) == "V3" and container_image_id else args.image
-    )
+    protected = _revision(args) in {"V3", "V4"}
+    image_reference = container_image_id if protected and container_image_id else args.image
     command = [
         "docker",
         "run",
@@ -401,46 +405,55 @@ def probe_command(
                 "--m2c-declared-target-attribute",
                 str(source_record["declared_target_attribute"]),
             ]
-            if _revision(args) == "V3"
+            if protected
             else []
         ),
     ]
-    if _revision(args) == "V3":
+    if protected:
+        revision = _revision(args)
         if (
             collection_prereg is None
             or collection_claim is None
-            or collection_start_capability is None
-            or collection_probe_entry_broker_socket is None
-            or collection_probe_entry_token_file is None
             or source_snapshot_root is None
+            or (
+                revision == "V3"
+                and (
+                    collection_start_capability is None
+                    or collection_probe_entry_broker_socket is None
+                    or collection_probe_entry_token_file is None
+                )
+            )
         ):
-            raise CollectionAuthorizationError("V3 probe command lacks collection authorization")
+            raise CollectionAuthorizationError(
+                f"{_revision(args)} probe command lacks collection authorization"
+            )
         if container_image_id is None:
-            raise CollectionAuthorizationError("V3 probe command lacks the resolved image ID")
-        # The host creates the stage-bound capability after validating the
-        # stage. Claims, capabilities, broker socket, and one-shot token are
-        # all read-only to the container; only the host may publish receipts.
+            raise CollectionAuthorizationError(
+                f"{_revision(args)} probe command lacks the resolved image ID"
+            )
+        # V4 uses ADR-0024's accepted immutable-snapshot + create-only claim
+        # evidence bar. V3 retains its historical launcher/broker plumbing.
         ledger_root = Path(collection_prereg.prereg.ledger_root)
         command[command.index(f"{args.project_root}:/workspace/project:ro")] = (
             f"{source_snapshot_root}:/workspace/project:ro"
         )
-        command[command.index("-w") : command.index("-w")] = [
+        mounts = [
             "-v",
             f"{ledger_root}:{ledger_root}:ro",
-            "-v",
-            f"{Path(collection_probe_entry_broker_socket).parent}:"
-            f"{Path(collection_probe_entry_broker_socket).parent}:ro",
         ]
+        if revision == "V3":
+            mounts.extend(
+                [
+                    "-v",
+                    f"{Path(collection_probe_entry_broker_socket).parent}:"
+                    f"{Path(collection_probe_entry_broker_socket).parent}:ro",
+                ]
+            )
+        command[command.index("-w") : command.index("-w")] = mounts
         command.extend(
             [
                 "--m2c-collection-claim",
                 str(collection_claim),
-                "--m2c-probe-start-capability",
-                str(collection_start_capability),
-                "--m2c-probe-entry-broker-socket",
-                str(collection_probe_entry_broker_socket),
-                "--m2c-probe-entry-token-file",
-                str(collection_probe_entry_token_file),
                 "--m2c-source-snapshot-root",
                 "/workspace/project",
                 "--m2c-container-image-id",
@@ -464,6 +477,17 @@ def probe_command(
                 canonical_path_sha256(output),
             ]
         )
+        if revision == "V3":
+            command.extend(
+                [
+                    "--m2c-probe-start-capability",
+                    str(collection_start_capability),
+                    "--m2c-probe-entry-broker-socket",
+                    str(collection_probe_entry_broker_socket),
+                    "--m2c-probe-entry-token-file",
+                    str(collection_probe_entry_token_file),
+                ]
+            )
         digest_index = command.index("--m2c-docker-command-sha256") + 1
         command[digest_index] = canonical_sha256(command)
     return command
@@ -597,11 +621,12 @@ def prepare_job(
     """Fail closed on sources/key, derive the probe, and return exact commands."""
 
     revision = _revision(args)
-    if revision == "V3" and (
+    protected = revision in {"V3", "V4"}
+    if protected and (
         collection_prereg is None or collection_claim is None or source_snapshot_root is None
     ):
         raise CollectionAuthorizationError(
-            "V3 collection requires a committed preregistration and consumed key claim"
+            f"{revision} collection requires a committed preregistration and consumed key claim"
         )
     for root, label in (
         (args.project_root, "project root"),
@@ -624,11 +649,18 @@ def prepare_job(
         if not source.is_file():
             raise ValueError(f"{label} is missing: {source}")
 
-    if revision == "V3":
-        expected_derived = derived_probe_bytes or derive_probe_bytes_v3(
-            args.upstream_v4_probe.read_bytes()
+    if protected:
+        expected_derived = derived_probe_bytes or (
+            derive_probe_bytes_v4(args.upstream_v4_probe.read_bytes())
+            if revision == "V4"
+            else derive_probe_bytes_v3(args.upstream_v4_probe.read_bytes())
         )
-        claim = verify_consumed_collection_key(
+        verify_claim = (
+            v4_auth.verify_consumed_collection_key
+            if revision == "V4"
+            else verify_consumed_collection_key
+        )
+        claim = verify_claim(
             resolved=collection_prereg,
             claim_path=collection_claim,
             matched_key=args.matched_key,
@@ -643,14 +675,16 @@ def prepare_job(
             declared_target_attribute="yellow",
         )
         if args.role != "TRAIN":
-            raise ValueError("ADR-0021 V3 collection authorizes TRAIN only; SMOKE is excluded")
-        manifest = load_v3_training_manifest(args.training_keys)
+            raise ValueError(f"{revision} collection authorizes TRAIN only; SMOKE is excluded")
+        manifest = (
+            load_v4_training_manifest(args.training_keys)
+            if revision == "V4"
+            else load_v3_training_manifest(args.training_keys)
+        )
         matches = [item for item in manifest.training_keys if item.matched_key == args.matched_key]
         if len(matches) != 1:
-            raise ValueError("worker key is not exactly once in frozen V3 TRAIN manifest")
+            raise ValueError(f"worker key is not exactly once in frozen {revision} TRAIN manifest")
         record = matches[0].model_dump(mode="json")
-        # Independently load the S6 identities; this is additional to the
-        # manifest's source/exclusion binding.
         s6_payload = load_json_object(args.s6_keys, label="S6 key manifest")
         s6_records = s6_payload.get("evaluation_keys", [])
         if any(
@@ -661,8 +695,9 @@ def prepare_job(
             )
             for item in s6_records
         ) or int(record["scene_seed"]) in {9038, 9057, 9077}:
-            raise ValueError("worker request overlaps V4 or frozen S6")
+            raise ValueError("worker request overlaps V4 Q-A or frozen S6")
     else:
+        expected_derived = derive_probe_bytes(args.upstream_v4_probe.read_bytes())
         training, _s6, collection, s6 = project_frozen_manifests(
             args.training_keys,
             args.s6_keys,
@@ -693,13 +728,9 @@ def prepare_job(
         raise FileExistsError(f"refusing to overwrite collection job: {job_root}")
     job_root.mkdir(parents=True, exist_ok=False)
     derived = job_root / "derived-path-blocked-probe.py"
-    derived.write_bytes(
-        expected_derived
-        if revision == "V3"
-        else derive_probe_bytes(args.upstream_v4_probe.read_bytes())
-    )
+    derived.write_bytes(expected_derived)
     derived.chmod(0o555)
-    if revision == "V3":
+    if protected:
         # The exact derived source is part of the consumed capability. It is
         # checked again by the probe before Kit and by the packager.
         if claim.derived_probe_sha256 != sha256_file(derived):
@@ -708,13 +739,13 @@ def prepare_job(
     probe_root = job_root / "probe"
     stage_root.mkdir()
     probe_root.mkdir()
-    stage_root.chmod(0o700 if revision == "V3" else 0o777)
-    probe_root.chmod(0o700 if revision == "V3" else 0o777)
+    stage_root.chmod(0o700 if protected else 0o777)
+    probe_root.chmod(0o700 if protected else 0o777)
     stage_cmd = stage_command(
         args,
         output=stage_root,
-        image_reference=container_image_id if revision == "V3" else None,
-        project_mount=source_snapshot_root if revision == "V3" else None,
+        image_reference=container_image_id if protected else None,
+        project_mount=source_snapshot_root if protected else None,
     )
     collection_start = (
         probe_start_capability_path(
@@ -746,12 +777,10 @@ def prepare_job(
         container_image_id=container_image_id,
     )
     job_receipt: dict[str, Any] = {
-        "schema_version": (
-            "M2CPathBlockedCollectionJobV3" if revision == "V3" else "M2CPathBlockedCollectionJobV2"
-        ),
+        "schema_version": (f"M2CPathBlockedCollectionJob{revision}"),
         "collection_contract_revision": revision,
-        "candidate_contract_revision": ("PublicTrackCandidateV3" if revision == "V3" else None),
-        "checkpoint_architecture_revision": ("M2C_Q012_V3" if revision == "V3" else "M2C_Q012_V2"),
+        "candidate_contract_revision": (f"PublicTrackCandidate{revision}" if protected else None),
+        "checkpoint_architecture_revision": f"M2C_Q012_{revision}",
         "status": "DRY_RUN_NOT_EXECUTED" if args.dry_run else "PREPARED_NOT_EXECUTED",
         "matched_key": args.matched_key,
         "scene_seed": record["scene_seed"],
@@ -772,7 +801,7 @@ def prepare_job(
         "s6_key_manifest_sha256": sha256_file(args.s6_keys),
         "runtime_registry_sha256": sha256_file(args.runtime_registry),
         "committed_source_snapshot": (
-            claim.committed_source_snapshot.model_dump(mode="json") if revision == "V3" else None
+            claim.committed_source_snapshot.model_dump(mode="json") if protected else None
         ),
         "stage_command": stage_cmd,
         "probe_command": probe_cmd,
@@ -783,9 +812,9 @@ def prepare_job(
         "training_executed": False,
         "evaluation_executed": False,
     }
-    if revision == "V3":
+    if protected:
         job_receipt["collection_authorization"] = {
-            "schema_version": "M2CS4V3JobAuthorizationBindingV1",
+            "schema_version": f"M2CS4{revision}JobAuthorizationBindingV1",
             "prereg_repository_path": collection_prereg.prereg.repository_relative_path,
             "prereg_file_sha256": collection_prereg.file_sha256,
             "prereg_sha256": collection_prereg.prereg.prereg_sha256,
@@ -801,7 +830,7 @@ def prepare_job(
             "formal_q_b_evaluation": False,
         }
     _write_new(
-        job_root / ("collection-job-v3.json" if revision == "V3" else "collection-job-v2.json"),
+        job_root / f"collection-job-{revision.lower()}.json",
         job_receipt,
     )
     return job_receipt, stage_cmd, probe_cmd
@@ -809,19 +838,28 @@ def prepare_job(
 
 def run(args: argparse.Namespace) -> dict[str, Any]:
     revision = _revision(args)
+    protected = revision in {"V3", "V4"}
     collection_prereg: ResolvedCollectionPreregV1 | None = None
     collection_claim: Path | None = None
     container_image_id: str | None = None
     derived_probe_bytes: bytes | None = None
     source_snapshot_root: Path | None = None
-    if revision == "V3":
+    if protected:
         if args.collection_prereg is None or args.collection_ledger_root is None:
             raise CollectionAuthorizationError(
-                "V3 collection has no active committed preregistration/ledger"
+                f"{revision} collection has no active committed preregistration/ledger"
             )
-        collection_prereg = load_committed_collection_prereg(
-            project_root=args.project_root,
-            prereg_path=args.collection_prereg,
+        auth = v4_auth if revision == "V4" else None
+        collection_prereg = (
+            auth.load_committed_collection_prereg(
+                project_root=args.project_root,
+                prereg_path=args.collection_prereg,
+            )
+            if auth is not None
+            else load_committed_collection_prereg(
+                project_root=args.project_root,
+                prereg_path=args.collection_prereg,
+            )
         )
         if Path(collection_prereg.prereg.ledger_root) != args.collection_ledger_root:
             raise CollectionAuthorizationError(
@@ -836,19 +874,26 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         # dry validation; a V3 worker dry-run is intentionally unavailable.
         if args.dry_run:
             raise CollectionAuthorizationError(
-                "V3 dry-run is disabled because it would emit an executable unconsumed probe"
+                f"{revision} dry-run is disabled because it would emit an executable unconsumed probe"
             )
         require_pre_freeze(M2CExperimentAction.ISAAC_COLLECTION)
         if sha256_file(args.upstream_v4_probe) != FROZEN_UPSTREAM_V4_PROBE_SHA256:
             raise CollectionAuthorizationError("upstream V4 probe identity is not frozen")
-        derived_probe_bytes = derive_probe_bytes_v3(args.upstream_v4_probe.read_bytes())
+        derived_probe_bytes = (
+            derive_probe_bytes_v4(args.upstream_v4_probe.read_bytes())
+            if revision == "V4"
+            else derive_probe_bytes_v3(args.upstream_v4_probe.read_bytes())
+        )
         # Consume the one physical-attempt authorization before any Docker
         # access or source-snapshot materialization.  The immutable image ID
         # is already part of the human-visible preregistration; resolving the
         # local tag after the claim is a fail-closed availability check and a
         # failure never refunds or replaces the selected key.
         container_image_id = collection_prereg.prereg.container_image_id
-        collection_claim = consume_collection_key(
+        consume_claim = (
+            v4_auth.consume_collection_key if revision == "V4" else consume_collection_key
+        )
+        collection_claim = consume_claim(
             resolved=collection_prereg,
             matched_key=args.matched_key,
             source_urdf_sha256=sha256_file(args.urdf),
@@ -856,11 +901,19 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             derived_probe_sha256=hashlib.sha256(derived_probe_bytes).hexdigest(),
             container_image_id=container_image_id,
         )
-        if resolve_docker_image_id(image=args.image) != container_image_id:
+        resolve_image = (
+            v4_auth.resolve_docker_image_id if revision == "V4" else resolve_docker_image_id
+        )
+        if resolve_image(image=args.image) != container_image_id:
             raise CollectionAuthorizationError(
                 "resolved Isaac image differs from the consumed claim"
             )
-        source_snapshot_root = materialize_committed_source_snapshot(
+        materialize_snapshot = (
+            v4_auth.materialize_committed_source_snapshot
+            if revision == "V4"
+            else materialize_committed_source_snapshot
+        )
+        source_snapshot_root = materialize_snapshot(
             project_root=args.project_root,
             expected=collection_prereg.prereg.committed_source_snapshot,
         )
@@ -900,6 +953,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         urdf=args.urdf,
     ):
         raise RuntimeError("Isaac stage builder failed its hash-bound acceptance gate")
+    broker = None
     if revision == "V3":
         assert collection_prereg is not None
         assert collection_claim is not None
@@ -973,8 +1027,12 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             issued=issued_start,
             accept_timeout_s=args.probe_timeout_s,
         )
-    else:
-        broker = None
+    elif revision == "V4":
+        for stage_member in (
+            job_root / "stage" / "m1b_physics_scene.usdc",
+            job_root / "stage" / "metrics.json",
+        ):
+            stage_member.chmod(0o400)
     probe_console = job_root / "probe" / "console.log"
     raw_probe = job_root / "probe" / "actuation-probe.json"
     probe_completed: subprocess.CompletedProcess[str] | None = None
@@ -1055,9 +1113,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         derived_probe_path=job_root / "derived-path-blocked-probe.py",
         upstream_v4_probe_path=args.upstream_v4_probe,
         revision=_revision(args),
-        collection_prereg_path=(
-            getattr(args, "collection_prereg", None) if revision == "V3" else None
-        ),
+        collection_prereg_path=(getattr(args, "collection_prereg", None) if protected else None),
         collection_claim_path=collection_claim,
     )
     return {
@@ -1080,7 +1136,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--output-root", required=True, type=Path)
     parser.add_argument("--packaged-output-root", required=True, type=Path)
     parser.add_argument("--role", choices=("TRAIN", "SMOKE"), required=True)
-    parser.add_argument("--revision", choices=("V2", "V3"), default="V3")
+    parser.add_argument("--revision", choices=("V2", "V3", "V4"), default="V4")
     parser.add_argument("--matched-key", required=True)
     parser.add_argument("--gpu", type=int, default=0)
     parser.add_argument("--image", default=ISAAC_IMAGE)
@@ -1093,7 +1149,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--training-keys",
         type=Path,
-        default=project / "configs/m2c_s4_v3_training_keys.json",
+        default=None,
     )
     parser.add_argument(
         "--s6-keys",
@@ -1106,6 +1162,14 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         default=project / "configs/qrm_runtime_mapping_v2.yaml",
     )
     args = parser.parse_args(argv)
+    if args.training_keys is None:
+        args.training_keys = project / (
+            "configs/m2c_s4_v4_training_keys.json"
+            if args.revision == "V4"
+            else "configs/m2c_s4_v3_training_keys.json"
+            if args.revision == "V3"
+            else "configs/m2c_s4_training_keys.json"
+        )
     if args.gpu < 0 or args.stage_timeout_s <= 0 or args.probe_timeout_s <= 0:
         parser.error("GPU and timeout values are invalid")
     return args
