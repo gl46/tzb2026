@@ -40,6 +40,7 @@ BINDING_NAMES = (
     "OFFLINE_WIRE_AUTHENTICATION_VERIFIER_BINDING",
 )
 EXPECTED_BLOCKERS = (
+    "A3_STATIC_HOME_SELF_COLLISION_PREFLIGHT_REJECTED",
     "EIGHT_SKILL_REAL_ISAAC_PHASE_VALIDATION_MISSING",
     "IMMUTABLE_DEPLOYMENT_COMMIT_CONTAINER_IMPORT_ASSET_CLOSURE_MISSING",
     "REAL_EXACT_PLAN_ISAAC_EXECUTOR_MISSING",
@@ -62,6 +63,11 @@ FK_REPORT_SHA256 = "fffc79564a60921398034913b13261e11d462b7dafdfe075f6b5558ff733
 FK_PROVIDER_PATH = Path("src/xh_agent/policy/qrm_lite/controlled_panda_fk_v1.py")
 FK_PROVIDER_SHA256 = "33d735905ecc132edae9c3a5f4d780518a328cd30518c0f897b1b0dda579b541"
 FK_CONFIGURATION_SHA256 = "0567b222f22d2676b8b118e5583df186e2c71e06c2f57f3f1af72d736dd460df"
+QUERY_COMPARISON_REPORT_PATH = Path("reports/m2c-phase2-a3-query-only-deployment-comparison.json")
+QUERY_COMPARISON_REPORT_SHA256 = "9ee99e1ebe6e6c129450ebafa5c74fb818eeb862d53a39aa914cbd3a5a66c4cd"
+FINAL_QUERY_SMOKE_RECEIPT_SHA256 = (
+    "a50740f34adef952d89613ecd8b23c132152e47f09791360f46301b2fca70c50"
+)
 
 
 class CandidateAuditFailure(RuntimeError):
@@ -134,6 +140,7 @@ def load_candidate_config(project_root: Path) -> dict[str, Any]:
         "source_bindings",
         "native_build_evidence",
         "read_only_fk_evidence",
+        "query_only_deployment_smoke",
         "a3_numeric_configuration_sha256",
         "production_bindings",
         "b0_policy",
@@ -196,6 +203,19 @@ def load_candidate_config(project_root: Path) -> dict[str, Any]:
         "formal_execution_eligible": False,
     }:
         raise CandidateAuditFailure("candidate read-only FK evidence binding differs")
+    query_smoke = candidate["query_only_deployment_smoke"]
+    if query_smoke != {
+        "report_path": QUERY_COMPARISON_REPORT_PATH.as_posix(),
+        "report_sha256": QUERY_COMPARISON_REPORT_SHA256,
+        "status": "PASS_DEPLOYMENT_QUERY_REPLAY_BLOCKED_STATIC_HOME_COLLISION",
+        "final_smoke_receipt_sha256": FINAL_QUERY_SMOKE_RECEIPT_SHA256,
+        "clear_result_count": 74,
+        "collision_rejection_count": 2,
+        "query_failure_count": 0,
+        "static_state_preflight_clear": False,
+        "formal_execution_eligible": False,
+    }:
+        raise CandidateAuditFailure("candidate query-only deployment smoke binding differs")
     native_report_raw = read_regular_file_once(project_root / NATIVE_BUILD_REPORT_PATH)
     if _sha256(native_report_raw) != native["report_sha256"]:
         raise CandidateAuditFailure("candidate native-build report SHA-256 differs")
@@ -230,6 +250,25 @@ def load_candidate_config(project_root: Path) -> dict[str, Any]:
         or fk_report.get("evidence_claims", {}).get("formal_execution_eligible") is not False
     ):
         raise CandidateAuditFailure("candidate FK report claims differ")
+    query_report_raw = read_regular_file_once(project_root / QUERY_COMPARISON_REPORT_PATH)
+    if _sha256(query_report_raw) != query_smoke["report_sha256"]:
+        raise CandidateAuditFailure("candidate query-only comparison report SHA-256 differs")
+    try:
+        query_report = json.loads(query_report_raw)
+    except json.JSONDecodeError as exc:
+        raise CandidateAuditFailure("candidate query-only comparison report is unreadable") from exc
+    if (
+        query_report.get("status") != query_smoke["status"]
+        or query_report.get("evidence_bindings", {}).get("after_smoke_receipt_sha256")
+        != query_smoke["final_smoke_receipt_sha256"]
+        or query_report.get("after", {}).get("clear_result_count")
+        != query_smoke["clear_result_count"]
+        or query_report.get("after", {}).get("collision_rejection_count")
+        != query_smoke["collision_rejection_count"]
+        or query_report.get("evidence_claims", {}).get("static_state_preflight_clear") is not False
+        or query_report.get("evidence_claims", {}).get("formal_execution_eligible") is not False
+    ):
+        raise CandidateAuditFailure("candidate query-only deployment smoke claims differ")
     for path, expected in candidate["source_bindings"].items():
         if _sha256(read_regular_file_once(project_root / path)) != expected:
             raise CandidateAuditFailure(f"candidate source SHA-256 differs: {path}")
@@ -291,6 +330,7 @@ def build_audit(project_root: Path) -> dict[str, Any]:
         "a3_local_closure": closure.model_dump(mode="json"),
         "a3_native_build_evidence": candidate["native_build_evidence"],
         "a3_read_only_fk_evidence": candidate["read_only_fk_evidence"],
+        "a3_query_only_deployment_smoke": candidate["query_only_deployment_smoke"],
         "blockers": list(EXPECTED_BLOCKERS),
         "governance": candidate["evidence_claims"],
     }

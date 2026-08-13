@@ -1,11 +1,11 @@
 {
   "after": {
     "builder_image_id": "sha256:01d3c57bde2ce5ff1655ab5739d0729ae7ea035be2ac56bd391a4357e3c4307e",
-    "clear_result_count": 73,
-    "collision_rejection_count": 3,
-    "immutable_commit": "7ea1b4319236a7e30e8a999f883b3b7fbaf30238",
+    "clear_result_count": 74,
+    "collision_rejection_count": 2,
+    "immutable_commit": "cf522c9e4d75aa5ef4c3f0c026bb6e4919ba5948",
     "native_shared_object_sha256": "2231cee659b15875fc0bed011f339ac9962168981d228f3f08c6189929ce9c23",
-    "numeric_configuration_sha256": "a8a041e7054442cbb8b1b8102a474331430015ed58dd2aae9c61339ec9a5883f",
+    "numeric_configuration_sha256": "8c6ba840339bca5a84ccd805b0c068439d59812eb0c3ecc9bdd809f1341d4bb5",
     "remaining_rejected_pairs": [
       {
         "child_a": 0,
@@ -18,12 +18,6 @@
         "child_b": 0,
         "link_a": "/World/Robot/panda_link2",
         "link_b": "/World/Robot/panda_link4"
-      },
-      {
-        "child_a": 0,
-        "child_b": 0,
-        "link_a": "/World/Robot/panda_link5",
-        "link_b": "/World/Robot/panda_link7"
       }
     ],
     "request_segment_count": 76
@@ -38,14 +32,24 @@
     "request_segment_count": 76
   },
   "comparison": {
+    "intermediate_collision_rejection_count": 3,
     "moveit_finger_state_m": [
       0.02,
       0.02
     ],
     "moveit_same_arm_state_reports_clear": true,
-    "rejection_count_reduction": 12,
+    "per_instance_margin_rejection_reduction": 1,
+    "rejection_count_reduction": 13,
     "remaining_pairs_are_finger_independent": true,
     "remaining_pairs_are_not_srdf_acm_disabled": true,
+    "removed_by_per_instance_margin": [
+      {
+        "child_a": 0,
+        "child_b": 0,
+        "link_a": "/World/Robot/panda_link5",
+        "link_b": "/World/Robot/panda_link7"
+      }
+    ],
     "removed_rejected_pairs": [
       {
         "child_a": 0,
@@ -99,6 +103,12 @@
         "child_a": 0,
         "child_b": 0,
         "link_a": "/World/Robot/panda_link5",
+        "link_b": "/World/Robot/panda_link7"
+      },
+      {
+        "child_a": 0,
+        "child_b": 0,
+        "link_a": "/World/Robot/panda_link5",
         "link_b": "/World/Robot/panda_link8"
       },
       {
@@ -128,9 +138,10 @@
     ]
   },
   "evidence_bindings": {
-    "after_smoke_receipt_sha256": "6515bec6249318596a6023e92556cfbf2351c9bd0b1bd43fe8d635800b02cbb6",
+    "after_smoke_receipt_sha256": "a50740f34adef952d89613ecd8b23c132152e47f09791360f46301b2fca70c50",
     "before_smoke_receipt_sha256": "a4035dc3fd122fcbbbe077d235d6c0276634b40cb7d4fdfd7aab5d69a697d602",
     "controlled_panda_srdf_sha256": "80948370d547cb320e49d42ffc0467e082112c09f2984700b489def88526a386",
+    "intermediate_smoke_receipt_sha256": "6515bec6249318596a6023e92556cfbf2351c9bd0b1bd43fe8d635800b02cbb6",
     "moveit_home_report_sha256": "6494f629b476770ed90862bef234789a06787f43d5b49e89c2cc3b1aec135537"
   },
   "evidence_claims": {
@@ -155,6 +166,6 @@
     "REAL_EXACT_PLAN_ISAAC_EXECUTOR_MISSING",
     "REAL_SESSION_ENDPOINT_STARTUP_AND_HOST_HMAC_ATTESTATION_MISSING"
   ],
-  "schema_version": "M2CPhase2A3QueryOnlyDeploymentComparisonAuditV1",
+  "schema_version": "M2CPhase2A3QueryOnlyDeploymentComparisonAuditV2",
   "status": "PASS_DEPLOYMENT_QUERY_REPLAY_BLOCKED_STATIC_HOME_COLLISION"
 }

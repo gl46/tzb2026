@@ -9,6 +9,7 @@ import pytest
 from m2c.audit_phase2_a3_query_only_deployment_comparison import (
     AFTER_RECEIPT_SHA256,
     BEFORE_RECEIPT_SHA256,
+    INTERMEDIATE_RECEIPT_SHA256,
     ComparisonAuditFailure,
     REMAINING_BLOCKERS,
     REMAINING_REJECTED_PAIRS,
@@ -22,23 +23,33 @@ BEFORE = Path(
     "query-only-deployment-smoke.json"
 )
 AFTER = Path(
+    "/Users/gl/tzb-m2c-evidence/m2c-phase2-a3-query-only-smoke-cf522c9/"
+    "output/query-only-deployment-smoke.json"
+)
+INTERMEDIATE = Path(
     "/Users/gl/tzb-m2c-evidence/m2c-phase2-a3-query-only-smoke-7ea1b43/"
     "query-only-deployment-smoke.json"
 )
 
 
 @pytest.mark.skipif(
-    not BEFORE.is_file() or not AFTER.is_file(), reason="external comparison evidence is absent"
+    not BEFORE.is_file() or not INTERMEDIATE.is_file() or not AFTER.is_file(),
+    reason="external comparison evidence is absent",
 )
 def test_query_only_before_after_replay_remains_fail_closed() -> None:
-    report = build_report(PROJECT_ROOT, BEFORE, AFTER)
+    report = build_report(PROJECT_ROOT, BEFORE, INTERMEDIATE, AFTER)
 
     assert report["status"] == "PASS_DEPLOYMENT_QUERY_REPLAY_BLOCKED_STATIC_HOME_COLLISION"
     assert report["evidence_bindings"]["before_smoke_receipt_sha256"] == BEFORE_RECEIPT_SHA256
+    assert (
+        report["evidence_bindings"]["intermediate_smoke_receipt_sha256"]
+        == INTERMEDIATE_RECEIPT_SHA256
+    )
     assert report["evidence_bindings"]["after_smoke_receipt_sha256"] == AFTER_RECEIPT_SHA256
     assert report["before"]["collision_rejection_count"] == 15
-    assert report["after"]["collision_rejection_count"] == 3
-    assert report["comparison"]["rejection_count_reduction"] == 12
+    assert report["after"]["collision_rejection_count"] == 2
+    assert report["comparison"]["rejection_count_reduction"] == 13
+    assert report["comparison"]["per_instance_margin_rejection_reduction"] == 1
     assert report["comparison"]["remaining_pairs_are_not_srdf_acm_disabled"]
     assert report["comparison"]["moveit_same_arm_state_reports_clear"]
     assert report["comparison"]["remaining_pairs_are_finger_independent"]
@@ -56,7 +67,8 @@ def test_query_only_before_after_replay_remains_fail_closed() -> None:
 
 
 @pytest.mark.skipif(
-    not BEFORE.is_file() or not AFTER.is_file(), reason="external comparison evidence is absent"
+    not BEFORE.is_file() or not INTERMEDIATE.is_file() or not AFTER.is_file(),
+    reason="external comparison evidence is absent",
 )
 def test_after_receipt_tamper_is_rejected(tmp_path: Path) -> None:
     copied = tmp_path / "after.json"
@@ -66,11 +78,11 @@ def test_after_receipt_tamper_is_rejected(tmp_path: Path) -> None:
     copied.write_text(json.dumps(value, sort_keys=True, separators=(",", ":")) + "\n")
 
     with pytest.raises(ComparisonAuditFailure, match="SHA-256"):
-        build_report(PROJECT_ROOT, BEFORE, copied)
+        build_report(PROJECT_ROOT, BEFORE, INTERMEDIATE, copied)
 
 
 def test_remaining_pairs_are_explicit_and_do_not_include_fingers() -> None:
-    assert len(REMAINING_REJECTED_PAIRS) == 3
+    assert len(REMAINING_REJECTED_PAIRS) == 2
     assert all(
         "finger" not in left and "finger" not in right
         for left, _, right, _ in REMAINING_REJECTED_PAIRS

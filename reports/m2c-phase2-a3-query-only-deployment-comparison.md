@@ -15,13 +15,16 @@ used privileged truth as policy input.
 ## Frozen comparison
 
 - before receipt SHA-256: `a4035dc3fd122fcbbbe077d235d6c0276634b40cb7d4fdfd7aab5d69a697d602`;
-- after receipt SHA-256: `6515bec6249318596a6023e92556cfbf2351c9bd0b1bd43fe8d635800b02cbb6`;
+- intermediate receipt SHA-256: `6515bec6249318596a6023e92556cfbf2351c9bd0b1bd43fe8d635800b02cbb6`;
+- final receipt SHA-256: `a50740f34adef952d89613ecd8b23c132152e47f09791360f46301b2fca70c50`;
 - same runtime image and same repeated home/open joint-state sequence;
 - before: 61 clear child pairs, 15 collision rejections;
-- after: 73 clear child pairs, 3 collision rejections;
+- intermediate: 73 clear child pairs, 3 collision rejections;
+- final per-instance shipped margins: 74 clear child pairs, 2 collision
+  rejections; link5-link7 is no longer rejected;
 - query failures: zero in both accepted runs.
 
-The remaining non-ACM pairs are hand-link7, link2-link4, and link5-link7.
+The remaining non-ACM pairs are hand-link7 and link2-link4.
 They do not involve either finger, so the historical MoveIt report's 0.02 m
 finger state versus the smoke's 0.04 m finger state cannot explain them.
 The historical no-motion MoveIt check reports the same seven arm joints clear,
@@ -34,7 +37,7 @@ formal execution is authorized.
 ## Replay
 
 ```text
-PYTHONPATH=src:scripts .venv/bin/python scripts/m2c/audit_phase2_a3_query_only_deployment_comparison.py --project-root . --before-receipt /Users/gl/tzb-m2c-evidence/m2c-phase2-a3-query-only-smoke-fcccc9c/query-only-deployment-smoke.json --after-receipt /Users/gl/tzb-m2c-evidence/m2c-phase2-a3-query-only-smoke-7ea1b43/query-only-deployment-smoke.json --expected-json reports/m2c-phase2-a3-query-only-deployment-comparison.json
+PYTHONPATH=src:scripts .venv/bin/python scripts/m2c/audit_phase2_a3_query_only_deployment_comparison.py --project-root . --before-receipt /Users/gl/tzb-m2c-evidence/m2c-phase2-a3-query-only-smoke-fcccc9c/query-only-deployment-smoke.json --intermediate-receipt /Users/gl/tzb-m2c-evidence/m2c-phase2-a3-query-only-smoke-7ea1b43/query-only-deployment-smoke.json --after-receipt /Users/gl/tzb-m2c-evidence/m2c-phase2-a3-query-only-smoke-cf522c9/output/query-only-deployment-smoke.json --expected-json reports/m2c-phase2-a3-query-only-deployment-comparison.json
 ```
 
 One next command:

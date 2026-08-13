@@ -41,6 +41,10 @@ def test_candidate_smoke_is_blocked_unmeasured_and_never_physical() -> None:
     )
     assert report["a3_read_only_fk_evidence"]["comparison_row_count"] == 144
     assert not report["a3_read_only_fk_evidence"]["formal_execution_eligible"]
+    assert report["a3_query_only_deployment_smoke"]["clear_result_count"] == 74
+    assert report["a3_query_only_deployment_smoke"]["collision_rejection_count"] == 2
+    assert not report["a3_query_only_deployment_smoke"]["static_state_preflight_clear"]
+    assert not report["a3_query_only_deployment_smoke"]["formal_execution_eligible"]
     assert not report["governance"]["contract_smoke_is_physical_evidence"]
     assert not report["governance"]["teacher_used"]
 

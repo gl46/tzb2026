@@ -75,6 +75,18 @@ The exact report is `reports/m2c-phase2-a3-controlled-panda-fk.json`. This
 closes provider implementation/numeric equivalence, not its immutable
 deployment/session binding.
 
+The query-only deployment path is now byte-replayed under the pinned Isaac 6
+container image without loading Kit or Isaac. The create-only final receipt
+SHA-256 is `a50740f34adef952d89613ecd8b23c132152e47f09791360f46301b2fca70c50`.
+It completed all 76 child-pair queries with zero query failures: 74 were clear
+and two were fail-closed static collision rejections (hand-link7 and
+link2-link4). The comparison report is
+`reports/m2c-phase2-a3-query-only-deployment-comparison.json`. Thus the
+permission and native deployment path is closed, but the static A.3 preflight
+is not clear and formal execution remains ineligible. This finding is recorded
+as `A3_STATIC_HOME_SELF_COLLISION_PREFLIGHT_REJECTED`; it is not converted into
+an ACM exception, a reduced margin, or an execution authorization.
+
 ## B0 boundary
 
 `FrozenB0FallbackWrapperV1` and ADR-0022 A.5 are withdrawn by accepted

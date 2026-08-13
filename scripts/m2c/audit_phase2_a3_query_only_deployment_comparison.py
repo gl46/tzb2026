@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Replay the A.3 query-only deployment smoke before/after margin correction.
+"""Replay the A.3 query-only deployment smoke across both margin corrections.
 
 This audit reads two immutable, canonical smoke receipts plus the governed
 SRDF and the historical no-motion MoveIt home-state result.  It records the
@@ -20,29 +20,35 @@ from typing import Any
 import xml.etree.ElementTree as ET
 
 
-SCHEMA_VERSION = "M2CPhase2A3QueryOnlyDeploymentComparisonAuditV1"
+SCHEMA_VERSION = "M2CPhase2A3QueryOnlyDeploymentComparisonAuditV2"
 SMOKE_SCHEMA_VERSION = "M2CA3QueryOnlyDeploymentSmokeV1"
 SMOKE_STATUS = "PASS_QUERY_ONLY_DEPLOYMENT_SMOKE_FAIL_CLOSED_COLLISION_REJECTION"
 BEFORE_RECEIPT_SHA256 = "a4035dc3fd122fcbbbe077d235d6c0276634b40cb7d4fdfd7aab5d69a697d602"
-AFTER_RECEIPT_SHA256 = "6515bec6249318596a6023e92556cfbf2351c9bd0b1bd43fe8d635800b02cbb6"
+INTERMEDIATE_RECEIPT_SHA256 = "6515bec6249318596a6023e92556cfbf2351c9bd0b1bd43fe8d635800b02cbb6"
+AFTER_RECEIPT_SHA256 = "a50740f34adef952d89613ecd8b23c132152e47f09791360f46301b2fca70c50"
 BEFORE_COMMIT = "fcccc9c1d656133b95b0cbe213a944c980d54fb0"
-AFTER_COMMIT = "7ea1b4319236a7e30e8a999f883b3b7fbaf30238"
+INTERMEDIATE_COMMIT = "7ea1b4319236a7e30e8a999f883b3b7fbaf30238"
+AFTER_COMMIT = "cf522c9e4d75aa5ef4c3f0c026bb6e4919ba5948"
 RUNTIME_IMAGE_ID = "sha256:783444c706538aa76cf5126e911ddc5e618779e6105305ad4af4260362a30aa9"
 BEFORE_NUMERIC_CONFIGURATION_SHA256 = (
     "1193e1bfab421cc69373e6e41b350c26e69a4a07ca17e66f92271aea365427d0"
 )
-AFTER_NUMERIC_CONFIGURATION_SHA256 = (
+INTERMEDIATE_NUMERIC_CONFIGURATION_SHA256 = (
     "a8a041e7054442cbb8b1b8102a474331430015ed58dd2aae9c61339ec9a5883f"
+)
+AFTER_NUMERIC_CONFIGURATION_SHA256 = (
+    "8c6ba840339bca5a84ccd805b0c068439d59812eb0c3ecc9bdd809f1341d4bb5"
 )
 CONTROLLED_PANDA_URDF_SHA256 = "6678ff409d60f074283805879f53edaa939ead34f97a5a961ee67f6229b44ba8"
 CONTROLLED_PANDA_SRDF_SHA256 = "80948370d547cb320e49d42ffc0467e082112c09f2984700b489def88526a386"
 MOVEIT_HOME_REPORT_SHA256 = "6494f629b476770ed90862bef234789a06787f43d5b49e89c2cc3b1aec135537"
 JOINT_STATE_SEQUENCE_SHA256 = "a9987a164b4ed7598f2b581c15cf9125f50b442489cd2002b429deb248927e23"
-REMAINING_REJECTED_PAIRS = (
+INTERMEDIATE_REJECTED_PAIRS = (
     ("/World/Robot/panda_hand", 0, "/World/Robot/panda_link7", 0),
     ("/World/Robot/panda_link2", 0, "/World/Robot/panda_link4", 0),
     ("/World/Robot/panda_link5", 0, "/World/Robot/panda_link7", 0),
 )
+REMAINING_REJECTED_PAIRS = INTERMEDIATE_REJECTED_PAIRS[:2]
 REMAINING_BLOCKERS = (
     "A3_STATIC_HOME_SELF_COLLISION_PREFLIGHT_REJECTED",
     "EIGHT_SKILL_REAL_ISAAC_PHASE_VALIDATION_MISSING",
@@ -219,16 +225,21 @@ def _srdf_disabled_pairs(srdf_raw: bytes) -> set[tuple[str, str]]:
 def build_report(
     project_root: Path,
     before_receipt_path: Path,
+    intermediate_receipt_path: Path,
     after_receipt_path: Path,
 ) -> dict[str, Any]:
     root = project_root.resolve(strict=True)
     before_raw = read_regular_file_once(before_receipt_path.resolve(strict=True))
+    intermediate_raw = read_regular_file_once(intermediate_receipt_path.resolve(strict=True))
     after_raw = read_regular_file_once(after_receipt_path.resolve(strict=True))
     if _sha256(before_raw) != BEFORE_RECEIPT_SHA256:
         raise ComparisonAuditFailure("before smoke receipt SHA-256 differs")
+    if _sha256(intermediate_raw) != INTERMEDIATE_RECEIPT_SHA256:
+        raise ComparisonAuditFailure("intermediate smoke receipt SHA-256 differs")
     if _sha256(after_raw) != AFTER_RECEIPT_SHA256:
         raise ComparisonAuditFailure("after smoke receipt SHA-256 differs")
     before = _canonical_object(before_raw, label="before smoke receipt")
+    intermediate = _canonical_object(intermediate_raw, label="intermediate smoke receipt")
     after = _canonical_object(after_raw, label="after smoke receipt")
     before_pairs = _validate_smoke(
         before,
@@ -238,15 +249,28 @@ def build_report(
         expected_clear=61,
         expected_rejected=15,
     )
+    intermediate_pairs = _validate_smoke(
+        intermediate,
+        label="intermediate",
+        expected_commit=INTERMEDIATE_COMMIT,
+        expected_numeric_sha256=INTERMEDIATE_NUMERIC_CONFIGURATION_SHA256,
+        expected_clear=73,
+        expected_rejected=3,
+    )
     after_pairs = _validate_smoke(
         after,
         label="after",
         expected_commit=AFTER_COMMIT,
         expected_numeric_sha256=AFTER_NUMERIC_CONFIGURATION_SHA256,
-        expected_clear=73,
-        expected_rejected=3,
+        expected_clear=74,
+        expected_rejected=2,
     )
-    if after_pairs != REMAINING_REJECTED_PAIRS or not set(after_pairs).issubset(before_pairs):
+    if (
+        intermediate_pairs != INTERMEDIATE_REJECTED_PAIRS
+        or after_pairs != REMAINING_REJECTED_PAIRS
+        or not set(after_pairs).issubset(intermediate_pairs)
+        or not set(intermediate_pairs).issubset(before_pairs)
+    ):
         raise ComparisonAuditFailure("remaining rejection set differs")
 
     srdf_path = root / "robot_ws/src/xh_sim/config/m1a_panda.srdf"
@@ -284,11 +308,15 @@ def build_report(
         raise ComparisonAuditFailure("remaining pair unexpectedly depends on finger opening")
 
     removed_pairs = tuple(item for item in before_pairs if item not in set(after_pairs))
+    removed_by_per_instance = tuple(
+        item for item in intermediate_pairs if item not in set(after_pairs)
+    )
     return {
         "schema_version": SCHEMA_VERSION,
         "status": "PASS_DEPLOYMENT_QUERY_REPLAY_BLOCKED_STATIC_HOME_COLLISION",
         "evidence_bindings": {
             "before_smoke_receipt_sha256": BEFORE_RECEIPT_SHA256,
+            "intermediate_smoke_receipt_sha256": INTERMEDIATE_RECEIPT_SHA256,
             "after_smoke_receipt_sha256": AFTER_RECEIPT_SHA256,
             "controlled_panda_srdf_sha256": CONTROLLED_PANDA_SRDF_SHA256,
             "moveit_home_report_sha256": MOVEIT_HOME_REPORT_SHA256,
@@ -308,8 +336,8 @@ def build_report(
             "builder_image_id": after["native_closure"]["builder_image_id"],
             "native_shared_object_sha256": after["native_closure"]["native_shared_object_sha256"],
             "request_segment_count": 76,
-            "clear_result_count": 73,
-            "collision_rejection_count": 3,
+            "clear_result_count": 74,
+            "collision_rejection_count": 2,
             "remaining_rejected_pairs": [
                 {
                     "link_a": left,
@@ -327,7 +355,18 @@ def build_report(
             "same_joint_state_sequence": before["query"]["joint_state_sequence_sha256"]
             == after["query"]["joint_state_sequence_sha256"]
             == JOINT_STATE_SEQUENCE_SHA256,
-            "rejection_count_reduction": 12,
+            "rejection_count_reduction": 13,
+            "intermediate_collision_rejection_count": 3,
+            "per_instance_margin_rejection_reduction": 1,
+            "removed_by_per_instance_margin": [
+                {
+                    "link_a": left,
+                    "child_a": child_a,
+                    "link_b": right,
+                    "child_b": child_b,
+                }
+                for left, child_a, right, child_b in removed_by_per_instance
+            ],
             "removed_rejected_pairs": [
                 {
                     "link_a": left,
@@ -366,11 +405,17 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--project-root", type=Path, default=Path(__file__).resolve().parents[2])
     parser.add_argument("--before-receipt", type=Path, required=True)
+    parser.add_argument("--intermediate-receipt", type=Path, required=True)
     parser.add_argument("--after-receipt", type=Path, required=True)
     parser.add_argument("--expected-json", type=Path)
     args = parser.parse_args()
     try:
-        report = build_report(args.project_root, args.before_receipt, args.after_receipt)
+        report = build_report(
+            args.project_root,
+            args.before_receipt,
+            args.intermediate_receipt,
+            args.after_receipt,
+        )
         payload = json.dumps(report, indent=2, sort_keys=True) + "\n"
         if args.expected_json is not None:
             if read_regular_file_once(args.expected_json).decode("utf-8") != payload:
