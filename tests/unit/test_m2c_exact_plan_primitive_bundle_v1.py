@@ -252,6 +252,9 @@ def _binding(
         "docs/decisions/ADR-0022-m2c-exact-plan-primitives-and-b0-wrapper.md": (
             b"accepted ADR contract fixture\n"
         ),
+        "docs/decisions/ADR-0024-m2c-s4-unblock-directive.md": (
+            b"accepted superseding ADR contract fixture\n"
+        ),
         "docs/decisions/ADR-0022-BINDING-ADDENDUM.md": b"binding contract fixture\n",
         "configs/m2c_s4_unlock_bindings.json": b"{}\n",
     }
@@ -275,6 +278,9 @@ def _binding(
     return ExactPlanPrimitiveDeploymentBindingV1(
         adr_sha256=hashlib.sha256(
             bound_files["docs/decisions/ADR-0022-m2c-exact-plan-primitives-and-b0-wrapper.md"]
+        ).hexdigest(),
+        superseding_adr_sha256=hashlib.sha256(
+            bound_files["docs/decisions/ADR-0024-m2c-s4-unblock-directive.md"]
         ).hexdigest(),
         binding_addendum_sha256=hashlib.sha256(
             bound_files["docs/decisions/ADR-0022-BINDING-ADDENDUM.md"]

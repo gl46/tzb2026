@@ -16,6 +16,7 @@
 #include <BulletCollision/NarrowPhaseCollision/btGjkPairDetector.h>
 #include <BulletCollision/NarrowPhaseCollision/btPointCollector.h>
 #include <BulletCollision/NarrowPhaseCollision/btVoronoiSimplexSolver.h>
+#include <LinearMath/btTransformUtil.h>
 
 #ifndef BT_USE_DOUBLE_PRECISION
 #error "ADR-0024 A.3 requires a Bullet float64 build"
@@ -35,6 +36,13 @@ struct FailClosedCastResult final : btConvexCast::CastResult {
 bool finite_vector(const btVector3& value) {
   return std::isfinite(value.x()) && std::isfinite(value.y()) &&
          std::isfinite(value.z());
+}
+
+bool finite_transform(const btTransform& value) {
+  return finite_vector(value.getOrigin()) &&
+         finite_vector(value.getBasis().getColumn(0)) &&
+         finite_vector(value.getBasis().getColumn(1)) &&
+         finite_vector(value.getBasis().getColumn(2));
 }
 
 bool discrete_distance(const btConvexShape* a, const btTransform& transform_a,
@@ -83,21 +91,31 @@ bool conservative_no_contact_certificate(
 
 }  // namespace
 
-extern "C" int m2c_a3_child_pair_ccd_v1(
+extern "C" int m2c_a3_child_pair_ccd_detailed_v1(
     const btConvexShape* shape_a, const btTransform* from_a,
     const btTransform* to_a, const btConvexShape* shape_b,
     const btTransform* from_b, const btTransform* to_b,
     double contact_distance_threshold_m, double toi_tolerance,
-    double* time_of_impact, int* failure_code, int* iterations) {
+    double* time_of_impact, int* failure_code, int* iterations,
+    int* discrete_start_clear, int* discrete_end_clear,
+    int* continuous_query_completed) {
   if (!shape_a || !shape_b || !from_a || !to_a || !from_b || !to_b ||
       !time_of_impact || !failure_code || !iterations ||
+      !discrete_start_clear || !discrete_end_clear ||
+      !continuous_query_completed ||
       !std::isfinite(contact_distance_threshold_m) ||
       contact_distance_threshold_m < 0.001 || !std::isfinite(toi_tolerance) ||
       toi_tolerance <= 0.0 || toi_tolerance > 1e-6 ||
-      !finite_vector(from_a->getOrigin()) || !finite_vector(to_a->getOrigin()) ||
-      !finite_vector(from_b->getOrigin()) || !finite_vector(to_b->getOrigin())) {
+      !finite_transform(*from_a) || !finite_transform(*to_a) ||
+      !finite_transform(*from_b) || !finite_transform(*to_b)) {
     return 2;
   }
+  *time_of_impact = 2.0;
+  *failure_code = 0;
+  *iterations = 0;
+  *discrete_start_clear = 0;
+  *discrete_end_clear = 0;
+  *continuous_query_completed = 0;
   const btScalar threshold(contact_distance_threshold_m);
   btScalar start_distance = btScalar(0.0);
   btScalar end_distance = btScalar(0.0);
@@ -106,6 +124,8 @@ extern "C" int m2c_a3_child_pair_ccd_v1(
       !discrete_distance(shape_a, *to_a, shape_b, *to_b, &end_distance)) {
     return 2;
   }
+  *discrete_start_clear = start_distance > threshold ? 1 : 0;
+  *discrete_end_clear = end_distance > threshold ? 1 : 0;
   if (start_distance <= threshold || end_distance <= threshold) {
     return 1;
   }
@@ -122,6 +142,7 @@ extern "C" int m2c_a3_child_pair_ccd_v1(
     return 2;
   }
   if (hit) {
+    *continuous_query_completed = 1;
     if (!std::isfinite(result.m_fraction) ||
         result.m_fraction < btScalar(-toi_tolerance) ||
         result.m_fraction > btScalar(1.0 + toi_tolerance)) {
@@ -140,6 +161,22 @@ extern "C" int m2c_a3_child_pair_ccd_v1(
     *failure_code = -100;
     return 2;
   }
-  *time_of_impact = 2.0;
+  *continuous_query_completed = 1;
   return 0;
+}
+
+extern "C" int m2c_a3_child_pair_ccd_v1(
+    const btConvexShape* shape_a, const btTransform* from_a,
+    const btTransform* to_a, const btConvexShape* shape_b,
+    const btTransform* from_b, const btTransform* to_b,
+    double contact_distance_threshold_m, double toi_tolerance,
+    double* time_of_impact, int* failure_code, int* iterations) {
+  int discrete_start_clear = 0;
+  int discrete_end_clear = 0;
+  int continuous_query_completed = 0;
+  return m2c_a3_child_pair_ccd_detailed_v1(
+      shape_a, from_a, to_a, shape_b, from_b, to_b,
+      contact_distance_threshold_m, toi_tolerance, time_of_impact,
+      failure_code, iterations, &discrete_start_clear, &discrete_end_clear,
+      &continuous_query_completed);
 }

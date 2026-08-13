@@ -29,6 +29,7 @@ from xh_agent.policy.qrm_lite.formal_split_runner_v2 import (
 
 
 ADR_0022_PATH = "docs/decisions/ADR-0022-m2c-exact-plan-primitives-and-b0-wrapper.md"
+ADR_0024_PATH = "docs/decisions/ADR-0024-m2c-s4-unblock-directive.md"
 PHYSICAL_COMMANDS = frozenset(
     {
         "CARTESIAN_POSE",
@@ -496,6 +497,10 @@ class ExactPlanPrimitiveDeploymentBindingV1(FrozenModel):
         ADR_0022_PATH
     )
     adr_sha256: str = Field(pattern=SHA256_PATTERN)
+    superseding_adr_path: Literal["docs/decisions/ADR-0024-m2c-s4-unblock-directive.md"] = (
+        ADR_0024_PATH
+    )
+    superseding_adr_sha256: str = Field(pattern=SHA256_PATTERN)
     binding_addendum_sha256: str = Field(pattern=SHA256_PATTERN)
     unlock_config_sha256: str = Field(pattern=SHA256_PATTERN)
     immutable_commit: str = Field(pattern=r"^[0-9a-f]{40}$")
@@ -504,6 +509,11 @@ class ExactPlanPrimitiveDeploymentBindingV1(FrozenModel):
     phase_schema_by_skill: tuple[tuple[str, str], ...] = Field(min_length=8)
     execution_mode: Literal["REAL_ISAAC", "CONTRACT_TEST"]
     reviewed_addendum_accepted: Literal[True] = True
+    invalid_or_rejected_action_policy: Literal["TERMINAL_NO_PHYSICAL_EXECUTION"] = (
+        "TERMINAL_NO_PHYSICAL_EXECUTION"
+    )
+    b0_runtime_wrapper_present: Literal[False] = False
+    b0_runtime_fallback_invocation_allowed: Literal[False] = False
     teacher_used: Literal[False] = False
     privileged_truth_policy_input: Literal[False] = False
 
@@ -584,6 +594,11 @@ class M2CExactPlanPrimitiveBundleV1:
             )
         if _read_regular_file_sha256(self.project_root / binding.adr_path) != binding.adr_sha256:
             raise ExactPlanUnavailable("accepted ADR-0022 digest differs from deployment binding")
+        if (
+            _read_regular_file_sha256(self.project_root / binding.superseding_adr_path)
+            != binding.superseding_adr_sha256
+        ):
+            raise ExactPlanUnavailable("accepted ADR-0024 digest differs from deployment binding")
         addendum_path = self.project_root / "docs/decisions/ADR-0022-BINDING-ADDENDUM.md"
         unlock_path = self.project_root / "configs/m2c_s4_unlock_bindings.json"
         if (

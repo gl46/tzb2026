@@ -1,0 +1,57 @@
+{
+  "schema_version": "M2CADR0024Phase2BindingCandidateV1",
+  "status": "CONTRACT_SMOKE_ONLY_BLOCKED_UNMEASURED",
+  "checkpoint_date_asia_shanghai": "2026-08-20",
+  "accepted_adr": {
+    "path": "docs/decisions/ADR-0024-m2c-s4-unblock-directive.md",
+    "sha256": "62c14028df1ad91e4d3c4282c4775e33149292e9bcf10add2d505be8c7424689",
+    "status": "ACCEPTED_HUMAN_DECISION"
+  },
+  "source_bindings": {
+    "docs/decisions/ADR-0024-m2c-s4-unblock-directive.md": "62c14028df1ad91e4d3c4282c4775e33149292e9bcf10add2d505be8c7424689",
+    "robot_ws/src/xh_sim/config/m1a_panda.srdf": "80948370d547cb320e49d42ffc0467e082112c09f2984700b489def88526a386",
+    "robot_ws/src/xh_sim/urdf/panda_controlled.urdf": "6678ff409d60f074283805879f53edaa939ead34f97a5a961ee67f6229b44ba8",
+    "src/xh_agent/policy/qrm_lite/a3_bullet_native_adapter_v1.cpp": "4399fe9ecf61658caca1875fc4a3271fb5ee9a40c144a68963f0e3e4319ee331",
+    "src/xh_agent/policy/qrm_lite/a3_bullet_production_adapter_v1.py": "f7ccd5e8b609d9e2c70976209f19593829aaa0e79a943a2559542358ef996646",
+    "src/xh_agent/policy/qrm_lite/a3_bullet_self_ccd_v1.cpp": "48a1caa8d2f1c8fcb76a504377f399223018a26925c03f1d549db9bab833506f",
+    "src/xh_agent/policy/qrm_lite/a3_bullet_self_ccd_v1.py": "fb9d06e6256fd2ca9deaaa3e0397e6d406cb6ca0b3cabe4ae93d5f5566676131",
+    "src/xh_agent/policy/qrm_lite/exact_plan_preflight_v1.py": "a177efa148111aa004bb2780378f58ae4d33762474ecbdbaae38a4a70be84713",
+    "src/xh_agent/policy/qrm_lite/exact_plan_primitive_bundle_v1.py": "e4f7318a26eb52ab44e4d221fe54f1b8ec4a1a8e1befbbb897dd51e8d442fae7",
+    "src/xh_agent/policy/qrm_lite/formal_split_runner_v2.py": "affbec7bfa2462c58ef093196c367eda98472f1ca349ba7b98d71796798b7c06"
+  },
+  "a3_numeric_configuration_sha256": "1193e1bfab421cc69373e6e41b350c26e69a4a07ca17e66f92271aea365427d0",
+  "production_bindings": {
+    "FORMAL_PHYSICAL_RUNNER_BINDING": null,
+    "FORMAL_DEPLOYMENT_CLOSURE_BINDING": null,
+    "FROZEN_B0_RUNTIME_WRAPPER_BINDING": null,
+    "OFFLINE_WIRE_AUTHENTICATION_VERIFIER_BINDING": null
+  },
+  "b0_policy": {
+    "runtime_wrapper_required": false,
+    "runtime_fallback_allowed": false,
+    "invalid_or_rejected_action_policy": "TERMINAL_NO_PHYSICAL_EXECUTION",
+    "no_action_relabelled_b0_fallback": false,
+    "independent_b0_comparison_arm_unchanged": true
+  },
+  "evidence_claims": {
+    "contract_smoke_passed": true,
+    "contract_smoke_is_physical_evidence": false,
+    "formal_execution_eligible": false,
+    "isaac_started": false,
+    "physical_execution_performed": false,
+    "training_performed": false,
+    "q_b_evaluation_performed": false,
+    "teacher_used": false,
+    "privileged_truth_policy_input": false
+  },
+  "blockers": [
+    "EIGHT_SKILL_REAL_ISAAC_PHASE_VALIDATION_MISSING",
+    "IMMUTABLE_DEPLOYMENT_COMMIT_CONTAINER_IMPORT_ASSET_CLOSURE_MISSING",
+    "ORIGINAL_LINK2_LINK4_STL_ASSETS_NOT_AVAILABLE_LOCALLY",
+    "PINNED_BULLET_FLOAT64_NATIVE_BUILD_AND_PACKAGE_RECEIPT_MISSING",
+    "REAL_EXACT_PLAN_ISAAC_EXECUTOR_MISSING",
+    "REAL_QUERY_ONLY_FK_PROVIDER_BINDING_MISSING",
+    "REAL_SESSION_ENDPOINT_STARTUP_AND_HOST_HMAC_ATTESTATION_MISSING"
+  ],
+  "one_next_command": ".venv/bin/python scripts/m2c/audit_adr0024_phase2_candidate.py --project-root ."
+}

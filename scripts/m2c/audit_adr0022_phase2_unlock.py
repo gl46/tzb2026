@@ -60,7 +60,7 @@ UNLOCK_CONFIG_PATH = Path("configs/m2c_s4_unlock_bindings.json")
 
 FROZEN_SOURCE_SHA256 = {
     ADR_PATH.as_posix(): "4538eb980b66dc0945d1f016325f6c3c5679c87b97b9986e25253e67a2cc3ef1",
-    BUNDLE_PATH.as_posix(): "5d1b497533312bb269e2abc37e445f980029a07a3b85b062559a8ed278f53c8a",
+    BUNDLE_PATH.as_posix(): "e4f7318a26eb52ab44e4d221fe54f1b8ec4a1a8e1befbbb897dd51e8d442fae7",
     WRAPPER_PATH.as_posix(): "5e2df2329725c79ec073c3ec34b87158787411d386b9ba13d0d4bc1d790642b8",
 }
 UNLOCK_BINDING_NAMES = (
@@ -232,6 +232,9 @@ def _write_contract_fixture(root: Path) -> tuple[ExactPlanSourceBindingV1, ...]:
         )
     supporting = {
         ADR_PATH: b"accepted ADR contract fixture; not repository evidence\n",
+        Path("docs/decisions/ADR-0024-m2c-s4-unblock-directive.md"): (
+            b"accepted superseding ADR contract fixture; not repository evidence\n"
+        ),
         ADDENDUM_PATH: b"contract fixture only; not an accepted addendum\n",
         UNLOCK_CONFIG_PATH: b'{"contract_fixture_only":true}\n',
     }
@@ -396,6 +399,9 @@ def _binding(
 ) -> ExactPlanPrimitiveDeploymentBindingV1:
     return ExactPlanPrimitiveDeploymentBindingV1(
         adr_sha256=_sha256(read_regular_file_once(root / ADR_PATH)),
+        superseding_adr_sha256=_sha256(
+            read_regular_file_once(root / "docs/decisions/ADR-0024-m2c-s4-unblock-directive.md")
+        ),
         binding_addendum_sha256=_sha256(read_regular_file_once(root / ADDENDUM_PATH)),
         unlock_config_sha256=_sha256(read_regular_file_once(root / UNLOCK_CONFIG_PATH)),
         immutable_commit=_COMMIT,

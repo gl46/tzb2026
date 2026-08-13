@@ -870,13 +870,11 @@ class IsaacExecuteResponseV2(StrictModel):
             if receipt.execution_source != "NO_PHYSICAL_EXECUTION":
                 raise ValueError("INVALID mapping falsely attributes an unexecuted fallback")
             if receipt.physically_executed:
-                raise ValueError(
-                    "INVALID mapping may not claim a physical fallback without a frozen B0 wrapper"
-                )
+                raise ValueError("INVALID mapping is terminal NO_PHYSICAL_EXECUTION under ADR-0024")
             if not receipt.fallback_reason or not receipt.fallback_reason.startswith(
                 "PHYSICAL_FALLBACK_NOT_EXECUTED:"
             ):
-                raise ValueError("INVALID mapping lacks fail-closed no-execution evidence")
+                raise ValueError("INVALID mapping lacks terminal no-execution evidence")
             if receipt.executed_skill != "NO_PHYSICAL_EXECUTION":
                 raise ValueError("INVALID mapping receipt falsely names a physical skill")
             if self.requested_skill_was_physically_executed:

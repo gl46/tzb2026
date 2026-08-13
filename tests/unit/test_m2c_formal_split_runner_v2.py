@@ -25,6 +25,7 @@ from xh_agent.policy.qrm_lite.formal_split_runner_v2 import (
     IsaacCaptureResponseV2,
     IsaacExecuteRequestV2,
     IsaacExecuteResponseV2,
+    PhysicalSkillReceiptV2,
     QwenBundleRuntimeBindingV2,
     append_public_executed_intent_history,
     build_inference_response_from_logits,
@@ -476,6 +477,40 @@ def test_isaac_execute_response_requires_real_one_skill_and_internal_gates() -> 
     assert controller_rejected.status == "INVALID"
     assert controller_rejected.fallback_required is True
     assert controller_rejected.execution_attribution == "NO_PHYSICAL_EXECUTION"
+
+    no_action_receipt = PhysicalSkillReceiptV2(
+        receipt_id="adr0024-terminal-no-action",
+        receipt_sha256="0" * 64,
+        executed_skill="NO_PHYSICAL_EXECUTION",
+        execution_source="NO_PHYSICAL_EXECUTION",
+        physically_executed=False,
+        started_at_ns=120,
+        completed_at_ns=121,
+        schema_gate="PASS",
+        stale_track_gate="PASS",
+        frame_unit_gate="PASS",
+        ik_gate="PASS",
+        collision_gate="PASS",
+        controller_gate="REJECTED",
+        safety_gate="NOT_RUN",
+        fallback_reason="PHYSICAL_FALLBACK_NOT_EXECUTED:ADR0024_TERMINAL_NO_ACTION",
+    )
+    no_action_receipt = no_action_receipt.model_copy(
+        update={"receipt_sha256": physical_receipt_sha256(no_action_receipt)}
+    )
+    terminal = IsaacExecuteResponseV2(
+        run_id=execute_request.run_id,
+        session_id=execute_request.session_id,
+        decision_index=execute_request.decision_index,
+        observation_id=execute_request.observation_id,
+        inference_response_sha256=execute_request.inference_response_sha256,
+        mapping=controller_rejected,
+        physical_skill_receipts=[no_action_receipt],
+        requested_skill_was_physically_executed=False,
+    )
+    assert terminal.physical_skill_receipts[0].execution_source == "NO_PHYSICAL_EXECUTION"
+    assert not terminal.physical_skill_receipts[0].physically_executed
+    assert terminal.exact_execution_plan is None
 
     mapping = RuntimeSkillMappingResultV2(
         status="VALID",
