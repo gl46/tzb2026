@@ -1,12 +1,12 @@
 {
   "blockers": [
-    "FORMAL_PUBLIC_OBSERVATION_V4_BINDING_NOT_IN_WIRE_PROTOCOL",
+    "FORMAL_PUBLIC_OBSERVATION_V4_NOT_IN_ACTIVE_WIRE_PROTOCOL",
     "FORMAL_BOUND_PLAN_PROVIDER_NOT_IMPLEMENTED",
     "FORMAL_BACKEND_EXACT_PLAN_CONSTRUCTION_AND_EXECUTION_STUBS",
     "A3_STATIC_HOME_SELF_COLLISION_PREFLIGHT_REJECTED",
     "FOUR_PRODUCTION_BINDINGS_UNSET"
   ],
-  "checked_head_commit": "142768a1c01e64bd1c132035466139e31799311f",
+  "checked_head_commit": "1daf6c1cba033a7d45893dcf3d6225dacd517f86",
   "formal_backend": {
     "construct_exact_plan_is_rejection_stub": true,
     "execute_exact_plan_is_rejection_stub": true,
@@ -30,7 +30,9 @@
       "declared_target_attribute",
       "public_track_associator_revision"
     ],
-    "v4_candidate_digest_recomputable_from_current_wire": false
+    "v4_candidate_digest_recomputable_from_current_wire": false,
+    "versioned_v4_observation_schema": "FormalPublicObservationV4",
+    "versioned_v4_transport_active": false
   },
   "implemented_contracts": {
     "a3_float64_bullet_candidate": true,
@@ -38,11 +40,12 @@
     "exact_plan_a1_a4_envelope": true,
     "no_replan_phase_executor": true,
     "query_only_deployment_path_completed": true,
-    "query_only_static_state_preflight_clear": false
+    "query_only_static_state_preflight_clear": false,
+    "versioned_formal_v4_observation_transport": true
   },
   "next_command": ".venv/bin/pytest -q tests/unit/test_m2c_phase2_formal_exact_plan_integration.py",
   "next_implementation_order": [
-    "ADD_VERSIONED_FORMAL_V4_PUBLIC_OBSERVATION_BINDING",
+    "PLUMB_VERSIONED_V4_OBSERVATION_THROUGH_CAPTURE_AND_INFERENCE_WIRE",
     "ADD_BOUND_PLAN_PROVIDER_OVER_RECOMPUTABLE_V4_AND_MAPPING_INPUTS",
     "INTEGRATE_FULL_PLAN_PREFLIGHT_BEFORE_ANY_COMMAND",
     "KEEP_BACKEND_TERMINAL_NO_PHYSICAL_EXECUTION_UNTIL_A3_AND_BINDINGS_PASS"
@@ -98,6 +101,10 @@
       "sha256": "a22837d4f4198e2b7558cf6591819ab352ff01dad87567c47d3c5515ac78a2b5"
     },
     {
+      "path": "src/xh_agent/policy/qrm_lite/formal_public_observation_v4.py",
+      "sha256": "eb417f06fc88489e23164f1d091d9a3bc2349de9617a85e22ab72c625a16327d"
+    },
+    {
       "path": "src/xh_agent/policy/qrm_lite/s4_entry_gate.py",
       "sha256": "4ede20b7e14004a095a64f151f641e464c7e95dbe7666feb68642523d9803dfb"
     },
@@ -120,6 +127,6 @@
   "verification": {
     "command": ".venv/bin/pytest -q tests/unit/test_m2c_*.py",
     "failed": 0,
-    "passed": 693
+    "passed": 703
   }
 }

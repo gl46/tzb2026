@@ -39,7 +39,7 @@ def test_phase2_integration_audit_replays_current_fail_closed_sources() -> None:
     assert recorded["blockers"] == replayed["blockers"]
     assert recorded["verification"] == {
         "command": ".venv/bin/pytest -q tests/unit/test_m2c_*.py",
-        "passed": 693,
+        "passed": 703,
         "failed": 0,
     }
 
@@ -79,6 +79,9 @@ def test_audit_separates_implemented_contracts_from_missing_formal_path() -> Non
         "public_track_associator_revision",
     ]
     assert report["formal_wire"]["v4_candidate_digest_recomputable_from_current_wire"] is False
+    assert report["formal_wire"]["versioned_v4_observation_schema"] == ("FormalPublicObservationV4")
+    assert report["formal_wire"]["versioned_v4_transport_active"] is False
+    assert report["implemented_contracts"]["versioned_formal_v4_observation_transport"] is True
     assert set(report["production_bindings"]) == {
         "FORMAL_PHYSICAL_RUNNER_BINDING",
         "FORMAL_DEPLOYMENT_CLOSURE_BINDING",

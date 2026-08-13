@@ -1,7 +1,7 @@
 # M2C Phase-2 formal exact-plan integration audit
 
 - Status: **BLOCKED_UNMEASURED_FORMAL_EXACT_PLAN_INTEGRATION**
-- Checked HEAD: `142768a1c01e64bd1c132035466139e31799311f`
+- Checked HEAD: `1daf6c1cba033a7d45893dcf3d6225dacd517f86`
 - Formal execution eligible: **false**
 - Physical execution / training by this audit: **false / false**
 
@@ -12,17 +12,18 @@ no-replan executor, and A3 float64 Bullet candidate exist.  The query-only
 deployment path also ran, but the frozen home state still has two fail-closed
 self-collision rejections.
 
-Those implemented pieces are not yet connected to an executable formal
-model-owned path.  `FormalPublicObservationV2` cannot carry the approved V4
-candidate and association bindings: `association_history`, `candidate_payload`, `candidate_payload_sha256`, `declared_target_attribute`, `public_track_associator_revision`.  Consequently the A.1 public
-candidate digest cannot be independently recomputed from the current wire.
+The versioned `FormalPublicObservationV4` transport now independently replays
+the approved V4 candidate and association bindings.  It is deliberately not
+yet active: `FormalPublicObservationV2` still cannot carry `association_history`, `candidate_payload`, `candidate_payload_sha256`, `declared_target_attribute`, `public_track_associator_revision`.
+Consequently the A.1 public candidate digest cannot be independently
+recomputed from the **current active** wire.
 The real backend's plan-construction and execution methods remain deliberate
 rejection stubs, and there is no production constructor for a bound
 `M2CExactPlanPrimitivePlanV1`.
 
 ## Blockers
 
-- `FORMAL_PUBLIC_OBSERVATION_V4_BINDING_NOT_IN_WIRE_PROTOCOL`
+- `FORMAL_PUBLIC_OBSERVATION_V4_NOT_IN_ACTIVE_WIRE_PROTOCOL`
 - `FORMAL_BOUND_PLAN_PROVIDER_NOT_IMPLEMENTED`
 - `FORMAL_BACKEND_EXACT_PLAN_CONSTRUCTION_AND_EXECUTION_STUBS`
 - `A3_STATIC_HOME_SELF_COLLISION_PREFLIGHT_REJECTED`
@@ -30,7 +31,7 @@ rejection stubs, and there is no production constructor for a bound
 
 ## Safe implementation order
 
-1. `ADD_VERSIONED_FORMAL_V4_PUBLIC_OBSERVATION_BINDING`
+1. `PLUMB_VERSIONED_V4_OBSERVATION_THROUGH_CAPTURE_AND_INFERENCE_WIRE`
 2. `ADD_BOUND_PLAN_PROVIDER_OVER_RECOMPUTABLE_V4_AND_MAPPING_INPUTS`
 3. `INTEGRATE_FULL_PLAN_PREFLIGHT_BEFORE_ANY_COMMAND`
 4. `KEEP_BACKEND_TERMINAL_NO_PHYSICAL_EXECUTION_UNTIL_A3_AND_BINDINGS_PASS`
@@ -40,7 +41,7 @@ permission failure.  The four production bindings remain unset.  Teacher and
 privileged simulator truth were not used.
 
 Verification: `.venv/bin/pytest -q tests/unit/test_m2c_*.py` ->
-**693 passed**, 0 failed.
+**703 passed**, 0 failed.
 
 Next command:
 

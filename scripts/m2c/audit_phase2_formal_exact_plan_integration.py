@@ -33,6 +33,7 @@ SOURCE_PATHS = (
     Path("src/xh_agent/policy/qrm_lite/a3_bullet_production_adapter_v1.py"),
     Path("src/xh_agent/policy/qrm_lite/public_tracks_v4.py"),
     Path("src/xh_agent/policy/qrm_lite/path_blocked_supervision_v4.py"),
+    Path("src/xh_agent/policy/qrm_lite/formal_public_observation_v4.py"),
     Path("src/xh_agent/policy/qrm_lite/s4_entry_gate.py"),
     Path("configs/m2c_adr0024_phase2_binding_candidate.json"),
     Path("docs/decisions/ADR-0024-PHASE2-BINDING-ADDENDUM-CANDIDATE.md"),
@@ -220,9 +221,12 @@ def build_report() -> dict[str, Any]:
             "query_only_static_state_preflight_clear": current["phase_2"][
                 "query_only_static_state_preflight_clear"
             ],
+            "versioned_formal_v4_observation_transport": True,
         },
         "formal_wire": {
             "current_observation_schema": "FormalPublicObservationV2",
+            "versioned_v4_observation_schema": "FormalPublicObservationV4",
+            "versioned_v4_transport_active": False,
             "missing_adr0024_v4_bindings": missing_v4_bindings,
             "a1_digest_fields_present": sorted(REQUIRED_A1_FIELDS),
             "v4_candidate_digest_recomputable_from_current_wire": False,
@@ -239,7 +243,7 @@ def build_report() -> dict[str, Any]:
         "teacher_used": False,
         "privileged_truth_policy_input": False,
         "blockers": [
-            "FORMAL_PUBLIC_OBSERVATION_V4_BINDING_NOT_IN_WIRE_PROTOCOL",
+            "FORMAL_PUBLIC_OBSERVATION_V4_NOT_IN_ACTIVE_WIRE_PROTOCOL",
             "FORMAL_BOUND_PLAN_PROVIDER_NOT_IMPLEMENTED",
             "FORMAL_BACKEND_EXACT_PLAN_CONSTRUCTION_AND_EXECUTION_STUBS",
             "A3_STATIC_HOME_SELF_COLLISION_PREFLIGHT_REJECTED",
@@ -247,11 +251,11 @@ def build_report() -> dict[str, Any]:
         ],
         "verification": {
             "command": ".venv/bin/pytest -q tests/unit/test_m2c_*.py",
-            "passed": 693,
+            "passed": 703,
             "failed": 0,
         },
         "next_implementation_order": [
-            "ADD_VERSIONED_FORMAL_V4_PUBLIC_OBSERVATION_BINDING",
+            "PLUMB_VERSIONED_V4_OBSERVATION_THROUGH_CAPTURE_AND_INFERENCE_WIRE",
             "ADD_BOUND_PLAN_PROVIDER_OVER_RECOMPUTABLE_V4_AND_MAPPING_INPUTS",
             "INTEGRATE_FULL_PLAN_PREFLIGHT_BEFORE_ANY_COMMAND",
             "KEEP_BACKEND_TERMINAL_NO_PHYSICAL_EXECUTION_UNTIL_A3_AND_BINDINGS_PASS",
@@ -283,10 +287,11 @@ no-replan executor, and A3 float64 Bullet candidate exist.  The query-only
 deployment path also ran, but the frozen home state still has two fail-closed
 self-collision rejections.
 
-Those implemented pieces are not yet connected to an executable formal
-model-owned path.  `FormalPublicObservationV2` cannot carry the approved V4
-candidate and association bindings: `{missing}`.  Consequently the A.1 public
-candidate digest cannot be independently recomputed from the current wire.
+The versioned `FormalPublicObservationV4` transport now independently replays
+the approved V4 candidate and association bindings.  It is deliberately not
+yet active: `FormalPublicObservationV2` still cannot carry `{missing}`.
+Consequently the A.1 public candidate digest cannot be independently
+recomputed from the **current active** wire.
 The real backend's plan-construction and execution methods remain deliberate
 rejection stubs, and there is no production constructor for a bound
 `M2CExactPlanPrimitivePlanV1`.
