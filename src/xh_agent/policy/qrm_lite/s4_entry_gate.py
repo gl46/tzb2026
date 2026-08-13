@@ -25,11 +25,13 @@ from xh_agent.policy.qrm_lite.model_owned_chain_v2 import (
     validate_model_owned_chain_episode,
 )
 from xh_agent.policy.qrm_lite.offline_wire_auth_v1 import (
-    SignedHostWireAuthenticationReceiptV1,
+    CANONICAL_WIRE_CHALLENGE_CONSUMPTION_ROOT,
+    HOST_HMAC_VERIFIER_IMPLEMENTATION_PATH,
+    HostWireHMACVerificationReceiptV2,
+    WireChallengeConsumptionReceiptV1,
     canonical_envelope_set_sha256,
     read_regular_file_once,
-    sha256_bytes as wire_sha256_bytes,
-    verify_receipt_signature as verify_wire_receipt_signature,
+    wire_challenge_consumption_path,
 )
 from xh_agent.policy.qrm_lite.formal_split_runner_v2 import (
     FORMAL_INFERENCE_PATH,
@@ -102,9 +104,10 @@ FORMAL_DEPLOYMENT_CLOSURE_BINDING: tuple[str, str, str] | None = None
 # Compatibility sentinel withdrawn by ADR-0024 section 2. It must remain None
 # and is not an unlock requirement or an execution path.
 FROZEN_B0_RUNTIME_WRAPPER_BINDING: tuple[str, str] | None = None
-# ADR-0024 section 4 rescinded the additional Ed25519/public-trust-root
-# attestation as a collection/Phase-2 precondition. This compatibility sentinel
-# stays None; entry independently replays exact canonical wire/audit content.
+# ADR-0024 section 4 rescinded Ed25519/public-trust-root attestation as a
+# precondition. This compatibility sentinel stays None and is never an unlock;
+# entry accepts only unsigned V2 host-local HMAC receipts and freezes their
+# verifier implementation through the deployment closure.
 OFFLINE_WIRE_AUTHENTICATION_VERIFIER_BINDING: dict[str, tuple[str, str, str, str]] | None = None
 QWEN_HEAD_TENSORS: tuple[str, ...] = (
     "skill_w",
@@ -148,10 +151,10 @@ RUNTIME_BINDINGS: dict[str, str] = {
         "f1f3448e6ee16747226c6a1e7bf61a08f985a1d3f1aebb739e9650c2596dd7a7"
     ),
     "scripts/m2c/run_formal_model_owned_chain.py": (
-        "6fc21c237d3dff2c276cdd5a15c9c6379a6555d99cad65a76297cbd6089af59c"
+        "46ddacecc585bc99efba31a94482c51545c5a82ef3e8e26eaa809b37b203781f"
     ),
     "scripts/m2c/verify_formal_wire_auth.py": (
-        "a6b48e7fd160109cfc81d9da594ca27f99dd43de9f1ce0d97cd291886c9203ab"
+        "bfd8e049432269b119be2bdb951f42d4e613f6896ef10c90ae817364a92ceb3d"
     ),
     "scripts/m2c/formal_isaac_v4_backend.py": (
         "73ada118846c4392c73aa3f0459195e71a1d54378c549487e1ef3504bc4d79bf"
@@ -169,7 +172,7 @@ RUNTIME_BINDINGS: dict[str, str] = {
         "e8d7587c11e23976732c80800481853b8a851eb0a78f40f40f47eb0fb04bb748"
     ),
     "src/xh_agent/policy/qrm_lite/formal_split_runner_v2.py": (
-        "85805eb73cb0febb1b2157db388d6d44a539442903f1833cb38ea33fc147e7f6"
+        "f9a48ffaaf548e0de07370cdd4478d744d26f4b0b1c3ed7d07fba992f6759f78"
     ),
     "src/xh_agent/policy/qrm_lite/formal_isaac_endpoint_v2.py": (
         "ce11aa23efd271e85bd6ada98ee336f37bb77319be6cd8a6b0a1059f42dc3c9b"
@@ -184,7 +187,7 @@ RUNTIME_BINDINGS: dict[str, str] = {
         "fd76aebd3d319dd30857a721e89bcb028ae144d4d60b6d761d2d8e04f8614444"
     ),
     "src/xh_agent/policy/qrm_lite/offline_wire_auth_v1.py": (
-        "ba5dbfd65b58b4e504c03296e5c8dad8fe7b3d83f65a24664038cbb5eb3c423e"
+        "094800945b945378dc7a937e66ecbe1c2d8a71dbf19ed2b6b78cec6b85a4a767"
     ),
     "src/xh_agent/policy/qrm_lite/models_q012_v2.py": (
         "5334fbee5750fd4df1f6b421eac0336ced98849aa68e1c6948986bdbb15f540c"
@@ -357,6 +360,10 @@ class FormalDeploymentClosureReceiptV1(StrictModel):
     container_image_digest: str = Field(pattern=r"^sha256:[0-9a-f]{64}$")
     transitive_import_manifest_path: str = Field(min_length=1)
     transitive_import_manifest_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    host_hmac_verifier_implementation_path: Literal[HOST_HMAC_VERIFIER_IMPLEMENTATION_PATH] = (
+        HOST_HMAC_VERIFIER_IMPLEMENTATION_PATH
+    )
+    host_hmac_verifier_implementation_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
     invalid_or_rejected_action_policy: Literal["TERMINAL_NO_PHYSICAL_EXECUTION"] = (
         "TERMINAL_NO_PHYSICAL_EXECUTION"
     )
@@ -434,6 +441,8 @@ class PhysicalIntegrationReceiptV2(StrictModel):
     world_model_bundle: QwenWorldModelBundleReceiptV1
     formal_runner_evidence_path: str = Field(min_length=1)
     formal_runner_evidence_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    challenge_consumption_receipt_path: str = Field(min_length=1)
+    challenge_consumption_receipt_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
     node2_wire_authentication_receipt_path: str = Field(min_length=1)
     node2_wire_authentication_receipt_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
     labserver_wire_authentication_receipt_path: str = Field(min_length=1)
@@ -602,6 +611,9 @@ def _verify_formal_runner_evidence(
         "status",
         "run_id",
         "challenge_nonce",
+        "challenge_consumption_receipt_path",
+        "challenge_consumption_receipt_sha256",
+        "challenge_consumption_id",
         "bundle",
         "isaac_endpoint_binding",
         "start_response",
@@ -636,6 +648,12 @@ def _verify_formal_runner_evidence(
         raise ValueError("formal runner evidence run differs from physical receipt")
     if raw["challenge_nonce"] != receipt.challenge_nonce:
         raise ValueError("formal runner evidence challenge differs from physical receipt")
+    if (
+        raw["challenge_consumption_receipt_path"] != receipt.challenge_consumption_receipt_path
+        or raw["challenge_consumption_receipt_sha256"]
+        != receipt.challenge_consumption_receipt_sha256
+    ):
+        raise ValueError("formal runner consumption binding differs from physical receipt")
     bundle = QwenBundleRuntimeBindingV2.model_validate(raw["bundle"])
     if not _world_model_runtime_matches_receipt(bundle, receipt.world_model_bundle):
         raise ValueError("formal runner runtime bundle differs from trained bundle receipt")
@@ -912,6 +930,14 @@ def _verify_isaac_audits(
         for value, expected in (
             (start_request.run_id, receipt.run_id),
             (start_request.challenge_nonce, receipt.challenge_nonce),
+            (
+                start_request.challenge_consumption_id,
+                evidence["challenge_consumption_id"],
+            ),
+            (
+                start_request.challenge_consumption_receipt_sha256,
+                evidence["challenge_consumption_receipt_sha256"],
+            ),
             (start_request.matched_key, receipt.matched_key),
             (start_request.scene_seed, receipt.scene_seed),
             (start_request.failure_seed, receipt.failure_seed),
@@ -1011,13 +1037,12 @@ def _external_physical_evidence_blockers(
             blockers.append("formal deployment does not bind the independent B0 comparison arm")
     except (OSError, json.JSONDecodeError, KeyError, TypeError) as error:
         blockers.append(f"frozen B0 runtime binding failed closed: {type(error).__name__}: {error}")
-    blockers.append(
-        "preregistered wire challenge has no frozen create-only consumption ledger; "
-        "single-use enforcement is not yet proven"
-    )
-
+    challenge_manifest_bytes: bytes | None = None
     try:
-        challenge_manifest = _read_json(root / FROZEN_WIRE_CHALLENGE_MANIFEST_PATH)
+        challenge_manifest_bytes = read_regular_file_once(
+            root / FROZEN_WIRE_CHALLENGE_MANIFEST_PATH
+        )
+        challenge_manifest = json.loads(challenge_manifest_bytes)
         if (
             challenge_manifest.get("schema_version") != "M2CS4WireChallengeManifestV1"
             or challenge_manifest.get("formal_q_b_evaluation_authorized") is not False
@@ -1052,6 +1077,10 @@ def _external_physical_evidence_blockers(
         "formal runner evidence": (
             receipt.formal_runner_evidence_path,
             receipt.formal_runner_evidence_sha256,
+        ),
+        "wire challenge consumption receipt": (
+            receipt.challenge_consumption_receipt_path,
+            receipt.challenge_consumption_receipt_sha256,
         ),
         "node2 wire authentication receipt": (
             receipt.node2_wire_authentication_receipt_path,
@@ -1091,6 +1120,51 @@ def _external_physical_evidence_blockers(
         if actual != expected_sha256:
             blockers.append(f"physical {label} SHA-256 mismatch: {actual} != {expected_sha256}")
     try:
+        consumption_path = Path(receipt.challenge_consumption_receipt_path)
+        if not consumption_path.is_absolute():
+            consumption_path = root / consumption_path
+        consumption_stat = consumption_path.stat(follow_symlinks=False)
+        if (
+            consumption_path.is_symlink()
+            or not consumption_path.is_file()
+            or consumption_stat.st_nlink != 1
+            or consumption_stat.st_mode & 0o222
+        ):
+            blockers.append(
+                "wire challenge consumption receipt is not immutable single-link evidence"
+            )
+        consumption = WireChallengeConsumptionReceiptV1.model_validate(
+            json.loads(evidence_bytes["wire challenge consumption receipt"])
+        )
+        expected_consumption_path = wire_challenge_consumption_path(
+            Path(CANONICAL_WIRE_CHALLENGE_CONSUMPTION_ROOT),
+            receipt.challenge_nonce,
+        )
+        if Path(receipt.challenge_consumption_receipt_path) != expected_consumption_path:
+            blockers.append("wire challenge consumption receipt path is not canonical")
+        if challenge_manifest_bytes is None or any(
+            observed != expected
+            for observed, expected in (
+                (consumption.run_id, receipt.run_id),
+                (consumption.challenge_nonce, receipt.challenge_nonce),
+                (consumption.matched_key, receipt.matched_key),
+                (consumption.scene_seed, receipt.scene_seed),
+                (consumption.failure_seed, receipt.failure_seed),
+                (consumption.challenge_manifest_sha256, _sha256(challenge_manifest_bytes)),
+            )
+        ):
+            blockers.append("wire challenge consumption receipt differs from preregistered run")
+        formal_consumption = json.loads(evidence_bytes["formal runner evidence"])
+        if (
+            not isinstance(formal_consumption, dict)
+            or formal_consumption.get("challenge_consumption_id") != consumption.consumption_id
+        ):
+            blockers.append("formal evidence consumption ID differs from create-only receipt")
+    except (OSError, json.JSONDecodeError, ValidationError, ValueError, KeyError) as error:
+        blockers.append(
+            f"wire challenge consumption replay failed closed: {type(error).__name__}: {error}"
+        )
+    try:
         closure_manifest = FormalTransitiveImportClosureManifestV1.model_validate(
             json.loads(evidence_bytes["deployment import manifest"])
         )
@@ -1103,6 +1177,9 @@ def _external_physical_evidence_blockers(
             blockers.append("deployment import manifest identity differs from receipt")
         required_closure_files = {
             receipt.runner_implementation_path: receipt.runner_implementation_sha256,
+            receipt.deployment_closure.host_hmac_verifier_implementation_path: (
+                receipt.deployment_closure.host_hmac_verifier_implementation_sha256
+            ),
             **{
                 getattr(
                     IsaacEndpointBindingV2.model_validate(
@@ -1129,6 +1206,14 @@ def _external_physical_evidence_blockers(
         for path, digest in required_closure_files.items():
             if closure_manifest.files.get(path) != digest:
                 blockers.append(f"deployment import closure lacks exact runtime file: {path}")
+        verifier_path = root / receipt.deployment_closure.host_hmac_verifier_implementation_path
+        if verifier_path.is_symlink():
+            blockers.append("host HMAC verifier implementation path is a symlink")
+        verifier_bytes = read_regular_file_once(verifier_path)
+        if _sha256(verifier_bytes) != (
+            receipt.deployment_closure.host_hmac_verifier_implementation_sha256
+        ):
+            blockers.append("host HMAC verifier implementation SHA mismatch")
         for path, digest in receipt.deployment_closure.b0_comparison_freeze_file_bindings.items():
             if closure_manifest.files.get(path) != digest:
                 blockers.append(f"deployment import closure lacks B0 comparison file: {path}")
@@ -1149,10 +1234,10 @@ def _external_physical_evidence_blockers(
         )
         qwen_service = _read_qwen_audit(evidence_bytes["Qwen service audit"])
         auth_receipts = {
-            "NODE2_QWEN": SignedHostWireAuthenticationReceiptV1.model_validate(
+            "NODE2_QWEN": HostWireHMACVerificationReceiptV2.model_validate(
                 json.loads(evidence_bytes["node2 wire authentication receipt"])
             ),
-            "LABSERVER_ISAAC": SignedHostWireAuthenticationReceiptV1.model_validate(
+            "LABSERVER_ISAAC": HostWireHMACVerificationReceiptV2.model_validate(
                 json.loads(evidence_bytes["labserver wire authentication receipt"])
             ),
         }
@@ -1163,6 +1248,10 @@ def _external_physical_evidence_blockers(
                 auth.core.run_id != receipt.run_id
                 or auth.core.challenge_nonce != receipt.challenge_nonce
                 or auth.core.formal_evidence_sha256 != receipt.formal_runner_evidence_sha256
+                or auth.core.verifier_implementation_path
+                != receipt.deployment_closure.host_hmac_verifier_implementation_path
+                or auth.core.verifier_implementation_sha256
+                != receipt.deployment_closure.host_hmac_verifier_implementation_sha256
             ):
                 blockers.append(f"{role} authentication receipt differs from formal evidence")
         node2 = auth_receipts["NODE2_QWEN"].core
@@ -1190,33 +1279,6 @@ def _external_physical_evidence_blockers(
             blockers.append("node2 authentication envelope-set digest differs")
         if labserver.envelope_set_sha256 != isaac_digest:
             blockers.append("labserver authentication envelope-set digest differs")
-        if OFFLINE_WIRE_AUTHENTICATION_VERIFIER_BINDING is not None:
-            if set(OFFLINE_WIRE_AUTHENTICATION_VERIFIER_BINDING) != set(auth_receipts):
-                blockers.append("offline authentication binding does not name both hosts")
-            else:
-                for role, auth in auth_receipts.items():
-                    verifier_path, verifier_sha, trust_path, trust_sha = (
-                        OFFLINE_WIRE_AUTHENTICATION_VERIFIER_BINDING[role]
-                    )
-                    if (
-                        auth.core.verifier_implementation_path,
-                        auth.core.verifier_implementation_sha256,
-                        auth.core.public_trust_root_sha256,
-                    ) != (verifier_path, verifier_sha, trust_sha):
-                        blockers.append(f"{role} authentication verifier/trust root differs")
-                        continue
-                    verifier_bytes = read_regular_file_once(_resolve_path(root, verifier_path))
-                    if wire_sha256_bytes(verifier_bytes) != verifier_sha:
-                        blockers.append(f"{role} authentication verifier SHA mismatch")
-                        continue
-                    trust_bytes = read_regular_file_once(_resolve_path(root, trust_path))
-                    if wire_sha256_bytes(trust_bytes) != trust_sha:
-                        blockers.append(f"{role} public authentication trust root SHA mismatch")
-                        continue
-                    verify_wire_receipt_signature(
-                        auth,
-                        allowed_signers_bytes=trust_bytes,
-                    )
         if replay["wire_cycles_verified"] != 8:
             blockers.append("formal evidence replay did not verify eight cycles")
     except (OSError, json.JSONDecodeError, ValidationError, ValueError, KeyError) as error:
@@ -1240,10 +1302,6 @@ def _formal_source_unlock_blockers() -> list[str]:
             "formal deployment has no frozen implementation commit, container image, "
             "and complete transitive-import closure"
         )
-    blockers.append(
-        "preregistered wire challenge has no frozen create-only consumption ledger; "
-        "single-use enforcement is not yet proven"
-    )
     return blockers
 
 

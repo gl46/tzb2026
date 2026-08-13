@@ -522,6 +522,8 @@ class IsaacStartRequestV2(StrictModel):
     protocol: Literal[FORMAL_WIRE_PROTOCOL] = FORMAL_WIRE_PROTOCOL
     run_id: str = Field(min_length=1)
     challenge_nonce: str = Field(pattern=SHA256_PATTERN)
+    challenge_consumption_id: str = Field(pattern=SHA256_PATTERN)
+    challenge_consumption_receipt_sha256: str = Field(pattern=SHA256_PATTERN)
     matched_key: str = Field(min_length=1)
     scene_seed: int = Field(ge=0)
     failure_seed: int = Field(ge=0)

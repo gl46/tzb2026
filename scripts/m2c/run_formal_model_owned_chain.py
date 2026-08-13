@@ -70,6 +70,13 @@ from xh_agent.policy.qrm_lite.model_owned_chain_v2 import (
     ModelOwnedChainDecisionV2,
     validate_model_owned_chain_episode,
 )
+from xh_agent.policy.qrm_lite.offline_wire_auth_v1 import (
+    CANONICAL_WIRE_CHALLENGE_CONSUMPTION_ROOT,
+    WireChallengeConsumptionReceiptV1,
+    consume_wire_challenge_create_only,
+    read_regular_file_once as read_wire_evidence_once,
+    sha256_bytes as wire_sha256_bytes,
+)
 from xh_agent.policy.qrm_lite.skill_registry_v2 import load_registry_v2
 
 
@@ -115,6 +122,9 @@ class HostPartialRunAuditV2:
     finalize_response: dict[str, Any] | None = None
     accepted_physical_receipt_count: int = 0
     last_physical_receipt_sha256: str | None = None
+    challenge_consumption_receipt_path: str | None = None
+    challenge_consumption_receipt_sha256: str | None = None
+    challenge_consumption_id: str | None = None
 
     def begin_cycle(self, decision_index: int) -> None:
         if self.active_cycle is not None:
@@ -167,6 +177,9 @@ class HostPartialRunAuditV2:
             "finalize_response": self.finalize_response,
             "accepted_physical_receipt_count": self.accepted_physical_receipt_count,
             "last_physical_receipt_sha256": self.last_physical_receipt_sha256,
+            "challenge_consumption_receipt_path": self.challenge_consumption_receipt_path,
+            "challenge_consumption_receipt_sha256": self.challenge_consumption_receipt_sha256,
+            "challenge_consumption_id": self.challenge_consumption_id,
             "formal_output_written": False,
             "final_task_success_evaluated": self.finalize_response is not None,
             "strict_pure_model_success": False,
@@ -185,6 +198,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--run-id", required=True)
     parser.add_argument("--challenge-nonce", required=True)
     parser.add_argument("--wire-challenge-manifest", type=Path, required=True)
+    parser.add_argument(
+        "--challenge-consumption-ledger",
+        type=Path,
+        default=Path(CANONICAL_WIRE_CHALLENGE_CONSUMPTION_ROOT),
+    )
     parser.add_argument("--matched-key", required=True)
     parser.add_argument("--scene-seed", type=int, required=True)
     parser.add_argument("--failure-seed", type=int, required=True)
@@ -321,6 +339,8 @@ def run_real(
     *,
     bundle: QwenBundleRuntimeBindingV2,
     endpoint: IsaacEndpointBindingV2,
+    challenge_consumption: WireChallengeConsumptionReceiptV1,
+    challenge_consumption_receipt_sha256: str,
     audit: HostPartialRunAuditV2 | None = None,
 ) -> dict[str, Any]:
     # Defense in depth for direct imports: main() already checks this before
@@ -344,6 +364,8 @@ def run_real(
     start_request = IsaacStartRequestV2(
         run_id=args.run_id,
         challenge_nonce=args.challenge_nonce,
+        challenge_consumption_id=challenge_consumption.consumption_id,
+        challenge_consumption_receipt_sha256=challenge_consumption_receipt_sha256,
         matched_key=args.matched_key,
         scene_seed=args.scene_seed,
         failure_seed=args.failure_seed,
@@ -634,6 +656,17 @@ def main(argv: list[str] | None = None) -> int:
             )
         )
         return 0
+    consumption_path, consumption = consume_wire_challenge_create_only(
+        ledger_directory=args.challenge_consumption_ledger,
+        challenge_manifest_path=args.wire_challenge_manifest,
+        run_id=args.run_id,
+        challenge_nonce=args.challenge_nonce,
+        matched_key=args.matched_key,
+        scene_seed=args.scene_seed,
+        failure_seed=args.failure_seed,
+        consumed_at_ns=time.time_ns(),
+    )
+    consumption_receipt_sha256 = wire_sha256_bytes(read_wire_evidence_once(consumption_path))
     audit = HostPartialRunAuditV2(
         run_id=args.run_id,
         matched_key=args.matched_key,
@@ -641,12 +674,17 @@ def main(argv: list[str] | None = None) -> int:
         failure_seed=args.failure_seed,
         bundle=bundle.model_dump(mode="json"),
         isaac_endpoint_binding=endpoint.model_dump(mode="json"),
+        challenge_consumption_receipt_path=str(consumption_path),
+        challenge_consumption_receipt_sha256=consumption_receipt_sha256,
+        challenge_consumption_id=consumption.consumption_id,
     )
     try:
         payload = run_real(
             args,
             bundle=bundle,
             endpoint=endpoint,
+            challenge_consumption=consumption,
+            challenge_consumption_receipt_sha256=(audit.challenge_consumption_receipt_sha256),
             audit=audit,
         )
     except Exception as exc:
@@ -660,6 +698,9 @@ def main(argv: list[str] | None = None) -> int:
                 f"audit={type(publish_error).__name__}: {publish_error}"
             ) from publish_error
         raise
+    payload["challenge_consumption_receipt_path"] = str(consumption_path)
+    payload["challenge_consumption_receipt_sha256"] = audit.challenge_consumption_receipt_sha256
+    payload["challenge_consumption_id"] = consumption.consumption_id
     publish_create_only(args.output, payload)
     return 0
 

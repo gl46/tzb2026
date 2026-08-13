@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Create one host-local, independently signed formal wire attestation."""
+"""Create one unsigned host-local formal HMAC verification receipt."""
 
 from __future__ import annotations
 
@@ -11,12 +11,9 @@ import tempfile
 
 from xh_agent.policy.qrm_lite.formal_split_runner_v2 import read_hmac_secret
 from xh_agent.policy.qrm_lite.offline_wire_auth_v1 import (
-    build_signed_receipt,
+    build_hmac_verification_receipt_v2,
     read_regular_file_once,
     sha256_bytes,
-    verify_labserver_isaac_transcript,
-    verify_node2_qwen_transcript,
-    verify_receipt_signature,
 )
 
 
@@ -30,8 +27,6 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--service-audit", type=Path, required=True)
     parser.add_argument("--session-audit", type=Path)
     parser.add_argument("--hmac-key-file", type=Path, required=True)
-    parser.add_argument("--signing-key", type=Path, required=True)
-    parser.add_argument("--allowed-signers", type=Path, required=True)
     parser.add_argument("--project-root", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     return parser.parse_args(argv)
@@ -73,37 +68,25 @@ def main(argv: list[str] | None = None) -> int:
     if (args.host_role == "LABSERVER_ISAAC") != (session is not None):
         raise ValueError("only the labserver role requires exactly one session audit")
     secret = read_hmac_secret(args.hmac_key_file)
-    if args.host_role == "NODE2_QWEN":
-        run_id, challenge, transcript = verify_node2_qwen_transcript(formal, service, secret=secret)
-    else:
-        assert session is not None
-        run_id, challenge, transcript = verify_labserver_isaac_transcript(
-            formal, service, session, secret=secret
-        )
     implementation = args.project_root / IMPLEMENTATION_PATH
     implementation_bytes = _read(implementation)
-    allowed_signers = _read(args.allowed_signers)
-    receipt = build_signed_receipt(
+    receipt = build_hmac_verification_receipt_v2(
         host_role=args.host_role,
-        run_id=run_id,
-        challenge_nonce=challenge,
         formal_evidence_bytes=formal,
         service_audit_bytes=service,
         session_audit_bytes=session,
-        envelope_set_sha256=transcript,
-        verifier_implementation_path=IMPLEMENTATION_PATH,
         verifier_implementation_bytes=implementation_bytes,
-        allowed_signers_bytes=allowed_signers,
-        private_key_path=args.signing_key,
+        secret=secret,
     )
-    verify_receipt_signature(receipt, allowed_signers_bytes=allowed_signers)
+    run_id = receipt.core.run_id
+    challenge = receipt.core.challenge_nonce
     payload = receipt.model_dump(mode="json")
     published_bytes = (json.dumps(payload, indent=2, sort_keys=True) + "\n").encode("utf-8")
     _publish(args.output, payload)
     print(
         json.dumps(
             {
-                "status": "PASS_HOST_LOCAL_WIRE_ATTESTATION_NOT_FORMAL_AUTHORIZATION",
+                "status": "PASS_HOST_LOCAL_HMAC_VERIFICATION_NOT_FORMAL_AUTHORIZATION",
                 "host_role": args.host_role,
                 "run_id": run_id,
                 "challenge_nonce": challenge,

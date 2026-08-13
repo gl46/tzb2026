@@ -296,6 +296,8 @@ def _start_request(binding: IsaacEndpointBindingV2) -> IsaacStartRequestV2:
     return IsaacStartRequestV2(
         run_id="run-contract-only",
         challenge_nonce="c" * 64,
+        challenge_consumption_id="d" * 64,
+        challenge_consumption_receipt_sha256="e" * 64,
         matched_key="key-contract-only",
         scene_seed=1,
         failure_seed=2,

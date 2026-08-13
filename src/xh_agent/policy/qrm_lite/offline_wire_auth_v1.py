@@ -1,8 +1,10 @@
-"""Host-local HMAC replay with independently verifiable OpenSSH attestations.
+"""Host-local HMAC replay receipts and legacy OpenSSH attestations.
 
 Each host verifies only its own symmetric-key transcript.  The two HMAC keys
-are never brought together or serialized.  An independent evidence authority
-signs the derived, public receipt core with a host-specific Ed25519 key.
+are never brought together or serialized.  ADR-0024 withdrew OpenSSH signing
+as an S4 entry precondition.  ``HostWireHMACVerificationReceiptV2`` is the
+current unsigned, byte-bound receipt; the V1 SSH types remain only so older
+evidence can be audited without reinterpreting it.
 """
 
 from __future__ import annotations
@@ -41,6 +43,9 @@ NODE2_PRINCIPAL = "m2c-node2-qwen-evidence-authority"
 LABSERVER_PRINCIPAL = "m2c-labserver-isaac-evidence-authority"
 SHA256_PATTERN = r"^[0-9a-f]{64}$"
 HostRole = Literal["NODE2_QWEN", "LABSERVER_ISAAC"]
+HOST_HMAC_VERIFIER_IMPLEMENTATION_PATH = "src/xh_agent/policy/qrm_lite/offline_wire_auth_v1.py"
+WIRE_CHALLENGE_MANIFEST_PATH = "configs/m2c_s4_wire_challenges.json"
+CANONICAL_WIRE_CHALLENGE_CONSUMPTION_ROOT = "/var/lib/xh-agent/m2c-s4-wire-challenge-consumption-v1"
 
 
 class StrictModel(BaseModel):
@@ -100,8 +105,209 @@ class SignedHostWireAuthenticationReceiptV1(StrictModel):
     )
 
 
+class HostWireHMACVerificationCoreV2(StrictModel):
+    """Public result of one host replaying only its own HMAC transcript."""
+
+    schema_version: Literal["M2CHostWireHMACVerificationCoreV2"] = (
+        "M2CHostWireHMACVerificationCoreV2"
+    )
+    host_role: HostRole
+    run_id: str = Field(min_length=1)
+    challenge_nonce: str = Field(pattern=SHA256_PATTERN)
+    formal_evidence_sha256: str = Field(pattern=SHA256_PATTERN)
+    service_audit_sha256: str = Field(pattern=SHA256_PATTERN)
+    session_audit_sha256: str | None = Field(default=None, pattern=SHA256_PATTERN)
+    envelope_set_sha256: str = Field(pattern=SHA256_PATTERN)
+    authenticated_envelope_count: int
+    request_envelope_count: int
+    response_envelope_count: int
+    verifier_implementation_path: Literal[HOST_HMAC_VERIFIER_IMPLEMENTATION_PATH] = (
+        HOST_HMAC_VERIFIER_IMPLEMENTATION_PATH
+    )
+    verifier_implementation_sha256: str = Field(pattern=SHA256_PATTERN)
+    audit_cleanly_stopped: Literal[True] = True
+    all_hmac_valid: Literal[True] = True
+    hmac_secret_exported: Literal[False] = False
+    hmac_secret_persisted_in_receipt: Literal[False] = False
+    teacher_used: Literal[False] = False
+    privileged_truth_policy_input: Literal[False] = False
+
+    @model_validator(mode="after")
+    def role_has_exact_counts(self) -> "HostWireHMACVerificationCoreV2":
+        expected = {
+            "NODE2_QWEN": (16, 8, 8, False),
+            "LABSERVER_ISAAC": (36, 18, 18, True),
+        }[self.host_role]
+        observed = (
+            self.authenticated_envelope_count,
+            self.request_envelope_count,
+            self.response_envelope_count,
+            self.session_audit_sha256 is not None,
+        )
+        if observed != expected:
+            raise ValueError("host HMAC receipt role/count/session contract differs")
+        return self
+
+
+class HostWireHMACVerificationReceiptV2(StrictModel):
+    schema_version: Literal["M2CHostWireHMACVerificationReceiptV2"] = (
+        "M2CHostWireHMACVerificationReceiptV2"
+    )
+    core: HostWireHMACVerificationCoreV2
+
+
+class WireChallengeConsumptionReceiptV1(StrictModel):
+    """Create-only proof that one preregistered challenge was claimed once."""
+
+    schema_version: Literal["M2CWireChallengeConsumptionReceiptV1"] = (
+        "M2CWireChallengeConsumptionReceiptV1"
+    )
+    status: Literal["CONSUMED_BEFORE_ENDPOINT_CONTACT"] = "CONSUMED_BEFORE_ENDPOINT_CONTACT"
+    run_id: str = Field(min_length=1)
+    challenge_nonce: str = Field(pattern=SHA256_PATTERN)
+    matched_key: str = Field(min_length=1)
+    scene_seed: int = Field(ge=0)
+    failure_seed: int = Field(ge=0)
+    challenge_manifest_path: Literal[WIRE_CHALLENGE_MANIFEST_PATH] = WIRE_CHALLENGE_MANIFEST_PATH
+    challenge_manifest_sha256: str = Field(pattern=SHA256_PATTERN)
+    ledger_root: str = Field(min_length=1)
+    consumption_id: str = Field(pattern=SHA256_PATTERN)
+    consumed_at_ns: int = Field(gt=0)
+    create_only_o_excl: Literal[True] = True
+    remains_consumed_after_rejection_or_failure: Literal[True] = True
+    endpoint_contact_before_consumption_allowed: Literal[False] = False
+    teacher_used: Literal[False] = False
+    privileged_truth_policy_input: Literal[False] = False
+
+    @model_validator(mode="after")
+    def deterministic_consumption_identity(self) -> "WireChallengeConsumptionReceiptV1":
+        if Path(self.ledger_root) != Path(CANONICAL_WIRE_CHALLENGE_CONSUMPTION_ROOT):
+            raise ValueError("wire challenge consumption ledger root is not canonical")
+        expected = wire_challenge_consumption_id(
+            challenge_nonce=self.challenge_nonce,
+            challenge_manifest_sha256=self.challenge_manifest_sha256,
+        )
+        if self.consumption_id != expected:
+            raise ValueError("wire challenge consumption ID is not canonical")
+        return self
+
+
 def sha256_bytes(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
+
+
+def wire_challenge_consumption_id(
+    *,
+    challenge_nonce: str,
+    challenge_manifest_sha256: str,
+) -> str:
+    if (
+        re.fullmatch(SHA256_PATTERN, challenge_nonce) is None
+        or re.fullmatch(SHA256_PATTERN, challenge_manifest_sha256) is None
+    ):
+        raise ValueError("wire challenge consumption identity contains malformed SHA-256")
+    return canonical_sha256(
+        {
+            "namespace": "m2c-wire-challenge-consumption-v1",
+            "challenge_nonce": challenge_nonce,
+            "challenge_manifest_sha256": challenge_manifest_sha256,
+        }
+    )
+
+
+def wire_challenge_consumption_path(ledger_directory: Path, challenge_nonce: str) -> Path:
+    if re.fullmatch(SHA256_PATTERN, challenge_nonce) is None:
+        raise ValueError("wire challenge nonce is malformed")
+    return ledger_directory / f"consumed-{challenge_nonce}.json"
+
+
+def consume_wire_challenge_create_only(
+    *,
+    ledger_directory: Path,
+    challenge_manifest_path: Path,
+    run_id: str,
+    challenge_nonce: str,
+    matched_key: str,
+    scene_seed: int,
+    failure_seed: int,
+    consumed_at_ns: int,
+) -> tuple[Path, WireChallengeConsumptionReceiptV1]:
+    """Atomically consume a preregistered challenge before endpoint contact."""
+
+    if ledger_directory.resolve() != Path(CANONICAL_WIRE_CHALLENGE_CONSUMPTION_ROOT).resolve():
+        raise ValueError("wire challenge consumption ledger root is not canonical")
+    manifest_bytes = read_regular_file_once(challenge_manifest_path)
+    manifest_sha256 = sha256_bytes(manifest_bytes)
+    manifest = _parse_json_object(manifest_bytes, label="wire challenge manifest")
+    if (
+        manifest.get("schema_version") != "M2CS4WireChallengeManifestV1"
+        or manifest.get("formal_q_b_evaluation_authorized") is not False
+        or manifest.get("teacher_used") is not False
+        or manifest.get("privileged_truth_policy_input") is not False
+    ):
+        raise ValueError("wire challenge manifest governance differs")
+    matches = [
+        item
+        for item in manifest.get("challenge_records", [])
+        if isinstance(item, dict)
+        and item.get("run_id") == run_id
+        and item.get("challenge_nonce") == challenge_nonce
+        and item.get("matched_key") == matched_key
+        and item.get("scene_seed") == scene_seed
+        and item.get("failure_seed") == failure_seed
+    ]
+    if len(matches) != 1:
+        raise ValueError("wire challenge consumption does not match one preregistration")
+    receipt = WireChallengeConsumptionReceiptV1(
+        run_id=run_id,
+        challenge_nonce=challenge_nonce,
+        matched_key=matched_key,
+        scene_seed=scene_seed,
+        failure_seed=failure_seed,
+        challenge_manifest_sha256=manifest_sha256,
+        ledger_root=str(ledger_directory.resolve()),
+        consumption_id=wire_challenge_consumption_id(
+            challenge_nonce=challenge_nonce,
+            challenge_manifest_sha256=manifest_sha256,
+        ),
+        consumed_at_ns=consumed_at_ns,
+    )
+    payload = canonical_json_bytes(receipt) + b"\n"
+    ledger_directory.mkdir(mode=0o700, parents=True, exist_ok=True)
+    directory_stat = ledger_directory.stat(follow_symlinks=False)
+    if (
+        not stat.S_ISDIR(directory_stat.st_mode)
+        or ledger_directory.is_symlink()
+        or directory_stat.st_uid != os.geteuid()
+        or directory_stat.st_mode & 0o077
+    ):
+        raise PermissionError("wire challenge consumption ledger directory is unsafe")
+    path = wire_challenge_consumption_path(ledger_directory, challenge_nonce)
+    flags = (
+        os.O_WRONLY
+        | os.O_CREAT
+        | os.O_EXCL
+        | getattr(os, "O_CLOEXEC", 0)
+        | getattr(os, "O_NOFOLLOW", 0)
+    )
+    descriptor = os.open(path, flags, 0o400)
+    try:
+        view = memoryview(payload)
+        while view:
+            written = os.write(descriptor, view)
+            if written <= 0:
+                raise OSError("wire challenge consumption write made no progress")
+            view = view[written:]
+        os.fsync(descriptor)
+    except Exception:
+        try:
+            path.unlink()
+        except OSError:
+            pass
+        raise
+    finally:
+        os.close(descriptor)
+    return path, receipt
 
 
 def read_regular_file_once(path: Path, *, require_private: bool = False) -> bytes:
@@ -610,3 +816,53 @@ def build_signed_receipt(
         core=core,
         signature_armored=sign_core(core, private_key_path=private_key_path),
     )
+
+
+def build_hmac_verification_receipt_v2(
+    *,
+    host_role: HostRole,
+    formal_evidence_bytes: bytes,
+    service_audit_bytes: bytes,
+    session_audit_bytes: bytes | None,
+    secret: bytes,
+    verifier_implementation_bytes: bytes,
+) -> HostWireHMACVerificationReceiptV2:
+    """Replay one host transcript and emit an unsigned content receipt.
+
+    The caller supplies exactly one host-local secret.  This function never
+    serializes that secret and has no SSH/key-authority input.
+    """
+
+    if host_role == "NODE2_QWEN":
+        if session_audit_bytes is not None:
+            raise ValueError("node2 HMAC verification may not accept a session audit")
+        run_id, challenge_nonce, envelope_set_sha256 = verify_node2_qwen_transcript(
+            formal_evidence_bytes,
+            service_audit_bytes,
+            secret=secret,
+        )
+    else:
+        if session_audit_bytes is None:
+            raise ValueError("labserver HMAC verification requires the Isaac session audit")
+        run_id, challenge_nonce, envelope_set_sha256 = verify_labserver_isaac_transcript(
+            formal_evidence_bytes,
+            service_audit_bytes,
+            session_audit_bytes,
+            secret=secret,
+        )
+    core = HostWireHMACVerificationCoreV2(
+        host_role=host_role,
+        run_id=run_id,
+        challenge_nonce=challenge_nonce,
+        formal_evidence_sha256=sha256_bytes(formal_evidence_bytes),
+        service_audit_sha256=sha256_bytes(service_audit_bytes),
+        session_audit_sha256=(
+            sha256_bytes(session_audit_bytes) if session_audit_bytes is not None else None
+        ),
+        envelope_set_sha256=envelope_set_sha256,
+        authenticated_envelope_count=16 if host_role == "NODE2_QWEN" else 36,
+        request_envelope_count=8 if host_role == "NODE2_QWEN" else 18,
+        response_envelope_count=8 if host_role == "NODE2_QWEN" else 18,
+        verifier_implementation_sha256=sha256_bytes(verifier_implementation_bytes),
+    )
+    return HostWireHMACVerificationReceiptV2(core=core)

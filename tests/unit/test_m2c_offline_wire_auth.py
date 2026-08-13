@@ -9,12 +9,18 @@ from pydantic import ValidationError
 
 from xh_agent.policy.qrm_lite.offline_wire_auth_v1 import (
     AUTH_NAMESPACE,
+    CANONICAL_WIRE_CHALLENGE_CONSUMPTION_ROOT,
     HostWireAuthenticationCoreV1,
+    HostWireHMACVerificationCoreV2,
+    HostWireHMACVerificationReceiptV2,
     SignedHostWireAuthenticationReceiptV1,
+    WireChallengeConsumptionReceiptV1,
     _read_canonical_audit,
     _wire_events,
+    consume_wire_challenge_create_only,
     sign_core,
     verify_receipt_signature,
+    wire_challenge_consumption_id,
 )
 
 
@@ -90,6 +96,93 @@ def test_role_schema_rejects_cross_host_counts_or_missing_session() -> None:
     raw["signer_principal"] = "m2c-labserver-isaac-evidence-authority"
     with pytest.raises(ValidationError, match="role/count/principal"):
         HostWireAuthenticationCoreV1.model_validate(raw)
+
+
+def test_unsigned_v2_receipt_has_no_ssh_or_trust_fields() -> None:
+    core = HostWireHMACVerificationCoreV2(
+        host_role="NODE2_QWEN",
+        run_id="run",
+        challenge_nonce="1" * 64,
+        formal_evidence_sha256="2" * 64,
+        service_audit_sha256="3" * 64,
+        envelope_set_sha256="4" * 64,
+        authenticated_envelope_count=16,
+        request_envelope_count=8,
+        response_envelope_count=8,
+        verifier_implementation_sha256="5" * 64,
+    )
+    raw = HostWireHMACVerificationReceiptV2(core=core).model_dump(mode="json")
+    encoded = json.dumps(raw)
+    assert "signature" not in encoded
+    assert "trust_root" not in encoded
+    assert "principal" not in encoded
+    with pytest.raises(ValidationError, match="Extra inputs"):
+        HostWireHMACVerificationReceiptV2.model_validate({**raw, "signature_armored": "fake"})
+
+
+def test_challenge_consumption_is_create_only_and_tamper_rejected(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    ledger = tmp_path / "ledger"
+    monkeypatch.setattr(
+        "xh_agent.policy.qrm_lite.offline_wire_auth_v1.CANONICAL_WIRE_CHALLENGE_CONSUMPTION_ROOT",
+        str(ledger),
+    )
+    manifest = tmp_path / "manifest.json"
+    challenge = "1" * 64
+    manifest.write_text(
+        json.dumps(
+            {
+                "schema_version": "M2CS4WireChallengeManifestV1",
+                "challenge_records": [
+                    {
+                        "run_id": "run",
+                        "challenge_nonce": challenge,
+                        "matched_key": "key",
+                        "scene_seed": 1,
+                        "failure_seed": 2,
+                    }
+                ],
+                "formal_q_b_evaluation_authorized": False,
+                "teacher_used": False,
+                "privileged_truth_policy_input": False,
+            },
+            sort_keys=True,
+        )
+    )
+    path, receipt = consume_wire_challenge_create_only(
+        ledger_directory=ledger,
+        challenge_manifest_path=manifest,
+        run_id="run",
+        challenge_nonce=challenge,
+        matched_key="key",
+        scene_seed=1,
+        failure_seed=2,
+        consumed_at_ns=1,
+    )
+    assert path.is_file()
+    assert path.stat().st_mode & 0o777 == 0o400
+    assert receipt.consumption_id == wire_challenge_consumption_id(
+        challenge_nonce=challenge,
+        challenge_manifest_sha256=receipt.challenge_manifest_sha256,
+    )
+    with pytest.raises(FileExistsError):
+        consume_wire_challenge_create_only(
+            ledger_directory=ledger,
+            challenge_manifest_path=manifest,
+            run_id="run",
+            challenge_nonce=challenge,
+            matched_key="key",
+            scene_seed=1,
+            failure_seed=2,
+            consumed_at_ns=2,
+        )
+    tampered = receipt.model_dump(mode="json")
+    tampered["consumption_id"] = "0" * 64
+    with pytest.raises(ValidationError, match="not canonical"):
+        WireChallengeConsumptionReceiptV1.model_validate(tampered)
+    assert CANONICAL_WIRE_CHALLENGE_CONSUMPTION_ROOT.startswith("/var/lib/")
 
 
 def test_signer_rejects_symlink_private_key(tmp_path: Path) -> None:

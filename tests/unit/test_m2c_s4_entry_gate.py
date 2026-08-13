@@ -45,6 +45,9 @@ from xh_agent.policy.qrm_lite.s4_entry_gate import (
     canonical_qwen_head_tensor_hashes,
     evaluate_s4_entry_gate,
 )
+from xh_agent.policy.qrm_lite.offline_wire_auth_v1 import (
+    HOST_HMAC_VERIFIER_IMPLEMENTATION_PATH,
+)
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -307,6 +310,7 @@ def _trained_world_model_bundle(tmp_path: Path) -> dict[str, object]:
 def _physical_receipt(tmp_path: Path) -> Path:
     manifest = json.loads((ROOT / FROZEN_KEY_MANIFEST_PATH).read_text())
     b0_freeze = json.loads((ROOT / "configs/m2c_b0_freeze.json").read_text())
+    verifier = ROOT / HOST_HMAC_VERIFIER_IMPLEMENTATION_PATH
     key = manifest["physical_prerequisite_smoke_keys"][0]
     challenge_manifest = json.loads((ROOT / FROZEN_WIRE_CHALLENGE_MANIFEST_PATH).read_text())
     challenge = next(
@@ -360,6 +364,8 @@ def _physical_receipt(tmp_path: Path) -> Path:
             "container_image_digest": "sha256:" + "d" * 64,
             "transitive_import_manifest_path": str(import_manifest),
             "transitive_import_manifest_sha256": _sha256(import_manifest),
+            "host_hmac_verifier_implementation_path": (HOST_HMAC_VERIFIER_IMPLEMENTATION_PATH),
+            "host_hmac_verifier_implementation_sha256": _sha256(verifier),
             "invalid_or_rejected_action_policy": "TERMINAL_NO_PHYSICAL_EXECUTION",
             "b0_runtime_wrapper_present": False,
             "b0_runtime_fallback_invocation_allowed": False,
@@ -373,6 +379,8 @@ def _physical_receipt(tmp_path: Path) -> Path:
         "world_model_bundle": _trained_world_model_bundle(tmp_path),
         "formal_runner_evidence_path": str(arbitrary_evidence),
         "formal_runner_evidence_sha256": _sha256(arbitrary_evidence),
+        "challenge_consumption_receipt_path": str(tmp_path / "absent-consumption.json"),
+        "challenge_consumption_receipt_sha256": "0" * 64,
         "node2_wire_authentication_receipt_path": str(arbitrary_node2_auth),
         "node2_wire_authentication_receipt_sha256": _sha256(arbitrary_node2_auth),
         "labserver_wire_authentication_receipt_path": str(arbitrary_labserver_auth),
@@ -490,7 +498,7 @@ def test_missing_formal_runner_freeze_blocks_even_complete_bundle(tmp_path: Path
         for item in result["blockers"]
     )
     assert any("transitive-import closure" in item for item in result["blockers"])
-    assert any("consumption ledger" in item for item in result["blockers"])
+    assert any("consumption" in item for item in result["blockers"])
 
 
 def test_adr0024_withdrawn_b0_and_signing_sentinels_are_not_source_blockers() -> None:
@@ -503,6 +511,21 @@ def test_adr0024_withdrawn_b0_and_signing_sentinels_are_not_source_blockers() ->
     assert not any(
         "signing-key custody" in item or "public trust root" in item for item in blockers
     )
+
+
+def test_entry_uses_unsigned_hmac_receipt_and_requires_consumption_binding() -> None:
+    from xh_agent.policy.qrm_lite.offline_wire_auth_v1 import (
+        HostWireHMACVerificationReceiptV2,
+    )
+    from xh_agent.policy.qrm_lite.s4_entry_gate import PhysicalIntegrationReceiptV2
+
+    auth_schema = HostWireHMACVerificationReceiptV2.model_json_schema()
+    encoded = json.dumps(auth_schema)
+    assert "signature_armored" not in encoded
+    assert "public_trust_root" not in encoded
+    fields = PhysicalIntegrationReceiptV2.model_fields
+    assert "challenge_consumption_receipt_path" in fields
+    assert "challenge_consumption_receipt_sha256" in fields
 
 
 def test_implementation_commit_may_be_ancestor_but_must_exist(tmp_path: Path) -> None:
