@@ -17,6 +17,9 @@ from xh_agent.policy.qrm_lite.a3_bullet_self_ccd_v1 import (
     A3RigidTransformV1,
     A3SelfCollisionRejected,
     A3SelfCollisionWorldV1,
+    BULLET_CONVEX_HULL_SHIPPED_MARGIN_M,
+    CONTROLLED_PANDA_BOX_SHIPPED_MARGIN_MAX_M,
+    CONTROLLED_PANDA_CYLINDER_SHIPPED_MARGIN_MAX_M,
     EXPECTED_BULLET_FLOAT64_COLLISION_SHA256,
     EXPECTED_BULLET_FLOAT64_LINEAR_MATH_SHA256,
     build_child_pair_ccd_request_v1,
@@ -175,6 +178,9 @@ def test_numeric_configuration_is_within_every_adr0024_bound() -> None:
     assert config.scalar_abi == "float64"
     assert config.convex_hull_construction_tolerance_m <= 1e-6
     assert config.convex_hull_outward_padding_m >= 0.002
+    assert config.box_collision_margin_m == CONTROLLED_PANDA_BOX_SHIPPED_MARGIN_MAX_M
+    assert config.cylinder_collision_margin_m == CONTROLLED_PANDA_CYLINDER_SHIPPED_MARGIN_MAX_M
+    assert config.convex_hull_collision_margin_m == BULLET_CONVEX_HULL_SHIPPED_MARGIN_M
     assert config.allowed_penetration_m == 0.0
     assert config.contact_distance_threshold_m >= 0.001
     assert config.toi_comparison_tolerance <= 1e-6
@@ -192,6 +198,12 @@ def test_numeric_configuration_is_within_every_adr0024_bound() -> None:
         ("contact_distance_threshold_m", 0.0009),
         ("toi_comparison_tolerance", 2e-6),
         ("maximum_ccd_iterations", 31),
+        ("box_collision_margin_m", CONTROLLED_PANDA_BOX_SHIPPED_MARGIN_MAX_M - 1e-9),
+        (
+            "cylinder_collision_margin_m",
+            CONTROLLED_PANDA_CYLINDER_SHIPPED_MARGIN_MAX_M - 1e-9,
+        ),
+        ("convex_hull_collision_margin_m", BULLET_CONVEX_HULL_SHIPPED_MARGIN_M - 1e-9),
     ],
 )
 def test_out_of_bound_numeric_value_is_rejected(field: str, value: object) -> None:

@@ -34,9 +34,34 @@ namespace {
 constexpr int kBox = 1;
 constexpr int kCylinderZ = 2;
 constexpr int kConvexHull = 3;
+constexpr double kBulletBaseMargin = 0.04;
 
 bool finite_positive(double value) {
   return std::isfinite(value) && value > 0.0;
+}
+
+double shipped_margin_for_shape(int kind, const double* parameters,
+                                std::size_t parameter_count) {
+  if (!parameters) {
+    return std::numeric_limits<double>::quiet_NaN();
+  }
+  if (kind == kBox && parameter_count == 3 &&
+      finite_positive(parameters[0]) && finite_positive(parameters[1]) &&
+      finite_positive(parameters[2])) {
+    const double smallest_half_extent =
+        0.5 * std::min(parameters[0], std::min(parameters[1], parameters[2]));
+    return std::min(kBulletBaseMargin, 0.1 * smallest_half_extent);
+  }
+  if (kind == kCylinderZ && parameter_count == 2 &&
+      finite_positive(parameters[0]) && finite_positive(parameters[1])) {
+    const double smallest_half_extent =
+        std::min(parameters[0], 0.5 * parameters[1]);
+    return std::min(kBulletBaseMargin, 0.1 * smallest_half_extent);
+  }
+  if (kind == kConvexHull && parameter_count == 1 && parameters[0] == 1.0) {
+    return kBulletBaseMargin;
+  }
+  return std::numeric_limits<double>::quiet_NaN();
 }
 
 bool hull_is_nondegenerate(const double* vertices_xyz,
@@ -83,9 +108,11 @@ std::unique_ptr<btConvexShape> make_shape(
     const double* vertices_xyz, std::size_t vertex_count,
     double hull_construction_tolerance_m, double outward_padding_m,
     double collision_margin_m) {
+  const double shipped_margin =
+      shipped_margin_for_shape(kind, parameters, parameter_count);
   if (!parameters || !finite_positive(outward_padding_m) ||
       outward_padding_m < 0.002 || !finite_positive(collision_margin_m) ||
-      collision_margin_m < 0.04 ||
+      !std::isfinite(shipped_margin) || collision_margin_m < shipped_margin ||
       !finite_positive(hull_construction_tolerance_m) ||
       hull_construction_tolerance_m > 1e-6) {
     return nullptr;

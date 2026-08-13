@@ -376,6 +376,8 @@ def test_native_sources_are_flat_float64_query_only_and_fail_closed() -> None:
     assert '#error "ADR-0024 A.3 requires a Bullet float64 build"' in core
     assert "static_assert(sizeof(btScalar) == sizeof(double)" in adapter
     assert "hull_is_nondegenerate" in adapter
+    assert "shipped_margin_for_shape" in adapter
+    assert "collision_margin_m < shipped_margin" in adapter
     assert "vertex_count < 4" in adapter
     assert "m2c_a3_flat_child_pair_ccd_v1" in adapter
     assert "*failure_code = -200" in adapter

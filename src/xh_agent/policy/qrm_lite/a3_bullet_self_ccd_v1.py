@@ -37,6 +37,17 @@ EXPECTED_BULLET_FLOAT64_COLLISION_SHA256 = (
 EXPECTED_BULLET_FLOAT64_LINEAR_MATH_SHA256 = (
     "5d3fe859ad08f78fac1e51ed85dddd9e39da501a0d566e86e00da5565d9e5343"
 )
+
+# Bullet 3.24 constructs boxes/cylinders with btConvexInternalShape's 0.04 m
+# default and immediately calls setSafeMargin(half_extents), selecting
+# min(0.04, 0.1 * min(half_extents)).  These are the maxima across the exact
+# controlled-Panda URDF shapes.  btConvexHullShape retains the base 0.04 m
+# default.  ADR-0024 requires margins no smaller than the shipped value for
+# each governed shape type; it does not require every primitive to inherit the
+# convex-hull value.
+CONTROLLED_PANDA_BOX_SHIPPED_MARGIN_MAX_M = 0.0055074
+CONTROLLED_PANDA_CYLINDER_SHIPPED_MARGIN_MAX_M = 0.008
+BULLET_CONVEX_HULL_SHIPPED_MARGIN_M = 0.04
 SUPPORTED_SHAPES = frozenset({"BOX", "CYLINDER", "CONVEX_HULL"})
 
 
@@ -88,9 +99,9 @@ class A3BulletNumericConfigurationV1(FrozenModel):
     scalar_abi: Literal["float64"] = "float64"
     convex_hull_construction_tolerance_m: float = Field(ge=0.0, le=1e-6)
     convex_hull_outward_padding_m: float = Field(ge=0.002)
-    box_collision_margin_m: float = Field(ge=0.04)
-    cylinder_collision_margin_m: float = Field(ge=0.04)
-    convex_hull_collision_margin_m: float = Field(ge=0.04)
+    box_collision_margin_m: float = Field(gt=0.0)
+    cylinder_collision_margin_m: float = Field(gt=0.0)
+    convex_hull_collision_margin_m: float = Field(gt=0.0)
     allowed_penetration_m: Literal[0.0] = 0.0
     contact_distance_threshold_m: float = Field(ge=0.001)
     toi_min: Literal[0.0] = 0.0
@@ -127,6 +138,12 @@ class A3BulletNumericConfigurationV1(FrozenModel):
             raise ValueError("A.3 numeric configuration contains NaN/Inf")
         if self.maximum_ccd_iterations > self.native_continuous_algorithm_iteration_cap:
             raise ValueError("configured CCD iterations exceed the pinned native cap")
+        if (
+            self.box_collision_margin_m < CONTROLLED_PANDA_BOX_SHIPPED_MARGIN_MAX_M
+            or self.cylinder_collision_margin_m < CONTROLLED_PANDA_CYLINDER_SHIPPED_MARGIN_MAX_M
+            or self.convex_hull_collision_margin_m < BULLET_CONVEX_HULL_SHIPPED_MARGIN_M
+        ):
+            raise ValueError("configured shape margin is below Bullet's shipped value")
         required_provenance = {
             "scalar_abi",
             "hull_tolerance",
@@ -162,9 +179,9 @@ def canonical_a3_bullet_numeric_configuration_v1() -> A3BulletNumericConfigurati
         "scalar_abi": "float64",
         "convex_hull_construction_tolerance_m": 1e-7,
         "convex_hull_outward_padding_m": 0.002,
-        "box_collision_margin_m": 0.04,
-        "cylinder_collision_margin_m": 0.04,
-        "convex_hull_collision_margin_m": 0.04,
+        "box_collision_margin_m": CONTROLLED_PANDA_BOX_SHIPPED_MARGIN_MAX_M,
+        "cylinder_collision_margin_m": CONTROLLED_PANDA_CYLINDER_SHIPPED_MARGIN_MAX_M,
+        "convex_hull_collision_margin_m": BULLET_CONVEX_HULL_SHIPPED_MARGIN_M,
         "allowed_penetration_m": 0.0,
         "contact_distance_threshold_m": 0.001,
         "toi_min": 0.0,
@@ -187,7 +204,10 @@ def canonical_a3_bullet_numeric_configuration_v1() -> A3BulletNumericConfigurati
             "scalar_abi": "ADR-0024 section 3; float64 package/build digest required",
             "hull_tolerance": "implementation value 1e-7 m within ADR-0024 <=1e-6 m bound",
             "outward_padding": "ADR-0024 minimum 0.002 m; selected exact lower bound",
-            "shape_margins": "Bullet shipped btConvexInternalShape default 0.04 m; never reduced",
+            "shape_margins": (
+                "Bullet 3.24 setSafeMargin shipped maxima for exact controlled-Panda "
+                "boxes=0.0055074 m and cylinder=0.008 m; convex hull base=0.04 m"
+            ),
             "allowed_penetration": "ADR-0024 fixed 0.0 m",
             "contact_threshold": "ADR-0024 minimum 0.001 m; selected exact lower bound",
             "toi_interval": "ADR-0024 closed interval [0,1]",
@@ -235,7 +255,7 @@ class A3ConvexChildV1(FrozenModel):
     decoded_vertices_sha256: str | None = Field(default=None, pattern=SHA256_PATTERN)
     smallest_conservative_radius_m: float = Field(gt=0.0)
     maximum_angular_motion_radius_m: float = Field(gt=0.0)
-    collision_margin_m: float = Field(ge=0.04)
+    collision_margin_m: float = Field(gt=0.0)
     outward_padding_m: float = Field(ge=0.002)
     conservative_outer_envelope: Literal[True] = True
     geometry_equality_claimed: Literal[False] = False
@@ -253,6 +273,13 @@ class A3ConvexChildV1(FrozenModel):
             raise ValueError("A.3 child radius contains NaN/Inf")
         if self.maximum_angular_motion_radius_m < self.smallest_conservative_radius_m:
             raise ValueError("A.3 maximum angular-motion radius is smaller than its inner radius")
+        required_margin = {
+            "BOX": CONTROLLED_PANDA_BOX_SHIPPED_MARGIN_MAX_M,
+            "CYLINDER": CONTROLLED_PANDA_CYLINDER_SHIPPED_MARGIN_MAX_M,
+            "CONVEX_HULL": BULLET_CONVEX_HULL_SHIPPED_MARGIN_M,
+        }[self.shape_kind]
+        if self.collision_margin_m < required_margin:
+            raise ValueError("A.3 child margin is below the governed shipped value")
         is_hull = self.shape_kind == "CONVEX_HULL"
         if is_hull != (self.decoded_vertices_sha256 is not None and self.source_vertex_count >= 4):
             raise ValueError("A.3 convex-hull vertex binding is incomplete or on a primitive")

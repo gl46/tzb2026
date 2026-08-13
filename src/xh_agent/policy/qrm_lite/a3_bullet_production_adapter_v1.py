@@ -38,6 +38,9 @@ from xh_agent.policy.qrm_lite.a3_bullet_self_ccd_v1 import (
     A3RigidTransformV1,
     A3SelfCollisionRejected,
     A3SelfCollisionWorldV1,
+    BULLET_CONVEX_HULL_SHIPPED_MARGIN_M,
+    CONTROLLED_PANDA_BOX_SHIPPED_MARGIN_MAX_M,
+    CONTROLLED_PANDA_CYLINDER_SHIPPED_MARGIN_MAX_M,
     EXPECTED_BULLET_FLOAT64_COLLISION_SHA256,
     EXPECTED_BULLET_FLOAT64_LINEAR_MATH_SHA256,
     canonical_a3_bullet_numeric_configuration_v1,
@@ -224,7 +227,7 @@ class A3ShapePayloadV1(FrozenModel):
     decoded_vertices_xyz_m: tuple[tuple[float, float, float], ...]
     hull_construction_tolerance_m: float = Field(gt=0.0, le=1e-6)
     outward_padding_m: float = Field(ge=0.002)
-    collision_margin_m: float = Field(ge=0.04)
+    collision_margin_m: float = Field(gt=0.0)
     every_decoded_stl_vertex_retained: bool
     conservative_outer_envelope: Literal[True] = True
     geometry_equality_claimed: Literal[False] = False
@@ -244,6 +247,13 @@ class A3ShapePayloadV1(FrozenModel):
         ):
             raise ValueError("A.3 shape parameters differ")
         is_hull = self.shape_kind == "CONVEX_HULL"
+        required_margin = {
+            "BOX": CONTROLLED_PANDA_BOX_SHIPPED_MARGIN_MAX_M,
+            "CYLINDER": CONTROLLED_PANDA_CYLINDER_SHIPPED_MARGIN_MAX_M,
+            "CONVEX_HULL": BULLET_CONVEX_HULL_SHIPPED_MARGIN_M,
+        }[self.shape_kind]
+        if self.collision_margin_m < required_margin:
+            raise ValueError("A.3 shape margin is below the governed shipped value")
         if is_hull:
             if self.shape_parameters != (1.0,) or len(self.decoded_vertices_xyz_m) < 4:
                 raise ValueError("A.3 convex-hull payload is incomplete")
