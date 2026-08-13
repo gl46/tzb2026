@@ -24,7 +24,6 @@ from pydantic import BaseModel, ConfigDict, Field
 from xh_agent.policy.qrm_lite.contracts import FailureType
 from xh_agent.policy.qrm_lite.executed_intent_history_v2 import (
     PublicExecutedIntentHistoryItemV2,
-    prompt_executed_intent_history_v2,
 )
 from xh_agent.policy.qrm_lite.model_owned_chain_v2 import (
     EXPECTED_PATH_BLOCKED_CHAIN,
@@ -62,6 +61,7 @@ from xh_agent.policy.qrm_lite.public_tracks_v4 import (
     encode_track_pointer_target_v4,
     public_track_candidate_slots_v4,
 )
+from xh_agent.policy.qrm_lite.qwen_prompt_v4 import render_qwen_public_prompt_v4
 from xh_agent.policy.qrm_lite.s4_v4_collection_authorization_v1 import (
     M2CS4V4CollectionConsumptionReceiptV1,
     M2CS4V4PackagedClaimBindingV1,
@@ -948,28 +948,11 @@ def qwen_coarse_v4_prompt(
     use_failure_context: bool,
 ) -> str:
     validate_training_sample_v4(sample)
-    payload = {
-        "task": "recover from a public PATH_BLOCKED manipulation failure",
-        "public_observation_revision": "PathBlockedPublicObservationV4",
-        "candidate_contract_revision": "PublicTrackCandidateV4",
-        "checkpoint_architecture_revision": "M2C_Q012_V4",
-        "canonical_public_track_candidates_k8": sample.observation.candidate_payload.model_dump(
-            mode="json"
-        ),
-        "failure_context": {"failure_type": "PATH_BLOCKED" if use_failure_context else "MASKED"},
-        "public_executed_intent_history": prompt_executed_intent_history_v2(
-            executed_intent_history,
-            expected_length=sample.decision_index,
-        ),
-        "allowed_skills": list(SKILL_LABELS),
-        "allowed_pointer_classes": list(POINTER_LABELS),
-        "allowed_destinations": list(DESTINATION_LABELS),
-    }
-    return (
-        "Select one CoarseIntentV2 skill, one literal V4 K=8 public-track pointer "
-        "(or NONE), and one registered destination cell (or NONE). Continuous "
-        "coordinates, TaskSpec target identity, Teacher output, and simulator truth "
-        "are unavailable. Context:\n" + json.dumps(payload, sort_keys=True, separators=(",", ":"))
+    return render_qwen_public_prompt_v4(
+        candidate_payload=sample.observation.candidate_payload,
+        decision_index=sample.decision_index,
+        executed_intent_history=executed_intent_history,
+        use_failure_context=use_failure_context,
     )
 
 

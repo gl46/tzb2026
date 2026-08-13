@@ -116,6 +116,7 @@ def test_all_current_real_m2c_entrypoints_call_the_shared_guard() -> None:
         "scripts/m2c/run_path_blocked_collection_worker.py": "require_pre_freeze",
         "scripts/m2c/run_formal_model_owned_chain.py": "M2CExperimentAction.Q_B_EVALUATION",
         "scripts/m2c/serve_qwen_coarse_v2.py": "M2CExperimentAction.FORMAL_MODEL_SERVICE",
+        "scripts/m2c/serve_qwen_coarse_v4.py": "M2CExperimentAction.FORMAL_MODEL_SERVICE",
         "scripts/m2c/serve_formal_isaac_endpoint.py": "M2CExperimentAction.FORMAL_ISAAC_SERVICE",
     }
     for relative, marker in expected.items():

@@ -28,6 +28,7 @@ from xh_agent.policy.qrm_lite.formal_split_runner_v4 import (
     sign_inference_response_v4,
     sign_isaac_wire_message_v4,
     validate_runtime_mapping_v4,
+    validate_inference_response_binding_v4,
     verify_inference_request_v4,
     verify_inference_response_v4,
     verify_isaac_wire_message_v4,
@@ -53,8 +54,10 @@ HASH = "a" * 64
 
 
 def _bundle() -> QwenBundleRuntimeBindingV4:
+    observation = _formal()
     return QwenBundleRuntimeBindingV4(
         bundle_manifest_file_sha256="1" * 64,
+        bundle_tree_sha256="0" * 64,
         bundle_sha256="2" * 64,
         head_checkpoint_sha256="3" * 64,
         head_deployment_file_sha256="4" * 64,
@@ -66,6 +69,13 @@ def _bundle() -> QwenBundleRuntimeBindingV4:
         training_manifest_sha256="a" * 64,
         s6_manifest_file_sha256="b" * 64,
         s6_manifest_sha256="c" * 64,
+        association_deployment_sha256=observation.association_deployment_sha256,
+        capture_source_implementation_sha256=(
+            observation.association_deployment.capture_source_implementation_sha256
+        ),
+        declared_attribute_selector_implementation_sha256=(
+            observation.declared_attribute_binding.selector_source_implementation_sha256
+        ),
         model_cache_dir=(
             "/verified/hf-cache/models--Qwen--Qwen3.5-4B/snapshots/"
             "851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a"
@@ -347,3 +357,13 @@ def test_v4_runtime_request_rejects_task_spec_or_candidate_splice() -> None:
     crossed = RuntimeSkillRequestV4.model_validate(payload)
     with pytest.raises(ValueError, match="differs from replayed candidates"):
         validate_runtime_mapping_v4(crossed, request.observation, REGISTRY)
+
+
+def test_v4_response_binding_rejects_wrong_nonempty_pointer_literal() -> None:
+    request = _request()
+    response = _response(request)
+    payload = response.model_dump(mode="json")
+    payload["intent"]["target_track_id"] = request.observation.canonical_slots[1]
+    crossed = response.model_validate(payload)
+    with pytest.raises(ValueError, match="decoded pointer differs"):
+        validate_inference_response_binding_v4(request, crossed)

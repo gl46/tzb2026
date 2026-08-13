@@ -11,7 +11,6 @@ claim that the Phase-2 deployment bindings are available.
 from __future__ import annotations
 
 import hmac
-import json
 import math
 from pathlib import Path
 from typing import Any, Literal, Mapping, Sequence, TypeVar
@@ -22,7 +21,6 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 from xh_agent.policy.qrm_lite.contracts import CoarseIntentV2, FailureType
 from xh_agent.policy.qrm_lite.executed_intent_history_v2 import (
     PublicExecutedIntentHistoryItemV2,
-    prompt_executed_intent_history_v2,
     validate_executed_intent_history_v2,
 )
 from xh_agent.policy.qrm_lite.formal_public_observation_v4 import (
@@ -49,6 +47,7 @@ from xh_agent.policy.qrm_lite.public_tracks_v4 import (
     PUBLIC_TRACK_POINTER_CLASS_COUNT_V4,
     PUBLIC_TRACK_POINTER_NONE_INDEX_V4,
 )
+from xh_agent.policy.qrm_lite.qwen_prompt_v4 import render_qwen_public_prompt_v4
 from xh_agent.policy.qrm_lite.skill_registry_v2 import (
     ParameterProvenanceV2,
     RuntimeSkillMappingResultV2,
@@ -64,7 +63,6 @@ FORMAL_INFERENCE_PATH_V4 = "/v1/m2c/qwen-coarse-v4/predict"
 QWEN_ARCHITECTURE_REVISION_V4 = "M2C_Q012_V4"
 PUBLIC_OBSERVATION_REVISION_V4 = "FormalPublicObservationV4"
 PUBLIC_TRACK_ASSOCIATOR_REVISION_V4 = "PublicTrackAssociatorV2"
-PUBLIC_TRACK_CANDIDATE_REVISION_V4 = "PublicTrackCandidateV4"
 
 _T = TypeVar("_T", bound=BaseModel)
 IsaacWireMessageTypeV4 = Literal[
@@ -90,6 +88,7 @@ class QwenBundleRuntimeBindingV4(StrictModel):
     model_id: Literal[QWEN_MODEL_ID] = QWEN_MODEL_ID
     model_revision: Literal[QWEN_MODEL_REVISION] = QWEN_MODEL_REVISION
     bundle_manifest_file_sha256: str = Field(pattern=SHA256_PATTERN)
+    bundle_tree_sha256: str = Field(pattern=SHA256_PATTERN)
     bundle_sha256: str = Field(pattern=SHA256_PATTERN)
     head_checkpoint_sha256: str = Field(pattern=SHA256_PATTERN)
     head_deployment_file_sha256: str = Field(pattern=SHA256_PATTERN)
@@ -101,6 +100,9 @@ class QwenBundleRuntimeBindingV4(StrictModel):
     training_manifest_sha256: str = Field(pattern=SHA256_PATTERN)
     s6_manifest_file_sha256: str = Field(pattern=SHA256_PATTERN)
     s6_manifest_sha256: str = Field(pattern=SHA256_PATTERN)
+    association_deployment_sha256: str = Field(pattern=SHA256_PATTERN)
+    capture_source_implementation_sha256: str = Field(pattern=SHA256_PATTERN)
+    declared_attribute_selector_implementation_sha256: str = Field(pattern=SHA256_PATTERN)
     model_cache_dir: str = Field(min_length=1)
     model_cache_tree_sha256: str = Field(pattern=SHA256_PATTERN)
     local_files_only: Literal[True] = True
@@ -161,6 +163,15 @@ class FormalInferenceRequestV4(StrictModel):
             raise ValueError("formal V4 runtime history contains non-model execution")
         if self.sent_at_ns <= self.observation.captured_at_ns:
             raise ValueError("formal V4 inference request does not follow its fresh capture")
+        if (
+            self.observation.association_deployment_sha256
+            != self.bundle.association_deployment_sha256
+            or self.observation.association_deployment.capture_source_implementation_sha256
+            != self.bundle.capture_source_implementation_sha256
+            or self.observation.declared_attribute_binding.selector_source_implementation_sha256
+            != self.bundle.declared_attribute_selector_implementation_sha256
+        ):
+            raise ValueError("formal V4 observation differs from frozen public deployment")
         return self
 
 
@@ -468,30 +479,11 @@ def verify_isaac_wire_message_v4(
 def runtime_qwen_prompt_v4(request: FormalInferenceRequestV4) -> str:
     """Render the exact V4 training-time public prompt from a wire request."""
 
-    payload = {
-        "task": "recover from a public PATH_BLOCKED manipulation failure",
-        "public_observation_revision": "PathBlockedPublicObservationV4",
-        "candidate_contract_revision": PUBLIC_TRACK_CANDIDATE_REVISION_V4,
-        "checkpoint_architecture_revision": QWEN_ARCHITECTURE_REVISION_V4,
-        "canonical_public_track_candidates_k8": (
-            request.observation.observation.candidate_payload.model_dump(mode="json")
-        ),
-        "failure_context": {
-            "failure_type": "PATH_BLOCKED" if request.bundle.failure_context == "on" else "MASKED"
-        },
-        "public_executed_intent_history": prompt_executed_intent_history_v2(
-            request.executed_intent_history,
-            expected_length=request.decision_index,
-        ),
-        "allowed_skills": list(M2C_Q012_V4_SKILL_LABELS),
-        "allowed_pointer_classes": list(POINTER_CLASS_LABELS),
-        "allowed_destinations": list(DESTINATION_CLASS_LABELS),
-    }
-    return (
-        "Select one CoarseIntentV2 skill, one literal V4 K=8 public-track pointer "
-        "(or NONE), and one registered destination cell (or NONE). Continuous "
-        "coordinates, TaskSpec target identity, Teacher output, and simulator truth "
-        "are unavailable. Context:\n" + json.dumps(payload, sort_keys=True, separators=(",", ":"))
+    return render_qwen_public_prompt_v4(
+        candidate_payload=request.observation.observation.candidate_payload,
+        decision_index=request.decision_index,
+        executed_intent_history=request.executed_intent_history,
+        use_failure_context=request.bundle.failure_context == "on",
     )
 
 
@@ -627,12 +619,11 @@ def build_inference_response_from_logits_v4(
     )
 
 
-def runtime_request_from_inference_v4(
+def validate_inference_response_binding_v4(
     request: FormalInferenceRequestV4,
     response: FormalInferenceResponseV4,
-    registry: RuntimeSkillRegistryV2,
-) -> RuntimeSkillRequestV4:
-    """Bind one V4 model response to its role-ranked slots without V2 resorting."""
+) -> None:
+    """Cross-check every response field that requires the originating request."""
 
     expected = {
         "run_id": request.run_id,
@@ -649,7 +640,6 @@ def runtime_request_from_inference_v4(
         raise ValueError("formal V4 inference response crosses request/bundle/observation")
     if response.completed_at_ns <= request.sent_at_ns:
         raise ValueError("formal V4 inference response completion precedes request")
-
     pointer_index = response.pointer.selected_index
     selected_track = (
         None
@@ -659,6 +649,21 @@ def runtime_request_from_inference_v4(
     if response.intent.target_track_id != selected_track:
         raise ValueError("formal V4 decoded pointer differs from the fresh candidate literal")
 
+
+def runtime_request_from_inference_v4(
+    request: FormalInferenceRequestV4,
+    response: FormalInferenceResponseV4,
+    registry: RuntimeSkillRegistryV2,
+) -> RuntimeSkillRequestV4:
+    """Bind one V4 model response to its role-ranked slots without V2 resorting."""
+
+    validate_inference_response_binding_v4(request, response)
+    pointer_index = response.pointer.selected_index
+    selected_track = (
+        None
+        if pointer_index == PUBLIC_TRACK_POINTER_NONE_INDEX_V4
+        else request.observation.canonical_slots[pointer_index]
+    )
     selected_skill = response.intent.skill_type
     canonical, alias, _ = resolve_registered_skill_v2(registry, selected_skill)
     spec = registry.skills.get(canonical or "")
