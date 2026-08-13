@@ -605,6 +605,8 @@ def test_v4_packager_happy_path_and_asset_tamper(tmp_path: Path, monkeypatch) ->
         "m2c.package_path_blocked_collection.v4_auth.verify_claim_bound_raw_session",
         lambda **_kwargs: (object(), object(), _PackagedAuthorization()),
     )
+    (tmp_path / "prereg.json").write_text('{"schema_version":"TestPrereg"}\n')
+    (tmp_path / "claim.json").write_text('{"schema_version":"TestClaim"}\n')
     common = {
         "raw_probe_path": raw_path,
         "evidence_root": evidence,

@@ -14,6 +14,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import re
 import stat
 from typing import Literal, Sequence
 
@@ -61,6 +62,12 @@ from xh_agent.policy.qrm_lite.public_tracks_v4 import (
     encode_track_pointer_target_v4,
     public_track_candidate_slots_v4,
 )
+from xh_agent.policy.qrm_lite.s4_v4_collection_authorization_v1 import (
+    M2CS4V4CollectionConsumptionReceiptV1,
+    M2CS4V4PackagedClaimBindingV1,
+    M2CS4V4RawClaimBindingV1,
+    M2CS4V4SelectedKeyCollectionPreregV1,
+)
 
 
 SHA256_PATTERN = r"^[0-9a-f]{64}$"
@@ -78,6 +85,7 @@ HEAD_TENSOR_NAMES = (
 )
 HEAD_CHECKPOINT_NAME = "qwen_coarse_v4_heads.npz"
 HEAD_DEPLOYMENT_NAME = "qwen_coarse_v4_checkpoint_deployment.json"
+TRAINING_DATASET_REPORT_NAME = "qwen_coarse_v4_training_dataset_report.json"
 BUNDLE_MANIFEST_NAME = "qwen_coarse_v4_bundle.json"
 
 
@@ -109,8 +117,60 @@ class M2CQwenCoarseV4PackageRefV1(StrictModel):
     source_evidence_file_sha256: str = Field(pattern=SHA256_PATTERN)
     physical_chain_file_sha256: str = Field(pattern=SHA256_PATTERN)
     supervised_dataset_file_sha256: str = Field(pattern=SHA256_PATTERN)
+    collection_receipt_file_sha256: str = Field(pattern=SHA256_PATTERN)
     dataset_sha256: str = Field(pattern=SHA256_PATTERN)
     samples: Literal[8] = 8
+
+
+class M2CQwenCoarseV4CopiedReceiptRefV1(StrictModel):
+    path: str
+    file_sha256: str = Field(pattern=SHA256_PATTERN)
+    canonical_receipt_sha256: str = Field(pattern=SHA256_PATTERN)
+
+
+class M2CQwenCoarseV4CollectionReceiptV1(StrictModel):
+    schema_version: Literal["M2CPathBlockedCollectionReceiptV4"]
+    status: Literal["PASS_SCRIPTED_PUBLIC_PHYSICAL_SUPERVISION"]
+    matched_key: str
+    scene_seed: int
+    failure_seed: int
+    split: Literal["train"]
+    collection_role: Literal["TRAIN"]
+    decision_source: Literal["SCRIPTED_PUBLIC_PHYSICAL_SUPERVISION"]
+    model_owned: Literal[False]
+    model_rollout: Literal[False]
+    formal_q_b_evaluation: Literal[False]
+    pure_model_success_evidence: Literal[False]
+    physical_chain_steps: Literal[8]
+    physical_receipts: Literal[8]
+    fresh_public_rgbd_observations: Literal[8]
+    copied_public_assets: dict[str, str]
+    physical_receipt_files: dict[str, M2CQwenCoarseV4CopiedReceiptRefV1]
+    raw_probe_sha256: str = Field(pattern=SHA256_PATTERN)
+    console_file_sha256: str = Field(pattern=SHA256_PATTERN)
+    packaged_physical_chain_sha256: str = Field(pattern=SHA256_PATTERN)
+    supervised_dataset_file_sha256: str = Field(pattern=SHA256_PATTERN)
+    dataset_sha256: str = Field(pattern=SHA256_PATTERN)
+    collection_manifest_sha256: str = Field(pattern=SHA256_PATTERN)
+    collection_manifest_file_sha256: str = Field(pattern=SHA256_PATTERN)
+    candidate_contract_revision: Literal["PublicTrackCandidateV4"]
+    checkpoint_architecture_revision: Literal["M2C_Q012_V4"]
+    s6_exclusion_manifest_sha256: str = Field(pattern=SHA256_PATTERN)
+    frozen_training_key_manifest_file_sha256: str = Field(pattern=SHA256_PATTERN)
+    frozen_s6_key_manifest_file_sha256: str = Field(pattern=SHA256_PATTERN)
+    runtime_registry_sha256: str = Field(pattern=SHA256_PATTERN)
+    executing_probe_source_sha256: str = Field(pattern=SHA256_PATTERN)
+    derived_probe_file_sha256: str = Field(pattern=SHA256_PATTERN)
+    frozen_upstream_v4_probe_sha256: str = Field(pattern=SHA256_PATTERN)
+    sdf_sha256: str = Field(pattern=SHA256_PATTERN)
+    supervision_sha256: str = Field(pattern=SHA256_PATTERN)
+    teacher_used: Literal[False]
+    privileged_truth_policy_input: Literal[False]
+    checkpoint_path: None
+    checkpoint_sha256: None
+    training_executed: Literal[False]
+    evaluation_executed: Literal[False]
+    collection_authorization: M2CS4V4PackagedClaimBindingV1
 
 
 class M2CQwenCoarseV4DatasetLoadReportV1(StrictModel):
@@ -126,6 +186,10 @@ class M2CQwenCoarseV4DatasetLoadReportV1(StrictModel):
     training_executed: Literal[False] = False
     teacher_used: Literal[False] = False
     privileged_truth_policy_input: Literal[False] = False
+
+
+def dataset_report_sha256_v4(report: M2CQwenCoarseV4DatasetLoadReportV1) -> str:
+    return canonical_sha256(report.model_dump(mode="json"))
 
 
 class M2CQwenCoarseV4OfflineSmokeV1(StrictModel):
@@ -154,6 +218,7 @@ class M2CQwenCoarseV4BundleManifestV1(StrictModel):
     public_track_candidate_revision: Literal["PublicTrackCandidateV4"] = "PublicTrackCandidateV4"
     model_id: str = Field(min_length=1)
     model_revision: str = Field(min_length=1)
+    base_model_snapshot_tree_sha256: str = Field(pattern=SHA256_PATTERN)
     failure_context: Literal["on", "off"]
     adapter_relative_path: Literal["adapter"] = "adapter"
     adapter_tree_sha256: str = Field(pattern=SHA256_PATTERN)
@@ -165,6 +230,11 @@ class M2CQwenCoarseV4BundleManifestV1(StrictModel):
     head_deployment: M2CQ012DeploymentManifestV4
     head_deployment_file_sha256: str = Field(pattern=SHA256_PATTERN)
     training_dataset_sha256: str = Field(pattern=SHA256_PATTERN)
+    training_dataset_report_relative_path: Literal[
+        "qwen_coarse_v4_training_dataset_report.json"
+    ] = TRAINING_DATASET_REPORT_NAME
+    training_dataset_report_sha256: str = Field(pattern=SHA256_PATTERN)
+    training_dataset_report_file_sha256: str = Field(pattern=SHA256_PATTERN)
     training_manifest_file_sha256: str = Field(pattern=SHA256_PATTERN)
     training_manifest_sha256: str = Field(pattern=SHA256_PATTERN)
     s6_manifest_file_sha256: str = Field(pattern=SHA256_PATTERN)
@@ -479,6 +549,21 @@ def _dataset_relative_path(uri: str) -> Path:
     return relative
 
 
+def read_dataset_asset_v4(
+    package_root: Path,
+    uri: str,
+    expected_sha256: str,
+) -> bytes:
+    root = package_root.resolve(strict=True)
+    path = (root / _dataset_relative_path(uri)).resolve(strict=True)
+    if not path.is_relative_to(root):
+        raise ValueError("V4 public asset escapes package root")
+    payload = _read_regular_file_once(path)
+    if sha256_bytes(payload) != expected_sha256:
+        raise ValueError(f"V4 public asset SHA-256 mismatch: {uri}")
+    return payload
+
+
 def _verify_packaged_assets_and_receipts(
     package_root: Path,
     evidence: M2CPathBlockedPhysicalChainEvidenceV4,
@@ -489,11 +574,7 @@ def _verify_packaged_assets_and_receipts(
             (step.observation.rgb_uri, step.observation.rgb_sha256),
             (step.observation.depth_uri, step.observation.depth_sha256),
         ):
-            path = (root / _dataset_relative_path(uri)).resolve(strict=True)
-            if not path.is_relative_to(root):
-                raise ValueError("V4 public asset escapes package root")
-            if sha256_bytes(_read_regular_file_once(path)) != expected_sha256:
-                raise ValueError(f"V4 public asset SHA-256 mismatch: {uri}")
+            read_dataset_asset_v4(root, uri, expected_sha256)
         receipt = step.physical_receipts[0]
         receipt_path = (root / _dataset_relative_path(receipt.receipt_uri)).resolve(strict=True)
         if not receipt_path.is_relative_to(root):
@@ -503,6 +584,151 @@ def _verify_packaged_assets_and_receipts(
             raise ValueError("V4 copied physical receipt is not an object")
         if receipt_raw != receipt.model_dump(mode="json"):
             raise ValueError("V4 copied physical receipt differs from bound chain receipt")
+
+
+def _verify_collection_receipt_v4(
+    package_root: Path,
+    *,
+    evidence: M2CPathBlockedPhysicalChainEvidenceV4,
+    dataset: PathBlockedSupervisedDatasetV4,
+    training_manifest: M2CS4V4TrainingKeyManifestV1,
+    s6_manifest: FrozenS6ExclusionManifestV2,
+    source_raw: bytes,
+    chain_raw: bytes,
+    dataset_raw: bytes,
+) -> bytes:
+    root = package_root.resolve(strict=True)
+    receipt_raw = _read_regular_file_once(root / "collection-receipt-v4.json")
+    receipt = M2CQwenCoarseV4CollectionReceiptV1.model_validate_json(receipt_raw)
+    source = json.loads(source_raw)
+    raw_authorization_payload = source.get("m2c_v4_collection_authorization")
+    if not isinstance(raw_authorization_payload, dict):
+        raise ValueError("V4 source evidence lacks the consumed collection claim projection")
+    raw_authorization = M2CS4V4RawClaimBindingV1.model_validate(raw_authorization_payload)
+    raw_authorization_sha256 = canonical_sha256(raw_authorization_payload)
+    raw_chain = source.get("m2c_path_blocked_physical_chain")
+    if not isinstance(raw_chain, dict) or (
+        raw_chain.get("collection_authorization_sha256") != raw_authorization_sha256
+    ):
+        raise ValueError("V4 source chain is not bound to its collection claim projection")
+    console_raw = _read_regular_file_once(root / "console.log")
+    prereg_raw = _read_regular_file_once(root / "collection-prereg-v4.json")
+    claim_raw = _read_regular_file_once(root / "collection-claim-v4.json")
+    prereg = M2CS4V4SelectedKeyCollectionPreregV1.model_validate_json(prereg_raw)
+    claim = M2CS4V4CollectionConsumptionReceiptV1.model_validate_json(claim_raw)
+    authorization = receipt.collection_authorization
+    if (
+        authorization.raw_claim_binding_sha256 != raw_authorization_sha256
+        or authorization.raw_probe_sha256 != sha256_bytes(source_raw)
+        or authorization.console_sha256 != sha256_bytes(console_raw)
+        or authorization.consumption_receipt_sha256 != raw_authorization.consumption_receipt_sha256
+        or authorization.consumption_id != raw_authorization.consumption_id
+        or authorization.matched_key != raw_authorization.matched_key
+        or authorization.committed_source_snapshot != raw_authorization.committed_source_snapshot
+        or authorization.container_image_id != raw_authorization.container_image_id
+        or sha256_bytes(prereg_raw) != raw_authorization.prereg_file_sha256
+        or prereg.prereg_sha256 != raw_authorization.prereg_sha256
+        or prereg.repository_relative_path != raw_authorization.prereg_repository_path
+        or prereg.committed_source_snapshot != raw_authorization.committed_source_snapshot
+        or claim.receipt_sha256 != raw_authorization.consumption_receipt_sha256
+        or claim.consumption_id != raw_authorization.consumption_id
+        or claim.challenge_nonce != raw_authorization.challenge_nonce
+        or claim.prereg_file_sha256 != raw_authorization.prereg_file_sha256
+        or claim.prereg_sha256 != raw_authorization.prereg_sha256
+        or claim.prereg_introduced_commit != raw_authorization.prereg_introduced_commit
+        or claim.selected_key.matched_key != raw_authorization.matched_key
+        or claim.selected_key.failure_seed != raw_authorization.failure_seed
+        or claim.source_sdf_sha256 != raw_authorization.source_sdf_sha256
+        or claim.source_supervision_sha256 != raw_authorization.source_supervision_sha256
+        or claim.source_urdf_sha256 != raw_authorization.source_urdf_sha256
+        or claim.derived_probe_sha256 != raw_authorization.derived_probe_sha256
+        or claim.container_image_id != raw_authorization.container_image_id
+        or claim.destination_cell != raw_authorization.destination_cell
+        or claim.committed_source_snapshot != raw_authorization.committed_source_snapshot
+    ):
+        raise ValueError("V4 packaged collection authorization differs from raw consumed claim")
+    expected_assets = {
+        f"{step.decision_index}:{kind}": digest
+        for step in evidence.steps
+        for kind, digest in (
+            ("rgb", step.observation.rgb_sha256),
+            ("depth", step.observation.depth_sha256),
+        )
+    }
+    expected_receipts = {}
+    for step in evidence.steps:
+        physical = step.physical_receipts[0]
+        path = (root / _dataset_relative_path(physical.receipt_uri)).resolve(strict=True)
+        if not path.is_relative_to(root):
+            raise ValueError("V4 collection receipt physical asset escapes package root")
+        expected_receipts[str(step.decision_index)] = M2CQwenCoarseV4CopiedReceiptRefV1(
+            path=str(_dataset_relative_path(physical.receipt_uri)),
+            file_sha256=sha256_bytes(_read_regular_file_once(path)),
+            canonical_receipt_sha256=physical.receipt_sha256,
+        )
+    if receipt.copied_public_assets != expected_assets or receipt.physical_receipt_files != (
+        expected_receipts
+    ):
+        raise ValueError("V4 collection receipt inventory differs from copied physical evidence")
+    expected_identity = (
+        evidence.matched_key,
+        evidence.scene_seed,
+        evidence.failure_seed,
+        evidence.split,
+        evidence.sdf_sha256,
+        evidence.supervision_sha256,
+    )
+    receipt_identity = (
+        receipt.matched_key,
+        receipt.scene_seed,
+        receipt.failure_seed,
+        receipt.split,
+        receipt.sdf_sha256,
+        receipt.supervision_sha256,
+    )
+    raw_identity = (
+        raw_authorization.matched_key,
+        evidence.scene_seed,
+        raw_authorization.failure_seed,
+        raw_authorization.split,
+        raw_authorization.source_sdf_sha256,
+        raw_authorization.source_supervision_sha256,
+    )
+    s6_sha256 = canonical_sha256(s6_manifest.model_dump(mode="json"))
+    if (
+        receipt_identity != expected_identity
+        or raw_identity != expected_identity
+        or receipt.raw_probe_sha256 != sha256_bytes(source_raw)
+        or receipt.console_file_sha256 != sha256_bytes(console_raw)
+        or receipt.packaged_physical_chain_sha256 != sha256_bytes(chain_raw)
+        or receipt.supervised_dataset_file_sha256 != sha256_bytes(dataset_raw)
+        or receipt.dataset_sha256 != dataset.dataset_sha256
+        or receipt.collection_manifest_file_sha256 != V4_MANIFEST_FILE_SHA256
+        or receipt.frozen_training_key_manifest_file_sha256 != V4_MANIFEST_FILE_SHA256
+        or receipt.collection_manifest_sha256 != training_manifest.manifest_sha256
+        or receipt.frozen_s6_key_manifest_file_sha256 != S6_MANIFEST_SHA256
+        or receipt.s6_exclusion_manifest_sha256 != s6_sha256
+        or receipt.runtime_registry_sha256 != evidence.runtime_registry_sha256
+        or receipt.executing_probe_source_sha256
+        != evidence.expected_association_deployment.capture_source_implementation_sha256
+        or receipt.derived_probe_file_sha256 != raw_authorization.derived_probe_sha256
+        or receipt.frozen_upstream_v4_probe_sha256 != raw_authorization.upstream_v4_probe_sha256
+    ):
+        raise ValueError("V4 collection receipt differs from independently replayed package")
+    copied_manifest_raw = _read_regular_file_once(root / "collection-manifest-v4.json")
+    copied_s6_raw = _read_regular_file_once(root / "s6-exclusion-manifest-v2.json")
+    copied_manifest = M2CS4V4TrainingKeyManifestV1.model_validate_json(copied_manifest_raw)
+    _copied_s6_payload, copied_s6, _copied_s6_bytes = _load_frozen_s6_manifest(
+        root / "s6-exclusion-manifest-v2.json"
+    )
+    if (
+        sha256_bytes(copied_manifest_raw) != V4_MANIFEST_FILE_SHA256
+        or sha256_bytes(copied_s6_raw) != S6_MANIFEST_SHA256
+        or copied_manifest != training_manifest
+        or copied_s6 != s6_manifest
+    ):
+        raise ValueError("V4 package contains substituted frozen manifests")
+    return receipt_raw
 
 
 def _replay_packaged_source(
@@ -518,6 +744,13 @@ def _replay_packaged_source(
     payload = json.loads(raw_bytes)
     if not isinstance(payload, dict):
         raise ValueError("V4 source evidence is not an object")
+    if payload.get("status") != "PASS" or payload.get("not_policy_rollout") is not True:
+        raise ValueError("V4 source evidence is not a passing non-policy collection")
+    if (
+        payload.get("actuation_probe_source_sha256")
+        != evidence.expected_association_deployment.capture_source_implementation_sha256
+    ):
+        raise ValueError("V4 source evidence executing probe differs from replay deployment")
     raw_chain = payload.get("m2c_path_blocked_physical_chain")
     raw_captures = payload.get("m2c_v4_raw_association_captures")
     if not isinstance(raw_chain, dict) or not isinstance(raw_captures, list):
@@ -596,6 +829,7 @@ def load_training_packages_v4(
             bytes,
             bytes,
             bytes,
+            bytes,
         ]
     ] = []
     for requested_root in package_roots:
@@ -639,6 +873,16 @@ def load_training_packages_v4(
             training_manifest=training_manifest,
         )
         _verify_packaged_assets_and_receipts(root, evidence)
+        collection_receipt_raw = _verify_collection_receipt_v4(
+            root,
+            evidence=evidence,
+            dataset=dataset,
+            training_manifest=training_manifest,
+            s6_manifest=s6_manifest,
+            source_raw=source_raw,
+            chain_raw=chain_raw,
+            dataset_raw=dataset_raw,
+        )
         parsed.append(
             (
                 key_order[evidence.matched_key],
@@ -648,10 +892,11 @@ def load_training_packages_v4(
                 source_raw,
                 chain_raw,
                 dataset_raw,
+                collection_receipt_raw,
             )
         )
     parsed.sort(key=lambda item: item[0])
-    rows = [sample for _, _, _, dataset, _, _, _ in parsed for sample in dataset.samples]
+    rows = [sample for _, _, _, dataset, _, _, _, _ in parsed for sample in dataset.samples]
     if len({item.matched_key for item in rows}) != len(parsed):
         raise ValueError("V4 training input repeats a frozen matched key")
     if len({item.episode_id for item in rows}) != len(parsed):
@@ -672,9 +917,19 @@ def load_training_packages_v4(
             source_evidence_file_sha256=sha256_bytes(source_raw),
             physical_chain_file_sha256=sha256_bytes(chain_raw),
             supervised_dataset_file_sha256=sha256_bytes(dataset_raw),
+            collection_receipt_file_sha256=sha256_bytes(collection_receipt_raw),
             dataset_sha256=dataset.dataset_sha256,
         )
-        for _, root, evidence, dataset, source_raw, chain_raw, dataset_raw in parsed
+        for (
+            _,
+            root,
+            evidence,
+            dataset,
+            source_raw,
+            chain_raw,
+            dataset_raw,
+            collection_receipt_raw,
+        ) in parsed
     ]
     return rows, M2CQwenCoarseV4DatasetLoadReportV1(
         status="PASS_REPLAYED_V4_TRAIN_DATA",
@@ -922,6 +1177,7 @@ def write_bundle_manifest_v4(
     heads: NumpyThreeHeadsV4,
     model_id: str,
     model_revision: str,
+    base_model_snapshot_tree_sha256: str,
     failure_context: Literal["on", "off"],
     dataset_report: M2CQwenCoarseV4DatasetLoadReportV1,
     seed: int,
@@ -929,6 +1185,8 @@ def write_bundle_manifest_v4(
 ) -> M2CQwenCoarseV4BundleManifestV1:
     if optimizer_steps <= 0:
         raise ValueError("V4 trained bundle requires at least one optimizer step")
+    if not re.fullmatch(SHA256_PATTERN, base_model_snapshot_tree_sha256):
+        raise ValueError("V4 base-model snapshot tree SHA-256 is malformed")
     if not output_root.is_dir():
         raise FileNotFoundError("V4 output staging root does not exist")
     adapter_sha256 = sha256_tree_v4(output_root / "adapter")
@@ -938,6 +1196,10 @@ def write_bundle_manifest_v4(
     )
     deployment_bytes = M2CQwenCoarseV4BundleManifestV1._deployment_file_bytes(deployment)
     _write_new_file(output_root / HEAD_DEPLOYMENT_NAME, deployment_bytes)
+    dataset_report_bytes = (
+        json.dumps(dataset_report.model_dump(mode="json"), indent=2, sort_keys=True) + "\n"
+    ).encode("utf-8")
+    _write_new_file(output_root / TRAINING_DATASET_REPORT_NAME, dataset_report_bytes)
     payload: dict[str, object] = {
         "schema_version": "M2CQwenCoarseV4BundleManifestV1",
         "status": "TRAINED_QWEN_LORA_M2C_Q012_V4",
@@ -947,6 +1209,7 @@ def write_bundle_manifest_v4(
         "public_track_candidate_revision": "PublicTrackCandidateV4",
         "model_id": model_id,
         "model_revision": model_revision,
+        "base_model_snapshot_tree_sha256": base_model_snapshot_tree_sha256,
         "failure_context": failure_context,
         "adapter_relative_path": "adapter",
         "adapter_tree_sha256": adapter_sha256,
@@ -956,6 +1219,9 @@ def write_bundle_manifest_v4(
         "head_deployment": deployment.model_dump(mode="json"),
         "head_deployment_file_sha256": sha256_bytes(deployment_bytes),
         "training_dataset_sha256": dataset_report.combined_dataset_sha256,
+        "training_dataset_report_relative_path": TRAINING_DATASET_REPORT_NAME,
+        "training_dataset_report_sha256": dataset_report_sha256_v4(dataset_report),
+        "training_dataset_report_file_sha256": sha256_bytes(dataset_report_bytes),
         "training_manifest_file_sha256": (
             dataset_report.key_manifest_audit.training_manifest_file_sha256
         ),
@@ -997,6 +1263,26 @@ def load_bundle_v4(
         raise ValueError("V4 deployment file SHA-256 mismatch")
     if M2CQ012DeploymentManifestV4.model_validate_json(deployment_raw) != manifest.head_deployment:
         raise ValueError("V4 deployment file differs from bundle manifest")
+    dataset_report_raw = _read_regular_file_once(
+        output_root / manifest.training_dataset_report_relative_path
+    )
+    if sha256_bytes(dataset_report_raw) != manifest.training_dataset_report_file_sha256:
+        raise ValueError("V4 training dataset report file SHA-256 mismatch")
+    dataset_report = M2CQwenCoarseV4DatasetLoadReportV1.model_validate_json(dataset_report_raw)
+    if (
+        dataset_report_sha256_v4(dataset_report) != manifest.training_dataset_report_sha256
+        or dataset_report.combined_dataset_sha256 != manifest.training_dataset_sha256
+        or dataset_report.rows_total != manifest.train_samples
+        or dataset_report.eligible_episodes != manifest.train_episodes
+        or dataset_report.key_manifest_audit.training_manifest_file_sha256
+        != manifest.training_manifest_file_sha256
+        or dataset_report.key_manifest_audit.training_manifest_sha256
+        != manifest.training_manifest_sha256
+        or dataset_report.key_manifest_audit.s6_manifest_file_sha256
+        != manifest.s6_manifest_file_sha256
+        or dataset_report.key_manifest_audit.s6_manifest_sha256 != manifest.s6_manifest_sha256
+    ):
+        raise ValueError("V4 training dataset report differs from bundle manifest")
     loaded = load_m2c_q012_checkpoint_v4(
         output_root / manifest.head_checkpoint_relative_path,
         expected_deployment=manifest.head_deployment,

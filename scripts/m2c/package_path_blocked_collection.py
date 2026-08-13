@@ -375,6 +375,13 @@ def _write_json_new(path: Path, payload: object) -> None:
         os.fsync(stream.fileno())
 
 
+def _write_bytes_new(path: Path, payload: bytes) -> None:
+    with path.open("xb") as stream:
+        stream.write(payload)
+        stream.flush()
+        os.fsync(stream.fileno())
+
+
 def _dataset_relative_path(uri: str, *, label: str) -> Path:
     if not uri.startswith("dataset://"):
         raise ValueError(f"{label} must use a dataset:// URI")
@@ -711,6 +718,18 @@ def package_collection(
         temporary = Path(temporary_text)
         raw_copy = temporary / "actuation-probe.json"
         raw_copy.write_bytes(raw_probe_bytes)
+        console_copy_sha256: str | None = None
+        if revision == "V4":
+            console_copy = temporary / "console.log"
+            console_copy.write_bytes(console_bytes)
+            console_copy_sha256 = sha256_file(console_copy)
+            assert collection_prereg_path is not None and collection_claim_path is not None
+            (temporary / "collection-prereg-v4.json").write_bytes(
+                read_regular_file_once(collection_prereg_path)
+            )
+            (temporary / "collection-claim-v4.json").write_bytes(
+                read_regular_file_once(collection_claim_path)
+            )
         copied_assets: dict[str, str] = {}
         copied_receipts: dict[str, dict[str, str]] = {}
         for step in packaged.steps:
@@ -754,15 +773,19 @@ def package_collection(
         s6_manifest_path = temporary / "s6-exclusion-manifest-v2.json"
         _write_json_new(packaged_path, packaged.model_dump(mode="json"))
         _write_json_new(samples_path, dataset.model_dump(mode="json"))
-        _write_json_new(
-            collection_manifest_path,
-            (
-                (training_manifest_v3 or training_manifest_v4).model_dump(mode="json")
-                if revision in {"V3", "V4"}
-                else collection_manifest.model_dump(mode="json")
-            ),
-        )
-        _write_json_new(s6_manifest_path, s6_manifest.model_dump(mode="json"))
+        if revision == "V4":
+            _write_bytes_new(collection_manifest_path, read_regular_file_once(training_keys_path))
+            _write_bytes_new(s6_manifest_path, read_regular_file_once(s6_keys_path))
+        else:
+            _write_json_new(
+                collection_manifest_path,
+                (
+                    training_manifest_v3.model_dump(mode="json")
+                    if revision == "V3"
+                    else collection_manifest.model_dump(mode="json")
+                ),
+            )
+            _write_json_new(s6_manifest_path, s6_manifest.model_dump(mode="json"))
         receipt: dict[str, Any] = {
             "schema_version": f"M2CPathBlockedCollectionReceipt{revision}",
             "status": "PASS_SCRIPTED_PUBLIC_PHYSICAL_SUPERVISION",
@@ -819,6 +842,8 @@ def package_collection(
             "training_executed": False,
             "evaluation_executed": False,
         }
+        if revision == "V4":
+            receipt["console_file_sha256"] = console_copy_sha256
         if revision in {"V3", "V4"}:
             receipt["collection_authorization"] = packaged_authorization
         receipt_path = temporary / f"collection-receipt-{revision.lower()}.json"
