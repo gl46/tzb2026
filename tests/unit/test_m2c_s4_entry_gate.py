@@ -331,8 +331,6 @@ def _physical_receipt(tmp_path: Path) -> Path:
     arbitrary_service_audit.write_text('{"claimed_service":true}\n')
     import_manifest = tmp_path / "arbitrary-import-closure.json"
     _write(import_manifest, {"claimed_complete": True})
-    b0_wrapper = tmp_path / "arbitrary-b0-wrapper.py"
-    b0_wrapper.write_text("# not a frozen B0 wrapper\n")
     payload = {
         "schema_version": "M2CS4PhysicalIntegrationReceiptV2",
         "evidence_origin": "ISAAC_PHYSICAL_INTEGRATION",
@@ -362,13 +360,13 @@ def _physical_receipt(tmp_path: Path) -> Path:
             "container_image_digest": "sha256:" + "d" * 64,
             "transitive_import_manifest_path": str(import_manifest),
             "transitive_import_manifest_sha256": _sha256(import_manifest),
-            "b0_runtime_wrapper_path": str(b0_wrapper),
-            "b0_runtime_wrapper_sha256": _sha256(b0_wrapper),
-            "b0_freeze_manifest_sha256": B0_FREEZE_SHA256,
-            "b0_freeze_file_bindings": {
+            "invalid_or_rejected_action_policy": "TERMINAL_NO_PHYSICAL_EXECUTION",
+            "b0_runtime_wrapper_present": False,
+            "b0_runtime_fallback_invocation_allowed": False,
+            "b0_comparison_freeze_manifest_sha256": B0_FREEZE_SHA256,
+            "b0_comparison_freeze_file_bindings": {
                 item["path"]: item["sha256"] for item in b0_freeze["b0_files"]
             },
-            "b0_fallback_invocation_attribution": "FROZEN_B0_RUNTIME_WRAPPER",
             "backend_reimplements_b0_fallback": False,
             "teacher_used": False,
         },
@@ -492,11 +490,19 @@ def test_missing_formal_runner_freeze_blocks_even_complete_bundle(tmp_path: Path
         for item in result["blockers"]
     )
     assert any("transitive-import closure" in item for item in result["blockers"])
-    assert any("frozen unchanged B0 wrapper" in item for item in result["blockers"])
-    assert any("offline verifier/public trust root" in item for item in result["blockers"])
-    assert any("host-local signing proxies" in item for item in result["blockers"])
-    assert any("signing-key custody" in item for item in result["blockers"])
     assert any("consumption ledger" in item for item in result["blockers"])
+
+
+def test_adr0024_withdrawn_b0_and_signing_sentinels_are_not_source_blockers() -> None:
+    blockers = __import__(
+        "xh_agent.policy.qrm_lite.s4_entry_gate",
+        fromlist=["_formal_source_unlock_blockers"],
+    )._formal_source_unlock_blockers()
+
+    assert not any("B0 wrapper" in item or "B0 fallback" in item for item in blockers)
+    assert not any(
+        "signing-key custody" in item or "public trust root" in item for item in blockers
+    )
 
 
 def test_implementation_commit_may_be_ancestor_but_must_exist(tmp_path: Path) -> None:

@@ -94,16 +94,17 @@ QWEN_TRAIN_REPORT_NAME = "train_report.json"
 # environment override, so the current production gate cannot authorize formal
 # evaluation regardless of supplied receipts.
 FORMAL_PHYSICAL_RUNNER_BINDING: tuple[str, str] | None = None
-# A runner/source hash is not a deployment identity.  Unlocking this binding
-# requires a separately reviewed immutable implementation commit + container
-# image + complete transitive-import manifest, including the exact frozen B0
-# fallback wrapper.  It intentionally remains unset while the current backend
-# reimplements fallback behaviour instead of invoking that wrapper.
+# A runner/source hash is not a deployment identity. Unlocking this binding
+# still requires the immutable implementation commit, container image, and
+# complete transitive-import manifest. ADR-0024 withdrew the runtime B0
+# wrapper; INVALID/preflight rejection is terminal NO_PHYSICAL_EXECUTION.
 FORMAL_DEPLOYMENT_CLOSURE_BINDING: tuple[str, str, str] | None = None
+# Compatibility sentinel withdrawn by ADR-0024 section 2. It must remain None
+# and is not an unlock requirement or an execution path.
 FROZEN_B0_RUNTIME_WRAPPER_BINDING: tuple[str, str] | None = None
-# HMAC keys remain only on node2/labserver.  Entry therefore needs a separately
-# frozen verifier with a public verification trust root; trusting a JSON claim
-# that "HMAC passed" would be equivalent to trusting the runner itself.
+# ADR-0024 section 4 rescinded the additional Ed25519/public-trust-root
+# attestation as a collection/Phase-2 precondition. This compatibility sentinel
+# stays None; entry independently replays exact canonical wire/audit content.
 OFFLINE_WIRE_AUTHENTICATION_VERIFIER_BINDING: dict[str, tuple[str, str, str, str]] | None = None
 QWEN_HEAD_TENSORS: tuple[str, ...] = (
     "skill_w",
@@ -356,23 +357,23 @@ class FormalDeploymentClosureReceiptV1(StrictModel):
     container_image_digest: str = Field(pattern=r"^sha256:[0-9a-f]{64}$")
     transitive_import_manifest_path: str = Field(min_length=1)
     transitive_import_manifest_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
-    b0_runtime_wrapper_path: str = Field(min_length=1)
-    b0_runtime_wrapper_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
-    b0_freeze_manifest_sha256: Literal[B0_FREEZE_SHA256] = B0_FREEZE_SHA256
-    b0_freeze_file_bindings: dict[str, str] = Field(min_length=1)
-    b0_fallback_invocation_attribution: Literal["FROZEN_B0_RUNTIME_WRAPPER"] = (
-        "FROZEN_B0_RUNTIME_WRAPPER"
+    invalid_or_rejected_action_policy: Literal["TERMINAL_NO_PHYSICAL_EXECUTION"] = (
+        "TERMINAL_NO_PHYSICAL_EXECUTION"
     )
+    b0_runtime_wrapper_present: Literal[False] = False
+    b0_runtime_fallback_invocation_allowed: Literal[False] = False
+    b0_comparison_freeze_manifest_sha256: Literal[B0_FREEZE_SHA256] = B0_FREEZE_SHA256
+    b0_comparison_freeze_file_bindings: dict[str, str] = Field(min_length=1)
     backend_reimplements_b0_fallback: Literal[False] = False
     teacher_used: Literal[False] = False
 
     @model_validator(mode="after")
-    def exact_b0_freeze_binding_shape(self) -> "FormalDeploymentClosureReceiptV1":
+    def exact_b0_comparison_freeze_binding_shape(self) -> "FormalDeploymentClosureReceiptV1":
         if any(
             len(digest) != 64 or any(character not in "0123456789abcdef" for character in digest)
-            for digest in self.b0_freeze_file_bindings.values()
+            for digest in self.b0_comparison_freeze_file_bindings.values()
         ):
-            raise ValueError("deployment B0 freeze bindings contain malformed SHA-256")
+            raise ValueError("B0 comparison freeze bindings contain malformed SHA-256")
         return self
 
 
@@ -985,10 +986,6 @@ def _external_physical_evidence_blockers(
             "formal Qwen-to-Isaac runner is not independently reviewed, "
             "real-Isaac contract-verified, and frozen"
         )
-        blockers.append(
-            "formal runner has no frozen host-local signing proxies; central "
-            "Qwen/Isaac HMAC-key custody remains source-level blocked"
-        )
     else:
         frozen_runner_path, frozen_runner_sha256 = FORMAL_PHYSICAL_RUNNER_BINDING
         if receipt.runner_implementation_path != frozen_runner_path:
@@ -1007,31 +1004,13 @@ def _external_physical_evidence_blockers(
             blockers.append("formal deployment commit/image differs from frozen closure")
         if closure.transitive_import_manifest_sha256 != manifest_sha:
             blockers.append("formal deployment transitive-import manifest differs")
-    if FROZEN_B0_RUNTIME_WRAPPER_BINDING is None:
-        blockers.append(
-            "formal runtime fallback is not attributed to a frozen unchanged B0 wrapper"
-        )
-    else:
-        closure = receipt.deployment_closure
-        if (
-            closure.b0_runtime_wrapper_path,
-            closure.b0_runtime_wrapper_sha256,
-        ) != FROZEN_B0_RUNTIME_WRAPPER_BINDING:
-            blockers.append("formal runtime B0 wrapper differs from frozen binding")
     try:
         b0_freeze = _read_json(root / B0_FREEZE_PATH)
         exact_b0 = {item["path"]: item["sha256"] for item in b0_freeze["b0_files"]}
-        if receipt.deployment_closure.b0_freeze_file_bindings != exact_b0:
-            blockers.append("formal deployment does not bind every frozen B0 file exactly")
+        if receipt.deployment_closure.b0_comparison_freeze_file_bindings != exact_b0:
+            blockers.append("formal deployment does not bind the independent B0 comparison arm")
     except (OSError, json.JSONDecodeError, KeyError, TypeError) as error:
         blockers.append(f"frozen B0 runtime binding failed closed: {type(error).__name__}: {error}")
-    if OFFLINE_WIRE_AUTHENTICATION_VERIFIER_BINDING is None:
-        blockers.append(
-            "wire HMAC authenticity has no frozen offline verifier/public trust root receipt"
-        )
-        blockers.append(
-            "offline attestation signing-key custody is not independently provisioned and frozen"
-        )
     blockers.append(
         "preregistered wire challenge has no frozen create-only consumption ledger; "
         "single-use enforcement is not yet proven"
@@ -1098,10 +1077,6 @@ def _external_physical_evidence_blockers(
             receipt.deployment_closure.transitive_import_manifest_path,
             receipt.deployment_closure.transitive_import_manifest_sha256,
         ),
-        "frozen B0 runtime wrapper": (
-            receipt.deployment_closure.b0_runtime_wrapper_path,
-            receipt.deployment_closure.b0_runtime_wrapper_sha256,
-        ),
     }
     evidence_bytes: dict[str, bytes] = {}
     for label, (raw_path, expected_sha256) in evidence.items():
@@ -1128,9 +1103,6 @@ def _external_physical_evidence_blockers(
             blockers.append("deployment import manifest identity differs from receipt")
         required_closure_files = {
             receipt.runner_implementation_path: receipt.runner_implementation_sha256,
-            receipt.deployment_closure.b0_runtime_wrapper_path: (
-                receipt.deployment_closure.b0_runtime_wrapper_sha256
-            ),
             **{
                 getattr(
                     IsaacEndpointBindingV2.model_validate(
@@ -1157,9 +1129,9 @@ def _external_physical_evidence_blockers(
         for path, digest in required_closure_files.items():
             if closure_manifest.files.get(path) != digest:
                 blockers.append(f"deployment import closure lacks exact runtime file: {path}")
-        for path, digest in receipt.deployment_closure.b0_freeze_file_bindings.items():
+        for path, digest in receipt.deployment_closure.b0_comparison_freeze_file_bindings.items():
             if closure_manifest.files.get(path) != digest:
-                blockers.append(f"deployment import closure lacks frozen B0 file: {path}")
+                blockers.append(f"deployment import closure lacks B0 comparison file: {path}")
     except (OSError, json.JSONDecodeError, ValidationError, ValueError, KeyError) as error:
         blockers.append(f"deployment import closure failed closed: {type(error).__name__}: {error}")
     try:
@@ -1259,30 +1231,14 @@ def _formal_source_unlock_blockers() -> list[str]:
 
     blockers: list[str] = []
     if FORMAL_PHYSICAL_RUNNER_BINDING is None:
-        blockers.extend(
-            [
-                "formal Qwen-to-Isaac runner is not independently reviewed, "
-                "real-Isaac contract-verified, and frozen",
-                "formal runner has no frozen host-local signing proxies; central "
-                "Qwen/Isaac HMAC-key custody remains source-level blocked",
-            ]
+        blockers.append(
+            "formal Qwen-to-Isaac runner is not independently reviewed, "
+            "real-Isaac contract-verified, and frozen"
         )
     if FORMAL_DEPLOYMENT_CLOSURE_BINDING is None:
         blockers.append(
             "formal deployment has no frozen implementation commit, container image, "
             "and complete transitive-import closure"
-        )
-    if FROZEN_B0_RUNTIME_WRAPPER_BINDING is None:
-        blockers.append(
-            "formal runtime fallback is not attributed to a frozen unchanged B0 wrapper"
-        )
-    if OFFLINE_WIRE_AUTHENTICATION_VERIFIER_BINDING is None:
-        blockers.extend(
-            [
-                "wire HMAC authenticity has no frozen offline verifier/public trust root receipt",
-                "offline attestation signing-key custody is not independently provisioned "
-                "and frozen",
-            ]
         )
     blockers.append(
         "preregistered wire challenge has no frozen create-only consumption ledger; "
