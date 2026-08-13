@@ -149,6 +149,28 @@ def test_v4_runtime_user_is_read_from_exact_image(monkeypatch: pytest.MonkeyPatc
         worker._require_v4_image_runtime_user(image_reference="sha256:" + "1" * 64)
 
 
+def test_v4_claim_projection_is_byte_exact_and_read_only(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    canonical = tmp_path / "canonical-claim.json"
+    canonical.write_text('{"schema_version":"test"}\n')
+    monkeypatch.setattr(
+        v4_auth.M2CS4V4CollectionConsumptionReceiptV1,
+        "model_validate_json",
+        lambda _raw: object(),
+    )
+    projection = worker._project_v4_claim_for_container(
+        canonical_claim=canonical,
+        job_root=tmp_path,
+        owner_uid=os.geteuid(),
+        owner_gid=os.getegid(),
+    )
+    assert projection.read_bytes() == canonical.read_bytes()
+    assert stat.S_IMODE(projection.stat().st_mode) == 0o400
+    assert stat.S_IMODE(projection.parent.stat().st_mode) == 0o500
+
+
 def test_v4_authorization_surface_ends_at_claim_bound_raw_verification() -> None:
     source = Path(v4_auth.__file__).read_text()
     assert "def verify_claim_bound_raw_session(" in source

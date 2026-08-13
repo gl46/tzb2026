@@ -436,27 +436,37 @@ def probe_command(
             )
         # V4 uses ADR-0024's accepted immutable-snapshot + create-only claim
         # evidence bar. V3 retains its historical launcher/broker plumbing.
-        ledger_root = Path(collection_prereg.prereg.ledger_root)
         command[command.index(f"{args.project_root}:/workspace/project:ro")] = (
             f"{source_snapshot_root}:/workspace/project:ro"
         )
-        mounts = [
-            "-v",
-            f"{ledger_root}:{ledger_root}:ro",
-        ]
+        mounts: list[str] = []
         if revision == "V3":
+            ledger_root = Path(collection_prereg.prereg.ledger_root)
             mounts.extend(
                 [
                     "-v",
+                    f"{ledger_root}:{ledger_root}:ro",
+                    "-v",
                     f"{Path(collection_probe_entry_broker_socket).parent}:"
                     f"{Path(collection_probe_entry_broker_socket).parent}:ro",
+                ]
+            )
+        else:
+            mounts.extend(
+                [
+                    "-v",
+                    f"{collection_claim}:/workspace/authorization/collection-claim-v4.json:ro",
                 ]
             )
         command[command.index("-w") : command.index("-w")] = mounts
         command.extend(
             [
                 "--m2c-collection-claim",
-                str(collection_claim),
+                (
+                    "/workspace/authorization/collection-claim-v4.json"
+                    if revision == "V4"
+                    else str(collection_claim)
+                ),
                 "--m2c-source-snapshot-root",
                 "/workspace/project",
                 "--m2c-container-image-id",
@@ -657,6 +667,73 @@ def _prepare_v4_container_output_directory(
         )
 
 
+def _project_v4_claim_for_container(
+    *,
+    canonical_claim: Path,
+    job_root: Path,
+    owner_uid: int = V4_ISAAC_RUNTIME_UID,
+    owner_gid: int = V4_ISAAC_RUNTIME_GID,
+) -> Path:
+    """Publish an exact read-only claim projection for the image user.
+
+    The canonical append-only ledger remains root-only. The probe sees only
+    this byte-identical file; host packaging later reopens the canonical
+    ledger claim and verifies its semantic receipt hash.
+    """
+
+    raw = v4_auth.read_regular_file_once(canonical_claim)
+    v4_auth.M2CS4V4CollectionConsumptionReceiptV1.model_validate_json(raw)
+    projection_root = job_root / "authorization"
+    projection_root.mkdir()
+    projection = projection_root / "collection-claim-v4.json"
+    flags = (
+        os.O_WRONLY
+        | os.O_CREAT
+        | os.O_EXCL
+        | getattr(os, "O_CLOEXEC", 0)
+        | getattr(os, "O_NOFOLLOW", 0)
+    )
+    descriptor = os.open(projection, flags, 0o400)
+    try:
+        offset = 0
+        while offset < len(raw):
+            written = os.write(descriptor, raw[offset:])
+            if written <= 0:
+                raise CollectionAuthorizationError("short write publishing V4 claim projection")
+            offset += written
+        os.fsync(descriptor)
+        os.fchown(descriptor, owner_uid, owner_gid)
+        os.fchmod(descriptor, 0o400)
+        info = os.fstat(descriptor)
+        if (
+            not stat.S_ISREG(info.st_mode)
+            or stat.S_IMODE(info.st_mode) != 0o400
+            or info.st_uid != owner_uid
+            or info.st_gid != owner_gid
+            or info.st_nlink != 1
+        ):
+            raise CollectionAuthorizationError("V4 claim projection metadata is unsafe")
+    finally:
+        os.close(descriptor)
+    os.chown(projection_root, owner_uid, owner_gid)
+    projection_root.chmod(0o500)
+    root_info = projection_root.stat(follow_symlinks=False)
+    if (
+        not stat.S_ISDIR(root_info.st_mode)
+        or stat.S_IMODE(root_info.st_mode) != 0o500
+        or root_info.st_uid != owner_uid
+        or root_info.st_gid != owner_gid
+        or v4_auth.read_regular_file_once(projection) != raw
+    ):
+        raise CollectionAuthorizationError("V4 claim projection differs from canonical ledger")
+    directory_fd = os.open(projection_root, os.O_RDONLY | getattr(os, "O_CLOEXEC", 0))
+    try:
+        os.fsync(directory_fd)
+    finally:
+        os.close(directory_fd)
+    return projection
+
+
 def _seal_v4_container_output_directory(path: Path) -> None:
     """Make a completed V4 container output tree host-read-only."""
 
@@ -817,6 +894,14 @@ def prepare_job(
         probe_root.mkdir()
         stage_root.chmod(0o700 if protected else 0o777)
         probe_root.chmod(0o700 if protected else 0o777)
+    probe_claim = (
+        _project_v4_claim_for_container(
+            canonical_claim=collection_claim,
+            job_root=job_root,
+        )
+        if revision == "V4"
+        else collection_claim
+    )
     stage_cmd = stage_command(
         args,
         output=stage_root,
@@ -845,7 +930,7 @@ def prepare_job(
         output=probe_root,
         source_record=record,
         collection_prereg=collection_prereg,
-        collection_claim=collection_claim,
+        collection_claim=probe_claim,
         collection_start_capability=collection_start,
         collection_probe_entry_broker_socket=collection_probe_entry_broker,
         collection_probe_entry_token_file=collection_probe_entry_token,
@@ -908,6 +993,10 @@ def prepare_job(
             "prereg_introduced_commit": collection_prereg.introduced_commit,
             "consumption_receipt_path": str(collection_claim),
             "consumption_receipt_sha256": claim.receipt_sha256,
+            "container_claim_projection_path": (str(probe_claim) if revision == "V4" else None),
+            "container_claim_projection_sha256": (
+                sha256_file(probe_claim) if revision == "V4" else None
+            ),
             "consumption_id": claim.consumption_id,
             "challenge_nonce": claim.challenge_nonce,
             "committed_source_snapshot": claim.committed_source_snapshot.model_dump(mode="json"),
