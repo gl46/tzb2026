@@ -2,26 +2,26 @@
 
 Status: `BLOCKED_ZERO_OBSERVED_ELIGIBLE_CHAIN_YIELD`
 
-This report replays nine immutable collection reports plus the governed offline replay of scene 19083. It does not collect, execute physics, train, run a model rollout, or perform formal Q-B evaluation.
+This report replays ten immutable collection reports plus the governed offline replay of scene 19083. It does not collect, execute physics, train, run a model rollout, or perform formal Q-B evaluation.
 
 ## Measured yield
 
-- Unique TRAIN identities: **28** (V3: 11; V4: 17)
-- Complete eight-step physical chains: **19**
+- Unique TRAIN identities: **31** (V3: 11; V4: 20)
+- Complete eight-step physical chains: **22**
 - Eligible and packaged training episodes: **0**
-- Eligible yield per attempted identity: **0/28 = 0.0**
-- Eligible yield conditional on a complete chain: **0/19 = 0.0**
+- Eligible yield per attempted identity: **0/31 = 0.0**
+- Eligible yield conditional on a complete chain: **0/22 = 0.0**
 - Finite evidence-based key projection for one eligible episode: **none at the observed zero point yield**
 
 The code-level minimum is one complete eligible episode; the current trainer rejects zero. This is not a claim that model capability is zero: pure model success remains `null` because no formal Q-B evaluation has run.
 
 ## Complete-chain failure taxonomy
 
-- Terminal contact/controller rejection: **13**
-- Terminal pregrasp IK rejection: **5**
+- Terminal contact/controller rejection: **15**
+- Terminal pregrasp IK rejection: **6**
 - Lifted but rejected by the public success predicate: **1**
 
-All ten complete V3 chains and all eight newly collected Batch-09/10/11 V4 chains passed gates for steps 0–6. The evidence supports a recurring terminal regrasp approach/contact-acceptance mismatch, but does not isolate perception offset, approach geometry, or object state as its cause. Scene 19083 passes the 32-detection offline schema replay but remains excluded by its unchanged physical failure; its replay also records a step-1 public-target-outside-K8 exclusion.
+All ten complete V3 chains and all eleven newly collected Batch-09/10/11/12 V4 chains passed gates for steps 0–6. The evidence supports a recurring terminal regrasp approach/contact-acceptance mismatch, but does not isolate perception offset, approach geometry, or object state as its cause. Scene 19083 passes the 32-detection offline schema replay but remains excluded by its unchanged physical failure; its replay also records a step-1 public-target-outside-K8 exclusion.
 
 ## Frozen eligibility consequence
 

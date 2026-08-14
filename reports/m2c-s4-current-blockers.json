@@ -1,8 +1,8 @@
 {
   "schema_version": "M2CS4CurrentBlockersV2",
   "status": "BLOCKED_UNMEASURED_ZERO_ELIGIBLE_YIELD_AND_FORMAL_EXACT_PLAN_INTEGRATION",
-  "reported_at": "2026-08-14T21:48:07+08:00",
-  "checked_head_commit": "7d5c1619e31b76c415f498bc53f371442b371018",
+  "reported_at": "2026-08-14T22:35:22+08:00",
+  "checked_head_commit": "5a61488a601a81b8671ff557bedc6cbed167befa",
   "q_a_state": "PASSED",
   "q_b_state": "UNMEASURED",
   "pure_model_success_episodes": null,
@@ -12,11 +12,11 @@
     "frozen_v3_train_keys": 36,
     "frozen_v4_train_keys": 36,
     "unique_v3_train_keys_attempted": 11,
-    "unique_v4_train_keys_consumed": 17,
-    "unique_train_keys_consumed_total": 28,
+    "unique_v4_train_keys_consumed": 20,
+    "unique_train_keys_consumed_total": 31,
     "raw_v3_eight_step_chains": 10,
-    "raw_v4_eight_step_chains": 9,
-    "physical_skill_receipts_v4": 72,
+    "raw_v4_eight_step_chains": 12,
+    "physical_skill_receipts_v4": 96,
     "collision_or_safety_violations_v4": 0,
     "training_samples_eligible": 0,
     "training_samples_packaged": 0,
@@ -25,23 +25,24 @@
     "formal_q_b_evaluation_executed": false,
     "public_track_associator_v2_implemented": true,
     "batch_04_preregistered_and_consumed": true,
-    "latest_completed_batch": "BATCH_11",
+    "latest_completed_batch": "BATCH_12",
     "active_selected_key_preregistration_present": false,
     "collection_execution_authorized": false,
     "raw_detection_capacity_decision_required": false,
     "permission_issue_resolution": {
-      "resolved_for_observed_batch11_path": true,
+      "resolved_for_observed_batch12_path": true,
       "batch04_stage_output_permission_failures": 3,
       "first_subsequent_stage_acceptance_report": "reports/m2c-s4-v4-batch06-snapshot-owner-failure.json",
       "first_subsequent_probe_simulation_start_report": "reports/m2c-s4-v4-batch07-pre-timeline-proprio-failure.json",
       "first_subsequent_raw_physical_chain_report": "reports/m2c-s4-v4-batch08-collection.json",
-      "latest_three_stage_and_probe_pass_report": "reports/m2c-s4-v4-batch10-collection.json",
-      "latest_mixed_batch_report": "reports/m2c-s4-v4-batch11-collection.json"
+      "latest_three_stage_and_probe_pass_report": "reports/m2c-s4-v4-batch12-collection.json",
+      "latest_mixed_batch_report": "reports/m2c-s4-v4-batch11-collection.json",
+      "latest_all_physical_batch_report": "reports/m2c-s4-v4-batch12-collection.json"
     },
     "authorization_contract": {
       "path": "src/xh_agent/policy/qrm_lite/s4_v4_collection_authorization_v1.py",
-      "sha256": "a92fcd74e8d08a9fe0528d5f55313ea0453ff79a03ea2001a4411b895fc6780c",
-      "checked_parent_commit": "7d5c1619e31b76c415f498bc53f371442b371018",
+      "sha256": "6e445222248089bd514ee18fdc08e339ba25135d8c931556d32d146ebb44948f",
+      "checked_parent_commit": "5a61488a601a81b8671ff557bedc6cbed167befa",
       "canonical_cli_authorized": false,
       "programmatic_worker_authorized": false,
       "programmatic_packager_authorized": false,
@@ -87,6 +88,10 @@
       {
         "path": "reports/m2c-s4-v4-batch11-collection.json",
         "sha256": "c010e89cd457be341a1d8d62d2ef95d98c5a5b81eca8117b0d9d2e130f9a6d19"
+      },
+      {
+        "path": "reports/m2c-s4-v4-batch12-collection.json",
+        "sha256": "405848262c0f3b99d5421d4e37c0c68c58de0a0b2feda3232921c9820cdb2c70"
       }
     ],
     "accepted_raw_capacity_decision": {
@@ -109,10 +114,10 @@
     },
     "training_eligibility_yield": {
       "path": "reports/m2c-s4-training-eligibility-yield-adr0025.json",
-      "sha256": "16dd5856924d9004fe488875ea5865bcb1d1a516c37752295cd66d9e8347dc5a",
+      "sha256": "30894f74abb1136b9d0895b7e6a6ae63535bdf9d8caf04e0069bd2409da286d4",
       "status": "BLOCKED_ZERO_OBSERVED_ELIGIBLE_CHAIN_YIELD",
-      "unique_train_identities": 28,
-      "complete_eight_step_chains": 19,
+      "unique_train_identities": 31,
+      "complete_eight_step_chains": 22,
       "eligible_training_episodes": 0,
       "finite_key_projection_for_one_eligible_episode": null
     }
