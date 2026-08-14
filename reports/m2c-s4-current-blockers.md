@@ -1,7 +1,7 @@
 # M2C S4 current blockers
 
 - Status: **BLOCKED_UNMEASURED_ZERO_ELIGIBLE_YIELD_AND_FORMAL_EXACT_PLAN_INTEGRATION**
-- Checked parent HEAD: `9c149ef6cbd3dff9af23f9d79a52beb01faf6726`
+- Checked parent HEAD: `f4df0bf99ac9c118bac9671938fc9e6ff03c6423`
 - Q-A: **PASSED**
 - Q-B: **UNMEASURED**
 - `pure_model_success_episodes`: **null**, not zero
@@ -11,11 +11,11 @@
 
 ADR-0025 approved raw public-detection capacity 32 from the frozen scene-contract provenance, not from the observed maximum. The immutable scene-19083 bytes now pass the revised raw schema without truncation or filtering, but the physical result remains authoritative: terminal `CONTACT_GATE_REJECTED`, `final_task_success=false`, zero eligible rows, and no packaged sample.
 
-Across the sixteen immutable V3/V4 collection reports, 47 distinct TRAIN identities produced 38 complete eight-step chains and zero eligible episodes. The updated ADR-0025 section-3 audit measures both per-key yield (0/47) and complete-chain conditional yield (0/38) as 0.0. At that observed point yield there is no finite evidence-based projection even for the trainer's code minimum of one eligible episode. This blocks training; it does not claim model capability is zero. Model rollout and formal Q-B evaluation have not run, so pure success remains `null`.
+Across the seventeen immutable V3/V4 collection reports, 50 distinct TRAIN identities produced 41 complete eight-step chains and zero eligible episodes. The updated ADR-0025 section-3 audit measures both per-key yield (0/50) and complete-chain conditional yield (0/41) as 0.0. At that observed point yield there is no finite evidence-based projection even for the trainer's code minimum of one eligible episode. This blocks training; it does not claim model capability is zero. Model rollout and formal Q-B evaluation have not run, so pure success remains `null`.
 
-Ten complete V3 chains and the twenty-seven Batch-09 through Batch-18 V4 chains passed gates for steps 0–6. Across all complete chains, twenty-five terminate at the contact/controller gate, twelve at pregrasp IK, and one lifts but fails the public success predicate. This supports a recurring terminal regrasp approach/contact-acceptance mismatch but does not isolate perception offset, approach geometry, or object state. No gate, threshold, B0 byte, or frozen eligibility predicate was changed.
+Ten complete V3 chains and the thirty Batch-09 through Batch-19 V4 chains passed gates for steps 0–6. Across all complete chains, twenty-seven terminate at the contact/controller gate, thirteen at pregrasp IK, and one lifts but fails the public success predicate. This supports a recurring terminal regrasp approach/contact-acceptance mismatch but does not isolate perception offset, approach geometry, or object state. No gate, threshold, B0 byte, or frozen eligibility predicate was changed.
 
-Batch-18 preregistered the sole remaining V4 TRAIN key outcome-blind and consumed it exactly once. Scene 19307 completed its stage/probe chain and produced 8 physical receipts with zero safety violations, but remained ineligible at the unchanged REGRASP pregrasp-IK gate. The frozen V4 TRAIN manifest is now exhausted: 36/36 keys consumed, zero remaining, and no subsequent preregistration is active. Collection is fail-closed.
+Batch-19 preregistered the first three identity-disjoint V4 extension keys outcome-blind and consumed each exactly once. All three completed stage/probe chains and produced 24 physical receipts with zero safety violations; scenes 22001 and 22002 remained ineligible at the unchanged REGRASP contact gate, and scene 22007 remained ineligible at the unchanged pregrasp-IK gate. The original V4 TRAIN manifest remains exhausted at 36/36; extension1 has consumed 3/36 with 33 unconsumed. No subsequent preregistration is active, so collection is fail-closed.
 
 ## ADR-0022 / ADR-0024 / ADR-0025 Phase-2 entry
 
@@ -39,5 +39,5 @@ The 2026-08-20 bundle-smoke checkpoint is unchanged.
 Next command:
 
 ```bash
-PYTHONPATH=src:scripts uv run pytest -q tests/unit/test_m2c_s4_current_blockers_report.py tests/unit/test_m2c_s4_v4_batch18_collection_audit.py
+PYTHONPATH=src:scripts uv run pytest -q tests/unit/test_m2c_s4_current_blockers_report.py tests/unit/test_m2c_s4_v4_batch19_collection_audit.py
 ```

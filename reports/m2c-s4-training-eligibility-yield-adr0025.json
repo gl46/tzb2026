@@ -6,11 +6,12 @@
   },
   "audit_implementation": {
     "path": "scripts/m2c/audit_s4_training_eligibility_yield_adr0025.py",
-    "sha256": "a68bfa79965a4c5111d7453aa49348e0d5a776c6a34c454e830666a3ea367527"
+    "sha256": "ff02fefb54855808350bbd7f4e47f0ee4de655f0db543823e1e3aa207bc2428a"
   },
   "blockers": [
-    "ZERO_ELIGIBLE_TRAINING_EPISODES_ACROSS_47_UNIQUE_TRAIN_IDENTITIES",
-    "FROZEN_V4_TRAIN_MANIFEST_EXHAUSTED_36_OF_36_KEYS_CONSUMED",
+    "ZERO_ELIGIBLE_TRAINING_EPISODES_ACROSS_50_UNIQUE_TRAIN_IDENTITIES",
+    "ORIGINAL_V4_TRAIN_MANIFEST_EXHAUSTED_36_OF_36_KEYS_CONSUMED",
+    "V4_EXTENSION1_MANIFEST_CONSUMED_3_OF_36_KEYS",
     "NO_FINITE_EVIDENCE_BASED_COLLECTION_SIZE_AT_ZERO_OBSERVED_POINT_YIELD",
     "TRAINING_REQUIRES_AT_LEAST_ONE_COMPLETE_ELIGIBLE_EPISODE",
     "FORMAL_Q_B_REMAINS_UNMEASURED"
@@ -26,8 +27,8 @@
   },
   "complete_chain_failure_taxonomy": {
     "LIFTED_BUT_PUBLIC_SUCCESS_PREDICATE_REJECTED": 1,
-    "TERMINAL_CONTACT_OR_CONTROLLER_GATE_REJECTED": 25,
-    "TERMINAL_PREGRASP_IK_GATE_REJECTED": 12
+    "TERMINAL_CONTACT_OR_CONTROLLER_GATE_REJECTED": 27,
+    "TERMINAL_PREGRASP_IK_GATE_REJECTED": 13
   },
   "evidence_claims": {
     "b0_or_safety_contract_changed": false,
@@ -47,24 +48,24 @@
     "minimum_code_level_eligible_episode_count": 1,
     "predicate_changed_by_this_audit": false,
     "source_bindings": {
-      "scripts/m2c/package_path_blocked_collection.py": "331a0fbc64411f63e53087e23d051a360ba2d45cc6f1e22504444a4fa8204d46",
-      "scripts/m2c/qwen_coarse_v4.py": "dc869c8325dae1c21fd999eff141bb5f2a2b2acb2b644b47067da38c39250298",
+      "scripts/m2c/package_path_blocked_collection.py": "c8e48b8147dab3ee2323812fd776b4daa913c51898be7b72ad12e70c16045a88",
+      "scripts/m2c/qwen_coarse_v4.py": "b6337bfd51d526992c2381d209e76915e0062bb1b60b551edd0e58665324d543",
       "scripts/m2c/train_qwen_coarse_v4.py": "2d4e38e211c492e08f4be53e68e334735776285c0bfe0977ce8e68b7161304a6",
-      "src/xh_agent/policy/qrm_lite/path_blocked_collection_v4.py": "467ce96ea2b5db7b84904bbe489e4436f43f82587acefbb56027bd927119216c",
+      "src/xh_agent/policy/qrm_lite/path_blocked_collection_v4.py": "37fcb12bfd209a5c0fb2441286130f9f8f945db03c830c3ef9ebe0b24fd26394",
       "src/xh_agent/policy/qrm_lite/path_blocked_supervision_v3.py": "915fb2567e86294d38a20d82f75b0728f87558aff89d84bb54ec4c01b1a4f646"
     },
     "zero_eligible_episode_training_rejected": true
   },
   "identity_audit": {
-    "attempt_rows": 48,
+    "attempt_rows": 51,
     "duplicate_attempt_rows_within_first_v3_report": 1,
     "source_identity_sets_pairwise_disjoint": true,
-    "unique_train_identities_total": 47,
+    "unique_train_identities_total": 50,
     "unique_v3_train_identities": 11,
-    "unique_v4_train_identities": 36
+    "unique_v4_train_identities": 39
   },
   "observed_yield": {
-    "complete_eight_step_chains": 38,
+    "complete_eight_step_chains": 41,
     "eligible_training_episodes": 0,
     "eligible_yield_per_complete_eight_step_chain": 0.0,
     "eligible_yield_per_unique_train_identity": 0.0,
@@ -75,11 +76,11 @@
   "one_next_command": "PYTHONPATH=src:scripts uv run python scripts/m2c/audit_s4_training_eligibility_yield_adr0025.py --expected-json reports/m2c-s4-training-eligibility-yield-adr0025.json",
   "root_cause_finding": {
     "causal_attribution_limit": "Evidence does not isolate perception offset, approach geometry, or object state as the cause.",
-    "complete_chains_ending_in_contact_or_controller_rejection": 25,
-    "complete_chains_ending_in_pregrasp_ik_rejection": 12,
+    "complete_chains_ending_in_contact_or_controller_rejection": 27,
+    "complete_chains_ending_in_pregrasp_ik_rejection": 13,
     "complete_chains_lifted_but_rejected_by_public_success_predicate": 1,
     "complete_v3_chains_with_steps_0_through_6_all_gates_pass": 10,
-    "complete_v4_chains_with_steps_0_through_6_all_gates_pass": 27,
+    "complete_v4_chains_with_steps_0_through_6_all_gates_pass": 30,
     "safety_gate_or_threshold_change_authorized": false,
     "scene_19083_additional_offline_exclusion": "STEP_1_PUBLIC_TARGET_OUTSIDE_V4_K8",
     "status": "RECURRENT_TERMINAL_REGRASP_APPROACH_OR_CONTACT_ACCEPTANCE_MISMATCH_NOT_CAUSALLY_ISOLATED"
@@ -255,6 +256,16 @@
       "sha256": "a27116aa00f379f1ea461342b34ec8f7f621a8e916ca1f9eae0c63f86aa6d59b",
       "status": "BLOCKED_ZERO_ELIGIBLE_V4_TRAIN_SAMPLES_BATCH18",
       "unique_train_identities": 1
+    },
+    {
+      "attempt_rows": 3,
+      "complete_eight_step_chains": 3,
+      "eligible_training_episodes": 0,
+      "path": "reports/m2c-s4-v4-batch19-collection.json",
+      "schema_version": "M2CS4V4Batch19CollectionAuditV1",
+      "sha256": "dd103b06ac945cceb5816393bfff7b82a2f5ab77b8c8b077dff1b48a4d61d030",
+      "status": "BLOCKED_ZERO_ELIGIBLE_V4_TRAIN_SAMPLES_BATCH19",
+      "unique_train_identities": 3
     }
   ],
   "status": "BLOCKED_ZERO_OBSERVED_ELIGIBLE_CHAIN_YIELD"

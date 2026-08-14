@@ -238,21 +238,34 @@ SOURCE_REPORTS: tuple[SourceReportSpec, ...] = (
             "RAW_V4_FINAL_FALSE_REGRASP_PREGRASP_IK_GATE_REJECTED": 1,
         },
     ),
+    SourceReportSpec(
+        path=Path("reports/m2c-s4-v4-batch19-collection.json"),
+        sha256="dd103b06ac945cceb5816393bfff7b82a2f5ab77b8c8b077dff1b48a4d61d030",
+        schema_version="M2CS4V4Batch19CollectionAuditV1",
+        status="BLOCKED_ZERO_ELIGIBLE_V4_TRAIN_SAMPLES_BATCH19",
+        attempt_count=3,
+        unique_key_count=3,
+        complete_chain_count=3,
+        classifications={
+            "RAW_V4_FINAL_FALSE_REGRASP_CONTACT_GATE_REJECTED": 2,
+            "RAW_V4_FINAL_FALSE_REGRASP_PREGRASP_IK_GATE_REJECTED": 1,
+        },
+    ),
 )
 
 
 SOURCE_BINDINGS: Mapping[str, str] = {
     "scripts/m2c/package_path_blocked_collection.py": (
-        "331a0fbc64411f63e53087e23d051a360ba2d45cc6f1e22504444a4fa8204d46"
+        "c8e48b8147dab3ee2323812fd776b4daa913c51898be7b72ad12e70c16045a88"
     ),
     "scripts/m2c/qwen_coarse_v4.py": (
-        "dc869c8325dae1c21fd999eff141bb5f2a2b2acb2b644b47067da38c39250298"
+        "b6337bfd51d526992c2381d209e76915e0062bb1b60b551edd0e58665324d543"
     ),
     "scripts/m2c/train_qwen_coarse_v4.py": (
         "2d4e38e211c492e08f4be53e68e334735776285c0bfe0977ce8e68b7161304a6"
     ),
     "src/xh_agent/policy/qrm_lite/path_blocked_collection_v4.py": (
-        "467ce96ea2b5db7b84904bbe489e4436f43f82587acefbb56027bd927119216c"
+        "37fcb12bfd209a5c0fb2441286130f9f8f945db03c830c3ef9ebe0b24fd26394"
     ),
     "src/xh_agent/policy/qrm_lite/path_blocked_supervision_v3.py": (
         "915fb2567e86294d38a20d82f75b0728f87558aff89d84bb54ec4c01b1a4f646"
@@ -482,7 +495,7 @@ def build_report(*, project_root: Path) -> dict[str, Any]:
             if left & right:
                 raise S4YieldAuditError("source report identity sets are not disjoint")
     all_identities = set().union(*identity_sets)
-    if len(all_identities) != 47:
+    if len(all_identities) != 50:
         raise S4YieldAuditError("combined unique TRAIN identity count differs")
 
     taxonomy: Counter[str] = Counter()
@@ -492,7 +505,7 @@ def build_report(*, project_root: Path) -> dict[str, Any]:
             if str(attempt["classification"]).startswith("RAW_V3_"):
                 taxonomy[_verify_complete_v3_attempt(attempt)] += 1
                 complete_chain_count += 1
-    for spec, batch_report in parsed[-10:]:
+    for spec, batch_report in parsed[-11:]:
         verified_report_chains = 0
         for attempt in batch_report["attempts"]:
             if attempt.get("raw_chain_schema") != "M2CPathBlockedRawProbeChainV4":
@@ -502,7 +515,7 @@ def build_report(*, project_root: Path) -> dict[str, Any]:
             verified_report_chains += 1
         if verified_report_chains != spec.complete_chain_count:
             raise S4YieldAuditError("source complete V4 chain count differs")
-    if complete_chain_count != 37:
+    if complete_chain_count != 40:
         raise S4YieldAuditError("complete collected chain count differs")
 
     offline = read_bound_json(
@@ -528,10 +541,10 @@ def build_report(*, project_root: Path) -> dict[str, Any]:
         raise S4YieldAuditError("scene 19083 offline replay outcome differs")
     taxonomy["TERMINAL_CONTACT_OR_CONTROLLER_GATE_REJECTED"] += 1
     complete_chain_count += 1
-    if complete_chain_count != 38 or taxonomy != Counter(
+    if complete_chain_count != 41 or taxonomy != Counter(
         {
-            "TERMINAL_CONTACT_OR_CONTROLLER_GATE_REJECTED": 25,
-            "TERMINAL_PREGRASP_IK_GATE_REJECTED": 12,
+            "TERMINAL_CONTACT_OR_CONTROLLER_GATE_REJECTED": 27,
+            "TERMINAL_PREGRASP_IK_GATE_REJECTED": 13,
             "LIFTED_BUT_PUBLIC_SUCCESS_PREDICATE_REJECTED": 1,
         }
     ):
@@ -572,8 +585,8 @@ def build_report(*, project_root: Path) -> dict[str, Any]:
             "duplicate_attempt_rows_within_first_v3_report": 1,
             "source_identity_sets_pairwise_disjoint": True,
             "unique_v3_train_identities": 11,
-            "unique_v4_train_identities": 36,
-            "unique_train_identities_total": 47,
+            "unique_v4_train_identities": 39,
+            "unique_train_identities_total": 50,
         },
         "observed_yield": {
             "complete_eight_step_chains": complete_chain_count,
@@ -598,9 +611,9 @@ def build_report(*, project_root: Path) -> dict[str, Any]:
         "root_cause_finding": {
             "status": "RECURRENT_TERMINAL_REGRASP_APPROACH_OR_CONTACT_ACCEPTANCE_MISMATCH_NOT_CAUSALLY_ISOLATED",
             "complete_v3_chains_with_steps_0_through_6_all_gates_pass": 10,
-            "complete_v4_chains_with_steps_0_through_6_all_gates_pass": 27,
-            "complete_chains_ending_in_contact_or_controller_rejection": 25,
-            "complete_chains_ending_in_pregrasp_ik_rejection": 12,
+            "complete_v4_chains_with_steps_0_through_6_all_gates_pass": 30,
+            "complete_chains_ending_in_contact_or_controller_rejection": 27,
+            "complete_chains_ending_in_pregrasp_ik_rejection": 13,
             "complete_chains_lifted_but_rejected_by_public_success_predicate": 1,
             "causal_attribution_limit": (
                 "Evidence does not isolate perception offset, approach geometry, or object state as the cause."
@@ -630,8 +643,9 @@ def build_report(*, project_root: Path) -> dict[str, Any]:
             "b0_or_safety_contract_changed": False,
         },
         "blockers": [
-            "ZERO_ELIGIBLE_TRAINING_EPISODES_ACROSS_47_UNIQUE_TRAIN_IDENTITIES",
-            "FROZEN_V4_TRAIN_MANIFEST_EXHAUSTED_36_OF_36_KEYS_CONSUMED",
+            "ZERO_ELIGIBLE_TRAINING_EPISODES_ACROSS_50_UNIQUE_TRAIN_IDENTITIES",
+            "ORIGINAL_V4_TRAIN_MANIFEST_EXHAUSTED_36_OF_36_KEYS_CONSUMED",
+            "V4_EXTENSION1_MANIFEST_CONSUMED_3_OF_36_KEYS",
             "NO_FINITE_EVIDENCE_BASED_COLLECTION_SIZE_AT_ZERO_OBSERVED_POINT_YIELD",
             "TRAINING_REQUIRES_AT_LEAST_ONE_COMPLETE_ELIGIBLE_EPISODE",
             "FORMAL_Q_B_REMAINS_UNMEASURED",
@@ -655,15 +669,15 @@ def render_markdown(report: Mapping[str, Any]) -> str:
 
 Status: `{report["status"]}`
 
-This report replays sixteen immutable collection reports plus the governed offline replay of scene 19083. It does not collect, execute physics, train, run a model rollout, or perform formal Q-B evaluation.
+This report replays seventeen immutable collection reports plus the governed offline replay of scene 19083. It does not collect, execute physics, train, run a model rollout, or perform formal Q-B evaluation.
 
 ## Measured yield
 
-- Unique TRAIN identities: **{report["identity_audit"]["unique_train_identities_total"]}** (V3: 11; V4: 36)
+- Unique TRAIN identities: **{report["identity_audit"]["unique_train_identities_total"]}** (V3: 11; V4: 39)
 - Complete eight-step physical chains: **{yield_data["complete_eight_step_chains"]}**
 - Eligible and packaged training episodes: **0**
-- Eligible yield per attempted identity: **0/47 = 0.0**
-- Eligible yield conditional on a complete chain: **0/38 = 0.0**
+- Eligible yield per attempted identity: **0/50 = 0.0**
+- Eligible yield conditional on a complete chain: **0/41 = 0.0**
 - Finite evidence-based key projection for one eligible episode: **none at the observed zero point yield**
 
 The code-level minimum is one complete eligible episode; the current trainer rejects zero. This is not a claim that model capability is zero: pure model success remains `null` because no formal Q-B evaluation has run.
@@ -674,7 +688,7 @@ The code-level minimum is one complete eligible episode; the current trainer rej
 - Terminal pregrasp IK rejection: **{taxonomy["TERMINAL_PREGRASP_IK_GATE_REJECTED"]}**
 - Lifted but rejected by the public success predicate: **{taxonomy["LIFTED_BUT_PUBLIC_SUCCESS_PREDICATE_REJECTED"]}**
 
-All ten complete V3 chains and all twenty-seven newly collected Batch-09 through Batch-18 V4 chains passed gates for steps 0–6. The evidence supports a recurring terminal regrasp approach/contact-acceptance mismatch, but does not isolate perception offset, approach geometry, or object state as its cause. Scene 19083 passes the 32-detection offline schema replay but remains excluded by its unchanged physical failure; its replay also records a step-1 public-target-outside-K8 exclusion. The frozen V4 TRAIN manifest is exhausted: 36/36 keys are consumed.
+All ten complete V3 chains and all thirty newly collected Batch-09 through Batch-19 V4 chains passed gates for steps 0–6. The evidence supports a recurring terminal regrasp approach/contact-acceptance mismatch, but does not isolate perception offset, approach geometry, or object state as its cause. Scene 19083 passes the 32-detection offline schema replay but remains excluded by its unchanged physical failure; its replay also records a step-1 public-target-outside-K8 exclusion. The original frozen V4 TRAIN manifest is exhausted at 36/36 keys; the separately frozen extension manifest has consumed 3/36 keys.
 
 ## Frozen eligibility consequence
 

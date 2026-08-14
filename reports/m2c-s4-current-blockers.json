@@ -1,8 +1,8 @@
 {
   "schema_version": "M2CS4CurrentBlockersV2",
   "status": "BLOCKED_UNMEASURED_ZERO_ELIGIBLE_YIELD_AND_FORMAL_EXACT_PLAN_INTEGRATION",
-  "reported_at": "2026-08-15T03:13:23+08:00",
-  "checked_head_commit": "85dccd1577e430d4f9860e5f43683b8d9dcd6667",
+  "reported_at": "2026-08-15T04:16:47+08:00",
+  "checked_head_commit": "f4df0bf99ac9c118bac9671938fc9e6ff03c6423",
   "q_a_state": "PASSED",
   "q_b_state": "UNMEASURED",
   "pure_model_success_episodes": null,
@@ -11,12 +11,14 @@
   "path_blocked_training": {
     "frozen_v3_train_keys": 36,
     "frozen_v4_train_keys": 36,
+    "frozen_v4_extension1_train_keys": 36,
+    "frozen_v4_train_keys_total": 72,
     "unique_v3_train_keys_attempted": 11,
-    "unique_v4_train_keys_consumed": 36,
-    "unique_train_keys_consumed_total": 47,
+    "unique_v4_train_keys_consumed": 39,
+    "unique_train_keys_consumed_total": 50,
     "raw_v3_eight_step_chains": 10,
-    "raw_v4_eight_step_chains": 28,
-    "physical_skill_receipts_v4": 224,
+    "raw_v4_eight_step_chains": 31,
+    "physical_skill_receipts_v4": 248,
     "collision_or_safety_violations_v4": 0,
     "training_samples_eligible": 0,
     "training_samples_packaged": 0,
@@ -25,7 +27,7 @@
     "formal_q_b_evaluation_executed": false,
     "public_track_associator_v2_implemented": true,
     "batch_04_preregistered_and_consumed": true,
-    "latest_completed_batch": "BATCH_18",
+    "latest_completed_batch": "BATCH_19",
     "active_selected_key_preregistration_present": false,
     "collection_execution_authorized": false,
     "raw_detection_capacity_decision_required": false,
@@ -34,23 +36,27 @@
       "first_subsequent_stage_acceptance_report": "reports/m2c-s4-v4-batch06-snapshot-owner-failure.json",
       "first_subsequent_probe_simulation_start_report": "reports/m2c-s4-v4-batch07-pre-timeline-proprio-failure.json",
       "first_subsequent_raw_physical_chain_report": "reports/m2c-s4-v4-batch08-collection.json",
-      "latest_three_stage_and_probe_pass_report": "reports/m2c-s4-v4-batch18-collection.json",
+      "latest_three_stage_and_probe_pass_report": "reports/m2c-s4-v4-batch19-collection.json",
       "latest_mixed_batch_report": "reports/m2c-s4-v4-batch11-collection.json",
-      "latest_all_physical_batch_report": "reports/m2c-s4-v4-batch18-collection.json",
-      "resolved_for_observed_batch18_path": true
+      "latest_all_physical_batch_report": "reports/m2c-s4-v4-batch19-collection.json",
+      "resolved_for_observed_batch19_path": true
     },
     "authorization_contract": {
       "path": "src/xh_agent/policy/qrm_lite/s4_v4_collection_authorization_v1.py",
-      "sha256": "6d11d13d22100f217a3319956c8876a4c029f43ba8d0466b61bc4dfb8bf5de24",
-      "checked_parent_commit": "9c149ef6cbd3dff9af23f9d79a52beb01faf6726",
+      "sha256": "4dd5cb2f48ea56a7011a5278cc14256baaf39bcc048ec1bba2caec0cd23e1edc",
+      "checked_parent_commit": "320fbf7523ec14cbc4f8f96676ac81ad7a62bd28",
       "canonical_cli_authorized": false,
       "programmatic_worker_authorized": false,
       "programmatic_packager_authorized": false,
-      "reason": "FROZEN_V4_TRAIN_MANIFEST_EXHAUSTED_ZERO_ELIGIBLE_TRAINING_EPISODES"
+      "reason": "NO_ACTIVE_PREREGISTRATION_BATCH19_CONSUMED_ZERO_ELIGIBLE_TRAINING_EPISODES"
     },
     "training_manifest": {
       "path": "configs/m2c_s4_v4_training_keys.json",
       "sha256": "83a672f439521dc2c6263225851ec54cbd80de052af835a6590a7e02443b79c4"
+    },
+    "training_manifest_extension1": {
+      "path": "configs/m2c_s4_v4_training_keys_extension1.json",
+      "sha256": "9fcc971f5bdf0787692b6d2de9be81885fe164e4b78b34fac214d6467c64e164"
     },
     "source_reports": [
       {
@@ -116,6 +122,10 @@
       {
         "path": "reports/m2c-s4-v4-batch18-collection.json",
         "sha256": "a27116aa00f379f1ea461342b34ec8f7f621a8e916ca1f9eae0c63f86aa6d59b"
+      },
+      {
+        "path": "reports/m2c-s4-v4-batch19-collection.json",
+        "sha256": "dd103b06ac945cceb5816393bfff7b82a2f5ab77b8c8b077dff1b48a4d61d030"
       }
     ],
     "accepted_raw_capacity_decision": {
@@ -138,15 +148,16 @@
     },
     "training_eligibility_yield": {
       "path": "reports/m2c-s4-training-eligibility-yield-adr0025.json",
-      "sha256": "3ee8d2918b7261c3f1013175575ffb6b06a6b8dd527fb6f2a32f8744648e162f",
+      "sha256": "9b59249db6def3800f1af03d26e915f77aade29f7c295bcfb679559f3f3ffee0",
       "status": "BLOCKED_ZERO_OBSERVED_ELIGIBLE_CHAIN_YIELD",
-      "unique_train_identities": 47,
-      "complete_eight_step_chains": 38,
+      "unique_train_identities": 50,
+      "complete_eight_step_chains": 41,
       "eligible_training_episodes": 0,
       "finite_key_projection_for_one_eligible_episode": null
     },
-    "frozen_v4_train_manifest_exhausted": true,
-    "remaining_unconsumed_v4_train_keys": 0
+    "original_frozen_v4_train_manifest_exhausted": true,
+    "v4_extension1_train_keys_consumed": 3,
+    "remaining_unconsumed_v4_extension1_train_keys": 33
   },
   "phase_2": {
     "candidate_addendum_generated": true,
