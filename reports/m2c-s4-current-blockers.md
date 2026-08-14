@@ -1,7 +1,7 @@
 # M2C S4 current blockers
 
 - Status: **BLOCKED_UNMEASURED_ZERO_ELIGIBLE_YIELD_AND_FORMAL_EXACT_PLAN_INTEGRATION**
-- Checked parent HEAD: `44db0475a63dad035ae23416f9df7679e594826e`
+- Checked parent HEAD: `762fa7150e37320675aed5c25358fc6011f45aa4`
 - Q-A: **PASSED**
 - Q-B: **UNMEASURED**
 - `pure_model_success_episodes`: **null**, not zero
@@ -11,11 +11,11 @@
 
 ADR-0025 approved raw public-detection capacity 32 from the frozen scene-contract provenance, not from the observed maximum. The immutable scene-19083 bytes now pass the revised raw schema without truncation or filtering, but the physical result remains authoritative: terminal `CONTACT_GATE_REJECTED`, `final_task_success=false`, zero eligible rows, and no packaged sample.
 
-Across the twenty immutable V3/V4 collection reports, 59 distinct TRAIN identities produced 47 complete eight-step chains and zero eligible episodes. The updated ADR-0025 section-3 audit measures both per-key yield (0/59) and complete-chain conditional yield (0/47) as 0.0. At that observed point yield there is no finite evidence-based projection even for the trainer's code minimum of one eligible episode. This blocks training; it does not claim model capability is zero. Model rollout and formal Q-B evaluation have not run, so pure success remains `null`.
+Across the twenty-one immutable V3/V4 collection reports, 62 distinct TRAIN identities produced 49 complete eight-step chains and zero eligible episodes. The updated ADR-0025 section-3 audit measures both per-key yield (0/62) and complete-chain conditional yield (0/49) as 0.0. At that observed point yield there is no finite evidence-based projection even for the trainer's code minimum of one eligible episode. This blocks training; it does not claim model capability is zero. Model rollout and formal Q-B evaluation have not run, so pure success remains `null`.
 
-Ten complete V3 chains and the thirty-six Batch-09 through Batch-22 V4 chains passed gates for steps 0–6. Across all complete chains, thirty terminate at the contact/controller gate, sixteen at pregrasp IK, and one lifts but fails the public success predicate. This supports a recurring terminal regrasp approach/contact-acceptance mismatch but does not isolate perception offset, approach geometry, or object state. No gate, threshold, B0 byte, or frozen eligibility predicate was changed.
+Ten complete V3 chains and the thirty-eight Batch-09 through Batch-23 V4 chains passed gates for steps 0–6. Across all complete chains, thirty-one terminate at the contact/controller gate, seventeen at pregrasp IK, and one lifts but fails the public success predicate. This supports a recurring terminal regrasp approach/contact-acceptance mismatch but does not isolate perception offset, approach geometry, or object state. No gate, threshold, B0 byte, or frozen eligibility predicate was changed.
 
-Batch-22 preregistered the next three identity-disjoint V4 extension keys outcome-blind and consumed each exactly once. Scenes 22053 and 22087 reached Isaac startup but their stage processes exited 139 before probe execution; scene 22107 completed a strict eight-step chain with 8 physical receipts and zero safety violations, then remained ineligible at the unchanged pregrasp-IK gate. The original V4 TRAIN manifest remains exhausted at 36/36; extension1 has consumed 12/36 with 24 unconsumed. No subsequent preregistration is active, so collection is fail-closed.
+Batch-23 preregistered the next three identity-disjoint V4 extension keys outcome-blind and consumed each exactly once. Scenes 22112 and 22163 completed strict eight-step chains with 16 physical receipts and zero safety violations, then remained ineligible at the unchanged contact and pregrasp-IK gates respectively; scene 22141 reached Isaac startup but its stage process exited 139 before probe execution. The original V4 TRAIN manifest remains exhausted at 36/36; extension1 has consumed 15/36 with 21 unconsumed. No subsequent preregistration is active, so collection is fail-closed.
 
 ## ADR-0022 / ADR-0024 / ADR-0025 Phase-2 entry
 
@@ -39,5 +39,5 @@ The 2026-08-20 bundle-smoke checkpoint is unchanged.
 Next command:
 
 ```bash
-PYTHONPATH=src:scripts uv run pytest -q tests/unit/test_m2c_s4_current_blockers_report.py tests/unit/test_m2c_s4_v4_batch22_collection_audit.py
+PYTHONPATH=src:scripts uv run pytest -q tests/unit/test_m2c_s4_current_blockers_report.py tests/unit/test_m2c_s4_v4_batch23_collection_audit.py
 ```
