@@ -1,0 +1,225 @@
+{
+  "authorization": {
+    "adr_commit": "abf66b1084e3820a327c29cb79ebf68af0252fd0",
+    "adr_path": "docs/decisions/ADR-0025-m2c-raw-capacity-acm-and-yield.md",
+    "adr_sha256": "6f27171d319e3f966c652ca9f8c0fe7c641f4bf420de58642869f9c9c805c3aa",
+    "max_raw_public_detections": 32,
+    "numeric_provenance": "4_X_FROZEN_INDUSTRIAL_CYLINDER_SCENE_MAX_8_ENTITIES",
+    "offline_replay_only": true,
+    "outcome_reinterpretation_authorized": false,
+    "physical_retry_or_replacement_authorized": false,
+    "raw_detection_capacity_revision": "M2C_V4_RAW_PUBLIC_DETECTIONS_32_V1",
+    "selected_option": "A"
+  },
+  "formal_q_b_evaluation_executed": false,
+  "host_replay": {
+    "association_session_receipt_sha256": "61241ff448d51e78e4647468824a83118f354efe8934c5483d8eb7870343b3cf",
+    "candidate_counts": [
+      7,
+      8,
+      8,
+      7,
+      8,
+      8,
+      8,
+      8
+    ],
+    "deployment_binding_sha256": "97a1a04a14fc997946d4a36a3269b5040f428b379c8fd198cd822ea427f201ec",
+    "final_candidate_k": 8,
+    "passed": true,
+    "perception_track_counts": [
+      7,
+      13,
+      11,
+      7,
+      8,
+      9,
+      10,
+      10
+    ],
+    "s6_manifest_file_sha256": "ce1440966d31dda6b3f0e06c41a19dc654ebc734a6597d6346ec9df3c5f0d2ba",
+    "selected_track_in_candidate_k8": [
+      true,
+      false,
+      true,
+      true,
+      true,
+      null,
+      true,
+      true
+    ],
+    "step_count": 8,
+    "training_manifest_file_sha256": "83a672f439521dc2c6263225851ec54cbd80de052af835a6590a7e02443b79c4"
+  },
+  "implementation": {
+    "commit": "e7d0564cd603cc2b020748aef0534ac0f2a5e5ab",
+    "report_script_path": "scripts/m2c/replay_s4_v4_scene19083_raw_capacity.py",
+    "report_script_sha256": "0b37c71c700b2776c5ba75cb150f21b3039ff8ace0ab8e5b786d52b2d940bd4f",
+    "source_bindings": [
+      {
+        "path": "scripts/m2c/derive_model_owned_chain_probe.py",
+        "sha256": "847fe5d02008cf6b317789c38d56bec5f7f65ced369f16f8905b8f4575b2ef96"
+      },
+      {
+        "path": "scripts/m2c/qwen_coarse_v4.py",
+        "sha256": "dc869c8325dae1c21fd999eff141bb5f2a2b2acb2b644b47067da38c39250298"
+      },
+      {
+        "path": "src/xh_agent/perception/public_track_associator_v2.py",
+        "sha256": "1ee6ccaf595a3b74d9762f34721807f7aa107d49237f820a396c846902214964"
+      },
+      {
+        "path": "src/xh_agent/policy/qrm_lite/path_blocked_collection_v4.py",
+        "sha256": "467ce96ea2b5db7b84904bbe489e4436f43f82587acefbb56027bd927119216c"
+      },
+      {
+        "path": "src/xh_agent/policy/qrm_lite/path_blocked_supervision_v4.py",
+        "sha256": "49e60395a0c31270bd19db48af108f59b2ad6a81a6d53e9b2a096a74b27c2d69"
+      }
+    ]
+  },
+  "model_rollout": false,
+  "privileged_truth_policy_input": false,
+  "schema_upgrade": {
+    "all_detections_passed_without_truncation_or_filtering": true,
+    "capture_count": 8,
+    "raw_detection_counts": [
+      7,
+      13,
+      11,
+      7,
+      8,
+      9,
+      10,
+      10
+    ],
+    "replay_schema": "M2CV4RawPublicAssociationCaptureV2",
+    "source_schema": "M2CV4RawPublicAssociationCaptureV1",
+    "transformations": [
+      {
+        "capture_index": 0,
+        "detection_count": 7,
+        "detections_sha256": "ea11a459924e0523820d5ca16e9abaae8f477e89ae63961459688a727c65c779",
+        "original_capture_sha256": "7b93da73b2d09e4fdb15fe74a8fe147498c7c7ee26f9234c821b02a10db44414",
+        "original_schema_version": "M2CV4RawPublicAssociationCaptureV1",
+        "proprioception_sha256": "ae9979e646aceb526338be7f78b452b207d67311d06eac90a84e7803438eb43a",
+        "truncated_or_filtered": false,
+        "upgraded_capture_sha256": "93f4d15a577b11cef536e6df533873280860c6c8c39cc9602207537381e0f955",
+        "upgraded_schema_version": "M2CV4RawPublicAssociationCaptureV2"
+      },
+      {
+        "capture_index": 1,
+        "detection_count": 13,
+        "detections_sha256": "65666bbb67eb0a8399fac7a255ceeeb75d402666c2be7570d368f2e923d8f075",
+        "original_capture_sha256": "09c395f9b2312de1a3cd14ef7c65726f861ce2c64519a2b348370d5828f9a9c7",
+        "original_schema_version": "M2CV4RawPublicAssociationCaptureV1",
+        "proprioception_sha256": "bfa7deb7bd4a0438f44cf0b4414da7529f7a552772a0234b67890a29ae6976d1",
+        "truncated_or_filtered": false,
+        "upgraded_capture_sha256": "233fba944a533e657608c3dcfaabcfd6990524530102337c8f655753fc92170f",
+        "upgraded_schema_version": "M2CV4RawPublicAssociationCaptureV2"
+      },
+      {
+        "capture_index": 2,
+        "detection_count": 11,
+        "detections_sha256": "a1d99ba72dd00d103e175fad0e0665e0ac64672b5d90c1061560d06d5f00ba50",
+        "original_capture_sha256": "950a5259c70a927021a745c45707ac3696d910700b3c9e2cbabf18f6a2ba2b73",
+        "original_schema_version": "M2CV4RawPublicAssociationCaptureV1",
+        "proprioception_sha256": "5a6cd9811650c88f818ce16b0ceff38f3fdc47450366a5cc200d27a258fdfb2e",
+        "truncated_or_filtered": false,
+        "upgraded_capture_sha256": "2dba2fd1f25b80dc33efc3c6352f1d95dfe04fc695edfd2e1deff94803794b9a",
+        "upgraded_schema_version": "M2CV4RawPublicAssociationCaptureV2"
+      },
+      {
+        "capture_index": 3,
+        "detection_count": 7,
+        "detections_sha256": "38517525b3d26d8b4c636e98072aa01d0c905d85ee9dab831d0c07cea9191aa2",
+        "original_capture_sha256": "e0f6473b0bed574daf2281b76d0fb470c0173cbdfcd55c57a9ecc532692af983",
+        "original_schema_version": "M2CV4RawPublicAssociationCaptureV1",
+        "proprioception_sha256": "3b677c341012d892a2d176802d00b6488ebc138cb99d824d486d0b0eb6d7bed4",
+        "truncated_or_filtered": false,
+        "upgraded_capture_sha256": "37af536469eb7c111ed7612734d85fcce88ba22a442f9bc3954112772db66ec6",
+        "upgraded_schema_version": "M2CV4RawPublicAssociationCaptureV2"
+      },
+      {
+        "capture_index": 4,
+        "detection_count": 8,
+        "detections_sha256": "ba381c6278c79997d086acb3269f3d572eeacd2f80b83aefbcb5d683e829cbfd",
+        "original_capture_sha256": "864245193159f3e2f9cf7e5c6d9b2ed21df6ecb277e0bf790d5c11857e3124a9",
+        "original_schema_version": "M2CV4RawPublicAssociationCaptureV1",
+        "proprioception_sha256": "ea8f4e9577c7744c74aeda709298ace5157bb71af224d08072bfe357bdc9e721",
+        "truncated_or_filtered": false,
+        "upgraded_capture_sha256": "1912360948d251280c8ac0a2fbba2747973d5504ff9e0badad8150c5a6f1a6af",
+        "upgraded_schema_version": "M2CV4RawPublicAssociationCaptureV2"
+      },
+      {
+        "capture_index": 5,
+        "detection_count": 9,
+        "detections_sha256": "7ef9b5a24b09ac378b7118102423cdbacbf792161a23e6f0a695e93b28f37dda",
+        "original_capture_sha256": "1930de67ebba60442439c948a0c4badb30ae383a0f3bd20bc65a2485ebb5e15e",
+        "original_schema_version": "M2CV4RawPublicAssociationCaptureV1",
+        "proprioception_sha256": "a3e184d8cecaee9534cc921e0f85c0a81392a0fe14e640d57ebf47afd35955ab",
+        "truncated_or_filtered": false,
+        "upgraded_capture_sha256": "91ba498932a4c79542e287264d95f9e11ac7b06e83e6e1e8fb62ecdee9f207ae",
+        "upgraded_schema_version": "M2CV4RawPublicAssociationCaptureV2"
+      },
+      {
+        "capture_index": 6,
+        "detection_count": 10,
+        "detections_sha256": "58fcb446b4dccba2974a6cf030893fb21f1e1d5419cf62e43601c140616975da",
+        "original_capture_sha256": "0f13b320394ba1615797ed048b80f92b59c1257f68e7c3b756501c2dc732b86c",
+        "original_schema_version": "M2CV4RawPublicAssociationCaptureV1",
+        "proprioception_sha256": "109a0237858f8d193c000db840c4712b8c63477a24dbf5a43e8d69526443a2a6",
+        "truncated_or_filtered": false,
+        "upgraded_capture_sha256": "839f100eb7f866a6fb187f35b325dfe30e53da6601732ab8e6d57e48f89ee8aa",
+        "upgraded_schema_version": "M2CV4RawPublicAssociationCaptureV2"
+      },
+      {
+        "capture_index": 7,
+        "detection_count": 10,
+        "detections_sha256": "a12f968c1d5b2128d2c20ffc49b1eeefe08440e909c7f626f735e48447cda4fd",
+        "original_capture_sha256": "26f6609f54e688ee3a6ebac2023b0b0862f80e26023454e979655fffc0ad0690",
+        "original_schema_version": "M2CV4RawPublicAssociationCaptureV1",
+        "proprioception_sha256": "f5ffbc25316b00a3d45070ec65ade71bd49136110e866f863cdb9f3da33badf2",
+        "truncated_or_filtered": false,
+        "upgraded_capture_sha256": "a2216313e8f1b96d3b27240004a6e001b5f2d9818274709b88779928db85419a",
+        "upgraded_schema_version": "M2CV4RawPublicAssociationCaptureV2"
+      }
+    ]
+  },
+  "schema_version": "M2CS4V4Scene19083OfflineRawCapacityReplayV1",
+  "source_evidence": {
+    "collision_or_safety_violations": 0,
+    "failure_seed": 190837,
+    "historical_report_path": "reports/m2c-s4-v4-batch08-collection.json",
+    "historical_report_sha256": "226761a056c6c3a127784019147e49b3e6e301f72d4b9711e222cd7c939a2894",
+    "matched_key": "m2c-s4-v4-train-dc5715316cad6e42faf074a9b6715f76e2df7bd0d267c3cf88037fdc5f8c50a7",
+    "physical_skill_receipt_count": 8,
+    "privileged_truth_policy_input": false,
+    "raw_probe_relative_path": "raw/train/m2c-s4-v4-train-dc5715316cad6e42faf074a9b6715f76e2df7bd0d267c3cf88037fdc5f8c50a7/probe/actuation-probe.json",
+    "raw_probe_sha256": "9f3144467f247131240c5e152a8317e578e69c4c29192e0b64e4ddb78e5fef89",
+    "scene_seed": 19083,
+    "teacher_used": false
+  },
+  "status": "PASS_OFFLINE_REPLAY_EXCLUDED_UNCHANGED_PHYSICAL_FAILURE",
+  "teacher_used": false,
+  "training_executed": false,
+  "unchanged_outcome": {
+    "offline_dataset_sample_count": 0,
+    "offline_dataset_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "offline_dataset_status": "EMPTY",
+    "persisted_training_sample_count": 0,
+    "pure_model_success_episodes": null,
+    "replayed_final_task_success": false,
+    "source_final_task_success": false,
+    "terminal_controller_gate": "REJECTED",
+    "terminal_execution_status": "CONTACT_GATE_REJECTED",
+    "training_sample_eligible": false,
+    "training_sample_packaged": false,
+    "training_validation_status": "EXCLUDED",
+    "validation_exclusion_reasons": [
+      "FINAL_TASK_NOT_SUCCESSFUL",
+      "STEP_1:PUBLIC_TARGET_OUTSIDE_V4_K8",
+      "STEP_7:CONTROLLER_GATE_NOT_PASSING"
+    ]
+  }
+}
