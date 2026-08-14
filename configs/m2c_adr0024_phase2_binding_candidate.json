@@ -15,6 +15,7 @@
     "scripts/m2c/run_formal_model_owned_chain_v4.py": "799caecdb12f73b5e6ea226eb2b983e4fbe4c08482f7ed037ae33c2168068eef",
     "scripts/m2c/run_a3_query_only_deployment_smoke.py": "fdef2e7dd76b6d3a141143eb30f794170126b59b3d605f651427749b07782058",
     "scripts/m2c/serve_formal_isaac_endpoint_v4.py": "19f141caf244b7dca9362ec4c18ee69ad720ba86e15223cffcb5f735a1013a4c",
+    "scripts/m2c/verify_formal_wire_auth_v4.py": "f3a32149987525b75f67ef9a887bcad2f46e0fff2f9e2c70d9a0259befd5a06c",
     "src/xh_agent/policy/qrm_lite/a3_bullet_native_adapter_v1.cpp": "5de2750b6704e30eef1955d3e7f60692cc424777f23024aa064410585331c900",
     "src/xh_agent/policy/qrm_lite/a3_bullet_production_adapter_v1.py": "aa9a96309a3381b1dce8cf1b43e3322c4ae968d558bc1bef394b56a6c307c807",
     "src/xh_agent/policy/qrm_lite/a3_bullet_self_ccd_v1.cpp": "48a1caa8d2f1c8fcb76a504377f399223018a26925c03f1d549db9bab833506f",
@@ -29,7 +30,8 @@
     "src/xh_agent/policy/qrm_lite/formal_split_host_v4.py": "a6ed4f26c428904843ad117a4602138d66fc2c5000c042168a3b3cc7c03e0808",
     "src/xh_agent/policy/qrm_lite/formal_split_runner_v2.py": "affbec7bfa2462c58ef093196c367eda98472f1ca349ba7b98d71796798b7c06",
     "src/xh_agent/policy/qrm_lite/formal_split_runner_v4.py": "5dfec6becb2d333e3e0f1fef2f7ed97983da28af7c19c07e537956720bf2862c",
-    "src/xh_agent/policy/qrm_lite/isaac_exact_plan_runtime_v1.py": "57712a3d573f35dc3acb656e8533bb01789200501d2d7bee20450e91223e8dbe"
+    "src/xh_agent/policy/qrm_lite/isaac_exact_plan_runtime_v1.py": "57712a3d573f35dc3acb656e8533bb01789200501d2d7bee20450e91223e8dbe",
+    "src/xh_agent/policy/qrm_lite/offline_wire_auth_v4.py": "52ade7742f725532af5c45853f735ef9c8891ba223c86be334fa4a973614f0f2"
   },
   "native_build_evidence": {
     "report_path": "reports/m2c-phase2-a3-native-build.json",

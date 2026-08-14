@@ -1,7 +1,7 @@
 # M2C S4 current blockers
 
-- Status: **BLOCKED_UNMEASURED_RAW_SCHEMA_AND_A3_STATIC_COLLISION**
-- Checked HEAD: `79571b84d7e33b52779030ce56e6e18022c0cd3f`
+- Status: **BLOCKED_UNMEASURED_RAW_SCHEMA_AND_FORMAL_EXACT_PLAN_INTEGRATION**
+- Checked HEAD: `f541059ccd6ff537b196957d88d156832acddce5`
 - Q-A: **PASSED**
 - Q-B: **UNMEASURED**
 - `pure_model_success_episodes`: **null**, not zero
@@ -65,10 +65,13 @@ Consequently the Phase-2 candidate addendum remains
 not authorize formal execution. The four production bindings remain null.
 The V4 host-orchestration/evidence contract and HTTP service shell now exist
 and preserve terminal `NO_PHYSICAL_EXECUTION` without B0 substitution. The
-service's production backend factory remains deliberately unbound. Besides the static-state rejection, real
-eight-skill phase receipts, immutable deployment/import closure, the real
-exact-plan Isaac executor, the deployed read-only FK provider, and real-session
-endpoint/HMAC evidence remain missing.
+service's production backend factory remains deliberately unbound. The V4
+host-local verifier now replays both exact audit lifecycles, every HMAC
+envelope, the consumed challenge, and variable one-to-eight-decision terminal
+counts without an SSH/signing prerequisite. No real node2/labserver receipt
+has been produced. Plan-specific eight-skill phase receipts, immutable
+deployment/import closure, the real exact-plan Isaac executor, the deployed
+read-only FK provider, and real-session endpoint evidence remain missing.
 
 ADR-0024's B0 decision is preserved: invalid mapping or preflight rejection is
 terminal `NO_PHYSICAL_EXECUTION`, never a relabelled B0 fallback. The independent
@@ -90,8 +93,8 @@ B0 comparison arm remains unchanged.
 - Focused S6/status/entry regression: **33 passed**.
 
 Failures: no product-test failure. The mainline remains deliberately
-fail-closed at two governed boundaries: the V4 raw-detection schema decision
-and the A3 static-home self-collision rejection.
+fail-closed at two boundaries: the governed V4 raw-detection schema decision
+and the unbound formal exact-plan deployment/evidence path.
 
 Next command:
 

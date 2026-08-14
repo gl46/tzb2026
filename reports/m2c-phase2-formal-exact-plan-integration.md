@@ -1,7 +1,7 @@
 # M2C Phase-2 formal exact-plan integration audit
 
 - Status: **BLOCKED_UNMEASURED_FORMAL_EXACT_PLAN_INTEGRATION**
-- Checked HEAD: `79571b84d7e33b52779030ce56e6e18022c0cd3f`
+- Checked HEAD: `f541059ccd6ff537b196957d88d156832acddce5`
 - Formal execution eligible: **false**
 - Physical execution / training by this audit: **false / false**
 
@@ -36,6 +36,13 @@ never selects an expected skill, and never substitutes B0. No real V4 Isaac
 HTTP service is deployment-bound, so this remains a contract result rather
 than formal physical evidence.
 
+The V4 host-local verifier now replays the exact Qwen and Isaac audit
+lifecycles, every HMAC envelope, the one-shot challenge receipt, and variable
+terminal counts for one through eight decisions. Its receipts contain no SSH
+signature, trust root, or signer principal. No real node2/labserver receipts
+exist yet, so this implementation does not remove the session/startup evidence
+blocker or authorize a production binding.
+
 The coordinator does not generate waypoints.  A single-use, deployment-bound
 provider now consumes one query-only active-session state receipt and replays
 the complete request/observation/mapping/plan/source closure before exposing a
@@ -67,7 +74,7 @@ withdrawn compatibility sentinels remain `None`. Teacher and privileged
 simulator truth were not used.
 
 Verification: `.venv/bin/pytest -q tests/unit/test_m2c_*.py` ->
-**803 passed**, 0 failed.
+**809 passed**, 0 failed.
 
 Next command:
 

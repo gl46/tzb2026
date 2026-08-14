@@ -48,6 +48,13 @@ def test_candidate_smoke_is_blocked_unmeasured_and_never_physical() -> None:
     assert report["a3_query_only_deployment_smoke"]["collision_rejection_count"] == 2
     assert not report["a3_query_only_deployment_smoke"]["static_state_preflight_clear"]
     assert not report["a3_query_only_deployment_smoke"]["formal_execution_eligible"]
+    hmac = report["formal_v4_host_local_hmac_verifier"]
+    assert hmac["status"] == "PASS_CONTRACT_ONLY_NO_REAL_HOST_RECEIPTS"
+    assert hmac["node2_and_labserver_replay_implemented"] is True
+    assert hmac["variable_terminal_envelope_counts_supported"] is True
+    assert hmac["trusted_host_signature_required"] is False
+    assert hmac["real_host_receipts_present"] is False
+    assert hmac["formal_authorization"] is False
     assert not report["governance"]["contract_smoke_is_physical_evidence"]
     assert not report["governance"]["teacher_used"]
 
@@ -93,6 +100,14 @@ def test_candidate_config_requires_literal_none_bindings_and_exact_terminal_poli
             (PROJECT_ROOT / "scripts/m2c/serve_formal_isaac_endpoint_v4.py").read_bytes()
         ).hexdigest()
     )
+    for path in (
+        "src/xh_agent/policy/qrm_lite/offline_wire_auth_v4.py",
+        "scripts/m2c/verify_formal_wire_auth_v4.py",
+    ):
+        assert (
+            candidate["source_bindings"][path]
+            == hashlib.sha256((PROJECT_ROOT / path).read_bytes()).hexdigest()
+        )
 
 
 def test_candidate_source_tamper_and_false_physical_claim_fail_closed(tmp_path: Path) -> None:

@@ -105,6 +105,14 @@ session-audit implementation, and host-local HMAC verifier. A successful
 authorization still claims no physical action; the real session-bound phase
 and bundle receipts plus post-execution HMAC replay remain required evidence.
 
+The V4 host-local HMAC verifier and create-only CLI now replay both sides of a
+terminalized episode without any SSH signature, trust root, or signer
+principal. They bind the one-shot challenge receipt, formal evidence, exact
+Qwen/Isaac audit lifecycle, every authenticated envelope, and variable counts
+for one through eight model decisions. This is still contract-only: no real
+node2 or labserver receipt exists, the V4 Isaac HTTP backend factory is
+unbound, and the entry/readiness migration is incomplete.
+
 ## B0 boundary
 
 `FrozenB0FallbackWrapperV1` and ADR-0022 A.5 are withdrawn by accepted
@@ -125,6 +133,7 @@ nor any safety/IK/collision/controller gate.
 - `EIGHT_SKILL_REAL_ISAAC_PHASE_VALIDATION_MISSING`
 - `REAL_BOUND_PLAN_SYNTHESIS_BACKEND_NOT_BOUND`
 - `REAL_ISAAC_EPISODE_LIFECYCLE_AND_CAPTURE_SOURCE_NOT_BOUND`
+- `REAL_FORMAL_V4_ISAAC_HTTP_SERVICE_BACKEND_FACTORY_NOT_BOUND`
 - `IMMUTABLE_DEPLOYMENT_COMMIT_CONTAINER_IMPORT_ASSET_CLOSURE_MISSING`
 - `REAL_EXACT_PLAN_ISAAC_EXECUTOR_DEPLOYMENT_BINDING_MISSING`
 - `REAL_QUERY_ONLY_FK_PROVIDER_DEPLOYMENT_BINDING_MISSING`

@@ -1,8 +1,8 @@
 {
   "schema_version": "M2CS4CurrentBlockersV2",
   "status": "BLOCKED_UNMEASURED_RAW_SCHEMA_AND_FORMAL_EXACT_PLAN_INTEGRATION",
-  "reported_at": "2026-08-14T09:34:37+08:00",
-  "checked_head_commit": "79571b84d7e33b52779030ce56e6e18022c0cd3f",
+  "reported_at": "2026-08-14T11:12:18+08:00",
+  "checked_head_commit": "f541059ccd6ff537b196957d88d156832acddce5",
   "q_a_state": "PASSED",
   "q_b_state": "UNMEASURED",
   "pure_model_success_episodes": null,
@@ -107,15 +107,17 @@
     "real_exact_plan_executor_deployment_binding_bound": false,
     "formal_v4_host_orchestrator_contract_active": true,
     "formal_v4_http_service_shell_active": true,
+    "formal_v4_host_local_hmac_verifier_active": true,
+    "real_node2_and_labserver_hmac_receipts_present": false,
     "real_formal_v4_isaac_http_service_bound": false,
     "formal_execution_eligible": false,
     "candidate_config": {
       "path": "configs/m2c_adr0024_phase2_binding_candidate.json",
-      "sha256": "87fa503218bcb8cb9d6fbd72085147bb3ad12762f7255b0b1df7fbab2ba9a263"
+      "sha256": "fe1d70d69b78c04704dea07ce1c8ff78b68fc7609116a441d69bde5ff0eb19b0"
     },
     "candidate_addendum": {
       "path": "docs/decisions/ADR-0024-PHASE2-BINDING-ADDENDUM-CANDIDATE.md",
-      "sha256": "a41547359db769f65ce701bb53f9c5f373390cd4060ddf66d458e7480c399e3a"
+      "sha256": "31e89f4c659d8e46fd7356a4e172bc7c11e5a2fdd29ebf5c82230b08100c10c1"
     },
     "query_only_comparison_report": {
       "path": "reports/m2c-phase2-a3-query-only-deployment-comparison.json",

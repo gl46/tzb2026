@@ -155,6 +155,8 @@ def test_phase2_query_only_evidence_remains_non_authorizing() -> None:
     assert phase2["real_exact_plan_executor_deployment_binding_bound"] is False
     assert phase2["formal_v4_host_orchestrator_contract_active"] is True
     assert phase2["formal_v4_http_service_shell_active"] is True
+    assert phase2["formal_v4_host_local_hmac_verifier_active"] is True
+    assert phase2["real_node2_and_labserver_hmac_receipts_present"] is False
     assert phase2["real_formal_v4_isaac_http_service_bound"] is False
     assert phase2["formal_execution_eligible"] is False
     assert phase2["remaining_rejected_pairs"] == comparison["after"]["remaining_rejected_pairs"]

@@ -35,6 +35,8 @@ FORMAL_V2_RUNNER_PATH = Path("src/xh_agent/policy/qrm_lite/formal_split_runner_v
 FORMAL_V4_HOST_PATH = Path("src/xh_agent/policy/qrm_lite/formal_split_host_v4.py")
 FORMAL_V4_CLI_PATH = Path("scripts/m2c/run_formal_model_owned_chain_v4.py")
 FORMAL_V4_SERVICE_PATH = Path("scripts/m2c/serve_formal_isaac_endpoint_v4.py")
+FORMAL_V4_HMAC_VERIFIER_PATH = Path("src/xh_agent/policy/qrm_lite/offline_wire_auth_v4.py")
+FORMAL_V4_HMAC_CLI_PATH = Path("scripts/m2c/verify_formal_wire_auth_v4.py")
 ADR_0024_PATH = Path("docs/decisions/ADR-0024-m2c-s4-unblock-directive.md")
 BINDING_NAMES = (
     "FORMAL_PHYSICAL_RUNNER_BINDING",
@@ -352,6 +354,47 @@ def build_audit(project_root: Path) -> dict[str, Any]:
         isinstance(factory_bindings[0], ast.Constant) and factory_bindings[0].value is None
     ):
         raise CandidateAuditFailure("formal V4 service backend factory is not literal None")
+    hmac_source = read_regular_file_once(root / FORMAL_V4_HMAC_VERIFIER_PATH).decode("utf-8")
+    hmac_tree = ast.parse(hmac_source)
+    hmac_receipt_fields = {
+        item.target.id
+        for node in hmac_tree.body
+        if isinstance(node, ast.ClassDef) and node.name == "HostWireHMACVerificationCoreV4"
+        for item in node.body
+        if isinstance(item, ast.AnnAssign) and isinstance(item.target, ast.Name)
+    }
+    if not {
+        "challenge_consumption_receipt_sha256",
+        "formal_evidence_sha256",
+        "service_audit_sha256",
+        "envelope_set_sha256",
+        "completion_kind",
+        "decision_count",
+        "all_hmac_valid",
+    }.issubset(hmac_receipt_fields) or hmac_receipt_fields.intersection(
+        {"signature_armored", "public_trust_root_sha256", "signer_principal"}
+    ):
+        raise CandidateAuditFailure("formal V4 host-local HMAC receipt schema differs")
+    hmac_functions = {
+        item.name
+        for item in hmac_tree.body
+        if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef))
+    }
+    if not {
+        "verify_node2_qwen_transcript_v4",
+        "verify_labserver_isaac_transcript_v4",
+        "build_hmac_verification_receipt_v4",
+    }.issubset(hmac_functions):
+        raise CandidateAuditFailure("formal V4 host-local HMAC replay is incomplete")
+    hmac_cli = read_regular_file_once(root / FORMAL_V4_HMAC_CLI_PATH).decode("utf-8")
+    for token in (
+        "read_hmac_secret",
+        "build_hmac_verification_receipt_v4",
+        "_publish_create_only",
+        "PASS_HOST_LOCAL_V4_HMAC_VERIFICATION_NOT_FORMAL_AUTHORIZATION",
+    ):
+        if token not in hmac_cli:
+            raise CandidateAuditFailure(f"formal V4 HMAC CLI omitted marker: {token}")
     closure = inspect_a3_production_closure_v1(project_root=root)
     if closure.status != "NOT_AVAILABLE" or closure.formal_execution_eligible:
         raise CandidateAuditFailure("local A.3 closure unexpectedly claimed production readiness")
@@ -380,6 +423,15 @@ def build_audit(project_root: Path) -> dict[str, Any]:
         "a3_native_build_evidence": candidate["native_build_evidence"],
         "a3_read_only_fk_evidence": candidate["read_only_fk_evidence"],
         "a3_query_only_deployment_smoke": candidate["query_only_deployment_smoke"],
+        "formal_v4_host_local_hmac_verifier": {
+            "status": "PASS_CONTRACT_ONLY_NO_REAL_HOST_RECEIPTS",
+            "receipt_schema": "M2CHostWireHMACVerificationReceiptV4",
+            "node2_and_labserver_replay_implemented": True,
+            "variable_terminal_envelope_counts_supported": True,
+            "trusted_host_signature_required": False,
+            "real_host_receipts_present": False,
+            "formal_authorization": False,
+        },
         "blockers": list(EXPECTED_BLOCKERS),
         "governance": candidate["evidence_claims"],
     }

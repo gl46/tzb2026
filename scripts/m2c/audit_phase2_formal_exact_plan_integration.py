@@ -40,10 +40,12 @@ SOURCE_PATHS = (
     Path("src/xh_agent/policy/qrm_lite/formal_split_host_v4.py"),
     Path("scripts/m2c/run_formal_model_owned_chain_v4.py"),
     Path("scripts/m2c/serve_formal_isaac_endpoint_v4.py"),
+    Path("scripts/m2c/verify_formal_wire_auth_v4.py"),
     Path("src/xh_agent/policy/qrm_lite/formal_isaac_endpoint_v4.py"),
     Path("src/xh_agent/policy/qrm_lite/formal_exact_plan_runtime_v1.py"),
     Path("src/xh_agent/policy/qrm_lite/formal_bound_plan_provider_v1.py"),
     Path("src/xh_agent/policy/qrm_lite/formal_isaac_backend_v4.py"),
+    Path("src/xh_agent/policy/qrm_lite/offline_wire_auth_v4.py"),
     Path("src/xh_agent/policy/qrm_lite/s4_entry_gate.py"),
     Path("configs/m2c_adr0024_phase2_binding_candidate.json"),
     Path("docs/decisions/ADR-0024-PHASE2-BINDING-ADDENDUM-CANDIDATE.md"),
@@ -185,6 +187,7 @@ def build_report() -> dict[str, Any]:
     backend_v4_path = Path("src/xh_agent/policy/qrm_lite/formal_isaac_backend_v4.py")
     host_v4_path = Path("src/xh_agent/policy/qrm_lite/formal_split_host_v4.py")
     service_v4_path = Path("scripts/m2c/serve_formal_isaac_endpoint_v4.py")
+    hmac_v4_path = Path("src/xh_agent/policy/qrm_lite/offline_wire_auth_v4.py")
     bound_provider_path = Path("src/xh_agent/policy/qrm_lite/formal_bound_plan_provider_v1.py")
     bundle_path = Path("src/xh_agent/policy/qrm_lite/exact_plan_primitive_bundle_v1.py")
     entry_path = Path("src/xh_agent/policy/qrm_lite/s4_entry_gate.py")
@@ -193,6 +196,7 @@ def build_report() -> dict[str, Any]:
     backend_v4 = _module(backend_v4_path)
     host_v4 = _module(host_v4_path)
     service_v4 = _module(service_v4_path)
+    hmac_v4 = _module(hmac_v4_path)
     bound_provider = _module(bound_provider_path)
     legacy_backend = _module(backend_path)
     bundle = _module(bundle_path)
@@ -272,6 +276,17 @@ def build_report() -> dict[str, Any]:
     )
     if not service_factory_none:
         raise AuditError("formal V4 HTTP service backend factory is not fail-closed")
+    hmac_classes = {item.name for item in hmac_v4.body if isinstance(item, ast.ClassDef)}
+    hmac_functions = {item.name for item in hmac_v4.body if isinstance(item, ast.FunctionDef)}
+    if not {
+        "HostWireHMACVerificationCoreV4",
+        "HostWireHMACVerificationReceiptV4",
+    }.issubset(hmac_classes) or not {
+        "verify_node2_qwen_transcript_v4",
+        "verify_labserver_isaac_transcript_v4",
+        "build_hmac_verification_receipt_v4",
+    }.issubset(hmac_functions):
+        raise AuditError("formal V4 host-local HMAC replay is incomplete")
     provider_methods = _class_methods(bound_provider, "FormalBoundExactPlanProviderV1")
     if not {"_validate_production_deployment", "build_bound_plan"}.issubset(provider_methods):
         raise AuditError("formal V4 bound-plan provider contract is incomplete")
@@ -326,6 +341,7 @@ def build_report() -> dict[str, Any]:
             "formal_v4_backend_coordinator_active": runtime_bridge_active,
             "formal_v4_host_orchestrator_active": True,
             "formal_v4_http_service_shell_active": True,
+            "formal_v4_host_local_hmac_replay_active": True,
             "replayable_public_observation_provider_active": True,
             "typed_non_actuating_gate_rejection_only": True,
             "partial_failure_actuation_accounting_exact": True,
@@ -372,7 +388,7 @@ def build_report() -> dict[str, Any]:
         ],
         "verification": {
             "command": ".venv/bin/pytest -q tests/unit/test_m2c_*.py",
-            "passed": 803,
+            "passed": 809,
             "failed": 0,
         },
         "next_implementation_order": [
@@ -431,6 +447,13 @@ and finalization calls. It publishes a replayable terminal evidence envelope,
 never selects an expected skill, and never substitutes B0. No real V4 Isaac
 HTTP service is deployment-bound, so this remains a contract result rather
 than formal physical evidence.
+
+The V4 host-local verifier now replays the exact Qwen and Isaac audit
+lifecycles, every HMAC envelope, the one-shot challenge receipt, and variable
+terminal counts for one through eight decisions. Its receipts contain no SSH
+signature, trust root, or signer principal. No real node2/labserver receipts
+exist yet, so this implementation does not remove the session/startup evidence
+blocker or authorize a production binding.
 
 The coordinator does not generate waypoints.  A single-use, deployment-bound
 provider now consumes one query-only active-session state receipt and replays

@@ -39,7 +39,7 @@ def test_phase2_integration_audit_replays_current_fail_closed_sources() -> None:
     assert recorded["blockers"] == replayed["blockers"]
     assert recorded["verification"] == {
         "command": ".venv/bin/pytest -q tests/unit/test_m2c_*.py",
-        "passed": 803,
+        "passed": 809,
         "failed": 0,
     }
 
@@ -71,6 +71,7 @@ def test_audit_separates_implemented_contracts_from_missing_formal_path() -> Non
             "formal_v4_backend_coordinator_active",
             "formal_v4_host_orchestrator_active",
             "formal_v4_http_service_shell_active",
+            "formal_v4_host_local_hmac_replay_active",
             "replayable_public_observation_provider_active",
             "typed_non_actuating_gate_rejection_only",
             "partial_failure_actuation_accounting_exact",
