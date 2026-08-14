@@ -19,7 +19,7 @@ from m2c.audit_s4_training_eligibility_yield_adr0025 import (
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 
-def test_yield_audit_replays_all_fifty_unique_keys_and_zero_eligible() -> None:
+def test_yield_audit_replays_all_fifty_three_unique_keys_and_zero_eligible() -> None:
     report = build_report(project_root=PROJECT_ROOT)
 
     assert report["status"] == "BLOCKED_ZERO_OBSERVED_ELIGIBLE_CHAIN_YIELD"
@@ -29,14 +29,14 @@ def test_yield_audit_replays_all_fifty_unique_keys_and_zero_eligible() -> None:
         == hashlib.sha256(audit_path.read_bytes()).hexdigest()
     )
     assert report["identity_audit"] == {
-        "attempt_rows": 51,
+        "attempt_rows": 54,
         "duplicate_attempt_rows_within_first_v3_report": 1,
         "source_identity_sets_pairwise_disjoint": True,
         "unique_v3_train_identities": 11,
-        "unique_v4_train_identities": 39,
-        "unique_train_identities_total": 50,
+        "unique_v4_train_identities": 42,
+        "unique_train_identities_total": 53,
     }
-    assert report["observed_yield"]["complete_eight_step_chains"] == 41
+    assert report["observed_yield"]["complete_eight_step_chains"] == 43
     assert report["observed_yield"]["eligible_training_episodes"] == 0
     assert report["observed_yield"]["eligible_yield_per_unique_train_identity"] == 0.0
     assert report["observed_yield"]["finite_key_projection_for_one_eligible_episode"] is None
@@ -51,8 +51,8 @@ def test_complete_chain_taxonomy_and_episode_atomic_predicate_are_exact() -> Non
 
     assert report["complete_chain_failure_taxonomy"] == {
         "LIFTED_BUT_PUBLIC_SUCCESS_PREDICATE_REJECTED": 1,
-        "TERMINAL_CONTACT_OR_CONTROLLER_GATE_REJECTED": 27,
-        "TERMINAL_PREGRASP_IK_GATE_REJECTED": 13,
+        "TERMINAL_CONTACT_OR_CONTROLLER_GATE_REJECTED": 28,
+        "TERMINAL_PREGRASP_IK_GATE_REJECTED": 14,
     }
     predicate = report["frozen_training_predicate"]
     assert predicate["final_task_success_required"] is True
@@ -106,9 +106,9 @@ def test_eligibility_source_drift_is_rejected(tmp_path: Path) -> None:
 def test_markdown_does_not_claim_measured_model_zero() -> None:
     markdown = render_markdown(build_report(project_root=PROJECT_ROOT))
 
-    assert "0/50 = 0.0" in markdown
-    assert "0/41 = 0.0" in markdown
+    assert "0/53 = 0.0" in markdown
+    assert "0/43 = 0.0" in markdown
     assert "original frozen V4 TRAIN manifest is exhausted at 36/36 keys" in markdown
-    assert "extension manifest has consumed 3/36 keys" in markdown
+    assert "extension manifest has consumed 6/36 keys" in markdown
     assert "pure model success remains `null`" in markdown
     assert "does not change that predicate, B0, a safety gate, or a threshold" in markdown
