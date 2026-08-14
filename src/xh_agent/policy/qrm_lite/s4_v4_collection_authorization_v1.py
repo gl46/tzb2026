@@ -33,10 +33,13 @@ from typing import Any, Literal
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from xh_agent.policy.qrm_lite.path_blocked_collection_v4 import (
-    M2CS4V4TrainingKeyManifestV1,
     M2CS4V4TrainingKeyV1,
+    V4_EXTENSION1_MANIFEST_CONTENT_SHA256,
+    V4_EXTENSION1_MANIFEST_FILE_SHA256,
     V4_MANIFEST_CONTENT_SHA256,
     V4_MANIFEST_FILE_SHA256,
+    V4TrainingKeyManifest,
+    validate_v4_training_manifest_payload,
 )
 
 
@@ -60,6 +63,21 @@ REQUIRED_SEMANTIC_SOURCE_PATHS = frozenset(
         "src/xh_agent/policy/qrm_lite/s4_v4_collection_authorization_v1.py",
     }
 )
+EXTENSION1_REQUIRED_SEMANTIC_SOURCE_PATHS = REQUIRED_SEMANTIC_SOURCE_PATHS | {
+    "scripts/m2c/build_s4_v4_training_extension1_manifest.py"
+}
+V4_TRAIN_MANIFEST_PROFILES = {
+    "configs/m2c_s4_v4_training_keys.json": (
+        V4_MANIFEST_FILE_SHA256,
+        V4_MANIFEST_CONTENT_SHA256,
+        REQUIRED_SEMANTIC_SOURCE_PATHS,
+    ),
+    "configs/m2c_s4_v4_training_keys_extension1.json": (
+        V4_EXTENSION1_MANIFEST_FILE_SHA256,
+        V4_EXTENSION1_MANIFEST_CONTENT_SHA256,
+        EXTENSION1_REQUIRED_SEMANTIC_SOURCE_PATHS,
+    ),
+}
 AUTHORITATIVE_PRIOR_ATTEMPT_SOURCES = {
     "reports/m2c-s4-v3-path-blocked-train-collection.json": (
         "c505ec6517d7a766768f72cd14fc49d1919cff234dc2d8fbee1877104b41480d",
@@ -625,9 +643,7 @@ class M2CS4V4SelectedKeyCollectionPreregV1(StrictModel):
     candidate_count_bound: Literal[8]
     recapture_policy: Literal["NONE"]
     training_manifest: BoundRepositoryFileV1
-    training_manifest_content_sha256: Literal[
-        "525cd393fd4264ef7d47691d142616d4fc59c068c25336f43fe3b54f8753a034"
-    ]
+    training_manifest_content_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
     s6_exclusion_manifest: BoundRepositoryFileV1
     runtime_registry: BoundRepositoryFileV1
     semantic_source_bindings: list[BoundRepositoryFileV1]
@@ -685,7 +701,7 @@ class ResolvedCollectionPreregV1:
     file_sha256: str
     raw_bytes: bytes
     prereg: M2CS4V4SelectedKeyCollectionPreregV1
-    manifest: M2CS4V4TrainingKeyManifestV1
+    manifest: V4TrainingKeyManifest
     # Derived from Git history. It cannot be embedded in the newly introduced
     # prereg file because doing so would make the commit hash self-referential.
     introduced_commit: str
@@ -850,16 +866,20 @@ def load_committed_collection_prereg(
     ):
         raise CollectionAuthorizationError("governing ADR was not accepted before preregistration")
 
+    profile = V4_TRAIN_MANIFEST_PROFILES.get(prereg.training_manifest.path)
+    if profile is None:
+        raise CollectionAuthorizationError("prereg TRAIN manifest profile is not frozen")
+    expected_manifest_file_sha256, expected_manifest_content_sha256, required_sources = profile
     if (
-        prereg.training_manifest.path != "configs/m2c_s4_v4_training_keys.json"
-        or prereg.training_manifest.sha256 != V4_MANIFEST_FILE_SHA256
+        prereg.training_manifest.sha256 != expected_manifest_file_sha256
+        or prereg.training_manifest_content_sha256 != expected_manifest_content_sha256
         or prereg.s6_exclusion_manifest.path != "configs/m2c_s6_evaluation_keys.json"
         or prereg.s6_exclusion_manifest.sha256 != S6_MANIFEST_FILE_SHA256
         or prereg.runtime_registry.path != "configs/qrm_runtime_mapping_v2.yaml"
         or prereg.runtime_registry.sha256 != RUNTIME_REGISTRY_FILE_SHA256
     ):
         raise CollectionAuthorizationError("prereg manifest/runtime identities are not frozen")
-    manifest = M2CS4V4TrainingKeyManifestV1.model_validate(
+    manifest = validate_v4_training_manifest_payload(
         _json_object(
             _verify_bound_repository_file(root, prereg.training_manifest),
             label="V4 TRAIN manifest",
@@ -867,11 +887,11 @@ def load_committed_collection_prereg(
     )
     _verify_bound_repository_file(root, prereg.s6_exclusion_manifest)
     _verify_bound_repository_file(root, prereg.runtime_registry)
-    if manifest.manifest_sha256 != V4_MANIFEST_CONTENT_SHA256:
+    if manifest.manifest_sha256 != expected_manifest_content_sha256:
         raise CollectionAuthorizationError("V4 TRAIN manifest content identity changed")
 
     bindings = {item.path: item for item in prereg.semantic_source_bindings}
-    if set(bindings) != set(REQUIRED_SEMANTIC_SOURCE_PATHS):
+    if set(bindings) != set(required_sources):
         raise CollectionAuthorizationError("prereg semantic source closure is incomplete")
     for binding in bindings.values():
         _verify_bound_repository_file(root, binding)

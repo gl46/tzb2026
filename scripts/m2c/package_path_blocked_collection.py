@@ -186,7 +186,6 @@ from xh_agent.policy.qrm_lite.path_blocked_supervision_v3 import (  # noqa: E402
     recompute_candidate_payload_v3,
 )
 from xh_agent.policy.qrm_lite.path_blocked_collection_v4 import (  # noqa: E402
-    V4_MANIFEST_FILE_SHA256,
     build_path_blocked_supervised_dataset_v4,
     host_replay_probe_chain_v4,
     load_v4_training_manifest,
@@ -816,7 +815,7 @@ def package_collection(
             "collection_manifest_file_sha256": (
                 V3_MANIFEST_FILE_SHA256
                 if revision == "V3"
-                else V4_MANIFEST_FILE_SHA256
+                else sha256_file(training_keys_path)
                 if revision == "V4"
                 else sha256_file(training_keys_path)
             ),

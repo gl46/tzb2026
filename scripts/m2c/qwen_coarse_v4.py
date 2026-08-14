@@ -31,15 +31,16 @@ from xh_agent.policy.qrm_lite.model_owned_chain_v2 import (
 from xh_agent.policy.qrm_lite.path_blocked_collection_v4 import (
     M2C_Q012_V4_SKILL_LABELS,
     S6_MANIFEST_SHA256,
-    V4_MANIFEST_FILE_SHA256,
     M2CPathBlockedPhysicalChainEvidenceV4,
     M2CPathBlockedSupervisedStepV4,
-    M2CS4V4TrainingKeyManifestV1,
     PathBlockedSupervisedDatasetV4,
+    V4TrainingKeyManifest,
     build_path_blocked_supervised_dataset_v4,
     canonical_sha256,
     host_replay_probe_chain_v4,
+    load_v4_training_manifest,
     validate_path_blocked_physical_evidence_v4,
+    v4_manifest_file_sha256,
 )
 from xh_agent.policy.qrm_lite.path_blocked_supervision_v2 import (
     DESTINATION_CLASS_LABELS,
@@ -379,13 +380,11 @@ def validate_key_manifests_v4(
     evaluation_manifest_path: Path,
 ) -> tuple[
     M2CQwenCoarseV4KeyManifestAuditV1,
-    M2CS4V4TrainingKeyManifestV1,
+    V4TrainingKeyManifest,
     FrozenS6ExclusionManifestV2,
 ]:
     training_raw = _read_regular_file_once(training_manifest_path)
-    if sha256_bytes(training_raw) != V4_MANIFEST_FILE_SHA256:
-        raise ValueError("V4 training manifest differs from the frozen checked-in bytes")
-    training = M2CS4V4TrainingKeyManifestV1.model_validate_json(training_raw)
+    training = load_v4_training_manifest(training_manifest_path)
     s6_payload, s6, s6_raw = _load_frozen_s6_manifest(evaluation_manifest_path)
     if training.source_bindings.get("configs/m2c_s6_evaluation_keys.json") != sha256_bytes(s6_raw):
         raise ValueError("V4 training manifest does not bind the frozen S6 file")
@@ -591,7 +590,7 @@ def _verify_collection_receipt_v4(
     *,
     evidence: M2CPathBlockedPhysicalChainEvidenceV4,
     dataset: PathBlockedSupervisedDatasetV4,
-    training_manifest: M2CS4V4TrainingKeyManifestV1,
+    training_manifest: V4TrainingKeyManifest,
     s6_manifest: FrozenS6ExclusionManifestV2,
     source_raw: bytes,
     chain_raw: bytes,
@@ -695,6 +694,7 @@ def _verify_collection_receipt_v4(
         raw_authorization.source_supervision_sha256,
     )
     s6_sha256 = canonical_sha256(s6_manifest.model_dump(mode="json"))
+    expected_training_file_sha256 = v4_manifest_file_sha256(training_manifest)
     if (
         receipt_identity != expected_identity
         or raw_identity != expected_identity
@@ -703,8 +703,8 @@ def _verify_collection_receipt_v4(
         or receipt.packaged_physical_chain_sha256 != sha256_bytes(chain_raw)
         or receipt.supervised_dataset_file_sha256 != sha256_bytes(dataset_raw)
         or receipt.dataset_sha256 != dataset.dataset_sha256
-        or receipt.collection_manifest_file_sha256 != V4_MANIFEST_FILE_SHA256
-        or receipt.frozen_training_key_manifest_file_sha256 != V4_MANIFEST_FILE_SHA256
+        or receipt.collection_manifest_file_sha256 != expected_training_file_sha256
+        or receipt.frozen_training_key_manifest_file_sha256 != expected_training_file_sha256
         or receipt.collection_manifest_sha256 != training_manifest.manifest_sha256
         or receipt.frozen_s6_key_manifest_file_sha256 != S6_MANIFEST_SHA256
         or receipt.s6_exclusion_manifest_sha256 != s6_sha256
@@ -717,12 +717,12 @@ def _verify_collection_receipt_v4(
         raise ValueError("V4 collection receipt differs from independently replayed package")
     copied_manifest_raw = _read_regular_file_once(root / "collection-manifest-v4.json")
     copied_s6_raw = _read_regular_file_once(root / "s6-exclusion-manifest-v2.json")
-    copied_manifest = M2CS4V4TrainingKeyManifestV1.model_validate_json(copied_manifest_raw)
+    copied_manifest = load_v4_training_manifest(root / "collection-manifest-v4.json")
     _copied_s6_payload, copied_s6, _copied_s6_bytes = _load_frozen_s6_manifest(
         root / "s6-exclusion-manifest-v2.json"
     )
     if (
-        sha256_bytes(copied_manifest_raw) != V4_MANIFEST_FILE_SHA256
+        sha256_bytes(copied_manifest_raw) != expected_training_file_sha256
         or sha256_bytes(copied_s6_raw) != S6_MANIFEST_SHA256
         or copied_manifest != training_manifest
         or copied_s6 != s6_manifest
@@ -735,7 +735,7 @@ def _replay_packaged_source(
     package_root: Path,
     evidence: M2CPathBlockedPhysicalChainEvidenceV4,
     *,
-    training_manifest: M2CS4V4TrainingKeyManifestV1,
+    training_manifest: V4TrainingKeyManifest,
 ) -> bytes:
     raw_path = package_root / "actuation-probe.json"
     raw_bytes = _read_regular_file_once(raw_path)

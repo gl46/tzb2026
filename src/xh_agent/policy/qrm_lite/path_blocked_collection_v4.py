@@ -78,6 +78,13 @@ V4_MANIFEST_KEY = "M2C_S4_V4_FROZEN_TRAIN_KEYS"
 # Filled only after the create-only builder output is frozen.
 V4_MANIFEST_FILE_SHA256 = "83a672f439521dc2c6263225851ec54cbd80de052af835a6590a7e02443b79c4"
 V4_MANIFEST_CONTENT_SHA256 = "525cd393fd4264ef7d47691d142616d4fc59c068c25336f43fe3b54f8753a034"
+V4_EXTENSION1_MANIFEST_FILE_SHA256 = (
+    "9fcc971f5bdf0787692b6d2de9be81885fe164e4b78b34fac214d6467c64e164"
+)
+V4_EXTENSION1_MANIFEST_CONTENT_SHA256 = (
+    "efb69cfc509abca6ed98b7ab476b8d4f3f154aa1d2f2c417fa8f439a5422f34f"
+)
+V4_EXTENSION1_MANIFEST_KEY = "M2C_S4_V4_FROZEN_TRAIN_KEYS_EXTENSION1"
 V2_TRAIN_SMOKE_MANIFEST_SHA256 = "ca2162a898853ee04600aaf9246c121ac0604754638e497d1824b159c161fd94"
 V3_TRAIN_MANIFEST_SHA256 = "b5a2da566f4086724e99cea1664aeeac3b91344a68b72be84bcf6c5d0ddad65c"
 V4_QA_MANIFEST_SHA256 = "4e78c044b68b11c1d871ecb90e65c7e2dfc616c8971abb89cb9969d2d48f738b"
@@ -210,19 +217,158 @@ class M2CS4V4TrainingKeyManifestV1(StrictModel):
         return self
 
 
-def load_v4_training_manifest(path: Path) -> M2CS4V4TrainingKeyManifestV1:
-    if sha256_file(path) != V4_MANIFEST_FILE_SHA256:
-        raise ValueError("V4 collection requires the exact frozen TRAIN manifest file")
-    return M2CS4V4TrainingKeyManifestV1.model_validate_json(path.read_bytes())
+class M2CS4V4TrainingKeyExtensionManifestV1(StrictModel):
+    """First outcome-blind extension of the exhausted immutable V4 TRAIN manifest."""
+
+    schema_version: Literal["M2CS4V4TrainingKeyExtensionManifestV1"]
+    status: Literal["FROZEN_TRAIN_ONLY_BEFORE_ANY_SELECTED_KEY_COLLECTION"]
+    written_date_asia_shanghai: str
+    train_only: Literal[True]
+    candidate_contract_revision: Literal["PublicTrackCandidateV4"]
+    checkpoint_architecture_revision: Literal["M2C_Q012_V4"]
+    candidate_count_bound: Literal[8]
+    pointer_class_count: Literal[9]
+    recapture_policy: Literal["NONE"]
+    declared_target_attribute: Literal["yellow"]
+    selection_uses_rollout_outcomes: Literal[False]
+    any_selected_key_collection_observed_before_freeze: Literal[False]
+    collection_executed: Literal[False]
+    training_executed: Literal[False]
+    smoke_collection_authorized: Literal[False]
+    evaluation_collection_authorized: Literal[False]
+    candidate_implementation: dict[str, str]
+    accepted_contract_commits: dict[str, str]
+    v4_implementation_bindings: dict[str, str]
+    selection_implementation: dict[str, Any]
+    selection_protocol: dict[str, Any]
+    source_bindings: dict[str, str]
+    exclusion_contract: dict[str, Any]
+    exclusions: dict[str, Any]
+    layout_contract: dict[str, Any]
+    training_key_digest: str = Field(pattern=r"^[0-9a-f]{64}$")
+    training_keys: list[M2CS4V4TrainingKeyV1] = Field(min_length=36, max_length=36)
+    physical_prerequisite_smoke_keys: list[Any] = Field(max_length=0)
+    teacher_used: Literal[False]
+    privileged_truth_policy_input: Literal[False]
+    manifest_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+
+    @model_validator(mode="after")
+    def frozen_extension_identity_is_exact(self) -> "M2CS4V4TrainingKeyExtensionManifestV1":
+        payload = self.model_dump(mode="json", exclude={"manifest_sha256"})
+        if self.manifest_sha256 != V4_EXTENSION1_MANIFEST_CONTENT_SHA256:
+            raise ValueError("V4 extension embedded manifest identity is not frozen")
+        if canonical_sha256(payload) != self.manifest_sha256:
+            raise ValueError("V4 extension embedded manifest SHA-256 mismatch")
+        records = [item.model_dump(mode="json") for item in self.training_keys]
+        if canonical_sha256(records) != self.training_key_digest:
+            raise ValueError("V4 extension training-key digest mismatch")
+        for field in ("matched_key", "scene_seed", "failure_seed"):
+            values = [getattr(item, field) for item in self.training_keys]
+            if len(values) != len(set(values)):
+                raise ValueError(f"V4 extension TRAIN manifest repeats {field}")
+        expected_sources = {
+            "configs/m2c_s4_training_keys.json": V2_TRAIN_SMOKE_MANIFEST_SHA256,
+            "configs/m2c_s4_v3_training_keys.json": V3_TRAIN_MANIFEST_SHA256,
+            "configs/m2c_s4_v4_training_keys.json": V4_MANIFEST_FILE_SHA256,
+            "configs/m2c_headroom_domain_v4.json": V4_QA_MANIFEST_SHA256,
+            "configs/m2c_s6_evaluation_keys.json": S6_MANIFEST_SHA256,
+        }
+        if any(
+            self.source_bindings.get(path) != digest for path, digest in expected_sources.items()
+        ):
+            raise ValueError("V4 extension does not bind every excluded identity source")
+        required = {
+            "old_v2_train_and_smoke": True,
+            "complete_v3_train": True,
+            "original_v4_train": True,
+            "v4_q_a": True,
+            "all_s6_evaluation": True,
+        }
+        if any(self.exclusion_contract.get(key) is not value for key, value in required.items()):
+            raise ValueError("V4 extension exclusion contract is incomplete")
+        return self
+
+
+V4TrainingKeyManifest = M2CS4V4TrainingKeyManifestV1 | M2CS4V4TrainingKeyExtensionManifestV1
+
+
+def _manifest_profile_for_content(content_sha256: str) -> tuple[str, str, str]:
+    profiles = {
+        V4_MANIFEST_CONTENT_SHA256: (
+            V4_MANIFEST_KEY,
+            V4_MANIFEST_FILE_SHA256,
+            "M2CS4V4TrainingKeyManifestV1",
+        ),
+        V4_EXTENSION1_MANIFEST_CONTENT_SHA256: (
+            V4_EXTENSION1_MANIFEST_KEY,
+            V4_EXTENSION1_MANIFEST_FILE_SHA256,
+            "M2CS4V4TrainingKeyExtensionManifestV1",
+        ),
+    }
+    try:
+        return profiles[content_sha256]
+    except KeyError as error:
+        raise ValueError("V4 TRAIN manifest content identity is not frozen") from error
+
+
+def v4_manifest_file_sha256(manifest: V4TrainingKeyManifest) -> str:
+    return _manifest_profile_for_content(manifest.manifest_sha256)[1]
+
+
+def v4_manifest_key(manifest: V4TrainingKeyManifest) -> str:
+    return _manifest_profile_for_content(manifest.manifest_sha256)[0]
+
+
+def validate_v4_training_manifest_payload(
+    payload: Mapping[str, Any],
+) -> V4TrainingKeyManifest:
+    schema = payload.get("schema_version")
+    if schema == "M2CS4V4TrainingKeyManifestV1":
+        return M2CS4V4TrainingKeyManifestV1.model_validate(payload)
+    if schema == "M2CS4V4TrainingKeyExtensionManifestV1":
+        return M2CS4V4TrainingKeyExtensionManifestV1.model_validate(payload)
+    raise ValueError("V4 TRAIN manifest schema is not frozen")
+
+
+def load_v4_training_manifest(path: Path) -> V4TrainingKeyManifest:
+    raw = path.read_bytes()
+    file_sha256 = hashlib.sha256(raw).hexdigest()
+    try:
+        payload = json.loads(raw)
+    except (UnicodeDecodeError, json.JSONDecodeError) as error:
+        raise ValueError("V4 TRAIN manifest is not JSON") from error
+    if not isinstance(payload, dict):
+        raise ValueError("V4 TRAIN manifest is not an object")
+    schema = payload.get("schema_version")
+    manifest = validate_v4_training_manifest_payload(payload)
+    _key, expected_file_sha256, expected_schema = _manifest_profile_for_content(
+        manifest.manifest_sha256
+    )
+    if file_sha256 != expected_file_sha256 or schema != expected_schema:
+        raise ValueError("V4 collection requires an exact frozen TRAIN manifest file")
+    return manifest
 
 
 class FrozenManifestRefV4(StrictModel):
     schema_version: Literal["FrozenManifestRefV4"] = "FrozenManifestRefV4"
-    manifest_key: Literal["M2C_S4_V4_FROZEN_TRAIN_KEYS"] = V4_MANIFEST_KEY
-    manifest_file_sha256: Literal[
-        "83a672f439521dc2c6263225851ec54cbd80de052af835a6590a7e02443b79c4"
-    ]
-    manifest_sha256: Literal["525cd393fd4264ef7d47691d142616d4fc59c068c25336f43fe3b54f8753a034"]
+    manifest_key: Literal[
+        "M2C_S4_V4_FROZEN_TRAIN_KEYS",
+        "M2C_S4_V4_FROZEN_TRAIN_KEYS_EXTENSION1",
+    ] = V4_MANIFEST_KEY
+    manifest_file_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    manifest_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+
+    @model_validator(mode="after")
+    def manifest_profile_is_frozen(self) -> "FrozenManifestRefV4":
+        expected_key, expected_file_sha256, _schema = _manifest_profile_for_content(
+            self.manifest_sha256
+        )
+        if (self.manifest_key, self.manifest_file_sha256) != (
+            expected_key,
+            expected_file_sha256,
+        ):
+            raise ValueError("V4 evidence manifest reference is not a frozen profile")
+        return self
 
 
 class PathBlockedRawPublicObservationV4(StrictModel):
@@ -479,7 +625,7 @@ def host_replay_probe_chain_v4(
     raw_captures: list[Mapping[str, Any]],
     *,
     training_key: M2CS4V4TrainingKeyV1,
-    training_manifest: M2CS4V4TrainingKeyManifestV1,
+    training_manifest: V4TrainingKeyManifest,
     capture_source_implementation_sha256: str,
 ) -> M2CPathBlockedProbeChainV4:
     """Independently turn raw public detections into exact V4 observations."""
@@ -746,7 +892,7 @@ class M2CPathBlockedPhysicalChainEvidenceV4(M2CPathBlockedProbeChainV4):
 def package_probe_chain_v4(
     raw_chain: Mapping[str, Any],
     *,
-    training_manifest: M2CS4V4TrainingKeyManifestV1,
+    training_manifest: V4TrainingKeyManifest,
     s6_manifest: FrozenS6ExclusionManifestV2,
     runtime_registry_sha256: str,
     source_evidence_uri: str,
@@ -758,7 +904,8 @@ def package_probe_chain_v4(
         **payload,
         schema_version="M2CPathBlockedPhysicalChainEvidenceV4",
         v4_training_manifest_ref=FrozenManifestRefV4(
-            manifest_file_sha256=V4_MANIFEST_FILE_SHA256,
+            manifest_key=v4_manifest_key(training_manifest),
+            manifest_file_sha256=v4_manifest_file_sha256(training_manifest),
             manifest_sha256=training_manifest.manifest_sha256,
         ),
         s6_exclusion_manifest_sha256=canonical_sha256(s6_manifest.model_dump(mode="json")),
@@ -844,7 +991,7 @@ def _destination(value: str | None) -> int | None:
 def validate_path_blocked_physical_evidence_v4(
     raw: M2CPathBlockedPhysicalChainEvidenceV4 | Mapping[str, Any],
     *,
-    training_manifest: M2CS4V4TrainingKeyManifestV1 | Mapping[str, Any],
+    training_manifest: V4TrainingKeyManifest | Mapping[str, Any],
     s6_manifest: FrozenS6ExclusionManifestV2 | Mapping[str, Any],
 ) -> PathBlockedEvidenceValidationV4:
     try:
@@ -855,25 +1002,31 @@ def validate_path_blocked_physical_evidence_v4(
         )
         manifest = (
             training_manifest
-            if isinstance(training_manifest, M2CS4V4TrainingKeyManifestV1)
-            else M2CS4V4TrainingKeyManifestV1.model_validate(training_manifest)
+            if isinstance(
+                training_manifest,
+                (M2CS4V4TrainingKeyManifestV1, M2CS4V4TrainingKeyExtensionManifestV1),
+            )
+            else validate_v4_training_manifest_payload(training_manifest)
         )
         s6 = (
             s6_manifest
             if isinstance(s6_manifest, FrozenS6ExclusionManifestV2)
             else FrozenS6ExclusionManifestV2.model_validate(s6_manifest)
         )
-    except ValidationError as error:
+    except (ValidationError, ValueError) as error:
         episode = str(raw.get("episode_id", "UNKNOWN")) if isinstance(raw, Mapping) else "UNKNOWN"
+        error_types = (
+            [f"SCHEMA_INVALID:{item['type']}" for item in error.errors(include_url=False)]
+            if isinstance(error, ValidationError)
+            else ["SCHEMA_INVALID:VALUE_ERROR"]
+        )
         return PathBlockedEvidenceValidationV4(
             status="INVALID_SCHEMA",
             episode_id=episode,
             physical_evidence_valid=False,
             model_training_eligible=False,
             steps_validated=0,
-            exclusion_reasons=[
-                f"SCHEMA_INVALID:{item['type']}" for item in error.errors(include_url=False)
-            ],
+            exclusion_reasons=error_types,
         )
     reasons: list[str] = []
 
@@ -883,7 +1036,8 @@ def validate_path_blocked_physical_evidence_v4(
 
     keys = [item for item in manifest.training_keys if item.matched_key == evidence.matched_key]
     if (
-        evidence.v4_training_manifest_ref.manifest_file_sha256 != V4_MANIFEST_FILE_SHA256
+        evidence.v4_training_manifest_ref.manifest_file_sha256 != v4_manifest_file_sha256(manifest)
+        or evidence.v4_training_manifest_ref.manifest_key != v4_manifest_key(manifest)
         or evidence.v4_training_manifest_ref.manifest_sha256 != manifest.manifest_sha256
     ):
         reject("V4_TRAIN_MANIFEST_BINDING_MISMATCH")
@@ -1017,7 +1171,7 @@ def validate_path_blocked_physical_evidence_v4(
 def build_path_blocked_supervised_dataset_v4(
     evidence: M2CPathBlockedPhysicalChainEvidenceV4,
     *,
-    training_manifest: M2CS4V4TrainingKeyManifestV1,
+    training_manifest: V4TrainingKeyManifest,
     s6_manifest: FrozenS6ExclusionManifestV2,
 ) -> PathBlockedSupervisedDatasetV4:
     validation = validate_path_blocked_physical_evidence_v4(
