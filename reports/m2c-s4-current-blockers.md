@@ -1,7 +1,7 @@
 # M2C S4 current blockers
 
 - Status: **BLOCKED_UNMEASURED_RAW_SCHEMA_AND_FORMAL_EXACT_PLAN_INTEGRATION**
-- Checked HEAD: `ea1ab3cd3393cf1afc0e2284bdbde89b12ce0212`
+- Checked HEAD: `9821a318ed738df747878564bd388a24df133bb2`
 - Q-A: **PASSED**
 - Q-B: **UNMEASURED**
 - `pure_model_success_episodes`: **null**, not zero
@@ -63,6 +63,11 @@ to force a pass.
 Consequently the Phase-2 candidate addendum remains
 `CONTRACT_SMOKE_ONLY_BLOCKED_UNMEASURED`. It is not physical evidence and does
 not authorize formal execution. The four production bindings remain null.
+The candidate now includes a replayable per-phase A3 swept-collision contract:
+it binds the complete joint path, collision world, geometry, FK receipt,
+complete child-pair request, native receipt, and numeric configuration. No real
+phase evidence has been produced, so this closes only the offline contract and
+does not change formal eligibility.
 The V4 host-orchestration/evidence contract and HTTP service shell now exist
 and preserve terminal `NO_PHYSICAL_EXECUTION` without B0 substitution. The
 service's production backend factory remains deliberately unbound. The V4

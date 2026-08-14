@@ -32,6 +32,9 @@ from typing import Any, Literal, Mapping, Protocol
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from xh_agent.policy.qrm_lite.a3_phase_swept_collision_evidence_v1 import (
+    A3PhaseSweptCollisionEvidenceV1,
+)
 from xh_agent.policy.qrm_lite.exact_plan_primitive_bundle_v1 import (
     ExactPlanPhaseContractV1,
     ExactPlanPhasePreflightV1,
@@ -619,6 +622,7 @@ class NonActuatingSweptCollisionV1(FrozenModel):
     algorithm_sha256: str = Field(pattern=SHA256_PATTERN)
     configuration_sha256: str = Field(pattern=SHA256_PATTERN)
     segments: tuple[SweptCollisionSegmentV1, ...]
+    a3_phase_evidence: A3PhaseSweptCollisionEvidenceV1 | None = None
     query_duration_ns: int = Field(ge=0)
     query_only: Literal[True] = True
     articulation_target_writes: Literal[0] = 0
@@ -630,6 +634,15 @@ class NonActuatingSweptCollisionV1(FrozenModel):
 
     @model_validator(mode="after")
     def digest(self) -> "NonActuatingSweptCollisionV1":
+        evidence = self.a3_phase_evidence
+        if evidence is not None and (
+            evidence.bound_plan_sha256 != self.bound_plan_sha256
+            or evidence.phase_index != self.phase_index
+            or evidence.phase_sha256 != self.phase_sha256
+            or evidence.path_sha256 != self.path_sha256
+            or evidence.phase_algorithm_sha256 != self.algorithm_sha256
+        ):
+            raise ValueError("A.3 detailed collision evidence crossed plan/phase/path")
         if self.receipt_sha256 != _canonical_model_sha256(self, "receipt_sha256"):
             raise ValueError("swept-collision query digest differs")
         return self
@@ -1577,6 +1590,53 @@ class ExactPlanPreflightV1:
             )
         ):
             raise ExactPlanPreflightRejected("swept-collision coverage is incomplete or crossed")
+
+        a3_contract = config.algorithm_id == "A3_BULLET_CHILD_PAIR_CCD_CONTRACT_V1"
+        a3_formal = config.algorithm_id == "A3_BULLET_CHILD_PAIR_CCD_V1"
+        if expected_segments and (a3_contract or a3_formal):
+            evidence = collision.a3_phase_evidence
+            if evidence is None:
+                raise ExactPlanPreflightRejected(
+                    "A.3 swept collision lacks complete child-pair evidence"
+                )
+            request = evidence.child_pair_request
+            if (
+                evidence.geometry.receipt_sha256 != config.collision_geometry_sha256
+                or request.expected_executor_segment_count != expected_segments
+                or request.numeric_configuration_sha256
+                != evidence.numeric_configuration.configuration_sha256
+                or evidence.native_receipt.request_sha256 != request.request_sha256
+                or evidence.native_receipt.status != "PASS"
+                or evidence.formal_query_evidence_eligible != a3_formal
+                or any(segment.collision_pairs for segment in collision.segments)
+            ):
+                raise ExactPlanPreflightRejected(
+                    "A.3 detailed collision evidence crossed configuration or did not pass"
+                )
+            expected_executor_segments = set(range(expected_segments))
+            if {
+                item.executor_segment_index for item in request.segments
+            } != expected_executor_segments:
+                raise ExactPlanPreflightRejected(
+                    "A.3 detailed collision evidence omitted an executor segment"
+                )
+            subdivision_counts: dict[tuple[int, str, int, str, int], set[int]] = {}
+            for item in request.segments:
+                pair_key = (
+                    item.executor_segment_index,
+                    item.link_a,
+                    item.child_a,
+                    item.link_b,
+                    item.child_b,
+                )
+                subdivision_counts.setdefault(pair_key, set()).add(item.subdivision_index)
+            if not subdivision_counts or any(
+                len(indices) < config.subsamples_per_segment
+                for indices in subdivision_counts.values()
+            ):
+                raise ExactPlanPreflightRejected(
+                    "A.3 detailed collision evidence is below the frozen subdivision floor"
+                )
         robot_root = config.robot_root_path
         for segment in collision.segments:
             for pair in segment.collision_pairs:
