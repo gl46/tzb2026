@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
@@ -12,10 +13,14 @@ from xh_agent.policy.qrm_lite.exact_plan_preflight_v1 import (
 from xh_agent.policy.qrm_lite.formal_split_runner_v2 import canonical_sha256
 from xh_agent.policy.qrm_lite.isaac_active_session_query_v1 import (
     CONTROLLED_PANDA_ARM_MAX_EFFORT,
+    ISAAC_6_0_1_CONTAINER_IMAGE_DIGEST,
+    ISAAC_6_0_1_FRANKA_RUNTIME_TYPE,
+    ISAAC_6_0_1_RIGID_PRIM_RUNTIME_TYPE,
     IsaacActiveSessionQueryConfigurationV1,
     IsaacActiveSessionQueryProviderV1,
     IsaacActiveSessionQueryUnavailable,
     IsaacActiveSessionRuntimeReadoutV1,
+    IsaacObjectActiveSessionRuntimeV1,
 )
 from xh_agent.policy.qrm_lite.lula_query_only_ik_v1 import (
     LULA_JOINT_NAMES,
@@ -24,6 +29,8 @@ from xh_agent.policy.qrm_lite.lula_query_only_ik_v1 import (
 
 
 ROOT = Path(__file__).resolve().parents[2]
+QUERY_ADAPTER_PATH = ROOT / "src/xh_agent/policy/qrm_lite/isaac_active_session_query_v1.py"
+QUERY_ADAPTER_SHA256 = hashlib.sha256(QUERY_ADAPTER_PATH.read_bytes()).hexdigest()
 
 
 def _with_digest(model_type: type[Any], **payload: Any) -> Any:
@@ -119,6 +126,34 @@ class _Runtime:
         )
 
 
+class _Robot:
+    def __init__(self, counters: _Counters, *, mutate: bool = False) -> None:
+        self.counters = counters
+        self.mutate = mutate
+
+    def get_joint_positions(self) -> list[list[float]]:
+        if self.mutate:
+            self.counters.writes += 1
+        return [[0.0, -0.1, 0.2, -0.3, 0.4, -0.5, 0.6, 0.04]]
+
+    @staticmethod
+    def get_dof_max_efforts() -> list[list[float]]:
+        return [[*CONTROLLED_PANDA_ARM_MAX_EFFORT, 20.0]]
+
+
+class _RigidPrim:
+    def __init__(
+        self,
+        position: tuple[float, float, float],
+        orientation: tuple[float, float, float, float],
+    ) -> None:
+        self.position = position
+        self.orientation = orientation
+
+    def get_world_poses(self) -> tuple[list[list[float]], list[list[float]]]:
+        return [list(self.position)], [list(self.orientation)]
+
+
 def _configuration(runtime: _Runtime) -> IsaacActiveSessionQueryConfigurationV1:
     return _with_digest(
         IsaacActiveSessionQueryConfigurationV1,
@@ -126,9 +161,12 @@ def _configuration(runtime: _Runtime) -> IsaacActiveSessionQueryConfigurationV1:
         container_image_digest="sha256:" + "3" * 64,
         runtime_owner_implementation_path="scripts/m2c/formal_isaac_backend_v4.py",
         runtime_owner_implementation_sha256=runtime.implementation_sha256,
+        query_adapter_implementation_sha256=QUERY_ADAPTER_SHA256,
         mutation_counter_implementation_sha256=(
             runtime.mutation_counter_source.implementation_sha256
         ),
+        robot_runtime_type="contract.FakeRobot",
+        rigid_prim_runtime_type="contract.FakeRigidPrim",
         controller_configuration_sha256="4" * 64,
         joint_limit_source_sha256="5" * 64,
         robot_root_path="/World/Robot",
@@ -162,6 +200,38 @@ def _provider(
     return provider, runtime
 
 
+def _object_runtime_configuration(
+    counters: _Counters,
+) -> IsaacActiveSessionQueryConfigurationV1:
+    owner_path = "scripts/m2c/formal_isaac_v4_backend.py"
+    owner_sha = hashlib.sha256((ROOT / owner_path).read_bytes()).hexdigest()
+    return _with_digest(
+        IsaacActiveSessionQueryConfigurationV1,
+        scope="CONTRACT_TEST",
+        container_image_digest="sha256:" + "3" * 64,
+        runtime_owner_implementation_path=owner_path,
+        runtime_owner_implementation_sha256=owner_sha,
+        query_adapter_implementation_sha256=QUERY_ADAPTER_SHA256,
+        mutation_counter_implementation_sha256=counters.implementation_sha256,
+        robot_runtime_type=f"{__name__}._Robot",
+        rigid_prim_runtime_type=f"{__name__}._RigidPrim",
+        controller_configuration_sha256="4" * 64,
+        joint_limit_source_sha256="5" * 64,
+        robot_root_path="/World/Robot",
+        hand_path="/World/Robot/panda_hand",
+        joint_names=LULA_JOINT_NAMES,
+        arm_dof_indices=tuple(range(7)),
+        gripper_dof_index=7,
+        gripper_coordinate_semantics="PER_FINGER_OPENING_M",
+        expected_arm_max_abs_effort=CONTROLLED_PANDA_ARM_MAX_EFFORT,
+        maximum_effort_abs_tolerance=1e-6,
+        observation_clock="HOST_TIME_NS_AFTER_PUBLIC_CAPTURE",
+        query_only_required=True,
+        teacher_allowed=False,
+        privileged_truth_policy_input_allowed=False,
+    )
+
+
 def test_state_is_captured_once_then_bound_to_the_same_plan() -> None:
     provider, runtime = _provider()
     context = "6" * 64
@@ -190,6 +260,78 @@ def test_state_is_captured_once_then_bound_to_the_same_plan() -> None:
         provider.capture_preplan_state(context_sha256=context, after_ns=101)
     with pytest.raises(IsaacActiveSessionQueryUnavailable, match="already bound"):
         provider.read_active_state(plan)
+
+
+def test_concrete_isaac_object_runtime_calls_getters_only() -> None:
+    counters = _Counters()
+    configuration = _object_runtime_configuration(counters)
+    runtime = IsaacObjectActiveSessionRuntimeV1(
+        project_root=ROOT,
+        mode="CONTRACT_TEST",
+        robot=_Robot(counters),
+        hand_prim=_RigidPrim((0.1, 0.2, 0.5), (-1.0, 0.0, 0.0, 0.0)),
+        robot_root_prim=_RigidPrim((-0.35, 0.0, 0.45), (1.0, 0.0, 0.0, 0.0)),
+        mutation_counter_source=counters,
+        now_ns=lambda: 1_000,
+        configuration=configuration,
+    )
+    provider = IsaacActiveSessionQueryProviderV1(
+        project_root=ROOT,
+        mode="CONTRACT_TEST",
+        runtime=runtime,
+        configuration=configuration,
+    )
+
+    readout = provider.capture_preplan_state(context_sha256="7" * 64, after_ns=500)
+
+    assert readout.joint_positions_rad == (0.0, -0.1, 0.2, -0.3, 0.4, -0.5, 0.6)
+    assert readout.gripper_position_m == 0.04
+    assert readout.end_effector_world_wxyz == (1.0, -0.0, -0.0, -0.0)
+    assert readout.arm_max_abs_effort == CONTROLLED_PANDA_ARM_MAX_EFFORT
+    assert readout.observed_at_ns == 1_000
+    assert readout.mutation_counters_before == readout.mutation_counters_after
+
+
+def test_concrete_runtime_detects_getter_side_effect() -> None:
+    counters = _Counters()
+    configuration = _object_runtime_configuration(counters)
+    runtime = IsaacObjectActiveSessionRuntimeV1(
+        project_root=ROOT,
+        mode="CONTRACT_TEST",
+        robot=_Robot(counters, mutate=True),
+        hand_prim=_RigidPrim((0.1, 0.2, 0.5), (1.0, 0.0, 0.0, 0.0)),
+        robot_root_prim=_RigidPrim((-0.35, 0.0, 0.45), (1.0, 0.0, 0.0, 0.0)),
+        mutation_counter_source=counters,
+        now_ns=lambda: 1_000,
+        configuration=configuration,
+    )
+    with pytest.raises(ValueError, match="mutated"):
+        runtime.read_active_session_query_state(
+            context_sha256="8" * 64,
+            configuration=configuration,
+            after_ns=500,
+        )
+
+
+def test_concrete_runtime_does_not_fabricate_observation_time() -> None:
+    counters = _Counters()
+    configuration = _object_runtime_configuration(counters)
+    runtime = IsaacObjectActiveSessionRuntimeV1(
+        project_root=ROOT,
+        mode="CONTRACT_TEST",
+        robot=_Robot(counters),
+        hand_prim=_RigidPrim((0.1, 0.2, 0.5), (1.0, 0.0, 0.0, 0.0)),
+        robot_root_prim=_RigidPrim((-0.35, 0.0, 0.45), (1.0, 0.0, 0.0, 0.0)),
+        mutation_counter_source=counters,
+        now_ns=lambda: 500,
+        configuration=configuration,
+    )
+    with pytest.raises(IsaacActiveSessionQueryUnavailable, match="clock"):
+        runtime.read_active_session_query_state(
+            context_sha256="9" * 64,
+            configuration=configuration,
+            after_ns=500,
+        )
 
 
 def test_context_and_plan_identity_cannot_be_substituted() -> None:
@@ -227,7 +369,12 @@ def test_real_mode_rejects_contract_runtime() -> None:
     runtime = _Runtime(counters)
     config = _configuration(runtime)
     raw = config.model_dump(mode="json")
-    raw["scope"] = "REAL_ISAAC_6_0_1"
+    raw.update(
+        scope="REAL_ISAAC_6_0_1",
+        container_image_digest=ISAAC_6_0_1_CONTAINER_IMAGE_DIGEST,
+        robot_runtime_type=ISAAC_6_0_1_FRANKA_RUNTIME_TYPE,
+        rigid_prim_runtime_type=ISAAC_6_0_1_RIGID_PRIM_RUNTIME_TYPE,
+    )
     raw["configuration_sha256"] = canonical_sha256(
         {key: value for key, value in raw.items() if key != "configuration_sha256"}
     )
@@ -238,6 +385,30 @@ def test_real_mode_rejects_contract_runtime() -> None:
             runtime=runtime,
             configuration=IsaacActiveSessionQueryConfigurationV1.model_validate(raw),
         )
+
+
+def test_real_configuration_requires_startup_introspected_isaac_types() -> None:
+    counters = _Counters()
+    config = _object_runtime_configuration(counters)
+    raw = config.model_dump(mode="json")
+    raw.update(
+        scope="REAL_ISAAC_6_0_1",
+        container_image_digest=ISAAC_6_0_1_CONTAINER_IMAGE_DIGEST,
+        robot_runtime_type=ISAAC_6_0_1_FRANKA_RUNTIME_TYPE,
+        rigid_prim_runtime_type=ISAAC_6_0_1_RIGID_PRIM_RUNTIME_TYPE,
+    )
+    raw["configuration_sha256"] = canonical_sha256(
+        {key: value for key, value in raw.items() if key != "configuration_sha256"}
+    )
+    validated = IsaacActiveSessionQueryConfigurationV1.model_validate(raw)
+    assert validated.robot_runtime_type == ISAAC_6_0_1_FRANKA_RUNTIME_TYPE
+
+    raw["robot_runtime_type"] = "isaacsim.unverified.Franka"
+    raw["configuration_sha256"] = canonical_sha256(
+        {key: value for key, value in raw.items() if key != "configuration_sha256"}
+    )
+    with pytest.raises(ValueError, match="deployment identity"):
+        IsaacActiveSessionQueryConfigurationV1.model_validate(raw)
 
 
 def test_readout_digest_and_quaternion_are_fail_closed() -> None:

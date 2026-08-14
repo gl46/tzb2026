@@ -19,7 +19,7 @@ from __future__ import annotations
 import hashlib
 import math
 from pathlib import Path
-from typing import Any, Literal, Protocol
+from typing import Any, Callable, Literal, Protocol
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -47,6 +47,13 @@ from xh_agent.policy.qrm_lite.offline_wire_auth_v1 import read_regular_file_once
 
 IMPLEMENTATION_REPO_PATH = "src/xh_agent/policy/qrm_lite/isaac_active_session_query_v1.py"
 CONTROLLED_PANDA_ARM_MAX_EFFORT = (87.0, 87.0, 87.0, 87.0, 12.0, 12.0, 12.0)
+ISAAC_6_0_1_CONTAINER_IMAGE_DIGEST = (
+    "sha256:783444c706538aa76cf5126e911ddc5e618779e6105305ad4af4260362a30aa9"
+)
+ISAAC_6_0_1_FRANKA_RUNTIME_TYPE = (
+    "isaacsim.robot.experimental.manipulators.examples.franka.franka.Franka"
+)
+ISAAC_6_0_1_RIGID_PRIM_RUNTIME_TYPE = "isaacsim.core.experimental.prims.impl.rigid_prim.RigidPrim"
 
 
 class _FrozenModel(BaseModel):
@@ -96,7 +103,10 @@ class IsaacActiveSessionQueryConfigurationV1(_FrozenModel):
     container_image_digest: str = Field(pattern=r"^sha256:[0-9a-f]{64}$")
     runtime_owner_implementation_path: str = Field(min_length=1)
     runtime_owner_implementation_sha256: str = Field(pattern=SHA256_PATTERN)
+    query_adapter_implementation_sha256: str = Field(pattern=SHA256_PATTERN)
     mutation_counter_implementation_sha256: str = Field(pattern=SHA256_PATTERN)
+    robot_runtime_type: str = Field(pattern=r"^[A-Za-z_][A-Za-z0-9_.]+$")
+    rigid_prim_runtime_type: str = Field(pattern=r"^[A-Za-z_][A-Za-z0-9_.]+$")
     controller_configuration_sha256: str = Field(pattern=SHA256_PATTERN)
     joint_limit_source_sha256: str = Field(pattern=SHA256_PATTERN)
     robot_root_path: Literal["/World/Robot"] = "/World/Robot"
@@ -123,11 +133,20 @@ class IsaacActiveSessionQueryConfigurationV1(_FrozenModel):
             or self.expected_arm_max_abs_effort != CONTROLLED_PANDA_ARM_MAX_EFFORT
         ):
             raise ValueError("active-session controlled-Panda identity differs")
+        owner_path = Path(self.runtime_owner_implementation_path)
         if (
-            Path(self.runtime_owner_implementation_path).is_absolute()
-            or ".." in Path(self.runtime_owner_implementation_path).parts
+            owner_path.is_absolute()
+            or not owner_path.parts
+            or ".." in owner_path.parts
+            or owner_path.suffix != ".py"
         ):
             raise ValueError("active-session runtime owner path is not repo-relative")
+        if self.scope == "REAL_ISAAC_6_0_1" and (
+            self.container_image_digest != ISAAC_6_0_1_CONTAINER_IMAGE_DIGEST
+            or self.robot_runtime_type != ISAAC_6_0_1_FRANKA_RUNTIME_TYPE
+            or self.rigid_prim_runtime_type != ISAAC_6_0_1_RIGID_PRIM_RUNTIME_TYPE
+        ):
+            raise ValueError("REAL_ISAAC runtime deployment identity differs")
         if self.configuration_sha256 != _model_sha256(self, "configuration_sha256"):
             raise ValueError("active-session query configuration digest differs")
         return self
@@ -217,6 +236,199 @@ class FormalIsaacActiveSessionQueryRuntimeV1(Protocol):
     ) -> IsaacActiveSessionRuntimeReadoutV1: ...
 
 
+def _runtime_type(value: object) -> str:
+    kind = type(value)
+    return f"{kind.__module__}.{kind.__qualname__}"
+
+
+def _sequence(value: Any, *, label: str) -> list[Any]:
+    if hasattr(value, "numpy"):
+        value = value.numpy()
+    if hasattr(value, "tolist"):
+        value = value.tolist()
+    if not isinstance(value, (list, tuple)):
+        raise IsaacActiveSessionQueryUnavailable(f"{label} is not an array")
+    return list(value)
+
+
+def _first_row(value: Any, *, width: int, label: str) -> tuple[float, ...]:
+    outer = _sequence(value, label=label)
+    if len(outer) == 1 and isinstance(outer[0], (list, tuple)):
+        outer = list(outer[0])
+    try:
+        result = tuple(float(item) for item in outer)
+    except (TypeError, ValueError) as exc:
+        raise IsaacActiveSessionQueryUnavailable(f"{label} contains non-numeric data") from exc
+    if len(result) != width or not all(math.isfinite(item) for item in result):
+        raise IsaacActiveSessionQueryUnavailable(f"{label} width/value differs")
+    return result
+
+
+class IsaacObjectActiveSessionRuntimeV1:
+    """Concrete getter-only adapter for one active Isaac articulation.
+
+    The enclosing scene owner increments the shared counter at every target
+    write, physics step, controller command, scene edit, and attachment edit.
+    This adapter calls only articulation/rigid-prim getters.
+    """
+
+    def __init__(
+        self,
+        *,
+        project_root: Path,
+        mode: Literal["CONTRACT_TEST", "REAL_ISAAC"],
+        robot: Any,
+        hand_prim: Any,
+        robot_root_prim: Any,
+        mutation_counter_source: ActiveSessionMutationCounterSourceV1,
+        now_ns: Callable[[], int],
+        configuration: IsaacActiveSessionQueryConfigurationV1,
+    ) -> None:
+        owner_path = project_root.resolve() / configuration.runtime_owner_implementation_path
+        if (
+            hashlib.sha256(read_regular_file_once(owner_path)).hexdigest()
+            != configuration.runtime_owner_implementation_sha256
+        ):
+            raise IsaacActiveSessionQueryUnavailable(
+                "active-session runtime owner source digest differs"
+            )
+        if (
+            _runtime_type(robot) != configuration.robot_runtime_type
+            or _runtime_type(hand_prim) != configuration.rigid_prim_runtime_type
+            or _runtime_type(robot_root_prim) != configuration.rigid_prim_runtime_type
+        ):
+            raise IsaacActiveSessionQueryUnavailable(
+                "active-session Isaac object type identity differs"
+            )
+        if mode == "CONTRACT_TEST":
+            if (
+                configuration.scope != "CONTRACT_TEST"
+                or mutation_counter_source.real_active_session_source
+                or not mutation_counter_source.mocked_counter_source
+            ):
+                raise IsaacActiveSessionQueryUnavailable(
+                    "contract Isaac object runtime received production claims"
+                )
+        elif (
+            configuration.scope != "REAL_ISAAC_6_0_1"
+            or not mutation_counter_source.real_active_session_source
+            or mutation_counter_source.mocked_counter_source
+        ):
+            raise IsaacActiveSessionQueryUnavailable(
+                "REAL_ISAAC object runtime dependency identity differs"
+            )
+        self.implementation_sha256 = configuration.runtime_owner_implementation_sha256
+        self.real_isaac = mode == "REAL_ISAAC"
+        self.mocked_runtime = mode == "CONTRACT_TEST"
+        self.mutation_counter_source = mutation_counter_source
+        self.robot = robot
+        self.hand_prim = hand_prim
+        self.robot_root_prim = robot_root_prim
+        self.now_ns = now_ns
+
+    @staticmethod
+    def _world_pose(
+        prim: Any,
+        *,
+        label: str,
+    ) -> tuple[tuple[float, ...], tuple[float, ...]]:
+        getter = getattr(prim, "get_world_poses", None)
+        if not callable(getter):
+            raise IsaacActiveSessionQueryUnavailable(f"{label} lacks get_world_poses")
+        positions, orientations = getter()
+        return (
+            _first_row(positions, width=3, label=f"{label} world position"),
+            _canonical_quaternion(
+                _first_row(
+                    orientations,
+                    width=4,
+                    label=f"{label} world orientation",
+                )
+            ),
+        )
+
+    def read_active_session_query_state(
+        self,
+        *,
+        context_sha256: str,
+        configuration: IsaacActiveSessionQueryConfigurationV1,
+        after_ns: int,
+    ) -> IsaacActiveSessionRuntimeReadoutV1:
+        if configuration.runtime_owner_implementation_sha256 != self.implementation_sha256:
+            raise IsaacActiveSessionQueryUnavailable(
+                "active-session runtime received a different configuration"
+            )
+        before = self.mutation_counter_source.snapshot_mutation_counters()
+        joint_getter = getattr(self.robot, "get_joint_positions", None)
+        effort_getter = getattr(self.robot, "get_dof_max_efforts", None)
+        if not callable(joint_getter) or not callable(effort_getter):
+            raise IsaacActiveSessionQueryUnavailable(
+                "active-session articulation query API is incomplete"
+            )
+        joints = _first_row(
+            joint_getter(),
+            width=8,
+            label="active-session articulation positions",
+        )
+        efforts = _first_row(
+            effort_getter(),
+            width=8,
+            label="active-session articulation maximum efforts",
+        )
+        hand_position, hand_orientation = self._world_pose(
+            self.hand_prim,
+            label="active-session hand prim",
+        )
+        base_position, base_orientation = self._world_pose(
+            self.robot_root_prim,
+            label="active-session robot-root prim",
+        )
+        observed_at_ns = int(self.now_ns())
+        if observed_at_ns <= after_ns:
+            raise IsaacActiveSessionQueryUnavailable(
+                "active-session observation clock did not advance past capture"
+            )
+        after = self.mutation_counter_source.snapshot_mutation_counters()
+        state_payload = {
+            "joint_positions": joints[:7],
+            "end_effector_world_m": hand_position,
+            "end_effector_world_wxyz": hand_orientation,
+            "gripper_position_m": joints[7],
+        }
+        payload: dict[str, Any] = {
+            "schema_version": "IsaacActiveSessionRuntimeReadoutV1",
+            "context_sha256": context_sha256,
+            "configuration_sha256": configuration.configuration_sha256,
+            "runtime_owner_implementation_sha256": self.implementation_sha256,
+            "joint_names": LULA_JOINT_NAMES,
+            "joint_positions_rad": joints[:7],
+            "gripper_position_m": joints[7],
+            "end_effector_world_m": hand_position,
+            "end_effector_world_wxyz": hand_orientation,
+            "robot_base_world_m": base_position,
+            "robot_base_world_wxyz": base_orientation,
+            "arm_max_abs_effort": efforts[:7],
+            "observed_at_ns": observed_at_ns,
+            "real_isaac": self.real_isaac,
+            "mocked_runtime": self.mocked_runtime,
+            "mutation_counters_before": before,
+            "mutation_counters_after": after,
+            "query_only": True,
+            "articulation_target_writes": 0,
+            "simulation_steps": 0,
+            "scene_mutations": 0,
+            "controller_commands": 0,
+            "attachment_mutations": 0,
+            "teacher_used": False,
+            "privileged_truth_policy_input": False,
+            "state_sha256": canonical_non_actuating_state_sha256(state_payload),
+        }
+        return IsaacActiveSessionRuntimeReadoutV1(
+            **payload,
+            receipt_sha256=canonical_sha256(payload),
+        )
+
+
 class IsaacActiveSessionQueryProviderV1:
     """Single-use state source and conservative effort-clamp provider."""
 
@@ -249,6 +461,7 @@ class IsaacActiveSessionQueryProviderV1:
         expected_scope = "REAL_ISAAC_6_0_1" if mode == "REAL_ISAAC" else "CONTRACT_TEST"
         if (
             configuration.scope != expected_scope
+            or configuration.query_adapter_implementation_sha256 != self.implementation_sha256
             or runtime.implementation_sha256 != configuration.runtime_owner_implementation_sha256
             or runtime.mutation_counter_source.implementation_sha256
             != configuration.mutation_counter_implementation_sha256
