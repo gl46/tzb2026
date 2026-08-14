@@ -20,6 +20,7 @@ from xh_agent.perception.public_track_associator_v2 import (
     PUBLIC_TRACK_ASSOCIATION_GATE_M,
     PUBLIC_TRACK_AMBIGUITY_MARGIN_M,
     PUBLIC_TRACK_COST_QUANTUM_M,
+    PUBLIC_RAW_DETECTION_CAPACITY_REVISION,
     PUBLIC_TRACK_MAX_CONSECUTIVE_UNMATCHED_CAPTURES,
     PUBLIC_TRACK_MAX_CURRENT_DETECTIONS,
     LastPhysicallyExecutedPublicSkillV2,
@@ -243,6 +244,8 @@ class PathBlockedRawPublicObservationV4(StrictModel):
 
 
 class M2CV4RawPublicAssociationCaptureV1(StrictModel):
+    """Historical ADR-0024 evidence schema; never upgraded in place."""
+
     schema_version: Literal["M2CV4RawPublicAssociationCaptureV1"]
     timestamp_ns: int = Field(gt=0)
     camera_frame: str = Field(min_length=1)
@@ -259,6 +262,41 @@ class M2CV4RawPublicAssociationCaptureV1(StrictModel):
 
     @model_validator(mode="after")
     def raw_public_fields_are_aligned(self) -> "M2CV4RawPublicAssociationCaptureV1":
+        if any(item.timestamp_ns != self.timestamp_ns for item in self.detections):
+            raise ValueError("V4 raw detections differ from capture timestamp")
+        if any(item.frame_id != self.camera_frame for item in self.detections):
+            raise ValueError("V4 raw detections differ from capture frame")
+        timestamps = [item.timestamp_ns for item in self.proprioception_interval]
+        if timestamps[-1] != self.timestamp_ns or any(
+            after <= before for before, after in zip(timestamps, timestamps[1:])
+        ):
+            raise ValueError("V4 raw proprioception interval is not ordered to capture")
+        if any(item.world_frame != self.world_frame for item in self.proprioception_interval):
+            raise ValueError("V4 raw proprioception frame differs")
+        return self
+
+
+class M2CV4RawPublicAssociationCaptureV2(StrictModel):
+    """ADR-0025 raw public capture; final candidate K remains eight."""
+
+    schema_version: Literal["M2CV4RawPublicAssociationCaptureV2"]
+    raw_detection_capacity_revision: Literal["M2C_V4_RAW_PUBLIC_DETECTIONS_32_V1"]
+    max_raw_public_detections: Literal[32]
+    timestamp_ns: int = Field(gt=0)
+    camera_frame: str = Field(min_length=1)
+    world_frame: str = Field(min_length=1)
+    position_units: Literal["m"]
+    camera_to_world_row_major: list[float] = Field(min_length=16, max_length=16)
+    detections: list[PublicRGBDDetectionV2] = Field(max_length=PUBLIC_TRACK_MAX_CURRENT_DETECTIONS)
+    proprioception_interval: list[PublicRobotProprioceptionV2] = Field(min_length=1)
+    last_physically_executed_public_skill: LastPhysicallyExecutedPublicSkillV2 | None
+    rgb_uri: str = Field(pattern=r"^dataset://[^\s]+$")
+    depth_uri: str = Field(pattern=r"^dataset://[^\s]+$")
+    rgb_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    depth_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+
+    @model_validator(mode="after")
+    def raw_public_fields_are_aligned(self) -> "M2CV4RawPublicAssociationCaptureV2":
         if any(item.timestamp_ns != self.timestamp_ns for item in self.detections):
             raise ValueError("V4 raw detections differ from capture timestamp")
         if any(item.frame_id != self.camera_frame for item in self.detections):
@@ -447,7 +485,7 @@ def host_replay_probe_chain_v4(
     """Independently turn raw public detections into exact V4 observations."""
 
     chain = M2CPathBlockedRawProbeChainV4.model_validate(raw_chain)
-    captures = [M2CV4RawPublicAssociationCaptureV1.model_validate(item) for item in raw_captures]
+    captures = [M2CV4RawPublicAssociationCaptureV2.model_validate(item) for item in raw_captures]
     if len(chain.steps) != 8 or len(captures) != 8:
         raise ValueError("V4 host replay requires exactly eight steps and captures")
     if [step.decision_index for step in chain.steps] != list(range(8)):
@@ -475,6 +513,7 @@ def host_replay_probe_chain_v4(
         "ambiguity_margin_m": PUBLIC_TRACK_AMBIGUITY_MARGIN_M,
         "cost_quantum_m": PUBLIC_TRACK_COST_QUANTUM_M,
         "max_consecutive_unmatched_captures": (PUBLIC_TRACK_MAX_CONSECUTIVE_UNMATCHED_CAPTURES),
+        "raw_detection_capacity_revision": PUBLIC_RAW_DETECTION_CAPACITY_REVISION,
         "max_current_detections": PUBLIC_TRACK_MAX_CURRENT_DETECTIONS,
     }
     deployment = _self_hashed(

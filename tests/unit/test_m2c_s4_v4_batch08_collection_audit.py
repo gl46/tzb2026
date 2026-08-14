@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import hashlib
 import json
 from pathlib import Path
 
@@ -60,3 +61,14 @@ def test_build_report_rejects_empty_evidence(tmp_path: Path) -> None:
     audit = _load_module()
     with pytest.raises(FileNotFoundError):
         audit.build_report(evidence_root=tmp_path)
+
+
+def test_historical_contract_replay_reads_preregistered_git_blob() -> None:
+    audit = _load_module()
+    contract = audit._read_git_blob(
+        project_root=ROOT,
+        commit=audit.PREREG_COMMIT,
+        relative_path=audit.COLLECTION_CONTRACT_PATH,
+    )
+    assert hashlib.sha256(contract).hexdigest() == audit.COLLECTION_CONTRACT_SHA256
+    assert contract != (ROOT / audit.COLLECTION_CONTRACT_PATH).read_bytes()

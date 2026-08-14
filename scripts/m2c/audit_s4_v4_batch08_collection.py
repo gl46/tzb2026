@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import os
 from pathlib import Path, PurePosixPath
+import subprocess
 from typing import Any, Mapping
 
 from pydantic import ValidationError
@@ -51,6 +52,19 @@ EXPECTED_SKILLS = [
 
 class Batch08AuditError(Batch04AuditError):
     """Batch-08 bytes do not prove the bounded mixed outcome."""
+
+
+def _read_git_blob(*, project_root: Path, commit: str, relative_path: str) -> bytes:
+    """Read the immutable historical contract used by the preregistered run."""
+    result = subprocess.run(
+        ["git", "show", f"{commit}:{relative_path}"],
+        cwd=project_root,
+        check=False,
+        capture_output=True,
+    )
+    if result.returncode != 0:
+        raise Batch08AuditError("Batch-08 historical collection contract is unavailable from Git")
+    return result.stdout
 
 
 def _require_false_boundary(value: object, *, path: str = "root") -> None:
@@ -337,7 +351,11 @@ def build_report(*, evidence_root: Path, project_root: Path = ROOT) -> dict[str,
     selected = prereg.get("selected_keys")
     if not isinstance(selected, list) or len(selected) != 3:
         raise Batch08AuditError("Batch-08 preregistration does not select exactly three keys")
-    contract_bytes = read_regular_file_once(project_root / COLLECTION_CONTRACT_PATH)
+    contract_bytes = _read_git_blob(
+        project_root=project_root,
+        commit=PREREG_COMMIT,
+        relative_path=COLLECTION_CONTRACT_PATH,
+    )
     if sha256_bytes(contract_bytes) != COLLECTION_CONTRACT_SHA256:
         raise Batch08AuditError("Batch-08 collection contract bytes changed")
     if contract_bytes.count(b"detections: list[PublicRGBDDetectionV2] = Field(max_length=8)") != 1:

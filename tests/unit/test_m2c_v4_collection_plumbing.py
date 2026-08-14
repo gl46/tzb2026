@@ -16,6 +16,7 @@ from m2c.package_path_blocked_collection import package_collection
 from m2c import run_path_blocked_collection_worker as worker
 from m2c.run_path_blocked_collection_worker import parse_args
 from xh_agent.policy.qrm_lite.path_blocked_collection_v4 import (
+    M2CV4RawPublicAssociationCaptureV2,
     M2CS4V4TrainingKeyManifestV1,
     host_replay_probe_chain_v4,
 )
@@ -76,6 +77,8 @@ def test_v4_derived_probe_is_raw_only_and_compiles() -> None:
     compile(source, "derived-v4.py", "exec")
     assert '"m2c_v4_raw_association_captures"' in source
     assert '"schema_version": "M2CPathBlockedRawProbeChainV4"' in source
+    assert '"schema_version": "M2CV4RawPublicAssociationCaptureV2"' in source
+    assert '"max_raw_public_detections": 32' in source
     assert "build_public_track_candidates_v3" not in source
     assert "M2C_V4_RAW_ASSOCIATION_CAPTURES = []" in source
     assert "bind_consumed_claim_to_raw_session" in source
@@ -314,8 +317,12 @@ def _manifest() -> M2CS4V4TrainingKeyManifestV1:
     payload = build_manifest()
     import xh_agent.policy.qrm_lite.path_blocked_collection_v4 as collection
 
-    collection.V4_MANIFEST_CONTENT_SHA256 = str(payload["manifest_sha256"])
-    return M2CS4V4TrainingKeyManifestV1.model_validate(payload)
+    frozen = collection.V4_MANIFEST_CONTENT_SHA256
+    try:
+        collection.V4_MANIFEST_CONTENT_SHA256 = str(payload["manifest_sha256"])
+        return M2CS4V4TrainingKeyManifestV1.model_validate(payload)
+    finally:
+        collection.V4_MANIFEST_CONTENT_SHA256 = frozen
 
 
 def _raw_bundle() -> tuple[dict[str, object], list[dict[str, object]]]:
@@ -359,7 +366,9 @@ def _raw_bundle() -> tuple[dict[str, object], list[dict[str, object]]]:
                 }
             )
         capture: dict[str, object] = {
-            "schema_version": "M2CV4RawPublicAssociationCaptureV1",
+            "schema_version": "M2CV4RawPublicAssociationCaptureV2",
+            "raw_detection_capacity_revision": "M2C_V4_RAW_PUBLIC_DETECTIONS_32_V1",
+            "max_raw_public_detections": 32,
             "timestamp_ns": timestamp,
             "camera_frame": "m2b_policy_rgbd_optical",
             "world_frame": "world",
@@ -506,6 +515,30 @@ def _raw_bundle() -> tuple[dict[str, object], list[dict[str, object]]]:
         "privileged_truth_policy_input": False,
     }
     return chain, captures
+
+
+def test_v4_raw_capacity_is_32_and_candidate_k_stays_8() -> None:
+    _, captures = _raw_bundle()
+    raw = copy.deepcopy(captures[0])
+    prototype = raw["detections"][0]
+    raw["detections"] = [
+        {
+            **prototype,
+            "position_3d": [float(index) * 0.001, 0.0, 0.5],
+        }
+        for index in range(32)
+    ]
+    parsed = M2CV4RawPublicAssociationCaptureV2.model_validate(raw)
+    assert parsed.max_raw_public_detections == 32
+    assert parsed.raw_detection_capacity_revision == ("M2C_V4_RAW_PUBLIC_DETECTIONS_32_V1")
+    raw["detections"].append(
+        {
+            **prototype,
+            "position_3d": [0.1, 0.0, 0.5],
+        }
+    )
+    with pytest.raises(ValueError, match="at most 32 items"):
+        M2CV4RawPublicAssociationCaptureV2.model_validate(raw)
 
 
 def test_v4_host_replay_happy_and_history_tamper() -> None:

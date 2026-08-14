@@ -192,7 +192,8 @@ def deployment() -> PublicAssociationDeploymentBindingV2:
         "ambiguity_margin_m": 0.02,
         "cost_quantum_m": 0.000001,
         "max_consecutive_unmatched_captures": 2,
-        "max_current_detections": 8,
+        "raw_detection_capacity_revision": "M2C_V4_RAW_PUBLIC_DETECTIONS_32_V1",
+        "max_current_detections": 32,
     }
     payload["deployment_binding_sha256"] = canonical_sha256(payload)
     return PublicAssociationDeploymentBindingV2.model_validate(payload)
@@ -338,6 +339,8 @@ def checkpoint_binding(
         "architecture_revision": "M2C_Q012_V4",
         "public_observation_revision": "PathBlockedPublicObservationV4",
         "public_track_associator_revision": "PublicTrackAssociatorV2",
+        "raw_detection_capacity_revision": "M2C_V4_RAW_PUBLIC_DETECTIONS_32_V1",
+        "max_raw_public_detections": 32,
         "public_track_candidate_revision": "PublicTrackCandidateV4",
         "public_track_candidate_count": 8,
         "pointer_class_count": 9,
@@ -691,6 +694,8 @@ def test_checkpoint_guard_rejects_cross_revision_symlink_and_hardlink(tmp_path: 
         ("architecture_revision", "M2C_Q012_V3"),
         ("public_observation_revision", "PathBlockedPublicObservationV3"),
         ("public_track_associator_revision", "PublicTrackAssociator"),
+        ("raw_detection_capacity_revision", "M2C_V4_RAW_PUBLIC_DETECTIONS_8_V0"),
+        ("max_raw_public_detections", 8),
         ("public_track_candidate_revision", "PublicTrackCandidateV3"),
         ("public_track_candidate_count", 9),
         ("pointer_class_count", 8),

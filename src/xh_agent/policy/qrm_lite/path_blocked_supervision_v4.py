@@ -23,6 +23,7 @@ import numpy as np
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from xh_agent.perception.public_track_associator_v2 import (
+    PUBLIC_TRACK_MAX_CURRENT_DETECTIONS,
     PublicAssociatedTrackV2,
     PublicAssociationCaptureV2,
     PublicAssociationDeploymentBindingV2,
@@ -86,7 +87,9 @@ class PublicTrackCandidatePayloadV4(_StrictModel):
 class PublicAssociationReplayFrameV4(_StrictModel):
     schema_version: Literal["PublicAssociationReplayFrameV4"] = "PublicAssociationReplayFrameV4"
     capture: PublicAssociationCaptureV2
-    associated_tracks: list[PublicAssociatedTrackV2] = Field(max_length=8)
+    associated_tracks: list[PublicAssociatedTrackV2] = Field(
+        max_length=PUBLIC_TRACK_MAX_CURRENT_DETECTIONS
+    )
     associated_tracks_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
 
     @model_validator(mode="after")
@@ -115,7 +118,10 @@ class PathBlockedPublicObservationV4(_StrictModel):
     position_units: Literal["m"]
     calibration_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
     association_history: list[PublicAssociationReplayFrameV4] = Field(min_length=1)
-    perception_tracks: list[PerceptionTrackV1] = Field(min_length=1, max_length=8)
+    perception_tracks: list[PerceptionTrackV1] = Field(
+        min_length=1,
+        max_length=PUBLIC_TRACK_MAX_CURRENT_DETECTIONS,
+    )
     declared_target_attribute: str = Field(min_length=1, pattern=r"^[a-z0-9_-]+$")
     candidate_payload: PublicTrackCandidatePayloadV4
     candidate_payload_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
@@ -182,6 +188,8 @@ class M2CQ012CheckpointBindingV4(_StrictModel):
     architecture_revision: Literal["M2C_Q012_V4"]
     public_observation_revision: Literal["PathBlockedPublicObservationV4"]
     public_track_associator_revision: Literal["PublicTrackAssociatorV2"]
+    raw_detection_capacity_revision: Literal["M2C_V4_RAW_PUBLIC_DETECTIONS_32_V1"]
+    max_raw_public_detections: Literal[32]
     public_track_candidate_revision: Literal["PublicTrackCandidateV4"]
     public_track_candidate_count: Literal[8]
     pointer_class_count: Literal[9]

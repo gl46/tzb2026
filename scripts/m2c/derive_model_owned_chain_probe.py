@@ -1071,7 +1071,9 @@ def _m2c_capture(
             ).model_dump(mode="json")
         )
     raw_capture = {
-        "schema_version": "M2CV4RawPublicAssociationCaptureV1",
+        "schema_version": "M2CV4RawPublicAssociationCaptureV2",
+        "raw_detection_capacity_revision": "M2C_V4_RAW_PUBLIC_DETECTIONS_32_V1",
+        "max_raw_public_detections": 32,
         "timestamp_ns": timestamp_ns,
         "camera_frame": "m2b_policy_rgbd_optical",
         "world_frame": "world",

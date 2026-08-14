@@ -1044,6 +1044,8 @@ def checkpoint_binding_for_numpy_heads_v4(
         "architecture_revision": "M2C_Q012_V4",
         "public_observation_revision": "PathBlockedPublicObservationV4",
         "public_track_associator_revision": "PublicTrackAssociatorV2",
+        "raw_detection_capacity_revision": "M2C_V4_RAW_PUBLIC_DETECTIONS_32_V1",
+        "max_raw_public_detections": 32,
         "public_track_candidate_revision": "PublicTrackCandidateV4",
         "public_track_candidate_count": 8,
         "pointer_class_count": 9,

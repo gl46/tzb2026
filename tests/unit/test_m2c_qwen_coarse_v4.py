@@ -23,10 +23,11 @@ from m2c.qwen_coarse_v4 import (
     validate_key_manifests_v4,
     write_bundle_manifest_v4,
 )
-from test_m2c_v4_collection_plumbing import _manifest, _raw_bundle
+from test_m2c_v4_collection_plumbing import _raw_bundle
 from xh_agent.policy.qrm_lite.path_blocked_collection_v4 import (
     build_path_blocked_supervised_dataset_v4,
     host_replay_probe_chain_v4,
+    load_v4_training_manifest,
     package_probe_chain_v4,
 )
 from xh_agent.policy.qrm_lite.path_blocked_supervision_v2 import (
@@ -78,7 +79,7 @@ def _s6_manifest() -> FrozenS6ExclusionManifestV2:
 
 
 def _package(tmp_path: Path) -> Path:
-    manifest = _manifest()
+    manifest = load_v4_training_manifest(TRAINING_KEYS)
     key = manifest.training_keys[0]
     chain, captures = _raw_bundle()
     chain.update(

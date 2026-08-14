@@ -186,7 +186,8 @@ def deployment() -> PublicAssociationDeploymentBindingV2:
         "ambiguity_margin_m": 0.02,
         "cost_quantum_m": 0.000001,
         "max_consecutive_unmatched_captures": 2,
-        "max_current_detections": 8,
+        "raw_detection_capacity_revision": "M2C_V4_RAW_PUBLIC_DETECTIONS_32_V1",
+        "max_current_detections": 32,
     }
     payload["deployment_binding_sha256"] = canonical(payload)
     return PublicAssociationDeploymentBindingV2.model_validate(payload)
@@ -442,8 +443,9 @@ def test_two_unmatched_captures_expire_and_never_emit_prior() -> None:
 
 
 def test_detection_bound_and_forbidden_fields_fail_closed() -> None:
-    with pytest.raises(ValidationError, match="at most 8"):
-        make_capture(10, [float(index) for index in range(9)])
+    assert len(make_capture(10, [float(index) for index in range(32)]).detections) == 32
+    with pytest.raises(ValidationError, match="at most 32"):
+        make_capture(10, [float(index) for index in range(33)])
     payload = make_capture(10, [0.0]).model_dump(mode="python")
     payload["task_target_track_id"] = "track-secret"
     with pytest.raises(ValidationError, match="Extra inputs are not permitted"):
