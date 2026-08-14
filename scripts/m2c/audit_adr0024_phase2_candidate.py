@@ -34,6 +34,7 @@ ENTRY_GATE_PATH = Path("src/xh_agent/policy/qrm_lite/s4_entry_gate.py")
 FORMAL_V2_RUNNER_PATH = Path("src/xh_agent/policy/qrm_lite/formal_split_runner_v2.py")
 FORMAL_V4_HOST_PATH = Path("src/xh_agent/policy/qrm_lite/formal_split_host_v4.py")
 FORMAL_V4_CLI_PATH = Path("scripts/m2c/run_formal_model_owned_chain_v4.py")
+FORMAL_V4_SERVICE_PATH = Path("scripts/m2c/serve_formal_isaac_endpoint_v4.py")
 ADR_0024_PATH = Path("docs/decisions/ADR-0024-m2c-s4-unblock-directive.md")
 BINDING_NAMES = (
     "FORMAL_PHYSICAL_RUNNER_BINDING",
@@ -45,7 +46,7 @@ EXPECTED_BLOCKERS = (
     "EIGHT_SKILL_REAL_ISAAC_PHASE_VALIDATION_MISSING",
     "REAL_BOUND_PLAN_SYNTHESIS_BACKEND_NOT_BOUND",
     "REAL_ISAAC_EPISODE_LIFECYCLE_AND_CAPTURE_SOURCE_NOT_BOUND",
-    "REAL_FORMAL_V4_ISAAC_HTTP_SERVICE_NOT_BOUND",
+    "REAL_FORMAL_V4_ISAAC_HTTP_SERVICE_BACKEND_FACTORY_NOT_BOUND",
     "IMMUTABLE_DEPLOYMENT_COMMIT_CONTAINER_IMPORT_ASSET_CLOSURE_MISSING",
     "REAL_EXACT_PLAN_ISAAC_EXECUTOR_DEPLOYMENT_BINDING_MISSING",
     "REAL_QUERY_ONLY_FK_PROVIDER_DEPLOYMENT_BINDING_MISSING",
@@ -330,6 +331,27 @@ def build_audit(project_root: Path) -> dict[str, Any]:
     ):
         if token not in formal_v4_cli:
             raise CandidateAuditFailure(f"formal V4 CLI contract omitted marker: {token}")
+    formal_v4_service = read_regular_file_once(root / FORMAL_V4_SERVICE_PATH).decode("utf-8")
+    for token in (
+        "FormalIsaacEndpointStateMachineV4",
+        "FORMAL_V4_HTTP_SERVICE_SHELL_ONLY_BACKEND_FACTORY_UNBOUND",
+        "TERMINAL_FAILURE",
+        "require_pre_freeze",
+    ):
+        if token not in formal_v4_service:
+            raise CandidateAuditFailure(f"formal V4 service shell omitted marker: {token}")
+    service_tree = ast.parse(formal_v4_service)
+    factory_bindings = [
+        node.value
+        for node in service_tree.body
+        if isinstance(node, ast.AnnAssign)
+        and isinstance(node.target, ast.Name)
+        and node.target.id == "FORMAL_V4_BACKEND_FACTORY_BINDING"
+    ]
+    if len(factory_bindings) != 1 or not (
+        isinstance(factory_bindings[0], ast.Constant) and factory_bindings[0].value is None
+    ):
+        raise CandidateAuditFailure("formal V4 service backend factory is not literal None")
     closure = inspect_a3_production_closure_v1(project_root=root)
     if closure.status != "NOT_AVAILABLE" or closure.formal_execution_eligible:
         raise CandidateAuditFailure("local A.3 closure unexpectedly claimed production readiness")

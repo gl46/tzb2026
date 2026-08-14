@@ -1,7 +1,7 @@
 # M2C S4 current blockers
 
 - Status: **BLOCKED_UNMEASURED_RAW_SCHEMA_AND_A3_STATIC_COLLISION**
-- Checked HEAD: `b942c2e0d68a9203c38f9c7c30f74f2b08e9b149`
+- Checked HEAD: `79571b84d7e33b52779030ce56e6e18022c0cd3f`
 - Q-A: **PASSED**
 - Q-B: **UNMEASURED**
 - `pure_model_success_episodes`: **null**, not zero
@@ -63,9 +63,9 @@ to force a pass.
 Consequently the Phase-2 candidate addendum remains
 `CONTRACT_SMOKE_ONLY_BLOCKED_UNMEASURED`. It is not physical evidence and does
 not authorize formal execution. The four production bindings remain null.
-The V4 host-orchestration/evidence contract now exists and preserves terminal
-`NO_PHYSICAL_EXECUTION` without B0 substitution, but no real V4 Isaac HTTP
-service is deployment-bound. Besides the static-state rejection, real
+The V4 host-orchestration/evidence contract and HTTP service shell now exist
+and preserve terminal `NO_PHYSICAL_EXECUTION` without B0 substitution. The
+service's production backend factory remains deliberately unbound. Besides the static-state rejection, real
 eight-skill phase receipts, immutable deployment/import closure, the real
 exact-plan Isaac executor, the deployed read-only FK provider, and real-session
 endpoint/HMAC evidence remain missing.

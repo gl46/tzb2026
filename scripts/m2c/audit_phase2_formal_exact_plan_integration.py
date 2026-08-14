@@ -39,6 +39,7 @@ SOURCE_PATHS = (
     Path("src/xh_agent/policy/qrm_lite/formal_split_runner_v4.py"),
     Path("src/xh_agent/policy/qrm_lite/formal_split_host_v4.py"),
     Path("scripts/m2c/run_formal_model_owned_chain_v4.py"),
+    Path("scripts/m2c/serve_formal_isaac_endpoint_v4.py"),
     Path("src/xh_agent/policy/qrm_lite/formal_isaac_endpoint_v4.py"),
     Path("src/xh_agent/policy/qrm_lite/formal_exact_plan_runtime_v1.py"),
     Path("src/xh_agent/policy/qrm_lite/formal_bound_plan_provider_v1.py"),
@@ -183,6 +184,7 @@ def build_report() -> dict[str, Any]:
     endpoint_v4_path = Path("src/xh_agent/policy/qrm_lite/formal_isaac_endpoint_v4.py")
     backend_v4_path = Path("src/xh_agent/policy/qrm_lite/formal_isaac_backend_v4.py")
     host_v4_path = Path("src/xh_agent/policy/qrm_lite/formal_split_host_v4.py")
+    service_v4_path = Path("scripts/m2c/serve_formal_isaac_endpoint_v4.py")
     bound_provider_path = Path("src/xh_agent/policy/qrm_lite/formal_bound_plan_provider_v1.py")
     bundle_path = Path("src/xh_agent/policy/qrm_lite/exact_plan_primitive_bundle_v1.py")
     entry_path = Path("src/xh_agent/policy/qrm_lite/s4_entry_gate.py")
@@ -190,6 +192,7 @@ def build_report() -> dict[str, Any]:
     endpoint_v4 = _module(endpoint_v4_path)
     backend_v4 = _module(backend_v4_path)
     host_v4 = _module(host_v4_path)
+    service_v4 = _module(service_v4_path)
     bound_provider = _module(bound_provider_path)
     legacy_backend = _module(backend_path)
     bundle = _module(bundle_path)
@@ -252,6 +255,23 @@ def build_report() -> dict[str, Any]:
         "b0_runtime_fallback_present",
     }.issubset(host_evidence_fields):
         raise AuditError("formal V4 host evidence schema lost terminal replay fields")
+    service_classes = {item.name for item in service_v4.body if isinstance(item, ast.ClassDef)}
+    service_functions = {item.name for item in service_v4.body if isinstance(item, ast.FunctionDef)}
+    if not {"_Handler", "_Server"}.issubset(service_classes) or not {
+        "validate_deployment",
+        "main",
+    }.issubset(service_functions):
+        raise AuditError("formal V4 HTTP service shell is incomplete")
+    service_factory_none = any(
+        isinstance(item, ast.AnnAssign)
+        and isinstance(item.target, ast.Name)
+        and item.target.id == "FORMAL_V4_BACKEND_FACTORY_BINDING"
+        and isinstance(item.value, ast.Constant)
+        and item.value.value is None
+        for item in service_v4.body
+    )
+    if not service_factory_none:
+        raise AuditError("formal V4 HTTP service backend factory is not fail-closed")
     provider_methods = _class_methods(bound_provider, "FormalBoundExactPlanProviderV1")
     if not {"_validate_production_deployment", "build_bound_plan"}.issubset(provider_methods):
         raise AuditError("formal V4 bound-plan provider contract is incomplete")
@@ -305,6 +325,7 @@ def build_report() -> dict[str, Any]:
             "formal_v4_endpoint_state_machine_active": True,
             "formal_v4_backend_coordinator_active": runtime_bridge_active,
             "formal_v4_host_orchestrator_active": True,
+            "formal_v4_http_service_shell_active": True,
             "replayable_public_observation_provider_active": True,
             "typed_non_actuating_gate_rejection_only": True,
             "partial_failure_actuation_accounting_exact": True,
@@ -329,6 +350,8 @@ def build_report() -> dict[str, Any]:
             "v4_exact_plan_runtime_prepare_and_execute_active": True,
             "v4_bound_plan_provider_contract_active": True,
             "v4_host_orchestrator_contract_active": True,
+            "v4_http_service_shell_active": True,
+            "v4_http_service_backend_factory_bound": False,
             "legacy_v2_construct_exact_plan_is_rejection_stub": legacy_construct_stub,
             "legacy_v2_execute_exact_plan_is_rejection_stub": legacy_execute_stub,
             "production_bound_plan_constructor_calls": constructor_calls,
@@ -342,20 +365,20 @@ def build_report() -> dict[str, Any]:
         "blockers": [
             "REAL_BOUND_PLAN_SYNTHESIS_BACKEND_NOT_BOUND",
             "REAL_ISAAC_EPISODE_LIFECYCLE_AND_CAPTURE_SOURCE_NOT_BOUND",
-            "REAL_FORMAL_V4_ISAAC_HTTP_SERVICE_NOT_BOUND",
+            "REAL_FORMAL_V4_ISAAC_HTTP_SERVICE_BACKEND_FACTORY_NOT_BOUND",
             "PLAN_SPECIFIC_A3_PREFLIGHT_AND_EIGHT_SKILL_EXECUTION_UNMEASURED",
             "PHASE2_READINESS_VERIFIER_ADR0024_V2_MIGRATION_INCOMPLETE",
             "TWO_ACTIVE_PRODUCTION_BINDINGS_UNSET",
         ],
         "verification": {
             "command": ".venv/bin/pytest -q tests/unit/test_m2c_*.py",
-            "passed": 798,
+            "passed": 803,
             "failed": 0,
         },
         "next_implementation_order": [
             "BIND_REAL_QUERY_ONLY_PLAN_SYNTHESIS_BACKEND",
             "BIND_REAL_ISAAC_EPISODE_LIFECYCLE_AND_PUBLIC_CAPTURE_SOURCE",
-            "BIND_REAL_FORMAL_V4_ISAAC_HTTP_SERVICE",
+            "BIND_REAL_FORMAL_V4_ISAAC_HTTP_SERVICE_BACKEND_FACTORY",
             "REPLAY_PLAN_SPECIFIC_A3_PREFLIGHT_FOR_ALL_EIGHT_SKILLS",
             "MIGRATE_PHASE2_READINESS_TO_ADR0024_AND_SET_ONLY_TWO_ACTIVE_BINDINGS",
         ],
