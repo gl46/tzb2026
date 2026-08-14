@@ -113,6 +113,7 @@
     "formal_isaac_scene_query_sources_wired": true,
     "formal_isaac_post_stability_mutation_counter_active": true,
     "attached_object_phase_geometry_contract_active": true,
+    "attached_object_phase_geometry_derivation_evidence_replay_active": true,
     "complete_scene_environment_swept_collision_provider_contract_active": true,
     "contract_scene_collision_primitive_count": 8,
     "contract_scene_dynamic_collision_primitive_count": 6,
@@ -135,11 +136,11 @@
     "formal_execution_eligible": false,
     "candidate_config": {
       "path": "configs/m2c_adr0024_phase2_binding_candidate.json",
-      "sha256": "739f2ac1cad278180891556767edd04099e10ece96102e8c823ad81f83dc712e"
+      "sha256": "0532708641bcfb5ef6543c285f30b782763956b2d20c59b34502909e0267bde9"
     },
     "candidate_addendum": {
       "path": "docs/decisions/ADR-0024-PHASE2-BINDING-ADDENDUM-CANDIDATE.md",
-      "sha256": "d68b2f152f3cd3b5044e6c1806d1a57a7f9ca6e9ec0641601cda74147441d2aa"
+      "sha256": "01fbf5b6dc5c96bf3eeeb1d1c16533ebc2111b141c338cd006aa498df16f410d"
     },
     "query_only_comparison_report": {
       "path": "reports/m2c-phase2-a3-query-only-deployment-comparison.json",

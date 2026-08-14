@@ -17,7 +17,7 @@ from __future__ import annotations
 import hashlib
 import math
 from pathlib import Path
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -29,15 +29,14 @@ from xh_agent.policy.qrm_lite.a3_bullet_self_ccd_v1 import (
     A3LinkChildTransformSequenceV1,
     A3RigidTransformV1,
 )
+from xh_agent.policy.qrm_lite.a3_attachment_transition_evidence_v1 import (
+    A3AttachmentTransitionEvidenceV1,
+)
 from xh_agent.policy.qrm_lite.a3_scene_environment_v1 import (
     A3SceneCollisionGeometryReceiptV1,
     A3ScenePoseProviderV1,
     A3SceneStateReceiptV1,
     produce_a3_scene_state_receipt_v1,
-)
-from xh_agent.policy.qrm_lite.exact_plan_preflight_v1 import (
-    NonActuatingAttachmentTransitionV1,
-    NonActuatingPhasePathV1,
 )
 from xh_agent.policy.qrm_lite.exact_plan_primitive_bundle_v1 import (
     ExactPlanPhaseContractV1,
@@ -48,6 +47,12 @@ from xh_agent.policy.qrm_lite.formal_split_runner_v2 import (
     canonical_sha256,
 )
 from xh_agent.policy.qrm_lite.offline_wire_auth_v1 import read_regular_file_once
+
+if TYPE_CHECKING:
+    from xh_agent.policy.qrm_lite.exact_plan_preflight_v1 import (
+        NonActuatingAttachmentTransitionV1,
+        NonActuatingPhasePathV1,
+    )
 
 
 IMPLEMENTATION_REPO_PATH = "src/xh_agent/policy/qrm_lite/a3_attached_object_phase_geometry_v1.py"
@@ -153,7 +158,8 @@ class A3PlannedAttachedObjectBindingV1(_FrozenModel):
     schema_version: Literal["A3PlannedAttachedObjectBindingV1"] = "A3PlannedAttachedObjectBindingV1"
     bound_plan_sha256: str = Field(pattern=SHA256_PATTERN)
     attachment_sha256: str = Field(pattern=SHA256_PATTERN)
-    attachment_transition: NonActuatingAttachmentTransitionV1
+    attachment_transition_evidence_sha256: str = Field(pattern=SHA256_PATTERN)
+    attachment_transition_evidence: A3AttachmentTransitionEvidenceV1
     external_link_path: str = Field(pattern=r"^/World/M1B/[^/]+/[^/]+$")
     allowed_robot_touch_paths: tuple[str, str]
     scene_geometry: A3SceneCollisionGeometryReceiptV1
@@ -175,20 +181,19 @@ class A3PlannedAttachedObjectBindingV1(_FrozenModel):
 
     @model_validator(mode="after")
     def replay_binding(self) -> "A3PlannedAttachedObjectBindingV1":
-        transition = self.attachment_transition
-        evidence = transition.a3_attachment_evidence
-        pair = transition.bilateral_contact_pairs
+        evidence = self.attachment_transition_evidence
+        pair = evidence.planned_bilateral_pair
         source_links = {item.link_path: item for item in self.scene_geometry.source_links}
         states = {item.link_path: item.world_transform for item in self.scene_state.link_states}
         if (
             self.real_runtime_provider == self.contract_test_only
-            or transition.transition != "ATTACH"
-            or transition.attachment_sha256_after != self.attachment_sha256
-            or transition.bound_plan_sha256 != self.bound_plan_sha256
-            or evidence is None
-            or len(pair) != 1
-            or pair[0].external_path != self.external_link_path
-            or tuple(sorted((pair[0].left_robot_path, pair[0].right_robot_path)))
+            or self.attachment_transition_evidence_sha256 != evidence.evidence_sha256
+            or evidence.transition != "ATTACH"
+            or evidence.attachment_sha256_after != self.attachment_sha256
+            or evidence.bound_plan_sha256 != self.bound_plan_sha256
+            or pair is None
+            or pair.external_path != self.external_link_path
+            or tuple(sorted((pair.left_robot_path, pair.right_robot_path)))
             != self.allowed_robot_touch_paths
             or self.external_link_path not in source_links
             or not source_links[self.external_link_path].dynamic
@@ -412,7 +417,8 @@ class A3QueryOnlyAttachedObjectPhaseGeometryResolverV1:
             "schema_version": "A3PlannedAttachedObjectBindingV1",
             "bound_plan_sha256": self.bound_plan_sha256,
             "attachment_sha256": attachment.attachment_sha256_after,
-            "attachment_transition": attachment.model_dump(mode="json"),
+            "attachment_transition_evidence_sha256": evidence.evidence_sha256,
+            "attachment_transition_evidence": evidence.model_dump(mode="json"),
             "external_link_path": pair.external_path,
             "allowed_robot_touch_paths": tuple(
                 sorted((pair.left_robot_path, pair.right_robot_path))

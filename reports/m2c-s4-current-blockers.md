@@ -84,10 +84,13 @@ only exact phase-allowlisted contact pairs are excluded. The real-Isaac scene
 owner now materializes the same eight collision-bearing `RigidPrim` handles
 after natural stability and shares a monotonic host-owned mutation counter with
 the getter-only scene source. Public-capture Kit steps increment that counter
-before the call. The separate attached-object resolver binds the planned
-ATTACH receipt and source scene state to a hand/object relative transform, then
-replays every later end-effector path sample; unknown initial attachments and
-source mutation reject. This closes the local source/resolver contract gap,
+before the call. The separate attached-object resolver binds the canonical
+planned ATTACH transition evidence and source scene state to a hand/object
+relative transform, then replays every later end-effector path sample. The
+complete-scene receipt embeds that derivation evidence and requires a one-to-one
+match with every attached geometry before any native query; unknown initial
+attachments, missing derivation evidence, and source mutation reject. This
+closes the local source/resolver contract gap,
 not deployment: no Isaac process was started, no real scene-state or attached
 geometry receipt exists, and the resolver is not composed into the unbound V4
 HTTP backend factory. Formal eligibility therefore remains false.

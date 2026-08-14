@@ -7,6 +7,9 @@ from pathlib import Path
 import time
 from typing import Callable, Literal, Protocol, Sequence
 
+from xh_agent.policy.qrm_lite.a3_attached_object_phase_geometry_v1 import (
+    A3AttachedObjectPhaseGeometryEvidenceV1,
+)
 from xh_agent.policy.qrm_lite.a3_bullet_production_adapter_v1 import (
     A3AttachedObjectGeometryV1,
     A3ControlledPandaGeometryReceiptV1,
@@ -187,6 +190,9 @@ class A3CompleteSceneSweptCollisionProviderV2:
         *,
         configuration: ExactPlanPreflightConfigurationV1,
         attached_objects: tuple[A3AttachedObjectGeometryV1, ...] = (),
+        attached_object_phase_geometry_evidence: tuple[
+            A3AttachedObjectPhaseGeometryEvidenceV1, ...
+        ] = (),
     ) -> NonActuatingSweptCollisionV1:
         self._validate_configuration(configuration)
         wire = phase.phase
@@ -197,6 +203,8 @@ class A3CompleteSceneSweptCollisionProviderV2:
             or path.phase_index != wire.phase_index
             or path.phase_sha256 != phase.phase_sha256
             or self.scene_state.bound_plan_sha256 != plan.bound_plan_sha256
+            or tuple(item.geometry for item in attached_object_phase_geometry_evidence)
+            != attached_objects
         ):
             raise A3CompleteSceneSweptCollisionUnavailable(
                 "A.3 complete-scene phase query crossed plan/phase/path/state"
@@ -285,6 +293,9 @@ class A3CompleteSceneSweptCollisionProviderV2:
                     executor_joint_state_sequence=states,
                     robot_geometry=self.robot_geometry,
                     attached_objects=attached_objects,
+                    attached_object_phase_geometry_evidence=(
+                        attached_object_phase_geometry_evidence
+                    ),
                     fk_receipt=fk_receipt,
                     scene_geometry=self.scene_geometry,
                     scene_state=self.scene_state,

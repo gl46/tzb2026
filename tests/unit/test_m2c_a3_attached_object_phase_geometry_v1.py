@@ -401,6 +401,14 @@ def test_relative_transform_and_phase_geometry_tamper_fail_replay(tmp_path: Path
     )
 
     binding_raw = evidence.attachment_binding.model_dump(mode="json")
+    binding_raw["attachment_transition_evidence_sha256"] = "0" * 64
+    binding_raw["receipt_sha256"] = canonical_sha256(
+        {key: value for key, value in binding_raw.items() if key != "receipt_sha256"}
+    )
+    with pytest.raises(ValueError, match="source evidence"):
+        A3PlannedAttachedObjectBindingV1.model_validate(binding_raw)
+
+    binding_raw = evidence.attachment_binding.model_dump(mode="json")
     binding_raw["hand_to_object_transform"]["translation_world_m"][0] += 0.01
     binding_raw["receipt_sha256"] = canonical_sha256(
         {key: value for key, value in binding_raw.items() if key != "receipt_sha256"}

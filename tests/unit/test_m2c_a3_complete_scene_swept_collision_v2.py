@@ -156,6 +156,22 @@ def test_complete_scene_provider_binds_scene_state_to_exact_plan(tmp_path: Path)
         )
 
 
+def test_complete_scene_provider_rejects_attached_geometry_without_derivation_evidence(
+    tmp_path: Path,
+) -> None:
+    provider, backend = _provider(tmp_path)
+    phase, plan = _phase_and_plan(PLAN_SHA, PHASE_SHA)
+    with pytest.raises(Exception, match="crossed plan/phase/path/state"):
+        provider.query_phase(
+            plan,
+            phase,
+            _path(PLAN_SHA, PHASE_SHA),
+            configuration=_configuration(provider),
+            attached_objects=(SimpleNamespace(receipt_sha256="a" * 64),),
+        )
+    assert backend.calls == 0
+
+
 def test_non_motion_phase_does_not_query_native_backend(tmp_path: Path) -> None:
     provider, backend = _provider(tmp_path)
     phase, plan = _phase_and_plan(

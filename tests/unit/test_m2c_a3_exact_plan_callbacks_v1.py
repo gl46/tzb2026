@@ -179,8 +179,18 @@ class _CollisionProvider:
     def __init__(self) -> None:
         self.attached_counts: list[int] = []
 
-    def query_phase(self, plan, phase, path, *, configuration, attached_objects=()):
+    def query_phase(
+        self,
+        plan,
+        phase,
+        path,
+        *,
+        configuration,
+        attached_objects=(),
+        attached_object_phase_geometry_evidence=(),
+    ):
         del plan, path, configuration
+        assert len(attached_objects) == len(attached_object_phase_geometry_evidence)
         self.attached_counts.append(len(attached_objects))
         return SimpleNamespace(phase_index=phase.phase.phase_index)
 
@@ -231,6 +241,10 @@ class _Resolver:
         self.bound: set[str] = set()
         self.geometry_calls: list[str] = []
         self.fail_geometry = False
+        self.last_geometry = None
+        self.last_phase = None
+        self.last_path = None
+        self.fail_evidence = False
 
     def validate_initial_attachment(self, *, attachment_sha256, plan):
         del plan
@@ -242,13 +256,33 @@ class _Resolver:
         self.bound.add(attachment.attachment_sha256_after)
 
     def geometry_for_phase(self, *, attachment_sha256, plan, phase, path):
-        del plan, phase
         if self.fail_geometry or attachment_sha256 not in self.bound:
             raise RuntimeError("attached geometry unavailable")
         self.geometry_calls.append(attachment_sha256)
-        return SimpleNamespace(
+        self.last_geometry = SimpleNamespace(
             attachment_receipt_sha256=attachment_sha256,
             executor_state_count=len(path.samples),
+        )
+        self.last_phase = phase
+        self.last_path = path
+        return self.last_geometry
+
+    def phase_evidence(self, *, attachment_sha256, path_sha256):
+        if (
+            self.fail_evidence
+            or self.last_geometry is None
+            or self.last_phase is None
+            or self.last_path is None
+            or attachment_sha256 not in self.bound
+            or path_sha256 != self.last_path.path_sha256
+        ):
+            raise RuntimeError("attached phase evidence unavailable")
+        return SimpleNamespace(
+            geometry=self.last_geometry,
+            bound_plan_sha256=self.last_path.bound_plan_sha256,
+            phase_index=self.last_phase.phase.phase_index,
+            phase_sha256=self.last_phase.phase_sha256,
+            path_sha256=path_sha256,
         )
 
     def release_planned_attachment(self, *, attachment_sha256, plan, phase, path):
@@ -407,6 +441,33 @@ def test_composite_poisoned_when_attached_payload_geometry_is_missing() -> None:
         configuration=configuration,
     )
     with pytest.raises(A3ExactPlanCallbacksUnavailable, match="payload phase geometry"):
+        callbacks.check_swept_collision(
+            plan,
+            plan.phases[1],
+            path,
+            configuration=configuration,
+        )
+    assert callbacks._stage == "POISONED"
+
+
+def test_composite_poisoned_when_attached_payload_derivation_evidence_is_missing() -> None:
+    callbacks, configuration, _, _, resolver, plan = _stack()
+    callbacks.snapshot_runtime(plan)
+    first_path, _ = _run_phase(
+        callbacks,
+        configuration,
+        plan,
+        plan.phases[0],
+        start=plan.inputs.preplan_state_sha256,
+    )
+    resolver.fail_evidence = True
+    path = callbacks.solve_phase_path(
+        plan,
+        plan.phases[1],
+        start_state_sha256=first_path.path_sha256,
+        configuration=configuration,
+    )
+    with pytest.raises(A3ExactPlanCallbacksUnavailable, match="phase evidence is unavailable"):
         callbacks.check_swept_collision(
             plan,
             plan.phases[1],

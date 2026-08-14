@@ -6,6 +6,9 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from xh_agent.policy.qrm_lite.a3_attached_object_phase_geometry_v1 import (
+    A3AttachedObjectPhaseGeometryEvidenceV1,
+)
 from xh_agent.policy.qrm_lite.a3_bullet_production_adapter_v1 import (
     A3AttachedObjectGeometryV1,
     A3ControlledPandaGeometryReceiptV1,
@@ -53,6 +56,9 @@ class A3CompleteScenePhaseSweptCollisionEvidenceV2(_FrozenModel):
     executor_joint_state_sequence: tuple[tuple[float, ...], ...] = Field(min_length=2)
     robot_geometry: A3ControlledPandaGeometryReceiptV1
     attached_objects: tuple[A3AttachedObjectGeometryV1, ...] = ()
+    attached_object_phase_geometry_evidence: tuple[
+        A3AttachedObjectPhaseGeometryEvidenceV1, ...
+    ] = ()
     fk_receipt: A3ReadOnlyFKReceiptV1
     scene_geometry: A3SceneCollisionGeometryReceiptV1
     scene_state: A3SceneStateReceiptV1
@@ -96,6 +102,15 @@ class A3CompleteScenePhaseSweptCollisionEvidenceV2(_FrozenModel):
             or self.scene_state.bound_plan_sha256 != self.bound_plan_sha256
             or self.native_receipt.backend_implementation_sha256
             != self.native_backend_implementation_sha256
+            or tuple(item.geometry for item in self.attached_object_phase_geometry_evidence)
+            != self.attached_objects
+            or any(
+                item.bound_plan_sha256 != self.bound_plan_sha256
+                or item.phase_index != self.phase_index
+                or item.phase_sha256 != self.phase_sha256
+                or item.path_sha256 != self.path_sha256
+                for item in self.attached_object_phase_geometry_evidence
+            )
         ):
             raise ValueError("A.3 complete-scene evidence crossed plan/path dependencies")
         try:
@@ -162,6 +177,10 @@ class A3CompleteScenePhaseSweptCollisionEvidenceV2(_FrozenModel):
             and self.complete_scene_world.formal_query_evidence_eligible
             and self.native_receipt.real_native_backend
             and not self.native_receipt.contract_test_only
+            and all(
+                item.formal_query_evidence_eligible
+                for item in self.attached_object_phase_geometry_evidence
+            )
         )
         if self.formal_query_evidence_eligible != expected_formal:
             raise ValueError("A.3 complete-scene formal eligibility differs")
@@ -186,6 +205,7 @@ def build_a3_complete_scene_phase_evidence_v2(
     executor_joint_state_sequence: tuple[tuple[float, ...], ...],
     robot_geometry: A3ControlledPandaGeometryReceiptV1,
     attached_objects: tuple[A3AttachedObjectGeometryV1, ...],
+    attached_object_phase_geometry_evidence: tuple[A3AttachedObjectPhaseGeometryEvidenceV1, ...],
     fk_receipt: A3ReadOnlyFKReceiptV1,
     scene_geometry: A3SceneCollisionGeometryReceiptV1,
     scene_state: A3SceneStateReceiptV1,
@@ -201,6 +221,9 @@ def build_a3_complete_scene_phase_evidence_v2(
         and complete_scene_world.formal_query_evidence_eligible
         and native_receipt.real_native_backend
         and not native_receipt.contract_test_only
+        and all(
+            item.formal_query_evidence_eligible for item in attached_object_phase_geometry_evidence
+        )
     )
     payload = {
         "schema_version": "A3CompleteScenePhaseSweptCollisionEvidenceV2",
@@ -216,6 +239,9 @@ def build_a3_complete_scene_phase_evidence_v2(
         "executor_joint_state_sequence": executor_joint_state_sequence,
         "robot_geometry": robot_geometry.model_dump(mode="json"),
         "attached_objects": [item.model_dump(mode="json") for item in attached_objects],
+        "attached_object_phase_geometry_evidence": [
+            item.model_dump(mode="json") for item in attached_object_phase_geometry_evidence
+        ],
         "fk_receipt": fk_receipt.model_dump(mode="json"),
         "scene_geometry": scene_geometry.model_dump(mode="json"),
         "scene_state": scene_state.model_dump(mode="json"),

@@ -18,6 +18,9 @@ import hashlib
 from pathlib import Path
 from typing import Literal, Protocol
 
+from xh_agent.policy.qrm_lite.a3_attached_object_phase_geometry_v1 import (
+    A3AttachedObjectPhaseGeometryEvidenceV1,
+)
 from xh_agent.policy.qrm_lite.a3_attachment_transition_v1 import (
     A3AttachmentTransitionProviderV1,
 )
@@ -86,6 +89,13 @@ class A3AttachedObjectPhaseGeometryResolverV1(Protocol):
         path: NonActuatingPhasePathV1,
     ) -> A3AttachedObjectGeometryV1: ...
 
+    def phase_evidence(
+        self,
+        *,
+        attachment_sha256: str,
+        path_sha256: str,
+    ) -> A3AttachedObjectPhaseGeometryEvidenceV1: ...
+
     def release_planned_attachment(
         self,
         *,
@@ -113,6 +123,9 @@ class A3CompleteSweptCollisionProviderV1(Protocol):
         *,
         configuration: ExactPlanPreflightConfigurationV1,
         attached_objects: tuple[A3AttachedObjectGeometryV1, ...],
+        attached_object_phase_geometry_evidence: tuple[
+            A3AttachedObjectPhaseGeometryEvidenceV1, ...
+        ],
     ) -> NonActuatingSweptCollisionV1: ...
 
 
@@ -318,6 +331,7 @@ class A3ExactPlanNonActuatingCallbacksV1:
         if configuration != self.configuration or path != self._active_path:
             self._poison("A.3 collision query crossed path/configuration")
         attached_objects: tuple[A3AttachedObjectGeometryV1, ...] = ()
+        attached_evidence: tuple[A3AttachedObjectPhaseGeometryEvidenceV1, ...] = ()
         if self._attachment_sha256 is not None and phase.phase.command in MOTION_COMMANDS:
             try:
                 geometry = self.attached_geometry_resolver.geometry_for_phase(
@@ -333,7 +347,23 @@ class A3ExactPlanNonActuatingCallbacksV1:
                 or geometry.executor_state_count != len(path.samples)
             ):
                 self._poison("A.3 attached payload geometry crossed phase states")
+            try:
+                evidence = self.attached_geometry_resolver.phase_evidence(
+                    attachment_sha256=self._attachment_sha256,
+                    path_sha256=path.path_sha256,
+                )
+            except Exception as exc:
+                self._poison("A.3 attached payload phase evidence is unavailable", exc)
+            if (
+                evidence.geometry != geometry
+                or evidence.bound_plan_sha256 != plan.bound_plan_sha256
+                or evidence.phase_index != phase.phase.phase_index
+                or evidence.phase_sha256 != phase.phase_sha256
+                or evidence.path_sha256 != path.path_sha256
+            ):
+                self._poison("A.3 attached payload phase evidence crossed plan/path")
             attached_objects = (geometry,)
+            attached_evidence = (evidence,)
         try:
             collision = self.swept_collision_provider.query_phase(
                 plan,
@@ -341,6 +371,7 @@ class A3ExactPlanNonActuatingCallbacksV1:
                 path,
                 configuration=configuration,
                 attached_objects=attached_objects,
+                attached_object_phase_geometry_evidence=attached_evidence,
             )
         except Exception as exc:
             self._poison("A.3 swept-collision provider rejected", exc)

@@ -128,11 +128,14 @@ The real-Isaac scene-owner implementation now constructs that exact eight-link
 getter-only source after the natural-stability boundary. It activates one
 host-owned monotonic mutation counter only after all scene handles exist and
 records every subsequent public-capture Kit step before the call. The planned
-attached-object resolver separately binds the ATTACH receipt, the complete
-scene geometry/state receipt, the terminal hand/object relative transform and
-every later end-effector path sample; unknown initial attachments and any
-source mutation reject. These properties are covered by local contract tests
-only. No Isaac process was started, no real scene-state or attached-object
+attached-object resolver separately binds the canonical ATTACH transition
+evidence, the complete scene geometry/state receipt, the terminal hand/object
+relative transform and every later end-effector path sample. Each complete
+scene CCD receipt must embed the corresponding derivation evidence and match
+it one-for-one to the attached geometry; missing or self-consistent-but-unbound
+geometry rejects before the native query. Unknown initial attachments and any
+source mutation also reject. These properties are covered by local contract
+tests only. No Isaac process was started, no real scene-state or attached-object
 receipt was produced, and the resolver is not yet composed into the unbound
 formal V4 HTTP backend factory, so the composition remains non-authorizing.
 
