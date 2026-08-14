@@ -2,19 +2,21 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from m2c.build_s4_v4_batch10_prereg import STOP_AFTER, select_batch10_keys
-from xh_agent.policy.qrm_lite import s4_v4_collection_authorization_v1 as authorization
+from m2c.build_s4_v4_batch10_prereg import (
+    BATCH10_PRIOR_ATTEMPT_KEY_COUNT,
+    BATCH10_PRIOR_ATTEMPT_SOURCE_PATHS,
+    STOP_AFTER,
+    select_batch10_keys,
+)
 
 
 ROOT = Path(__file__).resolve().parents[2]
 
 
 def test_authoritative_prior_inventory_contains_all_twenty_two_attempted_keys() -> None:
-    assert authorization.AUTHORITATIVE_PRIOR_ATTEMPT_KEY_COUNT == 22
-    assert len(authorization.AUTHORITATIVE_PRIOR_ATTEMPT_SOURCES) == 7
-    assert "reports/m2c-s4-v4-batch09-collection.json" in (
-        authorization.AUTHORITATIVE_PRIOR_ATTEMPT_SOURCES
-    )
+    assert BATCH10_PRIOR_ATTEMPT_KEY_COUNT == 22
+    assert len(BATCH10_PRIOR_ATTEMPT_SOURCE_PATHS) == 7
+    assert "reports/m2c-s4-v4-batch09-collection.json" in BATCH10_PRIOR_ATTEMPT_SOURCE_PATHS
 
 
 def test_batch10_selection_is_outcome_blind_and_identity_disjoint() -> None:

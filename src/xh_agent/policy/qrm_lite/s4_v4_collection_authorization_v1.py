@@ -96,6 +96,11 @@ AUTHORITATIVE_PRIOR_ATTEMPT_SOURCES = {
         "M2CS4V4Batch09CollectionAuditV1",
         3,
     ),
+    "reports/m2c-s4-v4-batch10-collection.json": (
+        "ee6414efcf02a71959e501bdd91edf3d86f9003c978a495790d8cfb6fc99b83a",
+        "M2CS4V4Batch10CollectionAuditV1",
+        3,
+    ),
 }
 AUTHORITATIVE_PRIOR_ATTEMPT_KEY_COUNT = sum(
     expected_unique
