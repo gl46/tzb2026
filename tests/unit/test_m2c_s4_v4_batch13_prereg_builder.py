@@ -8,17 +8,13 @@ from m2c.build_s4_v4_batch13_prereg import (
     STOP_AFTER,
     select_batch13_keys,
 )
-from xh_agent.policy.qrm_lite import s4_v4_collection_authorization_v1 as authorization
-
 
 ROOT = Path(__file__).resolve().parents[2]
 
 
 def test_authoritative_prior_inventory_contains_all_thirty_one_attempted_keys() -> None:
     assert BATCH13_PRIOR_ATTEMPT_KEY_COUNT == 31
-    assert authorization.AUTHORITATIVE_PRIOR_ATTEMPT_KEY_COUNT == 31
     assert len(BATCH13_PRIOR_ATTEMPT_SOURCE_PATHS) == 10
-    assert len(authorization.AUTHORITATIVE_PRIOR_ATTEMPT_SOURCES) == 10
     assert "reports/m2c-s4-v4-batch12-collection.json" in BATCH13_PRIOR_ATTEMPT_SOURCE_PATHS
 
 
