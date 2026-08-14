@@ -2,44 +2,44 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from m2c.build_s4_v4_batch23_prereg import (
-    BATCH23_PRIOR_ATTEMPT_KEY_COUNT,
-    BATCH23_PRIOR_ATTEMPT_SOURCE_PATHS,
+from m2c.build_s4_v4_batch24_prereg import (
+    BATCH24_PRIOR_ATTEMPT_KEY_COUNT,
+    BATCH24_PRIOR_ATTEMPT_SOURCE_PATHS,
     STOP_AFTER,
     TRAINING_MANIFEST_PATH,
     build_prereg,
     prereg_bytes,
-    select_batch23_keys,
+    select_batch24_keys,
     write_create_only,
 )
 from xh_agent.policy.qrm_lite import s4_v4_collection_authorization_v1 as authorization
 
 
 ROOT = Path(__file__).resolve().parents[2]
-SOURCE_COMMIT = "de851a2cd49f1f816c48195fcd597cb430862804"
+SOURCE_COMMIT = "HEAD"
 
 
-def test_batch23_binds_complete_fifty_nine_identity_prior_inventory() -> None:
-    assert BATCH23_PRIOR_ATTEMPT_KEY_COUNT == 59
-    assert set(BATCH23_PRIOR_ATTEMPT_SOURCE_PATHS) == set(
-        authorization.BATCH23_AUTHORITATIVE_PRIOR_ATTEMPT_SOURCES
+def test_batch24_binds_complete_sixty_two_identity_prior_inventory() -> None:
+    assert BATCH24_PRIOR_ATTEMPT_KEY_COUNT == 62
+    assert set(BATCH24_PRIOR_ATTEMPT_SOURCE_PATHS) == set(
+        authorization.BATCH24_AUTHORITATIVE_PRIOR_ATTEMPT_SOURCES
     )
-    assert "reports/m2c-s4-v4-batch22-collection.json" in BATCH23_PRIOR_ATTEMPT_SOURCE_PATHS
+    assert "reports/m2c-s4-v4-batch23-collection.json" in BATCH24_PRIOR_ATTEMPT_SOURCE_PATHS
 
 
-def test_batch23_selects_three_new_sdf_balanced_keys_without_outcomes() -> None:
-    selected = select_batch23_keys(project_root=ROOT, source_commit=SOURCE_COMMIT)
+def test_batch24_selects_three_new_sdf_balanced_keys_without_outcomes() -> None:
+    selected = select_batch24_keys(project_root=ROOT, source_commit=SOURCE_COMMIT)
     assert len(selected) == STOP_AFTER == 3
     assert len({item["matched_key"] for item in selected}) == 3
     assert len({item["sdf_sha256"] for item in selected}) == 3
     assert [(item["scene_seed"], item["failure_seed"]) for item in selected] == [
-        (22112, 221127),
-        (22141, 221417),
-        (22163, 221637),
+        (22164, 221647),
+        (22180, 221807),
+        (22181, 221817),
     ]
 
 
-def test_batch23_prereg_binds_extension_yield_and_no_retry_contract() -> None:
+def test_batch24_prereg_binds_current_yield_and_no_retry_contract() -> None:
     prereg = build_prereg(project_root=ROOT, source_commit=SOURCE_COMMIT)
     profile = authorization.V4_TRAIN_MANIFEST_PROFILES[TRAINING_MANIFEST_PATH]
     assert prereg["training_manifest"] == {
@@ -47,7 +47,7 @@ def test_batch23_prereg_binds_extension_yield_and_no_retry_contract() -> None:
         "sha256": profile[0],
     }
     assert prereg["training_manifest_content_sha256"] == profile[1]
-    assert prereg["selected_keys"] == select_batch23_keys(
+    assert prereg["selected_keys"] == select_batch24_keys(
         project_root=ROOT,
         source_commit=SOURCE_COMMIT,
     )
@@ -63,7 +63,7 @@ def test_batch23_prereg_binds_extension_yield_and_no_retry_contract() -> None:
     }
 
 
-def test_batch23_prereg_publish_is_create_only(tmp_path: Path) -> None:
+def test_batch24_prereg_publish_is_create_only(tmp_path: Path) -> None:
     output = tmp_path / "prereg.json"
     payload = prereg_bytes(build_prereg(project_root=ROOT, source_commit=SOURCE_COMMIT))
     write_create_only(output, payload)
@@ -73,4 +73,4 @@ def test_batch23_prereg_publish_is_create_only(tmp_path: Path) -> None:
     except FileExistsError:
         pass
     else:
-        raise AssertionError("Batch-23 prereg writer overwrote an existing file")
+        raise AssertionError("Batch-24 prereg writer overwrote an existing file")
