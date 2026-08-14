@@ -46,24 +46,35 @@ def records_for_versioned_train(
 
     expected = {
         "V3": (
-            "M2CS4V3TrainingKeyManifestV1",
-            "FROZEN_TRAIN_ONLY_BEFORE_ANY_V3_COLLECTION",
+            {
+                (
+                    "M2CS4V3TrainingKeyManifestV1",
+                    "FROZEN_TRAIN_ONLY_BEFORE_ANY_V3_COLLECTION",
+                )
+            },
             "PublicTrackCandidateV3",
             "M2C_Q012_V3",
         ),
         "V4": (
-            "M2CS4V4TrainingKeyManifestV1",
-            "FROZEN_TRAIN_ONLY_BEFORE_ANY_V4_COLLECTION",
+            {
+                (
+                    "M2CS4V4TrainingKeyManifestV1",
+                    "FROZEN_TRAIN_ONLY_BEFORE_ANY_V4_COLLECTION",
+                ),
+                (
+                    "M2CS4V4TrainingKeyExtensionManifestV1",
+                    "FROZEN_TRAIN_ONLY_BEFORE_ANY_SELECTED_KEY_COLLECTION",
+                ),
+            },
             "PublicTrackCandidateV4",
             "M2C_Q012_V4",
         ),
     }.get(revision)
     if expected is None:
         raise ValueError("versioned source materialization revision must be V3 or V4")
-    schema, status, candidate_revision, checkpoint_revision = expected
+    manifest_identities, candidate_revision, checkpoint_revision = expected
     if (
-        training.get("schema_version") != schema
-        or training.get("status") != status
+        (training.get("schema_version"), training.get("status")) not in manifest_identities
         or training.get("train_only") is not True
         or training.get("smoke_collection_authorized") is not False
         or training.get("evaluation_collection_authorized") is not False

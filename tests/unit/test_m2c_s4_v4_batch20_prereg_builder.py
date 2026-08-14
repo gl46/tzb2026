@@ -2,44 +2,44 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from m2c.build_s4_v4_batch19_prereg import (
-    BATCH19_PRIOR_ATTEMPT_KEY_COUNT,
-    BATCH19_PRIOR_ATTEMPT_SOURCE_PATHS,
+from m2c.build_s4_v4_batch20_prereg import (
+    BATCH20_PRIOR_ATTEMPT_KEY_COUNT,
+    BATCH20_PRIOR_ATTEMPT_SOURCE_PATHS,
     STOP_AFTER,
     TRAINING_MANIFEST_PATH,
     build_prereg,
     prereg_bytes,
-    select_batch19_keys,
+    select_batch20_keys,
     write_create_only,
 )
 from xh_agent.policy.qrm_lite import s4_v4_collection_authorization_v1 as authorization
 
 
 ROOT = Path(__file__).resolve().parents[2]
-SOURCE_COMMIT = "75699c543fc2bdcee65286400cdf4b4d50b1afac"
+SOURCE_COMMIT = "HEAD"
 
 
-def test_batch19_binds_complete_forty_seven_identity_prior_inventory() -> None:
-    assert BATCH19_PRIOR_ATTEMPT_KEY_COUNT == 47
-    assert set(BATCH19_PRIOR_ATTEMPT_SOURCE_PATHS) == set(
-        authorization.AUTHORITATIVE_PRIOR_ATTEMPT_SOURCES
+def test_batch20_binds_complete_fifty_identity_prior_inventory() -> None:
+    assert BATCH20_PRIOR_ATTEMPT_KEY_COUNT == 50
+    assert set(BATCH20_PRIOR_ATTEMPT_SOURCE_PATHS) == set(
+        authorization.BATCH20_AUTHORITATIVE_PRIOR_ATTEMPT_SOURCES
     )
-    assert "reports/m2c-s4-v4-batch18-collection.json" in BATCH19_PRIOR_ATTEMPT_SOURCE_PATHS
+    assert "reports/m2c-s4-v4-batch19-collection.json" in BATCH20_PRIOR_ATTEMPT_SOURCE_PATHS
 
 
-def test_batch19_selects_three_new_sdf_balanced_keys_without_outcomes() -> None:
-    selected = select_batch19_keys(project_root=ROOT, source_commit=SOURCE_COMMIT)
+def test_batch20_selects_three_new_sdf_balanced_keys_without_outcomes() -> None:
+    selected = select_batch20_keys(project_root=ROOT, source_commit=SOURCE_COMMIT)
     assert len(selected) == STOP_AFTER == 3
     assert len({item["matched_key"] for item in selected}) == 3
     assert len({item["sdf_sha256"] for item in selected}) == 3
     assert [(item["scene_seed"], item["failure_seed"]) for item in selected] == [
-        (22001, 220017),
-        (22002, 220027),
-        (22007, 220077),
+        (22008, 220087),
+        (22022, 220227),
+        (22025, 220257),
     ]
 
 
-def test_batch19_prereg_binds_extension_yield_and_no_retry_contract() -> None:
+def test_batch20_prereg_binds_extension_yield_and_no_retry_contract() -> None:
     prereg = build_prereg(project_root=ROOT, source_commit=SOURCE_COMMIT)
     profile = authorization.V4_TRAIN_MANIFEST_PROFILES[TRAINING_MANIFEST_PATH]
     assert prereg["training_manifest"] == {
@@ -47,7 +47,7 @@ def test_batch19_prereg_binds_extension_yield_and_no_retry_contract() -> None:
         "sha256": profile[0],
     }
     assert prereg["training_manifest_content_sha256"] == profile[1]
-    assert prereg["selected_keys"] == select_batch19_keys(
+    assert prereg["selected_keys"] == select_batch20_keys(
         project_root=ROOT,
         source_commit=SOURCE_COMMIT,
     )
@@ -63,7 +63,7 @@ def test_batch19_prereg_binds_extension_yield_and_no_retry_contract() -> None:
     }
 
 
-def test_batch19_prereg_publish_is_create_only(tmp_path: Path) -> None:
+def test_batch20_prereg_publish_is_create_only(tmp_path: Path) -> None:
     output = tmp_path / "prereg.json"
     payload = prereg_bytes(build_prereg(project_root=ROOT, source_commit=SOURCE_COMMIT))
     write_create_only(output, payload)
@@ -73,4 +73,4 @@ def test_batch19_prereg_publish_is_create_only(tmp_path: Path) -> None:
     except FileExistsError:
         pass
     else:
-        raise AssertionError("Batch-19 prereg writer overwrote an existing file")
+        raise AssertionError("Batch-20 prereg writer overwrote an existing file")

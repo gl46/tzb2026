@@ -164,6 +164,28 @@ AUTHORITATIVE_PRIOR_ATTEMPT_KEY_COUNT = sum(
     expected_unique
     for _sha256, _schema, expected_unique in AUTHORITATIVE_PRIOR_ATTEMPT_SOURCES.values()
 )
+BATCH20_AUTHORITATIVE_PRIOR_ATTEMPT_SOURCES = {
+    **AUTHORITATIVE_PRIOR_ATTEMPT_SOURCES,
+    "reports/m2c-s4-v4-batch19-collection.json": (
+        "dd103b06ac945cceb5816393bfff7b82a2f5ab77b8c8b077dff1b48a4d61d030",
+        "M2CS4V4Batch19CollectionAuditV1",
+        3,
+    ),
+}
+BATCH20_AUTHORITATIVE_PRIOR_ATTEMPT_KEY_COUNT = sum(
+    expected_unique
+    for _sha256, _schema, expected_unique in BATCH20_AUTHORITATIVE_PRIOR_ATTEMPT_SOURCES.values()
+)
+AUTHORITATIVE_PRIOR_ATTEMPT_PROFILES = {
+    "m2c-s4-v4-train-batch-19": (
+        AUTHORITATIVE_PRIOR_ATTEMPT_SOURCES,
+        AUTHORITATIVE_PRIOR_ATTEMPT_KEY_COUNT,
+    ),
+    "m2c-s4-v4-train-batch-20": (
+        BATCH20_AUTHORITATIVE_PRIOR_ATTEMPT_SOURCES,
+        BATCH20_AUTHORITATIVE_PRIOR_ATTEMPT_KEY_COUNT,
+    ),
+}
 CANONICAL_COLLECTION_LEDGER_ROOT = (
     "/var/tmp/xh-data/isaac-industrial/m2c/s4-v4-collection-authorization-ledger-v1"
 )
@@ -903,8 +925,12 @@ def load_committed_collection_prereg(
         raise CollectionAuthorizationError(
             "prereg does not bind its complete introduction-commit source tree"
         )
+    prior_profile = AUTHORITATIVE_PRIOR_ATTEMPT_PROFILES.get(prereg.batch_id)
+    if prior_profile is None:
+        raise CollectionAuthorizationError("prereg batch has no frozen prior-attempt profile")
+    expected_prior_sources, expected_prior_key_count = prior_profile
     prior_bindings = {item.path: item for item in prereg.prior_attempt_identity_sources}
-    if set(prior_bindings) != set(AUTHORITATIVE_PRIOR_ATTEMPT_SOURCES):
+    if set(prior_bindings) != set(expected_prior_sources):
         raise CollectionAuthorizationError(
             "prereg does not bind the complete authoritative prior-attempt inventory"
         )
@@ -915,9 +941,7 @@ def load_committed_collection_prereg(
             label=f"prior attempt identity source {binding.path}",
         )
         attempts = source.get("attempts")
-        expected_sha, expected_schema, expected_unique = AUTHORITATIVE_PRIOR_ATTEMPT_SOURCES[
-            binding.path
-        ]
+        expected_sha, expected_schema, expected_unique = expected_prior_sources[binding.path]
         if binding.sha256 != expected_sha or source.get("schema_version") != expected_schema:
             raise CollectionAuthorizationError("prior attempt source identity is not frozen")
         if not isinstance(attempts, list):
@@ -934,7 +958,7 @@ def load_committed_collection_prereg(
             raise CollectionAuthorizationError(
                 "prior attempt source has the wrong unique-key count"
             )
-    if len(prior_keys) != AUTHORITATIVE_PRIOR_ATTEMPT_KEY_COUNT:
+    if len(prior_keys) != expected_prior_key_count:
         raise CollectionAuthorizationError(
             "prior attempt inventory does not contain the exact authoritative unique-key union"
         )
