@@ -2,7 +2,7 @@
   "schema_version": "M2CS4CurrentBlockersV2",
   "status": "BLOCKED_UNMEASURED_ZERO_ELIGIBLE_YIELD_AND_FORMAL_EXACT_PLAN_INTEGRATION",
   "reported_at": "2026-08-15T01:42:18+08:00",
-  "checked_head_commit": "7066f74acda8a0308d03b287a419652ecf57842d",
+  "checked_head_commit": "4f4b780ecdbd363043bf7ce2fd2e618463cbfc3d",
   "q_a_state": "PASSED",
   "q_b_state": "UNMEASURED",
   "pure_model_success_episodes": null,
@@ -12,11 +12,11 @@
     "frozen_v3_train_keys": 36,
     "frozen_v4_train_keys": 36,
     "unique_v3_train_keys_attempted": 11,
-    "unique_v4_train_keys_consumed": 32,
-    "unique_train_keys_consumed_total": 43,
+    "unique_v4_train_keys_consumed": 35,
+    "unique_train_keys_consumed_total": 46,
     "raw_v3_eight_step_chains": 10,
-    "raw_v4_eight_step_chains": 24,
-    "physical_skill_receipts_v4": 192,
+    "raw_v4_eight_step_chains": 27,
+    "physical_skill_receipts_v4": 216,
     "collision_or_safety_violations_v4": 0,
     "training_samples_eligible": 0,
     "training_samples_packaged": 0,
@@ -25,24 +25,24 @@
     "formal_q_b_evaluation_executed": false,
     "public_track_associator_v2_implemented": true,
     "batch_04_preregistered_and_consumed": true,
-    "latest_completed_batch": "BATCH_16",
+    "latest_completed_batch": "BATCH_17",
     "active_selected_key_preregistration_present": false,
     "collection_execution_authorized": false,
     "raw_detection_capacity_decision_required": false,
     "permission_issue_resolution": {
-      "resolved_for_observed_batch16_path": true,
       "batch04_stage_output_permission_failures": 3,
       "first_subsequent_stage_acceptance_report": "reports/m2c-s4-v4-batch06-snapshot-owner-failure.json",
       "first_subsequent_probe_simulation_start_report": "reports/m2c-s4-v4-batch07-pre-timeline-proprio-failure.json",
       "first_subsequent_raw_physical_chain_report": "reports/m2c-s4-v4-batch08-collection.json",
-      "latest_three_stage_and_probe_pass_report": "reports/m2c-s4-v4-batch16-collection.json",
+      "latest_three_stage_and_probe_pass_report": "reports/m2c-s4-v4-batch17-collection.json",
       "latest_mixed_batch_report": "reports/m2c-s4-v4-batch11-collection.json",
-      "latest_all_physical_batch_report": "reports/m2c-s4-v4-batch16-collection.json"
+      "latest_all_physical_batch_report": "reports/m2c-s4-v4-batch17-collection.json",
+      "resolved_for_observed_batch17_path": true
     },
     "authorization_contract": {
       "path": "src/xh_agent/policy/qrm_lite/s4_v4_collection_authorization_v1.py",
-      "sha256": "8d8a3b604d0fe6721f1856d4a1436a0d177deddecc843f163319b0a736591b54",
-      "checked_parent_commit": "7066f74acda8a0308d03b287a419652ecf57842d",
+      "sha256": "6c55962cfe36dd6d3e134cb0ba327fbf9ea33ec2a2770b829593e50e2edb9005",
+      "checked_parent_commit": "4f4b780ecdbd363043bf7ce2fd2e618463cbfc3d",
       "canonical_cli_authorized": false,
       "programmatic_worker_authorized": false,
       "programmatic_packager_authorized": false,
@@ -108,6 +108,10 @@
       {
         "path": "reports/m2c-s4-v4-batch16-collection.json",
         "sha256": "d1fcaeadfcae9451394cad54b25b783e62942d50b5852a18e2317ccc015e9ee1"
+      },
+      {
+        "path": "reports/m2c-s4-v4-batch17-collection.json",
+        "sha256": "a279ddd178a82e99b24ada70d48389f5e83344bc21cd4e9a77d1b63dc333b217"
       }
     ],
     "accepted_raw_capacity_decision": {
@@ -130,10 +134,10 @@
     },
     "training_eligibility_yield": {
       "path": "reports/m2c-s4-training-eligibility-yield-adr0025.json",
-      "sha256": "2b65d438975345bef92500913e5dfdd46b65f23bf57dd213ad2ca69a021b9b18",
+      "sha256": "5dfa3a1649b6c1396723695437bd612fde7ad3fee55f8e8b94ff733d4c5eb6d7",
       "status": "BLOCKED_ZERO_OBSERVED_ELIGIBLE_CHAIN_YIELD",
-      "unique_train_identities": 43,
-      "complete_eight_step_chains": 34,
+      "unique_train_identities": 46,
+      "complete_eight_step_chains": 37,
       "eligible_training_episodes": 0,
       "finite_key_projection_for_one_eligible_episode": null
     }
