@@ -1,0 +1,220 @@
+{
+  "attempts": [
+    {
+      "attempt_id": "batch23-01",
+      "classification": "RAW_V4_FINAL_FALSE_REGRASP_CONTACT_GATE_REJECTED",
+      "collision_or_safety_violations": 0,
+      "consumed_at_ns": 1786745331231691424,
+      "consumption_id": "d90864a6acd7322f00fa776a1e1693b494f9cbb82666dc02c4855b022143e23c",
+      "core_evidence_file_sha256": {
+        "canonical_claim": "b2cfe09f23cee00ddbbb34c94d7e0705bd43b3450c269f66cb37d453d414f41e",
+        "derived_probe": "dccdeb476f2a9394352237e6c8fc621d8f6726186e7780fe13647533b44bac7e",
+        "job": "a29cd52fa3812615bdefd98f0c2da388dfd46ef4774e7cbe954c82adfd9b8e8b",
+        "probe_console": "aeccedfe2f19c707a0317d5894670672840587b754dfde077a497739021c1899",
+        "projected_claim": "b2cfe09f23cee00ddbbb34c94d7e0705bd43b3450c269f66cb37d453d414f41e",
+        "raw_probe": "5f72232d94d2668cae94bc0ab076e78d7576cbf8daed1384a37bb4e5f4be1e53",
+        "stage_console": "4f3cf6f4cfd7595662a73f4d4def11375c6bc1f0ba927d1f44bdb70faa3c91c6",
+        "stage_metrics": "60849276f5821e30189dd34ea624452e129147b4e670d03e213955c6e1fd6c7f",
+        "stage_usdc": "5ac45ac64eb9bcf2505433c805f8011b5f796d774b1fda42b2ae81bbbbbda1bb"
+      },
+      "final_controller_gate": "REJECTED",
+      "final_execution_status": "CONTACT_GATE_REJECTED",
+      "formal_q_b_evaluation": false,
+      "host_replay_passed": true,
+      "identity": {
+        "failure_seed": 221127,
+        "matched_key": "m2c-s4-v4-train-c6707e4b453452006f5ed1aee1c23ed2f764c3a5920ccbc9356a97f38dce5832",
+        "scene_seed": 22112,
+        "sdf_sha256": "2bd5a27d6d3a2ff42152024e4fbd9a68749840c153f3fe68e5b27085e58b1615",
+        "supervision_sha256": "0e169c2a91ed3a26c2e8e57a24268446bf05d7f3c2ab5d64fee45f25934d2c75"
+      },
+      "job_inventory": {
+        "canonical_path_sha256_map_digest": "496be1b2fff6247c0a30c8dd805c24b9a60eb4658cefda389011b47a06ce3e30",
+        "regular_file_count": 55
+      },
+      "model_rollout": false,
+      "offline_dataset_exclusion_reasons": [
+        "FINAL_TASK_NOT_SUCCESSFUL",
+        "STEP_7:CONTROLLER_GATE_NOT_PASSING"
+      ],
+      "offline_dataset_sample_count": 0,
+      "offline_dataset_status": "EMPTY",
+      "physical_action_executed": true,
+      "physical_skill_receipts": 8,
+      "privileged_truth_policy_input": false,
+      "probe_process_invoked": true,
+      "raw_capture_detection_counts": [
+        7,
+        6,
+        7,
+        7,
+        8,
+        11,
+        11,
+        11
+      ],
+      "raw_capture_schema": "M2CV4RawPublicAssociationCaptureV2",
+      "raw_chain_final_task_success": false,
+      "raw_chain_schema": "M2CPathBlockedRawProbeChainV4",
+      "raw_detection_capacity": 32,
+      "raw_probe_sha256": "5f72232d94d2668cae94bc0ab076e78d7576cbf8daed1384a37bb4e5f4be1e53",
+      "stage_acceptance_passed": true,
+      "step_0_through_6_all_gates_pass": true,
+      "teacher_used": false,
+      "training_sample_eligible": false,
+      "training_sample_packaged": false
+    },
+    {
+      "attempt_id": "batch23-02",
+      "classification": "ISAAC_STAGE_PROCESS_EXIT_139",
+      "collision_or_safety_violations": 0,
+      "consumed_at_ns": 1786745711975796199,
+      "consumption_id": "7fc44750e64446b65da4457e2a668c7b3e336d878ae7a67f9aa6786dd0124c31",
+      "core_evidence_file_sha256": {
+        "canonical_claim": "8a1026b528ebf32d4de945627120a25929d6601e8852ea0e8f5f95b74bf048a4",
+        "derived_probe": "dccdeb476f2a9394352237e6c8fc621d8f6726186e7780fe13647533b44bac7e",
+        "job": "5414a035d53b60681575c3ed032771b83bafd9258defc4970fd02291fc823344",
+        "projected_claim": "8a1026b528ebf32d4de945627120a25929d6601e8852ea0e8f5f95b74bf048a4",
+        "stage_console": "f1c7aca6b8ac5d39f48e1d01391c41d73f43486e1fc545f141892f9a71f9465c",
+        "stage_usdc": "89cb98c061e141a9c95a2c35803dc3d63c3f70d6ce422b8552010ac3a44b64c8"
+      },
+      "formal_q_b_evaluation": false,
+      "host_replay_passed": false,
+      "identity": {
+        "failure_seed": 221417,
+        "matched_key": "m2c-s4-v4-train-b70c39c23c04f35093e8d30a1e888aca49bcbf3b6c0ce2563a52f3530735627e",
+        "scene_seed": 22141,
+        "sdf_sha256": "769d539378a899420e55c172a34c01cfaef19c1a83fe3eded3f7a4ba190c825d",
+        "supervision_sha256": "098cbe6a3e9df3f2a7126dc8fa12d5c38f4d8df8edc85ad066f281a6f557ac40"
+      },
+      "job_inventory": {
+        "canonical_path_sha256_map_digest": "8a11e7772b42d718fbfd0c5ee4ace0708bc9b5daadbb3e4ee7f301b849627791",
+        "regular_file_count": 5
+      },
+      "model_rollout": false,
+      "offline_dataset_sample_count": 0,
+      "offline_dataset_status": "NOT_RUN_STAGE_PROCESS_EXIT_139",
+      "physical_action_executed": false,
+      "physical_skill_receipts": 0,
+      "privileged_truth_policy_input": false,
+      "probe_process_invoked": false,
+      "stage_acceptance_passed": false,
+      "stage_process_exit_code": 139,
+      "stage_simulation_app_started": true,
+      "stage_simulation_app_startup_completed": true,
+      "teacher_used": false,
+      "training_sample_eligible": false,
+      "training_sample_packaged": false
+    },
+    {
+      "attempt_id": "batch23-03",
+      "classification": "RAW_V4_FINAL_FALSE_REGRASP_PREGRASP_IK_GATE_REJECTED",
+      "collision_or_safety_violations": 0,
+      "consumed_at_ns": 1786745862821405618,
+      "consumption_id": "fe2c6bc33df8985a604ce0dfe3bd8052eec89e56267d0d8229c36bde1831b117",
+      "core_evidence_file_sha256": {
+        "canonical_claim": "d57353e0d7bee0aef9642fc7d7cae65802cdab7a32c2134eb525e0713e40c288",
+        "derived_probe": "dccdeb476f2a9394352237e6c8fc621d8f6726186e7780fe13647533b44bac7e",
+        "job": "3017833c543bc4708a91428d5f354f5d85d4db74ea158505c5abbf264fd193fb",
+        "probe_console": "a4ad4cd2fd12bed1d0a460fc7d197420c62e47ddf448a01ac9b16f941ac4652f",
+        "projected_claim": "d57353e0d7bee0aef9642fc7d7cae65802cdab7a32c2134eb525e0713e40c288",
+        "raw_probe": "31076a7d42557b2abdad5a0d21eb823bc9a74989240c7fe4c8f0a59aff7db315",
+        "stage_console": "4f60306f6352708aadc0a3843f10885e938dca034339c1f4320c6595b46c942d",
+        "stage_metrics": "12d751108e5fdd42cec37ac5041b5c9cd999a4049dfadd01813afe42a4252db8",
+        "stage_usdc": "f89bf724f9e13bfdf4270d9a9bec58845827a08db9f7bbaa0116afcc1c3524e3"
+      },
+      "final_controller_gate": "REJECTED",
+      "final_execution_status": "PREGRASP_IK_GATE_REJECTED",
+      "formal_q_b_evaluation": false,
+      "host_replay_passed": true,
+      "identity": {
+        "failure_seed": 221637,
+        "matched_key": "m2c-s4-v4-train-05e8101a9e5ce6125d227b8585ba9d3d0465c07cb5b870020184797132d555f8",
+        "scene_seed": 22163,
+        "sdf_sha256": "e30efb66aef4ff948e48551cb26d03990c14b6bb25813b9a8fd6e8b7c9831cf7",
+        "supervision_sha256": "0fcb689906b193da3ac6fb2aff83c24168c6a09fb5376a4a61e2e2f0a257f19d"
+      },
+      "job_inventory": {
+        "canonical_path_sha256_map_digest": "812c1af28eb8c5c8824b08e8a53aee1f57f5f862155b335485c5d1c1df35b2ed",
+        "regular_file_count": 55
+      },
+      "model_rollout": false,
+      "offline_dataset_exclusion_reasons": [
+        "FINAL_TASK_NOT_SUCCESSFUL",
+        "STEP_7:CONTROLLER_GATE_NOT_PASSING"
+      ],
+      "offline_dataset_sample_count": 0,
+      "offline_dataset_status": "EMPTY",
+      "physical_action_executed": true,
+      "physical_skill_receipts": 8,
+      "privileged_truth_policy_input": false,
+      "probe_process_invoked": true,
+      "raw_capture_detection_counts": [
+        7,
+        7,
+        6,
+        8,
+        9,
+        9,
+        10,
+        12
+      ],
+      "raw_capture_schema": "M2CV4RawPublicAssociationCaptureV2",
+      "raw_chain_final_task_success": false,
+      "raw_chain_schema": "M2CPathBlockedRawProbeChainV4",
+      "raw_detection_capacity": 32,
+      "raw_probe_sha256": "31076a7d42557b2abdad5a0d21eb823bc9a74989240c7fe4c8f0a59aff7db315",
+      "stage_acceptance_passed": true,
+      "step_0_through_6_all_gates_pass": true,
+      "teacher_used": false,
+      "training_sample_eligible": false,
+      "training_sample_packaged": false
+    }
+  ],
+  "audit_implementation": {
+    "path": "scripts/m2c/audit_s4_v4_batch23_collection.py",
+    "physical_replay_helper_path": "scripts/m2c/audit_s4_v4_batch10_collection.py",
+    "physical_replay_helper_sha256": "5ae44e82a63d7eb611879c81e0ff3c3205eb6d8b9613226cea4ce65e3b7fa4a6",
+    "sha256": "08cd21b613908621f6a6864403f6cc904347c1fc6ff6ebca69a11023dfd72f6a"
+  },
+  "batch_preregistration": {
+    "introduced_commit": "90487aa35942a4ebe7a1749a448b94e1c2dd3513",
+    "path": "docs/decisions/M2C-S4-V4-TRAIN-COLLECTION-BATCH-23-PREREG.json",
+    "prereg_sha256": "3e3572e3409ec37f5e22046bf6248bacec5cf1e818c32b4b3c2acc13420c948d",
+    "sha256": "8113b4d5423eeed7a096ff73b20d74113bd9df727ceeafc79987b42008dfc39f",
+    "source_snapshot_commit": "de851a2cd49f1f816c48195fcd597cb430862804",
+    "source_snapshot_inventory_sha256": "9ec9e87abb225b963d307b7c28f0592ade7a6c9b868119f53e9d44da2828d265"
+  },
+  "evidence_inventory": {
+    "canonical_path_sha256_map_digest": "00fe92b6860fba3ed0ed9b2fc038cebcb463a97c376c9ed117635ed2dbb1a5a5",
+    "regular_file_count": 118,
+    "total_file_bytes": 116071560
+  },
+  "failure_taxonomy": {
+    "ISAAC_STAGE_PROCESS_EXIT_139": 1,
+    "RAW_V4_FINAL_FALSE_REGRASP_CONTACT_GATE_REJECTED": 1,
+    "RAW_V4_FINAL_FALSE_REGRASP_PREGRASP_IK_GATE_REJECTED": 1
+  },
+  "formal_q_b_evaluation_executed": false,
+  "model_rollout_executed": false,
+  "observed_counts": {
+    "collision_or_safety_violations": 0,
+    "consumed_unique_train_keys": 3,
+    "host_replay_passes": 2,
+    "physical_skill_receipts": 16,
+    "probe_process_invocations": 2,
+    "raw_physical_chains": 2,
+    "stage_acceptance_passes": 2,
+    "stage_process_exit_139": 1,
+    "terminal_contact_gate_rejections": 1,
+    "terminal_pregrasp_ik_gate_rejections": 1,
+    "training_samples_eligible": 0,
+    "training_samples_packaged": 0
+  },
+  "privileged_truth_policy_input": false,
+  "pure_model_success_episodes": null,
+  "schema_version": "M2CS4V4Batch23CollectionAuditV1",
+  "status": "BLOCKED_ZERO_ELIGIBLE_V4_TRAIN_SAMPLES_BATCH23_WITH_STAGE_FAILURE",
+  "teacher_used": false,
+  "training_executed": false
+}
