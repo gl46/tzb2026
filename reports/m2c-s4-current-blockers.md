@@ -1,7 +1,7 @@
 # M2C S4 current blockers
 
 - Status: **BLOCKED_UNMEASURED_ZERO_ELIGIBLE_YIELD_AND_FORMAL_EXACT_PLAN_INTEGRATION**
-- Checked parent HEAD: `ca270acfb649f9dd9a4f2e0520f8728599695068`
+- Checked parent HEAD: `0621b55b91e4aad6cda1db699c62d710e3a54e79`
 - Q-A: **PASSED**
 - Q-B: **UNMEASURED**
 - `pure_model_success_episodes`: **null**, not zero
@@ -11,11 +11,11 @@
 
 ADR-0025 approved raw public-detection capacity 32 from the frozen scene-contract provenance, not from the observed maximum. The immutable scene-19083 bytes now pass the revised raw schema without truncation or filtering, but the physical result remains authoritative: terminal `CONTACT_GATE_REJECTED`, `final_task_success=false`, zero eligible rows, and no packaged sample.
 
-Across the ten immutable V3/V4 collection reports, 31 distinct TRAIN identities produced 22 complete eight-step chains and zero eligible episodes. The updated ADR-0025 section-3 audit measures both per-key yield (0/31) and complete-chain conditional yield (0/22) as 0.0. At that observed point yield there is no finite evidence-based projection even for the trainer's code minimum of one eligible episode. This blocks training; it does not claim model capability is zero. Model rollout and formal Q-B evaluation have not run, so pure success remains `null`.
+Across the eleven immutable V3/V4 collection reports, 34 distinct TRAIN identities produced 25 complete eight-step chains and zero eligible episodes. The updated ADR-0025 section-3 audit measures both per-key yield (0/34) and complete-chain conditional yield (0/25) as 0.0. At that observed point yield there is no finite evidence-based projection even for the trainer's code minimum of one eligible episode. This blocks training; it does not claim model capability is zero. Model rollout and formal Q-B evaluation have not run, so pure success remains `null`.
 
-Ten complete V3 chains and the eleven Batch-09/10/11/12 V4 chains passed gates for steps 0–6. Across all complete chains, fifteen terminate at the contact/controller gate, six at pregrasp IK, and one lifts but fails the public success predicate. This supports a recurring terminal regrasp approach/contact-acceptance mismatch but does not isolate perception offset, approach geometry, or object state. No gate, threshold, B0 byte, or frozen eligibility predicate was changed.
+Ten complete V3 chains and the fourteen Batch-09/10/11/12/13 V4 chains passed gates for steps 0–6. Across all complete chains, seventeen terminate at the contact/controller gate, seven at pregrasp IK, and one lifts but fails the public success predicate. This supports a recurring terminal regrasp approach/contact-acceptance mismatch but does not isolate perception offset, approach geometry, or object state. No gate, threshold, B0 byte, or frozen eligibility predicate was changed.
 
-Batch-12 was preregistered outcome-blind and all three selected keys were consumed exactly once. All three stage/probe chains completed and produced 24 physical receipts with zero safety violations. Scene 19189 remained ineligible at the unchanged REGRASP pregrasp-IK gate; scenes 19190 and 19191 remained ineligible at the unchanged contact gate. No subsequent preregistration is active in this snapshot, so collection is fail-closed again.
+Batch-13 was preregistered outcome-blind and all three selected keys were consumed exactly once. All three stage/probe chains completed and produced 24 physical receipts with zero safety violations. Scene 19200 remained ineligible at the unchanged REGRASP pregrasp-IK gate; scenes 19213 and 19220 remained ineligible at the unchanged contact gate. No subsequent preregistration is active in this snapshot, so collection is fail-closed again.
 
 ## ADR-0022 / ADR-0024 / ADR-0025 Phase-2 entry
 
@@ -39,5 +39,5 @@ The 2026-08-20 bundle-smoke checkpoint is unchanged.
 Next command:
 
 ```bash
-PYTHONPATH=src:scripts uv run pytest -q tests/unit/test_m2c_s4_current_blockers_report.py tests/unit/test_m2c_s4_v4_batch12_collection_audit.py
+PYTHONPATH=src:scripts uv run pytest -q tests/unit/test_m2c_s4_current_blockers_report.py tests/unit/test_m2c_s4_v4_batch13_collection_audit.py
 ```
