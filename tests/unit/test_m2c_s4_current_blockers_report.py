@@ -73,16 +73,18 @@ def test_current_s4_blocker_report_replays_v3_and_v4_collection() -> None:
     v3_bindings = training["source_reports"][:2]
     v4_bindings = training["source_reports"][2:]
     assert _v3_counts(v3_bindings) == (11, 10)
-    assert _v4_counts(v4_bindings) == (35, 27, 216, 0)
+    assert _v4_counts(v4_bindings) == (36, 28, 224, 0)
     assert training["unique_v3_train_keys_attempted"] == 11
-    assert training["unique_v4_train_keys_consumed"] == 35
-    assert training["unique_train_keys_consumed_total"] == 46
+    assert training["unique_v4_train_keys_consumed"] == 36
+    assert training["unique_train_keys_consumed_total"] == 47
     assert training["raw_v3_eight_step_chains"] == 10
-    assert training["raw_v4_eight_step_chains"] == 27
-    assert training["physical_skill_receipts_v4"] == 216
+    assert training["raw_v4_eight_step_chains"] == 28
+    assert training["physical_skill_receipts_v4"] == 224
     assert training["collision_or_safety_violations_v4"] == 0
     assert training["training_samples_eligible"] == 0
     assert training["training_samples_packaged"] == 0
+    assert training["frozen_v4_train_manifest_exhausted"] is True
+    assert training["remaining_unconsumed_v4_train_keys"] == 0
     assert not any(
         training[field]
         for field in (
@@ -95,10 +97,10 @@ def test_current_s4_blocker_report_replays_v3_and_v4_collection() -> None:
     )
 
     permission = training["permission_issue_resolution"]
-    assert permission["resolved_for_observed_batch17_path"] is True
+    assert permission["resolved_for_observed_batch18_path"] is True
     assert permission["batch04_stage_output_permission_failures"] == 3
     assert training["batch_04_preregistered_and_consumed"] is True
-    assert training["latest_completed_batch"] == "BATCH_17"
+    assert training["latest_completed_batch"] == "BATCH_18"
 
     report_commit = _git("log", "-1", "--format=%H", "--", str(REPORT.relative_to(ROOT)))
     checked_commit = report["checked_head_commit"]
@@ -131,7 +133,7 @@ def test_raw_detection_capacity_is_accepted_but_training_remains_fail_closed() -
     assert yield_report["observed_yield"]["eligible_training_episodes"] == 0
     assert yield_report["observed_yield"]["finite_key_projection_for_one_eligible_episode"] is None
 
-    batch08 = _load_binding(training["source_reports"][-10])
+    batch08 = _load_binding(training["source_reports"][-11])
     raw_attempt = next(
         attempt for attempt in batch08["attempts"] if attempt.get("raw_probe_sha256")
     )
@@ -140,21 +142,21 @@ def test_raw_detection_capacity_is_accepted_but_training_remains_fail_closed() -
     assert raw_attempt["host_replay_passed"] is False
     assert raw_attempt["training_sample_packaged"] is False
 
-    batch09 = _load_binding(training["source_reports"][-9])
+    batch09 = _load_binding(training["source_reports"][-10])
     assert batch09["observed_counts"]["stage_acceptance_passes"] == 3
     assert batch09["observed_counts"]["host_replay_passes"] == 3
     assert batch09["observed_counts"]["physical_skill_receipts"] == 24
     assert batch09["observed_counts"]["collision_or_safety_violations"] == 0
     assert batch09["observed_counts"]["training_samples_eligible"] == 0
 
-    batch10 = _load_binding(training["source_reports"][-8])
+    batch10 = _load_binding(training["source_reports"][-9])
     assert batch10["observed_counts"]["stage_acceptance_passes"] == 3
     assert batch10["observed_counts"]["host_replay_passes"] == 3
     assert batch10["observed_counts"]["physical_skill_receipts"] == 24
     assert batch10["observed_counts"]["collision_or_safety_violations"] == 0
     assert batch10["observed_counts"]["training_samples_eligible"] == 0
 
-    batch11 = _load_binding(training["source_reports"][-7])
+    batch11 = _load_binding(training["source_reports"][-8])
     assert batch11["observed_counts"]["stage_process_exit_139"] == 1
     assert batch11["observed_counts"]["stage_acceptance_passes"] == 2
     assert batch11["observed_counts"]["host_replay_passes"] == 2
@@ -162,47 +164,54 @@ def test_raw_detection_capacity_is_accepted_but_training_remains_fail_closed() -
     assert batch11["observed_counts"]["collision_or_safety_violations"] == 0
     assert batch11["observed_counts"]["training_samples_eligible"] == 0
 
-    batch12 = _load_binding(training["source_reports"][-6])
+    batch12 = _load_binding(training["source_reports"][-7])
     assert batch12["observed_counts"]["stage_acceptance_passes"] == 3
     assert batch12["observed_counts"]["host_replay_passes"] == 3
     assert batch12["observed_counts"]["physical_skill_receipts"] == 24
     assert batch12["observed_counts"]["collision_or_safety_violations"] == 0
     assert batch12["observed_counts"]["training_samples_eligible"] == 0
 
-    batch13 = _load_binding(training["source_reports"][-5])
+    batch13 = _load_binding(training["source_reports"][-6])
     assert batch13["observed_counts"]["stage_acceptance_passes"] == 3
     assert batch13["observed_counts"]["host_replay_passes"] == 3
     assert batch13["observed_counts"]["physical_skill_receipts"] == 24
     assert batch13["observed_counts"]["collision_or_safety_violations"] == 0
     assert batch13["observed_counts"]["training_samples_eligible"] == 0
 
-    batch14 = _load_binding(training["source_reports"][-4])
+    batch14 = _load_binding(training["source_reports"][-5])
     assert batch14["observed_counts"]["stage_acceptance_passes"] == 3
     assert batch14["observed_counts"]["host_replay_passes"] == 3
     assert batch14["observed_counts"]["physical_skill_receipts"] == 24
     assert batch14["observed_counts"]["collision_or_safety_violations"] == 0
     assert batch14["observed_counts"]["training_samples_eligible"] == 0
 
-    batch15 = _load_binding(training["source_reports"][-3])
+    batch15 = _load_binding(training["source_reports"][-4])
     assert batch15["observed_counts"]["stage_acceptance_passes"] == 3
     assert batch15["observed_counts"]["host_replay_passes"] == 3
     assert batch15["observed_counts"]["physical_skill_receipts"] == 24
     assert batch15["observed_counts"]["collision_or_safety_violations"] == 0
     assert batch15["observed_counts"]["training_samples_eligible"] == 0
 
-    batch16 = _load_binding(training["source_reports"][-2])
+    batch16 = _load_binding(training["source_reports"][-3])
     assert batch16["observed_counts"]["stage_acceptance_passes"] == 3
     assert batch16["observed_counts"]["host_replay_passes"] == 3
     assert batch16["observed_counts"]["physical_skill_receipts"] == 24
     assert batch16["observed_counts"]["collision_or_safety_violations"] == 0
     assert batch16["observed_counts"]["training_samples_eligible"] == 0
 
-    batch17 = _load_binding(training["source_reports"][-1])
+    batch17 = _load_binding(training["source_reports"][-2])
     assert batch17["observed_counts"]["stage_acceptance_passes"] == 3
     assert batch17["observed_counts"]["host_replay_passes"] == 3
     assert batch17["observed_counts"]["physical_skill_receipts"] == 24
     assert batch17["observed_counts"]["collision_or_safety_violations"] == 0
     assert batch17["observed_counts"]["training_samples_eligible"] == 0
+
+    batch18 = _load_binding(training["source_reports"][-1])
+    assert batch18["observed_counts"]["stage_acceptance_passes"] == 1
+    assert batch18["observed_counts"]["host_replay_passes"] == 1
+    assert batch18["observed_counts"]["physical_skill_receipts"] == 8
+    assert batch18["observed_counts"]["collision_or_safety_violations"] == 0
+    assert batch18["observed_counts"]["training_samples_eligible"] == 0
 
 
 def test_phase2_query_only_evidence_remains_non_authorizing() -> None:
