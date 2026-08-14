@@ -1,7 +1,7 @@
 # M2C S4 current blockers
 
 - Status: **BLOCKED_UNMEASURED_ZERO_ELIGIBLE_YIELD_AND_FORMAL_EXACT_PLAN_INTEGRATION**
-- Checked parent HEAD: `5a61488a601a81b8671ff557bedc6cbed167befa`
+- Checked parent HEAD: `ca270acfb649f9dd9a4f2e0520f8728599695068`
 - Q-A: **PASSED**
 - Q-B: **UNMEASURED**
 - `pure_model_success_episodes`: **null**, not zero
