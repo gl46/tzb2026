@@ -69,9 +69,12 @@ service's production backend factory remains deliberately unbound. The V4
 host-local verifier now replays both exact audit lifecycles, every HMAC
 envelope, the consumed challenge, and variable one-to-eight-decision terminal
 counts without an SSH/signing prerequisite. No real node2/labserver receipt
-has been produced. Plan-specific eight-skill phase receipts, immutable
+has been produced. The ADR-0024 V2 readiness verifier is complete and remains
+fail-closed because no real evidence index exists. Plan-specific eight-skill phase receipts, immutable
 deployment/import closure, the real exact-plan Isaac executor, the deployed
 read-only FK provider, and real-session endpoint evidence remain missing.
+The S4 entry gate still consumes the historical V2 physical envelope and must
+gain strict V4 replay before either active binding can be reviewed.
 
 ADR-0024's B0 decision is preserved: invalid mapping or preflight rejection is
 terminal `NO_PHYSICAL_EXECUTION`, never a relabelled B0 fallback. The independent

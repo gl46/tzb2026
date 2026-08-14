@@ -108,16 +108,17 @@
     "formal_v4_host_orchestrator_contract_active": true,
     "formal_v4_http_service_shell_active": true,
     "formal_v4_host_local_hmac_verifier_active": true,
+    "phase2_readiness_adr0024_v2_migration_complete": true,
     "real_node2_and_labserver_hmac_receipts_present": false,
     "real_formal_v4_isaac_http_service_bound": false,
     "formal_execution_eligible": false,
     "candidate_config": {
       "path": "configs/m2c_adr0024_phase2_binding_candidate.json",
-      "sha256": "fe1d70d69b78c04704dea07ce1c8ff78b68fc7609116a441d69bde5ff0eb19b0"
+      "sha256": "46b003411b71fdef523049d80cdedf9df891a44ac090ae3b376dbf653628da6a"
     },
     "candidate_addendum": {
       "path": "docs/decisions/ADR-0024-PHASE2-BINDING-ADDENDUM-CANDIDATE.md",
-      "sha256": "31e89f4c659d8e46fd7356a4e172bc7c11e5a2fdd29ebf5c82230b08100c10c1"
+      "sha256": "7f6acc07ec92cc9239def038f7a8bc3a32e343bf6a81c2583f5e41c147a15f5b"
     },
     "query_only_comparison_report": {
       "path": "reports/m2c-phase2-a3-query-only-deployment-comparison.json",
@@ -147,7 +148,7 @@
       "REAL_EXACT_PLAN_ISAAC_EXECUTOR_DEPLOYMENT_BINDING_MISSING",
       "REAL_QUERY_ONLY_FK_PROVIDER_DEPLOYMENT_BINDING_MISSING",
       "REAL_SESSION_ENDPOINT_STARTUP_AND_HOST_HMAC_ATTESTATION_MISSING",
-      "PHASE2_READINESS_VERIFIER_ADR0024_V2_MIGRATION_INCOMPLETE",
+      "S4_ENTRY_GATE_FORMAL_V4_EVIDENCE_REPLAY_NOT_BOUND",
       "TWO_ACTIVE_PRODUCTION_BINDINGS_UNSET"
     ]
   },

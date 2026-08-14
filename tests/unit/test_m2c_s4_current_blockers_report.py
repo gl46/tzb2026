@@ -156,6 +156,7 @@ def test_phase2_query_only_evidence_remains_non_authorizing() -> None:
     assert phase2["formal_v4_host_orchestrator_contract_active"] is True
     assert phase2["formal_v4_http_service_shell_active"] is True
     assert phase2["formal_v4_host_local_hmac_verifier_active"] is True
+    assert phase2["phase2_readiness_adr0024_v2_migration_complete"] is True
     assert phase2["real_node2_and_labserver_hmac_receipts_present"] is False
     assert phase2["real_formal_v4_isaac_http_service_bound"] is False
     assert phase2["formal_execution_eligible"] is False
@@ -174,8 +175,9 @@ def test_phase2_query_only_evidence_remains_non_authorizing() -> None:
     assert "REAL_FORMAL_V4_ISAAC_HTTP_SERVICE_BACKEND_FACTORY_NOT_BOUND" in phase2["blockers"]
     assert "REAL_EXACT_PLAN_ISAAC_EXECUTOR_MISSING" not in phase2["blockers"]
     assert "REAL_EXACT_PLAN_ISAAC_EXECUTOR_DEPLOYMENT_BINDING_MISSING" in phase2["blockers"]
+    assert "S4_ENTRY_GATE_FORMAL_V4_EVIDENCE_REPLAY_NOT_BOUND" in phase2["blockers"]
     assert "TWO_ACTIVE_PRODUCTION_BINDINGS_UNSET" in phase2["blockers"]
-    assert "PHASE2_READINESS_VERIFIER_ADR0024_V2_MIGRATION_INCOMPLETE" in phase2["blockers"]
+    assert "PHASE2_READINESS_VERIFIER_ADR0024_V2_MIGRATION_INCOMPLETE" not in phase2["blockers"]
 
 
 def test_current_s4_report_preserves_governance_and_s6_freeze() -> None:

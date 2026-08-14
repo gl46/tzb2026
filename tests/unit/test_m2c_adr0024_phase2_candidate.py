@@ -55,6 +55,15 @@ def test_candidate_smoke_is_blocked_unmeasured_and_never_physical() -> None:
     assert hmac["trusted_host_signature_required"] is False
     assert hmac["real_host_receipts_present"] is False
     assert hmac["formal_authorization"] is False
+    readiness = report["phase2_readiness_verifier"]
+    assert readiness == {
+        "status": "PASS_ADR0024_V2_CONTRACT_NO_REAL_EVIDENCE_INDEX",
+        "evidence_index_schema": "M2CADR0024Phase2EvidenceIndexV2",
+        "signed_host_receipts_required": False,
+        "active_session_b0_wrapper_required": False,
+        "real_evidence_index_present": False,
+        "binding_application_authorized": False,
+    }
     assert not report["governance"]["contract_smoke_is_physical_evidence"]
     assert not report["governance"]["teacher_used"]
 

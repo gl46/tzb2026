@@ -11,6 +11,7 @@
     "docs/decisions/ADR-0024-m2c-s4-unblock-directive.md": "62c14028df1ad91e4d3c4282c4775e33149292e9bcf10add2d505be8c7424689",
     "robot_ws/src/xh_sim/config/m1a_panda.srdf": "80948370d547cb320e49d42ffc0467e082112c09f2984700b489def88526a386",
     "robot_ws/src/xh_sim/urdf/panda_controlled.urdf": "6678ff409d60f074283805879f53edaa939ead34f97a5a961ee67f6229b44ba8",
+    "scripts/m2c/check_adr0022_binding_addendum_readiness.py": "b3bbe1350cb0053792c5c502622ba6fc07e43eba1dc896c63858061f94dafdcc",
     "scripts/m2c/audit_phase2_a3_query_only_deployment_comparison.py": "69a32a91c03c1707fe352e9ce7f70560cd4a192893be0a20b1c6c95ce49b643f",
     "scripts/m2c/run_formal_model_owned_chain_v4.py": "799caecdb12f73b5e6ea226eb2b983e4fbe4c08482f7ed037ae33c2168068eef",
     "scripts/m2c/run_a3_query_only_deployment_smoke.py": "fdef2e7dd76b6d3a141143eb30f794170126b59b3d605f651427749b07782058",
@@ -31,7 +32,9 @@
     "src/xh_agent/policy/qrm_lite/formal_split_runner_v2.py": "affbec7bfa2462c58ef093196c367eda98472f1ca349ba7b98d71796798b7c06",
     "src/xh_agent/policy/qrm_lite/formal_split_runner_v4.py": "5dfec6becb2d333e3e0f1fef2f7ed97983da28af7c19c07e537956720bf2862c",
     "src/xh_agent/policy/qrm_lite/isaac_exact_plan_runtime_v1.py": "57712a3d573f35dc3acb656e8533bb01789200501d2d7bee20450e91223e8dbe",
-    "src/xh_agent/policy/qrm_lite/offline_wire_auth_v4.py": "52ade7742f725532af5c45853f735ef9c8891ba223c86be334fa4a973614f0f2"
+    "src/xh_agent/policy/qrm_lite/offline_wire_auth_v4.py": "52ade7742f725532af5c45853f735ef9c8891ba223c86be334fa4a973614f0f2",
+    "src/xh_agent/policy/qrm_lite/phase2_binding_readiness_v2.py": "41c8ad66185b06be69e53347f03c6892fd2eb96527b24f72c2d2bb36fc26891f",
+    "src/xh_agent/policy/qrm_lite/s4_entry_gate.py": "4ede20b7e14004a095a64f151f641e464c7e95dbe7666feb68642523d9803dfb"
   },
   "native_build_evidence": {
     "report_path": "reports/m2c-phase2-a3-native-build.json",
@@ -96,7 +99,7 @@
     "REAL_EXACT_PLAN_ISAAC_EXECUTOR_DEPLOYMENT_BINDING_MISSING",
     "REAL_QUERY_ONLY_FK_PROVIDER_DEPLOYMENT_BINDING_MISSING",
     "REAL_SESSION_ENDPOINT_STARTUP_AND_HOST_HMAC_ATTESTATION_MISSING",
-    "PHASE2_READINESS_VERIFIER_ADR0024_V2_MIGRATION_INCOMPLETE",
+    "S4_ENTRY_GATE_FORMAL_V4_EVIDENCE_REPLAY_NOT_BOUND",
     "TWO_ACTIVE_PRODUCTION_BINDINGS_UNSET"
   ],
   "one_next_command": ".venv/bin/python scripts/m2c/audit_adr0024_phase2_candidate.py --project-root ."

@@ -37,6 +37,8 @@ FORMAL_V4_CLI_PATH = Path("scripts/m2c/run_formal_model_owned_chain_v4.py")
 FORMAL_V4_SERVICE_PATH = Path("scripts/m2c/serve_formal_isaac_endpoint_v4.py")
 FORMAL_V4_HMAC_VERIFIER_PATH = Path("src/xh_agent/policy/qrm_lite/offline_wire_auth_v4.py")
 FORMAL_V4_HMAC_CLI_PATH = Path("scripts/m2c/verify_formal_wire_auth_v4.py")
+PHASE2_READINESS_V2_PATH = Path("src/xh_agent/policy/qrm_lite/phase2_binding_readiness_v2.py")
+PHASE2_READINESS_CLI_PATH = Path("scripts/m2c/check_adr0022_binding_addendum_readiness.py")
 ADR_0024_PATH = Path("docs/decisions/ADR-0024-m2c-s4-unblock-directive.md")
 BINDING_NAMES = (
     "FORMAL_PHYSICAL_RUNNER_BINDING",
@@ -53,7 +55,7 @@ EXPECTED_BLOCKERS = (
     "REAL_EXACT_PLAN_ISAAC_EXECUTOR_DEPLOYMENT_BINDING_MISSING",
     "REAL_QUERY_ONLY_FK_PROVIDER_DEPLOYMENT_BINDING_MISSING",
     "REAL_SESSION_ENDPOINT_STARTUP_AND_HOST_HMAC_ATTESTATION_MISSING",
-    "PHASE2_READINESS_VERIFIER_ADR0024_V2_MIGRATION_INCOMPLETE",
+    "S4_ENTRY_GATE_FORMAL_V4_EVIDENCE_REPLAY_NOT_BOUND",
     "TWO_ACTIVE_PRODUCTION_BINDINGS_UNSET",
 )
 NATIVE_BUILD_RECORDED_BLOCKERS = (
@@ -395,6 +397,21 @@ def build_audit(project_root: Path) -> dict[str, Any]:
     ):
         if token not in hmac_cli:
             raise CandidateAuditFailure(f"formal V4 HMAC CLI omitted marker: {token}")
+    readiness = read_regular_file_once(root / PHASE2_READINESS_V2_PATH).decode("utf-8")
+    for token in (
+        "M2CADR0024Phase2EvidenceIndexV2",
+        "HostWireHMACVerificationReceiptV4",
+        "COMPLETE_REAL_ISAAC_EIGHT_SKILL_VALIDATION",
+        '"FROZEN_B0_RUNTIME_WRAPPER_BINDING": None',
+        '"OFFLINE_WIRE_AUTHENTICATION_VERIFIER_BINDING": None',
+    ):
+        if token not in readiness:
+            raise CandidateAuditFailure(f"Phase-2 V2 readiness omitted marker: {token}")
+    if "PHASE2_READINESS_VERIFIER_ADR0024_V2_MIGRATION_INCOMPLETE" in readiness:
+        raise CandidateAuditFailure("Phase-2 V2 readiness retains the migration blocker")
+    readiness_cli = read_regular_file_once(root / PHASE2_READINESS_CLI_PATH).decode("utf-8")
+    if "phase2_binding_readiness_v2" not in readiness_cli:
+        raise CandidateAuditFailure("Phase-2 readiness CLI does not dispatch to V2")
     closure = inspect_a3_production_closure_v1(project_root=root)
     if closure.status != "NOT_AVAILABLE" or closure.formal_execution_eligible:
         raise CandidateAuditFailure("local A.3 closure unexpectedly claimed production readiness")
@@ -431,6 +448,14 @@ def build_audit(project_root: Path) -> dict[str, Any]:
             "trusted_host_signature_required": False,
             "real_host_receipts_present": False,
             "formal_authorization": False,
+        },
+        "phase2_readiness_verifier": {
+            "status": "PASS_ADR0024_V2_CONTRACT_NO_REAL_EVIDENCE_INDEX",
+            "evidence_index_schema": "M2CADR0024Phase2EvidenceIndexV2",
+            "signed_host_receipts_required": False,
+            "active_session_b0_wrapper_required": False,
+            "real_evidence_index_present": False,
+            "binding_application_authorized": False,
         },
         "blockers": list(EXPECTED_BLOCKERS),
         "governance": candidate["evidence_claims"],

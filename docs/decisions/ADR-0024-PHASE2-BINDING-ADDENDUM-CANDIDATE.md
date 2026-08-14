@@ -110,8 +110,9 @@ terminalized episode without any SSH signature, trust root, or signer
 principal. They bind the one-shot challenge receipt, formal evidence, exact
 Qwen/Isaac audit lifecycle, every authenticated envelope, and variable counts
 for one through eight model decisions. This is still contract-only: no real
-node2 or labserver receipt exists, the V4 Isaac HTTP backend factory is
-unbound, and the entry/readiness migration is incomplete.
+node2 or labserver receipt exists and the V4 Isaac HTTP backend factory is
+unbound. The ADR-0024 V2 readiness verifier is implemented and remains
+fail-closed until its exact real-evidence index is supplied.
 
 ## B0 boundary
 
@@ -138,7 +139,7 @@ nor any safety/IK/collision/controller gate.
 - `REAL_EXACT_PLAN_ISAAC_EXECUTOR_DEPLOYMENT_BINDING_MISSING`
 - `REAL_QUERY_ONLY_FK_PROVIDER_DEPLOYMENT_BINDING_MISSING`
 - `REAL_SESSION_ENDPOINT_STARTUP_AND_HOST_HMAC_ATTESTATION_MISSING`
-- `PHASE2_READINESS_VERIFIER_ADR0024_V2_MIGRATION_INCOMPLETE`
+- `S4_ENTRY_GATE_FORMAL_V4_EVIDENCE_REPLAY_NOT_BOUND`
 - `TWO_ACTIVE_PRODUCTION_BINDINGS_UNSET`
 
 No training, Isaac scene startup, physical action, SMOKE, Q-B, or S5/S6

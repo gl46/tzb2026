@@ -30,6 +30,7 @@ SOURCE_PATHS = (
     Path("src/xh_agent/policy/qrm_lite/exact_plan_primitive_bundle_v1.py"),
     Path("src/xh_agent/policy/qrm_lite/exact_plan_preflight_v1.py"),
     Path("src/xh_agent/policy/qrm_lite/phase2_binding_readiness_v1.py"),
+    Path("src/xh_agent/policy/qrm_lite/phase2_binding_readiness_v2.py"),
     Path("src/xh_agent/policy/qrm_lite/isaac_exact_plan_runtime_v1.py"),
     Path("src/xh_agent/policy/qrm_lite/a3_bullet_production_adapter_v1.py"),
     Path("src/xh_agent/policy/qrm_lite/public_tracks_v4.py"),
@@ -203,10 +204,19 @@ def build_report() -> dict[str, Any]:
     entry = _module(entry_path)
     preflight_path = Path("src/xh_agent/policy/qrm_lite/exact_plan_preflight_v1.py")
     preflight = _module(preflight_path)
-    readiness_path = Path("src/xh_agent/policy/qrm_lite/phase2_binding_readiness_v1.py")
+    readiness_path = Path("src/xh_agent/policy/qrm_lite/phase2_binding_readiness_v2.py")
     readiness_source = (ROOT / readiness_path).read_text(encoding="utf-8")
-    if "PHASE2_READINESS_VERIFIER_ADR0024_V2_MIGRATION_INCOMPLETE" not in readiness_source:
-        raise AuditError("Phase-2 readiness migration blocker is not fail-closed")
+    for token in (
+        "M2CADR0024Phase2EvidenceIndexV2",
+        "HostWireHMACVerificationReceiptV4",
+        "COMPLETE_REAL_ISAAC_EIGHT_SKILL_VALIDATION",
+        '"FROZEN_B0_RUNTIME_WRAPPER_BINDING": None',
+        '"OFFLINE_WIRE_AUTHENTICATION_VERIFIER_BINDING": None',
+    ):
+        if token not in readiness_source:
+            raise AuditError(f"Phase-2 V2 readiness omitted marker: {token}")
+    if "PHASE2_READINESS_VERIFIER_ADR0024_V2_MIGRATION_INCOMPLETE" in readiness_source:
+        raise AuditError("Phase-2 V2 readiness retains the migration blocker")
 
     formal_fields = _class_fields(observation, "PathBlockedPublicObservationV4")
     a1_fields = _class_fields(bundle, "ExactPlanA1InputsV1")
@@ -349,7 +359,7 @@ def build_report() -> dict[str, Any]:
             "trusted_host_signature_prerequisite_rescinded": True,
             "session_receipt_and_hmac_post_execution_evidence_required": True,
             "legacy_a3_signature_schema_audit_only": legacy_signature_audit_only,
-            "phase2_readiness_adr0024_v2_migration_complete": False,
+            "phase2_readiness_adr0024_v2_migration_complete": True,
         },
         "formal_wire": {
             "current_observation_schema": "FormalPublicObservationV4",
@@ -383,12 +393,12 @@ def build_report() -> dict[str, Any]:
             "REAL_ISAAC_EPISODE_LIFECYCLE_AND_CAPTURE_SOURCE_NOT_BOUND",
             "REAL_FORMAL_V4_ISAAC_HTTP_SERVICE_BACKEND_FACTORY_NOT_BOUND",
             "PLAN_SPECIFIC_A3_PREFLIGHT_AND_EIGHT_SKILL_EXECUTION_UNMEASURED",
-            "PHASE2_READINESS_VERIFIER_ADR0024_V2_MIGRATION_INCOMPLETE",
+            "S4_ENTRY_GATE_FORMAL_V4_EVIDENCE_REPLAY_NOT_BOUND",
             "TWO_ACTIVE_PRODUCTION_BINDINGS_UNSET",
         ],
         "verification": {
             "command": ".venv/bin/pytest -q tests/unit/test_m2c_*.py",
-            "passed": 809,
+            "passed": 813,
             "failed": 0,
         },
         "next_implementation_order": [
@@ -396,7 +406,8 @@ def build_report() -> dict[str, Any]:
             "BIND_REAL_ISAAC_EPISODE_LIFECYCLE_AND_PUBLIC_CAPTURE_SOURCE",
             "BIND_REAL_FORMAL_V4_ISAAC_HTTP_SERVICE_BACKEND_FACTORY",
             "REPLAY_PLAN_SPECIFIC_A3_PREFLIGHT_FOR_ALL_EIGHT_SKILLS",
-            "MIGRATE_PHASE2_READINESS_TO_ADR0024_AND_SET_ONLY_TWO_ACTIVE_BINDINGS",
+            "MIGRATE_S4_ENTRY_GATE_TO_STRICT_FORMAL_V4_EVIDENCE_REPLAY",
+            "COLLECT_REAL_PHASE2_V2_EVIDENCE_INDEX_AND_REVIEW_TWO_ACTIVE_BINDINGS",
         ],
         "next_command": (
             ".venv/bin/pytest -q tests/unit/test_m2c_phase2_formal_exact_plan_integration.py"
@@ -459,9 +470,10 @@ The coordinator does not generate waypoints.  A single-use, deployment-bound
 provider now consumes one query-only active-session state receipt and replays
 the complete request/observation/mapping/plan/source closure before exposing a
 plan.  Its real Isaac synthesis backend and lifecycle/capture deployment are
-still absent, plan-specific A3 evidence for all eight skills remains
-unmeasured, and the Phase-2 readiness verifier has not completed its ADR-0024
-migration.
+still absent and plan-specific A3 evidence for all eight skills remains
+unmeasured. The ADR-0024 V2 readiness verifier is complete but has no real
+evidence index to authorize an addendum. The S4 entry gate still replays the
+historical V2 physical envelope and is not yet a V4 authorization consumer.
 
 ## Blockers
 

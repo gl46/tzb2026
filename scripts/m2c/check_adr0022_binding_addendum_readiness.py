@@ -8,7 +8,7 @@ import json
 import os
 from pathlib import Path
 
-from xh_agent.policy.qrm_lite.phase2_binding_readiness_v1 import (
+from xh_agent.policy.qrm_lite.phase2_binding_readiness_v2 import (
     ADDENDUM_PATH,
     ReadinessFailure,
     UNLOCK_CONFIG_PATH,
