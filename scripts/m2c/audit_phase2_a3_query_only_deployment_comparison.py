@@ -16,6 +16,7 @@ import json
 import os
 from pathlib import Path
 import stat
+import subprocess
 from typing import Any
 import xml.etree.ElementTree as ET
 
@@ -99,6 +100,18 @@ def read_regular_file_once(path: Path) -> bytes:
 
 def _sha256(raw: bytes) -> str:
     return hashlib.sha256(raw).hexdigest()
+
+
+def _git_blob(project_root: Path, commit: str, relative_path: str) -> bytes:
+    completed = subprocess.run(
+        ["git", "show", f"{commit}:{relative_path}"],
+        cwd=project_root,
+        check=False,
+        capture_output=True,
+    )
+    if completed.returncode != 0:
+        raise ComparisonAuditFailure("historical controlled Panda SRDF blob is unavailable")
+    return completed.stdout
 
 
 def _canonical_object(raw: bytes, *, label: str) -> dict[str, Any]:
@@ -273,8 +286,8 @@ def build_report(
     ):
         raise ComparisonAuditFailure("remaining rejection set differs")
 
-    srdf_path = root / "robot_ws/src/xh_sim/config/m1a_panda.srdf"
-    srdf_raw = read_regular_file_once(srdf_path)
+    srdf_relative = "robot_ws/src/xh_sim/config/m1a_panda.srdf"
+    srdf_raw = _git_blob(root, AFTER_COMMIT, srdf_relative)
     if _sha256(srdf_raw) != CONTROLLED_PANDA_SRDF_SHA256:
         raise ComparisonAuditFailure("controlled Panda SRDF SHA-256 differs")
     disabled = _srdf_disabled_pairs(srdf_raw)

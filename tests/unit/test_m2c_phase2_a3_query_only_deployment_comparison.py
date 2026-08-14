@@ -88,3 +88,11 @@ def test_remaining_pairs_are_explicit_and_do_not_include_fingers() -> None:
         for left, _, right, _ in REMAINING_REJECTED_PAIRS
     )
     assert REMAINING_BLOCKERS[0] == "A3_STATIC_HOME_SELF_COLLISION_PREFLIGHT_REJECTED"
+
+
+def test_historical_comparison_uses_after_commit_srdf_not_current_worktree() -> None:
+    source = (
+        PROJECT_ROOT / "scripts/m2c/audit_phase2_a3_query_only_deployment_comparison.py"
+    ).read_text()
+    assert "_git_blob(root, AFTER_COMMIT, srdf_relative)" in source
+    assert "read_regular_file_once(srdf_path)" not in source
