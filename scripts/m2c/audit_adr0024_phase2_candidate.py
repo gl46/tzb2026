@@ -31,7 +31,9 @@ CANDIDATE_CONFIG_SCHEMA = "M2CADR0024Phase2BindingCandidateV1"
 CANDIDATE_CONFIG_PATH = Path("configs/m2c_adr0024_phase2_binding_candidate.json")
 CANDIDATE_ADDENDUM_PATH = Path("docs/decisions/ADR-0024-PHASE2-BINDING-ADDENDUM-CANDIDATE.md")
 ENTRY_GATE_PATH = Path("src/xh_agent/policy/qrm_lite/s4_entry_gate.py")
-FORMAL_RUNNER_PATH = Path("src/xh_agent/policy/qrm_lite/formal_split_runner_v2.py")
+FORMAL_V2_RUNNER_PATH = Path("src/xh_agent/policy/qrm_lite/formal_split_runner_v2.py")
+FORMAL_V4_HOST_PATH = Path("src/xh_agent/policy/qrm_lite/formal_split_host_v4.py")
+FORMAL_V4_CLI_PATH = Path("scripts/m2c/run_formal_model_owned_chain_v4.py")
 ADR_0024_PATH = Path("docs/decisions/ADR-0024-m2c-s4-unblock-directive.md")
 BINDING_NAMES = (
     "FORMAL_PHYSICAL_RUNNER_BINDING",
@@ -43,6 +45,7 @@ EXPECTED_BLOCKERS = (
     "EIGHT_SKILL_REAL_ISAAC_PHASE_VALIDATION_MISSING",
     "REAL_BOUND_PLAN_SYNTHESIS_BACKEND_NOT_BOUND",
     "REAL_ISAAC_EPISODE_LIFECYCLE_AND_CAPTURE_SOURCE_NOT_BOUND",
+    "REAL_FORMAL_V4_ISAAC_HTTP_SERVICE_NOT_BOUND",
     "IMMUTABLE_DEPLOYMENT_COMMIT_CONTAINER_IMPORT_ASSET_CLOSURE_MISSING",
     "REAL_EXACT_PLAN_ISAAC_EXECUTOR_DEPLOYMENT_BINDING_MISSING",
     "REAL_QUERY_ONLY_FK_PROVIDER_DEPLOYMENT_BINDING_MISSING",
@@ -298,7 +301,7 @@ def build_audit(project_root: Path) -> dict[str, Any]:
     smokes = replay_exact_plan_contract_smoke()
     if len(smokes) != 3 or any(item["status"] != "PASS_CONTRACT_ONLY" for item in smokes):
         raise CandidateAuditFailure("exact-plan contract smoke failed")
-    formal_source = read_regular_file_once(root / FORMAL_RUNNER_PATH).decode("utf-8")
+    formal_source = read_regular_file_once(root / FORMAL_V2_RUNNER_PATH).decode("utf-8")
     required_terminal_tokens = (
         'receipt.execution_source != "NO_PHYSICAL_EXECUTION"',
         'receipt.executed_skill != "NO_PHYSICAL_EXECUTION"',
@@ -306,6 +309,27 @@ def build_audit(project_root: Path) -> dict[str, Any]:
     )
     if any(token not in formal_source for token in required_terminal_tokens):
         raise CandidateAuditFailure("terminal NO_PHYSICAL_EXECUTION source contract is absent")
+    formal_v4_host = read_regular_file_once(root / FORMAL_V4_HOST_PATH).decode("utf-8")
+    for token in (
+        "M2CFormalSplitRunnerEvidenceV4",
+        "TERMINAL_NO_PHYSICAL_EXECUTION",
+        "b0_runtime_fallback_present",
+        "run_formal_v4_episode",
+    ):
+        if token not in formal_v4_host:
+            raise CandidateAuditFailure(f"formal V4 host contract omitted marker: {token}")
+    for forbidden in ("EXPECTED_CHAIN", "expected_skill", "B0_FALLBACK"):
+        if forbidden in formal_v4_host:
+            raise CandidateAuditFailure(f"formal V4 host contains fixed selection: {forbidden}")
+    formal_v4_cli = read_regular_file_once(root / FORMAL_V4_CLI_PATH).decode("utf-8")
+    for token in (
+        "consume_wire_challenge_create_only",
+        "require_pre_freeze",
+        "_require_unused_outputs",
+        "ABORTED_PARTIAL_RUN_NOT_ENTRY_EVIDENCE",
+    ):
+        if token not in formal_v4_cli:
+            raise CandidateAuditFailure(f"formal V4 CLI contract omitted marker: {token}")
     closure = inspect_a3_production_closure_v1(project_root=root)
     if closure.status != "NOT_AVAILABLE" or closure.formal_execution_eligible:
         raise CandidateAuditFailure("local A.3 closure unexpectedly claimed production readiness")

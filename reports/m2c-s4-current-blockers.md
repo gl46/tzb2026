@@ -63,9 +63,12 @@ to force a pass.
 Consequently the Phase-2 candidate addendum remains
 `CONTRACT_SMOKE_ONLY_BLOCKED_UNMEASURED`. It is not physical evidence and does
 not authorize formal execution. The four production bindings remain null.
-Besides the static-state rejection, real eight-skill phase receipts, immutable
-deployment/import closure, the real exact-plan Isaac executor, the deployed
-read-only FK provider, and real-session endpoint/HMAC evidence remain missing.
+The V4 host-orchestration/evidence contract now exists and preserves terminal
+`NO_PHYSICAL_EXECUTION` without B0 substitution, but no real V4 Isaac HTTP
+service is deployment-bound. Besides the static-state rejection, real
+eight-skill phase receipts, immutable deployment/import closure, the real
+exact-plan Isaac executor, the deployed read-only FK provider, and real-session
+endpoint/HMAC evidence remain missing.
 
 ADR-0024's B0 decision is preserved: invalid mapping or preflight rejection is
 terminal `NO_PHYSICAL_EXECUTION`, never a relabelled B0 fallback. The independent

@@ -75,6 +75,18 @@ def test_candidate_config_requires_literal_none_bindings_and_exact_terminal_poli
         "TERMINAL_NO_PHYSICAL_EXECUTION"
     )
     assert not candidate["b0_policy"]["runtime_wrapper_required"]
+    assert (
+        candidate["source_bindings"]["src/xh_agent/policy/qrm_lite/formal_split_host_v4.py"]
+        == hashlib.sha256(
+            (PROJECT_ROOT / "src/xh_agent/policy/qrm_lite/formal_split_host_v4.py").read_bytes()
+        ).hexdigest()
+    )
+    assert (
+        candidate["source_bindings"]["scripts/m2c/run_formal_model_owned_chain_v4.py"]
+        == hashlib.sha256(
+            (PROJECT_ROOT / "scripts/m2c/run_formal_model_owned_chain_v4.py").read_bytes()
+        ).hexdigest()
+    )
 
 
 def test_candidate_source_tamper_and_false_physical_claim_fail_closed(tmp_path: Path) -> None:

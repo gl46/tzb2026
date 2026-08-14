@@ -2,11 +2,12 @@
   "blockers": [
     "REAL_BOUND_PLAN_SYNTHESIS_BACKEND_NOT_BOUND",
     "REAL_ISAAC_EPISODE_LIFECYCLE_AND_CAPTURE_SOURCE_NOT_BOUND",
+    "REAL_FORMAL_V4_ISAAC_HTTP_SERVICE_NOT_BOUND",
     "PLAN_SPECIFIC_A3_PREFLIGHT_AND_EIGHT_SKILL_EXECUTION_UNMEASURED",
     "PHASE2_READINESS_VERIFIER_ADR0024_V2_MIGRATION_INCOMPLETE",
     "TWO_ACTIVE_PRODUCTION_BINDINGS_UNSET"
   ],
-  "checked_head_commit": "7aafa6b782c1a282d974957446eee2dfa3b8e54c",
+  "checked_head_commit": "04673d6a1db36ef50fd9e46651f1a4df4966bee9",
   "formal_backend": {
     "legacy_v2_construct_exact_plan_is_rejection_stub": true,
     "legacy_v2_execute_exact_plan_is_rejection_stub": true,
@@ -15,6 +16,7 @@
     "v4_bound_plan_provider_contract_active": true,
     "v4_endpoint_state_machine_active": true,
     "v4_exact_plan_runtime_prepare_and_execute_active": true,
+    "v4_host_orchestrator_contract_active": true,
     "v4_public_observation_provider_active": true
   },
   "formal_execution_eligible": false,
@@ -43,6 +45,7 @@
     "exact_plan_a1_a4_envelope": true,
     "formal_v4_backend_coordinator_active": true,
     "formal_v4_endpoint_state_machine_active": true,
+    "formal_v4_host_orchestrator_active": true,
     "legacy_a3_signature_schema_audit_only": true,
     "no_replan_phase_executor": true,
     "partial_failure_actuation_accounting_exact": true,
@@ -59,6 +62,7 @@
   "next_implementation_order": [
     "BIND_REAL_QUERY_ONLY_PLAN_SYNTHESIS_BACKEND",
     "BIND_REAL_ISAAC_EPISODE_LIFECYCLE_AND_PUBLIC_CAPTURE_SOURCE",
+    "BIND_REAL_FORMAL_V4_ISAAC_HTTP_SERVICE",
     "REPLAY_PLAN_SPECIFIC_A3_PREFLIGHT_FOR_ALL_EIGHT_SKILLS",
     "MIGRATE_PHASE2_READINESS_TO_ADR0024_AND_SET_ONLY_TWO_ACTIVE_BINDINGS"
   ],
@@ -129,6 +133,14 @@
       "sha256": "5dfec6becb2d333e3e0f1fef2f7ed97983da28af7c19c07e537956720bf2862c"
     },
     {
+      "path": "src/xh_agent/policy/qrm_lite/formal_split_host_v4.py",
+      "sha256": "a6ed4f26c428904843ad117a4602138d66fc2c5000c042168a3b3cc7c03e0808"
+    },
+    {
+      "path": "scripts/m2c/run_formal_model_owned_chain_v4.py",
+      "sha256": "799caecdb12f73b5e6ea226eb2b983e4fbe4c08482f7ed037ae33c2168068eef"
+    },
+    {
       "path": "src/xh_agent/policy/qrm_lite/formal_isaac_endpoint_v4.py",
       "sha256": "67da7fae1dc918da855d4e8d537ed39f107f21bb35d1c1237bdac0b7a4d15c31"
     },
@@ -150,7 +162,7 @@
     },
     {
       "path": "configs/m2c_adr0024_phase2_binding_candidate.json",
-      "sha256": "84e47af0edb64acb0882f2c0a1cdc8425792911c724980e940b9ce37a4c195ce"
+      "sha256": "b13e40b5992c3fa29073f3b3ea11793bb4afba785af4d201b1bd0771dc1deefd"
     },
     {
       "path": "docs/decisions/ADR-0024-PHASE2-BINDING-ADDENDUM-CANDIDATE.md",
@@ -158,7 +170,7 @@
     },
     {
       "path": "reports/m2c-s4-current-blockers.json",
-      "sha256": "008691b53e5850894428377f8158df2d1d95ab3aed93138525ff1bfb55aaa7d2"
+      "sha256": "e888782b849ee7601a518c8ede85d56ffce8fdd6113692090f16e5232caa323e"
     }
   ],
   "status": "BLOCKED_UNMEASURED_FORMAL_EXACT_PLAN_INTEGRATION",
@@ -167,6 +179,6 @@
   "verification": {
     "command": ".venv/bin/pytest -q tests/unit/test_m2c_*.py",
     "failed": 0,
-    "passed": 786
+    "passed": 798
   }
 }

@@ -39,7 +39,7 @@ def test_phase2_integration_audit_replays_current_fail_closed_sources() -> None:
     assert recorded["blockers"] == replayed["blockers"]
     assert recorded["verification"] == {
         "command": ".venv/bin/pytest -q tests/unit/test_m2c_*.py",
-        "passed": 786,
+        "passed": 798,
         "failed": 0,
     }
 
@@ -69,6 +69,7 @@ def test_audit_separates_implemented_contracts_from_missing_formal_path() -> Non
             "legacy_a3_signature_schema_audit_only",
             "formal_v4_endpoint_state_machine_active",
             "formal_v4_backend_coordinator_active",
+            "formal_v4_host_orchestrator_active",
             "replayable_public_observation_provider_active",
             "typed_non_actuating_gate_rejection_only",
             "partial_failure_actuation_accounting_exact",
@@ -86,6 +87,7 @@ def test_audit_separates_implemented_contracts_from_missing_formal_path() -> Non
         "v4_public_observation_provider_active": True,
         "v4_exact_plan_runtime_prepare_and_execute_active": True,
         "v4_bound_plan_provider_contract_active": True,
+        "v4_host_orchestrator_contract_active": True,
         "legacy_v2_construct_exact_plan_is_rejection_stub": True,
         "legacy_v2_execute_exact_plan_is_rejection_stub": True,
         "production_bound_plan_constructor_calls": [],
@@ -94,6 +96,7 @@ def test_audit_separates_implemented_contracts_from_missing_formal_path() -> Non
     assert report["formal_wire"]["v4_candidate_digest_recomputable_from_current_wire"] is True
     assert report["formal_wire"]["versioned_v4_observation_schema"] == ("FormalPublicObservationV4")
     assert report["formal_wire"]["versioned_v4_transport_active"] is True
+    assert "REAL_FORMAL_V4_ISAAC_HTTP_SERVICE_NOT_BOUND" in report["blockers"]
     assert report["implemented_contracts"]["versioned_formal_v4_observation_transport"] is True
     assert report["implemented_contracts"]["bound_plan_runtime_dynamic_a1_cross_binding"] is True
     assert (

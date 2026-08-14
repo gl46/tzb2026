@@ -37,6 +37,8 @@ SOURCE_PATHS = (
     Path("src/xh_agent/policy/qrm_lite/formal_public_observation_v4.py"),
     Path("src/xh_agent/policy/qrm_lite/formal_public_observation_provider_v4.py"),
     Path("src/xh_agent/policy/qrm_lite/formal_split_runner_v4.py"),
+    Path("src/xh_agent/policy/qrm_lite/formal_split_host_v4.py"),
+    Path("scripts/m2c/run_formal_model_owned_chain_v4.py"),
     Path("src/xh_agent/policy/qrm_lite/formal_isaac_endpoint_v4.py"),
     Path("src/xh_agent/policy/qrm_lite/formal_exact_plan_runtime_v1.py"),
     Path("src/xh_agent/policy/qrm_lite/formal_bound_plan_provider_v1.py"),
@@ -180,12 +182,14 @@ def build_report() -> dict[str, Any]:
     observation_path = Path("src/xh_agent/policy/qrm_lite/path_blocked_supervision_v4.py")
     endpoint_v4_path = Path("src/xh_agent/policy/qrm_lite/formal_isaac_endpoint_v4.py")
     backend_v4_path = Path("src/xh_agent/policy/qrm_lite/formal_isaac_backend_v4.py")
+    host_v4_path = Path("src/xh_agent/policy/qrm_lite/formal_split_host_v4.py")
     bound_provider_path = Path("src/xh_agent/policy/qrm_lite/formal_bound_plan_provider_v1.py")
     bundle_path = Path("src/xh_agent/policy/qrm_lite/exact_plan_primitive_bundle_v1.py")
     entry_path = Path("src/xh_agent/policy/qrm_lite/s4_entry_gate.py")
     observation = _module(observation_path)
     endpoint_v4 = _module(endpoint_v4_path)
     backend_v4 = _module(backend_v4_path)
+    host_v4 = _module(host_v4_path)
     bound_provider = _module(bound_provider_path)
     legacy_backend = _module(backend_path)
     bundle = _module(bundle_path)
@@ -233,6 +237,21 @@ def build_report() -> dict[str, Any]:
         raise AuditError("formal V4 endpoint state machine is incomplete")
     if not {"start", "capture", "execute", "finalize"}.issubset(backend_methods):
         raise AuditError("formal V4 backend coordinator is incomplete")
+    host_functions = {
+        item.name
+        for item in host_v4.body
+        if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef))
+    }
+    if "run_formal_v4_episode" not in host_functions:
+        raise AuditError("formal V4 host orchestrator is incomplete")
+    host_evidence_fields = _class_fields(host_v4, "M2CFormalSplitRunnerEvidenceV4")
+    if not {
+        "wire_transcript_sha256",
+        "evidence_sha256",
+        "strict_pure_model_success",
+        "b0_runtime_fallback_present",
+    }.issubset(host_evidence_fields):
+        raise AuditError("formal V4 host evidence schema lost terminal replay fields")
     provider_methods = _class_methods(bound_provider, "FormalBoundExactPlanProviderV1")
     if not {"_validate_production_deployment", "build_bound_plan"}.issubset(provider_methods):
         raise AuditError("formal V4 bound-plan provider contract is incomplete")
@@ -285,6 +304,7 @@ def build_report() -> dict[str, Any]:
             "deployment_bound_plan_provider_contract_active": True,
             "formal_v4_endpoint_state_machine_active": True,
             "formal_v4_backend_coordinator_active": runtime_bridge_active,
+            "formal_v4_host_orchestrator_active": True,
             "replayable_public_observation_provider_active": True,
             "typed_non_actuating_gate_rejection_only": True,
             "partial_failure_actuation_accounting_exact": True,
@@ -308,6 +328,7 @@ def build_report() -> dict[str, Any]:
             "v4_public_observation_provider_active": True,
             "v4_exact_plan_runtime_prepare_and_execute_active": True,
             "v4_bound_plan_provider_contract_active": True,
+            "v4_host_orchestrator_contract_active": True,
             "legacy_v2_construct_exact_plan_is_rejection_stub": legacy_construct_stub,
             "legacy_v2_execute_exact_plan_is_rejection_stub": legacy_execute_stub,
             "production_bound_plan_constructor_calls": constructor_calls,
@@ -321,18 +342,20 @@ def build_report() -> dict[str, Any]:
         "blockers": [
             "REAL_BOUND_PLAN_SYNTHESIS_BACKEND_NOT_BOUND",
             "REAL_ISAAC_EPISODE_LIFECYCLE_AND_CAPTURE_SOURCE_NOT_BOUND",
+            "REAL_FORMAL_V4_ISAAC_HTTP_SERVICE_NOT_BOUND",
             "PLAN_SPECIFIC_A3_PREFLIGHT_AND_EIGHT_SKILL_EXECUTION_UNMEASURED",
             "PHASE2_READINESS_VERIFIER_ADR0024_V2_MIGRATION_INCOMPLETE",
             "TWO_ACTIVE_PRODUCTION_BINDINGS_UNSET",
         ],
         "verification": {
             "command": ".venv/bin/pytest -q tests/unit/test_m2c_*.py",
-            "passed": 786,
+            "passed": 798,
             "failed": 0,
         },
         "next_implementation_order": [
             "BIND_REAL_QUERY_ONLY_PLAN_SYNTHESIS_BACKEND",
             "BIND_REAL_ISAAC_EPISODE_LIFECYCLE_AND_PUBLIC_CAPTURE_SOURCE",
+            "BIND_REAL_FORMAL_V4_ISAAC_HTTP_SERVICE",
             "REPLAY_PLAN_SPECIFIC_A3_PREFLIGHT_FOR_ALL_EIGHT_SKILLS",
             "MIGRATE_PHASE2_READINESS_TO_ADR0024_AND_SET_ONLY_TWO_ACTIVE_BINDINGS",
         ],
@@ -379,6 +402,12 @@ mapping, all-phase preflight, single-use exact-plan execution, and final public
 evaluation.  INVALID mappings and explicitly typed non-actuating gate
 rejections terminate as `NO_PHYSICAL_EXECUTION`; unknown failures are not
 laundered into experimental outcomes.
+
+The V4 host contract orders only authenticated capture, inference, execution,
+and finalization calls. It publishes a replayable terminal evidence envelope,
+never selects an expected skill, and never substitutes B0. No real V4 Isaac
+HTTP service is deployment-bound, so this remains a contract result rather
+than formal physical evidence.
 
 The coordinator does not generate waypoints.  A single-use, deployment-bound
 provider now consumes one query-only active-session state receipt and replays

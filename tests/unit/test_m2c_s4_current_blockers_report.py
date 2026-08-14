@@ -153,6 +153,8 @@ def test_phase2_query_only_evidence_remains_non_authorizing() -> None:
     assert phase2["real_bound_plan_synthesis_backend_bound"] is False
     assert phase2["exact_plan_executor_contract_active"] is True
     assert phase2["real_exact_plan_executor_deployment_binding_bound"] is False
+    assert phase2["formal_v4_host_orchestrator_contract_active"] is True
+    assert phase2["real_formal_v4_isaac_http_service_bound"] is False
     assert phase2["formal_execution_eligible"] is False
     assert phase2["remaining_rejected_pairs"] == comparison["after"]["remaining_rejected_pairs"]
     assert all(
@@ -166,6 +168,7 @@ def test_phase2_query_only_evidence_remains_non_authorizing() -> None:
     )
     assert "A3_STATIC_HOME_SELF_COLLISION_PREFLIGHT_REJECTED" not in phase2["blockers"]
     assert "REAL_BOUND_PLAN_SYNTHESIS_BACKEND_NOT_BOUND" in phase2["blockers"]
+    assert "REAL_FORMAL_V4_ISAAC_HTTP_SERVICE_NOT_BOUND" in phase2["blockers"]
     assert "REAL_EXACT_PLAN_ISAAC_EXECUTOR_MISSING" not in phase2["blockers"]
     assert "REAL_EXACT_PLAN_ISAAC_EXECUTOR_DEPLOYMENT_BINDING_MISSING" in phase2["blockers"]
     assert "TWO_ACTIVE_PRODUCTION_BINDINGS_UNSET" in phase2["blockers"]
