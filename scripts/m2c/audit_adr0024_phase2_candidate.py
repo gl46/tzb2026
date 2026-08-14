@@ -42,6 +42,7 @@ FORMAL_ISAAC_SCENE_OWNER_PATH = Path("scripts/m2c/formal_isaac_v4_backend.py")
 FORMAL_ISAAC_MUTATION_COUNTER_PATH = Path(
     "src/xh_agent/policy/qrm_lite/formal_isaac_mutation_counter_v1.py"
 )
+FORMAL_EPISODE_IO_PATH = Path("src/xh_agent/policy/qrm_lite/formal_isaac_episode_io_v4.py")
 ATTACHED_OBJECT_PHASE_GEOMETRY_PATH = Path(
     "src/xh_agent/policy/qrm_lite/a3_attached_object_phase_geometry_v1.py"
 )
@@ -61,13 +62,13 @@ EXACT_PLAN_SYNTHESIS_QUERY_PATH = Path(
 )
 ACTIVE_SESSION_QUERY_PATH = Path("src/xh_agent/policy/qrm_lite/isaac_active_session_query_v1.py")
 EXACT_PLAN_SYNTHESIS_CONFIG_SHA256 = (
-    "dd8fd58902719d80927f4aa347b10793282c40084e56a1ae02c0611d6e375610"
+    "be7c55e6cd1db1f5b5f5a02cb74e89e0cabeb76a915d527a4943aa4bdde7279b"
 )
 EXACT_PLAN_SYNTHESIS_CONFIGURATION_SHA256 = (
-    "5638d66518b37574c4a75d93b1e9d3ef98fbea421499b77cdbed610b4bac25fd"
+    "5795dd04a5928a55ea639f74318ce19f16cdeaf74ac05cadca3d54a3bfd2fa41"
 )
 EXACT_PLAN_SYNTHESIS_DEPENDENCIES_SHA256 = (
-    "1743c66392120f7d9b35b5a34f88e4369e2a597e25bf101bb9d54daef069d6cf"
+    "21d222a9a021a877982685928ca88018c3f34640b28990f785493b4bf49e04ac"
 )
 EXACT_PLAN_SYNTHESIS_BACKEND_SHA256 = (
     "417f9f0a7c039a98bca90e527ec8e2461094cae9c206214053dc474187f31612"
@@ -77,6 +78,8 @@ EXACT_PLAN_SYNTHESIS_QUERY_SHA256 = (
 )
 ACTIVE_SESSION_QUERY_SHA256 = "3f54330593dc3c5878f0e7f0a91a148f02887a2013206a74a40ffab2dbd36bf0"
 EXACT_PLAN_SYNTHESIS_IMPLEMENTATION_COMMIT = "d00c1a4e6ac29049125e2ed62ae479d4d3397bb0"
+FORMAL_EPISODE_IO_SHA256 = "270360830837c4928027858ffc88d1f12dc9d75f96297693086feb29749d88c0"
+FORMAL_EPISODE_IO_IMPLEMENTATION_COMMIT = "d2f2877f128e989678424ddbb0f4a117b69ae1c7"
 ADR_0024_PATH = Path("docs/decisions/ADR-0024-m2c-s4-unblock-directive.md")
 BINDING_NAMES = (
     "FORMAL_PHYSICAL_RUNNER_BINDING",
@@ -88,7 +91,7 @@ EXPECTED_BLOCKERS = (
     "EIGHT_SKILL_REAL_ISAAC_PHASE_VALIDATION_MISSING",
     "REAL_PUBLIC_TRACK_TO_COLLISION_PATH_A3_SAFETY_BINDING_NOT_BOUND",
     "REVIEWED_EXACT_PLAN_SYNTHESIS_DEPLOYMENT_NOT_BOUND",
-    "REAL_ISAAC_EPISODE_LIFECYCLE_AND_CAPTURE_SOURCE_NOT_BOUND",
+    "REVIEWED_REAL_ISAAC_EPISODE_IO_DEPLOYMENT_NOT_BOUND",
     "REAL_FORMAL_V4_ISAAC_HTTP_SERVICE_BACKEND_FACTORY_NOT_BOUND",
     "IMMUTABLE_DEPLOYMENT_COMMIT_CONTAINER_IMPORT_ASSET_CLOSURE_MISSING",
     "COMPLETE_SCENE_ENVIRONMENT_SWEPT_COLLISION_PROVIDER_NOT_BOUND",
@@ -193,6 +196,7 @@ def load_candidate_config(project_root: Path) -> dict[str, Any]:
         "read_only_fk_evidence",
         "query_only_deployment_smoke",
         "exact_plan_synthesis_candidate",
+        "episode_io_candidate",
         "a3_numeric_configuration_sha256",
         "production_bindings",
         "b0_policy",
@@ -294,6 +298,22 @@ def load_candidate_config(project_root: Path) -> dict[str, Any]:
     }
     if synthesis != expected_synthesis:
         raise CandidateAuditFailure("candidate exact-plan synthesis binding differs")
+    episode_io = candidate["episode_io_candidate"]
+    expected_episode_io = {
+        "implementation_path": FORMAL_EPISODE_IO_PATH.as_posix(),
+        "implementation_sha256": FORMAL_EPISODE_IO_SHA256,
+        "implementation_commit": FORMAL_EPISODE_IO_IMPLEMENTATION_COMMIT,
+        "shared_persistent_scene_owner_required": True,
+        "public_failure_boundary_evidence_bound": True,
+        "eight_capture_prefix_replay_bound": True,
+        "public_final_evaluation_bound": True,
+        "source_and_git_snapshot_verified_before_owner_contact": True,
+        "real_scene_owner_deployment_bound": False,
+        "http_backend_factory_bound": False,
+        "formal_execution_eligible": False,
+    }
+    if episode_io != expected_episode_io:
+        raise CandidateAuditFailure("candidate formal V4 episode I/O binding differs")
     synthesis_config_raw = read_regular_file_once(project_root / EXACT_PLAN_SYNTHESIS_CONFIG_PATH)
     if _sha256(synthesis_config_raw) != EXACT_PLAN_SYNTHESIS_CONFIG_SHA256:
         raise CandidateAuditFailure("candidate exact-plan synthesis config SHA-256 differs")
@@ -341,6 +361,7 @@ def load_candidate_config(project_root: Path) -> dict[str, Any]:
     for path, expected in (
         (EXACT_PLAN_SYNTHESIS_QUERY_PATH, EXACT_PLAN_SYNTHESIS_QUERY_SHA256),
         (ACTIVE_SESSION_QUERY_PATH, ACTIVE_SESSION_QUERY_SHA256),
+        (FORMAL_EPISODE_IO_PATH, FORMAL_EPISODE_IO_SHA256),
     ):
         if _sha256(read_regular_file_once(project_root / path)) != expected:
             raise CandidateAuditFailure(f"candidate query-only synthesis source differs: {path}")
@@ -495,6 +516,17 @@ def build_audit(project_root: Path) -> dict[str, Any]:
     ):
         if token not in mutation_counter:
             raise CandidateAuditFailure(f"formal Isaac mutation counter omitted marker: {token}")
+    episode_io_source = read_regular_file_once(root / FORMAL_EPISODE_IO_PATH).decode("utf-8")
+    for token in (
+        "FormalIsaacEpisodeIODeploymentBindingV1",
+        "FormalIsaacPersistentSceneOwnerV4",
+        "FormalIsaacEpisodeLifecycleAdapterV4",
+        "FormalIsaacPublicCaptureSourceAdapterV4",
+        "_require_immutable_commit",
+        "public_failure_boundary_evidence_sha256",
+    ):
+        if token not in episode_io_source:
+            raise CandidateAuditFailure(f"formal Isaac episode I/O omitted marker: {token}")
     attached_geometry = read_regular_file_once(root / ATTACHED_OBJECT_PHASE_GEOMETRY_PATH).decode(
         "utf-8"
     )
@@ -600,6 +632,7 @@ def build_audit(project_root: Path) -> dict[str, Any]:
         "a3_read_only_fk_evidence": candidate["read_only_fk_evidence"],
         "a3_query_only_deployment_smoke": candidate["query_only_deployment_smoke"],
         "exact_plan_synthesis_candidate": candidate["exact_plan_synthesis_candidate"],
+        "formal_isaac_episode_io_candidate": candidate["episode_io_candidate"],
         "formal_v4_host_local_hmac_verifier": {
             "status": "PASS_CONTRACT_ONLY_NO_REAL_HOST_RECEIPTS",
             "receipt_schema": "M2CHostWireHMACVerificationReceiptV4",

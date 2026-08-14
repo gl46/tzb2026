@@ -29,14 +29,14 @@
       "schema_version": "ExactPlanSourceBindingV1",
       "role": "TRANSITIVE_DEPENDENCY_MANIFEST",
       "path": "configs/m2c_exact_plan_synthesis_dependencies_v1.json",
-      "sha256": "1743c66392120f7d9b35b5a34f88e4369e2a597e25bf101bb9d54daef069d6cf",
+      "sha256": "21d222a9a021a877982685928ca88018c3f34640b28990f785493b4bf49e04ac",
       "audit_only": true
     },
     {
       "schema_version": "ExactPlanSourceBindingV1",
       "role": "ISAAC_RUNTIME",
       "path": "src/xh_agent/policy/qrm_lite/formal_isaac_backend_v4.py",
-      "sha256": "4c3033c3be7f3313fd31361bf5c6f882e6e4da690881455a973828ab1f16a404",
+      "sha256": "747f2cc20decedcafbcfb6423769c75a7eb2e22658988254f2d5c029b6df336c",
       "audit_only": true
     },
     {
@@ -131,7 +131,7 @@
     "/World/Robot/panda_leftfinger",
     "/World/Robot/panda_rightfinger"
   ],
-  "configuration_sha256": "5638d66518b37574c4a75d93b1e9d3ef98fbea421499b77cdbed610b4bac25fd",
+  "configuration_sha256": "5795dd04a5928a55ea639f74318ce19f16cdeaf74ac05cadca3d54a3bfd2fa41",
   "teacher_used": false,
   "evaluator_identity_used": false,
   "task_spec_fallback_used": false,

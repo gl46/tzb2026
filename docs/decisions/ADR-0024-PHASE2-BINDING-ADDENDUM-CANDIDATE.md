@@ -73,6 +73,17 @@ There is also no reviewed production deployment receipt or eight-skill
 physical evidence, so the candidate remains non-executable and the production
 bindings remain `None`.
 
+The generic formal V4 episode-I/O contract is now implemented at
+`src/xh_agent/policy/qrm_lite/formal_isaac_episode_io_v4.py`. One shared
+persistent scene owner must provide the public failure-boundary evidence, all
+eight ordered public captures and the final public evaluation. Each lifecycle
+transition is single-use and fail-closed, capture-prefix replay is exact, and
+the source tree plus immutable Git commit are verified before the owner is
+contacted. This closes the lifecycle/capture schema and composition gap only:
+there is no reviewed real-Isaac deployment binding, real scene owner or HTTP
+backend-factory binding, so the adapter remains non-executable and produces no
+physical evidence.
+
 ## A.3 delegated numeric configuration
 
 The candidate binds configuration digest
@@ -204,7 +215,7 @@ nor any safety/IK/collision/controller gate.
 - `EIGHT_SKILL_REAL_ISAAC_PHASE_VALIDATION_MISSING`
 - `REAL_PUBLIC_TRACK_TO_COLLISION_PATH_A3_SAFETY_BINDING_NOT_BOUND`
 - `REVIEWED_EXACT_PLAN_SYNTHESIS_DEPLOYMENT_NOT_BOUND`
-- `REAL_ISAAC_EPISODE_LIFECYCLE_AND_CAPTURE_SOURCE_NOT_BOUND`
+- `REVIEWED_REAL_ISAAC_EPISODE_IO_DEPLOYMENT_NOT_BOUND`
 - `REAL_FORMAL_V4_ISAAC_HTTP_SERVICE_BACKEND_FACTORY_NOT_BOUND`
 - `IMMUTABLE_DEPLOYMENT_COMMIT_CONTAINER_IMPORT_ASSET_CLOSURE_MISSING`
 - `COMPLETE_SCENE_ENVIRONMENT_SWEPT_COLLISION_PROVIDER_NOT_BOUND`

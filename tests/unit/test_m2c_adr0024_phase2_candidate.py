@@ -60,6 +60,15 @@ def test_candidate_smoke_is_blocked_unmeasured_and_never_physical() -> None:
     assert synthesis["real_query_source_bound"] is False
     assert synthesis["reviewed_production_deployment_bound"] is False
     assert synthesis["formal_execution_eligible"] is False
+    episode_io = report["formal_isaac_episode_io_candidate"]
+    assert episode_io["shared_persistent_scene_owner_required"] is True
+    assert episode_io["public_failure_boundary_evidence_bound"] is True
+    assert episode_io["eight_capture_prefix_replay_bound"] is True
+    assert episode_io["public_final_evaluation_bound"] is True
+    assert episode_io["source_and_git_snapshot_verified_before_owner_contact"] is True
+    assert episode_io["real_scene_owner_deployment_bound"] is False
+    assert episode_io["http_backend_factory_bound"] is False
+    assert episode_io["formal_execution_eligible"] is False
     hmac = report["formal_v4_host_local_hmac_verifier"]
     assert hmac["status"] == "PASS_CONTRACT_ONLY_NO_REAL_HOST_RECEIPTS"
     assert hmac["node2_and_labserver_replay_implemented"] is True
@@ -152,6 +161,7 @@ def test_candidate_config_requires_literal_none_bindings_and_exact_terminal_poli
     for path in (
         "src/xh_agent/policy/qrm_lite/offline_wire_auth_v4.py",
         "scripts/m2c/verify_formal_wire_auth_v4.py",
+        "src/xh_agent/policy/qrm_lite/formal_isaac_episode_io_v4.py",
     ):
         assert (
             candidate["source_bindings"][path]
@@ -178,6 +188,14 @@ def test_candidate_config_requires_literal_none_bindings_and_exact_terminal_poli
             synthesis[sha_key]
             == hashlib.sha256((PROJECT_ROOT / synthesis[key]).read_bytes()).hexdigest()
         )
+    episode_io = candidate["episode_io_candidate"]
+    assert (
+        episode_io["implementation_sha256"]
+        == hashlib.sha256(
+            (PROJECT_ROOT / episode_io["implementation_path"]).read_bytes()
+        ).hexdigest()
+    )
+    assert episode_io["implementation_commit"] == ("d2f2877f128e989678424ddbb0f4a117b69ae1c7")
 
 
 def test_candidate_source_tamper_and_false_physical_claim_fail_closed(tmp_path: Path) -> None:

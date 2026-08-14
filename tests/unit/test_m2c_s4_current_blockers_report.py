@@ -186,6 +186,15 @@ def test_phase2_query_only_evidence_remains_non_authorizing() -> None:
     assert synthesis["reviewed_production_deployment_bound"] is False
     assert synthesis["formal_execution_eligible"] is False
     assert phase2["real_bound_plan_synthesis_backend_bound"] is False
+    assert phase2["formal_v4_episode_io_contract_active"] is True
+    episode_io = phase2["formal_v4_episode_io_implementation"]
+    assert episode_io["sha256"] == _sha256(ROOT / episode_io["path"])
+    assert episode_io["implementation_commit"] == ("d2f2877f128e989678424ddbb0f4a117b69ae1c7")
+    assert phase2["formal_v4_shared_persistent_scene_owner_required"] is True
+    assert phase2["formal_v4_public_failure_boundary_evidence_bound"] is True
+    assert phase2["formal_v4_eight_capture_prefix_replay_bound"] is True
+    assert phase2["formal_v4_public_final_evaluation_bound"] is True
+    assert phase2["real_formal_v4_episode_io_deployment_bound"] is False
     assert phase2["exact_plan_executor_contract_active"] is True
     assert phase2["real_exact_plan_executor_deployment_binding_bound"] is False
     assert phase2["formal_v4_host_orchestrator_contract_active"] is True
@@ -210,6 +219,8 @@ def test_phase2_query_only_evidence_remains_non_authorizing() -> None:
     assert "COMPLETE_SCENE_ENVIRONMENT_SWEPT_COLLISION_PROVIDER_NOT_BOUND" in phase2["blockers"]
     assert "REAL_ATTACHED_OBJECT_PHASE_GEOMETRY_RESOLVER_NOT_BOUND" in phase2["blockers"]
     assert "REAL_PUBLIC_TRACK_TO_COLLISION_PATH_A3_SAFETY_BINDING_NOT_BOUND" in phase2["blockers"]
+    assert "REVIEWED_REAL_ISAAC_EPISODE_IO_DEPLOYMENT_NOT_BOUND" in phase2["blockers"]
+    assert "REAL_ISAAC_EPISODE_LIFECYCLE_AND_CAPTURE_SOURCE_NOT_BOUND" not in phase2["blockers"]
     assert "REAL_FORMAL_V4_ISAAC_HTTP_SERVICE_BACKEND_FACTORY_NOT_BOUND" in phase2["blockers"]
     assert "REAL_EXACT_PLAN_ISAAC_EXECUTOR_MISSING" not in phase2["blockers"]
     assert "REAL_EXACT_PLAN_ISAAC_EXECUTOR_DEPLOYMENT_BINDING_MISSING" in phase2["blockers"]

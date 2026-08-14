@@ -1,7 +1,7 @@
 # M2C S4 current blockers
 
 - Status: **BLOCKED_UNMEASURED_RAW_SCHEMA_AND_FORMAL_EXACT_PLAN_INTEGRATION**
-- Checked HEAD: `8960f946e6a54461a56e2950e9a55e20c8c948af`
+- Checked HEAD: `d2f2877f128e989678424ddbb0f4a117b69ae1c7`
 - Q-A: **PASSED**
 - Q-B: **UNMEASURED**
 - `pure_model_success_episodes`: **null**, not zero
@@ -118,6 +118,14 @@ fail-closed because no real evidence index exists. Plan-specific eight-skill pha
 immutable deployment/import closure, the real public-track-to-collision-path
 safety binding and synthesis deployment, the real exact-plan Isaac executor, the deployed
 read-only FK provider, and real-session endpoint evidence remain missing.
+The formal V4 episode-I/O lifecycle is now one explicit fail-closed contract:
+one persistent scene owner supplies the public failure boundary, eight ordered
+public captures and the final public evaluation; each transition is single-use,
+capture-prefix replay is exact, and immutable source/Git identity is checked
+before the owner is contacted. This closes the generic lifecycle/capture-source
+implementation gap only. No reviewed real-Isaac episode-I/O deployment, real
+scene owner or HTTP backend-factory binding exists, so it remains
+non-executable and produces no physical evidence.
 The S4 entry gate now preserves the historical V2 path and independently
 replays the strict formal V4 Phase-2 evidence index through its versioned V3
 physical envelope. Both active bindings remain unset, so this closes an
