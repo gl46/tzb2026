@@ -24,6 +24,9 @@ from xh_agent.policy.qrm_lite.a3_bullet_production_adapter_v1 import (  # noqa: 
 from xh_agent.policy.qrm_lite.a3_bullet_self_ccd_v1 import (  # noqa: E402
     canonical_a3_bullet_numeric_configuration_v1,
 )
+from xh_agent.policy.qrm_lite.formal_exact_plan_synthesis_v1 import (  # noqa: E402
+    FormalExactPlanSynthesisConfigurationV1,
+)
 
 
 SCHEMA_VERSION = "M2CADR0024Phase2CandidateAuditV1"
@@ -46,6 +49,26 @@ FORMAL_V4_HMAC_VERIFIER_PATH = Path("src/xh_agent/policy/qrm_lite/offline_wire_a
 FORMAL_V4_HMAC_CLI_PATH = Path("scripts/m2c/verify_formal_wire_auth_v4.py")
 PHASE2_READINESS_V2_PATH = Path("src/xh_agent/policy/qrm_lite/phase2_binding_readiness_v2.py")
 PHASE2_READINESS_CLI_PATH = Path("scripts/m2c/check_adr0022_binding_addendum_readiness.py")
+EXACT_PLAN_SYNTHESIS_CONFIG_PATH = Path("configs/m2c_exact_plan_synthesis_candidate_v1.json")
+EXACT_PLAN_SYNTHESIS_DEPENDENCIES_PATH = Path(
+    "configs/m2c_exact_plan_synthesis_dependencies_v1.json"
+)
+EXACT_PLAN_SYNTHESIS_BACKEND_PATH = Path(
+    "src/xh_agent/policy/qrm_lite/formal_exact_plan_synthesis_v1.py"
+)
+EXACT_PLAN_SYNTHESIS_CONFIG_SHA256 = (
+    "8048470570afeac7d0b9bbfc66b806667a01975f242bc4a81957541ce3c5099b"
+)
+EXACT_PLAN_SYNTHESIS_CONFIGURATION_SHA256 = (
+    "6a47773e1a57201eee7357bb590057416ee6d1a11adf2353546607acc62bcc68"
+)
+EXACT_PLAN_SYNTHESIS_DEPENDENCIES_SHA256 = (
+    "387488af4fb8f8bc7456812a79423a1f0baf3989ba64eba0fa930d29edeb5d71"
+)
+EXACT_PLAN_SYNTHESIS_BACKEND_SHA256 = (
+    "8a0ca78d6072babb9a94f72c15e0206728ce5913d9dceed9787e5dc16559d072"
+)
+EXACT_PLAN_SYNTHESIS_IMPLEMENTATION_COMMIT = "8960f946e6a54461a56e2950e9a55e20c8c948af"
 ADR_0024_PATH = Path("docs/decisions/ADR-0024-m2c-s4-unblock-directive.md")
 BINDING_NAMES = (
     "FORMAL_PHYSICAL_RUNNER_BINDING",
@@ -55,7 +78,7 @@ BINDING_NAMES = (
 )
 EXPECTED_BLOCKERS = (
     "EIGHT_SKILL_REAL_ISAAC_PHASE_VALIDATION_MISSING",
-    "REAL_BOUND_PLAN_SYNTHESIS_BACKEND_NOT_BOUND",
+    "REAL_BOUND_PLAN_SYNTHESIS_QUERY_SOURCE_AND_DEPLOYMENT_NOT_BOUND",
     "REAL_ISAAC_EPISODE_LIFECYCLE_AND_CAPTURE_SOURCE_NOT_BOUND",
     "REAL_FORMAL_V4_ISAAC_HTTP_SERVICE_BACKEND_FACTORY_NOT_BOUND",
     "IMMUTABLE_DEPLOYMENT_COMMIT_CONTAINER_IMPORT_ASSET_CLOSURE_MISSING",
@@ -160,6 +183,7 @@ def load_candidate_config(project_root: Path) -> dict[str, Any]:
         "native_build_evidence",
         "read_only_fk_evidence",
         "query_only_deployment_smoke",
+        "exact_plan_synthesis_candidate",
         "a3_numeric_configuration_sha256",
         "production_bindings",
         "b0_policy",
@@ -235,6 +259,69 @@ def load_candidate_config(project_root: Path) -> dict[str, Any]:
         "formal_execution_eligible": False,
     }:
         raise CandidateAuditFailure("candidate query-only deployment smoke binding differs")
+    synthesis = candidate["exact_plan_synthesis_candidate"]
+    expected_synthesis = {
+        "configuration_path": EXACT_PLAN_SYNTHESIS_CONFIG_PATH.as_posix(),
+        "configuration_file_sha256": EXACT_PLAN_SYNTHESIS_CONFIG_SHA256,
+        "configuration_sha256": EXACT_PLAN_SYNTHESIS_CONFIGURATION_SHA256,
+        "dependency_manifest_path": EXACT_PLAN_SYNTHESIS_DEPENDENCIES_PATH.as_posix(),
+        "dependency_manifest_sha256": EXACT_PLAN_SYNTHESIS_DEPENDENCIES_SHA256,
+        "backend_implementation_path": EXACT_PLAN_SYNTHESIS_BACKEND_PATH.as_posix(),
+        "backend_implementation_sha256": EXACT_PLAN_SYNTHESIS_BACKEND_SHA256,
+        "implementation_commit": EXACT_PLAN_SYNTHESIS_IMPLEMENTATION_COMMIT,
+        "registered_skill_count": 8,
+        "runtime_parameter_adaptation_allowed": False,
+        "physical_execution_claimed": False,
+        "real_query_source_bound": False,
+        "reviewed_production_deployment_bound": False,
+        "formal_execution_eligible": False,
+    }
+    if synthesis != expected_synthesis:
+        raise CandidateAuditFailure("candidate exact-plan synthesis binding differs")
+    synthesis_config_raw = read_regular_file_once(project_root / EXACT_PLAN_SYNTHESIS_CONFIG_PATH)
+    if _sha256(synthesis_config_raw) != EXACT_PLAN_SYNTHESIS_CONFIG_SHA256:
+        raise CandidateAuditFailure("candidate exact-plan synthesis config SHA-256 differs")
+    try:
+        synthesis_config = FormalExactPlanSynthesisConfigurationV1.model_validate_json(
+            synthesis_config_raw
+        )
+    except ValueError as exc:
+        raise CandidateAuditFailure("candidate exact-plan synthesis config is invalid") from exc
+    if (
+        synthesis_config.configuration_sha256 != EXACT_PLAN_SYNTHESIS_CONFIGURATION_SHA256
+        or synthesis_config.immutable_commit != EXACT_PLAN_SYNTHESIS_IMPLEMENTATION_COMMIT
+    ):
+        raise CandidateAuditFailure("candidate exact-plan synthesis config identity differs")
+    dependencies_raw = read_regular_file_once(project_root / EXACT_PLAN_SYNTHESIS_DEPENDENCIES_PATH)
+    if _sha256(dependencies_raw) != EXACT_PLAN_SYNTHESIS_DEPENDENCIES_SHA256:
+        raise CandidateAuditFailure("candidate exact-plan dependency manifest SHA-256 differs")
+    try:
+        dependencies = json.loads(dependencies_raw)
+    except json.JSONDecodeError as exc:
+        raise CandidateAuditFailure("candidate exact-plan dependency manifest is invalid") from exc
+    if (
+        set(dependencies)
+        != {
+            "schema_version",
+            "implementation_commit",
+            "dependencies",
+            "teacher_used",
+            "privileged_truth_policy_input",
+        }
+        or dependencies["schema_version"] != "M2CExactPlanSynthesisDependenciesV1"
+        or dependencies["implementation_commit"] != EXACT_PLAN_SYNTHESIS_IMPLEMENTATION_COMMIT
+        or dependencies["teacher_used"] is not False
+        or dependencies["privileged_truth_policy_input"] is not False
+    ):
+        raise CandidateAuditFailure("candidate exact-plan dependency manifest fields differ")
+    for path, expected in dependencies["dependencies"].items():
+        if _sha256(read_regular_file_once(project_root / path)) != expected:
+            raise CandidateAuditFailure(f"exact-plan synthesis dependency differs: {path}")
+    if (
+        _sha256(read_regular_file_once(project_root / EXACT_PLAN_SYNTHESIS_BACKEND_PATH))
+        != EXACT_PLAN_SYNTHESIS_BACKEND_SHA256
+    ):
+        raise CandidateAuditFailure("candidate exact-plan synthesis backend SHA-256 differs")
     native_report_raw = read_regular_file_once(project_root / NATIVE_BUILD_REPORT_PATH)
     if _sha256(native_report_raw) != native["report_sha256"]:
         raise CandidateAuditFailure("candidate native-build report SHA-256 differs")
@@ -490,6 +577,7 @@ def build_audit(project_root: Path) -> dict[str, Any]:
         "a3_native_build_evidence": candidate["native_build_evidence"],
         "a3_read_only_fk_evidence": candidate["read_only_fk_evidence"],
         "a3_query_only_deployment_smoke": candidate["query_only_deployment_smoke"],
+        "exact_plan_synthesis_candidate": candidate["exact_plan_synthesis_candidate"],
         "formal_v4_host_local_hmac_verifier": {
             "status": "PASS_CONTRACT_ONLY_NO_REAL_HOST_RECEIPTS",
             "receipt_schema": "M2CHostWireHMACVerificationReceiptV4",

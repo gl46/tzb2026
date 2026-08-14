@@ -171,6 +171,17 @@ def test_phase2_query_only_evidence_remains_non_authorizing() -> None:
     assert phase2["real_attached_object_phase_geometry_resolver_bound"] is False
     assert phase2["real_runtime_snapshot_bound"] is False
     assert phase2["bound_plan_provider_contract_active"] is True
+    assert phase2["exact_plan_synthesis_backend_contract_active"] is True
+    synthesis = phase2["exact_plan_synthesis_configuration_candidate"]
+    assert synthesis["sha256"] == _sha256(ROOT / synthesis["path"])
+    assert synthesis["dependency_manifest_sha256"] == _sha256(
+        ROOT / synthesis["dependency_manifest_path"]
+    )
+    assert synthesis["implementation_commit"] == "8960f946e6a54461a56e2950e9a55e20c8c948af"
+    assert synthesis["registered_skill_count"] == 8
+    assert synthesis["real_query_source_bound"] is False
+    assert synthesis["reviewed_production_deployment_bound"] is False
+    assert synthesis["formal_execution_eligible"] is False
     assert phase2["real_bound_plan_synthesis_backend_bound"] is False
     assert phase2["exact_plan_executor_contract_active"] is True
     assert phase2["real_exact_plan_executor_deployment_binding_bound"] is False
@@ -195,7 +206,7 @@ def test_phase2_query_only_evidence_remains_non_authorizing() -> None:
     assert "A3_STATIC_HOME_SELF_COLLISION_PREFLIGHT_REJECTED" not in phase2["blockers"]
     assert "COMPLETE_SCENE_ENVIRONMENT_SWEPT_COLLISION_PROVIDER_NOT_BOUND" in phase2["blockers"]
     assert "REAL_ATTACHED_OBJECT_PHASE_GEOMETRY_RESOLVER_NOT_BOUND" in phase2["blockers"]
-    assert "REAL_BOUND_PLAN_SYNTHESIS_BACKEND_NOT_BOUND" in phase2["blockers"]
+    assert "REAL_BOUND_PLAN_SYNTHESIS_QUERY_SOURCE_AND_DEPLOYMENT_NOT_BOUND" in phase2["blockers"]
     assert "REAL_FORMAL_V4_ISAAC_HTTP_SERVICE_BACKEND_FACTORY_NOT_BOUND" in phase2["blockers"]
     assert "REAL_EXACT_PLAN_ISAAC_EXECUTOR_MISSING" not in phase2["blockers"]
     assert "REAL_EXACT_PLAN_ISAAC_EXECUTOR_DEPLOYMENT_BINDING_MISSING" in phase2["blockers"]

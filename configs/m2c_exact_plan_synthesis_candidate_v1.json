@@ -1,0 +1,139 @@
+{
+  "schema_version": "FormalExactPlanSynthesisConfigurationV1",
+  "revision": "M2C_ADR0024_EXACT_PLAN_SYNTHESIS_V1",
+  "immutable_commit": "8960f946e6a54461a56e2950e9a55e20c8c948af",
+  "container_image_digest": "sha256:783444c706538aa76cf5126e911ddc5e618779e6105305ad4af4260362a30aa9",
+  "source_bindings": [
+    {
+      "schema_version": "ExactPlanSourceBindingV1",
+      "role": "PRIMITIVE_ENTRYPOINT",
+      "path": "src/xh_agent/policy/qrm_lite/exact_plan_primitive_bundle_v1.py",
+      "sha256": "e39649b2f86e3085180e33b5ace5d49f5ae36c13bc91880d426205215e017e10",
+      "audit_only": true
+    },
+    {
+      "schema_version": "ExactPlanSourceBindingV1",
+      "role": "PREFLIGHT_IMPLEMENTATION",
+      "path": "src/xh_agent/policy/qrm_lite/exact_plan_preflight_v1.py",
+      "sha256": "f16bcfd5e788b11244e6300470092f81e598547057b0372fce092084cebb06f4",
+      "audit_only": true
+    },
+    {
+      "schema_version": "ExactPlanSourceBindingV1",
+      "role": "EXECUTOR_IMPLEMENTATION",
+      "path": "src/xh_agent/policy/qrm_lite/isaac_exact_plan_runtime_v1.py",
+      "sha256": "57712a3d573f35dc3acb656e8533bb01789200501d2d7bee20450e91223e8dbe",
+      "audit_only": true
+    },
+    {
+      "schema_version": "ExactPlanSourceBindingV1",
+      "role": "TRANSITIVE_DEPENDENCY_MANIFEST",
+      "path": "configs/m2c_exact_plan_synthesis_dependencies_v1.json",
+      "sha256": "387488af4fb8f8bc7456812a79423a1f0baf3989ba64eba0fa930d29edeb5d71",
+      "audit_only": true
+    },
+    {
+      "schema_version": "ExactPlanSourceBindingV1",
+      "role": "ISAAC_RUNTIME",
+      "path": "src/xh_agent/policy/qrm_lite/formal_isaac_backend_v4.py",
+      "sha256": "4c3033c3be7f3313fd31361bf5c6f882e6e4da690881455a973828ab1f16a404",
+      "audit_only": true
+    },
+    {
+      "schema_version": "ExactPlanSourceBindingV1",
+      "role": "IK_ALGORITHM",
+      "path": "src/xh_agent/policy/qrm_lite/controlled_panda_fk_v1.py",
+      "sha256": "33d735905ecc132edae9c3a5f4d780518a328cd30518c0f897b1b0dda579b541",
+      "audit_only": true
+    },
+    {
+      "schema_version": "ExactPlanSourceBindingV1",
+      "role": "JOINT_LIMIT_CONFIGURATION",
+      "path": "robot_ws/src/xh_sim/urdf/panda_controlled.urdf",
+      "sha256": "6678ff409d60f074283805879f53edaa939ead34f97a5a961ee67f6229b44ba8",
+      "audit_only": true
+    },
+    {
+      "schema_version": "ExactPlanSourceBindingV1",
+      "role": "SWEPT_COLLISION_ALGORITHM",
+      "path": "src/xh_agent/policy/qrm_lite/a3_complete_scene_swept_collision_v2.py",
+      "sha256": "3108d1add125f7228acd5cb491e0f4c1b4ffc87db86b247e09a14225ef30aab3",
+      "audit_only": true
+    },
+    {
+      "schema_version": "ExactPlanSourceBindingV1",
+      "role": "ROBOT_ASSET",
+      "path": "robot_ws/src/xh_sim/urdf/panda_controlled.urdf",
+      "sha256": "6678ff409d60f074283805879f53edaa939ead34f97a5a961ee67f6229b44ba8",
+      "audit_only": true
+    },
+    {
+      "schema_version": "ExactPlanSourceBindingV1",
+      "role": "CONTROLLER_CONFIGURATION",
+      "path": "robot_ws/src/xh_sim/config/panda_controllers.yaml",
+      "sha256": "a3ff559a7a073f52c28458fe47814a5dc34711fe559f80ad2c012a7c9b9acb31",
+      "audit_only": true
+    },
+    {
+      "schema_version": "ExactPlanSourceBindingV1",
+      "role": "SAFETY_CONFIGURATION",
+      "path": "robot_ws/src/xh_sim/config/m1a_collision_policy.yaml",
+      "sha256": "33f3d60e17a669dd73f9cfe21631a92035bbb22a2dd63090ee7c3a3eaa661ce7",
+      "audit_only": true
+    },
+    {
+      "schema_version": "ExactPlanSourceBindingV1",
+      "role": "SCENE_ASSET",
+      "path": "configs/scenes/industrial_cylinder_v1.yaml",
+      "sha256": "056cfddb7fad3cc010b82cda732304adf3024ec5d6e9caa08a7b923748b7172d",
+      "audit_only": true
+    }
+  ],
+  "controller_frequency_hz": 60.0,
+  "convergence_tolerance_m": 0.02,
+  "phase_timeout_ns": 5000000000,
+  "preplan_freshness_limit_ns": 100000000,
+  "expected_grasp_category_prefix": "industrial_cylinder",
+  "pregrasp_height_m": 0.27,
+  "grasp_lift_height_m": 0.17,
+  "contact_centerline_m": 0.12,
+  "preclose_finger_position_m": 0.0205,
+  "close_finger_position_m": 0.014,
+  "open_finger_position_m": 0.04,
+  "default_lift_height_m": 0.05,
+  "place_approach_height_m": 0.1,
+  "retreat_height_m": 0.05,
+  "approach_steps": 150,
+  "contact_steps": 120,
+  "preclose_steps": 48,
+  "preclose_settle_steps": 24,
+  "close_steps": 72,
+  "contact_observation_steps": 60,
+  "lift_steps": 150,
+  "transport_steps": 120,
+  "place_steps": 90,
+  "release_steps": 60,
+  "retreat_steps": 90,
+  "controlled_robot_links": [
+    "/World/Robot/panda_link0",
+    "/World/Robot/panda_link1",
+    "/World/Robot/panda_link2",
+    "/World/Robot/panda_link3",
+    "/World/Robot/panda_link4",
+    "/World/Robot/panda_link5",
+    "/World/Robot/panda_link6",
+    "/World/Robot/panda_link7",
+    "/World/Robot/panda_hand",
+    "/World/Robot/panda_leftfinger",
+    "/World/Robot/panda_rightfinger"
+  ],
+  "permitted_robot_contact_paths": [
+    "/World/Robot/panda_leftfinger",
+    "/World/Robot/panda_rightfinger"
+  ],
+  "configuration_sha256": "6a47773e1a57201eee7357bb590057416ee6d1a11adf2353546607acc62bcc68",
+  "teacher_used": false,
+  "evaluator_identity_used": false,
+  "task_spec_fallback_used": false,
+  "privileged_truth_policy_input": false
+}

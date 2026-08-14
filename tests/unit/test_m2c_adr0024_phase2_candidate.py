@@ -50,6 +50,13 @@ def test_candidate_smoke_is_blocked_unmeasured_and_never_physical() -> None:
     assert report["a3_query_only_deployment_smoke"]["collision_rejection_count"] == 2
     assert not report["a3_query_only_deployment_smoke"]["static_state_preflight_clear"]
     assert not report["a3_query_only_deployment_smoke"]["formal_execution_eligible"]
+    synthesis = report["exact_plan_synthesis_candidate"]
+    assert synthesis["registered_skill_count"] == 8
+    assert synthesis["runtime_parameter_adaptation_allowed"] is False
+    assert synthesis["physical_execution_claimed"] is False
+    assert synthesis["real_query_source_bound"] is False
+    assert synthesis["reviewed_production_deployment_bound"] is False
+    assert synthesis["formal_execution_eligible"] is False
     hmac = report["formal_v4_host_local_hmac_verifier"]
     assert hmac["status"] == "PASS_CONTRACT_ONLY_NO_REAL_HOST_RECEIPTS"
     assert hmac["node2_and_labserver_replay_implemented"] is True
@@ -146,6 +153,21 @@ def test_candidate_config_requires_literal_none_bindings_and_exact_terminal_poli
         assert (
             candidate["source_bindings"][path]
             == hashlib.sha256((PROJECT_ROOT / path).read_bytes()).hexdigest()
+        )
+    synthesis = candidate["exact_plan_synthesis_candidate"]
+    for key in (
+        "configuration_path",
+        "dependency_manifest_path",
+        "backend_implementation_path",
+    ):
+        sha_key = {
+            "configuration_path": "configuration_file_sha256",
+            "dependency_manifest_path": "dependency_manifest_sha256",
+            "backend_implementation_path": "backend_implementation_sha256",
+        }[key]
+        assert (
+            synthesis[sha_key]
+            == hashlib.sha256((PROJECT_ROOT / synthesis[key]).read_bytes()).hexdigest()
         )
 
 

@@ -41,8 +41,26 @@ The real-Isaac exact-plan executor implementation is present and contract
 tested. It calls only the hash-frozen execution helpers and cannot select a
 yaw, centreline, retry, fallback, or replacement command at runtime. This does
 not make it deployable: its reviewed deployment binding remains absent, and
-the real plan-synthesis backend plus real episode lifecycle/capture source are
-not bound.
+the real episode lifecycle/capture source is not bound.
+
+The eight-skill plan-synthesis implementation is now present at
+`src/xh_agent/policy/qrm_lite/formal_exact_plan_synthesis_v1.py`. Its contract
+suite constructs `GRASP`, `LIFT`, `MOVE`, `PLACE`, `RELEASE`, `REOBSERVE`,
+`REASSOCIATE_TARGET`, and `REGRASP` from the replayed public observation, the
+frozen runtime mapping, and one query-only active-session state. It freezes a
+single public free-gap yaw, one contact centreline, every waypoint/gripper
+target/step count, all allowlist digests, and zero retries before returning a
+plan. Side/oblique grasp geometry, stale or crossed state, absent attachment,
+missing registry destination, and unsafe free-gap geometry all reject without
+producing a plan. The exact numeric candidate is
+`configs/m2c_exact_plan_synthesis_candidate_v1.json`; its transitive source
+closure is `configs/m2c_exact_plan_synthesis_dependencies_v1.json` and its
+implementation base commit is `8960f946e6a54461a56e2950e9a55e20c8c948af`.
+
+This closes only the missing implementation/schema portion of plan synthesis.
+There is no real Isaac query source, reviewed production deployment receipt,
+or eight-skill physical evidence, so the candidate remains non-executable and
+the production bindings remain `None`.
 
 ## A.3 delegated numeric configuration
 
@@ -173,7 +191,7 @@ nor any safety/IK/collision/controller gate.
 ## Blocking evidence
 
 - `EIGHT_SKILL_REAL_ISAAC_PHASE_VALIDATION_MISSING`
-- `REAL_BOUND_PLAN_SYNTHESIS_BACKEND_NOT_BOUND`
+- `REAL_BOUND_PLAN_SYNTHESIS_QUERY_SOURCE_AND_DEPLOYMENT_NOT_BOUND`
 - `REAL_ISAAC_EPISODE_LIFECYCLE_AND_CAPTURE_SOURCE_NOT_BOUND`
 - `REAL_FORMAL_V4_ISAAC_HTTP_SERVICE_BACKEND_FACTORY_NOT_BOUND`
 - `IMMUTABLE_DEPLOYMENT_COMMIT_CONTAINER_IMPORT_ASSET_CLOSURE_MISSING`

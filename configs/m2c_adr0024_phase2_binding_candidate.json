@@ -8,6 +8,8 @@
     "status": "ACCEPTED_HUMAN_DECISION"
   },
   "source_bindings": {
+    "configs/m2c_exact_plan_synthesis_candidate_v1.json": "8048470570afeac7d0b9bbfc66b806667a01975f242bc4a81957541ce3c5099b",
+    "configs/m2c_exact_plan_synthesis_dependencies_v1.json": "387488af4fb8f8bc7456812a79423a1f0baf3989ba64eba0fa930d29edeb5d71",
     "docs/decisions/ADR-0024-m2c-s4-unblock-directive.md": "62c14028df1ad91e4d3c4282c4775e33149292e9bcf10add2d505be8c7424689",
     "robot_ws/src/xh_sim/config/m1a_panda.srdf": "80948370d547cb320e49d42ffc0467e082112c09f2984700b489def88526a386",
     "robot_ws/src/xh_sim/urdf/panda_controlled.urdf": "6678ff409d60f074283805879f53edaa939ead34f97a5a961ee67f6229b44ba8",
@@ -36,6 +38,7 @@
     "src/xh_agent/policy/qrm_lite/exact_plan_preflight_v1.py": "f16bcfd5e788b11244e6300470092f81e598547057b0372fce092084cebb06f4",
     "src/xh_agent/policy/qrm_lite/exact_plan_primitive_bundle_v1.py": "e39649b2f86e3085180e33b5ace5d49f5ae36c13bc91880d426205215e017e10",
     "src/xh_agent/policy/qrm_lite/formal_bound_plan_provider_v1.py": "50a18983e7e444c8810a1f4c7bd44c73d2ba84ca5ff3c8b0ae19d937b86c8188",
+    "src/xh_agent/policy/qrm_lite/formal_exact_plan_synthesis_v1.py": "8a0ca78d6072babb9a94f72c15e0206728ce5913d9dceed9787e5dc16559d072",
     "src/xh_agent/policy/qrm_lite/formal_isaac_backend_v4.py": "4c3033c3be7f3313fd31361bf5c6f882e6e4da690881455a973828ab1f16a404",
     "src/xh_agent/policy/qrm_lite/formal_isaac_endpoint_v4.py": "67da7fae1dc918da855d4e8d537ed39f107f21bb35d1c1237bdac0b7a4d15c31",
     "src/xh_agent/policy/qrm_lite/formal_isaac_mutation_counter_v1.py": "cd8a67fc2bc8b40e2d63f36898ea9be643659af9ac486aa985d8dd07fc7b3908",
@@ -77,6 +80,22 @@
     "static_state_preflight_clear": false,
     "formal_execution_eligible": false
   },
+  "exact_plan_synthesis_candidate": {
+    "configuration_path": "configs/m2c_exact_plan_synthesis_candidate_v1.json",
+    "configuration_file_sha256": "8048470570afeac7d0b9bbfc66b806667a01975f242bc4a81957541ce3c5099b",
+    "configuration_sha256": "6a47773e1a57201eee7357bb590057416ee6d1a11adf2353546607acc62bcc68",
+    "dependency_manifest_path": "configs/m2c_exact_plan_synthesis_dependencies_v1.json",
+    "dependency_manifest_sha256": "387488af4fb8f8bc7456812a79423a1f0baf3989ba64eba0fa930d29edeb5d71",
+    "backend_implementation_path": "src/xh_agent/policy/qrm_lite/formal_exact_plan_synthesis_v1.py",
+    "backend_implementation_sha256": "8a0ca78d6072babb9a94f72c15e0206728ce5913d9dceed9787e5dc16559d072",
+    "implementation_commit": "8960f946e6a54461a56e2950e9a55e20c8c948af",
+    "registered_skill_count": 8,
+    "runtime_parameter_adaptation_allowed": false,
+    "physical_execution_claimed": false,
+    "real_query_source_bound": false,
+    "reviewed_production_deployment_bound": false,
+    "formal_execution_eligible": false
+  },
   "a3_numeric_configuration_sha256": "8c6ba840339bca5a84ccd805b0c068439d59812eb0c3ecc9bdd809f1341d4bb5",
   "production_bindings": {
     "FORMAL_PHYSICAL_RUNNER_BINDING": null,
@@ -104,7 +123,7 @@
   },
   "blockers": [
     "EIGHT_SKILL_REAL_ISAAC_PHASE_VALIDATION_MISSING",
-    "REAL_BOUND_PLAN_SYNTHESIS_BACKEND_NOT_BOUND",
+    "REAL_BOUND_PLAN_SYNTHESIS_QUERY_SOURCE_AND_DEPLOYMENT_NOT_BOUND",
     "REAL_ISAAC_EPISODE_LIFECYCLE_AND_CAPTURE_SOURCE_NOT_BOUND",
     "REAL_FORMAL_V4_ISAAC_HTTP_SERVICE_BACKEND_FACTORY_NOT_BOUND",
     "IMMUTABLE_DEPLOYMENT_COMMIT_CONTAINER_IMPORT_ASSET_CLOSURE_MISSING",

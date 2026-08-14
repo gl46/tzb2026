@@ -1,7 +1,7 @@
 # M2C S4 current blockers
 
 - Status: **BLOCKED_UNMEASURED_RAW_SCHEMA_AND_FORMAL_EXACT_PLAN_INTEGRATION**
-- Checked HEAD: `b0a1fe6b35a5f22f265e2a2172fa2e8aff7d8a0f`
+- Checked HEAD: `8960f946e6a54461a56e2950e9a55e20c8c948af`
 - Q-A: **PASSED**
 - Q-B: **UNMEASURED**
 - `pure_model_success_episodes`: **null**, not zero
@@ -68,6 +68,15 @@ it binds the complete joint path, collision world, geometry, FK receipt,
 complete child-pair request, native receipt, and numeric configuration. No real
 phase evidence has been produced, so this closes only the offline contract and
 does not change formal eligibility.
+The versioned eight-skill exact-plan synthesis backend is also implemented and
+locally replayed. It consumes only the frozen runtime mapping, the replayed V4
+public observation, and one query-only active-session state; before returning
+it fixes one public free-gap yaw, one contact centreline, every Cartesian and
+gripper phase, all source/allowlist digests, and zero retries. The candidate
+numeric configuration and dependency manifest are source-bound to commit
+`8960f946e6a54461a56e2950e9a55e20c8c948af`. This closes the missing synthesis
+implementation, not deployment: no real query source or reviewed production
+deployment is bound, so it remains non-executable.
 The planned attachment transition is likewise replayable from the exact
 left/right/external allowlists and runtime-snapshot digest. It never claims a
 physical contact or mutates the scene; the unchanged execution-time bilateral
@@ -101,8 +110,9 @@ host-local verifier now replays both exact audit lifecycles, every HMAC
 envelope, the consumed challenge, and variable one-to-eight-decision terminal
 counts without an SSH/signing prerequisite. No real node2/labserver receipt
 has been produced. The ADR-0024 V2 readiness verifier is complete and remains
-fail-closed because no real evidence index exists. Plan-specific eight-skill phase receipts, immutable
-deployment/import closure, the real exact-plan Isaac executor, the deployed
+fail-closed because no real evidence index exists. Plan-specific eight-skill phase receipts,
+immutable deployment/import closure, the real synthesis query source and
+deployment, the real exact-plan Isaac executor, the deployed
 read-only FK provider, and real-session endpoint evidence remain missing.
 The S4 entry gate now preserves the historical V2 path and independently
 replays the strict formal V4 Phase-2 evidence index through its versioned V3

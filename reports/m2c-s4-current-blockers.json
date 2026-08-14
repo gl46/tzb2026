@@ -1,8 +1,8 @@
 {
   "schema_version": "M2CS4CurrentBlockersV2",
   "status": "BLOCKED_UNMEASURED_RAW_SCHEMA_AND_FORMAL_EXACT_PLAN_INTEGRATION",
-  "reported_at": "2026-08-14T16:15:42+08:00",
-  "checked_head_commit": "b5a4654e4426a1243ae90c5ee1aa2f1e4052261b",
+  "reported_at": "2026-08-14T17:07:51+08:00",
+  "checked_head_commit": "8960f946e6a54461a56e2950e9a55e20c8c948af",
   "q_a_state": "PASSED",
   "q_b_state": "UNMEASURED",
   "pure_model_success_episodes": null,
@@ -123,6 +123,19 @@
     "real_attached_object_phase_geometry_resolver_bound": false,
     "real_runtime_snapshot_bound": false,
     "bound_plan_provider_contract_active": true,
+    "exact_plan_synthesis_backend_contract_active": true,
+    "exact_plan_synthesis_configuration_candidate": {
+      "path": "configs/m2c_exact_plan_synthesis_candidate_v1.json",
+      "sha256": "8048470570afeac7d0b9bbfc66b806667a01975f242bc4a81957541ce3c5099b",
+      "canonical_configuration_sha256": "6a47773e1a57201eee7357bb590057416ee6d1a11adf2353546607acc62bcc68",
+      "dependency_manifest_path": "configs/m2c_exact_plan_synthesis_dependencies_v1.json",
+      "dependency_manifest_sha256": "387488af4fb8f8bc7456812a79423a1f0baf3989ba64eba0fa930d29edeb5d71",
+      "implementation_commit": "8960f946e6a54461a56e2950e9a55e20c8c948af",
+      "registered_skill_count": 8,
+      "real_query_source_bound": false,
+      "reviewed_production_deployment_bound": false,
+      "formal_execution_eligible": false
+    },
     "real_bound_plan_synthesis_backend_bound": false,
     "exact_plan_executor_contract_active": true,
     "real_exact_plan_executor_deployment_binding_bound": false,
@@ -136,11 +149,11 @@
     "formal_execution_eligible": false,
     "candidate_config": {
       "path": "configs/m2c_adr0024_phase2_binding_candidate.json",
-      "sha256": "0532708641bcfb5ef6543c285f30b782763956b2d20c59b34502909e0267bde9"
+      "sha256": "0940f231ff5eb5012a8142c2b3c4325ad9d39158e5e3596335174ca23f5b3d75"
     },
     "candidate_addendum": {
       "path": "docs/decisions/ADR-0024-PHASE2-BINDING-ADDENDUM-CANDIDATE.md",
-      "sha256": "01fbf5b6dc5c96bf3eeeb1d1c16533ebc2111b141c338cd006aa498df16f410d"
+      "sha256": "9952b34a510603697186e286bedabb274161f79a7cb897fde071c3e1767dacc5"
     },
     "query_only_comparison_report": {
       "path": "reports/m2c-phase2-a3-query-only-deployment-comparison.json",
@@ -163,7 +176,7 @@
     ],
     "blockers": [
       "EIGHT_SKILL_REAL_ISAAC_PHASE_VALIDATION_MISSING",
-      "REAL_BOUND_PLAN_SYNTHESIS_BACKEND_NOT_BOUND",
+      "REAL_BOUND_PLAN_SYNTHESIS_QUERY_SOURCE_AND_DEPLOYMENT_NOT_BOUND",
       "REAL_ISAAC_EPISODE_LIFECYCLE_AND_CAPTURE_SOURCE_NOT_BOUND",
       "REAL_FORMAL_V4_ISAAC_HTTP_SERVICE_BACKEND_FACTORY_NOT_BOUND",
       "IMMUTABLE_DEPLOYMENT_COMMIT_CONTAINER_IMPORT_ASSET_CLOSURE_MISSING",
