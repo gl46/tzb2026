@@ -1,8 +1,8 @@
 {
   "schema_version": "M2CS4CurrentBlockersV2",
   "status": "BLOCKED_UNMEASURED_ZERO_ELIGIBLE_YIELD_AND_FORMAL_EXACT_PLAN_INTEGRATION",
-  "reported_at": "2026-08-15T00:22:59+08:00",
-  "checked_head_commit": "a2b6097a7f618dd9b923dcc0220a2600e927ca92",
+  "reported_at": "2026-08-15T01:07:53+08:00",
+  "checked_head_commit": "608e2ff5074785a837b9ccaccfa444df518f8f92",
   "q_a_state": "PASSED",
   "q_b_state": "UNMEASURED",
   "pure_model_success_episodes": null,
@@ -12,11 +12,11 @@
     "frozen_v3_train_keys": 36,
     "frozen_v4_train_keys": 36,
     "unique_v3_train_keys_attempted": 11,
-    "unique_v4_train_keys_consumed": 26,
-    "unique_train_keys_consumed_total": 37,
+    "unique_v4_train_keys_consumed": 29,
+    "unique_train_keys_consumed_total": 40,
     "raw_v3_eight_step_chains": 10,
-    "raw_v4_eight_step_chains": 18,
-    "physical_skill_receipts_v4": 144,
+    "raw_v4_eight_step_chains": 21,
+    "physical_skill_receipts_v4": 168,
     "collision_or_safety_violations_v4": 0,
     "training_samples_eligible": 0,
     "training_samples_packaged": 0,
@@ -25,24 +25,24 @@
     "formal_q_b_evaluation_executed": false,
     "public_track_associator_v2_implemented": true,
     "batch_04_preregistered_and_consumed": true,
-    "latest_completed_batch": "BATCH_14",
+    "latest_completed_batch": "BATCH_15",
     "active_selected_key_preregistration_present": false,
     "collection_execution_authorized": false,
     "raw_detection_capacity_decision_required": false,
     "permission_issue_resolution": {
-      "resolved_for_observed_batch14_path": true,
+      "resolved_for_observed_batch15_path": true,
       "batch04_stage_output_permission_failures": 3,
       "first_subsequent_stage_acceptance_report": "reports/m2c-s4-v4-batch06-snapshot-owner-failure.json",
       "first_subsequent_probe_simulation_start_report": "reports/m2c-s4-v4-batch07-pre-timeline-proprio-failure.json",
       "first_subsequent_raw_physical_chain_report": "reports/m2c-s4-v4-batch08-collection.json",
-      "latest_three_stage_and_probe_pass_report": "reports/m2c-s4-v4-batch14-collection.json",
+      "latest_three_stage_and_probe_pass_report": "reports/m2c-s4-v4-batch15-collection.json",
       "latest_mixed_batch_report": "reports/m2c-s4-v4-batch11-collection.json",
-      "latest_all_physical_batch_report": "reports/m2c-s4-v4-batch14-collection.json"
+      "latest_all_physical_batch_report": "reports/m2c-s4-v4-batch15-collection.json"
     },
     "authorization_contract": {
       "path": "src/xh_agent/policy/qrm_lite/s4_v4_collection_authorization_v1.py",
-      "sha256": "82e09e124f988564c5f1b28962afd5ed3d23a27e05de1e61df1c5804372a7cb6",
-      "checked_parent_commit": "a2b6097a7f618dd9b923dcc0220a2600e927ca92",
+      "sha256": "f1faeec5e3066c85031302945f2bccec8f3bfbbdac9b03faed55383d7cbd78cc",
+      "checked_parent_commit": "608e2ff5074785a837b9ccaccfa444df518f8f92",
       "canonical_cli_authorized": false,
       "programmatic_worker_authorized": false,
       "programmatic_packager_authorized": false,
@@ -100,6 +100,10 @@
       {
         "path": "reports/m2c-s4-v4-batch14-collection.json",
         "sha256": "e796c08e6d8c0994c7378f978e315850dbb5c0b4aab2d029ce4bf196176a0773"
+      },
+      {
+        "path": "reports/m2c-s4-v4-batch15-collection.json",
+        "sha256": "d93cfc5fcc1ac9b29f59a07673c283afea18d4b806ab1b8e5d8bd5b576ad3420"
       }
     ],
     "accepted_raw_capacity_decision": {
@@ -122,10 +126,10 @@
     },
     "training_eligibility_yield": {
       "path": "reports/m2c-s4-training-eligibility-yield-adr0025.json",
-      "sha256": "0212ea14d9087e489cc6ef1eef1f8f20d9002c0d58e5acf517e40bbb1fc69ef0",
+      "sha256": "c80cae2ee550049bbfa271294dd19a0fdad628589c7946ff1392065a046eb491",
       "status": "BLOCKED_ZERO_OBSERVED_ELIGIBLE_CHAIN_YIELD",
-      "unique_train_identities": 37,
-      "complete_eight_step_chains": 28,
+      "unique_train_identities": 40,
+      "complete_eight_step_chains": 31,
       "eligible_training_episodes": 0,
       "finite_key_projection_for_one_eligible_episode": null
     }
