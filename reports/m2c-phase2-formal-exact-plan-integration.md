@@ -1,7 +1,7 @@
 # M2C Phase-2 formal exact-plan integration audit
 
 - Status: **BLOCKED_UNMEASURED_FORMAL_EXACT_PLAN_INTEGRATION**
-- Checked HEAD: `0e8eaa8d2496568149a76c6ba3f6906d84c0a078`
+- Checked HEAD: `7aafa6b782c1a282d974957446eee2dfa3b8e54c`
 - Formal execution eligible: **false**
 - Physical execution / training by this audit: **false / false**
 

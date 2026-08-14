@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 
@@ -25,6 +26,8 @@ def test_candidate_smoke_is_blocked_unmeasured_and_never_physical() -> None:
     assert not report["production_binding_authorized"]
     assert report["entry_bindings"] == {name: None for name in BINDING_NAMES}
     assert report["blockers"] == list(EXPECTED_BLOCKERS)
+    assert "REAL_EXACT_PLAN_ISAAC_EXECUTOR_MISSING" not in report["blockers"]
+    assert "REAL_EXACT_PLAN_ISAAC_EXECUTOR_DEPLOYMENT_BINDING_MISSING" in report["blockers"]
     assert len(report["contract_smokes"]) == 3
     assert all(item["status"] == "PASS_CONTRACT_ONLY" for item in report["contract_smokes"])
     assert report["a3_local_closure"]["status"] == "NOT_AVAILABLE"
@@ -63,6 +66,11 @@ def test_candidate_config_requires_literal_none_bindings_and_exact_terminal_poli
         )
 
     candidate = load_candidate_config(PROJECT_ROOT)
+    executor_path = "src/xh_agent/policy/qrm_lite/isaac_exact_plan_runtime_v1.py"
+    assert (
+        candidate["source_bindings"][executor_path]
+        == hashlib.sha256((PROJECT_ROOT / executor_path).read_bytes()).hexdigest()
+    )
     assert candidate["b0_policy"]["invalid_or_rejected_action_policy"] == (
         "TERMINAL_NO_PHYSICAL_EXECUTION"
     )

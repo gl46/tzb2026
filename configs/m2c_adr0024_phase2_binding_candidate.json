@@ -20,7 +20,11 @@
     "src/xh_agent/policy/qrm_lite/controlled_panda_fk_v1.py": "33d735905ecc132edae9c3a5f4d780518a328cd30518c0f897b1b0dda579b541",
     "src/xh_agent/policy/qrm_lite/exact_plan_preflight_v1.py": "732f317eefb0f355f40743030e1266f61dd5f3d3b9fb22170b37b107756d4f43",
     "src/xh_agent/policy/qrm_lite/exact_plan_primitive_bundle_v1.py": "e39649b2f86e3085180e33b5ace5d49f5ae36c13bc91880d426205215e017e10",
-    "src/xh_agent/policy/qrm_lite/formal_split_runner_v2.py": "affbec7bfa2462c58ef093196c367eda98472f1ca349ba7b98d71796798b7c06"
+    "src/xh_agent/policy/qrm_lite/formal_bound_plan_provider_v1.py": "50a18983e7e444c8810a1f4c7bd44c73d2ba84ca5ff3c8b0ae19d937b86c8188",
+    "src/xh_agent/policy/qrm_lite/formal_isaac_backend_v4.py": "4c3033c3be7f3313fd31361bf5c6f882e6e4da690881455a973828ab1f16a404",
+    "src/xh_agent/policy/qrm_lite/formal_public_observation_provider_v4.py": "3fdf311cdae0fed357c354c8422ab54077187faf5c00eab6d8f6ebba38df9c99",
+    "src/xh_agent/policy/qrm_lite/formal_split_runner_v2.py": "affbec7bfa2462c58ef093196c367eda98472f1ca349ba7b98d71796798b7c06",
+    "src/xh_agent/policy/qrm_lite/isaac_exact_plan_runtime_v1.py": "57712a3d573f35dc3acb656e8533bb01789200501d2d7bee20450e91223e8dbe"
   },
   "native_build_evidence": {
     "report_path": "reports/m2c-phase2-a3-native-build.json",
@@ -78,9 +82,10 @@
   },
   "blockers": [
     "EIGHT_SKILL_REAL_ISAAC_PHASE_VALIDATION_MISSING",
-    "FORMAL_PUBLIC_OBSERVATION_V4_AND_BOUND_PLAN_PROVIDER_NOT_ACTIVE",
+    "REAL_BOUND_PLAN_SYNTHESIS_BACKEND_NOT_BOUND",
+    "REAL_ISAAC_EPISODE_LIFECYCLE_AND_CAPTURE_SOURCE_NOT_BOUND",
     "IMMUTABLE_DEPLOYMENT_COMMIT_CONTAINER_IMPORT_ASSET_CLOSURE_MISSING",
-    "REAL_EXACT_PLAN_ISAAC_EXECUTOR_MISSING",
+    "REAL_EXACT_PLAN_ISAAC_EXECUTOR_DEPLOYMENT_BINDING_MISSING",
     "REAL_QUERY_ONLY_FK_PROVIDER_DEPLOYMENT_BINDING_MISSING",
     "REAL_SESSION_ENDPOINT_STARTUP_AND_HOST_HMAC_ATTESTATION_MISSING",
     "PHASE2_READINESS_VERIFIER_ADR0024_V2_MIGRATION_INCOMPLETE",

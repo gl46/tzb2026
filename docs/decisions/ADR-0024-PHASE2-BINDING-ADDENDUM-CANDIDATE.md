@@ -37,6 +37,13 @@ These are contract properties only. They do not prove a native build, real FK,
 Isaac startup, physical safety, execution success, model-owned success, or
 entry readiness.
 
+The real-Isaac exact-plan executor implementation is present and contract
+tested. It calls only the hash-frozen execution helpers and cannot select a
+yaw, centreline, retry, fallback, or replacement command at runtime. This does
+not make it deployable: its reviewed deployment binding remains absent, and
+the real plan-synthesis backend plus real episode lifecycle/capture source are
+not bound.
+
 ## A.3 delegated numeric configuration
 
 The candidate binds configuration digest
@@ -116,9 +123,10 @@ nor any safety/IK/collision/controller gate.
 ## Blocking evidence
 
 - `EIGHT_SKILL_REAL_ISAAC_PHASE_VALIDATION_MISSING`
-- `FORMAL_PUBLIC_OBSERVATION_V4_AND_BOUND_PLAN_PROVIDER_NOT_ACTIVE`
+- `REAL_BOUND_PLAN_SYNTHESIS_BACKEND_NOT_BOUND`
+- `REAL_ISAAC_EPISODE_LIFECYCLE_AND_CAPTURE_SOURCE_NOT_BOUND`
 - `IMMUTABLE_DEPLOYMENT_COMMIT_CONTAINER_IMPORT_ASSET_CLOSURE_MISSING`
-- `REAL_EXACT_PLAN_ISAAC_EXECUTOR_MISSING`
+- `REAL_EXACT_PLAN_ISAAC_EXECUTOR_DEPLOYMENT_BINDING_MISSING`
 - `REAL_QUERY_ONLY_FK_PROVIDER_DEPLOYMENT_BINDING_MISSING`
 - `REAL_SESSION_ENDPOINT_STARTUP_AND_HOST_HMAC_ATTESTATION_MISSING`
 - `PHASE2_READINESS_VERIFIER_ADR0024_V2_MIGRATION_INCOMPLETE`
