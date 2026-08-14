@@ -1,7 +1,7 @@
 {
   "schema_version": "FormalExactPlanSynthesisConfigurationV1",
   "revision": "M2C_ADR0024_EXACT_PLAN_SYNTHESIS_V1",
-  "immutable_commit": "8960f946e6a54461a56e2950e9a55e20c8c948af",
+  "immutable_commit": "d00c1a4e6ac29049125e2ed62ae479d4d3397bb0",
   "container_image_digest": "sha256:783444c706538aa76cf5126e911ddc5e618779e6105305ad4af4260362a30aa9",
   "source_bindings": [
     {
@@ -29,7 +29,7 @@
       "schema_version": "ExactPlanSourceBindingV1",
       "role": "TRANSITIVE_DEPENDENCY_MANIFEST",
       "path": "configs/m2c_exact_plan_synthesis_dependencies_v1.json",
-      "sha256": "387488af4fb8f8bc7456812a79423a1f0baf3989ba64eba0fa930d29edeb5d71",
+      "sha256": "1743c66392120f7d9b35b5a34f88e4369e2a597e25bf101bb9d54daef069d6cf",
       "audit_only": true
     },
     {
@@ -131,7 +131,7 @@
     "/World/Robot/panda_leftfinger",
     "/World/Robot/panda_rightfinger"
   ],
-  "configuration_sha256": "6a47773e1a57201eee7357bb590057416ee6d1a11adf2353546607acc62bcc68",
+  "configuration_sha256": "5638d66518b37574c4a75d93b1e9d3ef98fbea421499b77cdbed610b4bac25fd",
   "teacher_used": false,
   "evaluator_identity_used": false,
   "task_spec_fallback_used": false,

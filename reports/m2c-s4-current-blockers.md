@@ -74,9 +74,13 @@ public observation, and one query-only active-session state; before returning
 it fixes one public free-gap yaw, one contact centreline, every Cartesian and
 gripper phase, all source/allowlist digests, and zero retries. The candidate
 numeric configuration and dependency manifest are source-bound to commit
-`8960f946e6a54461a56e2950e9a55e20c8c948af`. This closes the missing synthesis
-implementation, not deployment: no real query source or reviewed production
-deployment is bound, so it remains non-executable.
+`d00c1a4e6ac29049125e2ed62ae479d4d3397bb0`. A query-only bridge now composes
+one fresh single-use articulation/pose provider per decision with the shared
+scene-owner mutation counter and independently bound scene/attachment safety
+receipt. It rejects crossed state, mutation, retry, or a non-unique contact
+path. This closes the generic synthesis query contract, not deployment: no
+reviewed producer binds a public track to its A3 collision path and no reviewed
+production deployment is bound, so it remains non-executable.
 The planned attachment transition is likewise replayable from the exact
 left/right/external allowlists and runtime-snapshot digest. It never claims a
 physical contact or mutates the scene; the unchanged execution-time bilateral
@@ -111,8 +115,8 @@ envelope, the consumed challenge, and variable one-to-eight-decision terminal
 counts without an SSH/signing prerequisite. No real node2/labserver receipt
 has been produced. The ADR-0024 V2 readiness verifier is complete and remains
 fail-closed because no real evidence index exists. Plan-specific eight-skill phase receipts,
-immutable deployment/import closure, the real synthesis query source and
-deployment, the real exact-plan Isaac executor, the deployed
+immutable deployment/import closure, the real public-track-to-collision-path
+safety binding and synthesis deployment, the real exact-plan Isaac executor, the deployed
 read-only FK provider, and real-session endpoint evidence remain missing.
 The S4 entry gate now preserves the historical V2 path and independently
 replays the strict formal V4 Phase-2 evidence index through its versioned V3

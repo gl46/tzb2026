@@ -54,6 +54,9 @@ def test_candidate_smoke_is_blocked_unmeasured_and_never_physical() -> None:
     assert synthesis["registered_skill_count"] == 8
     assert synthesis["runtime_parameter_adaptation_allowed"] is False
     assert synthesis["physical_execution_claimed"] is False
+    assert synthesis["query_source_contract_active"] is True
+    assert synthesis["public_track_collision_safety_binding_contract_active"] is True
+    assert synthesis["real_scene_safety_binding_source_bound"] is False
     assert synthesis["real_query_source_bound"] is False
     assert synthesis["reviewed_production_deployment_bound"] is False
     assert synthesis["formal_execution_eligible"] is False
@@ -159,11 +162,17 @@ def test_candidate_config_requires_literal_none_bindings_and_exact_terminal_poli
         "configuration_path",
         "dependency_manifest_path",
         "backend_implementation_path",
+        "query_source_implementation_path",
+        "active_session_query_implementation_path",
     ):
         sha_key = {
             "configuration_path": "configuration_file_sha256",
             "dependency_manifest_path": "dependency_manifest_sha256",
             "backend_implementation_path": "backend_implementation_sha256",
+            "query_source_implementation_path": "query_source_implementation_sha256",
+            "active_session_query_implementation_path": (
+                "active_session_query_implementation_sha256"
+            ),
         }[key]
         assert (
             synthesis[sha_key]

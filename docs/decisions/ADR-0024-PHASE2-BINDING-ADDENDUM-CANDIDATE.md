@@ -55,12 +55,23 @@ missing registry destination, and unsafe free-gap geometry all reject without
 producing a plan. The exact numeric candidate is
 `configs/m2c_exact_plan_synthesis_candidate_v1.json`; its transitive source
 closure is `configs/m2c_exact_plan_synthesis_dependencies_v1.json` and its
-implementation base commit is `8960f946e6a54461a56e2950e9a55e20c8c948af`.
+implementation base commit is `d00c1a4e6ac29049125e2ed62ae479d4d3397bb0`.
 
-This closes only the missing implementation/schema portion of plan synthesis.
-There is no real Isaac query source, reviewed production deployment receipt,
-or eight-skill physical evidence, so the candidate remains non-executable and
-the production bindings remain `None`.
+The query-only composition contract is also present at
+`src/xh_agent/policy/qrm_lite/formal_isaac_plan_synthesis_query_v1.py`. It
+creates one fresh single-use articulation/pose provider per decision while
+sharing the persistent scene-owner mutation counter, binds the active-session
+read receipt and complete scene inventory into the plan state, and rejects any
+crossed session, target, attachment, timestamp, or mutation. Simulator paths
+are explicitly gate-only and never exposed to Qwen or used to select a skill
+or public pointer.
+
+This closes the generic query-source implementation/schema portion only. The
+repository still has no reviewed producer for the public-track-to-collision-
+path A.3 safety binding; the bridge deliberately does not guess that mapping.
+There is also no reviewed production deployment receipt or eight-skill
+physical evidence, so the candidate remains non-executable and the production
+bindings remain `None`.
 
 ## A.3 delegated numeric configuration
 
@@ -191,7 +202,8 @@ nor any safety/IK/collision/controller gate.
 ## Blocking evidence
 
 - `EIGHT_SKILL_REAL_ISAAC_PHASE_VALIDATION_MISSING`
-- `REAL_BOUND_PLAN_SYNTHESIS_QUERY_SOURCE_AND_DEPLOYMENT_NOT_BOUND`
+- `REAL_PUBLIC_TRACK_TO_COLLISION_PATH_A3_SAFETY_BINDING_NOT_BOUND`
+- `REVIEWED_EXACT_PLAN_SYNTHESIS_DEPLOYMENT_NOT_BOUND`
 - `REAL_ISAAC_EPISODE_LIFECYCLE_AND_CAPTURE_SOURCE_NOT_BOUND`
 - `REAL_FORMAL_V4_ISAAC_HTTP_SERVICE_BACKEND_FACTORY_NOT_BOUND`
 - `IMMUTABLE_DEPLOYMENT_COMMIT_CONTAINER_IMPORT_ASSET_CLOSURE_MISSING`

@@ -56,19 +56,27 @@ EXACT_PLAN_SYNTHESIS_DEPENDENCIES_PATH = Path(
 EXACT_PLAN_SYNTHESIS_BACKEND_PATH = Path(
     "src/xh_agent/policy/qrm_lite/formal_exact_plan_synthesis_v1.py"
 )
+EXACT_PLAN_SYNTHESIS_QUERY_PATH = Path(
+    "src/xh_agent/policy/qrm_lite/formal_isaac_plan_synthesis_query_v1.py"
+)
+ACTIVE_SESSION_QUERY_PATH = Path("src/xh_agent/policy/qrm_lite/isaac_active_session_query_v1.py")
 EXACT_PLAN_SYNTHESIS_CONFIG_SHA256 = (
-    "8048470570afeac7d0b9bbfc66b806667a01975f242bc4a81957541ce3c5099b"
+    "dd8fd58902719d80927f4aa347b10793282c40084e56a1ae02c0611d6e375610"
 )
 EXACT_PLAN_SYNTHESIS_CONFIGURATION_SHA256 = (
-    "6a47773e1a57201eee7357bb590057416ee6d1a11adf2353546607acc62bcc68"
+    "5638d66518b37574c4a75d93b1e9d3ef98fbea421499b77cdbed610b4bac25fd"
 )
 EXACT_PLAN_SYNTHESIS_DEPENDENCIES_SHA256 = (
-    "387488af4fb8f8bc7456812a79423a1f0baf3989ba64eba0fa930d29edeb5d71"
+    "1743c66392120f7d9b35b5a34f88e4369e2a597e25bf101bb9d54daef069d6cf"
 )
 EXACT_PLAN_SYNTHESIS_BACKEND_SHA256 = (
-    "8a0ca78d6072babb9a94f72c15e0206728ce5913d9dceed9787e5dc16559d072"
+    "417f9f0a7c039a98bca90e527ec8e2461094cae9c206214053dc474187f31612"
 )
-EXACT_PLAN_SYNTHESIS_IMPLEMENTATION_COMMIT = "8960f946e6a54461a56e2950e9a55e20c8c948af"
+EXACT_PLAN_SYNTHESIS_QUERY_SHA256 = (
+    "c1ffa47a1b28850e8e797d4e3dcb2a04fe37ff9ba78e39852022706ebcbbd950"
+)
+ACTIVE_SESSION_QUERY_SHA256 = "3f54330593dc3c5878f0e7f0a91a148f02887a2013206a74a40ffab2dbd36bf0"
+EXACT_PLAN_SYNTHESIS_IMPLEMENTATION_COMMIT = "d00c1a4e6ac29049125e2ed62ae479d4d3397bb0"
 ADR_0024_PATH = Path("docs/decisions/ADR-0024-m2c-s4-unblock-directive.md")
 BINDING_NAMES = (
     "FORMAL_PHYSICAL_RUNNER_BINDING",
@@ -78,7 +86,8 @@ BINDING_NAMES = (
 )
 EXPECTED_BLOCKERS = (
     "EIGHT_SKILL_REAL_ISAAC_PHASE_VALIDATION_MISSING",
-    "REAL_BOUND_PLAN_SYNTHESIS_QUERY_SOURCE_AND_DEPLOYMENT_NOT_BOUND",
+    "REAL_PUBLIC_TRACK_TO_COLLISION_PATH_A3_SAFETY_BINDING_NOT_BOUND",
+    "REVIEWED_EXACT_PLAN_SYNTHESIS_DEPLOYMENT_NOT_BOUND",
     "REAL_ISAAC_EPISODE_LIFECYCLE_AND_CAPTURE_SOURCE_NOT_BOUND",
     "REAL_FORMAL_V4_ISAAC_HTTP_SERVICE_BACKEND_FACTORY_NOT_BOUND",
     "IMMUTABLE_DEPLOYMENT_COMMIT_CONTAINER_IMPORT_ASSET_CLOSURE_MISSING",
@@ -268,10 +277,17 @@ def load_candidate_config(project_root: Path) -> dict[str, Any]:
         "dependency_manifest_sha256": EXACT_PLAN_SYNTHESIS_DEPENDENCIES_SHA256,
         "backend_implementation_path": EXACT_PLAN_SYNTHESIS_BACKEND_PATH.as_posix(),
         "backend_implementation_sha256": EXACT_PLAN_SYNTHESIS_BACKEND_SHA256,
+        "query_source_implementation_path": EXACT_PLAN_SYNTHESIS_QUERY_PATH.as_posix(),
+        "query_source_implementation_sha256": EXACT_PLAN_SYNTHESIS_QUERY_SHA256,
+        "active_session_query_implementation_path": ACTIVE_SESSION_QUERY_PATH.as_posix(),
+        "active_session_query_implementation_sha256": ACTIVE_SESSION_QUERY_SHA256,
         "implementation_commit": EXACT_PLAN_SYNTHESIS_IMPLEMENTATION_COMMIT,
         "registered_skill_count": 8,
         "runtime_parameter_adaptation_allowed": False,
         "physical_execution_claimed": False,
+        "query_source_contract_active": True,
+        "public_track_collision_safety_binding_contract_active": True,
+        "real_scene_safety_binding_source_bound": False,
         "real_query_source_bound": False,
         "reviewed_production_deployment_bound": False,
         "formal_execution_eligible": False,
@@ -322,6 +338,12 @@ def load_candidate_config(project_root: Path) -> dict[str, Any]:
         != EXACT_PLAN_SYNTHESIS_BACKEND_SHA256
     ):
         raise CandidateAuditFailure("candidate exact-plan synthesis backend SHA-256 differs")
+    for path, expected in (
+        (EXACT_PLAN_SYNTHESIS_QUERY_PATH, EXACT_PLAN_SYNTHESIS_QUERY_SHA256),
+        (ACTIVE_SESSION_QUERY_PATH, ACTIVE_SESSION_QUERY_SHA256),
+    ):
+        if _sha256(read_regular_file_once(project_root / path)) != expected:
+            raise CandidateAuditFailure(f"candidate query-only synthesis source differs: {path}")
     native_report_raw = read_regular_file_once(project_root / NATIVE_BUILD_REPORT_PATH)
     if _sha256(native_report_raw) != native["report_sha256"]:
         raise CandidateAuditFailure("candidate native-build report SHA-256 differs")

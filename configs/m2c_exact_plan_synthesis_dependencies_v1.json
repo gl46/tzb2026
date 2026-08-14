@@ -1,13 +1,17 @@
 {
   "schema_version": "M2CExactPlanSynthesisDependenciesV1",
-  "implementation_commit": "8960f946e6a54461a56e2950e9a55e20c8c948af",
+  "implementation_commit": "d00c1a4e6ac29049125e2ed62ae479d4d3397bb0",
   "dependencies": {
     "configs/qrm_runtime_mapping_v2.yaml": "3572f80f1597b7f3bdffb1f8aad90d5baeb086b25c371b88511bc58444813359",
     "src/xh_agent/grasp/free_gap.py": "2d85ddf87611d8593f4a4abc76d1e34a6aed2e805437c7a55f7b4f77184a5cd0",
     "src/xh_agent/policy/qrm_lite/exact_plan_primitive_bundle_v1.py": "e39649b2f86e3085180e33b5ace5d49f5ae36c13bc91880d426205215e017e10",
     "src/xh_agent/policy/qrm_lite/formal_bound_plan_provider_v1.py": "50a18983e7e444c8810a1f4c7bd44c73d2ba84ca5ff3c8b0ae19d937b86c8188",
-    "src/xh_agent/policy/qrm_lite/formal_exact_plan_synthesis_v1.py": "8a0ca78d6072babb9a94f72c15e0206728ce5913d9dceed9787e5dc16559d072",
+    "src/xh_agent/policy/qrm_lite/formal_exact_plan_synthesis_v1.py": "417f9f0a7c039a98bca90e527ec8e2461094cae9c206214053dc474187f31612",
     "src/xh_agent/policy/qrm_lite/formal_isaac_backend_v4.py": "4c3033c3be7f3313fd31361bf5c6f882e6e4da690881455a973828ab1f16a404",
+    "src/xh_agent/policy/qrm_lite/formal_isaac_mutation_counter_v1.py": "cd8a67fc2bc8b40e2d63f36898ea9be643659af9ac486aa985d8dd07fc7b3908",
+    "src/xh_agent/policy/qrm_lite/formal_isaac_plan_synthesis_query_v1.py": "c1ffa47a1b28850e8e797d4e3dcb2a04fe37ff9ba78e39852022706ebcbbd950",
+    "src/xh_agent/policy/qrm_lite/formal_public_observation_v4.py": "eb417f06fc88489e23164f1d091d9a3bc2349de9617a85e22ab72c625a16327d",
+    "src/xh_agent/policy/qrm_lite/isaac_active_session_query_v1.py": "3f54330593dc3c5878f0e7f0a91a148f02887a2013206a74a40ffab2dbd36bf0",
     "src/xh_agent/policy/qrm_lite/skill_registry_v2.py": "b12b575c205883f7ae48acf8976df9b38ed9ed47c364acad8521c4d3b6a7e089"
   },
   "teacher_used": false,
