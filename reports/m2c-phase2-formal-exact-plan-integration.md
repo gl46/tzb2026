@@ -1,7 +1,7 @@
 # M2C Phase-2 formal exact-plan integration audit
 
 - Status: **BLOCKED_UNMEASURED_FORMAL_EXACT_PLAN_INTEGRATION**
-- Checked HEAD: `9777661643ca5af9732a35cb366e935a89b7263a`
+- Checked HEAD: `eb6656f7ba168b412275dd5adf7e63cd0f7ff993`
 - Formal execution eligible: **false**
 - Physical execution / training by this audit: **false / false**
 
@@ -57,7 +57,7 @@ withdrawn compatibility sentinels remain `None`. Teacher and privileged
 simulator truth were not used.
 
 Verification: `.venv/bin/pytest -q tests/unit/test_m2c_*.py` ->
-**741 passed**, 0 failed.
+**766 passed**, 0 failed.
 
 Next command:
 

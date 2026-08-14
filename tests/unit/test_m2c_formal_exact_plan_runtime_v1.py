@@ -23,11 +23,14 @@ from xh_agent.policy.qrm_lite.formal_split_runner_v2 import (
     IsaacExecuteRequestV2,
     canonical_sha256,
 )
+from xh_agent.policy.qrm_lite.formal_split_runner_v4 import (
+    IsaacExecuteRequestV4,
+    RuntimeSkillRequestV4,
+)
 from xh_agent.policy.qrm_lite.skill_registry_v2 import (
     MappingRejectionV2,
     ParameterProvenanceV2,
     RuntimeSkillMappingResultV2,
-    RuntimeSkillRequestV2,
 )
 
 
@@ -43,27 +46,32 @@ def _mapping() -> RuntimeSkillMappingResultV2:
         parameters={"target_track_id": target},
         execution_parameters={"target_track_id": target},
         parameter_provenance={"target_track_id": ParameterProvenanceV2.MODEL},
-        fallback_action="B0_SAFE_HOLD",
+        fallback_action="NO_PHYSICAL_EXECUTION",
         fallback_required=False,
         execution_attribution="MODEL_SELECTED_REGISTERED_SKILL",
         gate_trace=[{"gate": "schema", "status": "PASS"}],
     )
 
 
-def _request() -> IsaacExecuteRequestV2:
+def _request() -> IsaacExecuteRequestV4:
     observation = _formal()
     target = observation.canonical_slots[0]
     assert target is not None
-    return IsaacExecuteRequestV2(
+    return IsaacExecuteRequestV4(
         run_id="formal-run-v4",
         session_id="formal-session-v4",
         decision_index=0,
         observation_id=observation.observation_id,
         capture_receipt_sha256=observation.capture_receipt_sha256,
+        formal_observation_sha256=observation.wire_sha256,
+        canonical_public_tracks_sha256=(observation.canonical_public_tracks_sha256),
         inference_response_sha256="a" * 64,
-        executed_intent_history_sha256="b" * 64,
-        runtime_request=RuntimeSkillRequestV2(
-            model_class_id="LIFT",
+        executed_intent_history=[],
+        executed_intent_history_sha256=canonical_sha256([]),
+        observation=observation,
+        runtime_request=RuntimeSkillRequestV4(
+            canonical_public_tracks_sha256=(observation.canonical_public_tracks_sha256),
+            model_class_id="coarse.skill.LIFT",
             skill="LIFT",
             model_target_track_id=target,
             model_target_slot=0,
@@ -81,7 +89,7 @@ def _request() -> IsaacExecuteRequestV2:
 def _bound_plan(
     tmp_path: Path,
     *,
-    request: IsaacExecuteRequestV2 | None = None,
+    request: IsaacExecuteRequestV4 | None = None,
     mapping: RuntimeSkillMappingResultV2 | None = None,
     input_updates: dict[str, Any] | None = None,
 ) -> M2CExactPlanPrimitivePlanV1:
@@ -277,6 +285,24 @@ def test_runtime_rejects_invalid_mapping_before_calling_provider(tmp_path: Path)
         runtime.prepare(request=request, observation=_formal(), mapping=invalid)
     assert provider.calls == 0
     assert bundle.preflight_calls == 0
+
+
+def test_runtime_rejects_legacy_v2_request_before_provider(tmp_path: Path) -> None:
+    mapping = _mapping()
+    provider = _Provider(_bound_plan(tmp_path, mapping=mapping))
+    bundle = _Bundle()
+    runtime = FormalExactPlanRuntimeV1(provider=provider, bundle=bundle)
+    legacy_request = IsaacExecuteRequestV2.model_construct()
+
+    with pytest.raises(ExactPlanUnavailable, match="requires a V4 execute request"):
+        runtime.prepare(
+            request=legacy_request,  # type: ignore[arg-type]
+            observation=_formal(),
+            mapping=mapping,
+        )
+    assert provider.calls == 0
+    assert bundle.preflight_calls == 0
+    assert bundle.execute_calls == 0
 
 
 def test_runtime_preflight_failure_never_calls_executor(tmp_path: Path) -> None:

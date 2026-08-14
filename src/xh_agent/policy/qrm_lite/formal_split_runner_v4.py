@@ -26,6 +26,11 @@ from xh_agent.policy.qrm_lite.executed_intent_history_v2 import (
 from xh_agent.policy.qrm_lite.formal_public_observation_v4 import (
     FormalPublicObservationV4,
 )
+from xh_agent.policy.qrm_lite.exact_plan_primitive_bundle_v1 import (
+    ExactPlanBundleExecutionReceiptV1,
+    ExactPlanPreflightReceiptV1,
+    M2CExactPlanPrimitivePlanV1,
+)
 from xh_agent.policy.qrm_lite.formal_split_runner_v2 import (
     DESTINATION_CLASS_LABELS,
     HeadPredictionV2,
@@ -60,14 +65,24 @@ from xh_agent.policy.qrm_lite.skill_registry_v2 import (
 
 FORMAL_WIRE_PROTOCOL_V4 = "M2C_FORMAL_SPLIT_RUNNER_V4"
 FORMAL_INFERENCE_PATH_V4 = "/v1/m2c/qwen-coarse-v4/predict"
+FORMAL_ISAAC_START_PATH_V4 = "/v1/m2c/isaac-v4/start"
+FORMAL_ISAAC_CAPTURE_PATH_V4 = "/v1/m2c/isaac-v4/capture"
+FORMAL_ISAAC_EXECUTE_PATH_V4 = "/v1/m2c/isaac-v4/execute"
+FORMAL_ISAAC_FINALIZE_PATH_V4 = "/v1/m2c/isaac-v4/finalize"
 QWEN_ARCHITECTURE_REVISION_V4 = "M2C_Q012_V4"
 PUBLIC_OBSERVATION_REVISION_V4 = "FormalPublicObservationV4"
 PUBLIC_TRACK_ASSOCIATOR_REVISION_V4 = "PublicTrackAssociatorV2"
 
 _T = TypeVar("_T", bound=BaseModel)
 IsaacWireMessageTypeV4 = Literal[
+    "ISAAC_START_REQUEST_V4",
+    "ISAAC_START_RESPONSE_V4",
+    "ISAAC_CAPTURE_REQUEST_V4",
     "ISAAC_CAPTURE_RESPONSE_V4",
     "ISAAC_EXECUTE_REQUEST_V4",
+    "ISAAC_EXECUTE_RESPONSE_V4",
+    "ISAAC_FINALIZE_REQUEST_V4",
+    "ISAAC_FINALIZE_RESPONSE_V4",
 ]
 
 
@@ -251,6 +266,96 @@ class SignedInferenceResponseV4(StrictModel):
     hmac_sha256: str = Field(pattern=SHA256_PATTERN)
 
 
+class IsaacEndpointBindingV4(StrictModel):
+    """Exact V4 labserver deployment consumed before opening a scene."""
+
+    schema_version: Literal["IsaacEndpointBindingV4"] = "IsaacEndpointBindingV4"
+    protocol: Literal[FORMAL_WIRE_PROTOCOL_V4] = FORMAL_WIRE_PROTOCOL_V4
+    endpoint_base_url: str = Field(pattern=r"^https?://[^\s]+$")
+    host: str = Field(min_length=1)
+    implementation_path: str = Field(min_length=1)
+    implementation_sha256: str = Field(pattern=SHA256_PATTERN)
+    physical_backend_path: str = Field(min_length=1)
+    physical_backend_sha256: str = Field(pattern=SHA256_PATTERN)
+    public_observation_provider_path: str = Field(min_length=1)
+    public_observation_provider_sha256: str = Field(pattern=SHA256_PATTERN)
+    formal_exact_plan_runtime_path: str = Field(min_length=1)
+    formal_exact_plan_runtime_sha256: str = Field(pattern=SHA256_PATTERN)
+    bound_plan_provider_path: str = Field(min_length=1)
+    bound_plan_provider_sha256: str = Field(pattern=SHA256_PATTERN)
+    primitive_bundle_path: str = Field(min_length=1)
+    primitive_bundle_sha256: str = Field(pattern=SHA256_PATTERN)
+    a3_deployment_binding_sha256: str = Field(pattern=SHA256_PATTERN)
+    runtime_registry_path: str = Field(min_length=1)
+    runtime_registry_sha256: str = Field(pattern=SHA256_PATTERN)
+    association_deployment_sha256: str = Field(pattern=SHA256_PATTERN)
+    capture_source_implementation_sha256: str = Field(pattern=SHA256_PATTERN)
+    declared_attribute_selector_implementation_sha256: str = Field(pattern=SHA256_PATTERN)
+    immutable_commit: str = Field(pattern=r"^[0-9a-f]{40}$")
+    container_image_digest: str = Field(pattern=r"^sha256:[0-9a-f]{64}$")
+    transitive_dependency_manifest_sha256: str = Field(pattern=SHA256_PATTERN)
+    invalid_action_policy: Literal["TERMINAL_NO_PHYSICAL_EXECUTION"] = (
+        "TERMINAL_NO_PHYSICAL_EXECUTION"
+    )
+    b0_runtime_fallback_present: Literal[False] = False
+    real_physics: Literal[True] = True
+    mocked_physics: Literal[False] = False
+    scripted_decision_source: Literal[False] = False
+    ready_for_formal_execution: Literal[True] = True
+    teacher_used: Literal[False] = False
+    privileged_truth_policy_input: Literal[False] = False
+
+
+class IsaacStartRequestV4(StrictModel):
+    schema_version: Literal["IsaacStartRequestV4"] = "IsaacStartRequestV4"
+    protocol: Literal[FORMAL_WIRE_PROTOCOL_V4] = FORMAL_WIRE_PROTOCOL_V4
+    run_id: str = Field(min_length=1)
+    challenge_nonce: str = Field(pattern=SHA256_PATTERN)
+    challenge_consumption_id: str = Field(pattern=SHA256_PATTERN)
+    challenge_consumption_receipt_sha256: str = Field(pattern=SHA256_PATTERN)
+    matched_key: str = Field(min_length=1)
+    scene_seed: int = Field(ge=0)
+    failure_seed: int = Field(ge=0)
+    sdf_sha256: str = Field(pattern=SHA256_PATTERN)
+    supervision_sha256: str = Field(pattern=SHA256_PATTERN)
+    endpoint_binding_sha256: str = Field(pattern=SHA256_PATTERN)
+    declared_target_attribute: str = Field(min_length=1, pattern=r"^[a-z0-9_-]+$")
+    declared_attribute_binding_sha256: str = Field(pattern=SHA256_PATTERN)
+    bundle: QwenBundleRuntimeBindingV4
+    teacher_used: Literal[False] = False
+    privileged_truth_policy_input: Literal[False] = False
+
+
+class IsaacStartResponseV4(StrictModel):
+    schema_version: Literal["IsaacStartResponseV4"] = "IsaacStartResponseV4"
+    protocol: Literal[FORMAL_WIRE_PROTOCOL_V4] = FORMAL_WIRE_PROTOCOL_V4
+    run_id: str = Field(min_length=1)
+    session_id: str = Field(min_length=1)
+    start_request_sha256: str = Field(pattern=SHA256_PATTERN)
+    failure_observed_at_ns: int = Field(gt=0)
+    endpoint_binding_sha256: str = Field(pattern=SHA256_PATTERN)
+    implementation_sha256: str = Field(pattern=SHA256_PATTERN)
+    physical_backend_sha256: str = Field(pattern=SHA256_PATTERN)
+    public_observation_provider_sha256: str = Field(pattern=SHA256_PATTERN)
+    formal_exact_plan_runtime_sha256: str = Field(pattern=SHA256_PATTERN)
+    real_physics: Literal[True] = True
+    mocked_physics: Literal[False] = False
+    teacher_used: Literal[False] = False
+    privileged_truth_policy_input: Literal[False] = False
+
+
+class IsaacCaptureRequestV4(StrictModel):
+    schema_version: Literal["IsaacCaptureRequestV4"] = "IsaacCaptureRequestV4"
+    protocol: Literal[FORMAL_WIRE_PROTOCOL_V4] = FORMAL_WIRE_PROTOCOL_V4
+    run_id: str = Field(min_length=1)
+    session_id: str = Field(min_length=1)
+    decision_index: int = Field(ge=0, le=7)
+    previous_execution_receipt_sha256: str | None = Field(
+        default=None,
+        pattern=SHA256_PATTERN,
+    )
+
+
 class IsaacCaptureResponseV4(StrictModel):
     schema_version: Literal["IsaacCaptureResponseV4"] = "IsaacCaptureResponseV4"
     protocol: Literal[FORMAL_WIRE_PROTOCOL_V4] = FORMAL_WIRE_PROTOCOL_V4
@@ -335,6 +440,10 @@ class IsaacExecuteRequestV4(StrictModel):
     formal_observation_sha256: str = Field(pattern=SHA256_PATTERN)
     canonical_public_tracks_sha256: str = Field(pattern=SHA256_PATTERN)
     inference_response_sha256: str = Field(pattern=SHA256_PATTERN)
+    executed_intent_history: list[PublicExecutedIntentHistoryItemV2] = Field(
+        default_factory=list,
+        max_length=7,
+    )
     executed_intent_history_sha256: str = Field(pattern=SHA256_PATTERN)
     observation: FormalPublicObservationV4
     runtime_request: RuntimeSkillRequestV4
@@ -359,7 +468,297 @@ class IsaacExecuteRequestV4(StrictModel):
             raise ValueError("formal V4 runtime slots differ from replayed K=8 candidates")
         if runtime.canonical_public_tracks_sha256 != observation.canonical_public_tracks_sha256:
             raise ValueError("formal V4 runtime candidate digest differs from replayed candidates")
+        validate_executed_intent_history_v2(
+            self.executed_intent_history,
+            expected_length=self.decision_index,
+        )
+        if self.executed_intent_history_sha256 != canonical_sha256(self.executed_intent_history):
+            raise ValueError("Isaac V4 execute history digest differs from its exact prefix")
         return self
+
+
+IsaacExecuteDispositionV4 = Literal[
+    "CONTINUE",
+    "TERMINAL_NO_PHYSICAL_EXECUTION",
+    "TERMINAL_EXECUTION_FAILURE",
+]
+
+
+class ModelDecisionExecutionReceiptV4(StrictModel):
+    """One model-selected operation executed (or rejected) by real Isaac.
+
+    V4 distinguishes robot actuation from public capture/association.  The
+    historical ``PhysicalSkillReceiptV2.physically_executed`` boolean cannot
+    honestly represent the latter two operations and is therefore not reused.
+    """
+
+    schema_version: Literal["ModelDecisionExecutionReceiptV4"] = "ModelDecisionExecutionReceiptV4"
+    receipt_id: str = Field(min_length=1)
+    receipt_sha256: str = Field(pattern=SHA256_PATTERN)
+    selected_skill: str = Field(min_length=1)
+    execution_source: Literal[
+        "MODEL_SELECTED_REGISTERED_SKILL",
+        "NO_PHYSICAL_EXECUTION",
+    ]
+    operation_kind: Literal[
+        "ROBOT_ACTUATION",
+        "PUBLIC_RGBD_CAPTURE",
+        "PUBLIC_TRACK_ASSOCIATION",
+        "NO_PHYSICAL_EXECUTION",
+    ]
+    outcome: Literal["PASS", "FAILED", "NOT_EXECUTED"]
+    executed_in_real_isaac: bool
+    robot_actuation_executed: bool
+    started_at_ns: int = Field(gt=0)
+    completed_at_ns: int = Field(gt=0)
+    schema_gate: Literal["PASS", "REJECTED", "NOT_RUN"]
+    stale_track_gate: Literal["PASS", "REJECTED", "NOT_RUN"]
+    frame_unit_gate: Literal["PASS", "REJECTED", "NOT_RUN"]
+    ik_gate: Literal["PASS", "REJECTED", "NOT_RUN"]
+    collision_gate: Literal["PASS", "REJECTED", "NOT_RUN"]
+    controller_gate: Literal["PASS", "REJECTED", "NOT_RUN"]
+    safety_gate: Literal["PASS", "REJECTED", "NOT_RUN"]
+    collision_or_safety_violation: bool = False
+    failure_reason: str | None = None
+    teacher_used: Literal[False] = False
+    privileged_truth_policy_input: Literal[False] = False
+
+    @model_validator(mode="after")
+    def operation_semantics_and_digest_are_exact(self) -> "ModelDecisionExecutionReceiptV4":
+        if self.completed_at_ns <= self.started_at_ns:
+            raise ValueError("formal V4 execution receipt timing is not ordered")
+        expected_sha = canonical_sha256(self.model_dump(mode="json", exclude={"receipt_sha256"}))
+        if self.receipt_sha256 != expected_sha:
+            raise ValueError("formal V4 execution receipt semantic digest differs")
+        if self.operation_kind == "NO_PHYSICAL_EXECUTION":
+            if (
+                self.execution_source != "NO_PHYSICAL_EXECUTION"
+                or self.selected_skill != "NO_PHYSICAL_EXECUTION"
+                or self.outcome != "NOT_EXECUTED"
+                or self.executed_in_real_isaac
+                or self.robot_actuation_executed
+                or self.collision_or_safety_violation
+                or not self.failure_reason
+                or not self.failure_reason.startswith("TERMINAL_NO_PHYSICAL_EXECUTION:")
+            ):
+                raise ValueError("formal V4 no-action receipt has execution claims")
+        else:
+            if (
+                self.execution_source != "MODEL_SELECTED_REGISTERED_SKILL"
+                or not self.executed_in_real_isaac
+                or self.outcome == "NOT_EXECUTED"
+            ):
+                raise ValueError("formal V4 executed operation lacks model/Isaac attribution")
+            if self.robot_actuation_executed != (self.operation_kind == "ROBOT_ACTUATION"):
+                raise ValueError("formal V4 robot-actuation flag differs from operation kind")
+            if self.outcome == "PASS" and self.failure_reason is not None:
+                raise ValueError("formal V4 PASS receipt contains a failure reason")
+            if self.outcome == "FAILED" and not self.failure_reason:
+                raise ValueError("formal V4 FAILED receipt lacks a reason")
+            if self.operation_kind in {"PUBLIC_RGBD_CAPTURE", "PUBLIC_TRACK_ASSOCIATION"}:
+                if any(
+                    getattr(self, gate) != "NOT_RUN"
+                    for gate in ("ik_gate", "collision_gate", "controller_gate", "safety_gate")
+                ):
+                    raise ValueError("formal V4 public operation claims actuation gates")
+        return self
+
+
+def canonical_runtime_mapping_sha256_v4(mapping: RuntimeSkillMappingResultV2) -> str:
+    """Hash every semantic mapping field while excluding the appended gate trace."""
+
+    return canonical_sha256(mapping.model_dump(mode="json", exclude={"gate_trace"}))
+
+
+class IsaacExecuteResponseV4(StrictModel):
+    """One independently remapped V4 decision and its exact execution evidence."""
+
+    schema_version: Literal["IsaacExecuteResponseV4"] = "IsaacExecuteResponseV4"
+    protocol: Literal[FORMAL_WIRE_PROTOCOL_V4] = FORMAL_WIRE_PROTOCOL_V4
+    run_id: str = Field(min_length=1)
+    session_id: str = Field(min_length=1)
+    decision_index: int = Field(ge=0, le=7)
+    observation_id: str = Field(min_length=1)
+    formal_observation_sha256: str = Field(pattern=SHA256_PATTERN)
+    inference_response_sha256: str = Field(pattern=SHA256_PATTERN)
+    mapping: RuntimeSkillMappingResultV2
+    bound_plan: M2CExactPlanPrimitivePlanV1 | None = None
+    bound_plan_sha256: str | None = Field(default=None, pattern=SHA256_PATTERN)
+    preflight_receipt: ExactPlanPreflightReceiptV1 | None = None
+    preflight_receipt_sha256: str | None = Field(default=None, pattern=SHA256_PATTERN)
+    bundle_execution_receipt: ExactPlanBundleExecutionReceiptV1 | None = None
+    bundle_execution_receipt_sha256: str | None = Field(
+        default=None,
+        pattern=SHA256_PATTERN,
+    )
+    execution_receipts: list[ModelDecisionExecutionReceiptV4] = Field(
+        min_length=1,
+        max_length=1,
+    )
+    disposition: IsaacExecuteDispositionV4
+    terminal_failure_outcome: Literal[False] | None = None
+    mapping_recomputed_in_isaac: Literal[True] = True
+    all_phase_preflight_before_any_command: bool
+    model_operation_executed_in_real_isaac: bool
+    real_physics: Literal[True] = True
+    mocked_physics: Literal[False] = False
+    teacher_used: Literal[False] = False
+    privileged_truth_policy_input: Literal[False] = False
+
+    @model_validator(mode="after")
+    def exact_plan_or_terminal_no_action_is_exclusive(self) -> "IsaacExecuteResponseV4":
+        receipt = self.execution_receipts[0]
+        if self.mapping.fallback_action != "NO_PHYSICAL_EXECUTION":
+            raise ValueError("formal V4 mapping retains a withdrawn B0 fallback")
+        exact_fields = (
+            self.bound_plan,
+            self.bound_plan_sha256,
+            self.preflight_receipt,
+            self.preflight_receipt_sha256,
+            self.bundle_execution_receipt,
+            self.bundle_execution_receipt_sha256,
+        )
+        if self.mapping.status == "INVALID":
+            if not self.mapping.fallback_required:
+                raise ValueError("INVALID V4 mapping did not require terminal handling")
+            if self.mapping.execution_attribution != "NO_PHYSICAL_EXECUTION":
+                raise ValueError("INVALID V4 mapping has nonterminal attribution")
+            if any(value is not None for value in exact_fields):
+                raise ValueError("INVALID V4 mapping claims plan/preflight/execution evidence")
+            if (
+                self.disposition != "TERMINAL_NO_PHYSICAL_EXECUTION"
+                or self.terminal_failure_outcome is not False
+                or self.all_phase_preflight_before_any_command
+                or self.model_operation_executed_in_real_isaac
+                or receipt.execution_source != "NO_PHYSICAL_EXECUTION"
+                or receipt.operation_kind != "NO_PHYSICAL_EXECUTION"
+                or receipt.outcome != "NOT_EXECUTED"
+            ):
+                raise ValueError("INVALID V4 mapping is not terminal no-action evidence")
+            return self
+
+        if self.mapping.fallback_required:
+            raise ValueError("VALID V4 mapping unexpectedly requires fallback")
+        if self.mapping.execution_attribution != "MODEL_SELECTED_REGISTERED_SKILL":
+            raise ValueError("VALID V4 mapping is not model-only")
+        if any(value is None for value in exact_fields):
+            raise ValueError("VALID V4 mapping lacks plan/preflight/execution evidence")
+        assert self.bound_plan is not None
+        assert self.preflight_receipt is not None
+        assert self.bundle_execution_receipt is not None
+        if (
+            self.bound_plan_sha256 != self.bound_plan.bound_plan_sha256
+            or self.preflight_receipt_sha256 != self.preflight_receipt.receipt_sha256
+            or self.preflight_receipt.bound_plan_sha256 != self.bound_plan.bound_plan_sha256
+            or self.bundle_execution_receipt_sha256
+            != canonical_sha256(self.bundle_execution_receipt)
+            or self.bundle_execution_receipt.bound_plan_sha256 != self.bound_plan.bound_plan_sha256
+            or self.bundle_execution_receipt.preflight_receipt_sha256
+            != self.preflight_receipt.receipt_sha256
+            or not self.all_phase_preflight_before_any_command
+            or not self.bundle_execution_receipt.real_isaac
+            or not self.bundle_execution_receipt.formal_evidence
+            or receipt.execution_source != "MODEL_SELECTED_REGISTERED_SKILL"
+            or receipt.selected_skill != self.mapping.canonical_skill
+        ):
+            raise ValueError("VALID V4 plan/preflight/execution evidence is crossed")
+        wire = self.bound_plan.exact_execution_plan
+        if (
+            wire.run_id != self.run_id
+            or wire.session_id != self.session_id
+            or wire.decision_index != self.decision_index
+            or wire.observation_id != self.observation_id
+            or self.bound_plan.inputs.signed_model_inference_response_sha256
+            != self.inference_response_sha256
+            or self.bound_plan.inputs.canonical_skill != self.mapping.canonical_skill
+            or self.bound_plan.inputs.runtime_action != self.mapping.runtime_action
+            or self.bound_plan.inputs.runtime_mapping_sha256
+            != canonical_runtime_mapping_sha256_v4(self.mapping)
+            or wire.execution_parameters_sha256
+            != canonical_sha256(self.mapping.execution_parameters)
+            or wire.target_track_id != self.mapping.target_track_id
+        ):
+            raise ValueError("VALID V4 bound plan crosses the decision/mapping")
+        gate_status = {
+            str(item.get("gate")): item.get("status") for item in self.mapping.gate_trace
+        }
+        if any(
+            gate_status.get(gate) != "PASS"
+            for gate in ("ik", "collision", "controller", "safety", "exact_plan")
+        ):
+            raise ValueError("VALID V4 mapping lacks all Isaac pre-execution gates")
+        exact_plan_gate = next(
+            (
+                item
+                for item in reversed(self.mapping.gate_trace)
+                if item.get("gate") == "exact_plan"
+            ),
+            {},
+        )
+        if exact_plan_gate.get("plan_sha256") != self.bound_plan.bound_plan_sha256:
+            raise ValueError("VALID V4 exact-plan gate differs from bound plan")
+        expected_operation_kind = {
+            "REOBSERVE": "PUBLIC_RGBD_CAPTURE",
+            "REASSOCIATE_TARGET": "PUBLIC_TRACK_ASSOCIATION",
+        }.get(str(self.mapping.canonical_skill), "ROBOT_ACTUATION")
+        if receipt.operation_kind != expected_operation_kind:
+            raise ValueError("formal V4 execution operation kind differs from selected skill")
+        if self.bundle_execution_receipt.status == "PASS":
+            if (
+                self.disposition != "CONTINUE"
+                or self.terminal_failure_outcome is not None
+                or not self.model_operation_executed_in_real_isaac
+                or not receipt.executed_in_real_isaac
+                or receipt.outcome != "PASS"
+                or receipt.failure_reason is not None
+                or receipt.collision_or_safety_violation
+                or any(
+                    getattr(receipt, gate) != "PASS"
+                    for gate in ("schema_gate", "stale_track_gate", "frame_unit_gate")
+                )
+                or (
+                    receipt.operation_kind == "ROBOT_ACTUATION"
+                    and any(
+                        getattr(receipt, gate) != "PASS"
+                        for gate in ("ik_gate", "collision_gate", "controller_gate", "safety_gate")
+                    )
+                )
+            ):
+                raise ValueError("PASS V4 bundle receipt is not a continuing real execution")
+        elif (
+            self.disposition != "TERMINAL_EXECUTION_FAILURE"
+            or self.terminal_failure_outcome is not False
+            or not self.model_operation_executed_in_real_isaac
+            or not receipt.executed_in_real_isaac
+            or receipt.outcome != "FAILED"
+        ):
+            raise ValueError("partial V4 execution is not a terminal failure")
+        return self
+
+
+class IsaacFinalizeRequestV4(StrictModel):
+    schema_version: Literal["IsaacFinalizeRequestV4"] = "IsaacFinalizeRequestV4"
+    protocol: Literal[FORMAL_WIRE_PROTOCOL_V4] = FORMAL_WIRE_PROTOCOL_V4
+    run_id: str = Field(min_length=1)
+    session_id: str = Field(min_length=1)
+    last_execution_receipt_sha256: str = Field(pattern=SHA256_PATTERN)
+    last_bundle_execution_receipt_sha256: str = Field(pattern=SHA256_PATTERN)
+    decisions_observed: Literal[8] = 8
+
+
+class IsaacFinalizeResponseV4(StrictModel):
+    schema_version: Literal["IsaacFinalizeResponseV4"] = "IsaacFinalizeResponseV4"
+    protocol: Literal[FORMAL_WIRE_PROTOCOL_V4] = FORMAL_WIRE_PROTOCOL_V4
+    run_id: str = Field(min_length=1)
+    session_id: str = Field(min_length=1)
+    evaluated_at_ns: int = Field(gt=0)
+    final_task_success: bool
+    completed_model_decisions: Literal[8] = 8
+    outcome_used_as_policy_input: Literal[False] = False
+    real_physics: Literal[True] = True
+    mocked_physics: Literal[False] = False
+    teacher_used: Literal[False] = False
+    privileged_truth_policy_input: Literal[False] = False
 
 
 class SignedIsaacWireMessageV4(StrictModel):
@@ -773,6 +1172,7 @@ def validate_runtime_mapping_v4(
         safety_check=safety_check,
         bin_cell_targets_provider=bin_cell_targets_provider,
     )
+    result = result.model_copy(update={"fallback_action": "NO_PHYSICAL_EXECUTION"})
     if result.target_track_id is None:
         return result
     external_slot = request.canonical_track_ids.index(result.target_track_id)

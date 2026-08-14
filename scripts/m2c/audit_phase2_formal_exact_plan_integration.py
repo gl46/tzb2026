@@ -285,7 +285,7 @@ def build_report() -> dict[str, Any]:
         ],
         "verification": {
             "command": ".venv/bin/pytest -q tests/unit/test_m2c_*.py",
-            "passed": 741,
+            "passed": 766,
             "failed": 0,
         },
         "next_implementation_order": [

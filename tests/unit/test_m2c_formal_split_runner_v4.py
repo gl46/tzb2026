@@ -273,6 +273,7 @@ def test_v4_runtime_mapping_preserves_role_ranked_nonlexical_slot() -> None:
     assert runtime.canonical_track_ids[:2] != sorted(runtime.canonical_track_ids[:2])
     assert runtime.model_target_slot == 0
     assert mapping.status == "VALID"
+    assert mapping.fallback_action == "NO_PHYSICAL_EXECUTION"
     assert mapping.target_track_id == observation.canonical_slots[0]
     assert mapping.target_track_slot == 0
     assert next(item for item in mapping.gate_trace if item["gate"] == "track")["slot"] == 0

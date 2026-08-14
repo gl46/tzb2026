@@ -7,7 +7,7 @@
     "PHASE2_READINESS_VERIFIER_ADR0024_V2_MIGRATION_INCOMPLETE",
     "TWO_ACTIVE_PRODUCTION_BINDINGS_UNSET"
   ],
-  "checked_head_commit": "9777661643ca5af9732a35cb366e935a89b7263a",
+  "checked_head_commit": "eb6656f7ba168b412275dd5adf7e63cd0f7ff993",
   "formal_backend": {
     "construct_exact_plan_is_rejection_stub": true,
     "execute_exact_plan_is_rejection_stub": true,
@@ -118,7 +118,7 @@
     },
     {
       "path": "src/xh_agent/policy/qrm_lite/formal_exact_plan_runtime_v1.py",
-      "sha256": "a5f651864b0be22ad0313bd3eeded3f62e476c81a9c7cf54ade17f63e626a5c0"
+      "sha256": "bbb5c822f40c5deb6b02a65d9845023f64435f4e066848280e6ba662d303f4b7"
     },
     {
       "path": "src/xh_agent/policy/qrm_lite/s4_entry_gate.py",
@@ -143,6 +143,6 @@
   "verification": {
     "command": ".venv/bin/pytest -q tests/unit/test_m2c_*.py",
     "failed": 0,
-    "passed": 741
+    "passed": 766
   }
 }
