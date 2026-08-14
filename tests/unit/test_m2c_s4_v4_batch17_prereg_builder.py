@@ -17,8 +17,8 @@ ROOT = Path(__file__).resolve().parents[2]
 def test_authoritative_prior_inventory_contains_all_forty_three_attempted_keys() -> None:
     assert BATCH17_PRIOR_ATTEMPT_KEY_COUNT == 43
     assert len(BATCH17_PRIOR_ATTEMPT_SOURCE_PATHS) == 14
-    assert BATCH17_PRIOR_ATTEMPT_KEY_COUNT == authorization.AUTHORITATIVE_PRIOR_ATTEMPT_KEY_COUNT
-    assert set(BATCH17_PRIOR_ATTEMPT_SOURCE_PATHS) == set(
+    assert BATCH17_PRIOR_ATTEMPT_KEY_COUNT < authorization.AUTHORITATIVE_PRIOR_ATTEMPT_KEY_COUNT
+    assert set(BATCH17_PRIOR_ATTEMPT_SOURCE_PATHS) < set(
         authorization.AUTHORITATIVE_PRIOR_ATTEMPT_SOURCES
     )
     assert "reports/m2c-s4-v4-batch16-collection.json" in BATCH17_PRIOR_ATTEMPT_SOURCE_PATHS
