@@ -32,6 +32,9 @@ from typing import Any, Literal, Mapping, Protocol
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from xh_agent.policy.qrm_lite.a3_attachment_transition_evidence_v1 import (
+    A3AttachmentTransitionEvidenceV1,
+)
 from xh_agent.policy.qrm_lite.a3_phase_swept_collision_evidence_v1 import (
     A3PhaseSweptCollisionEvidenceV1,
 )
@@ -694,6 +697,7 @@ class NonActuatingAttachmentTransitionV1(FrozenModel):
     complete: Literal[True] = True
     algorithm_sha256: str = Field(pattern=SHA256_PATTERN)
     configuration_sha256: str = Field(pattern=SHA256_PATTERN)
+    a3_attachment_evidence: A3AttachmentTransitionEvidenceV1 | None = None
     query_duration_ns: int = Field(ge=0)
     query_only: Literal[True] = True
     articulation_target_writes: Literal[0] = 0
@@ -709,6 +713,41 @@ class NonActuatingAttachmentTransitionV1(FrozenModel):
             raise ValueError("attachment before-state/identity differs")
         if self.attachment_present_after != (self.attachment_sha256_after is not None):
             raise ValueError("attachment after-state/identity differs")
+        evidence = self.a3_attachment_evidence
+        actual_pairs = tuple(
+            (pair.left_robot_path, pair.right_robot_path, pair.external_path)
+            for pair in self.bilateral_contact_pairs
+        )
+        expected_pairs = (
+            ()
+            if evidence is None or evidence.planned_bilateral_pair is None
+            else (
+                (
+                    evidence.planned_bilateral_pair.left_robot_path,
+                    evidence.planned_bilateral_pair.right_robot_path,
+                    evidence.planned_bilateral_pair.external_path,
+                ),
+            )
+        )
+        if evidence is not None and (
+            evidence.bound_plan_sha256 != self.bound_plan_sha256
+            or evidence.phase_index != self.phase_index
+            or evidence.phase_sha256 != self.phase_sha256
+            or evidence.path_sha256 != self.path_sha256
+            or evidence.command != self.command
+            or evidence.transition != self.transition
+            or evidence.attachment_or_removal_selector != self.attachment_or_removal_selector
+            or evidence.allowed_robot_contact_paths != self.allowed_robot_contact_paths
+            or evidence.allowed_external_contact_paths != self.allowed_external_contact_paths
+            or evidence.attachment_present_before != self.attachment_present_before
+            or evidence.attachment_sha256_before != self.attachment_sha256_before
+            or evidence.attachment_present_after != self.attachment_present_after
+            or evidence.attachment_sha256_after != self.attachment_sha256_after
+            or evidence.algorithm_sha256 != self.algorithm_sha256
+            or evidence.attachment_configuration_sha256 != self.configuration_sha256
+            or actual_pairs != expected_pairs
+        ):
+            raise ValueError("A.3 attachment evidence crossed transition inputs or outputs")
         if self.receipt_sha256 != _canonical_model_sha256(self, "receipt_sha256"):
             raise ValueError("attachment-transition query digest differs")
         return self
@@ -1664,6 +1703,7 @@ class ExactPlanPreflightV1:
         *,
         expected_attachment_present: bool,
         expected_attachment_sha256: str | None,
+        runtime_snapshot_sha256: str,
     ) -> tuple[bool, str | None]:
         wire = phase.phase
         config = self.configuration.attachment
@@ -1690,6 +1730,19 @@ class ExactPlanPreflightV1:
             raise ExactPlanPreflightRejected(
                 "attachment/contact query is incomplete, crossed, or uses the wrong transition"
             )
+
+        a3_contract = config.algorithm_id == "A3_PLANNED_ATTACHMENT_TRANSITION_CONTRACT_V1"
+        a3_formal = config.algorithm_id == "A3_PLANNED_ATTACHMENT_TRANSITION_V1"
+        if a3_contract or a3_formal:
+            evidence = transition.a3_attachment_evidence
+            if (
+                evidence is None
+                or evidence.runtime_snapshot_sha256 != runtime_snapshot_sha256
+                or evidence.formal_query_evidence_eligible != a3_formal
+            ):
+                raise ExactPlanPreflightRejected(
+                    "A.3 attachment transition lacks bound replay evidence"
+                )
 
         if expected_transition == "ATTACH":
             pairs = transition.bilateral_contact_pairs
@@ -1824,6 +1877,7 @@ class ExactPlanPreflightV1:
                 attachment,
                 expected_attachment_present=attachment_present,
                 expected_attachment_sha256=attachment_sha256,
+                runtime_snapshot_sha256=snapshot.snapshot_sha256,
             )
             raw_phase_results.append((path, collision, attachment))
             total_query_ns += (
@@ -2059,6 +2113,7 @@ def strict_replay_a3_audit_receipt_v1(
             item.attachment_transition,
             expected_attachment_present=attachment_present,
             expected_attachment_sha256=attachment_sha256,
+            runtime_snapshot_sha256=audit_receipt.runtime_snapshot.snapshot_sha256,
         )
         total_query_ns += (
             path.query_duration_ns

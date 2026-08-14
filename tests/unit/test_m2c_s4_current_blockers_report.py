@@ -152,6 +152,9 @@ def test_phase2_query_only_evidence_remains_non_authorizing() -> None:
     assert phase2["a3_phase_swept_collision_contract_active"] is True
     assert phase2["a3_phase_evidence_replay_active"] is True
     assert phase2["real_a3_phase_evidence_present"] is False
+    assert phase2["a3_attachment_transition_contract_active"] is True
+    assert phase2["a3_attachment_evidence_replay_active"] is True
+    assert phase2["real_runtime_snapshot_bound"] is False
     assert phase2["bound_plan_provider_contract_active"] is True
     assert phase2["real_bound_plan_synthesis_backend_bound"] is False
     assert phase2["exact_plan_executor_contract_active"] is True

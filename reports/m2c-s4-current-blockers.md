@@ -1,7 +1,7 @@
 # M2C S4 current blockers
 
 - Status: **BLOCKED_UNMEASURED_RAW_SCHEMA_AND_FORMAL_EXACT_PLAN_INTEGRATION**
-- Checked HEAD: `9821a318ed738df747878564bd388a24df133bb2`
+- Checked HEAD: `ed93cf37dee9c409a6c7938de3e4235061dd1fd8`
 - Q-A: **PASSED**
 - Q-B: **UNMEASURED**
 - `pure_model_success_episodes`: **null**, not zero
@@ -68,6 +68,10 @@ it binds the complete joint path, collision world, geometry, FK receipt,
 complete child-pair request, native receipt, and numeric configuration. No real
 phase evidence has been produced, so this closes only the offline contract and
 does not change formal eligibility.
+The planned attachment transition is likewise replayable from the exact
+left/right/external allowlists and runtime-snapshot digest. It never claims a
+physical contact or mutates the scene; the unchanged execution-time bilateral
+broker remains mandatory. No real runtime snapshot is bound yet.
 The V4 host-orchestration/evidence contract and HTTP service shell now exist
 and preserve terminal `NO_PHYSICAL_EXECUTION` without B0 substitution. The
 service's production backend factory remains deliberately unbound. The V4
