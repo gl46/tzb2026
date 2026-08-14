@@ -48,7 +48,6 @@ def test_missing_real_phase2_evidence_is_explicitly_blocked() -> None:
         "REAL_EXACT_PLAN_ISAAC_EXECUTOR_DEPLOYMENT_BINDING_MISSING",
         "REAL_QUERY_ONLY_FK_PROVIDER_DEPLOYMENT_BINDING_MISSING",
         "REAL_SESSION_ENDPOINT_STARTUP_AND_HOST_HMAC_ATTESTATION_MISSING",
-        "S4_ENTRY_GATE_FORMAL_V4_EVIDENCE_REPLAY_NOT_BOUND",
     ]
     assert report["governance"]["two_active_source_bindings_changed"] is False
     assert report["governance"]["withdrawn_compatibility_bindings_remain_none"] is True
@@ -95,6 +94,16 @@ def test_verified_renderers_propose_only_two_active_bindings() -> None:
         formal_runner_binding=(FORMAL_RUNNER_PATH, "e" * 64),
         formal_evidence_sha256="f" * 64,
         challenge_consumption_receipt_sha256="1" * 64,
+        run_id="formal-v4-fixture",
+        challenge_nonce="2" * 64,
+        challenge_consumption_id="3" * 64,
+        matched_key="m2c-s4-smoke-fixture",
+        scene_seed=1,
+        failure_seed=2,
+        sdf_sha256="4" * 64,
+        supervision_sha256="5" * 64,
+        final_task_success=False,
+        strict_pure_model_success=False,
         exact_plan_skills_verified=(
             "GRASP",
             "LIFT",

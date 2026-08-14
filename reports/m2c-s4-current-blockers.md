@@ -1,7 +1,7 @@
 # M2C S4 current blockers
 
 - Status: **BLOCKED_UNMEASURED_RAW_SCHEMA_AND_FORMAL_EXACT_PLAN_INTEGRATION**
-- Checked HEAD: `f541059ccd6ff537b196957d88d156832acddce5`
+- Checked HEAD: `ea1ab3cd3393cf1afc0e2284bdbde89b12ce0212`
 - Q-A: **PASSED**
 - Q-B: **UNMEASURED**
 - `pure_model_success_episodes`: **null**, not zero
@@ -73,8 +73,10 @@ has been produced. The ADR-0024 V2 readiness verifier is complete and remains
 fail-closed because no real evidence index exists. Plan-specific eight-skill phase receipts, immutable
 deployment/import closure, the real exact-plan Isaac executor, the deployed
 read-only FK provider, and real-session endpoint evidence remain missing.
-The S4 entry gate still consumes the historical V2 physical envelope and must
-gain strict V4 replay before either active binding can be reviewed.
+The S4 entry gate now preserves the historical V2 path and independently
+replays the strict formal V4 Phase-2 evidence index through its versioned V3
+physical envelope. Both active bindings remain unset, so this closes an
+implementation blocker without authorizing execution.
 
 ADR-0024's B0 decision is preserved: invalid mapping or preflight rejection is
 terminal `NO_PHYSICAL_EXECUTION`, never a relabelled B0 fallback. The independent
@@ -93,7 +95,7 @@ B0 comparison arm remains unchanged.
   **false / false / false**.
 - S6 frozen evaluation-manifest SHA:
   `ce1440966d31dda6b3f0e06c41a19dc654ebc734a6597d6346ec9df3c5f0d2ba`.
-- Focused S6/status/entry regression: **33 passed**.
+- Focused S6/status/entry regression: **36 passed**.
 
 Failures: no product-test failure. The mainline remains deliberately
 fail-closed at two boundaries: the governed V4 raw-detection schema decision

@@ -55,7 +55,6 @@ EXPECTED_BLOCKERS = (
     "REAL_EXACT_PLAN_ISAAC_EXECUTOR_DEPLOYMENT_BINDING_MISSING",
     "REAL_QUERY_ONLY_FK_PROVIDER_DEPLOYMENT_BINDING_MISSING",
     "REAL_SESSION_ENDPOINT_STARTUP_AND_HOST_HMAC_ATTESTATION_MISSING",
-    "S4_ENTRY_GATE_FORMAL_V4_EVIDENCE_REPLAY_NOT_BOUND",
     "TWO_ACTIVE_PRODUCTION_BINDINGS_UNSET",
 )
 NATIVE_BUILD_RECORDED_BLOCKERS = (
@@ -409,6 +408,15 @@ def build_audit(project_root: Path) -> dict[str, Any]:
             raise CandidateAuditFailure(f"Phase-2 V2 readiness omitted marker: {token}")
     if "PHASE2_READINESS_VERIFIER_ADR0024_V2_MIGRATION_INCOMPLETE" in readiness:
         raise CandidateAuditFailure("Phase-2 V2 readiness retains the migration blocker")
+    entry_v4 = read_regular_file_once(root / ENTRY_GATE_PATH).decode("utf-8")
+    for token in (
+        "M2CS4PhysicalIntegrationReceiptV3",
+        "M2CFormalSplitRunnerEvidenceV4",
+        "HostWireHMACVerificationReceiptV4",
+        "verify_phase2_evidence",
+    ):
+        if token not in entry_v4:
+            raise CandidateAuditFailure(f"S4 entry V4 replay omitted marker: {token}")
     readiness_cli = read_regular_file_once(root / PHASE2_READINESS_CLI_PATH).decode("utf-8")
     if "phase2_binding_readiness_v2" not in readiness_cli:
         raise CandidateAuditFailure("Phase-2 readiness CLI does not dispatch to V2")

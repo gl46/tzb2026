@@ -531,6 +531,177 @@ def test_entry_uses_unsigned_hmac_receipt_and_requires_consumption_binding() -> 
     assert "challenge_consumption_receipt_sha256" in fields
 
 
+def test_entry_declares_strict_formal_v4_phase2_receipt() -> None:
+    from xh_agent.policy.qrm_lite.s4_entry_gate import PhysicalIntegrationReceiptV3
+
+    fields = PhysicalIntegrationReceiptV3.model_fields
+    assert fields["phase2_evidence_index_sha256"].is_required()
+    assert fields["formal_runner_evidence_sha256"].is_required()
+    assert fields["challenge_consumption_receipt_sha256"].is_required()
+    assert fields["b0_runtime_fallback_present"].default is False
+
+
+def test_formal_v4_phase2_receipt_is_independently_replayed(tmp_path: Path, monkeypatch) -> None:
+    from xh_agent.policy.qrm_lite.phase2_binding_readiness_v2 import (
+        FORMAL_RUNNER_PATH,
+        SKILLS,
+        VerifiedPhase2EvidenceV2,
+    )
+    from xh_agent.policy.qrm_lite.s4_entry_gate import _physical_layer
+
+    smoke = json.loads((ROOT / FROZEN_KEY_MANIFEST_PATH).read_text())[
+        "physical_prerequisite_smoke_keys"
+    ][0]
+    index = tmp_path / "phase2-index.json"
+    _write(index, {"fixture": True})
+    verified = VerifiedPhase2EvidenceV2(
+        implementation_commit=_head(),
+        container_image_digest="sha256:" + "a" * 64,
+        transitive_import_manifest_sha256="b" * 64,
+        formal_runner_binding=(FORMAL_RUNNER_PATH, "c" * 64),
+        formal_evidence_sha256="d" * 64,
+        challenge_consumption_receipt_sha256="e" * 64,
+        run_id="formal-v4-smoke-run",
+        challenge_nonce="f" * 64,
+        challenge_consumption_id="1" * 64,
+        matched_key=smoke["matched_key"],
+        scene_seed=smoke["scene_seed"],
+        failure_seed=smoke["failure_seed"],
+        sdf_sha256=smoke["sdf_sha256"],
+        supervision_sha256=smoke["supervision_sha256"],
+        final_task_success=False,
+        strict_pure_model_success=False,
+        exact_plan_skills_verified=SKILLS,
+        host_hmac_roles_verified=("NODE2_QWEN", "LABSERVER_ISAAC"),
+    )
+
+    def _verified_replay(_root, _index, *, expected_index_sha256):
+        assert expected_index_sha256 == _sha256(index)
+        return object(), verified
+
+    monkeypatch.setattr(
+        "xh_agent.policy.qrm_lite.phase2_binding_readiness_v2.verify_phase2_evidence",
+        _verified_replay,
+    )
+    monkeypatch.setattr(
+        "xh_agent.policy.qrm_lite.s4_entry_gate.FORMAL_PHYSICAL_RUNNER_BINDING",
+        verified.formal_runner_binding,
+    )
+    monkeypatch.setattr(
+        "xh_agent.policy.qrm_lite.s4_entry_gate.FORMAL_DEPLOYMENT_CLOSURE_BINDING",
+        (
+            verified.implementation_commit,
+            verified.container_image_digest,
+            verified.transitive_import_manifest_sha256,
+        ),
+    )
+    receipt = tmp_path / "physical-v3.json"
+    payload = {
+        "schema_version": "M2CS4PhysicalIntegrationReceiptV3",
+        "evidence_origin": "ISAAC_PHYSICAL_INTEGRATION",
+        "execution_mode": "REAL_PHYSICS_NO_MOCKS",
+        "test_model_provenance": "M2C_QWEN_V4_WORLD_MODEL_BUNDLE",
+        "host": "labserver",
+        "collected_at_ns": 1,
+        "checked_implementation_commit": verified.implementation_commit,
+        "phase2_evidence_index_path": str(index),
+        "phase2_evidence_index_sha256": _sha256(index),
+        "formal_runner_evidence_sha256": verified.formal_evidence_sha256,
+        "challenge_consumption_receipt_sha256": (verified.challenge_consumption_receipt_sha256),
+        "run_id": verified.run_id,
+        "challenge_nonce": verified.challenge_nonce,
+        "challenge_consumption_id": verified.challenge_consumption_id,
+        "matched_key": verified.matched_key,
+        "scene_seed": verified.scene_seed,
+        "failure_seed": verified.failure_seed,
+        "sdf_sha256": verified.sdf_sha256,
+        "supervision_sha256": verified.supervision_sha256,
+        "exact_plan_skills_verified": list(SKILLS),
+        "synthetic": False,
+        "mocked_physics": False,
+        "contract_test_only": False,
+        "b0_runtime_fallback_present": False,
+        "teacher_used": False,
+        "privileged_truth_policy_input": False,
+    }
+    _write(receipt, payload)
+
+    summary, blockers = _physical_layer(
+        ROOT,
+        receipt,
+        json.loads((ROOT / FROZEN_KEY_MANIFEST_PATH).read_text()),
+        _head(),
+    )
+    assert blockers == []
+    assert summary["status"] == "PASS"
+    assert summary["phase2_evidence_verified"] is True
+    assert summary["decisions_observed"] == 8
+    assert summary["final_task_success"] is False
+
+    payload["run_id"] = "cross-run-substitution"
+    _write(receipt, payload)
+    summary, blockers = _physical_layer(
+        ROOT,
+        receipt,
+        json.loads((ROOT / FROZEN_KEY_MANIFEST_PATH).read_text()),
+        _head(),
+    )
+    assert summary["status"] == "INVALID"
+    assert any("run id differs" in item for item in blockers)
+
+
+def test_formal_v4_phase2_index_hash_mismatch_fails_before_replay(
+    tmp_path: Path,
+) -> None:
+    from xh_agent.policy.qrm_lite.s4_entry_gate import _physical_layer
+
+    index = tmp_path / "phase2-index.json"
+    _write(index, {"fixture": True})
+    receipt = tmp_path / "physical-v3.json"
+    smoke = json.loads((ROOT / FROZEN_KEY_MANIFEST_PATH).read_text())[
+        "physical_prerequisite_smoke_keys"
+    ][0]
+    _write(
+        receipt,
+        {
+            "schema_version": "M2CS4PhysicalIntegrationReceiptV3",
+            "host": "labserver",
+            "collected_at_ns": 1,
+            "checked_implementation_commit": _head(),
+            "phase2_evidence_index_path": str(index),
+            "phase2_evidence_index_sha256": "0" * 64,
+            "formal_runner_evidence_sha256": "1" * 64,
+            "challenge_consumption_receipt_sha256": "2" * 64,
+            "run_id": "formal-v4-smoke-run",
+            "challenge_nonce": "3" * 64,
+            "challenge_consumption_id": "4" * 64,
+            "matched_key": smoke["matched_key"],
+            "scene_seed": smoke["scene_seed"],
+            "failure_seed": smoke["failure_seed"],
+            "sdf_sha256": smoke["sdf_sha256"],
+            "supervision_sha256": smoke["supervision_sha256"],
+            "exact_plan_skills_verified": [
+                "GRASP",
+                "LIFT",
+                "MOVE",
+                "PLACE",
+                "RELEASE",
+                "REOBSERVE",
+                "REASSOCIATE_TARGET",
+                "REGRASP",
+            ],
+        },
+    )
+    summary, blockers = _physical_layer(
+        ROOT,
+        receipt,
+        json.loads((ROOT / FROZEN_KEY_MANIFEST_PATH).read_text()),
+        _head(),
+    )
+    assert summary["status"] == "INVALID"
+    assert any("index SHA-256 differs" in item for item in blockers)
+
+
 def test_consumption_time_must_precede_both_hosts_first_wire_request() -> None:
     qwen = [{"event_type": "WIRE_REQUEST_RECEIVED", "recorded_at_ns": 100}]
     isaac = [{"event_type": "WIRE_REQUEST_RECEIVED", "recorded_at_ns": 200}]

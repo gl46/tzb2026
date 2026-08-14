@@ -114,6 +114,13 @@ node2 or labserver receipt exists and the V4 Isaac HTTP backend factory is
 unbound. The ADR-0024 V2 readiness verifier is implemented and remains
 fail-closed until its exact real-evidence index is supplied.
 
+The S4 entry gate now accepts a versioned V3 physical envelope only by
+independently replaying that same Phase-2 evidence index. It cross-binds the
+formal V4 run, one-shot challenge, two host-local HMAC receipts, immutable
+deployment closure, all eight real-Isaac skill validations, and the frozen
+SMOKE identity. The historical V2 path remains unchanged; neither path can
+authorize while the two active production bindings remain `None`.
+
 ## B0 boundary
 
 `FrozenB0FallbackWrapperV1` and ADR-0022 A.5 are withdrawn by accepted
@@ -139,7 +146,6 @@ nor any safety/IK/collision/controller gate.
 - `REAL_EXACT_PLAN_ISAAC_EXECUTOR_DEPLOYMENT_BINDING_MISSING`
 - `REAL_QUERY_ONLY_FK_PROVIDER_DEPLOYMENT_BINDING_MISSING`
 - `REAL_SESSION_ENDPOINT_STARTUP_AND_HOST_HMAC_ATTESTATION_MISSING`
-- `S4_ENTRY_GATE_FORMAL_V4_EVIDENCE_REPLAY_NOT_BOUND`
 - `TWO_ACTIVE_PRODUCTION_BINDINGS_UNSET`
 
 No training, Isaac scene startup, physical action, SMOKE, Q-B, or S5/S6

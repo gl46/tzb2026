@@ -33,8 +33,8 @@
     "src/xh_agent/policy/qrm_lite/formal_split_runner_v4.py": "5dfec6becb2d333e3e0f1fef2f7ed97983da28af7c19c07e537956720bf2862c",
     "src/xh_agent/policy/qrm_lite/isaac_exact_plan_runtime_v1.py": "57712a3d573f35dc3acb656e8533bb01789200501d2d7bee20450e91223e8dbe",
     "src/xh_agent/policy/qrm_lite/offline_wire_auth_v4.py": "52ade7742f725532af5c45853f735ef9c8891ba223c86be334fa4a973614f0f2",
-    "src/xh_agent/policy/qrm_lite/phase2_binding_readiness_v2.py": "41c8ad66185b06be69e53347f03c6892fd2eb96527b24f72c2d2bb36fc26891f",
-    "src/xh_agent/policy/qrm_lite/s4_entry_gate.py": "4ede20b7e14004a095a64f151f641e464c7e95dbe7666feb68642523d9803dfb"
+    "src/xh_agent/policy/qrm_lite/phase2_binding_readiness_v2.py": "884b85bd3754903787bc5b73bcc28e16736cc69eeb223ff93243a9168f7a2056",
+    "src/xh_agent/policy/qrm_lite/s4_entry_gate.py": "27cfa5f6033f132d7284641c91b8d7ded9df9777eff8b8cee123a6f13025e521"
   },
   "native_build_evidence": {
     "report_path": "reports/m2c-phase2-a3-native-build.json",
@@ -99,7 +99,6 @@
     "REAL_EXACT_PLAN_ISAAC_EXECUTOR_DEPLOYMENT_BINDING_MISSING",
     "REAL_QUERY_ONLY_FK_PROVIDER_DEPLOYMENT_BINDING_MISSING",
     "REAL_SESSION_ENDPOINT_STARTUP_AND_HOST_HMAC_ATTESTATION_MISSING",
-    "S4_ENTRY_GATE_FORMAL_V4_EVIDENCE_REPLAY_NOT_BOUND",
     "TWO_ACTIVE_PRODUCTION_BINDINGS_UNSET"
   ],
   "one_next_command": ".venv/bin/python scripts/m2c/audit_adr0024_phase2_candidate.py --project-root ."

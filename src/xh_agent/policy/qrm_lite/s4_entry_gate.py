@@ -1,10 +1,9 @@
 """Fail-closed ADR-0020 section 7 entry gate for formal Q-B evaluation.
 
 The local layer proves deterministic contracts only.  The physical layer
-accepts an external Isaac receipt only when its decisions are attributed to a
-trained Qwen V2 world-model bundle (LoRA adapter plus the skill, pointer, and
-destination heads).  A structured Q0/Q1/Q2 checkpoint is deliberately not a
-physical-entry credential.
+accepts either the historical V2 envelope or an ADR-0024 V3 envelope whose
+entire Phase-2 formal V4 index is independently replayed. A structured
+Q0/Q1/Q2 checkpoint is deliberately not a physical-entry credential.
 """
 
 from __future__ import annotations
@@ -463,6 +462,62 @@ class PhysicalIntegrationReceiptV2(StrictModel):
     def frozen_runtime_is_exact(self) -> "PhysicalIntegrationReceiptV2":
         if self.runtime_binding_sha256 != RUNTIME_BINDINGS:
             raise ValueError("physical receipt runtime bindings do not match frozen set")
+        return self
+
+
+class PhysicalIntegrationReceiptV3(StrictModel):
+    """Entry envelope for the independently replayed ADR-0024 Phase-2 evidence set.
+
+    The referenced index is required to contain one
+    ``M2CFormalSplitRunnerEvidenceV4`` and the two corresponding
+    ``HostWireHMACVerificationReceiptV4`` records. Their strict schemas and
+    cross-bindings are replayed by the shared Phase-2 verifier.
+    """
+
+    schema_version: Literal["M2CS4PhysicalIntegrationReceiptV3"] = (
+        "M2CS4PhysicalIntegrationReceiptV3"
+    )
+    evidence_origin: Literal["ISAAC_PHYSICAL_INTEGRATION"] = "ISAAC_PHYSICAL_INTEGRATION"
+    execution_mode: Literal["REAL_PHYSICS_NO_MOCKS"] = "REAL_PHYSICS_NO_MOCKS"
+    test_model_provenance: Literal["M2C_QWEN_V4_WORLD_MODEL_BUNDLE"] = (
+        "M2C_QWEN_V4_WORLD_MODEL_BUNDLE"
+    )
+    host: str = Field(min_length=1)
+    collected_at_ns: int = Field(gt=0)
+    checked_implementation_commit: str = Field(pattern=r"^[0-9a-f]{40}$")
+    phase2_evidence_index_path: str = Field(min_length=1)
+    phase2_evidence_index_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    formal_runner_evidence_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    challenge_consumption_receipt_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    run_id: str = Field(min_length=1)
+    challenge_nonce: str = Field(pattern=r"^[0-9a-f]{64}$")
+    challenge_consumption_id: str = Field(pattern=r"^[0-9a-f]{64}$")
+    matched_key: str = Field(min_length=1)
+    scene_seed: int = Field(ge=0)
+    failure_seed: int = Field(ge=0)
+    sdf_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    supervision_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    exact_plan_skills_verified: tuple[str, ...] = Field(min_length=8, max_length=8)
+    synthetic: Literal[False] = False
+    mocked_physics: Literal[False] = False
+    contract_test_only: Literal[False] = False
+    b0_runtime_fallback_present: Literal[False] = False
+    teacher_used: Literal[False] = False
+    privileged_truth_policy_input: Literal[False] = False
+
+    @model_validator(mode="after")
+    def exact_phase2_skill_set(self) -> "PhysicalIntegrationReceiptV3":
+        if self.exact_plan_skills_verified != (
+            "GRASP",
+            "LIFT",
+            "MOVE",
+            "PLACE",
+            "RELEASE",
+            "REOBSERVE",
+            "REASSOCIATE_TARGET",
+            "REGRASP",
+        ):
+            raise ValueError("physical V3 receipt does not bind the exact eight-skill set")
         return self
 
 
@@ -1616,7 +1671,7 @@ def _local_layer(
         )
     try:
         receipt = LocalContractTestReceiptV2.model_validate(_read_json(local_receipt_path))
-    except (OSError, json.JSONDecodeError, ValidationError) as error:
+    except (OSError, json.JSONDecodeError, ValidationError, ValueError) as error:
         return (
             {
                 "status": "INVALID",
@@ -1645,6 +1700,154 @@ def _local_layer(
     )
 
 
+def _physical_layer_v3(
+    root: Path,
+    receipt: PhysicalIntegrationReceiptV3,
+    physical_receipt_path: Path,
+    manifest: dict[str, Any] | None,
+    head_commit: str | None,
+) -> tuple[dict[str, Any], list[str]]:
+    """Replay one immutable ADR-0024 Phase-2 V4 evidence index."""
+
+    # Local import avoids a module cycle: the Phase-2 verifier reuses the
+    # neutral transitive-import schema defined above.
+    from xh_agent.policy.qrm_lite.phase2_binding_readiness_v2 import (
+        ReadinessFailure,
+        verify_phase2_evidence,
+    )
+
+    blockers = _implementation_commit_blockers(
+        root,
+        receipt.checked_implementation_commit,
+        head_commit,
+    )
+    verified = None
+    try:
+        raw_index_path = Path(receipt.phase2_evidence_index_path)
+        candidate = raw_index_path if raw_index_path.is_absolute() else root / raw_index_path
+        if candidate.is_symlink():
+            raise ValueError("Phase-2 evidence index may not be a symlink")
+        index_path = candidate.resolve(strict=True)
+        _, verified = verify_phase2_evidence(
+            root,
+            index_path,
+            expected_index_sha256=receipt.phase2_evidence_index_sha256,
+        )
+    except (
+        OSError,
+        subprocess.SubprocessError,
+        ValidationError,
+        ValueError,
+        ReadinessFailure,
+    ) as error:
+        blockers.append(
+            f"formal V4 Phase-2 evidence replay failed closed: {type(error).__name__}: {error}"
+        )
+
+    if verified is not None:
+        comparisons = {
+            "implementation commit": (
+                receipt.checked_implementation_commit,
+                verified.implementation_commit,
+            ),
+            "formal evidence SHA-256": (
+                receipt.formal_runner_evidence_sha256,
+                verified.formal_evidence_sha256,
+            ),
+            "challenge consumption SHA-256": (
+                receipt.challenge_consumption_receipt_sha256,
+                verified.challenge_consumption_receipt_sha256,
+            ),
+            "run id": (receipt.run_id, verified.run_id),
+            "challenge nonce": (receipt.challenge_nonce, verified.challenge_nonce),
+            "challenge consumption id": (
+                receipt.challenge_consumption_id,
+                verified.challenge_consumption_id,
+            ),
+            "matched key": (receipt.matched_key, verified.matched_key),
+            "scene seed": (receipt.scene_seed, verified.scene_seed),
+            "failure seed": (receipt.failure_seed, verified.failure_seed),
+            "SDF SHA-256": (receipt.sdf_sha256, verified.sdf_sha256),
+            "supervision SHA-256": (
+                receipt.supervision_sha256,
+                verified.supervision_sha256,
+            ),
+            "exact eight-skill validation": (
+                receipt.exact_plan_skills_verified,
+                verified.exact_plan_skills_verified,
+            ),
+        }
+        blockers.extend(
+            f"physical V3 {label} differs from independently replayed evidence"
+            for label, (observed, expected) in comparisons.items()
+            if observed != expected
+        )
+        if FORMAL_PHYSICAL_RUNNER_BINDING is None:
+            blockers.append(
+                "formal Qwen-to-Isaac runner is not independently reviewed, "
+                "real-Isaac contract-verified, and frozen"
+            )
+        elif tuple(FORMAL_PHYSICAL_RUNNER_BINDING) != tuple(verified.formal_runner_binding):
+            blockers.append("formal V4 runner differs from the active source binding")
+        if FORMAL_DEPLOYMENT_CLOSURE_BINDING is None:
+            blockers.append(
+                "formal deployment has no frozen implementation commit, container image, "
+                "and complete transitive-import closure"
+            )
+        elif tuple(FORMAL_DEPLOYMENT_CLOSURE_BINDING) != (
+            verified.implementation_commit,
+            verified.container_image_digest,
+            verified.transitive_import_manifest_sha256,
+        ):
+            blockers.append("formal V4 deployment differs from the active closure binding")
+
+        smoke_keys = (
+            [] if manifest is None else manifest.get("physical_prerequisite_smoke_keys", [])
+        )
+        matches = [
+            entry for entry in smoke_keys if entry.get("matched_key") == verified.matched_key
+        ]
+        if len(matches) != 1:
+            blockers.append("physical V3 matched_key is not exactly one frozen SMOKE key")
+        else:
+            key = matches[0]
+            for field in ("scene_seed", "failure_seed", "sdf_sha256", "supervision_sha256"):
+                if getattr(verified, field) != key.get(field):
+                    blockers.append(f"physical V3 frozen SMOKE {field} mismatch")
+            if key.get("role") != "SMOKE" or key.get("split") != "val":
+                blockers.append("physical V3 prerequisite key is not frozen SMOKE/val")
+
+    blockers = list(dict.fromkeys(blockers))
+    return (
+        {
+            "status": "PASS" if not blockers else "INVALID",
+            "passed": not blockers,
+            "receipt_path": str(physical_receipt_path),
+            "receipt_schema": receipt.schema_version,
+            "evidence_origin": receipt.evidence_origin,
+            "execution_mode": receipt.execution_mode,
+            "test_model_provenance": receipt.test_model_provenance,
+            "checked_implementation_commit": receipt.checked_implementation_commit,
+            "matched_key": receipt.matched_key,
+            "run_id": receipt.run_id,
+            "decisions_observed": verified.model_decision_count if verified else 0,
+            "physical_receipts_observed": (verified.real_model_operation_count if verified else 0),
+            "strict_pure_model_success": (
+                verified.strict_pure_model_success if verified else False
+            ),
+            "final_task_success": verified.final_task_success if verified else False,
+            "phase2_evidence_verified": verified is not None,
+            "exact_plan_skills_verified": (
+                list(verified.exact_plan_skills_verified) if verified else []
+            ),
+            "world_model_bundle_verified": verified is not None,
+            "structured_q012_control_policy_accepted": False,
+            "synthetic_unit_journal_accepted": False,
+        },
+        blockers,
+    )
+
+
 def _physical_layer(
     root: Path,
     physical_receipt_path: Path | None,
@@ -1657,7 +1860,7 @@ def _physical_layer(
                 "status": "NOT_RUN",
                 "passed": False,
                 "receipt_path": None,
-                "required_model_provenance": "M2C_QWEN_V2_WORLD_MODEL_BUNDLE",
+                "required_model_provenance": ("M2C_QWEN_V4_WORLD_MODEL_BUNDLE_OR_LEGACY_V2"),
                 "world_model_bundle_verified": False,
                 "structured_q012_control_policy_accepted": False,
                 "synthetic_unit_journal_accepted": False,
@@ -1665,14 +1868,26 @@ def _physical_layer(
             ["real Isaac Qwen-world-model physical integration receipt not provided"],
         )
     try:
-        receipt = PhysicalIntegrationReceiptV2.model_validate(_read_json(physical_receipt_path))
+        raw_receipt = _read_json(physical_receipt_path)
+        if not isinstance(raw_receipt, dict):
+            raise ValueError("physical integration receipt is not one JSON object")
+        if raw_receipt.get("schema_version") == "M2CS4PhysicalIntegrationReceiptV3":
+            receipt_v3 = PhysicalIntegrationReceiptV3.model_validate(raw_receipt)
+            return _physical_layer_v3(
+                root,
+                receipt_v3,
+                physical_receipt_path,
+                manifest,
+                head_commit,
+            )
+        receipt = PhysicalIntegrationReceiptV2.model_validate(raw_receipt)
     except (OSError, json.JSONDecodeError, ValidationError) as error:
         return (
             {
                 "status": "INVALID",
                 "passed": False,
                 "receipt_path": str(physical_receipt_path),
-                "required_model_provenance": "M2C_QWEN_V2_WORLD_MODEL_BUNDLE",
+                "required_model_provenance": ("M2C_QWEN_V4_WORLD_MODEL_BUNDLE_OR_LEGACY_V2"),
                 "world_model_bundle_verified": False,
                 "structured_q012_control_policy_accepted": False,
                 "synthetic_unit_journal_accepted": False,
@@ -1867,7 +2082,7 @@ def evaluate_s4_entry_gate(
             "runtime_binding_sha256": RUNTIME_BINDINGS,
             "b0_freeze_sha256": B0_FREEZE_SHA256,
         },
-        "required_physical_model_provenance": "M2C_QWEN_V2_WORLD_MODEL_BUNDLE",
+        "required_physical_model_provenance": ("M2C_QWEN_V4_WORLD_MODEL_BUNDLE_OR_LEGACY_V2"),
         "world_model_mainline_required": True,
         "structured_q012_checkpoint_accepted_as_world_model": False,
         "governance_gate_passed": governance.get("q_b_authorized") is True,

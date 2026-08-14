@@ -217,6 +217,15 @@ def build_report() -> dict[str, Any]:
             raise AuditError(f"Phase-2 V2 readiness omitted marker: {token}")
     if "PHASE2_READINESS_VERIFIER_ADR0024_V2_MIGRATION_INCOMPLETE" in readiness_source:
         raise AuditError("Phase-2 V2 readiness retains the migration blocker")
+    entry_source = (ROOT / entry_path).read_text(encoding="utf-8")
+    for token in (
+        "M2CS4PhysicalIntegrationReceiptV3",
+        "M2CFormalSplitRunnerEvidenceV4",
+        "HostWireHMACVerificationReceiptV4",
+        "verify_phase2_evidence",
+    ):
+        if token not in entry_source:
+            raise AuditError(f"S4 entry V4 replay omitted marker: {token}")
 
     formal_fields = _class_fields(observation, "PathBlockedPublicObservationV4")
     a1_fields = _class_fields(bundle, "ExactPlanA1InputsV1")
@@ -360,6 +369,7 @@ def build_report() -> dict[str, Any]:
             "session_receipt_and_hmac_post_execution_evidence_required": True,
             "legacy_a3_signature_schema_audit_only": legacy_signature_audit_only,
             "phase2_readiness_adr0024_v2_migration_complete": True,
+            "s4_entry_gate_formal_v4_replay_active": True,
         },
         "formal_wire": {
             "current_observation_schema": "FormalPublicObservationV4",
@@ -393,12 +403,11 @@ def build_report() -> dict[str, Any]:
             "REAL_ISAAC_EPISODE_LIFECYCLE_AND_CAPTURE_SOURCE_NOT_BOUND",
             "REAL_FORMAL_V4_ISAAC_HTTP_SERVICE_BACKEND_FACTORY_NOT_BOUND",
             "PLAN_SPECIFIC_A3_PREFLIGHT_AND_EIGHT_SKILL_EXECUTION_UNMEASURED",
-            "S4_ENTRY_GATE_FORMAL_V4_EVIDENCE_REPLAY_NOT_BOUND",
             "TWO_ACTIVE_PRODUCTION_BINDINGS_UNSET",
         ],
         "verification": {
             "command": ".venv/bin/pytest -q tests/unit/test_m2c_*.py",
-            "passed": 813,
+            "passed": 816,
             "failed": 0,
         },
         "next_implementation_order": [
@@ -406,7 +415,6 @@ def build_report() -> dict[str, Any]:
             "BIND_REAL_ISAAC_EPISODE_LIFECYCLE_AND_PUBLIC_CAPTURE_SOURCE",
             "BIND_REAL_FORMAL_V4_ISAAC_HTTP_SERVICE_BACKEND_FACTORY",
             "REPLAY_PLAN_SPECIFIC_A3_PREFLIGHT_FOR_ALL_EIGHT_SKILLS",
-            "MIGRATE_S4_ENTRY_GATE_TO_STRICT_FORMAL_V4_EVIDENCE_REPLAY",
             "COLLECT_REAL_PHASE2_V2_EVIDENCE_INDEX_AND_REVIEW_TWO_ACTIVE_BINDINGS",
         ],
         "next_command": (
@@ -472,8 +480,9 @@ the complete request/observation/mapping/plan/source closure before exposing a
 plan.  Its real Isaac synthesis backend and lifecycle/capture deployment are
 still absent and plan-specific A3 evidence for all eight skills remains
 unmeasured. The ADR-0024 V2 readiness verifier is complete but has no real
-evidence index to authorize an addendum. The S4 entry gate still replays the
-historical V2 physical envelope and is not yet a V4 authorization consumer.
+evidence index to authorize an addendum. The S4 entry gate now preserves the
+historical V2 path while independently replaying a strict V3 envelope backed
+by that same formal V4 Phase-2 evidence index.
 
 ## Blockers
 

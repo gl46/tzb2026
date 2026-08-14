@@ -306,6 +306,18 @@ class VerifiedPhase2EvidenceV2(StrictModel):
     formal_runner_binding: tuple[str, str]
     formal_evidence_sha256: str = Field(pattern=SHA256_PATTERN)
     challenge_consumption_receipt_sha256: str = Field(pattern=SHA256_PATTERN)
+    run_id: str = Field(min_length=1)
+    challenge_nonce: str = Field(pattern=SHA256_PATTERN)
+    challenge_consumption_id: str = Field(pattern=SHA256_PATTERN)
+    matched_key: str = Field(min_length=1)
+    scene_seed: int = Field(ge=0)
+    failure_seed: int = Field(ge=0)
+    sdf_sha256: str = Field(pattern=SHA256_PATTERN)
+    supervision_sha256: str = Field(pattern=SHA256_PATTERN)
+    final_task_success: bool
+    strict_pure_model_success: bool
+    model_decision_count: Literal[8] = 8
+    real_model_operation_count: Literal[8] = 8
     exact_plan_skills_verified: tuple[str, ...]
     host_hmac_roles_verified: tuple[Literal["NODE2_QWEN", "LABSERVER_ISAAC"], ...]
     formal_v4_finalized_eight_decisions: Literal[True] = True
@@ -866,13 +878,18 @@ def _verify_host_receipts(
 def verify_phase2_evidence(
     project: Path,
     evidence_index_path: Path,
+    *,
+    expected_index_sha256: str | None = None,
 ) -> tuple[Phase2EvidenceIndexV2, VerifiedPhase2EvidenceV2]:
     project = project.resolve()
     if evidence_index_path.is_symlink():
         raise ReadinessFailure("Phase-2 evidence index may not be a symlink")
     index_path = evidence_index_path.resolve(strict=True)
+    index_bytes = read_regular_file_once(index_path)
+    if expected_index_sha256 is not None and sha256_bytes(index_bytes) != expected_index_sha256:
+        raise ReadinessFailure("Phase-2 evidence index SHA-256 differs from its entry receipt")
     index = Phase2EvidenceIndexV2.model_validate(
-        _json_object(read_regular_file_once(index_path), label="Phase-2 V2 evidence index")
+        _json_object(index_bytes, label="Phase-2 V2 evidence index")
     )
     _require_ancestor_commit(project, index.implementation_commit)
     project_by_path = {binding.path: binding for binding in index.project_bindings}
@@ -1000,6 +1017,16 @@ def verify_phase2_evidence(
         challenge_consumption_receipt_sha256=index.artifacts[
             "challenge_consumption_receipt"
         ].sha256,
+        run_id=formal.run_id,
+        challenge_nonce=formal.challenge_nonce,
+        challenge_consumption_id=formal.challenge_consumption_id,
+        matched_key=formal.matched_key,
+        scene_seed=formal.scene_seed,
+        failure_seed=formal.failure_seed,
+        sdf_sha256=formal.sdf_sha256,
+        supervision_sha256=formal.supervision_sha256,
+        final_task_success=formal.final_task_success,
+        strict_pure_model_success=formal.strict_pure_model_success,
         exact_plan_skills_verified=SKILLS,
         host_hmac_roles_verified=("NODE2_QWEN", "LABSERVER_ISAAC"),
     )
@@ -1024,7 +1051,6 @@ def build_readiness_report(
                 "REAL_EXACT_PLAN_ISAAC_EXECUTOR_DEPLOYMENT_BINDING_MISSING",
                 "REAL_QUERY_ONLY_FK_PROVIDER_DEPLOYMENT_BINDING_MISSING",
                 "REAL_SESSION_ENDPOINT_STARTUP_AND_HOST_HMAC_ATTESTATION_MISSING",
-                "S4_ENTRY_GATE_FORMAL_V4_EVIDENCE_REPLAY_NOT_BOUND",
             ]
         )
     else:

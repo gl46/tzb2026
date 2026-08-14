@@ -2,7 +2,7 @@
   "schema_version": "M2CS4CurrentBlockersV2",
   "status": "BLOCKED_UNMEASURED_RAW_SCHEMA_AND_FORMAL_EXACT_PLAN_INTEGRATION",
   "reported_at": "2026-08-14T11:12:18+08:00",
-  "checked_head_commit": "f541059ccd6ff537b196957d88d156832acddce5",
+  "checked_head_commit": "ea1ab3cd3393cf1afc0e2284bdbde89b12ce0212",
   "q_a_state": "PASSED",
   "q_b_state": "UNMEASURED",
   "pure_model_success_episodes": null,
@@ -109,16 +109,17 @@
     "formal_v4_http_service_shell_active": true,
     "formal_v4_host_local_hmac_verifier_active": true,
     "phase2_readiness_adr0024_v2_migration_complete": true,
+    "s4_entry_gate_formal_v4_replay_active": true,
     "real_node2_and_labserver_hmac_receipts_present": false,
     "real_formal_v4_isaac_http_service_bound": false,
     "formal_execution_eligible": false,
     "candidate_config": {
       "path": "configs/m2c_adr0024_phase2_binding_candidate.json",
-      "sha256": "46b003411b71fdef523049d80cdedf9df891a44ac090ae3b376dbf653628da6a"
+      "sha256": "3d383f196ca942edcfc7b7c8ba5c07a41268d69d704618ee0d9322692d3afcb7"
     },
     "candidate_addendum": {
       "path": "docs/decisions/ADR-0024-PHASE2-BINDING-ADDENDUM-CANDIDATE.md",
-      "sha256": "7f6acc07ec92cc9239def038f7a8bc3a32e343bf6a81c2583f5e41c147a15f5b"
+      "sha256": "20ad40546547080bf4530424569f5b156db262c935549e3d82398ef95e37119a"
     },
     "query_only_comparison_report": {
       "path": "reports/m2c-phase2-a3-query-only-deployment-comparison.json",
@@ -148,7 +149,6 @@
       "REAL_EXACT_PLAN_ISAAC_EXECUTOR_DEPLOYMENT_BINDING_MISSING",
       "REAL_QUERY_ONLY_FK_PROVIDER_DEPLOYMENT_BINDING_MISSING",
       "REAL_SESSION_ENDPOINT_STARTUP_AND_HOST_HMAC_ATTESTATION_MISSING",
-      "S4_ENTRY_GATE_FORMAL_V4_EVIDENCE_REPLAY_NOT_BOUND",
       "TWO_ACTIVE_PRODUCTION_BINDINGS_UNSET"
     ]
   },
@@ -185,7 +185,7 @@
   },
   "verification": {
     "s6_evaluation_manifest_sha256": "ce1440966d31dda6b3f0e06c41a19dc654ebc734a6597d6346ec9df3c5f0d2ba",
-    "s6_and_entry_focused_tests": 33,
+    "s6_and_entry_focused_tests": 36,
     "s6_and_entry_focused_tests_passed": true
   },
   "governance": {

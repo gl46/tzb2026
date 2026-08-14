@@ -32,8 +32,8 @@ def _write_markdown(path: Path, payload: dict[str, object]) -> None:
         "",
         f"- Status: **{payload['status']}**",
         f"- Checked Git HEAD: `{payload['checked_head_commit']}`",
-        "- Required physical policy: trained Qwen V2 world-model bundle "
-        "(LoRA adapter + skill/pointer/destination heads).",
+        "- Required physical policy: formal Qwen V4 Phase-2 evidence index "
+        "(or the preserved historical trained-Qwen V2 envelope).",
         "- Structured Q0/Q1/Q2 checkpoint accepted as world model: `false`",
         f"- Governance gate passed: `{payload['governance_gate_passed']}`",
         f"- Local contract tests passed: `{payload['local_contract_tests_passed']}`",
@@ -59,15 +59,15 @@ def _write_markdown(path: Path, payload: dict[str, object]) -> None:
             f"Qwen bundle verified `{physical.get('world_model_bundle_verified')}`."
         ),
         "",
-        "Local pytest evidence proves contracts only. ADR §7(3) passes only with one "
-        "real Isaac receipt from a frozen SMOKE key containing eight fresh public "
-        "observations, eight unique physical receipts, and trained Qwen V2 "
-        "world-model provenance. Entry independently replays the complete formal "
-        "runner wire evidence and its hash-bound labserver service/session audits; "
-        "it also requires a frozen implementation commit/container/import closure, "
-        "an unchanged B0 runtime wrapper, and a separately verifiable authentication "
-        "receipt that never persists endpoint HMAC secrets. Arbitrary hash files and "
-        "a structured Q012 NPZ cannot satisfy this layer.",
+        "Local pytest evidence proves contracts only. The V3 physical layer passes "
+        "only by independently replaying one immutable Phase-2 index: a finalized "
+        "eight-decision formal V4 episode, one-shot challenge, exact Qwen/Isaac "
+        "journals, two host-local HMAC receipts, all eight real-Isaac skill "
+        "validations, and the frozen SMOKE identity. It also requires the two active "
+        "runner/deployment bindings. ADR-0024 withdrew the runtime B0 fallback and "
+        "trusted-host signing prerequisites; invalid actions terminate without "
+        "physical execution. The historical V2 replay remains available unchanged. "
+        "Arbitrary hash files and a structured Q012 NPZ cannot satisfy either layer.",
         "",
         "## Blockers",
         "",

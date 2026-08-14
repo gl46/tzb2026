@@ -39,7 +39,7 @@ def test_phase2_integration_audit_replays_current_fail_closed_sources() -> None:
     assert recorded["blockers"] == replayed["blockers"]
     assert recorded["verification"] == {
         "command": ".venv/bin/pytest -q tests/unit/test_m2c_*.py",
-        "passed": 813,
+        "passed": 816,
         "failed": 0,
     }
 
@@ -79,6 +79,7 @@ def test_audit_separates_implemented_contracts_from_missing_formal_path() -> Non
         )
     )
     assert report["implemented_contracts"]["phase2_readiness_adr0024_v2_migration_complete"] is True
+    assert report["implemented_contracts"]["s4_entry_gate_formal_v4_replay_active"] is True
     assert "PHASE2_READINESS_VERIFIER_ADR0024_V2_MIGRATION_INCOMPLETE" not in report["blockers"]
     assert report["implemented_contracts"]["query_only_static_state_preflight_clear"] is False
     assert report["formal_backend"] == {
@@ -99,7 +100,7 @@ def test_audit_separates_implemented_contracts_from_missing_formal_path() -> Non
     assert report["formal_wire"]["versioned_v4_observation_schema"] == ("FormalPublicObservationV4")
     assert report["formal_wire"]["versioned_v4_transport_active"] is True
     assert "REAL_FORMAL_V4_ISAAC_HTTP_SERVICE_BACKEND_FACTORY_NOT_BOUND" in report["blockers"]
-    assert "S4_ENTRY_GATE_FORMAL_V4_EVIDENCE_REPLAY_NOT_BOUND" in report["blockers"]
+    assert "S4_ENTRY_GATE_FORMAL_V4_EVIDENCE_REPLAY_NOT_BOUND" not in report["blockers"]
     assert report["implemented_contracts"]["versioned_formal_v4_observation_transport"] is True
     assert report["implemented_contracts"]["bound_plan_runtime_dynamic_a1_cross_binding"] is True
     assert (
