@@ -1,8 +1,8 @@
 {
   "schema_version": "M2CS4CurrentBlockersV2",
   "status": "BLOCKED_UNMEASURED_ZERO_ELIGIBLE_YIELD_AND_FORMAL_EXACT_PLAN_INTEGRATION",
-  "reported_at": "2026-08-15T04:55:11+08:00",
-  "checked_head_commit": "786b9640f60fd6192f56572a700d03012561f1ac",
+  "reported_at": "2026-08-15T05:39:43+08:00",
+  "checked_head_commit": "53f922f9bc26c6378011970c1c35f38c2f0f0b0f",
   "q_a_state": "PASSED",
   "q_b_state": "UNMEASURED",
   "pure_model_success_episodes": null,
@@ -14,11 +14,11 @@
     "frozen_v4_extension1_train_keys": 36,
     "frozen_v4_train_keys_total": 72,
     "unique_v3_train_keys_attempted": 11,
-    "unique_v4_train_keys_consumed": 42,
-    "unique_train_keys_consumed_total": 53,
+    "unique_v4_train_keys_consumed": 45,
+    "unique_train_keys_consumed_total": 56,
     "raw_v3_eight_step_chains": 10,
-    "raw_v4_eight_step_chains": 33,
-    "physical_skill_receipts_v4": 264,
+    "raw_v4_eight_step_chains": 36,
+    "physical_skill_receipts_v4": 288,
     "collision_or_safety_violations_v4": 0,
     "training_samples_eligible": 0,
     "training_samples_packaged": 0,
@@ -27,7 +27,7 @@
     "formal_q_b_evaluation_executed": false,
     "public_track_associator_v2_implemented": true,
     "batch_04_preregistered_and_consumed": true,
-    "latest_completed_batch": "BATCH_20",
+    "latest_completed_batch": "BATCH_21",
     "active_selected_key_preregistration_present": false,
     "collection_execution_authorized": false,
     "raw_detection_capacity_decision_required": false,
@@ -36,19 +36,19 @@
       "first_subsequent_stage_acceptance_report": "reports/m2c-s4-v4-batch06-snapshot-owner-failure.json",
       "first_subsequent_probe_simulation_start_report": "reports/m2c-s4-v4-batch07-pre-timeline-proprio-failure.json",
       "first_subsequent_raw_physical_chain_report": "reports/m2c-s4-v4-batch08-collection.json",
-      "latest_three_stage_and_probe_pass_report": "reports/m2c-s4-v4-batch19-collection.json",
+      "latest_three_stage_and_probe_pass_report": "reports/m2c-s4-v4-batch21-collection.json",
       "latest_mixed_batch_report": "reports/m2c-s4-v4-batch20-collection.json",
-      "latest_all_physical_batch_report": "reports/m2c-s4-v4-batch19-collection.json",
-      "resolved_for_observed_batch20_path": true
+      "latest_all_physical_batch_report": "reports/m2c-s4-v4-batch21-collection.json",
+      "resolved_for_observed_batch21_path": true
     },
     "authorization_contract": {
       "path": "src/xh_agent/policy/qrm_lite/s4_v4_collection_authorization_v1.py",
-      "sha256": "b023483a51ca823cc39077a92db025159e1e76b1177287954fad6f75174237b8",
-      "checked_parent_commit": "960dd6c238f084225c3522decb6ba69b8b62f9c2",
+      "sha256": "ee6abe5f4f56f383cc0865eb91927121b71b161f4f7a5ab03f1aefb0560aa45f",
+      "checked_parent_commit": "d5b3436aaa868c54b6db1613231d67f04d8558e9",
       "canonical_cli_authorized": false,
       "programmatic_worker_authorized": false,
       "programmatic_packager_authorized": false,
-      "reason": "NO_ACTIVE_PREREGISTRATION_BATCH20_CONSUMED_ZERO_ELIGIBLE_TRAINING_EPISODES"
+      "reason": "NO_ACTIVE_PREREGISTRATION_BATCH21_CONSUMED_ZERO_ELIGIBLE_TRAINING_EPISODES"
     },
     "training_manifest": {
       "path": "configs/m2c_s4_v4_training_keys.json",
@@ -130,6 +130,10 @@
       {
         "path": "reports/m2c-s4-v4-batch20-collection.json",
         "sha256": "ec2dc5c0f38befc88ff7a2cde08b699f349081df234092123c6bc85b382066d3"
+      },
+      {
+        "path": "reports/m2c-s4-v4-batch21-collection.json",
+        "sha256": "53f9842a8679a44c876531764ea48456a5675475c9305383a2a17cfd3586e6c7"
       }
     ],
     "accepted_raw_capacity_decision": {
@@ -152,16 +156,16 @@
     },
     "training_eligibility_yield": {
       "path": "reports/m2c-s4-training-eligibility-yield-adr0025.json",
-      "sha256": "bc42c86c65cded4afca3cbe1a8bef7b453057beb4a3af0b9168caab8ccb275ed",
+      "sha256": "185497566f1eedb4e21099564e744b6c32f77d2945083489b92786e75403a54e",
       "status": "BLOCKED_ZERO_OBSERVED_ELIGIBLE_CHAIN_YIELD",
-      "unique_train_identities": 53,
-      "complete_eight_step_chains": 43,
+      "unique_train_identities": 56,
+      "complete_eight_step_chains": 46,
       "eligible_training_episodes": 0,
       "finite_key_projection_for_one_eligible_episode": null
     },
     "original_frozen_v4_train_manifest_exhausted": true,
-    "v4_extension1_train_keys_consumed": 6,
-    "remaining_unconsumed_v4_extension1_train_keys": 30
+    "v4_extension1_train_keys_consumed": 9,
+    "remaining_unconsumed_v4_extension1_train_keys": 27
   },
   "phase_2": {
     "candidate_addendum_generated": true,

@@ -265,6 +265,19 @@ SOURCE_REPORTS: tuple[SourceReportSpec, ...] = (
             "RAW_V4_FINAL_FALSE_REGRASP_PREGRASP_IK_GATE_REJECTED": 1,
         },
     ),
+    SourceReportSpec(
+        path=Path("reports/m2c-s4-v4-batch21-collection.json"),
+        sha256="53f9842a8679a44c876531764ea48456a5675475c9305383a2a17cfd3586e6c7",
+        schema_version="M2CS4V4Batch21CollectionAuditV1",
+        status="BLOCKED_ZERO_ELIGIBLE_V4_TRAIN_SAMPLES_BATCH21",
+        attempt_count=3,
+        unique_key_count=3,
+        complete_chain_count=3,
+        classifications={
+            "RAW_V4_FINAL_FALSE_REGRASP_CONTACT_GATE_REJECTED": 2,
+            "RAW_V4_FINAL_FALSE_REGRASP_PREGRASP_IK_GATE_REJECTED": 1,
+        },
+    ),
 )
 
 
@@ -509,7 +522,7 @@ def build_report(*, project_root: Path) -> dict[str, Any]:
             if left & right:
                 raise S4YieldAuditError("source report identity sets are not disjoint")
     all_identities = set().union(*identity_sets)
-    if len(all_identities) != 53:
+    if len(all_identities) != 56:
         raise S4YieldAuditError("combined unique TRAIN identity count differs")
 
     taxonomy: Counter[str] = Counter()
@@ -519,7 +532,7 @@ def build_report(*, project_root: Path) -> dict[str, Any]:
             if str(attempt["classification"]).startswith("RAW_V3_"):
                 taxonomy[_verify_complete_v3_attempt(attempt)] += 1
                 complete_chain_count += 1
-    for spec, batch_report in parsed[-12:]:
+    for spec, batch_report in parsed[-13:]:
         verified_report_chains = 0
         for attempt in batch_report["attempts"]:
             if attempt.get("raw_chain_schema") != "M2CPathBlockedRawProbeChainV4":
@@ -529,7 +542,7 @@ def build_report(*, project_root: Path) -> dict[str, Any]:
             verified_report_chains += 1
         if verified_report_chains != spec.complete_chain_count:
             raise S4YieldAuditError("source complete V4 chain count differs")
-    if complete_chain_count != 42:
+    if complete_chain_count != 45:
         raise S4YieldAuditError("complete collected chain count differs")
 
     offline = read_bound_json(
@@ -555,10 +568,10 @@ def build_report(*, project_root: Path) -> dict[str, Any]:
         raise S4YieldAuditError("scene 19083 offline replay outcome differs")
     taxonomy["TERMINAL_CONTACT_OR_CONTROLLER_GATE_REJECTED"] += 1
     complete_chain_count += 1
-    if complete_chain_count != 43 or taxonomy != Counter(
+    if complete_chain_count != 46 or taxonomy != Counter(
         {
-            "TERMINAL_CONTACT_OR_CONTROLLER_GATE_REJECTED": 28,
-            "TERMINAL_PREGRASP_IK_GATE_REJECTED": 14,
+            "TERMINAL_CONTACT_OR_CONTROLLER_GATE_REJECTED": 30,
+            "TERMINAL_PREGRASP_IK_GATE_REJECTED": 15,
             "LIFTED_BUT_PUBLIC_SUCCESS_PREDICATE_REJECTED": 1,
         }
     ):
@@ -599,8 +612,8 @@ def build_report(*, project_root: Path) -> dict[str, Any]:
             "duplicate_attempt_rows_within_first_v3_report": 1,
             "source_identity_sets_pairwise_disjoint": True,
             "unique_v3_train_identities": 11,
-            "unique_v4_train_identities": 42,
-            "unique_train_identities_total": 53,
+            "unique_v4_train_identities": 45,
+            "unique_train_identities_total": 56,
         },
         "observed_yield": {
             "complete_eight_step_chains": complete_chain_count,
@@ -625,9 +638,9 @@ def build_report(*, project_root: Path) -> dict[str, Any]:
         "root_cause_finding": {
             "status": "RECURRENT_TERMINAL_REGRASP_APPROACH_OR_CONTACT_ACCEPTANCE_MISMATCH_NOT_CAUSALLY_ISOLATED",
             "complete_v3_chains_with_steps_0_through_6_all_gates_pass": 10,
-            "complete_v4_chains_with_steps_0_through_6_all_gates_pass": 32,
-            "complete_chains_ending_in_contact_or_controller_rejection": 28,
-            "complete_chains_ending_in_pregrasp_ik_rejection": 14,
+            "complete_v4_chains_with_steps_0_through_6_all_gates_pass": 35,
+            "complete_chains_ending_in_contact_or_controller_rejection": 30,
+            "complete_chains_ending_in_pregrasp_ik_rejection": 15,
             "complete_chains_lifted_but_rejected_by_public_success_predicate": 1,
             "causal_attribution_limit": (
                 "Evidence does not isolate perception offset, approach geometry, or object state as the cause."
@@ -657,9 +670,9 @@ def build_report(*, project_root: Path) -> dict[str, Any]:
             "b0_or_safety_contract_changed": False,
         },
         "blockers": [
-            "ZERO_ELIGIBLE_TRAINING_EPISODES_ACROSS_53_UNIQUE_TRAIN_IDENTITIES",
+            "ZERO_ELIGIBLE_TRAINING_EPISODES_ACROSS_56_UNIQUE_TRAIN_IDENTITIES",
             "ORIGINAL_V4_TRAIN_MANIFEST_EXHAUSTED_36_OF_36_KEYS_CONSUMED",
-            "V4_EXTENSION1_MANIFEST_CONSUMED_6_OF_36_KEYS",
+            "V4_EXTENSION1_MANIFEST_CONSUMED_9_OF_36_KEYS",
             "NO_FINITE_EVIDENCE_BASED_COLLECTION_SIZE_AT_ZERO_OBSERVED_POINT_YIELD",
             "TRAINING_REQUIRES_AT_LEAST_ONE_COMPLETE_ELIGIBLE_EPISODE",
             "FORMAL_Q_B_REMAINS_UNMEASURED",
@@ -683,15 +696,15 @@ def render_markdown(report: Mapping[str, Any]) -> str:
 
 Status: `{report["status"]}`
 
-This report replays eighteen immutable collection reports plus the governed offline replay of scene 19083. It does not collect, execute physics, train, run a model rollout, or perform formal Q-B evaluation.
+This report replays nineteen immutable collection reports plus the governed offline replay of scene 19083. It does not collect, execute physics, train, run a model rollout, or perform formal Q-B evaluation.
 
 ## Measured yield
 
-- Unique TRAIN identities: **{report["identity_audit"]["unique_train_identities_total"]}** (V3: 11; V4: 42)
+- Unique TRAIN identities: **{report["identity_audit"]["unique_train_identities_total"]}** (V3: 11; V4: 45)
 - Complete eight-step physical chains: **{yield_data["complete_eight_step_chains"]}**
 - Eligible and packaged training episodes: **0**
-- Eligible yield per attempted identity: **0/53 = 0.0**
-- Eligible yield conditional on a complete chain: **0/43 = 0.0**
+- Eligible yield per attempted identity: **0/56 = 0.0**
+- Eligible yield conditional on a complete chain: **0/46 = 0.0**
 - Finite evidence-based key projection for one eligible episode: **none at the observed zero point yield**
 
 The code-level minimum is one complete eligible episode; the current trainer rejects zero. This is not a claim that model capability is zero: pure model success remains `null` because no formal Q-B evaluation has run.
@@ -702,7 +715,7 @@ The code-level minimum is one complete eligible episode; the current trainer rej
 - Terminal pregrasp IK rejection: **{taxonomy["TERMINAL_PREGRASP_IK_GATE_REJECTED"]}**
 - Lifted but rejected by the public success predicate: **{taxonomy["LIFTED_BUT_PUBLIC_SUCCESS_PREDICATE_REJECTED"]}**
 
-All ten complete V3 chains and all thirty-two newly collected Batch-09 through Batch-20 V4 chains passed gates for steps 0–6. The evidence supports a recurring terminal regrasp approach/contact-acceptance mismatch, but does not isolate perception offset, approach geometry, or object state as its cause. Scene 19083 passes the 32-detection offline schema replay but remains excluded by its unchanged physical failure; its replay also records a step-1 public-target-outside-K8 exclusion. The original frozen V4 TRAIN manifest is exhausted at 36/36 keys; the separately frozen extension manifest has consumed 6/36 keys.
+All ten complete V3 chains and all thirty-five newly collected Batch-09 through Batch-21 V4 chains passed gates for steps 0–6. The evidence supports a recurring terminal regrasp approach/contact-acceptance mismatch, but does not isolate perception offset, approach geometry, or object state as its cause. Scene 19083 passes the 32-detection offline schema replay but remains excluded by its unchanged physical failure; its replay also records a step-1 public-target-outside-K8 exclusion. The original frozen V4 TRAIN manifest is exhausted at 36/36 keys; the separately frozen extension manifest has consumed 9/36 keys.
 
 ## Frozen eligibility consequence
 
