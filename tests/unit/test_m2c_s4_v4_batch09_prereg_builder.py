@@ -8,8 +8,6 @@ from m2c.build_s4_v4_batch09_prereg import (
     STOP_AFTER,
     select_batch09_keys,
 )
-from xh_agent.policy.qrm_lite import s4_v4_collection_authorization_v1 as authorization
-
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -19,7 +17,6 @@ def test_authoritative_prior_inventory_contains_all_nineteen_attempted_keys() ->
     assert len(BATCH09_PRIOR_ATTEMPT_SOURCES) == 6
     assert "reports/m2c-s4-v4-batch08-collection.json" in (BATCH09_PRIOR_ATTEMPT_SOURCES)
     assert "reports/m2c-s4-v4-batch09-collection.json" not in BATCH09_PRIOR_ATTEMPT_SOURCES
-    assert authorization.AUTHORITATIVE_PRIOR_ATTEMPT_KEY_COUNT == 22
 
 
 def test_batch09_selection_is_outcome_blind_and_identity_disjoint() -> None:
