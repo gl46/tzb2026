@@ -122,10 +122,19 @@ as the robot snapshot. The V2 world composer removes an attached target from
 the ordinary environment exactly once, keeps attached-object/environment and
 robot/environment pairs in the float64 child-pair product, excludes only
 environment/environment pairs and contact pairs already frozen by the exact
-phase, and independently replays the aggregate receipt in preflight. These
-properties are covered by local contract tests only. No real active-session
-scene-state receipt, real complete-scene phase receipt, or real attached-object
-phase-geometry resolver is bound, so the composition remains non-authorizing.
+phase, and independently replays the aggregate receipt in preflight.
+
+The real-Isaac scene-owner implementation now constructs that exact eight-link
+getter-only source after the natural-stability boundary. It activates one
+host-owned monotonic mutation counter only after all scene handles exist and
+records every subsequent public-capture Kit step before the call. The planned
+attached-object resolver separately binds the ATTACH receipt, the complete
+scene geometry/state receipt, the terminal hand/object relative transform and
+every later end-effector path sample; unknown initial attachments and any
+source mutation reject. These properties are covered by local contract tests
+only. No Isaac process was started, no real scene-state or attached-object
+receipt was produced, and the resolver is not yet composed into the unbound
+formal V4 HTTP backend factory, so the composition remains non-authorizing.
 
 The V4 host-local HMAC verifier and create-only CLI now replay both sides of a
 terminalized episode without any SSH signature, trust root, or signer

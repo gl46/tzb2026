@@ -13,6 +13,7 @@
     "robot_ws/src/xh_sim/urdf/panda_controlled.urdf": "6678ff409d60f074283805879f53edaa939ead34f97a5a961ee67f6229b44ba8",
     "scripts/m2c/check_adr0022_binding_addendum_readiness.py": "b3bbe1350cb0053792c5c502622ba6fc07e43eba1dc896c63858061f94dafdcc",
     "scripts/m2c/audit_phase2_a3_query_only_deployment_comparison.py": "69a32a91c03c1707fe352e9ce7f70560cd4a192893be0a20b1c6c95ce49b643f",
+    "scripts/m2c/formal_isaac_v4_backend.py": "36bf796d515d8f811fc5608e02586210254a84e4cda01d0b70ddd437122544bc",
     "scripts/m2c/run_formal_model_owned_chain_v4.py": "799caecdb12f73b5e6ea226eb2b983e4fbe4c08482f7ed037ae33c2168068eef",
     "scripts/m2c/run_a3_query_only_deployment_smoke.py": "fdef2e7dd76b6d3a141143eb30f794170126b59b3d605f651427749b07782058",
     "scripts/m2c/serve_formal_isaac_endpoint_v4.py": "19f141caf244b7dca9362ec4c18ee69ad720ba86e15223cffcb5f735a1013a4c",
@@ -23,6 +24,7 @@
     "src/xh_agent/policy/qrm_lite/a3_bullet_self_ccd_v1.py": "0fd2808d8861c368864ee76251073b2c124e5db16632234f5e87b061b87bf527",
     "src/xh_agent/policy/qrm_lite/a3_attachment_transition_evidence_v1.py": "96f6894a6604795ad162e63a63b357764c5640f24b7cf252490de984bab443fb",
     "src/xh_agent/policy/qrm_lite/a3_attachment_transition_v1.py": "25fb997f0fbb0c7007c8b5a469b1fd853afbc1a7874577ac268252ce174a193e",
+    "src/xh_agent/policy/qrm_lite/a3_attached_object_phase_geometry_v1.py": "2ef031a5236bfcb7d955e2378e564a6f0d930b33ba579675a3f3d8a31079b582",
     "src/xh_agent/policy/qrm_lite/a3_complete_scene_collision_v2.py": "a260eb8e4ea50bedf91c3d6bcf39c11894e5f58308a83cb7b1c420be0836411c",
     "src/xh_agent/policy/qrm_lite/a3_complete_scene_swept_collision_evidence_v2.py": "f16c9680d93bfbfe98c0615a2e23f273a00e06f7edeffc0bf22e84fb6f1770a9",
     "src/xh_agent/policy/qrm_lite/a3_complete_scene_swept_collision_v2.py": "300e66fd28bba4d2d2cacdfce6abadf97eb9911cbe9f530d2669390a30bfb7cf",
@@ -36,6 +38,7 @@
     "src/xh_agent/policy/qrm_lite/formal_bound_plan_provider_v1.py": "50a18983e7e444c8810a1f4c7bd44c73d2ba84ca5ff3c8b0ae19d937b86c8188",
     "src/xh_agent/policy/qrm_lite/formal_isaac_backend_v4.py": "4c3033c3be7f3313fd31361bf5c6f882e6e4da690881455a973828ab1f16a404",
     "src/xh_agent/policy/qrm_lite/formal_isaac_endpoint_v4.py": "67da7fae1dc918da855d4e8d537ed39f107f21bb35d1c1237bdac0b7a4d15c31",
+    "src/xh_agent/policy/qrm_lite/formal_isaac_mutation_counter_v1.py": "cd8a67fc2bc8b40e2d63f36898ea9be643659af9ac486aa985d8dd07fc7b3908",
     "src/xh_agent/policy/qrm_lite/formal_public_observation_provider_v4.py": "3fdf311cdae0fed357c354c8422ab54077187faf5c00eab6d8f6ebba38df9c99",
     "src/xh_agent/policy/qrm_lite/formal_split_host_v4.py": "a6ed4f26c428904843ad117a4602138d66fc2c5000c042168a3b3cc7c03e0808",
     "src/xh_agent/policy/qrm_lite/formal_split_runner_v2.py": "affbec7bfa2462c58ef093196c367eda98472f1ca349ba7b98d71796798b7c06",
@@ -43,7 +46,7 @@
     "src/xh_agent/policy/qrm_lite/isaac_exact_plan_runtime_v1.py": "57712a3d573f35dc3acb656e8533bb01789200501d2d7bee20450e91223e8dbe",
     "src/xh_agent/policy/qrm_lite/offline_wire_auth_v4.py": "52ade7742f725532af5c45853f735ef9c8891ba223c86be334fa4a973614f0f2",
     "src/xh_agent/policy/qrm_lite/phase2_binding_readiness_v2.py": "884b85bd3754903787bc5b73bcc28e16736cc69eeb223ff93243a9168f7a2056",
-    "src/xh_agent/policy/qrm_lite/s4_entry_gate.py": "27cfa5f6033f132d7284641c91b8d7ded9df9777eff8b8cee123a6f13025e521"
+    "src/xh_agent/policy/qrm_lite/s4_entry_gate.py": "c9819b4fe80e08612e6bd6c37eaf8be2eb0c8cc7db7e7e1b3d720c2f7328bc50"
   },
   "native_build_evidence": {
     "report_path": "reports/m2c-phase2-a3-native-build.json",

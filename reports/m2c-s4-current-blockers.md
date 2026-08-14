@@ -80,10 +80,17 @@ and supervision, covers six dynamic cylinder collisions plus the work table and
 partition-bin floor, binds getter-only active-session poses for all eight links,
 and composes robot self, robot/environment and attached/environment pairs into
 one replayable float64 child-pair request. Environment/environment pairs and
-only exact phase-allowlisted contact pairs are excluded. This closes the local
-contract implementation gap, not deployment: no real scene-state receipt,
-complete-scene phase receipt, or real attached-object geometry resolver is
-bound, so formal eligibility remains false.
+only exact phase-allowlisted contact pairs are excluded. The real-Isaac scene
+owner now materializes the same eight collision-bearing `RigidPrim` handles
+after natural stability and shares a monotonic host-owned mutation counter with
+the getter-only scene source. Public-capture Kit steps increment that counter
+before the call. The separate attached-object resolver binds the planned
+ATTACH receipt and source scene state to a hand/object relative transform, then
+replays every later end-effector path sample; unknown initial attachments and
+source mutation reject. This closes the local source/resolver contract gap,
+not deployment: no Isaac process was started, no real scene-state or attached
+geometry receipt exists, and the resolver is not composed into the unbound V4
+HTTP backend factory. Formal eligibility therefore remains false.
 The V4 host-orchestration/evidence contract and HTTP service shell now exist
 and preserve terminal `NO_PHYSICAL_EXECUTION` without B0 substitution. The
 service's production backend factory remains deliberately unbound. The V4

@@ -33,6 +33,15 @@ from xh_agent.data_engine.isaac.public_failure_predicates import (
 from xh_agent.grasp.free_gap import select_free_gap_yaw_from_xy
 from xh_agent.perception.interfaces import PerceptionInputV1
 from xh_agent.policy.qrm_lite.contracts import PerceptionTrackV1
+from xh_agent.policy.qrm_lite.a3_scene_environment_v1 import (
+    IMPLEMENTATION_REPO_PATH as A3_SCENE_ENVIRONMENT_IMPLEMENTATION_REPO_PATH,
+    IsaacSceneRigidPrimReadOnlySourceV1,
+    build_a3_scene_collision_geometry_v1,
+)
+from xh_agent.policy.qrm_lite.formal_isaac_mutation_counter_v1 import (
+    FormalIsaacActiveSessionMutationCounterV1,
+    build_formal_isaac_mutation_counter_activation_v1,
+)
 from xh_agent.policy.qrm_lite.formal_public_role_selector_v2 import (
     select_public_journal_roles_v2,
 )
@@ -116,7 +125,13 @@ def _sim_time_ns(probe: ModuleType) -> int:
     return max(value, 1)
 
 
-def _now_after(probe: ModuleType, floor: int) -> int:
+def _now_after(
+    probe: ModuleType,
+    floor: int,
+    mutation_counter: FormalIsaacActiveSessionMutationCounterV1 | None = None,
+) -> int:
+    if mutation_counter is not None:
+        mutation_counter.record_simulation_steps()
     probe.simulation_app.update()
     return max(_sim_time_ns(probe), floor + 1)
 
@@ -198,6 +213,7 @@ class FormalIsaacV4BackendV2:
         self.probe = _load_frozen_v4_probe(self.frozen_v4_probe_path)
         self._validate_probe_cli_bindings()
         self._initialize_scene_once()
+        self._initialize_a3_query_sources()
 
         self.run_id: str | None = None
         self.session_id: str | None = None
@@ -347,6 +363,77 @@ class FormalIsaacV4BackendV2:
         if not stability["passed"]:
             raise RuntimeError("formal scene failed the frozen natural stability gate")
 
+    def _initialize_a3_query_sources(self) -> None:
+        """Bind the complete scene to one getter-only post-stability source."""
+
+        p = self.probe
+        project_root = Path(__file__).resolve().parents[2]
+        scene_geometry = build_a3_scene_collision_geometry_v1(
+            sdf_path=self.sdf_path,
+            supervision_path=self.supervision_path,
+            expected_sdf_sha256=sha256_file(self.sdf_path),
+            expected_supervision_sha256=sha256_file(self.supervision_path),
+            expected_scene_seed=int(p.ARGS.seed),
+        )
+        prims_by_path: dict[str, Any] = {}
+        for source in scene_geometry.source_links:
+            if not self.stage.GetPrimAtPath(source.link_path).IsValid():
+                raise RuntimeError(
+                    f"formal scene lacks A.3 collision-bearing link {source.link_path}"
+                )
+            if source.dynamic:
+                try:
+                    prim = self.scene_dynamic_prims[source.model_name]
+                except KeyError as exc:
+                    raise RuntimeError(
+                        "formal scene dynamic A.3 source differs from frozen scene"
+                    ) from exc
+            else:
+                prim = p.RigidPrim(source.link_path)
+            prims_by_path[source.link_path] = prim
+        runtime_types = {
+            f"{type(prim).__module__}.{type(prim).__qualname__}" for prim in prims_by_path.values()
+        }
+        if len(runtime_types) != 1:
+            raise RuntimeError("formal A.3 scene prim runtime types differ")
+
+        activation = build_formal_isaac_mutation_counter_activation_v1(
+            project_root=project_root,
+            scene_owner_path=Path(__file__).resolve(),
+            stage_sha256=self.stage_sha256,
+            sdf_sha256=scene_geometry.source_sdf.sha256,
+            supervision_sha256=scene_geometry.source_supervision.sha256,
+            activated_at_ns=time.time_ns(),
+        )
+        mutation_counter = FormalIsaacActiveSessionMutationCounterV1(
+            activation=activation,
+        )
+        scene_source_path = project_root / A3_SCENE_ENVIRONMENT_IMPLEMENTATION_REPO_PATH
+        source_configuration_sha256 = canonical_sha256(
+            {
+                "schema_version": "FormalIsaacA3ScenePoseSourceConfigurationV1",
+                "scene_geometry_receipt_sha256": scene_geometry.receipt_sha256,
+                "mutation_counter_activation_receipt_sha256": activation.receipt_sha256,
+                "stage_sha256": self.stage_sha256,
+                "rigid_prim_runtime_type": next(iter(runtime_types)),
+                "collision_link_paths": tuple(sorted(prims_by_path)),
+            }
+        )
+        self.a3_scene_geometry = scene_geometry
+        self.a3_mutation_counter_activation = activation
+        self.a3_mutation_counter = mutation_counter
+        self.a3_scene_pose_source = IsaacSceneRigidPrimReadOnlySourceV1(
+            implementation_path=scene_source_path,
+            implementation_sha256=sha256_file(scene_source_path),
+            configuration_sha256=source_configuration_sha256,
+            rigid_prim_runtime_type=next(iter(runtime_types)),
+            prims_by_path=prims_by_path,
+            mutation_counter_source=mutation_counter,
+            now_ns=time.time_ns,
+            real_runtime_provider=True,
+            contract_test_only=False,
+        )
+
     def start(self, request: IsaacStartRequestV2) -> IsaacStartResponseV2:
         if self.run_id is not None:
             raise RuntimeError("real Isaac backend supports one start per process")
@@ -400,6 +487,7 @@ class FormalIsaacV4BackendV2:
 
     def _capture_public(self, *, decision_index: int, label: str) -> dict[str, Any]:
         p = self.probe
+        self.a3_mutation_counter.record_simulation_steps()
         p.rep.orchestrator.step(
             rt_subframes=1,
             delta_time=1.0 / 60.0,
@@ -418,7 +506,11 @@ class FormalIsaacV4BackendV2:
         rgb = rgb[:, :, :3].astype(p.np.uint8)
         rgb_bytes = _png_bytes(p, rgb)
         depth_bytes = _as_numpy_bytes(p, depth)
-        captured_at_ns = _now_after(p, self.previous_completed_at_ns)
+        captured_at_ns = _now_after(
+            p,
+            self.previous_completed_at_ns,
+            self.a3_mutation_counter,
+        )
         rgb_sha = hashlib.sha256(rgb_bytes).hexdigest()
         depth_sha = hashlib.sha256(depth_bytes).hexdigest()
         base = f"formal/{self.run_id or 'prestart'}/{decision_index:02d}-{label}"
@@ -753,7 +845,11 @@ class FormalIsaacV4BackendV2:
         return IsaacFinalizeResponseV2(
             run_id=request.run_id,
             session_id=request.session_id,
-            evaluated_at_ns=_now_after(self.probe, self.previous_completed_at_ns),
+            evaluated_at_ns=_now_after(
+                self.probe,
+                self.previous_completed_at_ns,
+                self.a3_mutation_counter,
+            ),
             final_task_success=False,
         )
 

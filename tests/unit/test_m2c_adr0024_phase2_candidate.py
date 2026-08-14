@@ -66,6 +66,16 @@ def test_candidate_smoke_is_blocked_unmeasured_and_never_physical() -> None:
         "real_evidence_index_present": False,
         "binding_application_authorized": False,
     }
+    scene = report["formal_isaac_a3_scene_source"]
+    assert scene == {
+        "status": "PASS_CONTRACT_ONLY_NO_REAL_SCENE_RECEIPT",
+        "complete_scene_collision_link_count": 8,
+        "post_stability_mutation_counter_active": True,
+        "attached_object_phase_geometry_replay_active": True,
+        "real_scene_state_receipt_present": False,
+        "real_attached_object_phase_geometry_receipt_present": False,
+        "formal_authorization": False,
+    }
     assert not report["governance"]["contract_smoke_is_physical_evidence"]
     assert not report["governance"]["teacher_used"]
 
@@ -99,10 +109,13 @@ def test_candidate_config_requires_literal_none_bindings_and_exact_terminal_poli
         == hashlib.sha256((PROJECT_ROOT / callback_path).read_bytes()).hexdigest()
     )
     for complete_scene_path in (
+        "scripts/m2c/formal_isaac_v4_backend.py",
+        "src/xh_agent/policy/qrm_lite/a3_attached_object_phase_geometry_v1.py",
         "src/xh_agent/policy/qrm_lite/a3_scene_environment_v1.py",
         "src/xh_agent/policy/qrm_lite/a3_complete_scene_collision_v2.py",
         "src/xh_agent/policy/qrm_lite/a3_complete_scene_swept_collision_evidence_v2.py",
         "src/xh_agent/policy/qrm_lite/a3_complete_scene_swept_collision_v2.py",
+        "src/xh_agent/policy/qrm_lite/formal_isaac_mutation_counter_v1.py",
     ):
         assert (
             candidate["source_bindings"][complete_scene_path]

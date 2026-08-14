@@ -158,6 +158,9 @@ def test_phase2_query_only_evidence_remains_non_authorizing() -> None:
     assert phase2["complete_continuous_self_collision_provider_contract_active"] is True
     assert phase2["scene_environment_geometry_contract_active"] is True
     assert phase2["scene_environment_state_query_contract_active"] is True
+    assert phase2["formal_isaac_scene_query_sources_wired"] is True
+    assert phase2["formal_isaac_post_stability_mutation_counter_active"] is True
+    assert phase2["attached_object_phase_geometry_contract_active"] is True
     assert phase2["complete_scene_environment_swept_collision_provider_contract_active"] is True
     assert phase2["contract_scene_collision_primitive_count"] == 8
     assert phase2["contract_scene_dynamic_collision_primitive_count"] == 6

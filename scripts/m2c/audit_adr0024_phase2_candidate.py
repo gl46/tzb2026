@@ -35,6 +35,13 @@ FORMAL_V2_RUNNER_PATH = Path("src/xh_agent/policy/qrm_lite/formal_split_runner_v
 FORMAL_V4_HOST_PATH = Path("src/xh_agent/policy/qrm_lite/formal_split_host_v4.py")
 FORMAL_V4_CLI_PATH = Path("scripts/m2c/run_formal_model_owned_chain_v4.py")
 FORMAL_V4_SERVICE_PATH = Path("scripts/m2c/serve_formal_isaac_endpoint_v4.py")
+FORMAL_ISAAC_SCENE_OWNER_PATH = Path("scripts/m2c/formal_isaac_v4_backend.py")
+FORMAL_ISAAC_MUTATION_COUNTER_PATH = Path(
+    "src/xh_agent/policy/qrm_lite/formal_isaac_mutation_counter_v1.py"
+)
+ATTACHED_OBJECT_PHASE_GEOMETRY_PATH = Path(
+    "src/xh_agent/policy/qrm_lite/a3_attached_object_phase_geometry_v1.py"
+)
 FORMAL_V4_HMAC_VERIFIER_PATH = Path("src/xh_agent/policy/qrm_lite/offline_wire_auth_v4.py")
 FORMAL_V4_HMAC_CLI_PATH = Path("scripts/m2c/verify_formal_wire_auth_v4.py")
 PHASE2_READINESS_V2_PATH = Path("src/xh_agent/policy/qrm_lite/phase2_binding_readiness_v2.py")
@@ -357,6 +364,39 @@ def build_audit(project_root: Path) -> dict[str, Any]:
         isinstance(factory_bindings[0], ast.Constant) and factory_bindings[0].value is None
     ):
         raise CandidateAuditFailure("formal V4 service backend factory is not literal None")
+    scene_owner = read_regular_file_once(root / FORMAL_ISAAC_SCENE_OWNER_PATH).decode("utf-8")
+    for token in (
+        "build_a3_scene_collision_geometry_v1",
+        "FormalIsaacActiveSessionMutationCounterV1",
+        "IsaacSceneRigidPrimReadOnlySourceV1",
+        "self._initialize_scene_once()",
+        "self._initialize_a3_query_sources()",
+        "record_simulation_steps()",
+    ):
+        if token not in scene_owner:
+            raise CandidateAuditFailure(f"formal Isaac scene source omitted marker: {token}")
+    mutation_counter = read_regular_file_once(root / FORMAL_ISAAC_MUTATION_COUNTER_PATH).decode(
+        "utf-8"
+    )
+    for token in (
+        "FormalIsaacMutationCounterActivationReceiptV1",
+        "AFTER_SCENE_STABILITY_BEFORE_FORMAL_SESSION",
+        "snapshot_mutation_counters",
+        "real_active_session_source",
+    ):
+        if token not in mutation_counter:
+            raise CandidateAuditFailure(f"formal Isaac mutation counter omitted marker: {token}")
+    attached_geometry = read_regular_file_once(root / ATTACHED_OBJECT_PHASE_GEOMETRY_PATH).decode(
+        "utf-8"
+    )
+    for token in (
+        "A3PlannedAttachedObjectBindingV1",
+        "A3AttachedObjectPhaseGeometryEvidenceV1",
+        "produce_a3_scene_state_receipt_v1",
+        "privileged_truth_policy_input",
+    ):
+        if token not in attached_geometry:
+            raise CandidateAuditFailure(f"attached-object phase geometry omitted marker: {token}")
     hmac_source = read_regular_file_once(root / FORMAL_V4_HMAC_VERIFIER_PATH).decode("utf-8")
     hmac_tree = ast.parse(hmac_source)
     hmac_receipt_fields = {
@@ -466,6 +506,15 @@ def build_audit(project_root: Path) -> dict[str, Any]:
             "active_session_b0_wrapper_required": False,
             "real_evidence_index_present": False,
             "binding_application_authorized": False,
+        },
+        "formal_isaac_a3_scene_source": {
+            "status": "PASS_CONTRACT_ONLY_NO_REAL_SCENE_RECEIPT",
+            "complete_scene_collision_link_count": 8,
+            "post_stability_mutation_counter_active": True,
+            "attached_object_phase_geometry_replay_active": True,
+            "real_scene_state_receipt_present": False,
+            "real_attached_object_phase_geometry_receipt_present": False,
+            "formal_authorization": False,
         },
         "blockers": list(EXPECTED_BLOCKERS),
         "governance": candidate["evidence_claims"],

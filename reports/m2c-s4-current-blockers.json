@@ -1,8 +1,8 @@
 {
   "schema_version": "M2CS4CurrentBlockersV2",
   "status": "BLOCKED_UNMEASURED_RAW_SCHEMA_AND_FORMAL_EXACT_PLAN_INTEGRATION",
-  "reported_at": "2026-08-14T15:04:07+08:00",
-  "checked_head_commit": "9998aba6c7ea53722ff9163bfc25dc4fd18f7cb4",
+  "reported_at": "2026-08-14T16:15:42+08:00",
+  "checked_head_commit": "b5a4654e4426a1243ae90c5ee1aa2f1e4052261b",
   "q_a_state": "PASSED",
   "q_b_state": "UNMEASURED",
   "pure_model_success_episodes": null,
@@ -110,6 +110,9 @@
     "complete_continuous_self_collision_provider_contract_active": true,
     "scene_environment_geometry_contract_active": true,
     "scene_environment_state_query_contract_active": true,
+    "formal_isaac_scene_query_sources_wired": true,
+    "formal_isaac_post_stability_mutation_counter_active": true,
+    "attached_object_phase_geometry_contract_active": true,
     "complete_scene_environment_swept_collision_provider_contract_active": true,
     "contract_scene_collision_primitive_count": 8,
     "contract_scene_dynamic_collision_primitive_count": 6,
@@ -132,11 +135,11 @@
     "formal_execution_eligible": false,
     "candidate_config": {
       "path": "configs/m2c_adr0024_phase2_binding_candidate.json",
-      "sha256": "07185351fe8f5e35f1bc30922fab2210cfe438b66ce3ab46a18fc01920003e4f"
+      "sha256": "739f2ac1cad278180891556767edd04099e10ece96102e8c823ad81f83dc712e"
     },
     "candidate_addendum": {
       "path": "docs/decisions/ADR-0024-PHASE2-BINDING-ADDENDUM-CANDIDATE.md",
-      "sha256": "6c800447b875c906844d044d1e2f2cc33a73c206db5858e7abca3768ca3c65bb"
+      "sha256": "d68b2f152f3cd3b5044e6c1806d1a57a7f9ca6e9ec0641601cda74147441d2aa"
     },
     "query_only_comparison_report": {
       "path": "reports/m2c-phase2-a3-query-only-deployment-comparison.json",
