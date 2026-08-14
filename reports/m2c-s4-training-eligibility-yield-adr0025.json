@@ -6,10 +6,10 @@
   },
   "audit_implementation": {
     "path": "scripts/m2c/audit_s4_training_eligibility_yield_adr0025.py",
-    "sha256": "f459d427b8c93f0a0823914c5e47415fb8ffcba32bb13d8fc435b7f2195b342b"
+    "sha256": "4defc3daa08a611dddd0ee33107cc30529c556bd3b0c85eeb2edff30acd2cd5e"
   },
   "blockers": [
-    "ZERO_ELIGIBLE_TRAINING_EPISODES_ACROSS_22_UNIQUE_TRAIN_IDENTITIES",
+    "ZERO_ELIGIBLE_TRAINING_EPISODES_ACROSS_25_UNIQUE_TRAIN_IDENTITIES",
     "NO_FINITE_EVIDENCE_BASED_COLLECTION_SIZE_AT_ZERO_OBSERVED_POINT_YIELD",
     "TRAINING_REQUIRES_AT_LEAST_ONE_COMPLETE_ELIGIBLE_EPISODE",
     "FORMAL_Q_B_REMAINS_UNMEASURED"
@@ -25,8 +25,8 @@
   },
   "complete_chain_failure_taxonomy": {
     "LIFTED_BUT_PUBLIC_SUCCESS_PREDICATE_REJECTED": 1,
-    "TERMINAL_CONTACT_OR_CONTROLLER_GATE_REJECTED": 9,
-    "TERMINAL_PREGRASP_IK_GATE_REJECTED": 4
+    "TERMINAL_CONTACT_OR_CONTROLLER_GATE_REJECTED": 11,
+    "TERMINAL_PREGRASP_IK_GATE_REJECTED": 5
   },
   "evidence_claims": {
     "b0_or_safety_contract_changed": false,
@@ -55,15 +55,15 @@
     "zero_eligible_episode_training_rejected": true
   },
   "identity_audit": {
-    "attempt_rows": 23,
+    "attempt_rows": 26,
     "duplicate_attempt_rows_within_first_v3_report": 1,
     "source_identity_sets_pairwise_disjoint": true,
-    "unique_train_identities_total": 22,
+    "unique_train_identities_total": 25,
     "unique_v3_train_identities": 11,
-    "unique_v4_train_identities": 11
+    "unique_v4_train_identities": 14
   },
   "observed_yield": {
-    "complete_eight_step_chains": 14,
+    "complete_eight_step_chains": 17,
     "eligible_training_episodes": 0,
     "eligible_yield_per_complete_eight_step_chain": 0.0,
     "eligible_yield_per_unique_train_identity": 0.0,
@@ -74,11 +74,11 @@
   "one_next_command": "PYTHONPATH=src:scripts uv run python scripts/m2c/audit_s4_training_eligibility_yield_adr0025.py --expected-json reports/m2c-s4-training-eligibility-yield-adr0025.json",
   "root_cause_finding": {
     "causal_attribution_limit": "Evidence does not isolate perception offset, approach geometry, or object state as the cause.",
-    "complete_chains_ending_in_contact_or_controller_rejection": 9,
-    "complete_chains_ending_in_pregrasp_ik_rejection": 4,
+    "complete_chains_ending_in_contact_or_controller_rejection": 11,
+    "complete_chains_ending_in_pregrasp_ik_rejection": 5,
     "complete_chains_lifted_but_rejected_by_public_success_predicate": 1,
     "complete_v3_chains_with_steps_0_through_6_all_gates_pass": 10,
-    "complete_v4_chains_with_steps_0_through_6_all_gates_pass": 3,
+    "complete_v4_chains_with_steps_0_through_6_all_gates_pass": 6,
     "safety_gate_or_threshold_change_authorized": false,
     "scene_19083_additional_offline_exclusion": "STEP_1_PUBLIC_TARGET_OUTSIDE_V4_K8",
     "status": "RECURRENT_TERMINAL_REGRASP_APPROACH_OR_CONTACT_ACCEPTANCE_MISMATCH_NOT_CAUSALLY_ISOLATED"
@@ -163,6 +163,16 @@
       "schema_version": "M2CS4V4Batch09CollectionAuditV1",
       "sha256": "97a8c00e99d28e6eff306fcdf349e97dff4366508bca79487dce55f37137ac2c",
       "status": "BLOCKED_ZERO_ELIGIBLE_V4_TRAIN_SAMPLES_BATCH09",
+      "unique_train_identities": 3
+    },
+    {
+      "attempt_rows": 3,
+      "complete_eight_step_chains": 3,
+      "eligible_training_episodes": 0,
+      "path": "reports/m2c-s4-v4-batch10-collection.json",
+      "schema_version": "M2CS4V4Batch10CollectionAuditV1",
+      "sha256": "ee6414efcf02a71959e501bdd91edf3d86f9003c978a495790d8cfb6fc99b83a",
+      "status": "BLOCKED_ZERO_ELIGIBLE_V4_TRAIN_SAMPLES_BATCH10",
       "unique_train_identities": 3
     }
   ],

@@ -11,11 +11,11 @@
 
 ADR-0025 approved raw public-detection capacity 32 from the frozen scene-contract provenance, not from the observed maximum. The immutable scene-19083 bytes now pass the revised raw schema without truncation or filtering, but the physical result remains authoritative: terminal `CONTACT_GATE_REJECTED`, `final_task_success=false`, zero eligible rows, and no packaged sample.
 
-Across the seven immutable V3/V4 collection reports, 22 distinct TRAIN identities produced 14 complete eight-step chains and zero eligible episodes. The updated ADR-0025 section-3 audit measures both per-key yield (0/22) and complete-chain conditional yield (0/14) as 0.0. At that observed point yield there is no finite evidence-based projection even for the trainer's code minimum of one eligible episode. This blocks training; it does not claim model capability is zero. Model rollout and formal Q-B evaluation have not run, so pure success remains `null`.
+Across the eight immutable V3/V4 collection reports, 25 distinct TRAIN identities produced 17 complete eight-step chains and zero eligible episodes. The updated ADR-0025 section-3 audit measures both per-key yield (0/25) and complete-chain conditional yield (0/17) as 0.0. At that observed point yield there is no finite evidence-based projection even for the trainer's code minimum of one eligible episode. This blocks training; it does not claim model capability is zero. Model rollout and formal Q-B evaluation have not run, so pure success remains `null`.
 
-Ten complete V3 chains and the three Batch-09 V4 chains passed gates for steps 0–6. Across all complete chains, nine terminate at the contact/controller gate, four at pregrasp IK, and one lifts but fails the public success predicate. This supports a recurring terminal regrasp approach/contact-acceptance mismatch but does not isolate perception offset, approach geometry, or object state. No gate, threshold, B0 byte, or frozen eligibility predicate was changed.
+Ten complete V3 chains and the six Batch-09/10 V4 chains passed gates for steps 0–6. Across all complete chains, eleven terminate at the contact/controller gate, five at pregrasp IK, and one lifts but fails the public success predicate. This supports a recurring terminal regrasp approach/contact-acceptance mismatch but does not isolate perception offset, approach geometry, or object state. No gate, threshold, B0 byte, or frozen eligibility predicate was changed.
 
-Batch-09 was preregistered outcome-blind and all three selected keys were consumed exactly once. The permission path is resolved: three stage builders and three probes completed, producing 24 physical receipts and zero safety violations. The next outcome-blind selector is prepared against all 22 prior identities, but no subsequent preregistration is active in this snapshot, so collection is fail-closed again.
+Batch-10 was preregistered outcome-blind and all three selected keys were consumed exactly once. The permission path remains resolved: three stage builders and three probes completed, producing 24 additional physical receipts and zero safety violations. No subsequent preregistration is active in this snapshot, so collection is fail-closed again.
 
 ## ADR-0022 / ADR-0024 / ADR-0025 Phase-2 entry
 
@@ -39,5 +39,5 @@ The 2026-08-20 bundle-smoke checkpoint is unchanged.
 Next command:
 
 ```bash
-PYTHONPATH=src:scripts uv run pytest -q tests/unit/test_m2c_s4_current_blockers_report.py tests/unit/test_m2c_s4_v4_batch09_collection_audit.py
+PYTHONPATH=src:scripts uv run pytest -q tests/unit/test_m2c_s4_current_blockers_report.py tests/unit/test_m2c_s4_v4_batch10_collection_audit.py
 ```

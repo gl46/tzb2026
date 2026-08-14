@@ -1,8 +1,8 @@
 {
   "schema_version": "M2CS4CurrentBlockersV2",
   "status": "BLOCKED_UNMEASURED_ZERO_ELIGIBLE_YIELD_AND_FORMAL_EXACT_PLAN_INTEGRATION",
-  "reported_at": "2026-08-14T20:35:00+08:00",
-  "checked_head_commit": "c0e5282340301e9c880026bb28efe77b9c5f26f3",
+  "reported_at": "2026-08-14T21:10:00+08:00",
+  "checked_head_commit": "e514de0ae46f6780afb4012682e4b173106bb7f4",
   "q_a_state": "PASSED",
   "q_b_state": "UNMEASURED",
   "pure_model_success_episodes": null,
@@ -12,11 +12,11 @@
     "frozen_v3_train_keys": 36,
     "frozen_v4_train_keys": 36,
     "unique_v3_train_keys_attempted": 11,
-    "unique_v4_train_keys_consumed": 11,
-    "unique_train_keys_consumed_total": 22,
+    "unique_v4_train_keys_consumed": 14,
+    "unique_train_keys_consumed_total": 25,
     "raw_v3_eight_step_chains": 10,
-    "raw_v4_eight_step_chains": 4,
-    "physical_skill_receipts_v4": 32,
+    "raw_v4_eight_step_chains": 7,
+    "physical_skill_receipts_v4": 56,
     "collision_or_safety_violations_v4": 0,
     "training_samples_eligible": 0,
     "training_samples_packaged": 0,
@@ -25,22 +25,22 @@
     "formal_q_b_evaluation_executed": false,
     "public_track_associator_v2_implemented": true,
     "batch_04_preregistered_and_consumed": true,
-    "latest_completed_batch": "BATCH_09",
+    "latest_completed_batch": "BATCH_10",
     "active_selected_key_preregistration_present": false,
     "collection_execution_authorized": false,
     "raw_detection_capacity_decision_required": false,
     "permission_issue_resolution": {
-      "resolved_for_observed_batch09_path": true,
+      "resolved_for_observed_batch10_path": true,
       "batch04_stage_output_permission_failures": 3,
       "first_subsequent_stage_acceptance_report": "reports/m2c-s4-v4-batch06-snapshot-owner-failure.json",
       "first_subsequent_probe_simulation_start_report": "reports/m2c-s4-v4-batch07-pre-timeline-proprio-failure.json",
       "first_subsequent_raw_physical_chain_report": "reports/m2c-s4-v4-batch08-collection.json",
-      "latest_three_stage_and_probe_pass_report": "reports/m2c-s4-v4-batch09-collection.json"
+      "latest_three_stage_and_probe_pass_report": "reports/m2c-s4-v4-batch10-collection.json"
     },
     "authorization_contract": {
       "path": "src/xh_agent/policy/qrm_lite/s4_v4_collection_authorization_v1.py",
       "sha256": "a92fcd74e8d08a9fe0528d5f55313ea0453ff79a03ea2001a4411b895fc6780c",
-      "checked_parent_commit": "c0e5282340301e9c880026bb28efe77b9c5f26f3",
+      "checked_parent_commit": "e514de0ae46f6780afb4012682e4b173106bb7f4",
       "canonical_cli_authorized": false,
       "programmatic_worker_authorized": false,
       "programmatic_packager_authorized": false,
@@ -78,6 +78,10 @@
       {
         "path": "reports/m2c-s4-v4-batch09-collection.json",
         "sha256": "97a8c00e99d28e6eff306fcdf349e97dff4366508bca79487dce55f37137ac2c"
+      },
+      {
+        "path": "reports/m2c-s4-v4-batch10-collection.json",
+        "sha256": "ee6414efcf02a71959e501bdd91edf3d86f9003c978a495790d8cfb6fc99b83a"
       }
     ],
     "accepted_raw_capacity_decision": {
@@ -100,10 +104,10 @@
     },
     "training_eligibility_yield": {
       "path": "reports/m2c-s4-training-eligibility-yield-adr0025.json",
-      "sha256": "fdd925241239b05871be01e995fbb78097572f1a2fb0be17653f6a04cb160368",
+      "sha256": "6ba3be39efcc3deb3963b20be99bffcb8bd4fbf2dcb95555867b7d837b601d43",
       "status": "BLOCKED_ZERO_OBSERVED_ELIGIBLE_CHAIN_YIELD",
-      "unique_train_identities": 22,
-      "complete_eight_step_chains": 14,
+      "unique_train_identities": 25,
+      "complete_eight_step_chains": 17,
       "eligible_training_episodes": 0,
       "finite_key_projection_for_one_eligible_episode": null
     }
