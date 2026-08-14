@@ -78,6 +78,7 @@ class FormalIsaacEpisodeStartReceiptV4(_FrozenModel):
     declared_attribute_binding_sha256: str = Field(pattern=SHA256_PATTERN)
     qwen_bundle_sha256: str = Field(pattern=SHA256_PATTERN)
     failure_observed_at_ns: int = Field(gt=0)
+    public_failure_boundary_evidence_sha256: str = Field(pattern=SHA256_PATTERN)
     receipt_sha256: str = Field(pattern=SHA256_PATTERN)
     failure_boundary_derived_from_public_observation: Literal[True] = True
     real_isaac: Literal[True] = True

@@ -106,6 +106,7 @@ class _Lifecycle:
             "declared_attribute_binding_sha256": request.declared_attribute_binding_sha256,
             "qwen_bundle_sha256": canonical_sha256(request.bundle),
             "failure_observed_at_ns": 50,
+            "public_failure_boundary_evidence_sha256": "a" * 64,
             "failure_boundary_derived_from_public_observation": True,
             "real_isaac": True,
             "mocked_physics": False,
