@@ -151,8 +151,8 @@ def build_prereg(*, project_root: Path, source_commit: str = "HEAD") -> dict[str
         for path in sorted(authorization.REQUIRED_SEMANTIC_SOURCE_PATHS)
     ]
     prior_bindings = [
-        {"path": path, "sha256": values[0]}
-        for path, values in sorted(authorization.AUTHORITATIVE_PRIOR_ATTEMPT_SOURCES.items())
+        {"path": path, "sha256": authorization.AUTHORITATIVE_PRIOR_ATTEMPT_SOURCES[path][0]}
+        for path in sorted(BATCH14_PRIOR_ATTEMPT_SOURCE_PATHS)
     ]
     core: dict[str, Any] = {
         "attempt_each_selected_key_at_most_once": True,

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the outcome-blind, prereg-only Batch-15 V4 collection contract."""
+"""Build the outcome-blind, prereg-only Batch-16 V4 collection contract."""
 
 from __future__ import annotations
 
@@ -17,15 +17,15 @@ from xh_agent.policy.qrm_lite.path_blocked_collection_v4 import (
 
 
 ROOT = Path(__file__).resolve().parents[2]
-PREREG_PATH = Path("docs/decisions/M2C-S4-V4-TRAIN-COLLECTION-BATCH-15-PREREG.json")
-BATCH_ID = "m2c-s4-v4-train-batch-15"
-LEDGER_NAMESPACE = "M2C_S4_V4_COLLECTION_BATCH15"
+PREREG_PATH = Path("docs/decisions/M2C-S4-V4-TRAIN-COLLECTION-BATCH-16-PREREG.json")
+BATCH_ID = "m2c-s4-v4-train-batch-16"
+LEDGER_NAMESPACE = "M2C_S4_V4_COLLECTION_BATCH16"
 STOP_AFTER = 3
 YIELD_REPORT_PATH = Path("reports/m2c-s4-training-eligibility-yield-adr0025.json")
-YIELD_REPORT_SHA256 = "0212ea14d9087e489cc6ef1eef1f8f20d9002c0d58e5acf517e40bbb1fc69ef0"
+YIELD_REPORT_SHA256 = "c80cae2ee550049bbfa271294dd19a0fdad628589c7946ff1392065a046eb491"
 ADR0025_PATH = Path("docs/decisions/ADR-0025-m2c-raw-capacity-acm-and-yield.md")
 ADR0025_SHA256 = "6f27171d319e3f966c652ca9f8c0fe7c641f4bf420de58642869f9c9c805c3aa"
-BATCH15_PRIOR_ATTEMPT_SOURCE_PATHS = (
+BATCH16_PRIOR_ATTEMPT_SOURCE_PATHS = (
     "reports/m2c-s4-v3-path-blocked-train-collection.json",
     "reports/m2c-s4-v3-path-blocked-train-collection-batch03.json",
     "reports/m2c-s4-v4-batch04-permission-failure.json",
@@ -38,12 +38,13 @@ BATCH15_PRIOR_ATTEMPT_SOURCE_PATHS = (
     "reports/m2c-s4-v4-batch12-collection.json",
     "reports/m2c-s4-v4-batch13-collection.json",
     "reports/m2c-s4-v4-batch14-collection.json",
+    "reports/m2c-s4-v4-batch15-collection.json",
 )
-BATCH15_PRIOR_ATTEMPT_KEY_COUNT = 37
+BATCH16_PRIOR_ATTEMPT_KEY_COUNT = 40
 
 
-class Batch15PreregBuildError(ValueError):
-    """The frozen inputs cannot produce the Batch-15 preregistration."""
+class Batch16PreregBuildError(ValueError):
+    """The frozen inputs cannot produce the Batch-16 preregistration."""
 
 
 def _git(project_root: Path, *args: str) -> bytes:
@@ -53,7 +54,7 @@ def _git(project_root: Path, *args: str) -> bytes:
         capture_output=True,
     )
     if completed.returncode != 0:
-        raise Batch15PreregBuildError(
+        raise Batch16PreregBuildError(
             f"git {' '.join(args)} failed: {completed.stderr.decode(errors='replace').strip()}"
         )
     return completed.stdout
@@ -71,9 +72,9 @@ def _json_object(payload: bytes, *, label: str) -> dict[str, Any]:
     try:
         value = json.loads(payload)
     except (UnicodeDecodeError, json.JSONDecodeError) as error:
-        raise Batch15PreregBuildError(f"{label} is not JSON") from error
+        raise Batch16PreregBuildError(f"{label} is not JSON") from error
     if not isinstance(value, dict):
-        raise Batch15PreregBuildError(f"{label} is not an object")
+        raise Batch16PreregBuildError(f"{label} is not an object")
     return value
 
 
@@ -87,7 +88,7 @@ def _identity(record: Mapping[str, Any]) -> dict[str, Any]:
     }
 
 
-def select_batch15_keys(*, project_root: Path, source_commit: str = "HEAD") -> list[dict[str, Any]]:
+def select_batch16_keys(*, project_root: Path, source_commit: str = "HEAD") -> list[dict[str, Any]]:
     manifest = M2CS4V4TrainingKeyManifestV1.model_validate(
         _json_object(
             _git_blob(project_root, source_commit, "configs/m2c_s4_v4_training_keys.json"),
@@ -95,31 +96,31 @@ def select_batch15_keys(*, project_root: Path, source_commit: str = "HEAD") -> l
         )
     )
     prior_keys: set[str] = set()
-    for path in BATCH15_PRIOR_ATTEMPT_SOURCE_PATHS:
+    for path in BATCH16_PRIOR_ATTEMPT_SOURCE_PATHS:
         expected_sha256, expected_schema, expected_unique = (
             authorization.AUTHORITATIVE_PRIOR_ATTEMPT_SOURCES[path]
         )
         raw = _git_blob(project_root, source_commit, path)
         if _sha256(raw) != expected_sha256:
-            raise Batch15PreregBuildError(f"prior report SHA-256 differs: {path}")
+            raise Batch16PreregBuildError(f"prior report SHA-256 differs: {path}")
         report = _json_object(raw, label=path)
         if report.get("schema_version") != expected_schema:
-            raise Batch15PreregBuildError(f"prior report schema differs: {path}")
+            raise Batch16PreregBuildError(f"prior report schema differs: {path}")
         attempts = report.get("attempts")
         if not isinstance(attempts, list):
-            raise Batch15PreregBuildError(f"prior report lacks attempts: {path}")
+            raise Batch16PreregBuildError(f"prior report lacks attempts: {path}")
         source_keys = {
             item["identity"]["matched_key"]
             for item in attempts
             if isinstance(item, dict) and isinstance(item.get("identity"), dict)
         }
         if len(source_keys) != expected_unique:
-            raise Batch15PreregBuildError(f"prior report unique-key count differs: {path}")
+            raise Batch16PreregBuildError(f"prior report unique-key count differs: {path}")
         if prior_keys & source_keys:
-            raise Batch15PreregBuildError("authoritative prior report identity sets overlap")
+            raise Batch16PreregBuildError("authoritative prior report identity sets overlap")
         prior_keys |= source_keys
-    if len(prior_keys) != BATCH15_PRIOR_ATTEMPT_KEY_COUNT:
-        raise Batch15PreregBuildError("authoritative prior identity union differs")
+    if len(prior_keys) != BATCH16_PRIOR_ATTEMPT_KEY_COUNT:
+        raise Batch16PreregBuildError("authoritative prior identity union differs")
 
     selected: list[dict[str, Any]] = []
     selected_sdfs: set[str] = set()
@@ -131,7 +132,7 @@ def select_batch15_keys(*, project_root: Path, source_commit: str = "HEAD") -> l
         if len(selected) == STOP_AFTER:
             break
     if len(selected) != STOP_AFTER or len(selected_sdfs) != STOP_AFTER:
-        raise Batch15PreregBuildError("manifest cannot supply three new identity-disjoint SDF keys")
+        raise Batch16PreregBuildError("manifest cannot supply three new identity-disjoint SDF keys")
     return selected
 
 
@@ -139,9 +140,9 @@ def build_prereg(*, project_root: Path, source_commit: str = "HEAD") -> dict[str
     root = project_root.resolve(strict=True)
     commit = _git(root, "rev-parse", f"{source_commit}^{{commit}}").decode().strip()
     if _sha256(_git_blob(root, commit, YIELD_REPORT_PATH.as_posix())) != YIELD_REPORT_SHA256:
-        raise Batch15PreregBuildError("updated ADR-0025 yield report is not frozen in parent")
+        raise Batch16PreregBuildError("updated ADR-0025 yield report is not frozen in parent")
     if _sha256(_git_blob(root, commit, ADR0025_PATH.as_posix())) != ADR0025_SHA256:
-        raise Batch15PreregBuildError("accepted ADR-0025 is not frozen in parent")
+        raise Batch16PreregBuildError("accepted ADR-0025 is not frozen in parent")
 
     source_snapshot, _payloads = authorization._source_snapshot_payloads(  # noqa: SLF001
         root,
@@ -153,7 +154,7 @@ def build_prereg(*, project_root: Path, source_commit: str = "HEAD") -> dict[str
     ]
     prior_bindings = [
         {"path": path, "sha256": authorization.AUTHORITATIVE_PRIOR_ATTEMPT_SOURCES[path][0]}
-        for path in sorted(BATCH15_PRIOR_ATTEMPT_SOURCE_PATHS)
+        for path in sorted(BATCH16_PRIOR_ATTEMPT_SOURCE_PATHS)
     ]
     core: dict[str, Any] = {
         "attempt_each_selected_key_at_most_once": True,
@@ -202,7 +203,7 @@ def build_prereg(*, project_root: Path, source_commit: str = "HEAD") -> dict[str
             "training_execution": False,
         },
         "selected_key_outcome_observed_before_registration": False,
-        "selected_keys": select_batch15_keys(project_root=root, source_commit=commit),
+        "selected_keys": select_batch16_keys(project_root=root, source_commit=commit),
         "selection_inputs": ["manifest_order", "prior_attempted_identity", "sdf_sha256"],
         "selection_rule": "manifest_order_first_unattempted_per_sdf_v1",
         "selection_uses_outcomes": False,
