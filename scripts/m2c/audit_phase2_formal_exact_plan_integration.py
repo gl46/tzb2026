@@ -35,7 +35,11 @@ SOURCE_PATHS = (
     Path("src/xh_agent/policy/qrm_lite/public_tracks_v4.py"),
     Path("src/xh_agent/policy/qrm_lite/path_blocked_supervision_v4.py"),
     Path("src/xh_agent/policy/qrm_lite/formal_public_observation_v4.py"),
+    Path("src/xh_agent/policy/qrm_lite/formal_public_observation_provider_v4.py"),
+    Path("src/xh_agent/policy/qrm_lite/formal_split_runner_v4.py"),
+    Path("src/xh_agent/policy/qrm_lite/formal_isaac_endpoint_v4.py"),
     Path("src/xh_agent/policy/qrm_lite/formal_exact_plan_runtime_v1.py"),
+    Path("src/xh_agent/policy/qrm_lite/formal_isaac_backend_v4.py"),
     Path("src/xh_agent/policy/qrm_lite/s4_entry_gate.py"),
     Path("configs/m2c_adr0024_phase2_binding_candidate.json"),
     Path("docs/decisions/ADR-0024-PHASE2-BINDING-ADDENDUM-CANDIDATE.md"),
@@ -104,6 +108,17 @@ def _class_fields(module: ast.Module, class_name: str) -> frozenset[str]:
     raise AuditError(f"class is absent: {class_name}")
 
 
+def _class_methods(module: ast.Module, class_name: str) -> frozenset[str]:
+    for node in module.body:
+        if isinstance(node, ast.ClassDef) and node.name == class_name:
+            return frozenset(
+                item.name
+                for item in node.body
+                if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef))
+            )
+    raise AuditError(f"class is absent: {class_name}")
+
+
 def _method_raises_without_return(
     module: ast.Module,
     class_name: str,
@@ -161,11 +176,15 @@ def build_report() -> dict[str, Any]:
             raise AuditError(f"required source is absent: {path}")
 
     backend_path = Path("scripts/m2c/formal_isaac_v4_backend.py")
-    formal_path = Path("src/xh_agent/policy/qrm_lite/formal_split_runner_v2.py")
+    observation_path = Path("src/xh_agent/policy/qrm_lite/path_blocked_supervision_v4.py")
+    endpoint_v4_path = Path("src/xh_agent/policy/qrm_lite/formal_isaac_endpoint_v4.py")
+    backend_v4_path = Path("src/xh_agent/policy/qrm_lite/formal_isaac_backend_v4.py")
     bundle_path = Path("src/xh_agent/policy/qrm_lite/exact_plan_primitive_bundle_v1.py")
     entry_path = Path("src/xh_agent/policy/qrm_lite/s4_entry_gate.py")
-    backend = _module(backend_path)
-    formal = _module(formal_path)
+    observation = _module(observation_path)
+    endpoint_v4 = _module(endpoint_v4_path)
+    backend_v4 = _module(backend_v4_path)
+    legacy_backend = _module(backend_path)
     bundle = _module(bundle_path)
     entry = _module(entry_path)
     preflight_path = Path("src/xh_agent/policy/qrm_lite/exact_plan_preflight_v1.py")
@@ -175,7 +194,7 @@ def build_report() -> dict[str, Any]:
     if "PHASE2_READINESS_VERIFIER_ADR0024_V2_MIGRATION_INCOMPLETE" not in readiness_source:
         raise AuditError("Phase-2 readiness migration blocker is not fail-closed")
 
-    formal_fields = _class_fields(formal, "FormalPublicObservationV2")
+    formal_fields = _class_fields(observation, "PathBlockedPublicObservationV4")
     a1_fields = _class_fields(bundle, "ExactPlanA1InputsV1")
     missing_v4_bindings = sorted(REQUIRED_FORMAL_V4_BINDINGS - formal_fields)
     missing_a1_fields = sorted(REQUIRED_A1_FIELDS - a1_fields)
@@ -195,16 +214,34 @@ def build_report() -> dict[str, Any]:
     )
     current = json.loads((ROOT / "reports/m2c-s4-current-blockers.json").read_bytes())
 
-    construct_stub = _method_raises_without_return(
-        backend,
+    legacy_construct_stub = _method_raises_without_return(
+        legacy_backend,
         "FormalIsaacV4BackendV2",
         "_construct_exact_execution_plan",
     )
-    execute_stub = _method_raises_without_return(
-        backend,
+    legacy_execute_stub = _method_raises_without_return(
+        legacy_backend,
         "FormalIsaacV4BackendV2",
         "_execute_exact_plan",
     )
+    endpoint_methods = _class_methods(endpoint_v4, "FormalIsaacEndpointStateMachineV4")
+    backend_methods = _class_methods(backend_v4, "FormalIsaacBackendCoordinatorV4")
+    if not {"_start", "_capture", "_execute", "_finalize"}.issubset(endpoint_methods):
+        raise AuditError("formal V4 endpoint state machine is incomplete")
+    if not {"start", "capture", "execute", "finalize"}.issubset(backend_methods):
+        raise AuditError("formal V4 backend coordinator is incomplete")
+    backend_v4_source = (ROOT / backend_v4_path).read_text(encoding="utf-8")
+    runtime_bridge_active = all(
+        token in backend_v4_source
+        for token in (
+            "self.exact_plan_runtime.prepare(",
+            "self.exact_plan_runtime.execute_once(",
+            "FormalExactPlanGateRejectionV1",
+            'disposition="TERMINAL_NO_PHYSICAL_EXECUTION"',
+        )
+    )
+    if not runtime_bridge_active:
+        raise AuditError("formal V4 backend lost exact-plan/terminal integration")
     bindings = _none_bindings(entry)
     preflight_classes = {item.name for item in preflight.body if isinstance(item, ast.ClassDef)}
     preflight_functions = {
@@ -218,17 +255,6 @@ def build_report() -> dict[str, Any]:
     legacy_signature_audit_only = LEGACY_A3_SIGNATURE_TYPES.issubset(
         preflight_classes | preflight_functions
     )
-    formal_execution_eligible = not (
-        missing_v4_bindings
-        or construct_stub
-        or execute_stub
-        or constructor_calls
-        or any(value is None for value in bindings.values())
-        or not current["phase_2"]["query_only_static_state_preflight_clear"]
-    )
-    if formal_execution_eligible:
-        raise AuditError("audit unexpectedly found an executable formal Phase-2 path")
-
     return {
         "schema_version": SCHEMA_VERSION,
         "status": "BLOCKED_UNMEASURED_FORMAL_EXACT_PLAN_INTEGRATION",
@@ -250,6 +276,11 @@ def build_report() -> dict[str, Any]:
             "versioned_formal_v4_observation_transport": True,
             "bound_plan_runtime_dynamic_a1_cross_binding": True,
             "bound_plan_runtime_single_use_execution_attempt": True,
+            "formal_v4_endpoint_state_machine_active": True,
+            "formal_v4_backend_coordinator_active": runtime_bridge_active,
+            "replayable_public_observation_provider_active": True,
+            "typed_non_actuating_gate_rejection_only": True,
+            "partial_failure_actuation_accounting_exact": True,
             "adr0024_a3_deployment_authorization_v2": True,
             "trusted_host_signature_prerequisite_rescinded": True,
             "session_receipt_and_hmac_post_execution_evidence_required": True,
@@ -257,16 +288,20 @@ def build_report() -> dict[str, Any]:
             "phase2_readiness_adr0024_v2_migration_complete": False,
         },
         "formal_wire": {
-            "current_observation_schema": "FormalPublicObservationV2",
+            "current_observation_schema": "FormalPublicObservationV4",
             "versioned_v4_observation_schema": "FormalPublicObservationV4",
-            "versioned_v4_transport_active": False,
+            "versioned_v4_transport_active": True,
             "missing_adr0024_v4_bindings": missing_v4_bindings,
             "a1_digest_fields_present": sorted(REQUIRED_A1_FIELDS),
-            "v4_candidate_digest_recomputable_from_current_wire": False,
+            "v4_candidate_digest_recomputable_from_current_wire": True,
         },
         "formal_backend": {
-            "construct_exact_plan_is_rejection_stub": construct_stub,
-            "execute_exact_plan_is_rejection_stub": execute_stub,
+            "v4_endpoint_state_machine_active": True,
+            "v4_backend_coordinator_active": runtime_bridge_active,
+            "v4_public_observation_provider_active": True,
+            "v4_exact_plan_runtime_prepare_and_execute_active": True,
+            "legacy_v2_construct_exact_plan_is_rejection_stub": legacy_construct_stub,
+            "legacy_v2_execute_exact_plan_is_rejection_stub": legacy_execute_stub,
             "production_bound_plan_constructor_calls": constructor_calls,
         },
         "production_bindings": bindings,
@@ -276,23 +311,22 @@ def build_report() -> dict[str, Any]:
         "teacher_used": False,
         "privileged_truth_policy_input": False,
         "blockers": [
-            "FORMAL_PUBLIC_OBSERVATION_V4_NOT_IN_ACTIVE_WIRE_PROTOCOL",
             "PRODUCTION_BOUND_PLAN_PROVIDER_NOT_IMPLEMENTED",
-            "FORMAL_BACKEND_EXACT_PLAN_CONSTRUCTION_AND_EXECUTION_STUBS",
+            "REAL_ISAAC_EPISODE_LIFECYCLE_AND_CAPTURE_SOURCE_NOT_BOUND",
             "PLAN_SPECIFIC_A3_PREFLIGHT_AND_EIGHT_SKILL_EXECUTION_UNMEASURED",
             "PHASE2_READINESS_VERIFIER_ADR0024_V2_MIGRATION_INCOMPLETE",
             "TWO_ACTIVE_PRODUCTION_BINDINGS_UNSET",
         ],
         "verification": {
             "command": ".venv/bin/pytest -q tests/unit/test_m2c_*.py",
-            "passed": 766,
+            "passed": 780,
             "failed": 0,
         },
         "next_implementation_order": [
-            "PLUMB_VERSIONED_V4_OBSERVATION_THROUGH_CAPTURE_AND_INFERENCE_WIRE",
             "IMPLEMENT_PRODUCTION_BOUND_PLAN_PROVIDER_OVER_V4_AND_MAPPING_INPUTS",
-            "INTEGRATE_FULL_PLAN_PREFLIGHT_BEFORE_ANY_COMMAND",
-            "KEEP_BACKEND_TERMINAL_NO_PHYSICAL_EXECUTION_UNTIL_A3_AND_BINDINGS_PASS",
+            "BIND_REAL_ISAAC_EPISODE_LIFECYCLE_AND_PUBLIC_CAPTURE_SOURCE",
+            "REPLAY_PLAN_SPECIFIC_A3_PREFLIGHT_FOR_ALL_EIGHT_SKILLS",
+            "MIGRATE_PHASE2_READINESS_TO_ADR0024_AND_SET_ONLY_TWO_ACTIVE_BINDINGS",
         ],
         "next_command": (
             ".venv/bin/pytest -q tests/unit/test_m2c_phase2_formal_exact_plan_integration.py"
@@ -301,7 +335,6 @@ def build_report() -> dict[str, Any]:
 
 
 def render_markdown(report: dict[str, Any]) -> str:
-    missing = "`, `".join(report["formal_wire"]["missing_adr0024_v4_bindings"])
     blockers = "\n".join(f"- `{item}`" for item in report["blockers"])
     order = "\n".join(
         f"{index}. `{item}`"
@@ -330,19 +363,20 @@ all phase evidence is replayed under that closure. Per-run session receipts and
 post-execution host HMAC replay remain mandatory. The V1 signing schema remains
 parseable for historical audit only and cannot authorize a new command.
 
-The versioned `FormalPublicObservationV4` transport now independently replays
-the approved V4 candidate and association bindings.  It is deliberately not
-yet active: `FormalPublicObservationV2` still cannot carry `{missing}`.
-Consequently the A.1 public candidate digest cannot be independently
-recomputed from the **current active** wire.
-The separate `FormalExactPlanRuntimeV1` now cross-binds a complete externally
-provided A.1--A.4 envelope to V4 RGB-D/candidates, inference response, mapping,
-and execution parameters; it runs whole-plan preflight and consumes a prepared
-plan before the executor call.  It does not generate waypoints and has no
-production provider, so it cannot authorize execution by itself.
-The real backend's plan-construction and execution methods remain deliberate
-rejection stubs, and there is no production constructor for a bound
-`M2CExactPlanPrimitivePlanV1`.
+The active `FormalPublicObservationV4` transport independently replays the
+approved V4 association history, role-ranked K=8 candidates, declared public
+attribute, RGB-D bytes, and public proprioception journal.  The V4 endpoint
+state machine and backend coordinator now carry that observation through
+mapping, all-phase preflight, single-use exact-plan execution, and final public
+evaluation.  INVALID mappings and explicitly typed non-actuating gate
+rejections terminate as `NO_PHYSICAL_EXECUTION`; unknown failures are not
+laundered into experimental outcomes.
+
+The coordinator does not generate waypoints.  It requires a separately frozen
+bound-plan provider, real-Isaac episode lifecycle/capture source, and primitive
+bundle.  No production bound-plan constructor or real lifecycle deployment is
+present, plan-specific A3 evidence for all eight skills remains unmeasured, and
+the Phase-2 readiness verifier has not completed its ADR-0024 migration.
 
 ## Blockers
 

@@ -549,8 +549,14 @@ class ModelDecisionExecutionReceiptV4(StrictModel):
                 or self.outcome == "NOT_EXECUTED"
             ):
                 raise ValueError("formal V4 executed operation lacks model/Isaac attribution")
-            if self.robot_actuation_executed != (self.operation_kind == "ROBOT_ACTUATION"):
-                raise ValueError("formal V4 robot-actuation flag differs from operation kind")
+            if self.operation_kind != "ROBOT_ACTUATION" and self.robot_actuation_executed:
+                raise ValueError("formal V4 public operation claims robot actuation")
+            if (
+                self.operation_kind == "ROBOT_ACTUATION"
+                and self.outcome == "PASS"
+                and not self.robot_actuation_executed
+            ):
+                raise ValueError("formal V4 successful robot operation lacks actuation")
             if self.outcome == "PASS" and self.failure_reason is not None:
                 raise ValueError("formal V4 PASS receipt contains a failure reason")
             if self.outcome == "FAILED" and not self.failure_reason:
@@ -725,14 +731,18 @@ class IsaacExecuteResponseV4(StrictModel):
                 )
             ):
                 raise ValueError("PASS V4 bundle receipt is not a continuing real execution")
-        elif (
-            self.disposition != "TERMINAL_EXECUTION_FAILURE"
-            or self.terminal_failure_outcome is not False
-            or not self.model_operation_executed_in_real_isaac
-            or not receipt.executed_in_real_isaac
-            or receipt.outcome != "FAILED"
-        ):
-            raise ValueError("partial V4 execution is not a terminal failure")
+        else:
+            any_operation_executed = any(
+                item.operation_executed for item in self.bundle_execution_receipt.phase_receipts
+            )
+            if (
+                self.disposition != "TERMINAL_EXECUTION_FAILURE"
+                or self.terminal_failure_outcome is not False
+                or self.model_operation_executed_in_real_isaac != any_operation_executed
+                or not receipt.executed_in_real_isaac
+                or receipt.outcome != "FAILED"
+            ):
+                raise ValueError("partial V4 execution is not a terminal failure")
         return self
 
 

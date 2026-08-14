@@ -39,7 +39,7 @@ def test_phase2_integration_audit_replays_current_fail_closed_sources() -> None:
     assert recorded["blockers"] == replayed["blockers"]
     assert recorded["verification"] == {
         "command": ".venv/bin/pytest -q tests/unit/test_m2c_*.py",
-        "passed": 766,
+        "passed": 780,
         "failed": 0,
     }
 
@@ -67,6 +67,11 @@ def test_audit_separates_implemented_contracts_from_missing_formal_path() -> Non
             "trusted_host_signature_prerequisite_rescinded",
             "session_receipt_and_hmac_post_execution_evidence_required",
             "legacy_a3_signature_schema_audit_only",
+            "formal_v4_endpoint_state_machine_active",
+            "formal_v4_backend_coordinator_active",
+            "replayable_public_observation_provider_active",
+            "typed_non_actuating_gate_rejection_only",
+            "partial_failure_actuation_accounting_exact",
         )
     )
     assert (
@@ -75,20 +80,18 @@ def test_audit_separates_implemented_contracts_from_missing_formal_path() -> Non
     assert "PHASE2_READINESS_VERIFIER_ADR0024_V2_MIGRATION_INCOMPLETE" in report["blockers"]
     assert report["implemented_contracts"]["query_only_static_state_preflight_clear"] is False
     assert report["formal_backend"] == {
-        "construct_exact_plan_is_rejection_stub": True,
-        "execute_exact_plan_is_rejection_stub": True,
+        "v4_endpoint_state_machine_active": True,
+        "v4_backend_coordinator_active": True,
+        "v4_public_observation_provider_active": True,
+        "v4_exact_plan_runtime_prepare_and_execute_active": True,
+        "legacy_v2_construct_exact_plan_is_rejection_stub": True,
+        "legacy_v2_execute_exact_plan_is_rejection_stub": True,
         "production_bound_plan_constructor_calls": [],
     }
-    assert report["formal_wire"]["missing_adr0024_v4_bindings"] == [
-        "association_history",
-        "candidate_payload",
-        "candidate_payload_sha256",
-        "declared_target_attribute",
-        "public_track_associator_revision",
-    ]
-    assert report["formal_wire"]["v4_candidate_digest_recomputable_from_current_wire"] is False
+    assert report["formal_wire"]["missing_adr0024_v4_bindings"] == []
+    assert report["formal_wire"]["v4_candidate_digest_recomputable_from_current_wire"] is True
     assert report["formal_wire"]["versioned_v4_observation_schema"] == ("FormalPublicObservationV4")
-    assert report["formal_wire"]["versioned_v4_transport_active"] is False
+    assert report["formal_wire"]["versioned_v4_transport_active"] is True
     assert report["implemented_contracts"]["versioned_formal_v4_observation_transport"] is True
     assert report["implemented_contracts"]["bound_plan_runtime_dynamic_a1_cross_binding"] is True
     assert (

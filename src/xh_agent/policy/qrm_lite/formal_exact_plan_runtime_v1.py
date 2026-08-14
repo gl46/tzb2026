@@ -27,7 +27,56 @@ from xh_agent.policy.qrm_lite.formal_split_runner_v4 import (
     IsaacExecuteRequestV4,
     canonical_runtime_mapping_sha256_v4,
 )
-from xh_agent.policy.qrm_lite.skill_registry_v2 import RuntimeSkillMappingResultV2
+from xh_agent.policy.qrm_lite.skill_registry_v2 import (
+    MappingRejectionV2,
+    RuntimeSkillMappingResultV2,
+)
+
+
+FormalExactPlanRejectedGateV1 = Literal[
+    "ik",
+    "collision",
+    "controller",
+    "safety",
+    "exact_plan",
+]
+
+
+class FormalExactPlanGateRejectionV1(ExactPlanUnavailable):
+    """An authenticated non-actuating gate rejection safe to terminalize.
+
+    Generic planning, transport, verifier, or executor exceptions must not be
+    converted into an experimental negative.  Only a producer that can name
+    the exact frozen pre-execution gate and its matching registry rejection may
+    raise this type.
+    """
+
+    def __init__(
+        self,
+        *,
+        gate: FormalExactPlanRejectedGateV1,
+        rejection_reason: MappingRejectionV2,
+        detail: str,
+    ) -> None:
+        allowed_reasons = {
+            "ik": {MappingRejectionV2.IK_REJECTION},
+            "collision": {MappingRejectionV2.COLLISION_REJECTION},
+            "controller": {MappingRejectionV2.SAFETY_REJECTION},
+            "safety": {MappingRejectionV2.SAFETY_REJECTION},
+            "exact_plan": {
+                MappingRejectionV2.IK_REJECTION,
+                MappingRejectionV2.COLLISION_REJECTION,
+                MappingRejectionV2.SAFETY_REJECTION,
+            },
+        }
+        if rejection_reason not in allowed_reasons[gate]:
+            raise ValueError("formal exact-plan gate/rejection classification differs")
+        if not detail.strip():
+            raise ValueError("formal exact-plan gate rejection lacks a frozen detail")
+        self.gate = gate
+        self.rejection_reason = rejection_reason
+        self.detail = detail
+        super().__init__(f"{gate}:{rejection_reason.value}:{detail}")
 
 
 class _FrozenModel(BaseModel):
