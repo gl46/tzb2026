@@ -255,8 +255,11 @@ class ConservativeEffortUpperBoundReceiptV1(FrozenModel):
     joint_positions_sha256: str = Field(pattern=SHA256_PATTERN)
     estimated_abs_efforts: tuple[float, ...] = Field(min_length=7, max_length=7)
     provider_implementation_sha256: str = Field(pattern=SHA256_PATTERN)
+    provider_configuration_sha256: str = Field(pattern=SHA256_PATTERN)
     real_runtime_provider: bool
     mocked_provider: bool
+    mutation_counters_before: ActiveSessionMutationCountersV1
+    mutation_counters_after: ActiveSessionMutationCountersV1
     conservative_upper_bound: Literal[True] = True
     query_only: Literal[True] = True
     articulation_target_writes: Literal[0] = 0
@@ -273,6 +276,8 @@ class ConservativeEffortUpperBoundReceiptV1(FrozenModel):
             raise ValueError("effort upper bound is negative")
         if self.real_runtime_provider == self.mocked_provider:
             raise ValueError("effort provider must be exactly real or mocked")
+        if self.mutation_counters_before != self.mutation_counters_after:
+            raise ValueError("effort upper-bound query mutated the active session")
         if self.receipt_sha256 != _model_sha256(self, "receipt_sha256"):
             raise ValueError("effort upper-bound receipt digest differs")
         return self
@@ -280,9 +285,14 @@ class ConservativeEffortUpperBoundReceiptV1(FrozenModel):
 
 class ConservativeEffortUpperBoundProviderV1(Protocol):
     implementation_sha256: str
+    configuration_sha256: str
+    joint_limit_source_sha256: str
+    controller_configuration_sha256: str
+    maximum_abs_effort: tuple[float, ...]
     joint_names: tuple[str, ...]
     real_runtime_provider: bool
     mocked_provider: bool
+    mutation_counter_source: ActiveSessionMutationCounterSourceV1
 
     def estimate_abs_effort_upper_bound(
         self,
@@ -384,6 +394,7 @@ class LulaQueryOnlyPhasePathProviderV1:
         if (
             effort_provider.joint_names != LULA_JOINT_NAMES
             or state_source.mutation_counter_source is not ik_coordinator.counter_source
+            or effort_provider.mutation_counter_source is not ik_coordinator.counter_source
         ):
             raise LulaPhasePathUnavailable("phase-path production dependencies disagree")
         if mode == "CONTRACT_TEST":
@@ -433,6 +444,12 @@ class LulaQueryOnlyPhasePathProviderV1:
             or ik.deterministic_seed != lula.deterministic_sampling_seed
             or configuration.joint_limits.effort_estimator_sha256
             != self.effort_provider.implementation_sha256
+            or configuration.joint_limits.source_sha256
+            != self.effort_provider.joint_limit_source_sha256
+            or configuration.joint_limits.maximum_abs_effort
+            != self.effort_provider.maximum_abs_effort
+            or configuration.controller.controller_configuration_sha256
+            != self.effort_provider.controller_configuration_sha256
         ):
             raise LulaPhasePathUnavailable("phase-path preflight configuration differs")
 
@@ -501,6 +518,7 @@ class LulaQueryOnlyPhasePathProviderV1:
             receipt.joint_positions_sha256
             != canonical_sha256({"joint_names": LULA_JOINT_NAMES, "joint_positions": joints})
             or receipt.provider_implementation_sha256 != self.effort_provider.implementation_sha256
+            or receipt.provider_configuration_sha256 != self.effort_provider.configuration_sha256
             or receipt.real_runtime_provider != self.effort_provider.real_runtime_provider
             or receipt.mocked_provider != self.effort_provider.mocked_provider
         ):

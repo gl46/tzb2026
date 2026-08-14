@@ -205,14 +205,22 @@ class _StateSource:
 
 class _Effort:
     implementation_sha256 = "4" * 64
+    configuration_sha256 = "5" * 64
+    joint_limit_source_sha256 = "5" * 64
+    controller_configuration_sha256 = "9" * 64
+    maximum_abs_effort = (10.0,) * 7
     joint_names = LULA_JOINT_NAMES
     real_runtime_provider = False
     mocked_provider = True
+
+    def __init__(self, counters: _Counters) -> None:
+        self.mutation_counter_source = counters
 
     def estimate_abs_effort_upper_bound(
         self,
         joint_positions_rad: tuple[float, ...],
     ) -> ConservativeEffortUpperBoundReceiptV1:
+        counters = self.mutation_counter_source.snapshot_mutation_counters()
         payload: dict[str, Any] = {
             "schema_version": "ConservativeEffortUpperBoundReceiptV1",
             "joint_names": LULA_JOINT_NAMES,
@@ -221,8 +229,11 @@ class _Effort:
             ),
             "estimated_abs_efforts": (1.0,) * 7,
             "provider_implementation_sha256": self.implementation_sha256,
+            "provider_configuration_sha256": self.configuration_sha256,
             "real_runtime_provider": False,
             "mocked_provider": True,
+            "mutation_counters_before": counters,
+            "mutation_counters_after": counters,
             "conservative_upper_bound": True,
             "query_only": True,
             "articulation_target_writes": 0,
@@ -364,7 +375,7 @@ def _provider_and_configuration(
         mode="CONTRACT_TEST",
         adapter_implementation_path=ROOT / "src/xh_agent/policy/qrm_lite/lula_query_only_ik_v1.py",
     )
-    effort = _Effort()
+    effort = _Effort(counters)
     state = _StateSource(counters, plan.inputs.preplan_state_sha256)
     provider = LulaQueryOnlyPhasePathProviderV1(
         mode="CONTRACT_TEST",
@@ -517,6 +528,27 @@ def test_configuration_mismatch_rejects_before_ik() -> None:
     raw["ik"]["base_frame"] = "world"
     raw["ik"]["configuration_sha256"] = canonical_sha256(
         {key: value for key, value in raw["ik"].items() if key != "configuration_sha256"}
+    )
+    raw["configuration_sha256"] = canonical_sha256(
+        {key: value for key, value in raw.items() if key != "configuration_sha256"}
+    )
+    changed = ExactPlanPreflightConfigurationV1.model_validate(raw)
+    with pytest.raises(LulaPhasePathUnavailable, match="configuration"):
+        provider.solve_phase_path(
+            plan,
+            plan.phases[0],
+            start_state_sha256=plan.inputs.preplan_state_sha256,
+            configuration=changed,
+        )
+
+
+def test_effort_deployment_mismatch_rejects_before_path() -> None:
+    plan = _plan(_phases())
+    provider, configuration = _provider_and_configuration(plan)
+    raw = configuration.model_dump(mode="json")
+    raw["joint_limits"]["maximum_abs_effort"][0] = 9.0
+    raw["joint_limits"]["configuration_sha256"] = canonical_sha256(
+        {key: value for key, value in raw["joint_limits"].items() if key != "configuration_sha256"}
     )
     raw["configuration_sha256"] = canonical_sha256(
         {key: value for key, value in raw.items() if key != "configuration_sha256"}
