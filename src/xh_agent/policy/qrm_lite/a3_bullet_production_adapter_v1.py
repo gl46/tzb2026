@@ -52,7 +52,7 @@ from xh_agent.policy.qrm_lite.formal_split_runner_v2 import (
 CONTROLLED_PANDA_URDF_PATH = "robot_ws/src/xh_sim/urdf/panda_controlled.urdf"
 CONTROLLED_PANDA_URDF_SHA256 = "6678ff409d60f074283805879f53edaa939ead34f97a5a961ee67f6229b44ba8"
 CONTROLLED_PANDA_SRDF_PATH = "robot_ws/src/xh_sim/config/m1a_panda.srdf"
-CONTROLLED_PANDA_SRDF_SHA256 = "80948370d547cb320e49d42ffc0467e082112c09f2984700b489def88526a386"
+CONTROLLED_PANDA_SRDF_SHA256 = "9e139275cb11f0403abf10894f1424b80a5024e94f7d4e6fadb8bb637017edda"
 LINK2_STL_URI = "package://moveit_resources_panda_description/meshes/collision/link2.stl"
 LINK4_STL_URI = "package://moveit_resources_panda_description/meshes/collision/link4.stl"
 LINK2_STL_PATH = (

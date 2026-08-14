@@ -38,12 +38,14 @@ ADJACENT_SELF_PAIRS = [
     ("panda_link0", "panda_link1"),
     ("panda_link1", "panda_link2"),
     ("panda_link2", "panda_link3"),
+    ("panda_link2", "panda_link4"),  # ADR-0025: upstream Panda SRDF "Never"
     ("panda_link3", "panda_link4"),
     ("panda_link4", "panda_link5"),
     ("panda_link5", "panda_link6"),
     ("panda_link6", "panda_link7"),
     ("panda_link7", "panda_link8"),
     ("panda_link8", "panda_hand"),
+    ("panda_hand", "panda_link7"),  # ADR-0025: upstream Panda SRDF "Adjacent"
     ("panda_hand", "panda_leftfinger"),
     ("panda_hand", "panda_rightfinger"),
 ]

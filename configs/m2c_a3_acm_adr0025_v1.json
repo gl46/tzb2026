@@ -1,0 +1,58 @@
+{
+  "schema_version": "M2CA3ADR0025ACMConfigurationV1",
+  "status": "FROZEN_EXACT_TWO_UPSTREAM_PROVEN_PAIRS",
+  "accepted_adr": {
+    "path": "docs/decisions/ADR-0025-m2c-raw-capacity-acm-and-yield.md",
+    "sha256": "6f27171d319e3f966c652ca9f8c0fe7c641f4bf420de58642869f9c9c805c3aa",
+    "commit": "abf66b1084e3820a327c29cb79ebf68af0252fd0",
+    "section": "2"
+  },
+  "controlled_srdf": {
+    "path": "robot_ws/src/xh_sim/config/m1a_panda.srdf",
+    "baseline_commit": "93f72126e6f1b831b08852dfb7300f79cabe3aba",
+    "baseline_sha256": "80948370d547cb320e49d42ffc0467e082112c09f2984700b489def88526a386",
+    "revised_sha256": "9e139275cb11f0403abf10894f1424b80a5024e94f7d4e6fadb8bb637017edda"
+  },
+  "official_upstream_srdf": {
+    "host_role": "NODE2_QUERY_ONLY_BUILD_HOST",
+    "package": "ros-jazzy-moveit-resources-panda-moveit-config",
+    "package_version": "3.1.0-1noble.20260615.174424",
+    "package_deb_sha256": "f9ae0802676e10b6532d73ad7657d53b40fa6a8106b4ffdc6e13e80f36794917",
+    "path": "/opt/ros/jazzy/share/moveit_resources_panda_moveit_config/config/panda.srdf",
+    "sha256": "1150719ea9d81139418198a50faea17e155323547d056c4edcb7ecc82fd8d317",
+    "package_xml_sha256": "b53f7a2faa2a0bd2ea28c592c90c95e66473236d95854a8592a0abf7b84780e1"
+  },
+  "authorized_pairs": [
+    {
+      "link1": "panda_hand",
+      "link2": "panda_link7",
+      "controlled_reason": "Adjacent",
+      "adr0025_criterion": "A_OFFICIAL_UPSTREAM_SRDF",
+      "upstream_link1": "panda_hand",
+      "upstream_link2": "panda_link7",
+      "upstream_reason": "Adjacent",
+      "original_mesh_check_used": false,
+      "kinematic_permanence_claim_required": false
+    },
+    {
+      "link1": "panda_link2",
+      "link2": "panda_link4",
+      "controlled_reason": "Never",
+      "adr0025_criterion": "A_OFFICIAL_UPSTREAM_SRDF",
+      "upstream_link1": "panda_link2",
+      "upstream_link2": "panda_link4",
+      "upstream_reason": "Never",
+      "original_mesh_check_used": false,
+      "kinematic_permanence_claim_required": false
+    }
+  ],
+  "pair_count": 2,
+  "wildcard_or_category_disable_allowed": false,
+  "collision_margin_changed": false,
+  "outward_padding_changed": false,
+  "hull_geometry_changed": false,
+  "collision_threshold_changed": false,
+  "teacher_used": false,
+  "privileged_truth_policy_input": false,
+  "configuration_sha256": "5bb066245f6e717c1997322faa613ef1446064932fc4375af1276e3a8d9fcb89"
+}
