@@ -1,0 +1,219 @@
+{
+  "attempts": [
+    {
+      "attempt_id": "batch11-01",
+      "classification": "ISAAC_STAGE_PROCESS_EXIT_139",
+      "collision_or_safety_violations": 0,
+      "consumed_at_ns": 1786713593501761737,
+      "consumption_id": "e304add1fd52b0a021d63ed4e5f0aecbf82f846532801cf3a3a90ba29ce67fd4",
+      "core_evidence_file_sha256": {
+        "canonical_claim": "1e7a5c54b6cde1efef8422817d41f2132e33bf1a14a8020ef9221d19cf197725",
+        "derived_probe": "dccdeb476f2a9394352237e6c8fc621d8f6726186e7780fe13647533b44bac7e",
+        "job": "8b9d1dab3cadede92b5ea2cb82fa8107a8f671f29b5201a54ae6242e13abb7a0",
+        "projected_claim": "1e7a5c54b6cde1efef8422817d41f2132e33bf1a14a8020ef9221d19cf197725",
+        "stage_console": "9b2fc2b7311ec0414b80f42913214278cfa8878501184f43ce40f8aa426f6a08",
+        "stage_usdc": "34d2dc70e6f4ab52ee21c0b23c5f1ef6ae855cbbaf5326675df9229a596fc31b"
+      },
+      "formal_q_b_evaluation": false,
+      "host_replay_passed": false,
+      "identity": {
+        "failure_seed": 191627,
+        "matched_key": "m2c-s4-v4-train-44d03f8a5ac3cc97658a4055f143a67feda2ddbc2833c90fbdca2993b3480405",
+        "scene_seed": 19162,
+        "sdf_sha256": "e30efb66aef4ff948e48551cb26d03990c14b6bb25813b9a8fd6e8b7c9831cf7",
+        "supervision_sha256": "b884161c4f09503c7d2ab307f9c103f9d669a4d7e47e15aab1aceda99b3adfaf"
+      },
+      "job_inventory": {
+        "canonical_path_sha256_map_digest": "14de8bb6bf8e1fb0c6179d372526d5d2410c3b138812cc0ab967260e58325434",
+        "regular_file_count": 5
+      },
+      "model_rollout": false,
+      "offline_dataset_sample_count": 0,
+      "offline_dataset_status": "NOT_RUN_STAGE_PROCESS_EXIT_139",
+      "physical_action_executed": false,
+      "physical_skill_receipts": 0,
+      "privileged_truth_policy_input": false,
+      "probe_process_invoked": false,
+      "stage_acceptance_passed": false,
+      "stage_process_exit_code": 139,
+      "stage_simulation_app_started": true,
+      "stage_simulation_app_startup_completed": true,
+      "teacher_used": false,
+      "training_sample_eligible": false,
+      "training_sample_packaged": false
+    },
+    {
+      "attempt_id": "batch11-02",
+      "classification": "RAW_V4_FINAL_FALSE_REGRASP_CONTACT_GATE_REJECTED",
+      "collision_or_safety_violations": 0,
+      "consumed_at_ns": 1786713753349189982,
+      "consumption_id": "cb5a5eb2dbed743b8e934c423453e67d42a29a673fb9f001bf5be0f58f60f60a",
+      "core_evidence_file_sha256": {
+        "canonical_claim": "4facf0331fbc6c4224e382a7b1dbaf99ac6b533920cb319cc5b8f64606ed6cb8",
+        "derived_probe": "dccdeb476f2a9394352237e6c8fc621d8f6726186e7780fe13647533b44bac7e",
+        "job": "5f54a4ffc00a178e7b95eacd9f1db8391bc07ee0fd4ca8e1e93a95ac49d1cde2",
+        "probe_console": "71162eb2e63acf5892dc22f94ac47d9c0def5bdee06bf9324bdd88aea1d7eae4",
+        "projected_claim": "4facf0331fbc6c4224e382a7b1dbaf99ac6b533920cb319cc5b8f64606ed6cb8",
+        "raw_probe": "876a4d50e83c7746d1a7a330e95c8c62b2b0f11c2e8c9787b5189e86ea8bbce1",
+        "stage_console": "653db9b3a6c648a28215f509712db500673a79e4b5b9ae5a535b4fca70e86d3e",
+        "stage_metrics": "e27cac9339dbef581e7d9e9d7e3481aa668d9787c1ced3ca2d7e2d65cd3ab6a8",
+        "stage_usdc": "b946767b67ed9748ca799bf42dcff9312fd52445ca88ca101fa974b7fe0d000b"
+      },
+      "final_controller_gate": "REJECTED",
+      "final_execution_status": "CONTACT_GATE_REJECTED",
+      "formal_q_b_evaluation": false,
+      "host_replay_passed": true,
+      "identity": {
+        "failure_seed": 191677,
+        "matched_key": "m2c-s4-v4-train-c22f9f1fbcf4912fc8a18cd6f758c6249e6dc35bfff6b99bfd65a57a7226301e",
+        "scene_seed": 19167,
+        "sdf_sha256": "2bd5a27d6d3a2ff42152024e4fbd9a68749840c153f3fe68e5b27085e58b1615",
+        "supervision_sha256": "eb39e740fbe0af25a950a035266f6c4d3f31b6128cc537adde6703665d13643d"
+      },
+      "job_inventory": {
+        "canonical_path_sha256_map_digest": "bb3bbcc5ab9f5262e1027f3009da3e870c1ed3cc32de718723c9a579d87a96bc",
+        "regular_file_count": 55
+      },
+      "model_rollout": false,
+      "offline_dataset_exclusion_reasons": [
+        "FINAL_TASK_NOT_SUCCESSFUL",
+        "STEP_7:CONTROLLER_GATE_NOT_PASSING"
+      ],
+      "offline_dataset_sample_count": 0,
+      "offline_dataset_status": "EMPTY",
+      "physical_action_executed": true,
+      "physical_skill_receipts": 8,
+      "privileged_truth_policy_input": false,
+      "probe_process_invoked": true,
+      "raw_capture_detection_counts": [
+        7,
+        6,
+        7,
+        7,
+        8,
+        11,
+        11,
+        11
+      ],
+      "raw_capture_schema": "M2CV4RawPublicAssociationCaptureV2",
+      "raw_chain_final_task_success": false,
+      "raw_chain_schema": "M2CPathBlockedRawProbeChainV4",
+      "raw_detection_capacity": 32,
+      "raw_probe_sha256": "876a4d50e83c7746d1a7a330e95c8c62b2b0f11c2e8c9787b5189e86ea8bbce1",
+      "stage_acceptance_passed": true,
+      "step_0_through_6_all_gates_pass": true,
+      "teacher_used": false,
+      "training_sample_eligible": false,
+      "training_sample_packaged": false
+    },
+    {
+      "attempt_id": "batch11-03",
+      "classification": "RAW_V4_FINAL_FALSE_REGRASP_CONTACT_GATE_REJECTED",
+      "collision_or_safety_violations": 0,
+      "consumed_at_ns": 1786714146728951106,
+      "consumption_id": "e3f351278607957731b57b17a67cd5f2897552c727a42068792926b54ce654c0",
+      "core_evidence_file_sha256": {
+        "canonical_claim": "d124697c8d1dd492520771889be5050b014ac635c03548e7012498c159e96721",
+        "derived_probe": "dccdeb476f2a9394352237e6c8fc621d8f6726186e7780fe13647533b44bac7e",
+        "job": "2a056cffe01502db46ccc871b01955eeeac01775e1f460619b3d9f8d025f2b46",
+        "probe_console": "3db83b5a527464565e4f6536ac7eec15f0bba33f2dc7257bfe7faec155c134ec",
+        "projected_claim": "d124697c8d1dd492520771889be5050b014ac635c03548e7012498c159e96721",
+        "raw_probe": "ba8c599ba2dfe60b3b95202348ea37a5e5ec45fe7131822c6f707cdf7cd9c4ad",
+        "stage_console": "810e703bf4b3ad868870fd2c8d0c673e6033f60fd08d052fdcb541f9c2efa020",
+        "stage_metrics": "352d03cb2fc5879393fa7136ec529bf1d98a5ac4372c700679626467ecc50135",
+        "stage_usdc": "2cf7f1884240ad5ea9d6b7eb82283d1083ed02259a87b1a4fa77df25dce2529b"
+      },
+      "final_controller_gate": "REJECTED",
+      "final_execution_status": "CONTACT_GATE_REJECTED",
+      "formal_q_b_evaluation": false,
+      "host_replay_passed": true,
+      "identity": {
+        "failure_seed": 191737,
+        "matched_key": "m2c-s4-v4-train-94ddb675ff2e5e7354554cbf45941ae35e161c525842538f8659c31bc7c96733",
+        "scene_seed": 19173,
+        "sdf_sha256": "769d539378a899420e55c172a34c01cfaef19c1a83fe3eded3f7a4ba190c825d",
+        "supervision_sha256": "00d74a0ba871fee92215b32a00a3544748cf054917842aca9a95791ae06c9c2c"
+      },
+      "job_inventory": {
+        "canonical_path_sha256_map_digest": "8eba8406b9ad8660ca46a3b73768b55ad19e5ff3727c29919a370aac1ee50ca7",
+        "regular_file_count": 55
+      },
+      "model_rollout": false,
+      "offline_dataset_exclusion_reasons": [
+        "FINAL_TASK_NOT_SUCCESSFUL",
+        "STEP_1:PUBLIC_TARGET_OUTSIDE_V4_K8",
+        "STEP_7:CONTROLLER_GATE_NOT_PASSING"
+      ],
+      "offline_dataset_sample_count": 0,
+      "offline_dataset_status": "EMPTY",
+      "physical_action_executed": true,
+      "physical_skill_receipts": 8,
+      "privileged_truth_policy_input": false,
+      "probe_process_invoked": true,
+      "raw_capture_detection_counts": [
+        7,
+        10,
+        11,
+        7,
+        8,
+        9,
+        10,
+        10
+      ],
+      "raw_capture_schema": "M2CV4RawPublicAssociationCaptureV2",
+      "raw_chain_final_task_success": false,
+      "raw_chain_schema": "M2CPathBlockedRawProbeChainV4",
+      "raw_detection_capacity": 32,
+      "raw_probe_sha256": "ba8c599ba2dfe60b3b95202348ea37a5e5ec45fe7131822c6f707cdf7cd9c4ad",
+      "stage_acceptance_passed": true,
+      "step_0_through_6_all_gates_pass": true,
+      "teacher_used": false,
+      "training_sample_eligible": false,
+      "training_sample_packaged": false
+    }
+  ],
+  "audit_implementation": {
+    "path": "scripts/m2c/audit_s4_v4_batch11_collection.py",
+    "physical_replay_helper_path": "scripts/m2c/audit_s4_v4_batch10_collection.py",
+    "physical_replay_helper_sha256": "5ae44e82a63d7eb611879c81e0ff3c3205eb6d8b9613226cea4ce65e3b7fa4a6",
+    "sha256": "0b171d68358fdacab95a4e9ac9a39c77569d510014f11d73c70a75af446a87ff"
+  },
+  "batch_preregistration": {
+    "introduced_commit": "1580e321d9ac31bf0a535b33c7772d2753dec6d0",
+    "path": "docs/decisions/M2C-S4-V4-TRAIN-COLLECTION-BATCH-11-PREREG.json",
+    "prereg_sha256": "3a8314aed01f463c88777585922c1d07e2c7832eb7923ea4abea7ec49e5ef3e7",
+    "sha256": "d207d25da2b4d36797ae718a9edf04a08ff895687319b299f71047762e073722",
+    "source_snapshot_commit": "ec5c6c2cfb94f5de51cda20ec79701df294c10b9",
+    "source_snapshot_inventory_sha256": "dbb85310b544a74234be965f1a36fba73c7187aa54230e9377f30dff755b152b"
+  },
+  "evidence_inventory": {
+    "canonical_path_sha256_map_digest": "4868ef737aa1c22bfd86bf95f79880c4de37e3abd2318e59eeb55d20806e6625",
+    "regular_file_count": 118,
+    "total_file_bytes": 116062529
+  },
+  "failure_taxonomy": {
+    "ISAAC_STAGE_PROCESS_EXIT_139": 1,
+    "RAW_V4_FINAL_FALSE_REGRASP_CONTACT_GATE_REJECTED": 2
+  },
+  "formal_q_b_evaluation_executed": false,
+  "model_rollout_executed": false,
+  "observed_counts": {
+    "collision_or_safety_violations": 0,
+    "consumed_unique_train_keys": 3,
+    "host_replay_passes": 2,
+    "physical_skill_receipts": 16,
+    "probe_process_invocations": 2,
+    "raw_physical_chains": 2,
+    "stage_acceptance_passes": 2,
+    "stage_process_exit_139": 1,
+    "terminal_contact_gate_rejections": 2,
+    "training_samples_eligible": 0,
+    "training_samples_packaged": 0
+  },
+  "privileged_truth_policy_input": false,
+  "pure_model_success_episodes": null,
+  "schema_version": "M2CS4V4Batch11CollectionAuditV1",
+  "status": "BLOCKED_ZERO_ELIGIBLE_V4_TRAIN_SAMPLES_BATCH11_WITH_STAGE_FAILURE",
+  "teacher_used": false,
+  "training_executed": false
+}
