@@ -251,17 +251,22 @@ class _QuerySource:
             "observation_id": observation.observation_id,
             "capture_receipt_sha256": observation.capture_receipt_sha256,
             "formal_observation_sha256": observation.wire_sha256,
+            "active_session_runtime_receipt_sha256": "6" * 64,
+            "scene_safety_binding_receipt_sha256": "7" * 64,
+            "scene_geometry_receipt_sha256": "8" * 64,
+            "active_attachment_receipt_sha256": (
+                "5" * 64 if self.attached_public_track_id is not None else None
+            ),
             "end_effector_position_world_m": [0.10, 0.20, 0.65],
             "end_effector_orientation_world_wxyz": [0.0, 1.0, 0.0, 0.0],
             "gripper_position_m": 0.014,
             "attached_public_track_id": self.attached_public_track_id,
             "dynamic_contact_allowlist_paths": [
-                "/World/M1B/cylinder_00/link",
                 "/World/M1B/cylinder_01/link",
             ],
             "environment_collision_paths": [
-                "/World/M1B/work_table/link",
                 "/World/M1B/partition_bin/link",
+                "/World/M1B/work_table/link",
             ],
             "state_timestamp_ns": observation.captured_at_ns + 1,
             "articulation_target_writes": 0,

@@ -183,11 +183,18 @@ class FormalPlanSynthesisStateV1(_FrozenModel):
     observation_id: str = Field(min_length=1)
     capture_receipt_sha256: str = Field(pattern=SHA256_PATTERN)
     formal_observation_sha256: str = Field(pattern=SHA256_PATTERN)
+    active_session_runtime_receipt_sha256: str = Field(pattern=SHA256_PATTERN)
+    scene_safety_binding_receipt_sha256: str = Field(pattern=SHA256_PATTERN)
+    scene_geometry_receipt_sha256: str = Field(pattern=SHA256_PATTERN)
+    active_attachment_receipt_sha256: str | None = Field(
+        default=None,
+        pattern=SHA256_PATTERN,
+    )
     end_effector_position_world_m: tuple[float, float, float]
     end_effector_orientation_world_wxyz: tuple[float, float, float, float]
     gripper_position_m: float = Field(ge=0.0, le=0.08)
     attached_public_track_id: str | None = Field(default=None, pattern=r"^track-[0-9a-f]{8}$")
-    dynamic_contact_allowlist_paths: tuple[str, ...] = Field(min_length=1)
+    dynamic_contact_allowlist_paths: tuple[str, ...] = ()
     environment_collision_paths: tuple[str, ...] = Field(min_length=1)
     state_timestamp_ns: int = Field(gt=0)
     state_sha256: str = Field(pattern=SHA256_PATTERN)
@@ -208,10 +215,24 @@ class FormalPlanSynthesisStateV1(_FrozenModel):
         norm = math.sqrt(sum(value * value for value in self.end_effector_orientation_world_wxyz))
         if not math.isclose(norm, 1.0, rel_tol=0.0, abs_tol=1e-6):
             raise ValueError("query-only end-effector orientation is not normalized")
-        if len(self.dynamic_contact_allowlist_paths) != len(
-            set(self.dynamic_contact_allowlist_paths)
-        ) or len(self.environment_collision_paths) != len(set(self.environment_collision_paths)):
-            raise ValueError("query-only scene path inventory repeats")
+        if (
+            self.dynamic_contact_allowlist_paths
+            != tuple(sorted(set(self.dynamic_contact_allowlist_paths)))
+            or self.environment_collision_paths
+            != tuple(sorted(set(self.environment_collision_paths)))
+            or any(
+                not path.startswith("/World/")
+                for path in (
+                    *self.dynamic_contact_allowlist_paths,
+                    *self.environment_collision_paths,
+                )
+            )
+        ):
+            raise ValueError("query-only scene path inventory is not canonical")
+        if (self.attached_public_track_id is None) != (
+            self.active_attachment_receipt_sha256 is None
+        ):
+            raise ValueError("query-only attachment identity lacks its execution receipt")
         expected = canonical_sha256(self.model_dump(mode="json", exclude={"state_sha256"}))
         if self.state_sha256 != expected:
             raise ValueError("query-only plan-synthesis state digest differs")
@@ -623,6 +644,10 @@ class ConfiguredFormalExactPlanSynthesisBackendV1:
                 raise ExactPlanUnavailable("transport/release target is not the bound attachment")
         elif skill in {"GRASP", "REGRASP"} and state.attached_public_track_id is not None:
             raise ExactPlanUnavailable("grasp exact plan begins with an existing attachment")
+        if skill in _PHYSICAL_SKILLS and len(state.dynamic_contact_allowlist_paths) != 1:
+            raise ExactPlanUnavailable(
+                "physical exact plan lacks one uniquely bound external contact path"
+            )
 
         if skill in {"GRASP", "REGRASP"}:
             assert target_id is not None
