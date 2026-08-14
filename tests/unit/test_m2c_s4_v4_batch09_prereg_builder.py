@@ -3,6 +3,8 @@ from __future__ import annotations
 from pathlib import Path
 
 from m2c.build_s4_v4_batch09_prereg import (
+    BATCH09_PRIOR_ATTEMPT_KEY_COUNT,
+    BATCH09_PRIOR_ATTEMPT_SOURCES,
     STOP_AFTER,
     select_batch09_keys,
 )
@@ -13,11 +15,11 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 def test_authoritative_prior_inventory_contains_all_nineteen_attempted_keys() -> None:
-    assert authorization.AUTHORITATIVE_PRIOR_ATTEMPT_KEY_COUNT == 19
-    assert len(authorization.AUTHORITATIVE_PRIOR_ATTEMPT_SOURCES) == 6
-    assert "reports/m2c-s4-v4-batch08-collection.json" in (
-        authorization.AUTHORITATIVE_PRIOR_ATTEMPT_SOURCES
-    )
+    assert BATCH09_PRIOR_ATTEMPT_KEY_COUNT == 19
+    assert len(BATCH09_PRIOR_ATTEMPT_SOURCES) == 6
+    assert "reports/m2c-s4-v4-batch08-collection.json" in (BATCH09_PRIOR_ATTEMPT_SOURCES)
+    assert "reports/m2c-s4-v4-batch09-collection.json" not in BATCH09_PRIOR_ATTEMPT_SOURCES
+    assert authorization.AUTHORITATIVE_PRIOR_ATTEMPT_KEY_COUNT == 22
 
 
 def test_batch09_selection_is_outcome_blind_and_identity_disjoint() -> None:

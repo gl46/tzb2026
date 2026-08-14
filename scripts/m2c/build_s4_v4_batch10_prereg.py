@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the outcome-blind, prereg-only Batch-09 V4 collection contract."""
+"""Build the outcome-blind, prereg-only Batch-10 V4 collection contract."""
 
 from __future__ import annotations
 
@@ -10,39 +10,25 @@ from pathlib import Path
 import subprocess
 from typing import Any, Mapping
 
+from xh_agent.policy.qrm_lite import s4_v4_collection_authorization_v1 as authorization
 from xh_agent.policy.qrm_lite.path_blocked_collection_v4 import (
     M2CS4V4TrainingKeyManifestV1,
 )
-from xh_agent.policy.qrm_lite import s4_v4_collection_authorization_v1 as authorization
 
 
 ROOT = Path(__file__).resolve().parents[2]
-PREREG_PATH = Path("docs/decisions/M2C-S4-V4-TRAIN-COLLECTION-BATCH-09-PREREG.json")
-BATCH_ID = "m2c-s4-v4-train-batch-09"
-LEDGER_NAMESPACE = "M2C_S4_V4_COLLECTION_BATCH09"
+PREREG_PATH = Path("docs/decisions/M2C-S4-V4-TRAIN-COLLECTION-BATCH-10-PREREG.json")
+BATCH_ID = "m2c-s4-v4-train-batch-10"
+LEDGER_NAMESPACE = "M2C_S4_V4_COLLECTION_BATCH10"
 STOP_AFTER = 3
 YIELD_REPORT_PATH = Path("reports/m2c-s4-training-eligibility-yield-adr0025.json")
-YIELD_REPORT_SHA256 = "d85c7437655125d83f8684d88cac474254a0fb52dce788d4a4d6e36545df974f"
+YIELD_REPORT_SHA256 = "fdd925241239b05871be01e995fbb78097572f1a2fb0be17653f6a04cb160368"
 ADR0025_PATH = Path("docs/decisions/ADR-0025-m2c-raw-capacity-acm-and-yield.md")
 ADR0025_SHA256 = "6f27171d319e3f966c652ca9f8c0fe7c641f4bf420de58642869f9c9c805c3aa"
-BATCH09_PRIOR_PATHS = (
-    "reports/m2c-s4-v3-path-blocked-train-collection.json",
-    "reports/m2c-s4-v3-path-blocked-train-collection-batch03.json",
-    "reports/m2c-s4-v4-batch04-permission-failure.json",
-    "reports/m2c-s4-v4-batch06-snapshot-owner-failure.json",
-    "reports/m2c-s4-v4-batch07-pre-timeline-proprio-failure.json",
-    "reports/m2c-s4-v4-batch08-collection.json",
-)
-BATCH09_PRIOR_ATTEMPT_SOURCES = {
-    path: authorization.AUTHORITATIVE_PRIOR_ATTEMPT_SOURCES[path] for path in BATCH09_PRIOR_PATHS
-}
-BATCH09_PRIOR_ATTEMPT_KEY_COUNT = sum(
-    expected_unique for _sha256, _schema, expected_unique in BATCH09_PRIOR_ATTEMPT_SOURCES.values()
-)
 
 
-class Batch09PreregBuildError(ValueError):
-    """The frozen inputs cannot produce the Batch-09 preregistration."""
+class Batch10PreregBuildError(ValueError):
+    """The frozen inputs cannot produce the Batch-10 preregistration."""
 
 
 def _git(project_root: Path, *args: str) -> bytes:
@@ -52,7 +38,7 @@ def _git(project_root: Path, *args: str) -> bytes:
         capture_output=True,
     )
     if completed.returncode != 0:
-        raise Batch09PreregBuildError(
+        raise Batch10PreregBuildError(
             f"git {' '.join(args)} failed: {completed.stderr.decode(errors='replace').strip()}"
         )
     return completed.stdout
@@ -70,9 +56,9 @@ def _json_object(payload: bytes, *, label: str) -> dict[str, Any]:
     try:
         value = json.loads(payload)
     except (UnicodeDecodeError, json.JSONDecodeError) as error:
-        raise Batch09PreregBuildError(f"{label} is not JSON") from error
+        raise Batch10PreregBuildError(f"{label} is not JSON") from error
     if not isinstance(value, dict):
-        raise Batch09PreregBuildError(f"{label} is not an object")
+        raise Batch10PreregBuildError(f"{label} is not an object")
     return value
 
 
@@ -86,40 +72,38 @@ def _identity(record: Mapping[str, Any]) -> dict[str, Any]:
     }
 
 
-def select_batch09_keys(*, project_root: Path, source_commit: str = "HEAD") -> list[dict[str, Any]]:
-    manifest_raw = _git_blob(
-        project_root,
-        source_commit,
-        "configs/m2c_s4_v4_training_keys.json",
-    )
+def select_batch10_keys(*, project_root: Path, source_commit: str = "HEAD") -> list[dict[str, Any]]:
     manifest = M2CS4V4TrainingKeyManifestV1.model_validate(
-        _json_object(manifest_raw, label="V4 TRAIN manifest")
+        _json_object(
+            _git_blob(project_root, source_commit, "configs/m2c_s4_v4_training_keys.json"),
+            label="V4 TRAIN manifest",
+        )
     )
     prior_keys: set[str] = set()
     for path, (expected_sha256, expected_schema, expected_unique) in sorted(
-        BATCH09_PRIOR_ATTEMPT_SOURCES.items()
+        authorization.AUTHORITATIVE_PRIOR_ATTEMPT_SOURCES.items()
     ):
         raw = _git_blob(project_root, source_commit, path)
         if _sha256(raw) != expected_sha256:
-            raise Batch09PreregBuildError(f"prior report SHA-256 differs: {path}")
+            raise Batch10PreregBuildError(f"prior report SHA-256 differs: {path}")
         report = _json_object(raw, label=path)
         if report.get("schema_version") != expected_schema:
-            raise Batch09PreregBuildError(f"prior report schema differs: {path}")
+            raise Batch10PreregBuildError(f"prior report schema differs: {path}")
         attempts = report.get("attempts")
         if not isinstance(attempts, list):
-            raise Batch09PreregBuildError(f"prior report lacks attempts: {path}")
+            raise Batch10PreregBuildError(f"prior report lacks attempts: {path}")
         source_keys = {
             item["identity"]["matched_key"]
             for item in attempts
             if isinstance(item, dict) and isinstance(item.get("identity"), dict)
         }
         if len(source_keys) != expected_unique:
-            raise Batch09PreregBuildError(f"prior report unique-key count differs: {path}")
+            raise Batch10PreregBuildError(f"prior report unique-key count differs: {path}")
         if prior_keys & source_keys:
-            raise Batch09PreregBuildError("authoritative prior report identity sets overlap")
+            raise Batch10PreregBuildError("authoritative prior report identity sets overlap")
         prior_keys |= source_keys
-    if len(prior_keys) != BATCH09_PRIOR_ATTEMPT_KEY_COUNT:
-        raise Batch09PreregBuildError("authoritative prior identity union differs")
+    if len(prior_keys) != authorization.AUTHORITATIVE_PRIOR_ATTEMPT_KEY_COUNT:
+        raise Batch10PreregBuildError("authoritative prior identity union differs")
 
     selected: list[dict[str, Any]] = []
     selected_sdfs: set[str] = set()
@@ -131,7 +115,7 @@ def select_batch09_keys(*, project_root: Path, source_commit: str = "HEAD") -> l
         if len(selected) == STOP_AFTER:
             break
     if len(selected) != STOP_AFTER or len(selected_sdfs) != STOP_AFTER:
-        raise Batch09PreregBuildError("manifest cannot supply three new identity-disjoint SDF keys")
+        raise Batch10PreregBuildError("manifest cannot supply three new identity-disjoint SDF keys")
     return selected
 
 
@@ -139,24 +123,21 @@ def build_prereg(*, project_root: Path, source_commit: str = "HEAD") -> dict[str
     root = project_root.resolve(strict=True)
     commit = _git(root, "rev-parse", f"{source_commit}^{{commit}}").decode().strip()
     if _sha256(_git_blob(root, commit, YIELD_REPORT_PATH.as_posix())) != YIELD_REPORT_SHA256:
-        raise Batch09PreregBuildError("ADR-0025 section 3 yield report is not frozen in parent")
+        raise Batch10PreregBuildError("updated ADR-0025 yield report is not frozen in parent")
     if _sha256(_git_blob(root, commit, ADR0025_PATH.as_posix())) != ADR0025_SHA256:
-        raise Batch09PreregBuildError("accepted ADR-0025 is not frozen in parent")
+        raise Batch10PreregBuildError("accepted ADR-0025 is not frozen in parent")
 
     source_snapshot, _payloads = authorization._source_snapshot_payloads(  # noqa: SLF001
         root,
         commit=commit,
     )
     semantic_bindings = [
-        {
-            "path": path,
-            "sha256": _sha256(_git_blob(root, commit, path)),
-        }
+        {"path": path, "sha256": _sha256(_git_blob(root, commit, path))}
         for path in sorted(authorization.REQUIRED_SEMANTIC_SOURCE_PATHS)
     ]
     prior_bindings = [
         {"path": path, "sha256": values[0]}
-        for path, values in sorted(BATCH09_PRIOR_ATTEMPT_SOURCES.items())
+        for path, values in sorted(authorization.AUTHORITATIVE_PRIOR_ATTEMPT_SOURCES.items())
     ]
     core: dict[str, Any] = {
         "attempt_each_selected_key_at_most_once": True,
@@ -205,7 +186,7 @@ def build_prereg(*, project_root: Path, source_commit: str = "HEAD") -> dict[str
             "training_execution": False,
         },
         "selected_key_outcome_observed_before_registration": False,
-        "selected_keys": select_batch09_keys(project_root=root, source_commit=commit),
+        "selected_keys": select_batch10_keys(project_root=root, source_commit=commit),
         "selection_inputs": ["manifest_order", "prior_attempted_identity", "sdf_sha256"],
         "selection_rule": "manifest_order_first_unattempted_per_sdf_v1",
         "selection_uses_outcomes": False,

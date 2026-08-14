@@ -1,7 +1,7 @@
 # M2C S4 current blockers
 
 - Status: **BLOCKED_UNMEASURED_ZERO_ELIGIBLE_YIELD_AND_FORMAL_EXACT_PLAN_INTEGRATION**
-- Checked parent HEAD: `5d4e8845b45358c656997b9b9ebb8b0dab30e9c2`
+- Checked parent HEAD: `c0e5282340301e9c880026bb28efe77b9c5f26f3`
 - Q-A: **PASSED**
 - Q-B: **UNMEASURED**
 - `pure_model_success_episodes`: **null**, not zero
@@ -15,7 +15,7 @@ Across the seven immutable V3/V4 collection reports, 22 distinct TRAIN identitie
 
 Ten complete V3 chains and the three Batch-09 V4 chains passed gates for steps 0–6. Across all complete chains, nine terminate at the contact/controller gate, four at pregrasp IK, and one lifts but fails the public success predicate. This supports a recurring terminal regrasp approach/contact-acceptance mismatch but does not isolate perception offset, approach geometry, or object state. No gate, threshold, B0 byte, or frozen eligibility predicate was changed.
 
-Batch-09 was preregistered outcome-blind and all three selected keys were consumed exactly once. The permission path is resolved: three stage builders and three probes completed, producing 24 physical receipts and zero safety violations. No subsequent batch preregistration is active, so collection is fail-closed again.
+Batch-09 was preregistered outcome-blind and all three selected keys were consumed exactly once. The permission path is resolved: three stage builders and three probes completed, producing 24 physical receipts and zero safety violations. The next outcome-blind selector is prepared against all 22 prior identities, but no subsequent preregistration is active in this snapshot, so collection is fail-closed again.
 
 ## ADR-0022 / ADR-0024 / ADR-0025 Phase-2 entry
 
