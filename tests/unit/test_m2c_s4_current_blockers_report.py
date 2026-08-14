@@ -154,6 +154,10 @@ def test_phase2_query_only_evidence_remains_non_authorizing() -> None:
     assert phase2["real_a3_phase_evidence_present"] is False
     assert phase2["a3_attachment_transition_contract_active"] is True
     assert phase2["a3_attachment_evidence_replay_active"] is True
+    assert phase2["exact_plan_query_callback_composite_active"] is True
+    assert phase2["complete_continuous_self_collision_provider_contract_active"] is True
+    assert phase2["complete_scene_environment_swept_collision_provider_bound"] is False
+    assert phase2["real_attached_object_phase_geometry_resolver_bound"] is False
     assert phase2["real_runtime_snapshot_bound"] is False
     assert phase2["bound_plan_provider_contract_active"] is True
     assert phase2["real_bound_plan_synthesis_backend_bound"] is False
@@ -178,6 +182,8 @@ def test_phase2_query_only_evidence_remains_non_authorizing() -> None:
         )
     )
     assert "A3_STATIC_HOME_SELF_COLLISION_PREFLIGHT_REJECTED" not in phase2["blockers"]
+    assert "COMPLETE_SCENE_ENVIRONMENT_SWEPT_COLLISION_PROVIDER_NOT_BOUND" in phase2["blockers"]
+    assert "REAL_ATTACHED_OBJECT_PHASE_GEOMETRY_RESOLVER_NOT_BOUND" in phase2["blockers"]
     assert "REAL_BOUND_PLAN_SYNTHESIS_BACKEND_NOT_BOUND" in phase2["blockers"]
     assert "REAL_FORMAL_V4_ISAAC_HTTP_SERVICE_BACKEND_FACTORY_NOT_BOUND" in phase2["blockers"]
     assert "REAL_EXACT_PLAN_ISAAC_EXECUTOR_MISSING" not in phase2["blockers"]

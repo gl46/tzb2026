@@ -1,7 +1,7 @@
 # M2C S4 current blockers
 
 - Status: **BLOCKED_UNMEASURED_RAW_SCHEMA_AND_FORMAL_EXACT_PLAN_INTEGRATION**
-- Checked HEAD: `ed93cf37dee9c409a6c7938de3e4235061dd1fd8`
+- Checked HEAD: `b0a1fe6b35a5f22f265e2a2172fa2e8aff7d8a0f`
 - Q-A: **PASSED**
 - Q-B: **UNMEASURED**
 - `pure_model_success_episodes`: **null**, not zero
@@ -72,6 +72,12 @@ The planned attachment transition is likewise replayable from the exact
 left/right/external allowlists and runtime-snapshot digest. It never claims a
 physical contact or mutates the scene; the unchanged execution-time bilateral
 broker remains mandatory. No real runtime snapshot is bound yet.
+The new single-use A3 callback composition enforces the exact
+snapshot -> path -> collision -> attachment order, poisons on retry or any
+active-session mutation, and requires attached-object geometry for subsequent
+motion phases. It cannot be promoted by wiring the standalone self-CCD
+provider alone: a complete robot/environment swept-collision provider and a
+real attached-object phase-geometry resolver are both still unbound.
 The V4 host-orchestration/evidence contract and HTTP service shell now exist
 and preserve terminal `NO_PHYSICAL_EXECUTION` without B0 substitution. The
 service's production backend factory remains deliberately unbound. The V4

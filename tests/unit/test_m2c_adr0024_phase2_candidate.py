@@ -27,6 +27,8 @@ def test_candidate_smoke_is_blocked_unmeasured_and_never_physical() -> None:
     assert report["entry_bindings"] == {name: None for name in BINDING_NAMES}
     assert report["blockers"] == list(EXPECTED_BLOCKERS)
     assert "REAL_EXACT_PLAN_ISAAC_EXECUTOR_MISSING" not in report["blockers"]
+    assert "COMPLETE_SCENE_ENVIRONMENT_SWEPT_COLLISION_PROVIDER_NOT_BOUND" in report["blockers"]
+    assert "REAL_ATTACHED_OBJECT_PHASE_GEOMETRY_RESOLVER_NOT_BOUND" in report["blockers"]
     assert "REAL_EXACT_PLAN_ISAAC_EXECUTOR_DEPLOYMENT_BINDING_MISSING" in report["blockers"]
     assert len(report["contract_smokes"]) == 3
     assert all(item["status"] == "PASS_CONTRACT_ONLY" for item in report["contract_smokes"])
@@ -91,6 +93,11 @@ def test_candidate_config_requires_literal_none_bindings_and_exact_terminal_poli
         "TERMINAL_NO_PHYSICAL_EXECUTION"
     )
     assert not candidate["b0_policy"]["runtime_wrapper_required"]
+    callback_path = "src/xh_agent/policy/qrm_lite/a3_exact_plan_callbacks_v1.py"
+    assert (
+        candidate["source_bindings"][callback_path]
+        == hashlib.sha256((PROJECT_ROOT / callback_path).read_bytes()).hexdigest()
+    )
     assert (
         candidate["source_bindings"]["src/xh_agent/policy/qrm_lite/formal_split_host_v4.py"]
         == hashlib.sha256(

@@ -105,6 +105,16 @@ session-audit implementation, and host-local HMAC verifier. A successful
 authorization still claims no physical action; the real session-bound phase
 and bundle receipts plus post-execution HMAC replay remain required evidence.
 
+The candidate also contains a single-use all-phase callback composition. It
+enforces runtime-snapshot -> query-only path -> swept-collision -> planned
+attachment order for every phase, poisons on retry or active-session mutation,
+and requires attached-object geometry on every subsequent motion phase. Its
+collision interface deliberately requires both complete continuous-self and
+complete robot/environment scene coverage; the current standalone Bullet
+self-CCD provider cannot satisfy that interface by itself. No production
+scene-environment provider or real attached-object phase-geometry resolver is
+bound, so this composition remains contract-only.
+
 The V4 host-local HMAC verifier and create-only CLI now replay both sides of a
 terminalized episode without any SSH signature, trust root, or signer
 principal. They bind the one-shot challenge receipt, formal evidence, exact
@@ -143,6 +153,8 @@ nor any safety/IK/collision/controller gate.
 - `REAL_ISAAC_EPISODE_LIFECYCLE_AND_CAPTURE_SOURCE_NOT_BOUND`
 - `REAL_FORMAL_V4_ISAAC_HTTP_SERVICE_BACKEND_FACTORY_NOT_BOUND`
 - `IMMUTABLE_DEPLOYMENT_COMMIT_CONTAINER_IMPORT_ASSET_CLOSURE_MISSING`
+- `COMPLETE_SCENE_ENVIRONMENT_SWEPT_COLLISION_PROVIDER_NOT_BOUND`
+- `REAL_ATTACHED_OBJECT_PHASE_GEOMETRY_RESOLVER_NOT_BOUND`
 - `REAL_EXACT_PLAN_ISAAC_EXECUTOR_DEPLOYMENT_BINDING_MISSING`
 - `REAL_QUERY_ONLY_FK_PROVIDER_DEPLOYMENT_BINDING_MISSING`
 - `REAL_SESSION_ENDPOINT_STARTUP_AND_HOST_HMAC_ATTESTATION_MISSING`
