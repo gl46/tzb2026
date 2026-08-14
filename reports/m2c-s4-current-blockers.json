@@ -1,8 +1,8 @@
 {
   "schema_version": "M2CS4CurrentBlockersV2",
   "status": "BLOCKED_UNMEASURED_ZERO_ELIGIBLE_YIELD_AND_FORMAL_EXACT_PLAN_INTEGRATION",
-  "reported_at": "2026-08-15T01:42:18+08:00",
-  "checked_head_commit": "9c149ef6cbd3dff9af23f9d79a52beb01faf6726",
+  "reported_at": "2026-08-15T03:13:23+08:00",
+  "checked_head_commit": "85dccd1577e430d4f9860e5f43683b8d9dcd6667",
   "q_a_state": "PASSED",
   "q_b_state": "UNMEASURED",
   "pure_model_success_episodes": null,
@@ -224,7 +224,7 @@
     "formal_execution_eligible": false,
     "candidate_config": {
       "path": "configs/m2c_adr0024_phase2_binding_candidate.json",
-      "sha256": "0b36a1b60e8d033295b49765b686fe9ccb7676feb8056f0a1dd36d09b1c0691e"
+      "sha256": "6f0a50402a00e2de6874618689a25df36e0285578d211154cdab422d31eb448b"
     },
     "candidate_addendum": {
       "path": "docs/decisions/ADR-0024-PHASE2-BINDING-ADDENDUM-CANDIDATE.md",

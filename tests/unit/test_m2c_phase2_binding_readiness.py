@@ -13,7 +13,7 @@ from xh_agent.policy.qrm_lite.phase2_binding_readiness_v2 import (
     ARTIFACT_NAMES,
     FORMAL_RUNNER_PATH,
     REQUIRED_PROJECT_PATHS,
-    DeploymentAssetBindingV2,
+    DeploymentAssetBindingV3,
     EvidenceFileBindingV2,
     Phase2EvidenceIndexV2,
     ReadinessFailure,
@@ -186,10 +186,11 @@ def test_v2_index_has_no_withdrawn_signature_or_b0_artifact_roles() -> None:
 
 def test_deployment_asset_evidence_path_must_be_contained() -> None:
     with pytest.raises(ValueError, match="must be contained"):
-        DeploymentAssetBindingV2(
+        DeploymentAssetBindingV3(
             deployment_path="/World/scene.usd",
             evidence_path="../scene.usd",
             sha256="a" * 64,
+            roles=("SCENE_USD",),
             kind="SCENE_ASSET",
         )
 

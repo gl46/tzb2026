@@ -26,8 +26,14 @@ from xh_agent.policy.qrm_lite.formal_split_runner_v2 import (
     canonical_sha256,
 )
 from xh_agent.policy.qrm_lite.phase2_binding_readiness_v2 import (
-    DeploymentAssetBindingV2,
-    Phase2DeploymentAssetManifestV2,
+    DEPLOYMENT_ASSET_SINGLETON_ROLES_V3,
+    DEPLOYMENT_ASSET_TREE_CONTENT_ROLE_V3,
+    DeploymentAssetBindingV3,
+    DeploymentAssetRoleV3,
+    DeploymentAssetTreeInventoryV3,
+    DeploymentAssetTreeRoleV3,
+    Phase2DeploymentAssetManifestV3,
+    deployment_tree_sha256_v3,
 )
 from xh_agent.policy.qrm_lite.s4_entry_gate import (
     FormalTransitiveImportClosureManifestV1,
@@ -56,11 +62,13 @@ class Phase2DeploymentAssetSourceV2(_FrozenModel):
     deployment_path: str = Field(min_length=1)
     source_path: str = Field(min_length=1)
     sha256: str = Field(pattern=SHA256_PATTERN)
+    roles: tuple[DeploymentAssetRoleV3, ...] = Field(min_length=1)
     kind: Literal[
         "ROBOT_ASSET",
         "SCENE_ASSET",
         "ISAAC_RUNTIME",
         "NATIVE_RUNTIME",
+        "MODEL_ASSET",
         "CONFIGURATION",
     ]
 
@@ -72,6 +80,8 @@ class Phase2DeploymentAssetSourceV2(_FrozenModel):
         source = Path(self.source_path)
         if ".." in source.parts:
             raise ValueError("deployment asset source may not contain '..'")
+        if tuple(sorted(set(self.roles))) != self.roles:
+            raise ValueError("deployment asset roles must be unique canonical order")
         return self
 
 
@@ -81,6 +91,7 @@ class Phase2DeploymentClosureBuildRequestV2(_FrozenModel):
     repository_tree_sha1: str = Field(pattern=SHA1_PATTERN)
     container_image_digest: str = Field(pattern=IMAGE_PATTERN)
     assets: tuple[Phase2DeploymentAssetSourceV2, ...] = Field(min_length=1)
+    tree_roots: dict[DeploymentAssetTreeRoleV3, str] = Field(min_length=4)
     complete_runtime_and_asset_closure: Literal[True] = True
     content_addressed_immutable_snapshot: Literal[True] = True
     generated_inside_bound_container: Literal[True] = True
@@ -98,6 +109,33 @@ class Phase2DeploymentClosureBuildRequestV2(_FrozenModel):
             raise ValueError("deployment asset paths are duplicated")
         if len(source_paths) != len(set(source_paths)):
             raise ValueError("deployment asset sources are duplicated")
+        counts = {
+            role: sum(role in asset.roles for asset in self.assets)
+            for role in DEPLOYMENT_ASSET_SINGLETON_ROLES_V3
+        }
+        if any(count != 1 for count in counts.values()):
+            raise ValueError("deployment closure request lacks the exact singleton role set")
+        if any(
+            sum(role in DEPLOYMENT_ASSET_SINGLETON_ROLES_V3 for role in asset.roles) > 1
+            for asset in self.assets
+        ):
+            raise ValueError("one deployment closure source cannot satisfy two singleton roles")
+        if set(self.tree_roots) != set(DEPLOYMENT_ASSET_TREE_CONTENT_ROLE_V3):
+            raise ValueError("deployment closure request lacks the exact tree root set")
+        for tree_role, content_role in DEPLOYMENT_ASSET_TREE_CONTENT_ROLE_V3.items():
+            root = PurePosixPath(self.tree_roots[tree_role])
+            if not root.is_absolute() or ".." in root.parts:
+                raise ValueError("deployment closure tree root is not absolute and normalized")
+            members = [asset for asset in self.assets if content_role in asset.roles]
+            if not members:
+                raise ValueError("deployment closure request has an empty asset tree")
+            for asset in members:
+                try:
+                    relative = PurePosixPath(asset.deployment_path).relative_to(root)
+                except ValueError as error:
+                    raise ValueError("deployment closure tree member escapes its root") from error
+                if relative.as_posix() in {"", "."}:
+                    raise ValueError("deployment closure tree member has an empty relative path")
         payload = self.model_dump(mode="json", exclude={"request_sha256"})
         if self.request_sha256 != canonical_sha256(payload):
             raise ValueError("deployment closure request digest differs")
@@ -119,6 +157,7 @@ class Phase2DeploymentClosureBuildReceiptV2(_FrozenModel):
     deployment_asset_manifest_sha256: str = Field(pattern=SHA256_PATTERN)
     asset_file_count: int = Field(gt=0)
     asset_binding_set_sha256: str = Field(pattern=SHA256_PATTERN)
+    asset_tree_inventory_set_sha256: str = Field(pattern=SHA256_PATTERN)
     complete_git_tree_replayed: Literal[True] = True
     complete_runtime_and_asset_closure: Literal[True] = True
     create_only_publication: Literal[True] = True
@@ -317,7 +356,7 @@ def build_phase2_deployment_closure_v2(
     assets_root = output_root / "assets"
     assets_root.mkdir(mode=0o700, parents=False, exist_ok=False)
 
-    asset_bindings: list[DeploymentAssetBindingV2] = []
+    asset_bindings: list[DeploymentAssetBindingV3] = []
     for index, source in enumerate(request.assets):
         source_path = _resolve_asset_source(project_root, source.source_path)
         payload = _read_regular_file_once(source_path)
@@ -330,11 +369,30 @@ def build_phase2_deployment_closure_v2(
         destination = output_root / evidence_path
         _write_create_only(destination, payload)
         asset_bindings.append(
-            DeploymentAssetBindingV2(
+            DeploymentAssetBindingV3(
                 deployment_path=source.deployment_path,
                 evidence_path=evidence_path,
                 sha256=actual,
+                roles=source.roles,
                 kind=source.kind,
+            )
+        )
+
+    tree_inventories: list[DeploymentAssetTreeInventoryV3] = []
+    for tree_role, content_role in DEPLOYMENT_ASSET_TREE_CONTENT_ROLE_V3.items():
+        root = PurePosixPath(request.tree_roots[tree_role])
+        inventory_files = {
+            PurePosixPath(binding.deployment_path).relative_to(root).as_posix(): binding.sha256
+            for binding in asset_bindings
+            if content_role in binding.roles
+        }
+        tree_inventories.append(
+            DeploymentAssetTreeInventoryV3(
+                tree_role=tree_role,
+                root_path=root.as_posix(),
+                files=inventory_files,
+                tree_sha256=deployment_tree_sha256_v3(inventory_files),
+                complete_recursive_file_inventory=True,
             )
         )
 
@@ -346,10 +404,12 @@ def build_phase2_deployment_closure_v2(
         generated_inside_bound_container=True,
         teacher_used=False,
     )
-    assets = Phase2DeploymentAssetManifestV2(
+    assets = Phase2DeploymentAssetManifestV3(
+        deployment_profile="M2C_FORMAL_V4_FULL_DEPLOYMENT_V1",
         implementation_commit=request.implementation_commit,
         container_image_digest=request.container_image_digest,
         bindings=tuple(asset_bindings),
+        tree_inventories=tuple(tree_inventories),
         complete_runtime_and_asset_closure=True,
         content_addressed_immutable_snapshot=True,
         generated_inside_bound_container=True,
@@ -377,6 +437,9 @@ def build_phase2_deployment_closure_v2(
         "asset_file_count": len(asset_bindings),
         "asset_binding_set_sha256": canonical_sha256(
             [item.model_dump(mode="json") for item in asset_bindings]
+        ),
+        "asset_tree_inventory_set_sha256": canonical_sha256(
+            [item.model_dump(mode="json") for item in tree_inventories]
         ),
         "complete_git_tree_replayed": True,
         "complete_runtime_and_asset_closure": True,
@@ -419,7 +482,7 @@ def replay_phase2_deployment_closure_v2(
     try:
         receipt = Phase2DeploymentClosureBuildReceiptV2.model_validate_json(receipt_raw)
         transitive = FormalTransitiveImportClosureManifestV1.model_validate_json(transitive_raw)
-        assets = Phase2DeploymentAssetManifestV2.model_validate_json(assets_raw)
+        assets = Phase2DeploymentAssetManifestV3.model_validate_json(assets_raw)
     except (ValueError, json.JSONDecodeError) as error:
         raise DeploymentClosureFailure("deployment closure JSON is invalid") from error
     if (
@@ -437,6 +500,8 @@ def replay_phase2_deployment_closure_v2(
         or transitive.files != files
         or assets.implementation_commit != request.implementation_commit
         or assets.container_image_digest != request.container_image_digest
+        or {item.tree_role: item.root_path for item in assets.tree_inventories}
+        != request.tree_roots
     ):
         raise DeploymentClosureFailure("deployment closure receipt/manifests differ")
     source_by_deployment = {item.deployment_path: item for item in request.assets}
@@ -444,7 +509,11 @@ def replay_phase2_deployment_closure_v2(
         raise DeploymentClosureFailure("deployment closure asset set differs")
     for binding in assets.bindings:
         source = source_by_deployment[binding.deployment_path]
-        if binding.sha256 != source.sha256 or binding.kind != source.kind:
+        if (
+            binding.sha256 != source.sha256
+            or binding.kind != source.kind
+            or binding.roles != source.roles
+        ):
             raise DeploymentClosureFailure("deployment closure asset binding differs")
         evidence = output_root / binding.evidence_path
         evidence_stat = evidence.stat(follow_symlinks=False)
@@ -455,10 +524,12 @@ def replay_phase2_deployment_closure_v2(
             or sha256_bytes(_read_regular_file_once(evidence)) != binding.sha256
         ):
             raise DeploymentClosureFailure("deployment closure asset evidence differs")
-    if receipt.asset_file_count != len(
-        assets.bindings
-    ) or receipt.asset_binding_set_sha256 != canonical_sha256(
-        [item.model_dump(mode="json") for item in assets.bindings]
+    if (
+        receipt.asset_file_count != len(assets.bindings)
+        or receipt.asset_binding_set_sha256
+        != canonical_sha256([item.model_dump(mode="json") for item in assets.bindings])
+        or receipt.asset_tree_inventory_set_sha256
+        != canonical_sha256([item.model_dump(mode="json") for item in assets.tree_inventories])
     ):
         raise DeploymentClosureFailure("deployment closure asset aggregate differs")
     for path in (

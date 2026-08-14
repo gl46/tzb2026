@@ -21,7 +21,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 import re
 import stat
 import subprocess
@@ -29,10 +29,16 @@ from typing import Any, Literal, Mapping
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, model_validator
 
+from xh_agent.policy.qrm_lite.a3_bullet_production_adapter_v1 import (
+    A3BulletFloat64BuildManifestV1,
+)
 from xh_agent.policy.qrm_lite.exact_plan_primitive_bundle_v1 import (
     ExactPlanBundleExecutionReceiptV1,
     ExactPlanPreflightReceiptV1,
     M2CExactPlanPrimitivePlanV1,
+)
+from xh_agent.policy.qrm_lite.exact_plan_preflight_v1 import (
+    ExactPlanA3DeploymentBindingV2,
 )
 from xh_agent.policy.qrm_lite.formal_split_host_v4 import M2CFormalSplitRunnerEvidenceV4
 from xh_agent.policy.qrm_lite.formal_split_runner_v2 import (
@@ -44,8 +50,12 @@ from xh_agent.policy.qrm_lite.formal_split_runner_v4 import (
     FORMAL_INFERENCE_PATH_V4,
     FORMAL_ISAAC_EXECUTE_PATH_V4,
     FORMAL_WIRE_PROTOCOL_V4,
+    IsaacEndpointBindingV4,
     IsaacExecuteResponseV4,
     IsaacStartRequestV4,
+)
+from xh_agent.policy.qrm_lite.formal_isaac_episode_io_v4 import (
+    FormalIsaacEpisodeIODeploymentBindingV1,
 )
 from xh_agent.policy.qrm_lite.offline_wire_auth_v1 import (
     WireChallengeConsumptionReceiptV1,
@@ -62,6 +72,13 @@ from xh_agent.policy.qrm_lite.offline_wire_auth_v4 import (
 )
 from xh_agent.policy.qrm_lite.s4_entry_gate import (
     FormalTransitiveImportClosureManifestV1,
+)
+from xh_agent.perception.public_track_associator_v2 import (
+    PublicAssociationDeploymentBindingV2,
+)
+from xh_agent.policy.qrm_lite.path_blocked_supervision_v4 import (
+    M2CQ012DeploymentManifestV4,
+    PublicDeclaredTargetAttributeBindingV4,
 )
 
 
@@ -172,33 +189,181 @@ class ProjectFileBindingV2(StrictModel):
         return self
 
 
-class DeploymentAssetBindingV2(StrictModel):
+DeploymentAssetRoleV3 = Literal[
+    "CONTAINER_IMAGE_INSPECT",
+    "PYTHON_DEPENDENCY_INVENTORY",
+    "QWEN_BUNDLE_MANIFEST",
+    "QWEN_HEAD_CHECKPOINT",
+    "QWEN_HEAD_DEPLOYMENT",
+    "ISAAC_ENDPOINT_BINDING",
+    "PUBLIC_ASSOCIATION_DEPLOYMENT_BINDING",
+    "DECLARED_ATTRIBUTE_BINDING",
+    "FORMAL_EPISODE_IO_DEPLOYMENT_BINDING",
+    "EXACT_PLAN_SYNTHESIS_CONFIGURATION",
+    "EXACT_PLAN_SYNTHESIS_DEPENDENCY_MANIFEST",
+    "EXACT_PLAN_A3_DEPLOYMENT_BINDING",
+    "EXACT_PLAN_PRIMITIVE_DEPLOYMENT_BINDING",
+    "EXACT_PLAN_EXECUTOR_DEPLOYMENT_BINDING",
+    "QUERY_ONLY_FK_DEPLOYMENT_BINDING",
+    "CONTROLLED_ROBOT_URDF",
+    "CONTROLLED_ROBOT_SRDF",
+    "PANDA_LINK2_COLLISION_STL",
+    "PANDA_LINK4_COLLISION_STL",
+    "A3_NATIVE_BUILD_MANIFEST",
+    "A3_NATIVE_SHARED_OBJECT",
+    "BULLET_COLLISION_LIBRARY",
+    "BULLET_LINEAR_MATH_LIBRARY",
+    "SCENE_SDF",
+    "SCENE_SUPERVISION",
+    "SCENE_USD",
+    "CAMERA_CALIBRATION",
+    "RUNTIME_SKILL_REGISTRY",
+    "FORMAL_CHALLENGE_MANIFEST",
+    "QWEN_BUNDLE_FILE",
+    "QWEN_ADAPTER_FILE",
+    "QWEN_MODEL_CACHE_FILE",
+    "ISAAC_DEPENDENCY_FILE",
+]
+
+DeploymentAssetTreeRoleV3 = Literal[
+    "QWEN_BUNDLE_TREE",
+    "QWEN_ADAPTER_TREE",
+    "QWEN_MODEL_CACHE_TREE",
+    "ISAAC_DEPENDENCY_TREE",
+]
+
+DEPLOYMENT_ASSET_SINGLETON_ROLES_V3 = frozenset(
+    {
+        "CONTAINER_IMAGE_INSPECT",
+        "PYTHON_DEPENDENCY_INVENTORY",
+        "QWEN_BUNDLE_MANIFEST",
+        "QWEN_HEAD_CHECKPOINT",
+        "QWEN_HEAD_DEPLOYMENT",
+        "ISAAC_ENDPOINT_BINDING",
+        "PUBLIC_ASSOCIATION_DEPLOYMENT_BINDING",
+        "DECLARED_ATTRIBUTE_BINDING",
+        "FORMAL_EPISODE_IO_DEPLOYMENT_BINDING",
+        "EXACT_PLAN_SYNTHESIS_CONFIGURATION",
+        "EXACT_PLAN_SYNTHESIS_DEPENDENCY_MANIFEST",
+        "EXACT_PLAN_A3_DEPLOYMENT_BINDING",
+        "EXACT_PLAN_PRIMITIVE_DEPLOYMENT_BINDING",
+        "EXACT_PLAN_EXECUTOR_DEPLOYMENT_BINDING",
+        "QUERY_ONLY_FK_DEPLOYMENT_BINDING",
+        "CONTROLLED_ROBOT_URDF",
+        "CONTROLLED_ROBOT_SRDF",
+        "PANDA_LINK2_COLLISION_STL",
+        "PANDA_LINK4_COLLISION_STL",
+        "A3_NATIVE_BUILD_MANIFEST",
+        "A3_NATIVE_SHARED_OBJECT",
+        "BULLET_COLLISION_LIBRARY",
+        "BULLET_LINEAR_MATH_LIBRARY",
+        "SCENE_SDF",
+        "SCENE_SUPERVISION",
+        "SCENE_USD",
+        "CAMERA_CALIBRATION",
+        "RUNTIME_SKILL_REGISTRY",
+        "FORMAL_CHALLENGE_MANIFEST",
+    }
+)
+
+DEPLOYMENT_ASSET_TREE_CONTENT_ROLE_V3: dict[str, str] = {
+    "QWEN_BUNDLE_TREE": "QWEN_BUNDLE_FILE",
+    "QWEN_ADAPTER_TREE": "QWEN_ADAPTER_FILE",
+    "QWEN_MODEL_CACHE_TREE": "QWEN_MODEL_CACHE_FILE",
+    "ISAAC_DEPENDENCY_TREE": "ISAAC_DEPENDENCY_FILE",
+}
+
+
+def deployment_tree_sha256_v3(files: Mapping[str, str]) -> str:
+    """Recompute the frozen path+content tree digest used by Qwen V4."""
+
+    digest = hashlib.sha256()
+    for path, sha256 in sorted(files.items()):
+        relative = PurePosixPath(path)
+        if relative.is_absolute() or ".." in relative.parts or not relative.parts:
+            raise ValueError("deployment tree inventory path is not relative")
+        if re.fullmatch(SHA256_PATTERN, sha256) is None:
+            raise ValueError("deployment tree inventory file digest is malformed")
+        digest.update(path.encode("utf-8"))
+        digest.update(b"\0")
+        digest.update(bytes.fromhex(sha256))
+    return digest.hexdigest()
+
+
+class DeploymentAssetBindingV3(StrictModel):
     deployment_path: str = Field(min_length=1)
     evidence_path: str = Field(min_length=1)
     sha256: str = Field(pattern=SHA256_PATTERN)
+    roles: tuple[DeploymentAssetRoleV3, ...] = Field(min_length=1)
     kind: Literal[
         "ROBOT_ASSET",
         "SCENE_ASSET",
         "ISAAC_RUNTIME",
         "NATIVE_RUNTIME",
+        "MODEL_ASSET",
         "CONFIGURATION",
     ]
 
     @model_validator(mode="after")
-    def evidence_path_is_contained(self) -> "DeploymentAssetBindingV2":
+    def paths_and_roles_are_exact(self) -> "DeploymentAssetBindingV3":
+        deployment = PurePosixPath(self.deployment_path)
+        if not deployment.is_absolute() or ".." in deployment.parts:
+            raise ValueError("deployment asset path must be absolute and normalized")
         path = Path(self.evidence_path)
         if path.is_absolute() or ".." in path.parts:
             raise ValueError("deployment asset evidence path must be contained")
+        if tuple(sorted(set(self.roles))) != self.roles:
+            raise ValueError("deployment asset roles must be unique canonical order")
         return self
 
 
-class Phase2DeploymentAssetManifestV2(StrictModel):
-    schema_version: Literal["M2CPhase2DeploymentAssetManifestV2"] = (
-        "M2CPhase2DeploymentAssetManifestV2"
+class DeploymentAssetTreeInventoryV3(StrictModel):
+    schema_version: Literal["M2CDeploymentAssetTreeInventoryV3"] = (
+        "M2CDeploymentAssetTreeInventoryV3"
+    )
+    tree_role: DeploymentAssetTreeRoleV3
+    root_path: str = Field(min_length=1)
+    files: dict[str, str] = Field(min_length=1)
+    tree_sha256: str = Field(pattern=SHA256_PATTERN)
+    complete_recursive_file_inventory: Literal[True] = True
+
+    @model_validator(mode="after")
+    def exact_tree(self) -> "DeploymentAssetTreeInventoryV3":
+        root = PurePosixPath(self.root_path)
+        if not root.is_absolute() or ".." in root.parts:
+            raise ValueError("deployment tree root must be absolute and normalized")
+        if self.tree_sha256 != deployment_tree_sha256_v3(self.files):
+            raise ValueError("deployment tree inventory digest differs")
+        return self
+
+
+class Phase2ContainerImageInspectV3(StrictModel):
+    schema_version: Literal["M2CPhase2ContainerImageInspectV3"] = "M2CPhase2ContainerImageInspectV3"
+    image_id: str = Field(pattern=r"^sha256:[0-9a-f]{64}$")
+    repo_digests: tuple[str, ...] = Field(min_length=1)
+    inspect_exit_code: Literal[0] = 0
+    observed_before_endpoint_start: Literal[True] = True
+
+    @model_validator(mode="after")
+    def exact_image_identity(self) -> "Phase2ContainerImageInspectV3":
+        if len(self.repo_digests) != len(set(self.repo_digests)) or any(
+            "@sha256:" not in item for item in self.repo_digests
+        ):
+            raise ValueError("container image inspect repo digests differ")
+        return self
+
+
+class Phase2DeploymentAssetManifestV3(StrictModel):
+    schema_version: Literal["M2CPhase2DeploymentAssetManifestV3"] = (
+        "M2CPhase2DeploymentAssetManifestV3"
+    )
+    deployment_profile: Literal["M2C_FORMAL_V4_FULL_DEPLOYMENT_V1"] = (
+        "M2C_FORMAL_V4_FULL_DEPLOYMENT_V1"
     )
     implementation_commit: str = Field(pattern=r"^[0-9a-f]{40}$")
     container_image_digest: str = Field(pattern=r"^sha256:[0-9a-f]{64}$")
-    bindings: tuple[DeploymentAssetBindingV2, ...] = Field(min_length=1)
+    bindings: tuple[DeploymentAssetBindingV3, ...] = Field(min_length=1)
+    tree_inventories: tuple[DeploymentAssetTreeInventoryV3, ...] = Field(min_length=4)
     complete_runtime_and_asset_closure: Literal[True] = True
     content_addressed_immutable_snapshot: Literal[True] = True
     generated_inside_bound_container: Literal[True] = True
@@ -206,14 +371,202 @@ class Phase2DeploymentAssetManifestV2(StrictModel):
     privileged_truth_policy_input: Literal[False] = False
 
     @model_validator(mode="after")
-    def paths_are_unique(self) -> "Phase2DeploymentAssetManifestV2":
+    def exact_profile_and_trees(self) -> "Phase2DeploymentAssetManifestV3":
         deployment_paths = tuple(item.deployment_path for item in self.bindings)
         evidence_paths = tuple(item.evidence_path for item in self.bindings)
         if len(deployment_paths) != len(set(deployment_paths)) or len(evidence_paths) != len(
             set(evidence_paths)
         ):
             raise ValueError("deployment asset manifest paths are duplicated")
+        counts = {
+            role: sum(role in binding.roles for binding in self.bindings)
+            for role in DEPLOYMENT_ASSET_SINGLETON_ROLES_V3
+        }
+        if any(count != 1 for count in counts.values()):
+            raise ValueError("deployment asset manifest lacks the exact singleton role set")
+        if any(
+            sum(role in DEPLOYMENT_ASSET_SINGLETON_ROLES_V3 for role in binding.roles) > 1
+            for binding in self.bindings
+        ):
+            raise ValueError("one deployment asset cannot satisfy two singleton roles")
+        inventories = {item.tree_role: item for item in self.tree_inventories}
+        if len(inventories) != len(self.tree_inventories) or set(inventories) != set(
+            DEPLOYMENT_ASSET_TREE_CONTENT_ROLE_V3
+        ):
+            raise ValueError("deployment asset manifest lacks the exact tree role set")
+        for tree_role, content_role in DEPLOYMENT_ASSET_TREE_CONTENT_ROLE_V3.items():
+            inventory = inventories[tree_role]
+            root = PurePosixPath(inventory.root_path)
+            actual: dict[str, str] = {}
+            for binding in self.bindings:
+                if content_role not in binding.roles:
+                    continue
+                deployment = PurePosixPath(binding.deployment_path)
+                try:
+                    relative = deployment.relative_to(root)
+                except ValueError as error:
+                    raise ValueError("deployment tree member escapes its exact root") from error
+                relative_path = relative.as_posix()
+                if relative_path in {"", "."} or relative_path in actual:
+                    raise ValueError("deployment tree member path is duplicated or empty")
+                actual[relative_path] = binding.sha256
+            if actual != inventory.files:
+                raise ValueError("deployment tree inventory differs from its asset bindings")
         return self
+
+
+def _asset_binding_for_role_v3(
+    manifest: Phase2DeploymentAssetManifestV3,
+    role: str,
+) -> DeploymentAssetBindingV3:
+    matches = [binding for binding in manifest.bindings if role in binding.roles]
+    if len(matches) != 1:
+        raise ReadinessFailure(f"deployment asset role is not singleton: {role}")
+    return matches[0]
+
+
+def _verify_deployment_assets_against_formal_v3(
+    *,
+    manifest: Phase2DeploymentAssetManifestV3,
+    payload_by_role: Mapping[str, bytes],
+    formal: M2CFormalSplitRunnerEvidenceV4,
+) -> None:
+    """Bind the exact deployment snapshot back to the formal V4 episode."""
+
+    bundle = formal.bundle
+    singleton_sha = {
+        role: _asset_binding_for_role_v3(manifest, role).sha256
+        for role in DEPLOYMENT_ASSET_SINGLETON_ROLES_V3
+    }
+    if (
+        singleton_sha["QWEN_BUNDLE_MANIFEST"] != bundle.bundle_manifest_file_sha256
+        or singleton_sha["QWEN_HEAD_CHECKPOINT"] != bundle.head_checkpoint_sha256
+        or singleton_sha["QWEN_HEAD_DEPLOYMENT"] != bundle.head_deployment_file_sha256
+        or singleton_sha["SCENE_SDF"] != formal.sdf_sha256
+        or singleton_sha["SCENE_SUPERVISION"] != formal.supervision_sha256
+    ):
+        raise ReadinessFailure("deployment asset singleton differs from formal V4 evidence")
+
+    inventories = {item.tree_role: item for item in manifest.tree_inventories}
+    if (
+        inventories["QWEN_BUNDLE_TREE"].tree_sha256 != bundle.bundle_tree_sha256
+        or inventories["QWEN_ADAPTER_TREE"].tree_sha256 != bundle.adapter_tree_sha256
+        or inventories["QWEN_MODEL_CACHE_TREE"].tree_sha256 != bundle.model_cache_tree_sha256
+        or inventories["QWEN_MODEL_CACHE_TREE"].root_path != bundle.model_cache_dir
+    ):
+        raise ReadinessFailure("Qwen deployment tree differs from formal V4 bundle")
+
+    bundle_manifest_binding = _asset_binding_for_role_v3(
+        manifest,
+        "QWEN_BUNDLE_MANIFEST",
+    )
+    bundle_root = PurePosixPath(bundle_manifest_binding.deployment_path).parent
+    if (
+        inventories["QWEN_BUNDLE_TREE"].root_path != bundle_root.as_posix()
+        or inventories["QWEN_ADAPTER_TREE"].root_path != (bundle_root / "adapter").as_posix()
+        or PurePosixPath(
+            _asset_binding_for_role_v3(manifest, "QWEN_HEAD_CHECKPOINT").deployment_path
+        )
+        != bundle_root / "qwen_coarse_v4_heads.npz"
+        or PurePosixPath(
+            _asset_binding_for_role_v3(manifest, "QWEN_HEAD_DEPLOYMENT").deployment_path
+        )
+        != bundle_root / "qwen_coarse_v4_checkpoint_deployment.json"
+    ):
+        raise ReadinessFailure("Qwen deployment paths differ from the frozen V4 layout")
+
+    try:
+        bundle_manifest = json.loads(payload_by_role["QWEN_BUNDLE_MANIFEST"])
+    except (KeyError, json.JSONDecodeError, UnicodeDecodeError) as error:
+        raise ReadinessFailure("Qwen bundle manifest deployment asset is invalid JSON") from error
+    expected_bundle_fields = {
+        "schema_version": "M2CQwenCoarseV4BundleManifestV1",
+        "status": "TRAINED_QWEN_LORA_M2C_Q012_V4",
+        "architecture_revision": bundle.architecture_revision,
+        "public_track_associator_revision": bundle.public_track_associator_revision,
+        "public_track_candidate_revision": bundle.public_track_candidate_revision,
+        "model_id": bundle.model_id,
+        "model_revision": bundle.model_revision,
+        "failure_context": bundle.failure_context,
+        "base_model_snapshot_tree_sha256": bundle.model_cache_tree_sha256,
+        "adapter_tree_sha256": bundle.adapter_tree_sha256,
+        "head_checkpoint_sha256": bundle.head_checkpoint_sha256,
+        "head_deployment_file_sha256": bundle.head_deployment_file_sha256,
+        "training_dataset_sha256": bundle.training_dataset_sha256,
+        "training_manifest_file_sha256": bundle.training_manifest_file_sha256,
+        "training_manifest_sha256": bundle.training_manifest_sha256,
+        "s6_manifest_file_sha256": bundle.s6_manifest_file_sha256,
+        "s6_manifest_sha256": bundle.s6_manifest_sha256,
+        "bundle_sha256": bundle.bundle_sha256,
+        "training_complete": True,
+        "physical_evaluation_executed": False,
+        "teacher_used": False,
+        "privileged_truth_policy_input": False,
+    }
+    if (
+        not isinstance(bundle_manifest, dict)
+        or any(bundle_manifest.get(key) != value for key, value in expected_bundle_fields.items())
+        or canonical_sha256(
+            {key: value for key, value in bundle_manifest.items() if key != "bundle_sha256"}
+        )
+        != bundle.bundle_sha256
+    ):
+        raise ReadinessFailure("Qwen bundle manifest content differs from formal V4 bundle")
+
+    try:
+        head_deployment = M2CQ012DeploymentManifestV4.model_validate_json(
+            payload_by_role["QWEN_HEAD_DEPLOYMENT"]
+        )
+        endpoint = IsaacEndpointBindingV4.model_validate_json(
+            payload_by_role["ISAAC_ENDPOINT_BINDING"]
+        )
+        association = PublicAssociationDeploymentBindingV2.model_validate_json(
+            payload_by_role["PUBLIC_ASSOCIATION_DEPLOYMENT_BINDING"]
+        )
+        attribute = PublicDeclaredTargetAttributeBindingV4.model_validate_json(
+            payload_by_role["DECLARED_ATTRIBUTE_BINDING"]
+        )
+        episode_io = FormalIsaacEpisodeIODeploymentBindingV1.model_validate_json(
+            payload_by_role["FORMAL_EPISODE_IO_DEPLOYMENT_BINDING"]
+        )
+        a3 = ExactPlanA3DeploymentBindingV2.model_validate_json(
+            payload_by_role["EXACT_PLAN_A3_DEPLOYMENT_BINDING"]
+        )
+        native_build = A3BulletFloat64BuildManifestV1.model_validate_json(
+            payload_by_role["A3_NATIVE_BUILD_MANIFEST"]
+        )
+        image_inspect = Phase2ContainerImageInspectV3.model_validate_json(
+            payload_by_role["CONTAINER_IMAGE_INSPECT"]
+        )
+    except (KeyError, ValidationError) as error:
+        raise ReadinessFailure("one deployment binding asset has invalid strict schema") from error
+    endpoint_sha256 = canonical_sha256(endpoint)
+    if (
+        endpoint != formal.isaac_endpoint_binding
+        or head_deployment.checkpoint_file_sha256 != bundle.head_checkpoint_sha256
+        or head_deployment.checkpoint_binding_sha256 != bundle.checkpoint_binding_sha256
+        or head_deployment.deployment_manifest_sha256 != bundle.head_deployment_manifest_sha256
+        or bundle_manifest.get("head_deployment") != head_deployment.model_dump(mode="json")
+        or association.deployment_binding_sha256 != bundle.association_deployment_sha256
+        or association.deployment_binding_sha256 != endpoint.association_deployment_sha256
+        or attribute.binding_sha256 != formal.declared_attribute_binding_sha256
+        or episode_io.review_status != "REVIEWED_BINDING_ADDENDUM"
+        or not episode_io.formal_execution_eligible
+        or episode_io.immutable_commit != manifest.implementation_commit
+        or episode_io.container_image_digest != manifest.container_image_digest
+        or episode_io.endpoint_binding_sha256 != endpoint_sha256
+        or episode_io.association_deployment_sha256 != association.deployment_binding_sha256
+        or episode_io.declared_attribute_binding_sha256 != attribute.binding_sha256
+        or a3.immutable_commit != manifest.implementation_commit
+        or a3.container_image_digest != manifest.container_image_digest
+        or a3.binding_sha256 != endpoint.a3_deployment_binding_sha256
+        or image_inspect.image_id != manifest.container_image_digest
+        or native_build.native_shared_object.sha256 != singleton_sha["A3_NATIVE_SHARED_OBJECT"]
+        or native_build.bullet_collision_library.sha256 != singleton_sha["BULLET_COLLISION_LIBRARY"]
+        or native_build.bullet_linear_math_library.sha256
+        != singleton_sha["BULLET_LINEAR_MATH_LIBRARY"]
+    ):
+        raise ReadinessFailure("formal V4 deployment bindings cross one another")
 
 
 class ExactPlanSkillPhysicalValidationV2(StrictModel):
@@ -922,7 +1275,7 @@ def verify_phase2_evidence(
             raise ReadinessFailure("transitive closure contains a non-repository path")
         if sha256_bytes(_git_file(project, index.implementation_commit, path)) != digest:
             raise ReadinessFailure(f"transitive closure differs from immutable commit: {path}")
-    asset_manifest = Phase2DeploymentAssetManifestV2.model_validate_json(
+    asset_manifest = Phase2DeploymentAssetManifestV3.model_validate_json(
         payloads["deployment_asset_manifest"]
     )
     if (
@@ -931,6 +1284,7 @@ def verify_phase2_evidence(
     ):
         raise ReadinessFailure("deployment asset manifest differs from immutable deployment")
     asset_bindings: dict[str, str] = {}
+    asset_payload_by_role: dict[str, bytes] = {}
     artifact_identities: set[tuple[int, int]] = set()
     for artifact in index.artifacts.values():
         artifact_path = _resolve_contained(index_path.parent, artifact.path)
@@ -944,9 +1298,13 @@ def verify_phase2_evidence(
         if identity in asset_identities or identity in artifact_identities:
             raise ReadinessFailure("two evidence roles/deployment assets alias one inode")
         asset_identities.add(identity)
-        if sha256_bytes(read_regular_file_once(path)) != binding.sha256:
+        asset_payload = read_regular_file_once(path)
+        if sha256_bytes(asset_payload) != binding.sha256:
             raise ReadinessFailure(f"deployment asset SHA-256 differs: {binding.deployment_path}")
         asset_bindings[binding.deployment_path] = binding.sha256
+        for role in binding.roles:
+            if role in DEPLOYMENT_ASSET_SINGLETON_ROLES_V3:
+                asset_payload_by_role[role] = asset_payload
     overlapping = set(closure.files).intersection(asset_bindings)
     if any(closure.files[path] != asset_bindings[path] for path in overlapping):
         raise ReadinessFailure("import and asset closures disagree on one deployment path")
@@ -954,6 +1312,11 @@ def verify_phase2_evidence(
     formal, consumption = _formal_and_consumption(
         payloads["formal_evidence"],
         payloads["challenge_consumption_receipt"],
+    )
+    _verify_deployment_assets_against_formal_v3(
+        manifest=asset_manifest,
+        payload_by_role=asset_payload_by_role,
+        formal=formal,
     )
     if (
         formal.completion_kind != "FINALIZED"
