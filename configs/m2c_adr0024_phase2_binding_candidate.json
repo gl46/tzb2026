@@ -1,5 +1,5 @@
 {
-  "schema_version": "M2CADR0024Phase2BindingCandidateV1",
+  "schema_version": "M2CADR0024Phase2BindingCandidateV2",
   "status": "CONTRACT_SMOKE_ONLY_BLOCKED_UNMEASURED",
   "checkpoint_date_asia_shanghai": "2026-08-20",
   "accepted_adr": {
@@ -8,11 +8,17 @@
     "status": "ACCEPTED_HUMAN_DECISION"
   },
   "source_bindings": {
+    "configs/m2c_a3_acm_adr0025_v1.json": "9dd2a01d264b779782b0c1e7917b987b99a01e1f16a989b99870a24cecf88bcf",
     "configs/m2c_exact_plan_synthesis_candidate_v1.json": "be7c55e6cd1db1f5b5f5a02cb74e89e0cabeb76a915d527a4943aa4bdde7279b",
     "configs/m2c_exact_plan_synthesis_dependencies_v1.json": "21d222a9a021a877982685928ca88018c3f34640b28990f785493b4bf49e04ac",
     "docs/decisions/ADR-0024-m2c-s4-unblock-directive.md": "62c14028df1ad91e4d3c4282c4775e33149292e9bcf10add2d505be8c7424689",
-    "robot_ws/src/xh_sim/config/m1a_panda.srdf": "80948370d547cb320e49d42ffc0467e082112c09f2984700b489def88526a386",
+    "docs/decisions/ADR-0025-m2c-raw-capacity-acm-and-yield.md": "6f27171d319e3f966c652ca9f8c0fe7c641f4bf420de58642869f9c9c805c3aa",
+    "reports/m2c-phase2-a3-acm-adr0025.json": "4f9dd14d6fad0508b06919086321887e53aa9ff4c8c9593b12e19ed39f66a7ae",
+    "reports/m2c-phase2-a3-acm-smoke.json": "80320998f4b652b48d73aa45b0ae65a5353a424699d6d2aad7d7ef618db137df",
+    "robot_ws/src/xh_sim/config/m1a_panda.srdf": "9e139275cb11f0403abf10894f1424b80a5024e94f7d4e6fadb8bb637017edda",
     "robot_ws/src/xh_sim/urdf/panda_controlled.urdf": "6678ff409d60f074283805879f53edaa939ead34f97a5a961ee67f6229b44ba8",
+    "scripts/m2c/audit_a3_acm_adr0025.py": "e638c213341f043c36beea576787ca70b8c9d775fbb64e1b429696854bb016c8",
+    "scripts/m2c/audit_phase2_a3_acm_smoke.py": "35d62c73fe0d92b4840810d8cdeb903804c8723be710345df2378293ef1c7d79",
     "scripts/m2c/check_adr0022_binding_addendum_readiness.py": "b3bbe1350cb0053792c5c502622ba6fc07e43eba1dc896c63858061f94dafdcc",
     "scripts/m2c/audit_phase2_a3_query_only_deployment_comparison.py": "69a32a91c03c1707fe352e9ce7f70560cd4a192893be0a20b1c6c95ce49b643f",
     "scripts/m2c/formal_isaac_v4_backend.py": "36bf796d515d8f811fc5608e02586210254a84e4cda01d0b70ddd437122544bc",
@@ -21,7 +27,7 @@
     "scripts/m2c/serve_formal_isaac_endpoint_v4.py": "19f141caf244b7dca9362ec4c18ee69ad720ba86e15223cffcb5f735a1013a4c",
     "scripts/m2c/verify_formal_wire_auth_v4.py": "f3a32149987525b75f67ef9a887bcad2f46e0fff2f9e2c70d9a0259befd5a06c",
     "src/xh_agent/policy/qrm_lite/a3_bullet_native_adapter_v1.cpp": "5de2750b6704e30eef1955d3e7f60692cc424777f23024aa064410585331c900",
-    "src/xh_agent/policy/qrm_lite/a3_bullet_production_adapter_v1.py": "aa9a96309a3381b1dce8cf1b43e3322c4ae968d558bc1bef394b56a6c307c807",
+    "src/xh_agent/policy/qrm_lite/a3_bullet_production_adapter_v1.py": "52bbf4144d7711d8860d8026444d2ad6af47d5136ae3921d55451400f9234262",
     "src/xh_agent/policy/qrm_lite/a3_bullet_self_ccd_v1.cpp": "48a1caa8d2f1c8fcb76a504377f399223018a26925c03f1d549db9bab833506f",
     "src/xh_agent/policy/qrm_lite/a3_bullet_self_ccd_v1.py": "0fd2808d8861c368864ee76251073b2c124e5db16632234f5e87b061b87bf527",
     "src/xh_agent/policy/qrm_lite/a3_attachment_transition_evidence_v1.py": "96f6894a6604795ad162e63a63b357764c5640f24b7cf252490de984bab443fb",
@@ -73,15 +79,27 @@
     "comparison_row_count": 144,
     "formal_execution_eligible": false
   },
+  "a3_acm_evidence": {
+    "report_path": "reports/m2c-phase2-a3-acm-adr0025.json",
+    "report_sha256": "4f9dd14d6fad0508b06919086321887e53aa9ff4c8c9593b12e19ed39f66a7ae",
+    "status": "PASS_EXACT_TWO_ACM_PAIRS_HAVE_OFFICIAL_UPSTREAM_SRDF_EVIDENCE",
+    "configuration_path": "configs/m2c_a3_acm_adr0025_v1.json",
+    "configuration_file_sha256": "9dd2a01d264b779782b0c1e7917b987b99a01e1f16a989b99870a24cecf88bcf",
+    "configuration_sha256": "5bb066245f6e717c1997322faa613ef1446064932fc4375af1276e3a8d9fcb89",
+    "authorized_pair_count": 2,
+    "criterion": "A_OFFICIAL_UPSTREAM_SRDF",
+    "formal_execution_eligible": false
+  },
   "query_only_deployment_smoke": {
-    "report_path": "reports/m2c-phase2-a3-query-only-deployment-comparison.json",
-    "report_sha256": "9ee99e1ebe6e6c129450ebafa5c74fb818eeb862d53a39aa914cbd3a5a66c4cd",
-    "status": "PASS_DEPLOYMENT_QUERY_REPLAY_BLOCKED_STATIC_HOME_COLLISION",
-    "final_smoke_receipt_sha256": "a50740f34adef952d89613ecd8b23c132152e47f09791360f46301b2fca70c50",
+    "report_path": "reports/m2c-phase2-a3-acm-smoke.json",
+    "report_sha256": "80320998f4b652b48d73aa45b0ae65a5353a424699d6d2aad7d7ef618db137df",
+    "status": "PASS_QUERY_ONLY_A3_ACM_SMOKE_CLEAR",
+    "final_smoke_receipt_sha256": "146e2b25a02ecfd87fc04bcb88cf56d43a965dd3b6f39ab18b7786ec666b4be1",
+    "request_segment_count": 74,
     "clear_result_count": 74,
-    "collision_rejection_count": 2,
+    "collision_rejection_count": 0,
     "query_failure_count": 0,
-    "static_state_preflight_clear": false,
+    "static_state_preflight_clear": true,
     "formal_execution_eligible": false
   },
   "exact_plan_synthesis_candidate": {
@@ -159,5 +177,5 @@
     "REAL_SESSION_ENDPOINT_STARTUP_AND_HOST_HMAC_ATTESTATION_MISSING",
     "TWO_ACTIVE_PRODUCTION_BINDINGS_UNSET"
   ],
-  "one_next_command": ".venv/bin/python scripts/m2c/audit_adr0024_phase2_candidate.py --project-root ."
+  "one_next_command": "PYTHONPATH=src:scripts uv run python scripts/m2c/audit_adr0024_phase2_candidate.py --project-root ."
 }

@@ -30,7 +30,7 @@ from xh_agent.policy.qrm_lite.formal_exact_plan_synthesis_v1 import (  # noqa: E
 
 
 SCHEMA_VERSION = "M2CADR0024Phase2CandidateAuditV1"
-CANDIDATE_CONFIG_SCHEMA = "M2CADR0024Phase2BindingCandidateV1"
+CANDIDATE_CONFIG_SCHEMA = "M2CADR0024Phase2BindingCandidateV2"
 CANDIDATE_CONFIG_PATH = Path("configs/m2c_adr0024_phase2_binding_candidate.json")
 CANDIDATE_ADDENDUM_PATH = Path("docs/decisions/ADR-0024-PHASE2-BINDING-ADDENDUM-CANDIDATE.md")
 ENTRY_GATE_PATH = Path("src/xh_agent/policy/qrm_lite/s4_entry_gate.py")
@@ -117,10 +117,15 @@ FK_REPORT_SHA256 = "fffc79564a60921398034913b13261e11d462b7dafdfe075f6b5558ff733
 FK_PROVIDER_PATH = Path("src/xh_agent/policy/qrm_lite/controlled_panda_fk_v1.py")
 FK_PROVIDER_SHA256 = "33d735905ecc132edae9c3a5f4d780518a328cd30518c0f897b1b0dda579b541"
 FK_CONFIGURATION_SHA256 = "0567b222f22d2676b8b118e5583df186e2c71e06c2f57f3f1af72d736dd460df"
-QUERY_COMPARISON_REPORT_PATH = Path("reports/m2c-phase2-a3-query-only-deployment-comparison.json")
-QUERY_COMPARISON_REPORT_SHA256 = "9ee99e1ebe6e6c129450ebafa5c74fb818eeb862d53a39aa914cbd3a5a66c4cd"
+ACM_SOURCE_AUDIT_REPORT_PATH = Path("reports/m2c-phase2-a3-acm-adr0025.json")
+ACM_SOURCE_AUDIT_REPORT_SHA256 = "4f9dd14d6fad0508b06919086321887e53aa9ff4c8c9593b12e19ed39f66a7ae"
+ACM_CONFIGURATION_PATH = Path("configs/m2c_a3_acm_adr0025_v1.json")
+ACM_CONFIGURATION_FILE_SHA256 = "9dd2a01d264b779782b0c1e7917b987b99a01e1f16a989b99870a24cecf88bcf"
+ACM_CONFIGURATION_SHA256 = "5bb066245f6e717c1997322faa613ef1446064932fc4375af1276e3a8d9fcb89"
+QUERY_COMPARISON_REPORT_PATH = Path("reports/m2c-phase2-a3-acm-smoke.json")
+QUERY_COMPARISON_REPORT_SHA256 = "80320998f4b652b48d73aa45b0ae65a5353a424699d6d2aad7d7ef618db137df"
 FINAL_QUERY_SMOKE_RECEIPT_SHA256 = (
-    "a50740f34adef952d89613ecd8b23c132152e47f09791360f46301b2fca70c50"
+    "146e2b25a02ecfd87fc04bcb88cf56d43a965dd3b6f39ab18b7786ec666b4be1"
 )
 
 
@@ -194,6 +199,7 @@ def load_candidate_config(project_root: Path) -> dict[str, Any]:
         "source_bindings",
         "native_build_evidence",
         "read_only_fk_evidence",
+        "a3_acm_evidence",
         "query_only_deployment_smoke",
         "exact_plan_synthesis_candidate",
         "episode_io_candidate",
@@ -259,16 +265,30 @@ def load_candidate_config(project_root: Path) -> dict[str, Any]:
         "formal_execution_eligible": False,
     }:
         raise CandidateAuditFailure("candidate read-only FK evidence binding differs")
+    acm = candidate["a3_acm_evidence"]
+    if acm != {
+        "report_path": ACM_SOURCE_AUDIT_REPORT_PATH.as_posix(),
+        "report_sha256": ACM_SOURCE_AUDIT_REPORT_SHA256,
+        "status": "PASS_EXACT_TWO_ACM_PAIRS_HAVE_OFFICIAL_UPSTREAM_SRDF_EVIDENCE",
+        "configuration_path": ACM_CONFIGURATION_PATH.as_posix(),
+        "configuration_file_sha256": ACM_CONFIGURATION_FILE_SHA256,
+        "configuration_sha256": ACM_CONFIGURATION_SHA256,
+        "authorized_pair_count": 2,
+        "criterion": "A_OFFICIAL_UPSTREAM_SRDF",
+        "formal_execution_eligible": False,
+    }:
+        raise CandidateAuditFailure("candidate ADR-0025 ACM evidence binding differs")
     query_smoke = candidate["query_only_deployment_smoke"]
     if query_smoke != {
         "report_path": QUERY_COMPARISON_REPORT_PATH.as_posix(),
         "report_sha256": QUERY_COMPARISON_REPORT_SHA256,
-        "status": "PASS_DEPLOYMENT_QUERY_REPLAY_BLOCKED_STATIC_HOME_COLLISION",
+        "status": "PASS_QUERY_ONLY_A3_ACM_SMOKE_CLEAR",
         "final_smoke_receipt_sha256": FINAL_QUERY_SMOKE_RECEIPT_SHA256,
+        "request_segment_count": 74,
         "clear_result_count": 74,
-        "collision_rejection_count": 2,
+        "collision_rejection_count": 0,
         "query_failure_count": 0,
-        "static_state_preflight_clear": False,
+        "static_state_preflight_clear": True,
         "formal_execution_eligible": False,
     }:
         raise CandidateAuditFailure("candidate query-only deployment smoke binding differs")
@@ -399,6 +419,28 @@ def load_candidate_config(project_root: Path) -> dict[str, Any]:
         or fk_report.get("evidence_claims", {}).get("formal_execution_eligible") is not False
     ):
         raise CandidateAuditFailure("candidate FK report claims differ")
+    acm_report_raw = read_regular_file_once(project_root / ACM_SOURCE_AUDIT_REPORT_PATH)
+    if _sha256(acm_report_raw) != acm["report_sha256"]:
+        raise CandidateAuditFailure("candidate ACM source-audit report SHA-256 differs")
+    try:
+        acm_report = json.loads(acm_report_raw)
+    except json.JSONDecodeError as exc:
+        raise CandidateAuditFailure("candidate ACM source-audit report is unreadable") from exc
+    if (
+        acm_report.get("status") != acm["status"]
+        or acm_report.get("configuration", {}).get("file_sha256")
+        != acm["configuration_file_sha256"]
+        or acm_report.get("configuration", {}).get("configuration_sha256")
+        != acm["configuration_sha256"]
+        or len(acm_report.get("pair_evidence", [])) != acm["authorized_pair_count"]
+        or any(
+            item.get("criterion") != acm["criterion"]
+            for item in acm_report.get("pair_evidence", [])
+        )
+        or acm_report.get("controlled_srdf", {}).get("removed_pair_count") != 0
+        or acm_report.get("evidence_claims", {}).get("physical_execution_performed") is not False
+    ):
+        raise CandidateAuditFailure("candidate ACM source-audit claims differ")
     query_report_raw = read_regular_file_once(project_root / QUERY_COMPARISON_REPORT_PATH)
     if _sha256(query_report_raw) != query_smoke["report_sha256"]:
         raise CandidateAuditFailure("candidate query-only comparison report SHA-256 differs")
@@ -408,13 +450,17 @@ def load_candidate_config(project_root: Path) -> dict[str, Any]:
         raise CandidateAuditFailure("candidate query-only comparison report is unreadable") from exc
     if (
         query_report.get("status") != query_smoke["status"]
-        or query_report.get("evidence_bindings", {}).get("after_smoke_receipt_sha256")
+        or query_report.get("smoke_evidence", {}).get("sha256")
         != query_smoke["final_smoke_receipt_sha256"]
-        or query_report.get("after", {}).get("clear_result_count")
+        or query_report.get("query_result", {}).get("request_segment_count")
+        != query_smoke["request_segment_count"]
+        or query_report.get("query_result", {}).get("clear_result_count")
         != query_smoke["clear_result_count"]
-        or query_report.get("after", {}).get("collision_rejection_count")
+        or query_report.get("query_result", {}).get("collision_rejection_count")
         != query_smoke["collision_rejection_count"]
-        or query_report.get("evidence_claims", {}).get("static_state_preflight_clear") is not False
+        or query_report.get("query_result", {}).get("query_failure_count")
+        != query_smoke["query_failure_count"]
+        or query_report.get("evidence_claims", {}).get("static_state_preflight_clear") is not True
         or query_report.get("evidence_claims", {}).get("formal_execution_eligible") is not False
     ):
         raise CandidateAuditFailure("candidate query-only deployment smoke claims differ")
@@ -630,6 +676,7 @@ def build_audit(project_root: Path) -> dict[str, Any]:
         "a3_local_closure": closure.model_dump(mode="json"),
         "a3_native_build_evidence": candidate["native_build_evidence"],
         "a3_read_only_fk_evidence": candidate["read_only_fk_evidence"],
+        "a3_acm_evidence": candidate["a3_acm_evidence"],
         "a3_query_only_deployment_smoke": candidate["query_only_deployment_smoke"],
         "exact_plan_synthesis_candidate": candidate["exact_plan_synthesis_candidate"],
         "formal_isaac_episode_io_candidate": candidate["episode_io_candidate"],

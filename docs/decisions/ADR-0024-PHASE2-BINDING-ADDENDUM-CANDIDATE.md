@@ -122,19 +122,32 @@ The exact report is `reports/m2c-phase2-a3-controlled-panda-fk.json`. This
 closes provider implementation/numeric equivalence, not its immutable
 deployment/session binding.
 
-The query-only deployment path is now byte-replayed under the pinned Isaac 6
-container image without loading Kit or Isaac. The create-only final receipt
-SHA-256 is `a50740f34adef952d89613ecd8b23c132152e47f09791360f46301b2fca70c50`.
-It completed all 76 child-pair queries with zero query failures: 74 were clear
-and two were fail-closed static collision rejections (hand-link7 and
-link2-link4). The comparison report is
-`reports/m2c-phase2-a3-query-only-deployment-comparison.json`. Thus the
-permission and native deployment path is closed. The arbitrary frozen home
-state is not a universal capability gate: that specific state correctly
-rejects under A.3 and remains non-executable. It is not converted into an ACM
-exception, a reduced margin, or an execution authorization. Formal execution
-instead requires each actual bound plan to pass its complete plan-specific A.3
-replay before any command.
+ADR-0025 section 2 authorizes exactly two start-state ACM additions. The
+controlled SRDF adds `panda_hand`–`panda_link7` with reason `Adjacent` and
+`panda_link2`–`panda_link4` with reason `Never`; it removes no pair. Each
+addition uses criterion `A_OFFICIAL_UPSTREAM_SRDF` against node2 path
+`/opt/ros/jazzy/share/moveit_resources_panda_moveit_config/config/panda.srdf`,
+SHA-256
+`1150719ea9d81139418198a50faea17e155323547d056c4edcb7ecc82fd8d317`,
+package `ros-jazzy-moveit-resources-panda-moveit-config` version
+`3.1.0-1noble.20260615.174424`, package-deb SHA-256
+`f9ae0802676e10b6532d73ad7657d53b40fa6a8106b4ffdc6e13e80f36794917`.
+Neither pair uses original-mesh criterion (b), so no kinematic-permanence claim
+is needed. There is no wildcard/category disable and no margin, padding, hull,
+or threshold change. The exact source audit is
+`reports/m2c-phase2-a3-acm-adr0025.json`.
+
+The corrected query-only deployment path was then byte-replayed under the
+pinned Isaac 6 container image without loading Kit or Isaac. The create-only
+receipt SHA-256 is
+`146e2b25a02ecfd87fc04bcb88cf56d43a965dd3b6f39ab18b7786ec666b4be1`.
+All 74 governed child-pair requests were clear, with zero collision rejections
+and zero query failures; `static_state_preflight_clear=true`. The audit is
+`reports/m2c-phase2-a3-acm-smoke.json`. This closes the specific static-start
+ACM blocker and the query-only native path. It is not an execution
+authorization: every real bound plan must still pass the full plan-specific
+A.3 replay before any command, and the real eight-skill/deployment evidence
+listed below remains absent.
 
 The preflight coordinator now defines `ExactPlanA3DeploymentBindingV2`. It
 implements ADR-0024 section 4 directly: trusted-host signatures and launcher
@@ -225,12 +238,13 @@ nor any safety/IK/collision/controller gate.
 - `REAL_SESSION_ENDPOINT_STARTUP_AND_HOST_HMAC_ATTESTATION_MISSING`
 - `TWO_ACTIVE_PRODUCTION_BINDINGS_UNSET`
 
-No training, Isaac scene startup, physical action, SMOKE, Q-B, or S5/S6
-evaluation was performed while generating this candidate. No Teacher entered
-the control path; Teacher kill rules remain unchanged.
+No training, Isaac scene startup, physical action, Q-B, or S5/S6 evaluation
+was performed while generating this candidate. The A3 run was a query-only
+contract smoke with zero target writes, simulation steps, or scene mutations.
+No Teacher entered the control path; Teacher kill rules remain unchanged.
 
 ## One next command
 
 ```bash
-.venv/bin/python scripts/m2c/audit_adr0024_phase2_candidate.py --project-root .
+PYTHONPATH=src:scripts uv run python scripts/m2c/audit_adr0024_phase2_candidate.py --project-root .
 ```

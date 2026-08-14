@@ -46,9 +46,13 @@ def test_candidate_smoke_is_blocked_unmeasured_and_never_physical() -> None:
     )
     assert report["a3_read_only_fk_evidence"]["comparison_row_count"] == 144
     assert not report["a3_read_only_fk_evidence"]["formal_execution_eligible"]
+    assert report["a3_acm_evidence"]["authorized_pair_count"] == 2
+    assert report["a3_acm_evidence"]["criterion"] == "A_OFFICIAL_UPSTREAM_SRDF"
+    assert not report["a3_acm_evidence"]["formal_execution_eligible"]
+    assert report["a3_query_only_deployment_smoke"]["request_segment_count"] == 74
     assert report["a3_query_only_deployment_smoke"]["clear_result_count"] == 74
-    assert report["a3_query_only_deployment_smoke"]["collision_rejection_count"] == 2
-    assert not report["a3_query_only_deployment_smoke"]["static_state_preflight_clear"]
+    assert report["a3_query_only_deployment_smoke"]["collision_rejection_count"] == 0
+    assert report["a3_query_only_deployment_smoke"]["static_state_preflight_clear"]
     assert not report["a3_query_only_deployment_smoke"]["formal_execution_eligible"]
     synthesis = report["exact_plan_synthesis_candidate"]
     assert synthesis["registered_skill_count"] == 8
@@ -216,5 +220,7 @@ def test_candidate_addendum_explicitly_disclaims_addendum_binding_and_runs() -> 
         PROJECT_ROOT / "docs/decisions/ADR-0024-PHASE2-BINDING-ADDENDUM-CANDIDATE.md"
     ).read_text()
     assert "not an accepted binding addendum" in content
-    assert "No training, Isaac scene startup, physical action, SMOKE, Q-B" in content
+    assert "A_OFFICIAL_UPSTREAM_SRDF" in content
+    assert "All 74 governed child-pair requests were clear" in content
+    assert "No training, Isaac scene startup, physical action, Q-B" in content
     assert "Teacher used: **false**" in content

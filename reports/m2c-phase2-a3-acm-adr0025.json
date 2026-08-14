@@ -1,0 +1,80 @@
+{
+  "accepted_adr": {
+    "commit": "abf66b1084e3820a327c29cb79ebf68af0252fd0",
+    "path": "docs/decisions/ADR-0025-m2c-raw-capacity-acm-and-yield.md",
+    "section": "2",
+    "sha256": "6f27171d319e3f966c652ca9f8c0fe7c641f4bf420de58642869f9c9c805c3aa"
+  },
+  "configuration": {
+    "configuration_sha256": "5bb066245f6e717c1997322faa613ef1446064932fc4375af1276e3a8d9fcb89",
+    "file_sha256": "9dd2a01d264b779782b0c1e7917b987b99a01e1f16a989b99870a24cecf88bcf",
+    "path": "configs/m2c_a3_acm_adr0025_v1.json"
+  },
+  "controlled_srdf": {
+    "added_pair_count": 2,
+    "baseline_commit": "93f72126e6f1b831b08852dfb7300f79cabe3aba",
+    "baseline_pair_count": 11,
+    "baseline_sha256": "80948370d547cb320e49d42ffc0467e082112c09f2984700b489def88526a386",
+    "path": "robot_ws/src/xh_sim/config/m1a_panda.srdf",
+    "removed_pair_count": 0,
+    "revised_pair_count": 13,
+    "revised_sha256": "9e139275cb11f0403abf10894f1424b80a5024e94f7d4e6fadb8bb637017edda"
+  },
+  "evidence_claims": {
+    "articulation_target_writes": 0,
+    "collision_margin_changed": false,
+    "collision_threshold_changed": false,
+    "hull_geometry_changed": false,
+    "outward_padding_changed": false,
+    "physical_execution_performed": false,
+    "privileged_truth_policy_input": false,
+    "query_only_source_audit": true,
+    "scene_mutations": 0,
+    "simulation_steps": 0,
+    "teacher_used": false,
+    "wildcard_or_category_disable_used": false
+  },
+  "implementation_commit": "f4c0ec89142a041a4651133027ade66bf878c40e",
+  "official_upstream_srdf": {
+    "host_role": "NODE2_QUERY_ONLY_BUILD_HOST",
+    "package": "ros-jazzy-moveit-resources-panda-moveit-config",
+    "package_deb_sha256": "f9ae0802676e10b6532d73ad7657d53b40fa6a8106b4ffdc6e13e80f36794917",
+    "package_version": "3.1.0-1noble.20260615.174424",
+    "package_xml_sha256": "b53f7a2faa2a0bd2ea28c592c90c95e66473236d95854a8592a0abf7b84780e1",
+    "path": "/opt/ros/jazzy/share/moveit_resources_panda_moveit_config/config/panda.srdf",
+    "sha256": "1150719ea9d81139418198a50faea17e155323547d056c4edcb7ecc82fd8d317"
+  },
+  "pair_evidence": [
+    {
+      "controlled_reason": "Adjacent",
+      "criterion": "A_OFFICIAL_UPSTREAM_SRDF",
+      "kinematic_permanence_claim_required": false,
+      "link_pair": [
+        "panda_hand",
+        "panda_link7"
+      ],
+      "official_upstream_reason": "Adjacent",
+      "original_mesh_check_used": false
+    },
+    {
+      "controlled_reason": "Never",
+      "criterion": "A_OFFICIAL_UPSTREAM_SRDF",
+      "kinematic_permanence_claim_required": false,
+      "link_pair": [
+        "panda_link2",
+        "panda_link4"
+      ],
+      "official_upstream_reason": "Never",
+      "original_mesh_check_used": false
+    }
+  ],
+  "schema_version": "M2CA3ADR0025ACMSourceAuditV1",
+  "source_bindings": {
+    "configs/m2c_a3_acm_adr0025_v1.json": "9dd2a01d264b779782b0c1e7917b987b99a01e1f16a989b99870a24cecf88bcf",
+    "robot_ws/src/xh_sim/config/m1a_panda.srdf": "9e139275cb11f0403abf10894f1424b80a5024e94f7d4e6fadb8bb637017edda",
+    "scripts/m1a_moveit_execution_client.py": "a1efbf98bab4d5a3c397c6cf9828a9ed4931333f9339f6d27614530d81ea465e",
+    "scripts/run_moveit_execution_gate.sh": "bf9f67f96b9e1dc542f6ddcd3f8f306cbeb68f56ca19f4edd1006f2212bd2fe4",
+    "src/xh_agent/policy/qrm_lite/a3_bullet_production_adapter_v1.py": "52bbf4144d7711d8860d8026444d2ad6af47d5136ae3921d55451400f9234262"
+  },
+  "status": "PASS_EXACT_TWO_ACM_PAIRS_HAVE_OFFICIAL_UPSTREAM_SRDF_EVIDENCE"
+}
