@@ -149,6 +149,8 @@ def test_phase2_query_only_evidence_remains_non_authorizing() -> None:
     assert phase2["query_only_clear_child_pairs"] == 74
     assert phase2["query_only_collision_rejections"] == 2
     assert phase2["query_only_query_failures"] == 0
+    assert phase2["bound_plan_provider_contract_active"] is True
+    assert phase2["real_bound_plan_synthesis_backend_bound"] is False
     assert phase2["formal_execution_eligible"] is False
     assert phase2["remaining_rejected_pairs"] == comparison["after"]["remaining_rejected_pairs"]
     assert all(
@@ -161,7 +163,7 @@ def test_phase2_query_only_evidence_remains_non_authorizing() -> None:
         )
     )
     assert "A3_STATIC_HOME_SELF_COLLISION_PREFLIGHT_REJECTED" not in phase2["blockers"]
-    assert "FORMAL_PUBLIC_OBSERVATION_V4_AND_BOUND_PLAN_PROVIDER_NOT_ACTIVE" in phase2["blockers"]
+    assert "REAL_BOUND_PLAN_SYNTHESIS_BACKEND_NOT_BOUND" in phase2["blockers"]
     assert "TWO_ACTIVE_PRODUCTION_BINDINGS_UNSET" in phase2["blockers"]
     assert "PHASE2_READINESS_VERIFIER_ADR0024_V2_MIGRATION_INCOMPLETE" in phase2["blockers"]
 

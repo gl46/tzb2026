@@ -151,6 +151,8 @@ class _Lifecycle:
 
 
 class _PlanProvider:
+    formal_execution_eligible = True
+
     def __init__(
         self,
         tmp_path: Path,
@@ -180,6 +182,8 @@ class _PlanProvider:
 
 
 class _RealBundle:
+    formal_execution_eligible = True
+
     def __init__(self, *, partial_before_command: bool = False) -> None:
         self.partial_before_command = partial_before_command
         self.execute_calls = 0

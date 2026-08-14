@@ -1,8 +1,8 @@
 {
   "schema_version": "M2CS4CurrentBlockersV2",
   "status": "BLOCKED_UNMEASURED_RAW_SCHEMA_AND_FORMAL_EXACT_PLAN_INTEGRATION",
-  "reported_at": "2026-08-14T03:43:35+08:00",
-  "checked_head_commit": "9777661643ca5af9732a35cb366e935a89b7263a",
+  "reported_at": "2026-08-14T09:34:37+08:00",
+  "checked_head_commit": "0e8eaa8d2496568149a76c6ba3f6906d84c0a078",
   "q_a_state": "PASSED",
   "q_b_state": "UNMEASURED",
   "pure_model_success_episodes": null,
@@ -101,10 +101,12 @@
     "query_only_clear_child_pairs": 74,
     "query_only_collision_rejections": 2,
     "query_only_query_failures": 0,
+    "bound_plan_provider_contract_active": true,
+    "real_bound_plan_synthesis_backend_bound": false,
     "formal_execution_eligible": false,
     "candidate_config": {
       "path": "configs/m2c_adr0024_phase2_binding_candidate.json",
-      "sha256": "ad9f0dc4ac1187c84647a066d3324978677c7a3530cfea06ea3d499a494e1f1c"
+      "sha256": "55f2d6d414a6aaf323137b8608d715da27c97de886220e01bc67ac27e44cc194"
     },
     "candidate_addendum": {
       "path": "docs/decisions/ADR-0024-PHASE2-BINDING-ADDENDUM-CANDIDATE.md",
@@ -131,7 +133,7 @@
     ],
     "blockers": [
       "EIGHT_SKILL_REAL_ISAAC_PHASE_VALIDATION_MISSING",
-      "FORMAL_PUBLIC_OBSERVATION_V4_AND_BOUND_PLAN_PROVIDER_NOT_ACTIVE",
+      "REAL_BOUND_PLAN_SYNTHESIS_BACKEND_NOT_BOUND",
       "IMMUTABLE_DEPLOYMENT_COMMIT_CONTAINER_IMPORT_ASSET_CLOSURE_MISSING",
       "REAL_EXACT_PLAN_ISAAC_EXECUTOR_MISSING",
       "REAL_QUERY_ONLY_FK_PROVIDER_DEPLOYMENT_BINDING_MISSING",

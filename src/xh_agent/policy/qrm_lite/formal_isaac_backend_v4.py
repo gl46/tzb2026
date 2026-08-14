@@ -383,6 +383,11 @@ class FormalIsaacBackendCoordinatorV4:
         if exact_plan_runtime.provider is None or exact_plan_runtime.bundle is None:
             raise ValueError("formal V4 exact-plan runtime is not production-bound")
         if (
+            getattr(exact_plan_runtime.provider, "formal_execution_eligible", False) is not True
+            or getattr(exact_plan_runtime.bundle, "formal_execution_eligible", False) is not True
+        ):
+            raise ValueError("formal V4 plan provider/bundle is not execution-eligible")
+        if (
             observation_provider.deployment.deployment_binding_sha256
             != endpoint_binding.association_deployment_sha256
             or observation_provider.deployment.capture_source_implementation_sha256

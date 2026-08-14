@@ -39,6 +39,7 @@ SOURCE_PATHS = (
     Path("src/xh_agent/policy/qrm_lite/formal_split_runner_v4.py"),
     Path("src/xh_agent/policy/qrm_lite/formal_isaac_endpoint_v4.py"),
     Path("src/xh_agent/policy/qrm_lite/formal_exact_plan_runtime_v1.py"),
+    Path("src/xh_agent/policy/qrm_lite/formal_bound_plan_provider_v1.py"),
     Path("src/xh_agent/policy/qrm_lite/formal_isaac_backend_v4.py"),
     Path("src/xh_agent/policy/qrm_lite/s4_entry_gate.py"),
     Path("configs/m2c_adr0024_phase2_binding_candidate.json"),
@@ -179,11 +180,13 @@ def build_report() -> dict[str, Any]:
     observation_path = Path("src/xh_agent/policy/qrm_lite/path_blocked_supervision_v4.py")
     endpoint_v4_path = Path("src/xh_agent/policy/qrm_lite/formal_isaac_endpoint_v4.py")
     backend_v4_path = Path("src/xh_agent/policy/qrm_lite/formal_isaac_backend_v4.py")
+    bound_provider_path = Path("src/xh_agent/policy/qrm_lite/formal_bound_plan_provider_v1.py")
     bundle_path = Path("src/xh_agent/policy/qrm_lite/exact_plan_primitive_bundle_v1.py")
     entry_path = Path("src/xh_agent/policy/qrm_lite/s4_entry_gate.py")
     observation = _module(observation_path)
     endpoint_v4 = _module(endpoint_v4_path)
     backend_v4 = _module(backend_v4_path)
+    bound_provider = _module(bound_provider_path)
     legacy_backend = _module(backend_path)
     bundle = _module(bundle_path)
     entry = _module(entry_path)
@@ -230,6 +233,9 @@ def build_report() -> dict[str, Any]:
         raise AuditError("formal V4 endpoint state machine is incomplete")
     if not {"start", "capture", "execute", "finalize"}.issubset(backend_methods):
         raise AuditError("formal V4 backend coordinator is incomplete")
+    provider_methods = _class_methods(bound_provider, "FormalBoundExactPlanProviderV1")
+    if not {"_validate_production_deployment", "build_bound_plan"}.issubset(provider_methods):
+        raise AuditError("formal V4 bound-plan provider contract is incomplete")
     backend_v4_source = (ROOT / backend_v4_path).read_text(encoding="utf-8")
     runtime_bridge_active = all(
         token in backend_v4_source
@@ -276,6 +282,7 @@ def build_report() -> dict[str, Any]:
             "versioned_formal_v4_observation_transport": True,
             "bound_plan_runtime_dynamic_a1_cross_binding": True,
             "bound_plan_runtime_single_use_execution_attempt": True,
+            "deployment_bound_plan_provider_contract_active": True,
             "formal_v4_endpoint_state_machine_active": True,
             "formal_v4_backend_coordinator_active": runtime_bridge_active,
             "replayable_public_observation_provider_active": True,
@@ -300,6 +307,7 @@ def build_report() -> dict[str, Any]:
             "v4_backend_coordinator_active": runtime_bridge_active,
             "v4_public_observation_provider_active": True,
             "v4_exact_plan_runtime_prepare_and_execute_active": True,
+            "v4_bound_plan_provider_contract_active": True,
             "legacy_v2_construct_exact_plan_is_rejection_stub": legacy_construct_stub,
             "legacy_v2_execute_exact_plan_is_rejection_stub": legacy_execute_stub,
             "production_bound_plan_constructor_calls": constructor_calls,
@@ -311,7 +319,7 @@ def build_report() -> dict[str, Any]:
         "teacher_used": False,
         "privileged_truth_policy_input": False,
         "blockers": [
-            "PRODUCTION_BOUND_PLAN_PROVIDER_NOT_IMPLEMENTED",
+            "REAL_BOUND_PLAN_SYNTHESIS_BACKEND_NOT_BOUND",
             "REAL_ISAAC_EPISODE_LIFECYCLE_AND_CAPTURE_SOURCE_NOT_BOUND",
             "PLAN_SPECIFIC_A3_PREFLIGHT_AND_EIGHT_SKILL_EXECUTION_UNMEASURED",
             "PHASE2_READINESS_VERIFIER_ADR0024_V2_MIGRATION_INCOMPLETE",
@@ -319,11 +327,11 @@ def build_report() -> dict[str, Any]:
         ],
         "verification": {
             "command": ".venv/bin/pytest -q tests/unit/test_m2c_*.py",
-            "passed": 780,
+            "passed": 786,
             "failed": 0,
         },
         "next_implementation_order": [
-            "IMPLEMENT_PRODUCTION_BOUND_PLAN_PROVIDER_OVER_V4_AND_MAPPING_INPUTS",
+            "BIND_REAL_QUERY_ONLY_PLAN_SYNTHESIS_BACKEND",
             "BIND_REAL_ISAAC_EPISODE_LIFECYCLE_AND_PUBLIC_CAPTURE_SOURCE",
             "REPLAY_PLAN_SPECIFIC_A3_PREFLIGHT_FOR_ALL_EIGHT_SKILLS",
             "MIGRATE_PHASE2_READINESS_TO_ADR0024_AND_SET_ONLY_TWO_ACTIVE_BINDINGS",
@@ -372,11 +380,13 @@ evaluation.  INVALID mappings and explicitly typed non-actuating gate
 rejections terminate as `NO_PHYSICAL_EXECUTION`; unknown failures are not
 laundered into experimental outcomes.
 
-The coordinator does not generate waypoints.  It requires a separately frozen
-bound-plan provider, real-Isaac episode lifecycle/capture source, and primitive
-bundle.  No production bound-plan constructor or real lifecycle deployment is
-present, plan-specific A3 evidence for all eight skills remains unmeasured, and
-the Phase-2 readiness verifier has not completed its ADR-0024 migration.
+The coordinator does not generate waypoints.  A single-use, deployment-bound
+provider now consumes one query-only active-session state receipt and replays
+the complete request/observation/mapping/plan/source closure before exposing a
+plan.  Its real Isaac synthesis backend and lifecycle/capture deployment are
+still absent, plan-specific A3 evidence for all eight skills remains
+unmeasured, and the Phase-2 readiness verifier has not completed its ADR-0024
+migration.
 
 ## Blockers
 

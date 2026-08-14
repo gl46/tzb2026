@@ -586,6 +586,23 @@ class M2CExactPlanPrimitiveBundleV1:
         self.preflight_verifier = preflight_verifier
         self.executor = executor
 
+    @property
+    def formal_execution_eligible(self) -> bool:
+        """Whether production dependencies are present before per-plan replay.
+
+        This is only a constructor-level prerequisite.  ``_require_binding``
+        still replays every bound file and plan-specific identity before any
+        preflight or phase command.
+        """
+
+        return bool(
+            self.binding is not None
+            and self.binding.execution_mode == "REAL_ISAAC"
+            and self.preflight_verifier is not None
+            and self.executor is not None
+            and self.executor.real_isaac
+        )
+
     def _require_binding(self, plan: M2CExactPlanPrimitivePlanV1) -> None:
         binding = self.binding
         if binding is None or self.preflight_verifier is None or self.executor is None:

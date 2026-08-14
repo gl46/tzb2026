@@ -1,7 +1,7 @@
 # M2C Phase-2 formal exact-plan integration audit
 
 - Status: **BLOCKED_UNMEASURED_FORMAL_EXACT_PLAN_INTEGRATION**
-- Checked HEAD: `2063092f7535f29dcfb4e8295fe3e62d2d47da00`
+- Checked HEAD: `0e8eaa8d2496568149a76c6ba3f6906d84c0a078`
 - Formal execution eligible: **false**
 - Physical execution / training by this audit: **false / false**
 
@@ -30,15 +30,17 @@ evaluation.  INVALID mappings and explicitly typed non-actuating gate
 rejections terminate as `NO_PHYSICAL_EXECUTION`; unknown failures are not
 laundered into experimental outcomes.
 
-The coordinator does not generate waypoints.  It requires a separately frozen
-bound-plan provider, real-Isaac episode lifecycle/capture source, and primitive
-bundle.  No production bound-plan constructor or real lifecycle deployment is
-present, plan-specific A3 evidence for all eight skills remains unmeasured, and
-the Phase-2 readiness verifier has not completed its ADR-0024 migration.
+The coordinator does not generate waypoints.  A single-use, deployment-bound
+provider now consumes one query-only active-session state receipt and replays
+the complete request/observation/mapping/plan/source closure before exposing a
+plan.  Its real Isaac synthesis backend and lifecycle/capture deployment are
+still absent, plan-specific A3 evidence for all eight skills remains
+unmeasured, and the Phase-2 readiness verifier has not completed its ADR-0024
+migration.
 
 ## Blockers
 
-- `PRODUCTION_BOUND_PLAN_PROVIDER_NOT_IMPLEMENTED`
+- `REAL_BOUND_PLAN_SYNTHESIS_BACKEND_NOT_BOUND`
 - `REAL_ISAAC_EPISODE_LIFECYCLE_AND_CAPTURE_SOURCE_NOT_BOUND`
 - `PLAN_SPECIFIC_A3_PREFLIGHT_AND_EIGHT_SKILL_EXECUTION_UNMEASURED`
 - `PHASE2_READINESS_VERIFIER_ADR0024_V2_MIGRATION_INCOMPLETE`
@@ -46,7 +48,7 @@ the Phase-2 readiness verifier has not completed its ADR-0024 migration.
 
 ## Safe implementation order
 
-1. `IMPLEMENT_PRODUCTION_BOUND_PLAN_PROVIDER_OVER_V4_AND_MAPPING_INPUTS`
+1. `BIND_REAL_QUERY_ONLY_PLAN_SYNTHESIS_BACKEND`
 2. `BIND_REAL_ISAAC_EPISODE_LIFECYCLE_AND_PUBLIC_CAPTURE_SOURCE`
 3. `REPLAY_PLAN_SPECIFIC_A3_PREFLIGHT_FOR_ALL_EIGHT_SKILLS`
 4. `MIGRATE_PHASE2_READINESS_TO_ADR0024_AND_SET_ONLY_TWO_ACTIVE_BINDINGS`
@@ -57,7 +59,7 @@ withdrawn compatibility sentinels remain `None`. Teacher and privileged
 simulator truth were not used.
 
 Verification: `.venv/bin/pytest -q tests/unit/test_m2c_*.py` ->
-**780 passed**, 0 failed.
+**786 passed**, 0 failed.
 
 Next command:
 
