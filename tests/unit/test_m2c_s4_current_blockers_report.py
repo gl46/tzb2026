@@ -60,7 +60,9 @@ def test_current_s4_blocker_report_replays_v3_and_v4_collection() -> None:
     report = json.loads(REPORT.read_bytes())
 
     assert report["schema_version"] == "M2CS4CurrentBlockersV2"
-    assert report["status"] == ("BLOCKED_UNMEASURED_RAW_SCHEMA_AND_FORMAL_EXACT_PLAN_INTEGRATION")
+    assert report["status"] == (
+        "BLOCKED_UNMEASURED_ZERO_ELIGIBLE_YIELD_AND_FORMAL_EXACT_PLAN_INTEGRATION"
+    )
     assert report["q_a_state"] == "PASSED"
     assert report["q_b_state"] == "UNMEASURED"
     assert report["pure_model_success_episodes"] is None
@@ -107,21 +109,27 @@ def test_current_s4_blocker_report_replays_v3_and_v4_collection() -> None:
     )
 
 
-def test_raw_detection_capacity_decision_remains_fail_closed() -> None:
+def test_raw_detection_capacity_is_accepted_but_training_remains_fail_closed() -> None:
     report = json.loads(REPORT.read_bytes())
     training = report["path_blocked_training"]
-    pending = training["pending_schema_decision"]
-    request_path = ROOT / pending["path"]
+    accepted = training["accepted_raw_capacity_decision"]
+    assert _sha256(ROOT / accepted["path"]) == accepted["sha256"]
+    assert accepted["status"] == "ACCEPTED_HUMAN_DECISION"
+    assert accepted["selected_option"] == "A"
+    assert accepted["max_raw_public_detections"] == 32
+    assert accepted["observed_maximum_is_not_numeric_authority"] is True
+    assert accepted["offline_replay_authorized"] is True
+    assert accepted["new_collection_authorized"] is True
+    assert accepted["training_authorized"] is False
+    assert training["raw_detection_capacity_decision_required"] is False
 
-    assert _sha256(request_path) == pending["sha256"]
-    assert pending["status"] == "POST_OUTCOME_NOT_APPROVED"
-    assert pending["selected_option"] is None
-    assert pending["max_raw_public_detections"] is None
-    assert pending["observed_maximum_is_not_numeric_authority"] is True
-    assert pending["offline_replay_authorized"] is False
-    assert pending["new_collection_authorized"] is False
-    assert pending["training_authorized"] is False
-    assert training["raw_detection_capacity_decision_required"] is True
+    replay = _load_binding(training["scene_19083_offline_replay"])
+    assert replay["status"] == "PASS_OFFLINE_REPLAY_EXCLUDED_UNCHANGED_PHYSICAL_FAILURE"
+    assert replay["unchanged_outcome"]["training_sample_eligible"] is False
+    assert replay["unchanged_outcome"]["offline_dataset_sample_count"] == 0
+    yield_report = _load_binding(training["training_eligibility_yield"])
+    assert yield_report["observed_yield"]["eligible_training_episodes"] == 0
+    assert yield_report["observed_yield"]["finite_key_projection_for_one_eligible_episode"] is None
 
     batch08 = _load_binding(training["source_reports"][-1])
     raw_attempt = next(
@@ -143,11 +151,11 @@ def test_phase2_query_only_evidence_remains_non_authorizing() -> None:
     comparison = _load_binding(phase2["query_only_comparison_report"])
 
     assert candidate["status"] == "CONTRACT_SMOKE_ONLY_BLOCKED_UNMEASURED"
-    assert comparison["status"] == "PASS_DEPLOYMENT_QUERY_REPLAY_BLOCKED_STATIC_HOME_COLLISION"
+    assert comparison["status"] == "PASS_QUERY_ONLY_A3_ACM_SMOKE_CLEAR"
     assert phase2["query_only_deployment_path_completed"] is True
-    assert phase2["query_only_static_state_preflight_clear"] is False
+    assert phase2["query_only_static_state_preflight_clear"] is True
     assert phase2["query_only_clear_child_pairs"] == 74
-    assert phase2["query_only_collision_rejections"] == 2
+    assert phase2["query_only_collision_rejections"] == 0
     assert phase2["query_only_query_failures"] == 0
     assert phase2["a3_phase_swept_collision_contract_active"] is True
     assert phase2["a3_phase_evidence_replay_active"] is True
@@ -205,7 +213,7 @@ def test_phase2_query_only_evidence_remains_non_authorizing() -> None:
     assert phase2["real_node2_and_labserver_hmac_receipts_present"] is False
     assert phase2["real_formal_v4_isaac_http_service_bound"] is False
     assert phase2["formal_execution_eligible"] is False
-    assert phase2["remaining_rejected_pairs"] == comparison["after"]["remaining_rejected_pairs"]
+    assert phase2["remaining_rejected_pairs"] == comparison["query_result"]["rejected_pairs"]
     assert all(
         phase2[field] is None
         for field in (

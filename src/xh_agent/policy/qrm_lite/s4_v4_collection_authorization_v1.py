@@ -92,6 +92,10 @@ AUTHORITATIVE_PRIOR_ATTEMPT_SOURCES = {
         3,
     ),
 }
+AUTHORITATIVE_PRIOR_ATTEMPT_KEY_COUNT = sum(
+    expected_unique
+    for _sha256, _schema, expected_unique in AUTHORITATIVE_PRIOR_ATTEMPT_SOURCES.values()
+)
 CANONICAL_COLLECTION_LEDGER_ROOT = (
     "/var/tmp/xh-data/isaac-industrial/m2c/s4-v4-collection-authorization-ledger-v1"
 )
@@ -860,8 +864,10 @@ def load_committed_collection_prereg(
             raise CollectionAuthorizationError(
                 "prior attempt source has the wrong unique-key count"
             )
-    if len(prior_keys) != 16:
-        raise CollectionAuthorizationError("prior attempt inventory must contain 16 unique keys")
+    if len(prior_keys) != AUTHORITATIVE_PRIOR_ATTEMPT_KEY_COUNT:
+        raise CollectionAuthorizationError(
+            "prior attempt inventory does not contain the exact authoritative unique-key union"
+        )
     expected: list[SelectedV4TrainKeyV1] = []
     selected_sdfs: set[str] = set()
     for item in manifest.training_keys:

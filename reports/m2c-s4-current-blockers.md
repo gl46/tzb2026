@@ -1,7 +1,7 @@
 # M2C S4 current blockers
 
-- Status: **BLOCKED_UNMEASURED_RAW_SCHEMA_AND_FORMAL_EXACT_PLAN_INTEGRATION**
-- Checked HEAD: `d2f2877f128e989678424ddbb0f4a117b69ae1c7`
+- Status: **BLOCKED_UNMEASURED_ZERO_ELIGIBLE_YIELD_AND_FORMAL_EXACT_PLAN_INTEGRATION**
+- Checked parent HEAD: `b04bb2c433f3ab54a00316abf4112da9c5f0cd71`
 - Q-A: **PASSED**
 - Q-B: **UNMEASURED**
 - `pure_model_success_episodes`: **null**, not zero
@@ -9,153 +9,35 @@
 
 ## PATH_BLOCKED training entry
 
-The permission problem is resolved. Batch-04 consumed three preregistered V4
-TRAIN keys but failed before Kit because the stage-output directory was not
-writable. The subsequent immutable evidence shows progressive recovery of the
-same execution path:
+ADR-0025 approved raw public-detection capacity 32 from the frozen scene-contract provenance, not from the observed maximum. The immutable scene-19083 bytes now pass the revised raw schema without truncation or filtering, but the physical result remains authoritative: terminal `CONTACT_GATE_REJECTED`, `final_task_success=false`, zero eligible rows, and no packaged sample.
 
-- Batch-06 passed stage construction and was stopped by an overly strict
-  source-snapshot owner check before the probe could start Kit;
-- Batch-07 started the probe's `SimulationApp` and was stopped before the
-  physics timeline by a premature proprioception read;
-- Batch-08 produced one complete eight-step raw public physical chain with
-  eight physical-skill receipts and zero collision or safety violations.
+Across the six immutable V3/V4 collection reports, 19 distinct TRAIN identities produced 11 complete eight-step chains and zero eligible episodes. The committed ADR-0025 section-3 audit measures both per-key yield (0/19) and complete-chain conditional yield (0/11) as 0.0. At that observed point yield there is no finite evidence-based projection even for the trainer's code minimum of one eligible episode. This blocks training; it does not claim model capability is zero. Model rollout and formal Q-B evaluation have not run, so pure success remains `null`.
 
-Across V3 and V4, 19 distinct TRAIN identities have now been consumed: 11 V3
-identities and 8 V4 identities. The immutable reports contain ten V3
-eight-step chains and one V4 raw eight-step chain. None is currently eligible
-for training, so packaged samples remain zero. Training, model rollout, and
-formal Q-B evaluation have not run; `pure_model_success_episodes` must remain
-null.
+Ten complete V3 chains passed gates for steps 0–6. Across all complete chains, seven terminate at the contact/controller gate, three at pregrasp IK, and one lifts but fails the public success predicate. This supports a recurring terminal regrasp approach/contact-acceptance mismatch but does not isolate perception offset, approach geometry, or object state. No gate, threshold, B0 byte, or frozen eligibility predicate was changed.
 
-The remaining V4 collection blocker is not a permission failure. Scene 19083's
-ordered public captures contain 7, 13, 11, 7, 8, 9, 10, and 10 raw detections.
-The approved association contract currently limits the *raw* capture schema to
-8 before association, independently of the final K=8 candidate window. The
-host replay therefore correctly rejects five captures and does not package the
-chain. Its physical result remains `final_task_success=false` with a terminal
-contact-gate rejection; making the captures parseable cannot reinterpret that
-outcome.
+No Batch-09 preregistration is active in this snapshot, so collection remains fail-closed until its prereg-only commit.
 
-Changing the raw schema bound is one of ADR-0024's explicitly retained human
-decision categories. The post-outcome request
-`M2C-S4-V4-RAW-DETECTION-CAPACITY-ADR-REQUEST.md` therefore remains NOT
-APPROVED: it records no selected option, no numeric capacity, no offline replay
-authority, and no new collection or training authority. In particular, the
-observed maximum 13 is not used as numeric authority.
+## ADR-0022 / ADR-0024 / ADR-0025 Phase-2 entry
 
-## ADR-0022 / ADR-0024 Phase-2 entry
+ADR-0025 authorizes exactly two controlled-Panda start-state ACM pairs, each proven by the pinned official upstream MoveIt Panda SRDF: `panda_hand`–`panda_link7` (`Adjacent`) and `panda_link2`–`panda_link4` (`Never`). The controlled SRDF removes no pair and changes no margin, padding, hull, or threshold.
 
-The A3 query-only deployment path is now executable with immutable permissions,
-the pinned Isaac 6.0.1 image, float64 Bullet libraries, the controlled-Panda
-URDF/SRDF and original collision meshes. It starts neither Kit nor Isaac and
-performs zero articulation writes, simulation steps, scene mutations, Teacher
-calls, or privileged-truth policy reads.
+The corrected immutable query-only smoke executes 74 governed child-pair requests: 74 clear, zero collision rejection, and zero query failure. It starts neither Kit nor Isaac and performs zero articulation writes, simulation steps, or scene mutations. This closes the specific static-start ACM blocker but is not physical execution evidence.
 
-The final immutable query-only smoke checked all 76 non-ACM child pairs at the
-same frozen joint state. Seventy-four are clear, two are fail-closed collision
-rejections, and none is a query failure. The rejected pairs are
-`panda_hand`–`panda_link7` and `panda_link2`–`panda_link4`; both already overlap
-at the discrete start state and neither is disabled in the frozen SRDF. No
-collision margin, padding, geometry, ACM entry, or safety threshold was changed
-to force a pass.
+The Phase-2 candidate remains `CONTRACT_SMOKE_ONLY_BLOCKED_UNMEASURED`. Real eight-skill plan-specific A3 evidence, immutable deployment/import closure, the reviewed synthesis/episode-I/O deployment, the real exact-plan executor, deployed read-only FK, and real endpoint/host-HMAC evidence remain absent. The two active production bindings remain unset; the withdrawn B0-wrapper and trusted-host signing prerequisites are not reinstated.
 
-Consequently the Phase-2 candidate addendum remains
-`CONTRACT_SMOKE_ONLY_BLOCKED_UNMEASURED`. It is not physical evidence and does
-not authorize formal execution. The four production bindings remain null.
-The candidate now includes a replayable per-phase A3 swept-collision contract:
-it binds the complete joint path, collision world, geometry, FK receipt,
-complete child-pair request, native receipt, and numeric configuration. No real
-phase evidence has been produced, so this closes only the offline contract and
-does not change formal eligibility.
-The versioned eight-skill exact-plan synthesis backend is also implemented and
-locally replayed. It consumes only the frozen runtime mapping, the replayed V4
-public observation, and one query-only active-session state; before returning
-it fixes one public free-gap yaw, one contact centreline, every Cartesian and
-gripper phase, all source/allowlist digests, and zero retries. The candidate
-numeric configuration and dependency manifest are source-bound to commit
-`d00c1a4e6ac29049125e2ed62ae479d4d3397bb0`. A query-only bridge now composes
-one fresh single-use articulation/pose provider per decision with the shared
-scene-owner mutation counter and independently bound scene/attachment safety
-receipt. It rejects crossed state, mutation, retry, or a non-unique contact
-path. This closes the generic synthesis query contract, not deployment: no
-reviewed producer binds a public track to its A3 collision path and no reviewed
-production deployment is bound, so it remains non-executable.
-The planned attachment transition is likewise replayable from the exact
-left/right/external allowlists and runtime-snapshot digest. It never claims a
-physical contact or mutates the scene; the unchanged execution-time bilateral
-broker remains mandatory. No real runtime snapshot is bound yet.
-The new single-use A3 callback composition enforces the exact
-snapshot -> path -> collision -> attachment order, poisons on retry or any
-active-session mutation, and requires attached-object geometry for subsequent
-motion phases. The complete-scene V2 contract now byte-replays the frozen SDF
-and supervision, covers six dynamic cylinder collisions plus the work table and
-partition-bin floor, binds getter-only active-session poses for all eight links,
-and composes robot self, robot/environment and attached/environment pairs into
-one replayable float64 child-pair request. Environment/environment pairs and
-only exact phase-allowlisted contact pairs are excluded. The real-Isaac scene
-owner now materializes the same eight collision-bearing `RigidPrim` handles
-after natural stability and shares a monotonic host-owned mutation counter with
-the getter-only scene source. Public-capture Kit steps increment that counter
-before the call. The separate attached-object resolver binds the canonical
-planned ATTACH transition evidence and source scene state to a hand/object
-relative transform, then replays every later end-effector path sample. The
-complete-scene receipt embeds that derivation evidence and requires a one-to-one
-match with every attached geometry before any native query; unknown initial
-attachments, missing derivation evidence, and source mutation reject. This
-closes the local source/resolver contract gap,
-not deployment: no Isaac process was started, no real scene-state or attached
-geometry receipt exists, and the resolver is not composed into the unbound V4
-HTTP backend factory. Formal eligibility therefore remains false.
-The V4 host-orchestration/evidence contract and HTTP service shell now exist
-and preserve terminal `NO_PHYSICAL_EXECUTION` without B0 substitution. The
-service's production backend factory remains deliberately unbound. The V4
-host-local verifier now replays both exact audit lifecycles, every HMAC
-envelope, the consumed challenge, and variable one-to-eight-decision terminal
-counts without an SSH/signing prerequisite. No real node2/labserver receipt
-has been produced. The ADR-0024 V2 readiness verifier is complete and remains
-fail-closed because no real evidence index exists. Plan-specific eight-skill phase receipts,
-immutable deployment/import closure, the real public-track-to-collision-path
-safety binding and synthesis deployment, the real exact-plan Isaac executor, the deployed
-read-only FK provider, and real-session endpoint evidence remain missing.
-The formal V4 episode-I/O lifecycle is now one explicit fail-closed contract:
-one persistent scene owner supplies the public failure boundary, eight ordered
-public captures and the final public evaluation; each transition is single-use,
-capture-prefix replay is exact, and immutable source/Git identity is checked
-before the owner is contacted. This closes the generic lifecycle/capture-source
-implementation gap only. No reviewed real-Isaac episode-I/O deployment, real
-scene owner or HTTP backend-factory binding exists, so it remains
-non-executable and produces no physical evidence.
-The S4 entry gate now preserves the historical V2 path and independently
-replays the strict formal V4 Phase-2 evidence index through its versioned V3
-physical envelope. Both active bindings remain unset, so this closes an
-implementation blocker without authorizing execution.
+The 2026-08-20 bundle-smoke checkpoint is unchanged.
 
-ADR-0024's B0 decision is preserved: invalid mapping or preflight rejection is
-terminal `NO_PHYSICAL_EXECUTION`, never a relabelled B0 fallback. The independent
-B0 comparison arm remains unchanged.
+## Boundaries
 
-## Boundaries and verification
-
-- Teacher use: **false**; Nano/BWM/Super remain CANDIDATE /
-  CANDIDATE_LICENSE_PENDING / PARKED.
+- Teacher use: **false**; Teacher kill rules unchanged.
 - Privileged simulator truth as policy input: **false**.
 - B0 and M2B evidence: unchanged.
-- Production safety/IK/collision/controller/schema gates: unchanged.
-- V4 physical-supervision collection after Batch-03: **yes**, exactly as
-  recorded by the Batch-04/06/07/08 reports.
-- Training / Phase-2 physical smoke / formal Q-B evaluation:
-  **false / false / false**.
-- S6 frozen evaluation-manifest SHA:
-  `ce1440966d31dda6b3f0e06c41a19dc654ebc734a6597d6346ec9df3c5f0d2ba`.
-- Focused S6/status/entry regression: **36 passed**.
-
-Failures: no product-test failure. The mainline remains deliberately
-fail-closed at two boundaries: the governed V4 raw-detection schema decision
-and the unbound formal exact-plan deployment/evidence path.
+- Training / model rollout / formal Q-B: **false / false / false**.
+- Query-only A3 smoke: **true**, with no physical execution.
+- S6 frozen evaluation-manifest SHA: `ce1440966d31dda6b3f0e06c41a19dc654ebc734a6597d6346ec9df3c5f0d2ba`.
 
 Next command:
 
 ```bash
-.venv/bin/pytest -q tests/unit/test_m2c_s4_current_blockers_report.py
+PYTHONPATH=src:scripts uv run pytest -q tests/unit/test_m2c_s4_current_blockers_report.py tests/unit/test_m2c_s4_v4_batch09_prereg_builder.py
 ```
