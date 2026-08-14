@@ -98,6 +98,16 @@ def test_candidate_config_requires_literal_none_bindings_and_exact_terminal_poli
         candidate["source_bindings"][callback_path]
         == hashlib.sha256((PROJECT_ROOT / callback_path).read_bytes()).hexdigest()
     )
+    for complete_scene_path in (
+        "src/xh_agent/policy/qrm_lite/a3_scene_environment_v1.py",
+        "src/xh_agent/policy/qrm_lite/a3_complete_scene_collision_v2.py",
+        "src/xh_agent/policy/qrm_lite/a3_complete_scene_swept_collision_evidence_v2.py",
+        "src/xh_agent/policy/qrm_lite/a3_complete_scene_swept_collision_v2.py",
+    ):
+        assert (
+            candidate["source_bindings"][complete_scene_path]
+            == hashlib.sha256((PROJECT_ROOT / complete_scene_path).read_bytes()).hexdigest()
+        )
     assert (
         candidate["source_bindings"]["src/xh_agent/policy/qrm_lite/formal_split_host_v4.py"]
         == hashlib.sha256(

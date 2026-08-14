@@ -110,10 +110,22 @@ enforces runtime-snapshot -> query-only path -> swept-collision -> planned
 attachment order for every phase, poisons on retry or active-session mutation,
 and requires attached-object geometry on every subsequent motion phase. Its
 collision interface deliberately requires both complete continuous-self and
-complete robot/environment scene coverage; the current standalone Bullet
-self-CCD provider cannot satisfy that interface by itself. No production
-scene-environment provider or real attached-object phase-geometry resolver is
-bound, so this composition remains contract-only.
+complete robot/environment scene coverage; the standalone Bullet self-CCD
+provider cannot satisfy that interface by itself.
+
+The versioned complete-scene contract now byte-replays the generated SDF and
+supervision, rejects every unknown collision-bearing model or unsupported
+shape, and expands the frozen V4 scene into six dynamic cylinders plus the
+work-table and partition-bin collision primitives. A getter-only scene-state
+receipt binds all eight active-session link poses to the same mutation counter
+as the robot snapshot. The V2 world composer removes an attached target from
+the ordinary environment exactly once, keeps attached-object/environment and
+robot/environment pairs in the float64 child-pair product, excludes only
+environment/environment pairs and contact pairs already frozen by the exact
+phase, and independently replays the aggregate receipt in preflight. These
+properties are covered by local contract tests only. No real active-session
+scene-state receipt, real complete-scene phase receipt, or real attached-object
+phase-geometry resolver is bound, so the composition remains non-authorizing.
 
 The V4 host-local HMAC verifier and create-only CLI now replay both sides of a
 terminalized episode without any SSH signature, trust root, or signer

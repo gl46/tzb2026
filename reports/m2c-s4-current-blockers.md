@@ -75,9 +75,15 @@ broker remains mandatory. No real runtime snapshot is bound yet.
 The new single-use A3 callback composition enforces the exact
 snapshot -> path -> collision -> attachment order, poisons on retry or any
 active-session mutation, and requires attached-object geometry for subsequent
-motion phases. It cannot be promoted by wiring the standalone self-CCD
-provider alone: a complete robot/environment swept-collision provider and a
-real attached-object phase-geometry resolver are both still unbound.
+motion phases. The complete-scene V2 contract now byte-replays the frozen SDF
+and supervision, covers six dynamic cylinder collisions plus the work table and
+partition-bin floor, binds getter-only active-session poses for all eight links,
+and composes robot self, robot/environment and attached/environment pairs into
+one replayable float64 child-pair request. Environment/environment pairs and
+only exact phase-allowlisted contact pairs are excluded. This closes the local
+contract implementation gap, not deployment: no real scene-state receipt,
+complete-scene phase receipt, or real attached-object geometry resolver is
+bound, so formal eligibility remains false.
 The V4 host-orchestration/evidence contract and HTTP service shell now exist
 and preserve terminal `NO_PHYSICAL_EXECUTION` without B0 substitution. The
 service's production backend factory remains deliberately unbound. The V4

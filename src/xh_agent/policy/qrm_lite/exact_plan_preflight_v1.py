@@ -35,6 +35,9 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 from xh_agent.policy.qrm_lite.a3_attachment_transition_evidence_v1 import (
     A3AttachmentTransitionEvidenceV1,
 )
+from xh_agent.policy.qrm_lite.a3_complete_scene_swept_collision_evidence_v2 import (
+    A3CompleteScenePhaseSweptCollisionEvidenceV2,
+)
 from xh_agent.policy.qrm_lite.a3_phase_swept_collision_evidence_v1 import (
     A3PhaseSweptCollisionEvidenceV1,
 )
@@ -625,7 +628,9 @@ class NonActuatingSweptCollisionV1(FrozenModel):
     algorithm_sha256: str = Field(pattern=SHA256_PATTERN)
     configuration_sha256: str = Field(pattern=SHA256_PATTERN)
     segments: tuple[SweptCollisionSegmentV1, ...]
-    a3_phase_evidence: A3PhaseSweptCollisionEvidenceV1 | None = None
+    a3_phase_evidence: (
+        A3PhaseSweptCollisionEvidenceV1 | A3CompleteScenePhaseSweptCollisionEvidenceV2 | None
+    ) = None
     query_duration_ns: int = Field(ge=0)
     query_only: Literal[True] = True
     articulation_target_writes: Literal[0] = 0
@@ -1632,21 +1637,35 @@ class ExactPlanPreflightV1:
 
         a3_contract = config.algorithm_id == "A3_BULLET_CHILD_PAIR_CCD_CONTRACT_V1"
         a3_formal = config.algorithm_id == "A3_BULLET_CHILD_PAIR_CCD_V1"
-        if expected_segments and (a3_contract or a3_formal):
+        a3_complete_contract = (
+            config.algorithm_id == "A3_BULLET_COMPLETE_SCENE_CHILD_PAIR_CCD_CONTRACT_V2"
+        )
+        a3_complete_formal = config.algorithm_id == "A3_BULLET_COMPLETE_SCENE_CHILD_PAIR_CCD_V2"
+        if expected_segments and (
+            a3_contract or a3_formal or a3_complete_contract or a3_complete_formal
+        ):
             evidence = collision.a3_phase_evidence
             if evidence is None:
                 raise ExactPlanPreflightRejected(
                     "A.3 swept collision lacks complete child-pair evidence"
                 )
             request = evidence.child_pair_request
+            if isinstance(evidence, A3CompleteScenePhaseSweptCollisionEvidenceV2):
+                geometry_sha256 = evidence.collision_geometry_binding_sha256
+                expected_complete_schema = a3_complete_contract or a3_complete_formal
+            else:
+                geometry_sha256 = evidence.geometry.receipt_sha256
+                expected_complete_schema = False
             if (
-                evidence.geometry.receipt_sha256 != config.collision_geometry_sha256
+                geometry_sha256 != config.collision_geometry_sha256
                 or request.expected_executor_segment_count != expected_segments
                 or request.numeric_configuration_sha256
                 != evidence.numeric_configuration.configuration_sha256
                 or evidence.native_receipt.request_sha256 != request.request_sha256
                 or evidence.native_receipt.status != "PASS"
-                or evidence.formal_query_evidence_eligible != a3_formal
+                or evidence.formal_query_evidence_eligible != (a3_formal or a3_complete_formal)
+                or expected_complete_schema
+                != isinstance(evidence, A3CompleteScenePhaseSweptCollisionEvidenceV2)
                 or any(segment.collision_pairs for segment in collision.segments)
             ):
                 raise ExactPlanPreflightRejected(
