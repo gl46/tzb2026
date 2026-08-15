@@ -89,11 +89,9 @@ QWEN_HIDDEN_SIZE = 2560
 QWEN_BUNDLE_MANIFEST_NAME = "qwen_coarse_v2_bundle.json"
 QWEN_HEAD_CHECKPOINT_NAME = "qwen_coarse_v2_heads.npz"
 QWEN_TRAIN_REPORT_NAME = "train_report.json"
-# Intentionally unset until the separately reviewed Qwen->V2 mapping->Isaac
-# runner is committed, passes a real Isaac 6 contract startup, and is frozen by
-# exact path and SHA-256.  This is a source-level freeze rather than an
-# environment override, so the current production gate cannot authorize formal
-# evaluation regardless of supplied receipts.
+# Intentionally unset until the accepted ADR-0022 addendum's complete source
+# closure has been replayed.  This source-level freeze is applied only by the
+# later binding-only commit; it is not a physical Q-B receipt.
 FORMAL_PHYSICAL_RUNNER_BINDING: tuple[str, str] | None = None
 # A runner/source hash is not a deployment identity. Unlocking this binding
 # still requires the immutable implementation commit, container image, and
@@ -156,7 +154,7 @@ RUNTIME_BINDINGS: dict[str, str] = {
         "bfd8e049432269b119be2bdb951f42d4e613f6896ef10c90ae817364a92ceb3d"
     ),
     "scripts/m2c/formal_isaac_v4_backend.py": (
-        "36bf796d515d8f811fc5608e02586210254a84e4cda01d0b70ddd437122544bc"
+        "3bdf10a3594b51d9b5b0187389add5b1b99f51b4dffcdd0b16c9de56c94cc193"
     ),
     "scripts/m2c/serve_formal_isaac_endpoint.py": (
         "13a9fe4a4666161383c7149785a1035465ab9413e3742bd3b425f054b4f077c8"
