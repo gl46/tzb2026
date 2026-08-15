@@ -109,8 +109,18 @@ def _require_immutable_commit(
     source_paths: tuple[str, ...],
 ) -> None:
     head = _git_bytes(project_root, "rev-parse", "HEAD").decode("ascii").strip()
-    if head != immutable_commit:
-        raise ValueError("formal V4 episode I/O immutable commit is not current HEAD")
+    try:
+        _git_bytes(
+            project_root,
+            "merge-base",
+            "--is-ancestor",
+            immutable_commit,
+            head,
+        )
+    except subprocess.CalledProcessError as exc:
+        raise ValueError(
+            "formal V4 episode I/O immutable commit is not an ancestor of current HEAD"
+        ) from exc
     for raw_path in source_paths:
         current = read_regular_file_once(_safe_repo_path(project_root, raw_path))
         committed = _git_bytes(project_root, "show", f"{immutable_commit}:{raw_path}")

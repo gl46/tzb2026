@@ -220,8 +220,18 @@ def _verify_immutable_source_inventory(
     inventory: tuple[tuple[str, str], ...],
 ) -> None:
     head = _git_bytes(project_root, "rev-parse", "HEAD").decode("ascii").strip()
-    if head != immutable_commit:
-        raise ValueError("formal V4 runtime factory commit is not current HEAD")
+    try:
+        _git_bytes(
+            project_root,
+            "merge-base",
+            "--is-ancestor",
+            immutable_commit,
+            head,
+        )
+    except subprocess.CalledProcessError as exc:
+        raise ValueError(
+            "formal V4 runtime factory commit is not an ancestor of current HEAD"
+        ) from exc
     for raw_path, expected_sha256 in inventory:
         path = _safe_repo_path(project_root, raw_path)
         current = read_regular_file_once(path)

@@ -462,6 +462,40 @@ def test_factory_rejects_dirty_runtime_source(tmp_path: Path) -> None:
         )
 
 
+def test_factory_allows_binding_only_descendant_commit(tmp_path: Path) -> None:
+    contracts = _contracts(tmp_path)
+    project, endpoint, episode, association, attribute, provider, bundle, factory = contracts
+    episode_io, observations, provider_object, bundle_object = _objects(
+        project=project,
+        endpoint=endpoint,
+        episode_binding=episode,
+        association=association,
+        attribute=attribute,
+        provider_deployment=provider,
+        bundle_deployment=bundle,
+    )
+    binding_file = project / "configs" / "binding-only.json"
+    binding_file.parent.mkdir(parents=True, exist_ok=True)
+    binding_file.write_text('{"applied":true}\n', encoding="utf-8")
+    _git(project, "add", "configs/binding-only.json")
+    _git(project, "commit", "-q", "-m", "apply binding only")
+    instance = FormalIsaacV4RuntimeFactoryV1(
+        project_root=project,
+        binding=factory,
+        endpoint_binding=endpoint,
+        episode_io=episode_io,
+        observation_provider=observations,
+        association_deployment=association,
+        declared_attribute_binding=attribute,
+        bound_plan_provider=provider_object,
+        bound_plan_provider_deployment=provider,
+        primitive_bundle=bundle_object,
+        primitive_bundle_deployment=bundle,
+        runtime_registry_sha256=endpoint.runtime_registry_sha256,
+    )
+    assert instance.assembly.receipt.factory_binding_sha256 == factory.binding_sha256
+
+
 def test_factory_binding_rejects_digest_tamper(tmp_path: Path) -> None:
     *_, factory = _contracts(tmp_path)
     with pytest.raises(ValueError, match="binding digest differs"):
