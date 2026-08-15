@@ -37,6 +37,10 @@ from xh_agent.policy.qrm_lite.a3_scene_environment_v1 import (
     A3SceneCollisionGeometryReceiptV1,
     A3SceneStateReceiptV1,
 )
+from xh_agent.policy.qrm_lite.controlled_panda_fk_v1 import (
+    EXECUTOR_JOINT_NAMES,
+    expand_controlled_panda_executor_states_v1,
+)
 from xh_agent.policy.qrm_lite.exact_plan_preflight_v1 import (
     MOTION_COMMANDS,
     ExactPlanPreflightConfigurationV1,
@@ -213,16 +217,22 @@ class A3CompleteSceneSweptCollisionProviderV2:
         evidence = None
         expected_segments = wire.steps if wire.command in MOTION_COMMANDS else 0
         if expected_segments:
-            states = tuple(sample.joint_positions for sample in path.samples)
-            if len(states) != expected_segments + 1:
+            arm_states = tuple(sample.joint_positions for sample in path.samples)
+            gripper_states = tuple(sample.gripper_position_m for sample in path.samples)
+            if len(arm_states) != expected_segments + 1:
                 raise A3CompleteSceneSweptCollisionUnavailable(
                     "A.3 complete-scene path state count differs"
                 )
             try:
+                states = expand_controlled_panda_executor_states_v1(
+                    arm_joint_names=path.joint_names,
+                    arm_joint_state_sequence=arm_states,
+                    gripper_position_sequence_m=gripper_states,
+                )
                 fk_receipt = produce_read_only_fk_receipt_v1(
                     bound_plan_sha256=plan.bound_plan_sha256,
                     geometry=self.robot_geometry,
-                    joint_names=path.joint_names,
+                    joint_names=EXECUTOR_JOINT_NAMES,
                     joint_state_sequence=states,
                     provider=self.fk_provider,
                 )
@@ -289,7 +299,7 @@ class A3CompleteSceneSweptCollisionProviderV2:
                     native_backend_implementation_sha256=(
                         self.native_backend.implementation_sha256
                     ),
-                    executor_joint_names=path.joint_names,
+                    executor_joint_names=EXECUTOR_JOINT_NAMES,
                     executor_joint_state_sequence=states,
                     robot_geometry=self.robot_geometry,
                     attached_objects=attached_objects,

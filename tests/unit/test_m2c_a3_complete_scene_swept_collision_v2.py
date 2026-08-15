@@ -23,6 +23,7 @@ from xh_agent.policy.qrm_lite.a3_complete_scene_swept_collision_v2 import (
     CONTRACT_ALGORITHM_ID,
     A3CompleteSceneSweptCollisionProviderV2,
 )
+from xh_agent.policy.qrm_lite.controlled_panda_fk_v1 import EXECUTOR_JOINT_NAMES
 from xh_agent.policy.qrm_lite.exact_plan_preflight_v1 import (
     ExactPlanPreflightV1,
     SweptCollisionConfigurationV1,
@@ -94,6 +95,9 @@ def test_complete_scene_phase_provider_replays_robot_self_and_environment(
         A3CompleteScenePhaseSweptCollisionEvidenceV2,
     )
     evidence = receipt.a3_phase_evidence
+    assert evidence.executor_joint_names == EXECUTOR_JOINT_NAMES
+    assert all(len(state) == 9 for state in evidence.executor_joint_state_sequence)
+    assert all(state[-2:] == (0.04, 0.04) for state in evidence.executor_joint_state_sequence)
     assert evidence.child_pair_request.expected_non_acm_child_pair_count == 203
     assert len(evidence.complete_scene_world.environment_environment_acm_pairs) == 28
     assert evidence.complete_scene_world.complete_robot_environment_coverage is True

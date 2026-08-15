@@ -193,13 +193,13 @@ class _ComponentSource:
         preflight = SimpleNamespace(
             callbacks=callbacks,
             configuration=configuration,
-            project_root=ROOT,
-            deployment_binding=a3_deployment_binding,
+            project_root=None,
+            deployment_binding=None,
             implementation_sha256="2" * 64,
         )
         executor = SimpleNamespace(
             project_root=ROOT,
-            deployment_binding=primitive_binding,
+            deployment_binding=None,
             mutation_counter_source=active_session_provider.mutation_counter_source,
             attachment_state_registry=(
                 object() if self.cross == "attachment_registry" else self.active_attachment_source

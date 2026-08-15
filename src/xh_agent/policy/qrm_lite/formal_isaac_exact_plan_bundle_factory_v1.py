@@ -362,6 +362,9 @@ class FormalIsaacPerDecisionExactPlanBundleFactoryV1:
         resolver = getattr(callbacks, "attached_geometry_resolver", None)
         snapshot = getattr(callbacks, "runtime_snapshot", None)
         scene_state = getattr(collision, "scene_state", None)
+        expected_project_root = self.project_root if self.mode == "REAL_ISAAC" else None
+        expected_a3_binding = self.a3_deployment_binding if self.mode == "REAL_ISAAC" else None
+        expected_executor_binding = self.primitive_binding if self.mode == "REAL_ISAAC" else None
         if self.mode == "REAL_ISAAC" and (
             not isinstance(preflight, ExactPlanPreflightV1)
             or not isinstance(callbacks, A3ExactPlanNonActuatingCallbacksV1)
@@ -383,8 +386,8 @@ class FormalIsaacPerDecisionExactPlanBundleFactoryV1:
             or snapshot is None
             or scene_state is None
             or getattr(preflight, "configuration", None) != self.configuration
-            or getattr(preflight, "project_root", None) != self.project_root
-            or getattr(preflight, "deployment_binding", None) != self.a3_deployment_binding
+            or getattr(preflight, "project_root", None) != expected_project_root
+            or getattr(preflight, "deployment_binding", None) != expected_a3_binding
             or snapshot.bound_plan_sha256 != plan.bound_plan_sha256
             or snapshot.preplan_state_sha256 != plan.inputs.preplan_state_sha256
             or getattr(callbacks, "configuration", None) != self.configuration
@@ -419,7 +422,7 @@ class FormalIsaacPerDecisionExactPlanBundleFactoryV1:
             or getattr(resolver, "scene_pose_provider", None)
             is not self.component_source.scene_pose_provider
             or getattr(executor, "project_root", None) != self.project_root
-            or getattr(executor, "deployment_binding", None) != self.primitive_binding
+            or getattr(executor, "deployment_binding", None) != expected_executor_binding
             or getattr(executor, "mutation_counter_source", None)
             is not active_session.mutation_counter_source
             or getattr(executor, "attachment_state_registry", None)
