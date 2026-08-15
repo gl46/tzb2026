@@ -551,10 +551,18 @@ class IsaacActiveSessionQueryProviderV1:
             )
         return state
 
-    def read_active_state(
+    def peek_bound_preplan_state(
         self,
         plan: M2CExactPlanPrimitivePlanV1,
-    ) -> ActiveSessionRobotStateV1:
+    ) -> IsaacActiveSessionRuntimeReadoutV1:
+        """Validate the cached physical state against one plan without consuming it.
+
+        The A.3 runtime-snapshot gate and the phase-path provider must inspect
+        the same pre-plan capture.  Only ``read_active_state`` is allowed to
+        consume that capture for path synthesis; this method therefore exposes
+        a validated immutable copy while leaving the single-use handoff intact.
+        """
+
         state = self._cached
         if state is None or self._state_bound_to_plan:
             raise IsaacActiveSessionQueryUnavailable(
@@ -569,6 +577,13 @@ class IsaacActiveSessionQueryProviderV1:
             raise IsaacActiveSessionQueryUnavailable(
                 "active-session state differs from bound-plan inputs"
             )
+        return IsaacActiveSessionRuntimeReadoutV1.model_validate(state.model_dump(mode="json"))
+
+    def read_active_state(
+        self,
+        plan: M2CExactPlanPrimitivePlanV1,
+    ) -> ActiveSessionRobotStateV1:
+        state = self.peek_bound_preplan_state(plan)
         payload: dict[str, Any] = {
             "schema_version": "ActiveSessionRobotStateV1",
             "bound_plan_sha256": plan.bound_plan_sha256,
