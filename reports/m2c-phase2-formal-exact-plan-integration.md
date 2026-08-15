@@ -1,16 +1,18 @@
 # M2C Phase-2 formal exact-plan integration audit
 
 - Status: **BLOCKED_UNMEASURED_FORMAL_EXACT_PLAN_INTEGRATION**
-- Checked HEAD: `ea1ab3cd3393cf1afc0e2284bdbde89b12ce0212`
+- Checked HEAD: `40ad7a0a374ccc62454838eccaed4d5a743cdc10`
 - Formal execution eligible: **false**
 - Physical execution / training by this audit: **false / false**
 
 ## Result
 
 The ADR-0022/ADR-0024 exact-plan envelope, all-phase preflight coordinator,
-no-replan executor, and A3 float64 Bullet candidate exist.  The query-only
-deployment path also ran, but the frozen home state still has two fail-closed
-self-collision rejections.
+no-replan executor, and A3 float64 Bullet implementation exist.  The
+query-only native ABI was loaded in the frozen Isaac 6 image without loading
+Kit/Isaac; the corrected frozen home state returned 74/74 governed child-pair
+queries CLEAR with zero query failures.  This is a static-start smoke, not
+plan-specific execution evidence.
 
 The A.3 coordinator now has a versioned ADR-0024 deployment authorization
 contract. It replaces the rescinded trusted-host signature prerequisite with
@@ -46,9 +48,11 @@ blocker or authorize a production binding.
 The coordinator does not generate waypoints.  A single-use, deployment-bound
 provider now consumes one query-only active-session state receipt and replays
 the complete request/observation/mapping/plan/source closure before exposing a
-plan.  Its real Isaac synthesis backend and lifecycle/capture deployment are
-still absent and plan-specific A3 evidence for all eight skills remains
-unmeasured. The ADR-0024 V2 readiness verifier is complete but has no real
+plan.  The persistent-scene owner core now binds the public failure boundary,
+eight fresh capture prefixes, and terminal public evaluation, but its real raw
+RGB-D/proprioception source and formal HTTP factory are still unbound.  The
+real Isaac synthesis backend is also absent and plan-specific A3 evidence for
+all eight skills remains unmeasured. The ADR-0024 V2 readiness verifier is complete but has no real
 evidence index to authorize an addendum. The S4 entry gate now preserves the
 historical V2 path while independently replaying a strict V3 envelope backed
 by that same formal V4 Phase-2 evidence index.
@@ -56,7 +60,7 @@ by that same formal V4 Phase-2 evidence index.
 ## Blockers
 
 - `REAL_BOUND_PLAN_SYNTHESIS_BACKEND_NOT_BOUND`
-- `REAL_ISAAC_EPISODE_LIFECYCLE_AND_CAPTURE_SOURCE_NOT_BOUND`
+- `REAL_ISAAC_RAW_PUBLIC_FRAME_SOURCE_NOT_BOUND`
 - `REAL_FORMAL_V4_ISAAC_HTTP_SERVICE_BACKEND_FACTORY_NOT_BOUND`
 - `PLAN_SPECIFIC_A3_PREFLIGHT_AND_EIGHT_SKILL_EXECUTION_UNMEASURED`
 - `TWO_ACTIVE_PRODUCTION_BINDINGS_UNSET`
@@ -64,7 +68,7 @@ by that same formal V4 Phase-2 evidence index.
 ## Safe implementation order
 
 1. `BIND_REAL_QUERY_ONLY_PLAN_SYNTHESIS_BACKEND`
-2. `BIND_REAL_ISAAC_EPISODE_LIFECYCLE_AND_PUBLIC_CAPTURE_SOURCE`
+2. `BIND_REAL_ISAAC_RAW_PUBLIC_FRAME_SOURCE`
 3. `BIND_REAL_FORMAL_V4_ISAAC_HTTP_SERVICE_BACKEND_FACTORY`
 4. `REPLAY_PLAN_SPECIFIC_A3_PREFLIGHT_FOR_ALL_EIGHT_SKILLS`
 5. `COLLECT_REAL_PHASE2_V2_EVIDENCE_INDEX_AND_REVIEW_TWO_ACTIVE_BINDINGS`
@@ -74,8 +78,8 @@ permission failure. The two active production bindings remain unset; the two
 withdrawn compatibility sentinels remain `None`. Teacher and privileged
 simulator truth were not used.
 
-Verification: `.venv/bin/pytest -q tests/unit/test_m2c_*.py` ->
-**816 passed**, 0 failed.
+Verification: `PYTHONPATH=src:scripts .venv/bin/pytest -q tests/unit/test_m2c_phase2_a3_native_load_smoke.py tests/unit/test_m2c_formal_isaac_scene_owner_v4.py tests/unit/test_m2c_formal_isaac_episode_io_v4.py tests/unit/test_m2c_formal_isaac_backend_v4.py` ->
+**18 passed**, 0 failed.
 
 Next command:
 

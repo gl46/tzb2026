@@ -46,10 +46,13 @@ SOURCE_PATHS = (
     Path("src/xh_agent/policy/qrm_lite/formal_exact_plan_runtime_v1.py"),
     Path("src/xh_agent/policy/qrm_lite/formal_bound_plan_provider_v1.py"),
     Path("src/xh_agent/policy/qrm_lite/formal_isaac_backend_v4.py"),
+    Path("src/xh_agent/policy/qrm_lite/formal_isaac_scene_owner_v4.py"),
     Path("src/xh_agent/policy/qrm_lite/offline_wire_auth_v4.py"),
     Path("src/xh_agent/policy/qrm_lite/s4_entry_gate.py"),
     Path("configs/m2c_adr0024_phase2_binding_candidate.json"),
     Path("docs/decisions/ADR-0024-PHASE2-BINDING-ADDENDUM-CANDIDATE.md"),
+    Path("scripts/m2c/audit_phase2_a3_native_load_smoke.py"),
+    Path("reports/m2c-phase2-a3-native-load-smoke.json"),
     Path("reports/m2c-s4-current-blockers.json"),
 )
 
@@ -189,6 +192,7 @@ def build_report() -> dict[str, Any]:
     host_v4_path = Path("src/xh_agent/policy/qrm_lite/formal_split_host_v4.py")
     service_v4_path = Path("scripts/m2c/serve_formal_isaac_endpoint_v4.py")
     hmac_v4_path = Path("src/xh_agent/policy/qrm_lite/offline_wire_auth_v4.py")
+    scene_owner_path = Path("src/xh_agent/policy/qrm_lite/formal_isaac_scene_owner_v4.py")
     bound_provider_path = Path("src/xh_agent/policy/qrm_lite/formal_bound_plan_provider_v1.py")
     bundle_path = Path("src/xh_agent/policy/qrm_lite/exact_plan_primitive_bundle_v1.py")
     entry_path = Path("src/xh_agent/policy/qrm_lite/s4_entry_gate.py")
@@ -198,6 +202,7 @@ def build_report() -> dict[str, Any]:
     host_v4 = _module(host_v4_path)
     service_v4 = _module(service_v4_path)
     hmac_v4 = _module(hmac_v4_path)
+    scene_owner = _module(scene_owner_path)
     bound_provider = _module(bound_provider_path)
     legacy_backend = _module(backend_path)
     bundle = _module(bundle_path)
@@ -246,6 +251,14 @@ def build_report() -> dict[str, Any]:
         path.relative_to(ROOT) for path in constructor_paths
     )
     current = json.loads((ROOT / "reports/m2c-s4-current-blockers.json").read_bytes())
+    native_load = json.loads((ROOT / "reports/m2c-phase2-a3-native-load-smoke.json").read_bytes())
+    if (
+        native_load.get("status") != "PASS_QUERY_ONLY_NATIVE_LOAD_IN_FROZEN_ISAAC_IMAGE"
+        or native_load.get("query", {}).get("clear_result_count") != 74
+        or native_load.get("evidence_claims", {}).get("formal_execution_eligible") is not False
+        or native_load.get("evidence_claims", {}).get("isaac_started") is not False
+    ):
+        raise AuditError("query-only native-load evidence differs")
 
     legacy_construct_stub = _method_raises_without_return(
         legacy_backend,
@@ -270,6 +283,13 @@ def build_report() -> dict[str, Any]:
     }
     if "run_formal_v4_episode" not in host_functions:
         raise AuditError("formal V4 host orchestrator is incomplete")
+    scene_owner_methods = _class_methods(scene_owner, "FormalIsaacPersistentSceneOwnerCoreV4")
+    if not {
+        "establish_public_failure_boundary_v4",
+        "capture_public_v4",
+        "evaluate_public_outcome_v4",
+    }.issubset(scene_owner_methods):
+        raise AuditError("formal V4 persistent-scene owner core is incomplete")
     host_evidence_fields = _class_fields(host_v4, "M2CFormalSplitRunnerEvidenceV4")
     if not {
         "wire_transcript_sha256",
@@ -352,6 +372,7 @@ def build_report() -> dict[str, Any]:
             "query_only_static_state_preflight_clear": current["phase_2"][
                 "query_only_static_state_preflight_clear"
             ],
+            "query_only_native_load_in_frozen_isaac_image": True,
             "versioned_formal_v4_observation_transport": True,
             "bound_plan_runtime_dynamic_a1_cross_binding": True,
             "bound_plan_runtime_single_use_execution_attempt": True,
@@ -359,6 +380,7 @@ def build_report() -> dict[str, Any]:
             "formal_v4_endpoint_state_machine_active": True,
             "formal_v4_backend_coordinator_active": runtime_bridge_active,
             "formal_v4_host_orchestrator_active": True,
+            "formal_v4_persistent_scene_owner_core_active": True,
             "formal_v4_http_service_shell_active": True,
             "formal_v4_host_local_hmac_replay_active": True,
             "replayable_public_observation_provider_active": True,
@@ -386,6 +408,7 @@ def build_report() -> dict[str, Any]:
             "v4_exact_plan_runtime_prepare_and_execute_active": True,
             "v4_bound_plan_provider_contract_active": True,
             "v4_host_orchestrator_contract_active": True,
+            "v4_persistent_scene_owner_core_active": True,
             "v4_http_service_shell_active": True,
             "v4_http_service_backend_factory_bound": False,
             "legacy_v2_construct_exact_plan_is_rejection_stub": legacy_construct_stub,
@@ -400,19 +423,25 @@ def build_report() -> dict[str, Any]:
         "privileged_truth_policy_input": False,
         "blockers": [
             "REAL_BOUND_PLAN_SYNTHESIS_BACKEND_NOT_BOUND",
-            "REAL_ISAAC_EPISODE_LIFECYCLE_AND_CAPTURE_SOURCE_NOT_BOUND",
+            "REAL_ISAAC_RAW_PUBLIC_FRAME_SOURCE_NOT_BOUND",
             "REAL_FORMAL_V4_ISAAC_HTTP_SERVICE_BACKEND_FACTORY_NOT_BOUND",
             "PLAN_SPECIFIC_A3_PREFLIGHT_AND_EIGHT_SKILL_EXECUTION_UNMEASURED",
             "TWO_ACTIVE_PRODUCTION_BINDINGS_UNSET",
         ],
         "verification": {
-            "command": ".venv/bin/pytest -q tests/unit/test_m2c_*.py",
-            "passed": 816,
+            "command": (
+                "PYTHONPATH=src:scripts .venv/bin/pytest -q "
+                "tests/unit/test_m2c_phase2_a3_native_load_smoke.py "
+                "tests/unit/test_m2c_formal_isaac_scene_owner_v4.py "
+                "tests/unit/test_m2c_formal_isaac_episode_io_v4.py "
+                "tests/unit/test_m2c_formal_isaac_backend_v4.py"
+            ),
+            "passed": 18,
             "failed": 0,
         },
         "next_implementation_order": [
             "BIND_REAL_QUERY_ONLY_PLAN_SYNTHESIS_BACKEND",
-            "BIND_REAL_ISAAC_EPISODE_LIFECYCLE_AND_PUBLIC_CAPTURE_SOURCE",
+            "BIND_REAL_ISAAC_RAW_PUBLIC_FRAME_SOURCE",
             "BIND_REAL_FORMAL_V4_ISAAC_HTTP_SERVICE_BACKEND_FACTORY",
             "REPLAY_PLAN_SPECIFIC_A3_PREFLIGHT_FOR_ALL_EIGHT_SKILLS",
             "COLLECT_REAL_PHASE2_V2_EVIDENCE_INDEX_AND_REVIEW_TWO_ACTIVE_BINDINGS",
@@ -439,9 +468,11 @@ def render_markdown(report: dict[str, Any]) -> str:
 ## Result
 
 The ADR-0022/ADR-0024 exact-plan envelope, all-phase preflight coordinator,
-no-replan executor, and A3 float64 Bullet candidate exist.  The query-only
-deployment path also ran, but the frozen home state still has two fail-closed
-self-collision rejections.
+no-replan executor, and A3 float64 Bullet implementation exist.  The
+query-only native ABI was loaded in the frozen Isaac 6 image without loading
+Kit/Isaac; the corrected frozen home state returned 74/74 governed child-pair
+queries CLEAR with zero query failures.  This is a static-start smoke, not
+plan-specific execution evidence.
 
 The A.3 coordinator now has a versioned ADR-0024 deployment authorization
 contract. It replaces the rescinded trusted-host signature prerequisite with
@@ -477,9 +508,11 @@ blocker or authorize a production binding.
 The coordinator does not generate waypoints.  A single-use, deployment-bound
 provider now consumes one query-only active-session state receipt and replays
 the complete request/observation/mapping/plan/source closure before exposing a
-plan.  Its real Isaac synthesis backend and lifecycle/capture deployment are
-still absent and plan-specific A3 evidence for all eight skills remains
-unmeasured. The ADR-0024 V2 readiness verifier is complete but has no real
+plan.  The persistent-scene owner core now binds the public failure boundary,
+eight fresh capture prefixes, and terminal public evaluation, but its real raw
+RGB-D/proprioception source and formal HTTP factory are still unbound.  The
+real Isaac synthesis backend is also absent and plan-specific A3 evidence for
+all eight skills remains unmeasured. The ADR-0024 V2 readiness verifier is complete but has no real
 evidence index to authorize an addendum. The S4 entry gate now preserves the
 historical V2 path while independently replaying a strict V3 envelope backed
 by that same formal V4 Phase-2 evidence index.

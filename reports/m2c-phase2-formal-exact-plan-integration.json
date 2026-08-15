@@ -1,12 +1,12 @@
 {
   "blockers": [
     "REAL_BOUND_PLAN_SYNTHESIS_BACKEND_NOT_BOUND",
-    "REAL_ISAAC_EPISODE_LIFECYCLE_AND_CAPTURE_SOURCE_NOT_BOUND",
+    "REAL_ISAAC_RAW_PUBLIC_FRAME_SOURCE_NOT_BOUND",
     "REAL_FORMAL_V4_ISAAC_HTTP_SERVICE_BACKEND_FACTORY_NOT_BOUND",
     "PLAN_SPECIFIC_A3_PREFLIGHT_AND_EIGHT_SKILL_EXECUTION_UNMEASURED",
     "TWO_ACTIVE_PRODUCTION_BINDINGS_UNSET"
   ],
-  "checked_head_commit": "ea1ab3cd3393cf1afc0e2284bdbde89b12ce0212",
+  "checked_head_commit": "40ad7a0a374ccc62454838eccaed4d5a743cdc10",
   "formal_backend": {
     "legacy_v2_construct_exact_plan_is_rejection_stub": true,
     "legacy_v2_execute_exact_plan_is_rejection_stub": true,
@@ -18,6 +18,7 @@
     "v4_host_orchestrator_contract_active": true,
     "v4_http_service_backend_factory_bound": false,
     "v4_http_service_shell_active": true,
+    "v4_persistent_scene_owner_core_active": true,
     "v4_public_observation_provider_active": true
   },
   "formal_execution_eligible": false,
@@ -49,12 +50,14 @@
     "formal_v4_host_local_hmac_replay_active": true,
     "formal_v4_host_orchestrator_active": true,
     "formal_v4_http_service_shell_active": true,
+    "formal_v4_persistent_scene_owner_core_active": true,
     "legacy_a3_signature_schema_audit_only": true,
     "no_replan_phase_executor": true,
     "partial_failure_actuation_accounting_exact": true,
     "phase2_readiness_adr0024_v2_migration_complete": true,
     "query_only_deployment_path_completed": true,
-    "query_only_static_state_preflight_clear": false,
+    "query_only_native_load_in_frozen_isaac_image": true,
+    "query_only_static_state_preflight_clear": true,
     "replayable_public_observation_provider_active": true,
     "s4_entry_gate_formal_v4_replay_active": true,
     "session_receipt_and_hmac_post_execution_evidence_required": true,
@@ -65,7 +68,7 @@
   "next_command": ".venv/bin/pytest -q tests/unit/test_m2c_phase2_formal_exact_plan_integration.py",
   "next_implementation_order": [
     "BIND_REAL_QUERY_ONLY_PLAN_SYNTHESIS_BACKEND",
-    "BIND_REAL_ISAAC_EPISODE_LIFECYCLE_AND_PUBLIC_CAPTURE_SOURCE",
+    "BIND_REAL_ISAAC_RAW_PUBLIC_FRAME_SOURCE",
     "BIND_REAL_FORMAL_V4_ISAAC_HTTP_SERVICE_BACKEND_FACTORY",
     "REPLAY_PLAN_SPECIFIC_A3_PREFLIGHT_FOR_ALL_EIGHT_SKILLS",
     "COLLECT_REAL_PHASE2_V2_EVIDENCE_INDEX_AND_REVIEW_TWO_ACTIVE_BINDINGS"
@@ -90,7 +93,7 @@
     },
     {
       "path": "scripts/m2c/formal_isaac_v4_backend.py",
-      "sha256": "73ada118846c4392c73aa3f0459195e71a1d54378c549487e1ef3504bc4d79bf"
+      "sha256": "3bdf10a3594b51d9b5b0187389add5b1b99f51b4dffcdd0b16c9de56c94cc193"
     },
     {
       "path": "src/xh_agent/policy/qrm_lite/formal_split_runner_v2.py",
@@ -98,11 +101,11 @@
     },
     {
       "path": "src/xh_agent/policy/qrm_lite/exact_plan_primitive_bundle_v1.py",
-      "sha256": "e39649b2f86e3085180e33b5ace5d49f5ae36c13bc91880d426205215e017e10"
+      "sha256": "e655c6f284531f13e232342e85104574587cec3f2d821f8ba9971492ef8d27a5"
     },
     {
       "path": "src/xh_agent/policy/qrm_lite/exact_plan_preflight_v1.py",
-      "sha256": "732f317eefb0f355f40743030e1266f61dd5f3d3b9fb22170b37b107756d4f43"
+      "sha256": "15c4aef2240bca31d75b19411851580b23fb6d84f8414082ffc3d977de95b54a"
     },
     {
       "path": "src/xh_agent/policy/qrm_lite/phase2_binding_readiness_v1.py",
@@ -110,15 +113,15 @@
     },
     {
       "path": "src/xh_agent/policy/qrm_lite/phase2_binding_readiness_v2.py",
-      "sha256": "884b85bd3754903787bc5b73bcc28e16736cc69eeb223ff93243a9168f7a2056"
+      "sha256": "39b0ae973c16d038d702ba06f66cdbe610ea18f5e23b19db15330ba2679280ef"
     },
     {
       "path": "src/xh_agent/policy/qrm_lite/isaac_exact_plan_runtime_v1.py",
-      "sha256": "57712a3d573f35dc3acb656e8533bb01789200501d2d7bee20450e91223e8dbe"
+      "sha256": "acc9768ab052e31308ac8470891e78055189f6227eca9eb9cad578fdd3088eaa"
     },
     {
       "path": "src/xh_agent/policy/qrm_lite/a3_bullet_production_adapter_v1.py",
-      "sha256": "aa9a96309a3381b1dce8cf1b43e3322c4ae968d558bc1bef394b56a6c307c807"
+      "sha256": "52bbf4144d7711d8860d8026444d2ad6af47d5136ae3921d55451400f9234262"
     },
     {
       "path": "src/xh_agent/policy/qrm_lite/public_tracks_v4.py",
@@ -126,7 +129,7 @@
     },
     {
       "path": "src/xh_agent/policy/qrm_lite/path_blocked_supervision_v4.py",
-      "sha256": "a22837d4f4198e2b7558cf6591819ab352ff01dad87567c47d3c5515ac78a2b5"
+      "sha256": "49e60395a0c31270bd19db48af108f59b2ad6a81a6d53e9b2a096a74b27c2d69"
     },
     {
       "path": "src/xh_agent/policy/qrm_lite/formal_public_observation_v4.py",
@@ -162,15 +165,19 @@
     },
     {
       "path": "src/xh_agent/policy/qrm_lite/formal_exact_plan_runtime_v1.py",
-      "sha256": "c139fdbd97018813829522167ca0abef9c6b91f129f3e3a777a7ff57624eff8a"
+      "sha256": "cc7f1279ec36e069101cb84c31c8cc7eddf37b1066ccb7c618a62792aae810f4"
     },
     {
       "path": "src/xh_agent/policy/qrm_lite/formal_bound_plan_provider_v1.py",
-      "sha256": "50a18983e7e444c8810a1f4c7bd44c73d2ba84ca5ff3c8b0ae19d937b86c8188"
+      "sha256": "7dcc6b74ca2bad2aeae428f528de91922f90d56061d8b03857dfe2d711212eff"
     },
     {
       "path": "src/xh_agent/policy/qrm_lite/formal_isaac_backend_v4.py",
-      "sha256": "4c3033c3be7f3313fd31361bf5c6f882e6e4da690881455a973828ab1f16a404"
+      "sha256": "439c67eab16a63ea5f885fafb32a78d99d86b0ccf951396934df747494b7d3d4"
+    },
+    {
+      "path": "src/xh_agent/policy/qrm_lite/formal_isaac_scene_owner_v4.py",
+      "sha256": "45fb649856f9d0a2de04479bf31fa4d1f3fe79487020448ee738df84208412f9"
     },
     {
       "path": "src/xh_agent/policy/qrm_lite/offline_wire_auth_v4.py",
@@ -178,27 +185,35 @@
     },
     {
       "path": "src/xh_agent/policy/qrm_lite/s4_entry_gate.py",
-      "sha256": "27cfa5f6033f132d7284641c91b8d7ded9df9777eff8b8cee123a6f13025e521"
+      "sha256": "c9819b4fe80e08612e6bd6c37eaf8be2eb0c8cc7db7e7e1b3d720c2f7328bc50"
     },
     {
       "path": "configs/m2c_adr0024_phase2_binding_candidate.json",
-      "sha256": "3d383f196ca942edcfc7b7c8ba5c07a41268d69d704618ee0d9322692d3afcb7"
+      "sha256": "fa63b048371a5fe465a60a4b37ecff30fd83f3e22dfd0963b0806666ad62ead6"
     },
     {
       "path": "docs/decisions/ADR-0024-PHASE2-BINDING-ADDENDUM-CANDIDATE.md",
-      "sha256": "20ad40546547080bf4530424569f5b156db262c935549e3d82398ef95e37119a"
+      "sha256": "fc01dc07c66dea379d6f227b65db1723afc443765b4b5c59c2af98f0754d7e19"
+    },
+    {
+      "path": "scripts/m2c/audit_phase2_a3_native_load_smoke.py",
+      "sha256": "c644049e984c3c37c39c1ea5b468a4bbb43624d7f8bad9afbf33e75f3fc87589"
+    },
+    {
+      "path": "reports/m2c-phase2-a3-native-load-smoke.json",
+      "sha256": "7ff1b0e2452f886d92648be117b1a6215a6392738364a90817d4c2f7eff95f8b"
     },
     {
       "path": "reports/m2c-s4-current-blockers.json",
-      "sha256": "1e772b113b31e272f38f67bb8edd3e412f51ef1ce5d154f9a08d5341ccdea281"
+      "sha256": "120744fa968a2eb5220adaa56c62c6719c2a2c8210c35b86b970ce4c41a1ba0b"
     }
   ],
   "status": "BLOCKED_UNMEASURED_FORMAL_EXACT_PLAN_INTEGRATION",
   "teacher_used": false,
   "training_performed_by_this_audit": false,
   "verification": {
-    "command": ".venv/bin/pytest -q tests/unit/test_m2c_*.py",
+    "command": "PYTHONPATH=src:scripts .venv/bin/pytest -q tests/unit/test_m2c_phase2_a3_native_load_smoke.py tests/unit/test_m2c_formal_isaac_scene_owner_v4.py tests/unit/test_m2c_formal_isaac_episode_io_v4.py tests/unit/test_m2c_formal_isaac_backend_v4.py",
     "failed": 0,
-    "passed": 816
+    "passed": 18
   }
 }

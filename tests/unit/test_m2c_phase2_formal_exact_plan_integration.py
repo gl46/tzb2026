@@ -38,8 +38,14 @@ def test_phase2_integration_audit_replays_current_fail_closed_sources() -> None:
     assert recorded["production_bindings"] == replayed["production_bindings"]
     assert recorded["blockers"] == replayed["blockers"]
     assert recorded["verification"] == {
-        "command": ".venv/bin/pytest -q tests/unit/test_m2c_*.py",
-        "passed": 816,
+        "command": (
+            "PYTHONPATH=src:scripts .venv/bin/pytest -q "
+            "tests/unit/test_m2c_phase2_a3_native_load_smoke.py "
+            "tests/unit/test_m2c_formal_isaac_scene_owner_v4.py "
+            "tests/unit/test_m2c_formal_isaac_episode_io_v4.py "
+            "tests/unit/test_m2c_formal_isaac_backend_v4.py"
+        ),
+        "passed": 18,
         "failed": 0,
     }
 
@@ -63,6 +69,7 @@ def test_audit_separates_implemented_contracts_from_missing_formal_path() -> Non
             "no_replan_phase_executor",
             "a3_float64_bullet_candidate",
             "query_only_deployment_path_completed",
+            "query_only_native_load_in_frozen_isaac_image",
             "adr0024_a3_deployment_authorization_v2",
             "trusted_host_signature_prerequisite_rescinded",
             "session_receipt_and_hmac_post_execution_evidence_required",
@@ -70,6 +77,7 @@ def test_audit_separates_implemented_contracts_from_missing_formal_path() -> Non
             "formal_v4_endpoint_state_machine_active",
             "formal_v4_backend_coordinator_active",
             "formal_v4_host_orchestrator_active",
+            "formal_v4_persistent_scene_owner_core_active",
             "formal_v4_http_service_shell_active",
             "formal_v4_host_local_hmac_replay_active",
             "replayable_public_observation_provider_active",
@@ -81,7 +89,7 @@ def test_audit_separates_implemented_contracts_from_missing_formal_path() -> Non
     assert report["implemented_contracts"]["phase2_readiness_adr0024_v2_migration_complete"] is True
     assert report["implemented_contracts"]["s4_entry_gate_formal_v4_replay_active"] is True
     assert "PHASE2_READINESS_VERIFIER_ADR0024_V2_MIGRATION_INCOMPLETE" not in report["blockers"]
-    assert report["implemented_contracts"]["query_only_static_state_preflight_clear"] is False
+    assert report["implemented_contracts"]["query_only_static_state_preflight_clear"] is True
     assert report["formal_backend"] == {
         "v4_endpoint_state_machine_active": True,
         "v4_backend_coordinator_active": True,
@@ -89,6 +97,7 @@ def test_audit_separates_implemented_contracts_from_missing_formal_path() -> Non
         "v4_exact_plan_runtime_prepare_and_execute_active": True,
         "v4_bound_plan_provider_contract_active": True,
         "v4_host_orchestrator_contract_active": True,
+        "v4_persistent_scene_owner_core_active": True,
         "v4_http_service_shell_active": True,
         "v4_http_service_backend_factory_bound": False,
         "legacy_v2_construct_exact_plan_is_rejection_stub": True,
@@ -100,6 +109,8 @@ def test_audit_separates_implemented_contracts_from_missing_formal_path() -> Non
     assert report["formal_wire"]["versioned_v4_observation_schema"] == ("FormalPublicObservationV4")
     assert report["formal_wire"]["versioned_v4_transport_active"] is True
     assert "REAL_FORMAL_V4_ISAAC_HTTP_SERVICE_BACKEND_FACTORY_NOT_BOUND" in report["blockers"]
+    assert "REAL_ISAAC_RAW_PUBLIC_FRAME_SOURCE_NOT_BOUND" in report["blockers"]
+    assert "REAL_ISAAC_EPISODE_LIFECYCLE_AND_CAPTURE_SOURCE_NOT_BOUND" not in report["blockers"]
     assert "S4_ENTRY_GATE_FORMAL_V4_EVIDENCE_REPLAY_NOT_BOUND" not in report["blockers"]
     assert report["implemented_contracts"]["versioned_formal_v4_observation_transport"] is True
     assert report["implemented_contracts"]["bound_plan_runtime_dynamic_a1_cross_binding"] is True
