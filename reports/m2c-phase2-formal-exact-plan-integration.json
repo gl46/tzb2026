@@ -6,7 +6,7 @@
     "PLAN_SPECIFIC_A3_PREFLIGHT_AND_EIGHT_SKILL_EXECUTION_UNMEASURED",
     "TWO_ACTIVE_PRODUCTION_BINDINGS_UNSET"
   ],
-  "checked_head_commit": "40ad7a0a374ccc62454838eccaed4d5a743cdc10",
+  "checked_head_commit": "c9a004b7bd147c6558e88d95d1251199c5bcb313",
   "formal_backend": {
     "legacy_v2_construct_exact_plan_is_rejection_stub": true,
     "legacy_v2_execute_exact_plan_is_rejection_stub": true,
@@ -176,8 +176,8 @@
       "sha256": "439c67eab16a63ea5f885fafb32a78d99d86b0ccf951396934df747494b7d3d4"
     },
     {
-      "path": "src/xh_agent/policy/qrm_lite/formal_isaac_scene_owner_v4.py",
-      "sha256": "45fb649856f9d0a2de04479bf31fa4d1f3fe79487020448ee738df84208412f9"
+      "path": "src/xh_agent/policy/qrm_lite/formal_isaac_persistent_scene_v4.py",
+      "sha256": "e94f4ec2946769298d0ea9e2ad1a44da913cfada7f8b6f17cca543cc47e45166"
     },
     {
       "path": "src/xh_agent/policy/qrm_lite/offline_wire_auth_v4.py",
@@ -212,8 +212,8 @@
   "teacher_used": false,
   "training_performed_by_this_audit": false,
   "verification": {
-    "command": "PYTHONPATH=src:scripts .venv/bin/pytest -q tests/unit/test_m2c_phase2_a3_native_load_smoke.py tests/unit/test_m2c_formal_isaac_scene_owner_v4.py tests/unit/test_m2c_formal_isaac_episode_io_v4.py tests/unit/test_m2c_formal_isaac_backend_v4.py",
+    "command": "PYTHONPATH=src:scripts .venv/bin/pytest -q tests/unit/test_m2c_phase2_a3_native_load_smoke.py tests/unit/test_m2c_formal_isaac_persistent_scene_v4.py tests/unit/test_m2c_formal_isaac_episode_io_v4.py tests/unit/test_m2c_formal_isaac_backend_v4.py",
     "failed": 0,
-    "passed": 18
+    "passed": 19
   }
 }

@@ -46,7 +46,7 @@ SOURCE_PATHS = (
     Path("src/xh_agent/policy/qrm_lite/formal_exact_plan_runtime_v1.py"),
     Path("src/xh_agent/policy/qrm_lite/formal_bound_plan_provider_v1.py"),
     Path("src/xh_agent/policy/qrm_lite/formal_isaac_backend_v4.py"),
-    Path("src/xh_agent/policy/qrm_lite/formal_isaac_scene_owner_v4.py"),
+    Path("src/xh_agent/policy/qrm_lite/formal_isaac_persistent_scene_v4.py"),
     Path("src/xh_agent/policy/qrm_lite/offline_wire_auth_v4.py"),
     Path("src/xh_agent/policy/qrm_lite/s4_entry_gate.py"),
     Path("configs/m2c_adr0024_phase2_binding_candidate.json"),
@@ -192,7 +192,7 @@ def build_report() -> dict[str, Any]:
     host_v4_path = Path("src/xh_agent/policy/qrm_lite/formal_split_host_v4.py")
     service_v4_path = Path("scripts/m2c/serve_formal_isaac_endpoint_v4.py")
     hmac_v4_path = Path("src/xh_agent/policy/qrm_lite/offline_wire_auth_v4.py")
-    scene_owner_path = Path("src/xh_agent/policy/qrm_lite/formal_isaac_scene_owner_v4.py")
+    scene_owner_path = Path("src/xh_agent/policy/qrm_lite/formal_isaac_persistent_scene_v4.py")
     bound_provider_path = Path("src/xh_agent/policy/qrm_lite/formal_bound_plan_provider_v1.py")
     bundle_path = Path("src/xh_agent/policy/qrm_lite/exact_plan_primitive_bundle_v1.py")
     entry_path = Path("src/xh_agent/policy/qrm_lite/s4_entry_gate.py")
@@ -432,11 +432,11 @@ def build_report() -> dict[str, Any]:
             "command": (
                 "PYTHONPATH=src:scripts .venv/bin/pytest -q "
                 "tests/unit/test_m2c_phase2_a3_native_load_smoke.py "
-                "tests/unit/test_m2c_formal_isaac_scene_owner_v4.py "
+                "tests/unit/test_m2c_formal_isaac_persistent_scene_v4.py "
                 "tests/unit/test_m2c_formal_isaac_episode_io_v4.py "
                 "tests/unit/test_m2c_formal_isaac_backend_v4.py"
             ),
-            "passed": 18,
+            "passed": 19,
             "failed": 0,
         },
         "next_implementation_order": [

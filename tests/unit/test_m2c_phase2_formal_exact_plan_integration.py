@@ -41,11 +41,11 @@ def test_phase2_integration_audit_replays_current_fail_closed_sources() -> None:
         "command": (
             "PYTHONPATH=src:scripts .venv/bin/pytest -q "
             "tests/unit/test_m2c_phase2_a3_native_load_smoke.py "
-            "tests/unit/test_m2c_formal_isaac_scene_owner_v4.py "
+            "tests/unit/test_m2c_formal_isaac_persistent_scene_v4.py "
             "tests/unit/test_m2c_formal_isaac_episode_io_v4.py "
             "tests/unit/test_m2c_formal_isaac_backend_v4.py"
         ),
-        "passed": 18,
+        "passed": 19,
         "failed": 0,
     }
 

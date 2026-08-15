@@ -1,7 +1,7 @@
 # M2C Phase-2 formal exact-plan integration audit
 
 - Status: **BLOCKED_UNMEASURED_FORMAL_EXACT_PLAN_INTEGRATION**
-- Checked HEAD: `40ad7a0a374ccc62454838eccaed4d5a743cdc10`
+- Checked HEAD: `c9a004b7bd147c6558e88d95d1251199c5bcb313`
 - Formal execution eligible: **false**
 - Physical execution / training by this audit: **false / false**
 
@@ -78,8 +78,8 @@ permission failure. The two active production bindings remain unset; the two
 withdrawn compatibility sentinels remain `None`. Teacher and privileged
 simulator truth were not used.
 
-Verification: `PYTHONPATH=src:scripts .venv/bin/pytest -q tests/unit/test_m2c_phase2_a3_native_load_smoke.py tests/unit/test_m2c_formal_isaac_scene_owner_v4.py tests/unit/test_m2c_formal_isaac_episode_io_v4.py tests/unit/test_m2c_formal_isaac_backend_v4.py` ->
-**18 passed**, 0 failed.
+Verification: `PYTHONPATH=src:scripts .venv/bin/pytest -q tests/unit/test_m2c_phase2_a3_native_load_smoke.py tests/unit/test_m2c_formal_isaac_persistent_scene_v4.py tests/unit/test_m2c_formal_isaac_episode_io_v4.py tests/unit/test_m2c_formal_isaac_backend_v4.py` ->
+**19 passed**, 0 failed.
 
 Next command:
 
