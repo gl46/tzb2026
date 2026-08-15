@@ -5,7 +5,9 @@ import json
 from pathlib import Path
 from types import SimpleNamespace
 
+import numpy as np
 import pytest
+from pydantic import TypeAdapter
 
 from xh_agent.policy.qrm_lite.a3_attached_object_phase_geometry_v1 import (
     A3AttachedObjectPhaseGeometryEvidenceV1,
@@ -13,6 +15,15 @@ from xh_agent.policy.qrm_lite.a3_attached_object_phase_geometry_v1 import (
     A3PlannedAttachedObjectBindingV1,
     A3QueryOnlyAttachedObjectPhaseGeometryResolverV1,
 )
+from xh_agent.policy.qrm_lite.a3_active_session_attached_object_geometry_v2 import (
+    A3ActiveSessionAttachedObjectPhaseGeometryResolverV2,
+)
+from xh_agent.policy.qrm_lite.a3_active_session_attachment_evidence_v2 import (
+    A3AttachedObjectPhaseGeometryEvidenceAnyV2,
+    A3AttachedObjectPhaseGeometryEvidenceV2,
+    A3ExecutedAttachmentBindingV2,
+)
+from xh_agent.policy.qrm_lite.a3_bullet_self_ccd_v1 import A3RigidTransformV1
 from xh_agent.policy.qrm_lite.a3_attachment_transition_v1 import (
     A3AttachmentTransitionProviderV1,
 )
@@ -29,6 +40,14 @@ from xh_agent.policy.qrm_lite.exact_plan_preflight_v1 import (
     canonical_non_actuating_state_sha256,
 )
 from xh_agent.policy.qrm_lite.formal_split_runner_v2 import canonical_sha256
+from xh_agent.policy.qrm_lite.formal_isaac_scene_safety_binding_v1 import (
+    FormalIsaacActiveAttachmentRegistryV2,
+    FormalIsaacSceneSafetyBindingUnavailable,
+)
+from xh_agent.policy.qrm_lite.isaac_exact_plan_runtime_v1 import (
+    ExactPlanRuntimeUnavailable,
+    FrozenProbeExactPlanExecutorV1,
+)
 from xh_agent.policy.qrm_lite.lula_query_only_ik_v1 import (
     ActiveSessionMutationCountersV1,
 )
@@ -497,3 +516,255 @@ def test_real_mode_rejects_contract_scene_provider(tmp_path: Path) -> None:
             scene_geometry=geometry,
             scene_pose_provider=_SceneProvider(geometry),
         )
+
+
+class _Journal:
+    def __init__(self) -> None:
+        self.events: list[tuple[str, dict[str, object]]] = []
+
+    def append(self, event_type: str, payload) -> None:
+        self.events.append((event_type, dict(payload)))
+
+
+def _executed_attachment(tmp_path: Path):
+    resolver, plan, attach_phase, _, _, attach_path, transition = _bound_resolver(tmp_path)
+    resolver.bind_planned_attachment(
+        attachment=transition,
+        plan=plan,
+        phase=attach_phase,
+        path=attach_path,
+    )
+    planned = resolver.planned_attachment_bindings()[0]
+    journal = _Journal()
+    registry = FormalIsaacActiveAttachmentRegistryV2(
+        mode="CONTRACT_TEST",
+        journal=journal,
+        now_ns=lambda: 1_000,
+    )
+    executed = registry.commit_attachment(
+        public_track_id="track-deadbeef",
+        external_contact_path=planned.external_link_path,
+        bound_plan_sha256=planned.bound_plan_sha256,
+        phase_sha256=planned.attachment_transition_evidence.phase_sha256,
+        planned_attachment_binding=planned,
+    )
+    return planned, executed, registry, journal
+
+
+def test_executed_attachment_carries_query_geometry_into_the_next_plan(
+    tmp_path: Path,
+) -> None:
+    planned, executed, _, journal = _executed_attachment(tmp_path)
+    next_plan_sha256 = "e" * 64
+    motion_phase = _phase(0, "CARTESIAN_POSE")
+    next_plan = SimpleNamespace(
+        bound_plan_sha256=next_plan_sha256,
+        phases=(motion_phase,),
+    )
+    resolver = A3ActiveSessionAttachedObjectPhaseGeometryResolverV2(
+        project_root=ROOT,
+        mode="CONTRACT_TEST",
+        bound_plan_sha256=next_plan_sha256,
+        runtime_snapshot_sha256="f" * 64,
+        runtime_snapshot_checked_at_ns=2_000,
+        current_hand_world_transform=planned.attach_hand_world_transform,
+        scene_geometry=planned.scene_geometry,
+        scene_pose_provider=_SceneProvider(planned.scene_geometry),
+        active_attachment=executed,
+    )
+    resolver.validate_initial_attachment(
+        attachment_sha256=executed.receipt_sha256,
+        plan=next_plan,
+    )
+    motion_path = _path(
+        next_plan_sha256,
+        motion_phase,
+        ((0.0, 0.0, 0.5), (0.0, 0.0, 0.6)),
+    )
+    geometry = resolver.geometry_for_phase(
+        attachment_sha256=executed.receipt_sha256,
+        plan=next_plan,
+        phase=motion_phase,
+        path=motion_path,
+    )
+    evidence = resolver.phase_evidence(
+        attachment_sha256=executed.receipt_sha256,
+        path_sha256=motion_path.path_sha256,
+    )
+
+    assert geometry.attachment_receipt_sha256 == executed.receipt_sha256
+    assert evidence.attachment_binding.active_attachment == executed
+    assert evidence.bound_plan_sha256 == next_plan_sha256
+    replayed = TypeAdapter(A3AttachedObjectPhaseGeometryEvidenceAnyV2).validate_python(
+        evidence.model_dump(mode="json")
+    )
+    assert isinstance(replayed, A3AttachedObjectPhaseGeometryEvidenceV2)
+    first, second = geometry.transforms[0].transforms
+    assert second.translation_world_m[2] - first.translation_world_m[2] == pytest.approx(0.1)
+    assert journal.events[0][0] == "FORMAL_ACTIVE_ATTACHMENT_V2_COMMITTED"
+
+
+def test_executed_attachment_rejects_crossed_plan_phase_and_mode(tmp_path: Path) -> None:
+    planned, executed, registry, _ = _executed_attachment(tmp_path)
+    raw = executed.model_dump(mode="json")
+    raw["phase_sha256"] = "0" * 64
+    raw["receipt_sha256"] = canonical_sha256(
+        {key: value for key, value in raw.items() if key != "receipt_sha256"}
+    )
+    with pytest.raises(ValueError, match="planned A.3 geometry"):
+        A3ExecutedAttachmentBindingV2.model_validate(raw)
+
+    with pytest.raises(FormalIsaacSceneSafetyBindingUnavailable, match="already exists"):
+        registry.commit_attachment(
+            public_track_id="track-deadbeef",
+            external_contact_path=planned.external_link_path,
+            bound_plan_sha256=planned.bound_plan_sha256,
+            phase_sha256=planned.attachment_transition_evidence.phase_sha256,
+            planned_attachment_binding=planned,
+        )
+
+    with pytest.raises(A3AttachedObjectPhaseGeometryUnavailable, match="mode differs"):
+        A3ActiveSessionAttachedObjectPhaseGeometryResolverV2(
+            project_root=ROOT,
+            mode="REAL_ISAAC",
+            bound_plan_sha256="e" * 64,
+            runtime_snapshot_sha256="f" * 64,
+            runtime_snapshot_checked_at_ns=2_000,
+            current_hand_world_transform=A3RigidTransformV1(
+                translation_world_m=(0.0, 0.0, 0.5),
+                rotation_world_wxyz=(1.0, 0.0, 0.0, 0.0),
+            ),
+            scene_geometry=planned.scene_geometry,
+            scene_pose_provider=_SceneProvider(planned.scene_geometry),
+            active_attachment=executed,
+        )
+
+
+class _MutationRecorder:
+    def __init__(self) -> None:
+        self.scene = 0
+        self.attachment = 0
+
+    def record_scene_mutations(self, count: int = 1) -> None:
+        self.scene += count
+
+    def record_attachment_mutations(self, count: int = 1) -> None:
+        self.attachment += count
+
+
+class _AttachProbe:
+    np = np
+
+    def __init__(self) -> None:
+        self.attached: list[str] = []
+
+    def _step_pose(self, *_args, **_kwargs):
+        raise AssertionError("pose helper must not be called")
+
+    def _step_gripper(self, *_args, **_kwargs):
+        raise AssertionError("gripper helper must not be called")
+
+    def _remove_attachment(self, *_args, **_kwargs):
+        raise AssertionError("remove helper must not be called")
+
+    def _attach_preserving_pose(self, entity, _hand, _object) -> None:
+        self.attached.append(entity)
+
+    def broker_from_window(self, *_args, **_kwargs):
+        raise AssertionError("broker must not be called")
+
+    def evaluate_robot_collision_events(self, *_args, **_kwargs):
+        raise AssertionError("collision replay must not be called")
+
+    @staticmethod
+    def RigidPrim(path: str):
+        return SimpleNamespace(path=path)
+
+
+def _attachment_executor(
+    *,
+    plan,
+    registry: FormalIsaacActiveAttachmentRegistryV2,
+    journal: _Journal,
+    probe: _AttachProbe,
+) -> FrozenProbeExactPlanExecutorV1:
+    return FrozenProbeExactPlanExecutorV1(
+        project_root=ROOT,
+        mode="CONTRACT_TEST",
+        probe=probe,
+        robot=object(),
+        hand_prim=object(),
+        contact_collector=object(),
+        sensors={},
+        contact_views={},
+        journal=journal,
+        state_digest=lambda: "3" * 64,
+        capture_public=lambda *_args, **_kwargs: None,
+        reassociate_public=lambda *_args, **_kwargs: None,
+        mutation_counter_source=_MutationRecorder(),
+        attachment_state_registry=registry,
+    )
+
+
+def test_executor_commits_exact_preflight_attachment_binding_after_helper(
+    tmp_path: Path,
+) -> None:
+    resolver, plan, attach_phase, _, _, attach_path, transition = _bound_resolver(tmp_path)
+    resolver.bind_planned_attachment(
+        attachment=transition,
+        plan=plan,
+        phase=attach_phase,
+        path=attach_path,
+    )
+    planned = resolver.planned_attachment_bindings()[0]
+    plan.inputs = SimpleNamespace(target_track_id="track-deadbeef")
+    attach_phase.phase.contact_entity_selection = "TERMINAL_BILATERAL_CONTACT"
+    attach_phase.phase.allowed_external_contact_paths = (
+        "/World/M1B/cylinder_01/link",
+        "/World/M1B/cylinder_02/link",
+    )
+    journal = _Journal()
+    registry = FormalIsaacActiveAttachmentRegistryV2(
+        mode="CONTRACT_TEST",
+        journal=journal,
+        now_ns=lambda: 3_000,
+    )
+    probe = _AttachProbe()
+    executor = _attachment_executor(
+        plan=plan,
+        registry=registry,
+        journal=journal,
+        probe=probe,
+    )
+    executor.bind_preflight_attachment_bindings(plan, (planned,))
+    executor._attachment_candidate = "cylinder_01"
+    executor._attachment_candidate_phase_index = -1
+
+    result = executor._execute_attach(plan, attach_phase)
+
+    active = registry.snapshot_active_attachment()
+    assert active is not None
+    assert active.planned_attachment_binding == planned
+    assert active.helper_returned_before_registry_commit is True
+    assert result["active_attachment_receipt_sha256"] == active.receipt_sha256
+    assert probe.attached == ["cylinder_01"]
+
+    second_journal = _Journal()
+    second_probe = _AttachProbe()
+    second_registry = FormalIsaacActiveAttachmentRegistryV2(
+        mode="CONTRACT_TEST",
+        journal=second_journal,
+        now_ns=lambda: 3_001,
+    )
+    crossed = _attachment_executor(
+        plan=plan,
+        registry=second_registry,
+        journal=second_journal,
+        probe=second_probe,
+    )
+    crossed.bind_preflight_attachment_bindings(plan, (planned,))
+    crossed._attachment_candidate = "cylinder_02"
+    crossed._attachment_candidate_phase_index = -1
+    with pytest.raises(ExactPlanRuntimeUnavailable, match="differs from its preflight"):
+        crossed._execute_attach(plan, attach_phase)
+    assert second_probe.attached == []

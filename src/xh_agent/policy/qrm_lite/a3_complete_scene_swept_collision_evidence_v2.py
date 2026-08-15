@@ -6,8 +6,8 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from xh_agent.policy.qrm_lite.a3_attached_object_phase_geometry_v1 import (
-    A3AttachedObjectPhaseGeometryEvidenceV1,
+from xh_agent.policy.qrm_lite.a3_active_session_attachment_evidence_v2 import (
+    A3AttachedObjectPhaseGeometryEvidenceAnyV2,
 )
 from xh_agent.policy.qrm_lite.a3_bullet_production_adapter_v1 import (
     A3AttachedObjectGeometryV1,
@@ -57,7 +57,7 @@ class A3CompleteScenePhaseSweptCollisionEvidenceV2(_FrozenModel):
     robot_geometry: A3ControlledPandaGeometryReceiptV1
     attached_objects: tuple[A3AttachedObjectGeometryV1, ...] = ()
     attached_object_phase_geometry_evidence: tuple[
-        A3AttachedObjectPhaseGeometryEvidenceV1, ...
+        A3AttachedObjectPhaseGeometryEvidenceAnyV2, ...
     ] = ()
     fk_receipt: A3ReadOnlyFKReceiptV1
     scene_geometry: A3SceneCollisionGeometryReceiptV1
@@ -205,7 +205,7 @@ def build_a3_complete_scene_phase_evidence_v2(
     executor_joint_state_sequence: tuple[tuple[float, ...], ...],
     robot_geometry: A3ControlledPandaGeometryReceiptV1,
     attached_objects: tuple[A3AttachedObjectGeometryV1, ...],
-    attached_object_phase_geometry_evidence: tuple[A3AttachedObjectPhaseGeometryEvidenceV1, ...],
+    attached_object_phase_geometry_evidence: tuple[A3AttachedObjectPhaseGeometryEvidenceAnyV2, ...],
     fk_receipt: A3ReadOnlyFKReceiptV1,
     scene_geometry: A3SceneCollisionGeometryReceiptV1,
     scene_state: A3SceneStateReceiptV1,

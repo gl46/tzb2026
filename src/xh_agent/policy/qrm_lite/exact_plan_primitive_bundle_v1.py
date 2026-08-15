@@ -16,7 +16,7 @@ import os
 from pathlib import Path
 import re
 import stat
-from typing import Literal, Protocol
+from typing import TYPE_CHECKING, Literal, Protocol
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -26,6 +26,11 @@ from xh_agent.policy.qrm_lite.formal_split_runner_v2 import (
     SHA256_PATTERN,
     canonical_sha256,
 )
+
+if TYPE_CHECKING:
+    from xh_agent.policy.qrm_lite.a3_attached_object_phase_geometry_v1 import (
+        A3PlannedAttachedObjectBindingV1,
+    )
 
 
 ADR_0022_PATH = "docs/decisions/ADR-0022-m2c-exact-plan-primitives-and-b0-wrapper.md"
@@ -551,10 +556,21 @@ class ExactPlanPreflightVerifierV1(Protocol):
         phase: ExactPlanPhaseContractV1,
     ) -> ExactPlanPhasePreflightV1: ...
 
+    def planned_attachment_bindings(
+        self,
+        plan: M2CExactPlanPrimitivePlanV1,
+    ) -> tuple[A3PlannedAttachedObjectBindingV1, ...]: ...
+
 
 class ExactPlanPhaseExecutorV1(Protocol):
     implementation_sha256: str
     real_isaac: bool
+
+    def bind_preflight_attachment_bindings(
+        self,
+        plan: M2CExactPlanPrimitivePlanV1,
+        bindings: tuple[A3PlannedAttachedObjectBindingV1, ...],
+    ) -> None: ...
 
     def verify_bound_plan_before_execution(
         self,
@@ -698,6 +714,18 @@ class M2CExactPlanPrimitiveBundleV1:
         for expected, result in zip(plan.phases, preflight.phase_results):
             if result.phase_sha256 != expected.phase_sha256:
                 raise ExactPlanUnavailable("preflight phase order/digest differs")
+        if self.binding.execution_mode == "REAL_ISAAC":
+            assert self.preflight_verifier is not None
+            try:
+                attachment_bindings = self.preflight_verifier.planned_attachment_bindings(plan)
+                self.executor.bind_preflight_attachment_bindings(
+                    plan,
+                    attachment_bindings,
+                )
+            except Exception as exc:
+                raise ExactPlanUnavailable(
+                    "planned attachment handoff failed before executor authorization"
+                ) from exc
         independently_verified = self.executor.verify_bound_plan_before_execution(
             plan,
             preflight,

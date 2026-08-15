@@ -289,6 +289,9 @@ class _Resolver:
         del plan, phase, path
         self.bound.remove(attachment_sha256)
 
+    def planned_attachment_bindings(self):
+        return ()
+
 
 def _snapshot(plan_sha256: str):
     payload = {
@@ -421,6 +424,28 @@ def test_composite_requires_attached_payload_geometry_after_planned_attach() -> 
     assert collision.attached_counts == [0, 1]
     assert resolver.geometry_calls == ["e" * 64]
     assert callbacks.complete is True
+
+
+def test_composite_refuses_missing_execution_handoff_after_planned_attach() -> None:
+    callbacks, configuration, _, _, _, plan = _stack()
+    callbacks.snapshot_runtime(plan)
+    first_path, _ = _run_phase(
+        callbacks,
+        configuration,
+        plan,
+        plan.phases[0],
+        start=plan.inputs.preplan_state_sha256,
+    )
+    _run_phase(
+        callbacks,
+        configuration,
+        plan,
+        plan.phases[1],
+        start=first_path.path_sha256,
+    )
+
+    with pytest.raises(A3ExactPlanCallbacksUnavailable, match="binding crossed"):
+        callbacks.planned_attachment_bindings()
 
 
 def test_composite_poisoned_when_attached_payload_geometry_is_missing() -> None:

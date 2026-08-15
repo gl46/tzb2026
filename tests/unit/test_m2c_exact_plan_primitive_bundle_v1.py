@@ -184,6 +184,7 @@ class _Preflight:
     def __init__(self, implementation_sha256: str) -> None:
         self.implementation_sha256 = implementation_sha256
         self.calls: list[int] = []
+        self.attachment_binding_calls: list[str] = []
 
     def verify_phase(
         self,
@@ -204,20 +205,44 @@ class _Preflight:
             safety_configuration_sha256=hashes["SAFETY_CONFIGURATION"],
         )
 
+    def planned_attachment_bindings(
+        self,
+        plan: M2CExactPlanPrimitivePlanV1,
+    ) -> tuple[object, ...]:
+        self.attachment_binding_calls.append(plan.bound_plan_sha256)
+        return ()
+
 
 class _Executor:
-    real_isaac = False
-
-    def __init__(self, implementation_sha256: str, *, fail_at: int | None = None) -> None:
+    def __init__(
+        self,
+        implementation_sha256: str,
+        *,
+        fail_at: int | None = None,
+        real_isaac: bool = False,
+        stop_after_bind: bool = False,
+    ) -> None:
         self.implementation_sha256 = implementation_sha256
         self.fail_at = fail_at
+        self.real_isaac = real_isaac
+        self.stop_after_bind = stop_after_bind
         self.calls: list[int] = []
+        self.attachment_binding_calls: list[tuple[str, tuple[object, ...]]] = []
+
+    def bind_preflight_attachment_bindings(
+        self,
+        plan: M2CExactPlanPrimitivePlanV1,
+        bindings: tuple[object, ...],
+    ) -> None:
+        self.attachment_binding_calls.append((plan.bound_plan_sha256, bindings))
 
     def verify_bound_plan_before_execution(
         self,
         plan: M2CExactPlanPrimitivePlanV1,
         _preflight: ExactPlanPreflightReceiptV1,
     ) -> str:
+        if self.stop_after_bind:
+            raise ExactPlanUnavailable("unit-only stop after attachment handoff")
         return plan.bound_plan_sha256
 
     def execute_precomputed_phase(
@@ -247,6 +272,8 @@ def _binding(
     root: Path,
     bindings: tuple[ExactPlanSourceBindingV1, ...],
     plan: M2CExactPlanPrimitivePlanV1,
+    *,
+    execution_mode: str = "CONTRACT_TEST",
 ) -> ExactPlanPrimitiveDeploymentBindingV1:
     bound_files = {
         "docs/decisions/ADR-0022-m2c-exact-plan-primitives-and-b0-wrapper.md": (
@@ -292,7 +319,7 @@ def _binding(
         container_image_digest=IMAGE,
         source_bindings=bindings,
         phase_schema_by_skill=schemas,
-        execution_mode="CONTRACT_TEST",
+        execution_mode=execution_mode,
     )
 
 
@@ -382,3 +409,36 @@ def test_plan_is_deeply_immutable_and_digest_tamper_is_rejected(tmp_path: Path) 
     payload["phases"][0]["timeout_ns"] += 1
     with pytest.raises(ValidationError, match="canonical digest differs"):
         M2CExactPlanPrimitivePlanV1.model_validate(payload)
+
+
+def test_real_bundle_hands_preflight_attachment_bindings_to_executor_first(
+    tmp_path: Path,
+) -> None:
+    bindings = _make_binding_files(tmp_path)
+    plan = _make_plan(bindings)
+    hashes = {item.role: item.sha256 for item in bindings}
+    preflight = _Preflight(hashes["PREFLIGHT_IMPLEMENTATION"])
+    executor = _Executor(
+        hashes["EXECUTOR_IMPLEMENTATION"],
+        real_isaac=True,
+        stop_after_bind=True,
+    )
+    bundle = M2CExactPlanPrimitiveBundleV1(
+        project_root=tmp_path,
+        binding=_binding(
+            tmp_path,
+            bindings,
+            plan,
+            execution_mode="REAL_ISAAC",
+        ),
+        preflight_verifier=preflight,
+        executor=executor,
+    )
+    receipt = bundle.preflight(plan)
+
+    with pytest.raises(ExactPlanUnavailable, match="unit-only stop"):
+        bundle.execute(plan, receipt)
+
+    assert preflight.attachment_binding_calls == [plan.bound_plan_sha256]
+    assert executor.attachment_binding_calls == [(plan.bound_plan_sha256, ())]
+    assert executor.calls == []

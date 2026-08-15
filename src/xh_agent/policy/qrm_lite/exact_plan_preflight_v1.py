@@ -32,6 +32,9 @@ from typing import Any, Literal, Mapping, Protocol
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from xh_agent.policy.qrm_lite.a3_attached_object_phase_geometry_v1 import (
+    A3PlannedAttachedObjectBindingV1,
+)
 from xh_agent.policy.qrm_lite.a3_attachment_transition_evidence_v1 import (
     A3AttachmentTransitionEvidenceV1,
 )
@@ -1173,6 +1176,10 @@ class ExactPlanNonActuatingCallbacksV1(Protocol):
         configuration: ExactPlanPreflightConfigurationV1,
     ) -> NonActuatingAttachmentTransitionV1: ...
 
+    def planned_attachment_bindings(
+        self,
+    ) -> tuple[A3PlannedAttachedObjectBindingV1, ...]: ...
+
 
 def _matches(path: str, prefixes: tuple[str, ...]) -> bool:
     return any(path == prefix or path.startswith(f"{prefix}/") for prefix in prefixes)
@@ -2036,6 +2043,31 @@ class ExactPlanPreflightV1:
         if result.phase_sha256 != phase.phase_sha256:
             raise ExactPlanPreflightRejected("requested phase differs from cached full preflight")
         return result
+
+    def planned_attachment_bindings(
+        self,
+        plan: M2CExactPlanPrimitivePlanV1,
+    ) -> tuple[A3PlannedAttachedObjectBindingV1, ...]:
+        """Return exact same-plan ATTACH geometry after formal full-plan replay."""
+
+        receipt = self._cache.get(plan.bound_plan_sha256)
+        authorization = self._authorizations.get(plan.bound_plan_sha256)
+        if (
+            receipt is None
+            or receipt.standard_preflight_receipt.bound_plan_sha256 != plan.bound_plan_sha256
+            or authorization is None
+            or not authorization.formal_execution_eligible
+        ):
+            raise ExactPlanPreflightRejected(
+                "planned attachment handoff lacks a formal full-plan authorization"
+            )
+        try:
+            bindings = self.callbacks.planned_attachment_bindings()
+        except Exception as exc:
+            raise ExactPlanPreflightRejected("planned attachment handoff is unavailable") from exc
+        if any(item.bound_plan_sha256 != plan.bound_plan_sha256 for item in bindings):
+            raise ExactPlanPreflightRejected("planned attachment handoff crossed the bound plan")
+        return bindings
 
 
 def strict_replay_a3_audit_receipt_v1(

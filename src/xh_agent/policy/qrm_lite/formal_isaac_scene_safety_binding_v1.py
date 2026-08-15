@@ -29,6 +29,12 @@ from xh_agent.perception.public_track_associator_v2 import (
     PUBLIC_TRACK_COST_QUANTUM_M,
     PublicAssociationDeploymentBindingV2,
 )
+from xh_agent.policy.qrm_lite.a3_active_session_attachment_evidence_v2 import (
+    A3ExecutedAttachmentBindingV2,
+)
+from xh_agent.policy.qrm_lite.a3_attached_object_phase_geometry_v1 import (
+    A3PlannedAttachedObjectBindingV1,
+)
 from xh_agent.policy.qrm_lite.a3_bullet_self_ccd_v1 import A3RigidTransformV1
 from xh_agent.policy.qrm_lite.a3_scene_environment_v1 import (
     A3SceneCollisionGeometryReceiptV1,
@@ -218,7 +224,9 @@ class FormalIsaacActiveAttachmentSourceV1(Protocol):
     real_isaac: bool
     mocked_physics: bool
 
-    def snapshot_active_attachment(self) -> FormalIsaacActiveAttachmentBindingV1 | None: ...
+    def snapshot_active_attachment(
+        self,
+    ) -> FormalIsaacActiveAttachmentBindingV1 | A3ExecutedAttachmentBindingV2 | None: ...
 
 
 class FormalIsaacActiveAttachmentRegistryV1:
@@ -303,6 +311,116 @@ class FormalIsaacActiveAttachmentRegistryV1:
             )
             self.journal.append(
                 "FORMAL_ACTIVE_ATTACHMENT_REMOVED",
+                {"removal": receipt.model_dump(mode="json")},
+            )
+            self._active = None
+            return receipt
+
+
+class FormalIsaacActiveAttachmentRegistryV2:
+    """Persist an executed attachment together with its exact A.3 plan proof."""
+
+    requires_a3_planned_binding: Literal[True] = True
+
+    def __init__(
+        self,
+        *,
+        mode: Literal["CONTRACT_TEST", "REAL_ISAAC"],
+        journal: PersistentSceneSafetyJournalV1,
+        now_ns: Callable[[], int] = time.time_ns,
+    ) -> None:
+        self.real_isaac = mode == "REAL_ISAAC"
+        self.mocked_physics = mode == "CONTRACT_TEST"
+        self.journal = journal
+        self.now_ns = now_ns
+        self._active: A3ExecutedAttachmentBindingV2 | None = None
+        self._lock = threading.Lock()
+
+    def snapshot_active_attachment(self) -> A3ExecutedAttachmentBindingV2 | None:
+        with self._lock:
+            return self._active
+
+    def commit_attachment(
+        self,
+        *,
+        public_track_id: str,
+        external_contact_path: str,
+        bound_plan_sha256: str,
+        phase_sha256: str,
+        planned_attachment_binding: A3PlannedAttachedObjectBindingV1,
+    ) -> A3ExecutedAttachmentBindingV2:
+        with self._lock:
+            if self._active is not None:
+                raise FormalIsaacSceneSafetyBindingUnavailable(
+                    "active-session attachment already exists"
+                )
+            planned = A3PlannedAttachedObjectBindingV1.model_validate(
+                planned_attachment_binding.model_dump(mode="json")
+            )
+            if (
+                planned.bound_plan_sha256 != bound_plan_sha256
+                or planned.external_link_path != external_contact_path
+                or planned.attachment_transition_evidence.phase_sha256 != phase_sha256
+            ):
+                raise FormalIsaacSceneSafetyBindingUnavailable(
+                    "executed attachment crossed its planned A.3 binding"
+                )
+            payload = {
+                "schema_version": "A3ExecutedAttachmentBindingV2",
+                "public_track_id": public_track_id,
+                "external_contact_path": external_contact_path,
+                "bound_plan_sha256": bound_plan_sha256,
+                "phase_sha256": phase_sha256,
+                "planned_attachment_sha256": planned.attachment_sha256,
+                "planned_attachment_binding": planned.model_dump(mode="json"),
+                "attached_at_ns": int(self.now_ns()),
+                "helper_returned_before_registry_commit": True,
+                "real_isaac": self.real_isaac,
+                "contract_test_only": self.mocked_physics,
+                "formal_execution_evidence_eligible": bool(
+                    self.real_isaac and planned.formal_query_evidence_eligible
+                ),
+                "teacher_used": False,
+                "privileged_truth_policy_input": False,
+            }
+            receipt = A3ExecutedAttachmentBindingV2(
+                **payload,
+                receipt_sha256=canonical_sha256(payload),
+            )
+            self.journal.append(
+                "FORMAL_ACTIVE_ATTACHMENT_V2_COMMITTED",
+                {"attachment": receipt.model_dump(mode="json")},
+            )
+            self._active = receipt
+            return receipt
+
+    def commit_removal(
+        self,
+        *,
+        bound_plan_sha256: str,
+        phase_sha256: str,
+    ) -> FormalIsaacAttachmentRemovalReceiptV1:
+        with self._lock:
+            active = self._active
+            if active is None:
+                raise FormalIsaacSceneSafetyBindingUnavailable(
+                    "active-session attachment is absent"
+                )
+            payload = {
+                "schema_version": "FormalIsaacAttachmentRemovalReceiptV1",
+                "removed_attachment_receipt_sha256": active.receipt_sha256,
+                "bound_plan_sha256": bound_plan_sha256,
+                "phase_sha256": phase_sha256,
+                "removed_at_ns": int(self.now_ns()),
+                "teacher_used": False,
+                "privileged_truth_policy_input": False,
+            }
+            receipt = FormalIsaacAttachmentRemovalReceiptV1(
+                **payload,
+                receipt_sha256=canonical_sha256(payload),
+            )
+            self.journal.append(
+                "FORMAL_ACTIVE_ATTACHMENT_V2_REMOVED",
                 {"removal": receipt.model_dump(mode="json")},
             )
             self._active = None

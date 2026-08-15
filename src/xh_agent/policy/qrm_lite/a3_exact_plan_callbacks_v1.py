@@ -18,8 +18,11 @@ import hashlib
 from pathlib import Path
 from typing import Literal, Protocol
 
+from xh_agent.policy.qrm_lite.a3_active_session_attachment_evidence_v2 import (
+    A3AttachedObjectPhaseGeometryEvidenceAnyV2,
+)
 from xh_agent.policy.qrm_lite.a3_attached_object_phase_geometry_v1 import (
-    A3AttachedObjectPhaseGeometryEvidenceV1,
+    A3PlannedAttachedObjectBindingV1,
 )
 from xh_agent.policy.qrm_lite.a3_attachment_transition_v1 import (
     A3AttachmentTransitionProviderV1,
@@ -94,7 +97,7 @@ class A3AttachedObjectPhaseGeometryResolverV1(Protocol):
         *,
         attachment_sha256: str,
         path_sha256: str,
-    ) -> A3AttachedObjectPhaseGeometryEvidenceV1: ...
+    ) -> A3AttachedObjectPhaseGeometryEvidenceAnyV2: ...
 
     def release_planned_attachment(
         self,
@@ -104,6 +107,10 @@ class A3AttachedObjectPhaseGeometryResolverV1(Protocol):
         phase: ExactPlanPhaseContractV1,
         path: NonActuatingPhasePathV1,
     ) -> None: ...
+
+    def planned_attachment_bindings(
+        self,
+    ) -> tuple[A3PlannedAttachedObjectBindingV1, ...]: ...
 
 
 class A3CompleteSweptCollisionProviderV1(Protocol):
@@ -124,7 +131,7 @@ class A3CompleteSweptCollisionProviderV1(Protocol):
         configuration: ExactPlanPreflightConfigurationV1,
         attached_objects: tuple[A3AttachedObjectGeometryV1, ...],
         attached_object_phase_geometry_evidence: tuple[
-            A3AttachedObjectPhaseGeometryEvidenceV1, ...
+            A3AttachedObjectPhaseGeometryEvidenceAnyV2, ...
         ],
     ) -> NonActuatingSweptCollisionV1: ...
 
@@ -177,6 +184,8 @@ class A3ExactPlanNonActuatingCallbacksV1:
         ] = "NEW"
         self._active_path: NonActuatingPhasePathV1 | None = None
         self._attachment_sha256 = runtime_snapshot.active_attachment_sha256
+        self._initial_attachment_sha256 = runtime_snapshot.active_attachment_sha256
+        self._active_plan: M2CExactPlanPrimitivePlanV1 | None = None
 
         dependencies_real = bool(
             runtime_snapshot_real
@@ -273,6 +282,7 @@ class A3ExactPlanNonActuatingCallbacksV1:
             self._poison("A.3 initial attached payload geometry is unavailable", exc)
         self._counter()
         self._active_plan_sha256 = plan.bound_plan_sha256
+        self._active_plan = plan
         self._stage = "SNAPSHOT"
         return self.runtime_snapshot
 
@@ -331,7 +341,7 @@ class A3ExactPlanNonActuatingCallbacksV1:
         if configuration != self.configuration or path != self._active_path:
             self._poison("A.3 collision query crossed path/configuration")
         attached_objects: tuple[A3AttachedObjectGeometryV1, ...] = ()
-        attached_evidence: tuple[A3AttachedObjectPhaseGeometryEvidenceV1, ...] = ()
+        attached_evidence: tuple[A3AttachedObjectPhaseGeometryEvidenceAnyV2, ...] = ()
         if self._attachment_sha256 is not None and phase.phase.command in MOTION_COMMANDS:
             try:
                 geometry = self.attached_geometry_resolver.geometry_for_phase(
@@ -429,3 +439,33 @@ class A3ExactPlanNonActuatingCallbacksV1:
         self._next_phase_index += 1
         self._stage = "COMPLETE" if self._next_phase_index == len(plan.phases) else "PHASE_DONE"
         return transition
+
+    def planned_attachment_bindings(
+        self,
+    ) -> tuple[A3PlannedAttachedObjectBindingV1, ...]:
+        """Expose only complete same-plan bindings after all-phase replay."""
+
+        self._require_live()
+        if self._stage != "COMPLETE":
+            self._poison("A.3 planned attachment bindings requested before plan completion")
+        bindings = self.attached_geometry_resolver.planned_attachment_bindings()
+        expected_count = int(
+            self._initial_attachment_sha256 is None and self._attachment_sha256 is not None
+        )
+        if (
+            self._active_plan is None
+            or len(bindings) != expected_count
+            or any(
+                item.bound_plan_sha256 != self._active_plan_sha256
+                or item.attachment_sha256 != self._attachment_sha256
+                or item.attachment_transition_evidence.phase_sha256
+                not in {
+                    phase.phase_sha256
+                    for phase in self._active_plan.phases
+                    if phase.phase.command == "ATTACH_CONTACT_ENTITY"
+                }
+                for item in bindings
+            )
+        ):
+            self._poison("A.3 planned attachment binding crossed the active plan")
+        return bindings

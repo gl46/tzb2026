@@ -36,6 +36,9 @@ from typing import Any, Callable, Literal, Mapping, Protocol
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from xh_agent.policy.qrm_lite.a3_attached_object_phase_geometry_v1 import (
+    A3PlannedAttachedObjectBindingV1,
+)
 from xh_agent.policy.qrm_lite.exact_plan_primitive_bundle_v1 import (
     ExactPlanPhaseContractV1,
     ExactPlanPhaseExecutionV1,
@@ -296,6 +299,8 @@ class ActiveSessionMutationRecorderV1(Protocol):
 
 
 class ActiveSessionAttachmentRegistryV1(Protocol):
+    requires_a3_planned_binding: Literal[True]
+
     def commit_attachment(
         self,
         *,
@@ -303,6 +308,7 @@ class ActiveSessionAttachmentRegistryV1(Protocol):
         external_contact_path: str,
         bound_plan_sha256: str,
         phase_sha256: str,
+        planned_attachment_binding: A3PlannedAttachedObjectBindingV1,
     ) -> Any: ...
 
     def commit_removal(
@@ -464,6 +470,8 @@ class FrozenProbeExactPlanExecutorV1:
         self._poisoned = False
         self._attachment_candidate: str | None = None
         self._attachment_candidate_phase_index: int | None = None
+        self._preflight_attachment_bindings: dict[str, A3PlannedAttachedObjectBindingV1] = {}
+        self._attachment_bindings_bound = False
         self._phase_operation_started = False
         if self.real_isaac:
             # Guard construction before any source/module inspection can lead
@@ -522,6 +530,80 @@ class FrozenProbeExactPlanExecutorV1:
         # expected in the frozen module, but this adapter's allowlist excludes them.
         if not _FORBIDDEN_RUNTIME_SELECTORS.isdisjoint(_ALLOWED_FROZEN_EXECUTION_HELPERS):
             raise ExactPlanRuntimeUnavailable("runtime selector entered executor allowlist")
+        if getattr(self.attachment_state_registry, "requires_a3_planned_binding", None) is not True:
+            raise ExactPlanRuntimeUnavailable(
+                "REAL_ISAAC attachment registry lacks the A.3 planned-binding contract"
+            )
+
+    def bind_preflight_attachment_bindings(
+        self,
+        plan: M2CExactPlanPrimitivePlanV1,
+        bindings: tuple[A3PlannedAttachedObjectBindingV1, ...],
+    ) -> None:
+        """Bind query-only ATTACH geometry before executor authorization."""
+
+        self._verify_runtime_surface()
+        if (
+            self._authorized_plan is not None
+            or self._attachment_bindings_bound
+            or self._phase_operation_started
+            or self._poisoned
+        ):
+            raise ExactPlanRuntimeUnavailable(
+                "preflight attachment bindings arrived after executor authorization"
+            )
+        normalized = tuple(
+            A3PlannedAttachedObjectBindingV1.model_validate(item.model_dump(mode="json"))
+            for item in bindings
+        )
+        attach_phases = {
+            phase.phase_sha256: phase
+            for phase in plan.phases
+            if phase.phase.command == "ATTACH_CONTACT_ENTITY"
+        }
+        by_phase = {item.attachment_transition_evidence.phase_sha256: item for item in normalized}
+        if len(by_phase) != len(normalized) or set(by_phase) != set(attach_phases):
+            raise ExactPlanRuntimeUnavailable(
+                "preflight attachment binding set differs from exact ATTACH phases"
+            )
+        for phase_sha256, item in by_phase.items():
+            phase = attach_phases[phase_sha256]
+            transition = item.attachment_transition_evidence
+            if (
+                item.bound_plan_sha256 != plan.bound_plan_sha256
+                or transition.phase_index != phase.phase.phase_index
+                or transition.phase_sha256 != phase.phase_sha256
+                or transition.attachment_sha256_after != item.attachment_sha256
+                or not self._path_is_allowed(
+                    item.external_link_path,
+                    phase.phase.allowed_external_contact_paths,
+                )
+                or any(
+                    not self._path_is_allowed(
+                        path,
+                        phase.phase.allowed_robot_contact_paths,
+                    )
+                    for path in item.allowed_robot_touch_paths
+                )
+                or (self.real_isaac and not item.formal_query_evidence_eligible)
+            ):
+                raise ExactPlanRuntimeUnavailable(
+                    "preflight attachment binding crossed plan/phase/allowlist/mode"
+                )
+        self._preflight_attachment_bindings = by_phase
+        self._attachment_bindings_bound = True
+        self.journal.append(
+            "EXACT_PLAN_A3_ATTACHMENT_BINDINGS_BOUND",
+            {
+                "bound_plan_sha256": plan.bound_plan_sha256,
+                "attachment_binding_receipt_sha256": tuple(
+                    item.receipt_sha256 for item in normalized
+                ),
+                "attachment_phase_sha256": tuple(sorted(by_phase)),
+                "teacher_used": False,
+                "privileged_truth_policy_input": False,
+            },
+        )
 
     def verify_bound_plan_before_execution(
         self,
@@ -531,6 +613,10 @@ class FrozenProbeExactPlanExecutorV1:
         self._verify_runtime_surface()
         if self._authorized_plan is not None or self._poisoned:
             raise ExactPlanRuntimeUnavailable("executor is single-use or poisoned")
+        if self.real_isaac and not self._attachment_bindings_bound:
+            raise ExactPlanRuntimeUnavailable(
+                "REAL_ISAAC executor lacks the preflight attachment handoff"
+            )
         if plan.exact_execution_plan.canonical_skill not in SUPPORTED_SKILLS:
             raise ExactPlanRuntimeUnavailable("plan skill is outside ADR-0022")
         if preflight.bound_plan_sha256 != plan.bound_plan_sha256:
@@ -658,6 +744,18 @@ class FrozenProbeExactPlanExecutorV1:
             raise ExactPlanRuntimeUnavailable(
                 "broker entity is outside the bound contact allowlist"
             )
+        planned_binding = self._preflight_attachment_bindings.get(phase.phase_sha256)
+        if planned_binding is not None and (
+            planned_binding.bound_plan_sha256 != plan.bound_plan_sha256
+            or planned_binding.external_link_path != object_path
+        ):
+            raise ExactPlanRuntimeUnavailable(
+                "physical attachment differs from its preflight A.3 geometry"
+            )
+        if self.real_isaac and planned_binding is None:
+            raise ExactPlanRuntimeUnavailable(
+                "REAL_ISAAC attachment lacks its preflight A.3 geometry binding"
+            )
         object_prim = self.probe.RigidPrim(object_path)
         self._phase_operation_started = True
         if self.mutation_counter_source is None:
@@ -667,12 +765,15 @@ class FrozenProbeExactPlanExecutorV1:
         self.probe._attach_preserving_pose(entity, self.hand_prim, object_prim)
         attachment_receipt_sha256 = None
         if self.attachment_state_registry is not None:
-            attachment = self.attachment_state_registry.commit_attachment(
-                public_track_id=plan.inputs.target_track_id,
-                external_contact_path=object_path,
-                bound_plan_sha256=plan.bound_plan_sha256,
-                phase_sha256=phase.phase_sha256,
-            )
+            kwargs: dict[str, object] = {
+                "public_track_id": plan.inputs.target_track_id,
+                "external_contact_path": object_path,
+                "bound_plan_sha256": plan.bound_plan_sha256,
+                "phase_sha256": phase.phase_sha256,
+            }
+            if planned_binding is not None:
+                kwargs["planned_attachment_binding"] = planned_binding
+            attachment = self.attachment_state_registry.commit_attachment(**kwargs)
             attachment_receipt_sha256 = str(attachment.receipt_sha256)
         elif self.real_isaac:
             raise ExactPlanRuntimeUnavailable("active attachment registry is unavailable")

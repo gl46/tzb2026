@@ -590,3 +590,8 @@ class A3QueryOnlyAttachedObjectPhaseGeometryResolverV1:
                 "A.3 attached-object release crossed plan/phase/path identity"
             )
         del self._bindings[attachment_sha256]
+
+    def planned_attachment_bindings(self) -> tuple[A3PlannedAttachedObjectBindingV1, ...]:
+        """Return immutable same-plan bindings for execution cross-binding."""
+
+        return tuple(self._bindings[key] for key in sorted(self._bindings))

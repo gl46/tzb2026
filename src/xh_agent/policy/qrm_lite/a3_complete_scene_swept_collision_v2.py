@@ -7,8 +7,8 @@ from pathlib import Path
 import time
 from typing import Callable, Literal, Protocol, Sequence
 
-from xh_agent.policy.qrm_lite.a3_attached_object_phase_geometry_v1 import (
-    A3AttachedObjectPhaseGeometryEvidenceV1,
+from xh_agent.policy.qrm_lite.a3_active_session_attachment_evidence_v2 import (
+    A3AttachedObjectPhaseGeometryEvidenceAnyV2,
 )
 from xh_agent.policy.qrm_lite.a3_bullet_production_adapter_v1 import (
     A3AttachedObjectGeometryV1,
@@ -191,7 +191,7 @@ class A3CompleteSceneSweptCollisionProviderV2:
         configuration: ExactPlanPreflightConfigurationV1,
         attached_objects: tuple[A3AttachedObjectGeometryV1, ...] = (),
         attached_object_phase_geometry_evidence: tuple[
-            A3AttachedObjectPhaseGeometryEvidenceV1, ...
+            A3AttachedObjectPhaseGeometryEvidenceAnyV2, ...
         ] = (),
     ) -> NonActuatingSweptCollisionV1:
         self._validate_configuration(configuration)
