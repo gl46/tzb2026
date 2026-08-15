@@ -22,11 +22,37 @@ SOURCE_SHA256 = "a" * 64
 
 
 class _Robot:
+    def __init__(self) -> None:
+        self.pose_calls = 0
+        self.target_calls = 0
+
     def is_physics_tensor_entity_valid(self) -> bool:
         return True
 
     def get_dof_positions(self) -> list[list[float]]:
         return [[0.0] * 7 + [0.001, 0.001]]
+
+    def set_end_effector_pose(self, *_args: Any, **_kwargs: Any) -> None:
+        self.pose_calls += 1
+
+    def set_dof_position_targets(self, *_args: Any, **_kwargs: Any) -> None:
+        self.target_calls += 1
+
+
+class _MutationCounter:
+    def __init__(self) -> None:
+        self.target_writes = 0
+        self.simulation_steps = 0
+        self.controller_commands = 0
+
+    def record_articulation_target_writes(self, count: int = 1) -> None:
+        self.target_writes += count
+
+    def record_simulation_steps(self, count: int = 1) -> None:
+        self.simulation_steps += count
+
+    def record_controller_commands(self, count: int = 1) -> None:
+        self.controller_commands += count
 
 
 class _App:
@@ -60,6 +86,7 @@ class _Scene:
         self.run_id: str | None = None
         self.session_id: str | None = None
         self.previous_completed_at_ns = 0
+        self.a3_mutation_counter = _MutationCounter()
 
     def _capture_public(self, *, decision_index: int, label: str) -> dict[str, Any]:
         del decision_index, label
@@ -249,9 +276,17 @@ def test_update_recorder_and_execution_commit_are_single_use(
         lambda _action: None,
     )
     source = _source([100, 2_000, 3_000, 4_000])
+    source._install_robot_command_recorders()
     source._install_update_recorder()
+    source._scene.robot.set_end_effector_pose([0.0, 0.0, 0.0])
+    source._scene.robot.set_dof_position_targets([0.0] * 9)
     source._scene.probe.simulation_app.update()
     assert len(source._proprioception) == 1
+    assert source._scene.robot.pose_calls == 1
+    assert source._scene.robot.target_calls == 1
+    assert source._scene.a3_mutation_counter.target_writes == 2
+    assert source._scene.a3_mutation_counter.controller_commands == 2
+    assert source._scene.a3_mutation_counter.simulation_steps == 1
     source.capture_raw_public_frame_v4(
         run_id="run",
         session_id="session",

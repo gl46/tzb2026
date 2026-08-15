@@ -117,15 +117,49 @@ class FormalIsaacRawPublicFrameSourceV4Real:
         self._pending_public_skill: LastPhysicallyExecutedPublicSkillV2 | None = None
         self._last_execution_completed_at_ns = 0
         self._closed = False
+        self._install_robot_command_recorders()
         self._install_update_recorder()
+
+    def _install_robot_command_recorders(self) -> None:
+        robot = self._scene.robot
+        if getattr(robot, "_m2c_v4_command_recorders_wrapped", False):
+            raise RuntimeError("formal V4 robot command recorders were already installed")
+
+        original_pose = robot.set_end_effector_pose
+        original_dof_targets = robot.set_dof_position_targets
+        counter = self._scene.a3_mutation_counter
+
+        def set_end_effector_pose_and_record(*args: Any, **kwargs: Any) -> Any:
+            counter.record_articulation_target_writes()
+            counter.record_controller_commands()
+            return original_pose(*args, **kwargs)
+
+        def set_dof_position_targets_and_record(*args: Any, **kwargs: Any) -> Any:
+            counter.record_articulation_target_writes()
+            counter.record_controller_commands()
+            return original_dof_targets(*args, **kwargs)
+
+        try:
+            robot.set_end_effector_pose = set_end_effector_pose_and_record
+            robot.set_dof_position_targets = set_dof_position_targets_and_record
+            robot._m2c_v4_command_recorders_wrapped = True
+        except Exception as exc:
+            raise RuntimeError("formal V4 cannot install complete robot command recorders") from exc
+        if (
+            robot.set_end_effector_pose is not set_end_effector_pose_and_record
+            or robot.set_dof_position_targets is not set_dof_position_targets_and_record
+        ):
+            raise RuntimeError("formal V4 robot command recorder assignment was not retained")
 
     def _install_update_recorder(self) -> None:
         app = self._scene.probe.simulation_app
         original = app.update
+        counter = self._scene.a3_mutation_counter
         if getattr(app, "_m2c_v4_public_update_wrapped", False):
             raise RuntimeError("formal V4 public update recorder was already installed")
 
         def update_and_record(*args: Any, **kwargs: Any) -> Any:
+            counter.record_simulation_steps()
             result = original(*args, **kwargs)
             self._record_proprioception_sample()
             return result

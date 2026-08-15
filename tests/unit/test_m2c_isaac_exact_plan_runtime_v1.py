@@ -310,7 +310,12 @@ def _reassociate(*_args: Any) -> PublicReassociationPhaseReceiptV1:
     )
 
 
-def _executor(plan: M2CExactPlanPrimitivePlanV1, probe: _Probe, journal: _Journal):
+def _executor(
+    plan: M2CExactPlanPrimitivePlanV1,
+    probe: _Probe,
+    journal: _Journal,
+    mutation_counter: _MutationCounter | None = None,
+):
     return FrozenProbeExactPlanExecutorV1(
         project_root=PROJECT_ROOT,
         mode="CONTRACT_TEST",
@@ -324,7 +329,51 @@ def _executor(plan: M2CExactPlanPrimitivePlanV1, probe: _Probe, journal: _Journa
         state_digest=lambda: plan.inputs.preplan_state_sha256,
         capture_public=_capture,
         reassociate_public=_reassociate,
+        mutation_counter_source=mutation_counter,
     )
+
+
+class _MutationCounter:
+    def __init__(self) -> None:
+        self.scene_mutations = 0
+        self.attachment_mutations = 0
+
+    def record_scene_mutations(self, count: int = 1) -> None:
+        self.scene_mutations += count
+
+    def record_attachment_mutations(self, count: int = 1) -> None:
+        self.attachment_mutations += count
+
+
+def test_attachment_mutations_are_recorded_before_frozen_helpers(tmp_path: Path) -> None:
+    plan = _plan(tmp_path)
+    probe = _Probe()
+    probe.RigidPrim = lambda path: SimpleNamespace(path=path)
+    counter = _MutationCounter()
+    executor = _executor(plan, probe, _Journal(), counter)
+    executor._attachment_candidate = "cylinder_01"
+    executor._attachment_candidate_phase_index = 0
+    attach = SimpleNamespace(
+        phase=SimpleNamespace(
+            phase_index=1,
+            command="ATTACH_CONTACT_ENTITY",
+            allowed_external_contact_paths=("/World/M1B/cylinder_01/link",),
+            contact_entity_selection="TERMINAL_BILATERAL_CONTACT",
+        ),
+        phase_sha256="a" * 64,
+    )
+    remove = SimpleNamespace(
+        phase=SimpleNamespace(command="REMOVE_ATTACHMENT"),
+        phase_sha256="b" * 64,
+    )
+
+    executor._execute_attach(attach)
+    executor._execute_remove(remove)
+
+    assert probe.attachment_calls == 1
+    assert probe.removal_calls == 1
+    assert counter.scene_mutations == 2
+    assert counter.attachment_mutations == 2
 
 
 def test_frozen_probe_preflight_is_explicitly_unavailable_before_any_command(
@@ -445,8 +494,24 @@ def test_phase_order_or_state_digest_mismatch_fails_before_helper_call(
         wrong_state.verify_bound_plan_before_execution(plan, preflight)
 
 
-def test_real_isaac_construction_requires_reviewed_deployment_binding() -> None:
+def test_real_isaac_construction_requires_counter_and_reviewed_deployment_binding() -> None:
     probe = _Probe()
+    with pytest.raises(ExactPlanRuntimeUnavailable, match="mutation counter"):
+        FrozenProbeExactPlanExecutorV1(
+            project_root=PROJECT_ROOT,
+            mode="REAL_ISAAC",
+            probe=probe,
+            robot=object(),
+            hand_prim=object(),
+            contact_collector=object(),
+            sensors={},
+            contact_views={},
+            journal=_Journal(),
+            state_digest=lambda: ZERO,
+            capture_public=_capture,
+            reassociate_public=_reassociate,
+            deployment_binding=None,
+        )
     with pytest.raises(ExactPlanRuntimeUnavailable, match="deployment binding"):
         FrozenProbeExactPlanExecutorV1(
             project_root=PROJECT_ROOT,
@@ -461,6 +526,7 @@ def test_real_isaac_construction_requires_reviewed_deployment_binding() -> None:
             state_digest=lambda: ZERO,
             capture_public=_capture,
             reassociate_public=_reassociate,
+            mutation_counter_source=_MutationCounter(),
             deployment_binding=None,
         )
     assert probe.pose_calls == []

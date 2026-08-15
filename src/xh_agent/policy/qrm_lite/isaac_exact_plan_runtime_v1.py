@@ -287,6 +287,14 @@ class PersistentIsaacJournalV1(Protocol):
     def append(self, event_type: str, payload: Mapping[str, Any]) -> None: ...
 
 
+class ActiveSessionMutationRecorderV1(Protocol):
+    """Mutation intent recorder shared with the formal A.3 query sources."""
+
+    def record_scene_mutations(self, count: int = 1) -> None: ...
+
+    def record_attachment_mutations(self, count: int = 1) -> None: ...
+
+
 class FrozenProbePreflightUnavailableV1:
     """Fail-closed preflight adapter for the currently frozen helper surface."""
 
@@ -411,6 +419,7 @@ class FrozenProbeExactPlanExecutorV1:
             [M2CExactPlanPrimitivePlanV1, ExactPlanPhaseContractV1],
             PublicReassociationPhaseReceiptV1,
         ],
+        mutation_counter_source: ActiveSessionMutationRecorderV1 | None = None,
         deployment_binding: ExactPlanPrimitiveDeploymentBindingV1 | None = None,
     ) -> None:
         self.project_root = project_root.resolve()
@@ -426,6 +435,7 @@ class FrozenProbeExactPlanExecutorV1:
         self.state_digest = state_digest
         self.capture_public = capture_public
         self.reassociate_public = reassociate_public
+        self.mutation_counter_source = mutation_counter_source
         self.deployment_binding = deployment_binding
         self.implementation_sha256 = _file_sha256(Path(__file__))
         self._authorized_plan: str | None = None
@@ -455,6 +465,10 @@ class FrozenProbeExactPlanExecutorV1:
                     "contract-test executor may not accept a production deployment binding"
                 )
             return
+        if self.mutation_counter_source is None:
+            raise ExactPlanRuntimeUnavailable(
+                "REAL_ISAAC executor requires the shared active-session mutation counter"
+            )
         binding = self.deployment_binding
         if binding is None or binding.execution_mode != "REAL_ISAAC":
             raise ExactPlanRuntimeUnavailable(
@@ -618,6 +632,10 @@ class FrozenProbeExactPlanExecutorV1:
             )
         object_prim = self.probe.RigidPrim(object_path)
         self._phase_operation_started = True
+        if self.mutation_counter_source is None:
+            raise ExactPlanRuntimeUnavailable("attachment mutation counter is unavailable")
+        self.mutation_counter_source.record_scene_mutations()
+        self.mutation_counter_source.record_attachment_mutations()
         self.probe._attach_preserving_pose(entity, self.hand_prim, object_prim)
         # Entity identity is actuation-internal and intentionally absent from
         # the public/persistent model-path audit projection.
@@ -630,6 +648,10 @@ class FrozenProbeExactPlanExecutorV1:
 
     def _execute_remove(self, phase: ExactPlanPhaseContractV1) -> dict[str, object]:
         self._phase_operation_started = True
+        if self.mutation_counter_source is None:
+            raise ExactPlanRuntimeUnavailable("attachment mutation counter is unavailable")
+        self.mutation_counter_source.record_scene_mutations()
+        self.mutation_counter_source.record_attachment_mutations()
         self.probe._remove_attachment()
         self._attachment_candidate = None
         self._attachment_candidate_phase_index = None
