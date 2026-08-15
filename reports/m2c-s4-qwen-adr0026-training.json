@@ -1,0 +1,201 @@
+{
+  "schema_version": "M2CS4QwenADR0026TwoArmTrainingReportV1",
+  "status": "PASS_TWO_ARM_A100_TRAINING_NOT_Q_B",
+  "as_of_asia_shanghai": "2026-08-15",
+  "training_source_commit": "81dbb5efe4010fc34162f4113122d11feed04165",
+  "accepted_adr": {
+    "path": "docs/decisions/ADR-0026-m2c-terminal-step-diagnosis.md",
+    "sha256": "ba24b65435b19b3a7700bb7caba83a01d98897a8999aee54af5c2370d410c180",
+    "section": "4"
+  },
+  "execution_environment": {
+    "host": "node2",
+    "accelerator": "NVIDIA A100-SXM4-80GB",
+    "python": "3.12.3",
+    "torch": "2.13.0+cu130",
+    "transformers": "5.14.1",
+    "peft": "0.19.1",
+    "fast_transformers_training_path_available": false,
+    "identical_pytorch_fallback_used_for_both_arms": true
+  },
+  "preflight": {
+    "status": "PASS_REPLAYED_ADR0026_V4_DECISION_DATA",
+    "remote_path": "/home/gl/m2c-s4-training-preflight-81dbb5e.json",
+    "local_mirror_path": "/Users/gl/tzb-m2c-evidence/m2c-s4-training-preflight-81dbb5e.json",
+    "file_sha256": "f103b4ae3ffda03f63ce0612a841b82ffea9ec6a62e16528e91b3845da199952",
+    "rows": 273,
+    "episodes": 39,
+    "pointer_supervised_rows": 259,
+    "pointer_masked_rows": 14,
+    "source_files": 39,
+    "public_assets": 546,
+    "source_inventory_sha256": "e2b025539e64e9d84d7218e7eccbf9c98f26a15005afddad31e39a3a0104f412",
+    "asset_inventory_sha256": "1a46587cd4bdef0d00ade0d851de716f7104619d635249ff0fef1b0a8482974f",
+    "teacher_used": false,
+    "privileged_truth_policy_input": false
+  },
+  "source_bindings": [
+    {
+      "path": "docs/decisions/ADR-0026-m2c-terminal-step-diagnosis.md",
+      "sha256": "ba24b65435b19b3a7700bb7caba83a01d98897a8999aee54af5c2370d410c180"
+    },
+    {
+      "path": "scripts/m2c/train_qwen_decision_level_v4.py",
+      "sha256": "7bd1579af938a5ecd1ef8ccd7ae5383039a2a8406577112fec7260084047d437"
+    },
+    {
+      "path": "scripts/m2c/qwen_decision_level_v4.py",
+      "sha256": "d6c3120a4e5d502bc0c2283db292c42c92d00e7a1abd9d65e8898b9b527867ab"
+    },
+    {
+      "path": "reports/m2c-s4-decision-level-supervision-adr0026.json",
+      "sha256": "a6e7ead4f8ea885c54d197fc9af35d824a030ddafd5406a45a32988670731ac3"
+    },
+    {
+      "path": "configs/m2c_s4_v4_training_keys.json",
+      "sha256": "83a672f439521dc2c6263225851ec54cbd80de052af835a6590a7e02443b79c4"
+    },
+    {
+      "path": "configs/m2c_s4_v4_training_keys_extension1.json",
+      "sha256": "9fcc971f5bdf0787692b6d2de9be81885fe164e4b78b34fac214d6467c64e164"
+    },
+    {
+      "path": "configs/m2c_s6_evaluation_keys.json",
+      "sha256": "ce1440966d31dda6b3f0e06c41a19dc654ebc734a6597d6346ec9df3c5f0d2ba"
+    },
+    {
+      "path": "artifacts/m2c/s4-decision-level-supervision-adr0026-v1/dataset-manifest.json",
+      "sha256": "9d1b15412b193ef2662ce518fc2bf19016116c70ab026c581c68bb40cb10e03a"
+    },
+    {
+      "path": "artifacts/m2c/s4-decision-level-supervision-adr0026-v1/decision-level-v4.jsonl",
+      "sha256": "78c28350fd59c74df018724c44aa6705785909fcc7607d0ad0e27d7148efd86d"
+    }
+  ],
+  "dataset": {
+    "manifest_file_sha256": "9d1b15412b193ef2662ce518fc2bf19016116c70ab026c581c68bb40cb10e03a",
+    "manifest_sha256": "9e2e93b2b9fb95dcf632a8a6350b6fc6f70c2eb5de1cd8ae2bea5041f4b1dcbb",
+    "v4_shard_sha256": "78c28350fd59c74df018724c44aa6705785909fcc7607d0ad0e27d7148efd86d",
+    "rows": 273,
+    "episodes": 39,
+    "decision_indices": "0-6",
+    "pointer_supervised_rows": 259,
+    "pointer_masked_rows": 14,
+    "teacher_used": false,
+    "privileged_truth_policy_input": false
+  },
+  "model": {
+    "model_id": "Qwen/Qwen3.5-4B",
+    "model_revision": "851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a",
+    "base_model_snapshot_tree_sha256": "aefef289a0ece7d9baf7d1a0decd040830c82c1510222ff0cada7f23e024e6aa"
+  },
+  "common_training_contract": {
+    "seed": 20260815,
+    "epochs": 1,
+    "learning_rate": 0.0001,
+    "optimizer_steps": 273,
+    "wall_budget_seconds": 21600.0,
+    "only_intended_arm_difference": "failure_context",
+    "teacher_used": false,
+    "privileged_truth_policy_input": false,
+    "physical_evaluation_executed": false
+  },
+  "arms": {
+    "FC": {
+      "failure_context": "on",
+      "remote_output_root": "/home/gl/xh-data/m2c-s4-adr0026/qwen-v4-fc-on-seed-20260815",
+      "local_mirror_root": "/Users/gl/tzb-m2c-evidence/m2c-s4-adr0026-qwen-v4-fc-on-seed-20260815",
+      "train_report_file_sha256": "dd75ef59f82c4aa18ca3fd2391ffdc79cd8a16826c3f3e126f78d49c94628ffd",
+      "bundle_manifest_file_sha256": "d51d36128cbca136678f726088a11ea6a5d7bfbe79e2b8d96085d861e54b4e01",
+      "bundle_sha256": "6e7cb272445a64413d6adbe687431172816148f2bd571ada28ec7075fc2dd2a2",
+      "adapter_tree_sha256": "5101ccd684b1a459cc55f6e67f207f57aeb310c74d9c7c15dffe39b36bc50706",
+      "adapter_files": {
+        "README.md": "903fe86a7b09000584811bf479fb53423040bbc410e2f754595425eced863a9d",
+        "adapter_config.json": "aa93ba339b1f56a9689eacad405d453c43a5747a2fd1b5dd793e58ff10fb506c",
+        "adapter_model.safetensors": "c6b087e5c75611a8b8307b37f66d3c0e6884df1e634db3958ae464a71887c9af"
+      },
+      "head_checkpoint_sha256": "e04c8f5d39a121383057d4b1b060b7828fb5badfff3c4ce0d1e92993ee47d231",
+      "head_deployment_file_sha256": "f4f6ae2745c691918f397fb7849ca41873b10499b00369bc35594924ae78edc2",
+      "head_deployment_manifest_sha256": "7f139073c6984baa89d431cd976f578f819c62a04d77040edc18eaccb1a15c00",
+      "checkpoint_binding_sha256": "ef5a521b604fc1e503d984ff90717b07398012c70062f210b85fb35e7aed86eb",
+      "training_dataset_report_file_sha256": "46f3b29a18c1e0f0aea4cee1078df0d5a7ea6c6d0a822b2564a96a8e5bd52800",
+      "training_dataset_report_sha256": "7c908c9cf0a614bfdf79b85cbe5f3cf1b6c7067a663369e6479e50f4abab81e5",
+      "wall_seconds": 929.4566589899996,
+      "peak_vram_mb_reported": 34203.8291015625,
+      "max_gradient_l2": 654.2091837956875,
+      "mean_training_losses": {
+        "skill": 1.3100261785575673,
+        "pointer": 2.121631549353173,
+        "destination": 0.48408784140613265
+      },
+      "training_fit_metrics": {
+        "skill_accuracy": 0.9413919413919414,
+        "skill_macro_f1": 0.38709948330022076,
+        "pointer_accuracy": 0.4942084942084942,
+        "pointer_macro_f1": 0.3901556272713813,
+        "destination_accuracy": 0.989010989010989,
+        "destination_macro_f1": 0.28191144821245745,
+        "joint_exact_match_over_supervised_heads": 0.4981684981684982
+      }
+    },
+    "NO_FC": {
+      "failure_context": "off",
+      "remote_output_root": "/home/gl/xh-data/m2c-s4-adr0026/qwen-v4-nofc-off-seed-20260815",
+      "local_mirror_root": "/Users/gl/tzb-m2c-evidence/m2c-s4-adr0026-qwen-v4-nofc-off-seed-20260815",
+      "train_report_file_sha256": "61333701157644123221a18ca1085289357a9f422270ea46ffdd3705777b6abf",
+      "bundle_manifest_file_sha256": "f471be7b6eef5878f36066f1524d732f21bb4c8e9439988bc8f29c79b034d86f",
+      "bundle_sha256": "1b6757dc66bbabc939858f477537e18ef9797edce2c57c95f7ae6f4423c72138",
+      "adapter_tree_sha256": "940510325dd1a3f308b334d182226edd44dd26f5558176638f069aa9d430e443",
+      "adapter_files": {
+        "README.md": "903fe86a7b09000584811bf479fb53423040bbc410e2f754595425eced863a9d",
+        "adapter_config.json": "14ab6cb10732f31ffc1aed62e519591104c5aee53ddf2446ff93387fa0830f99",
+        "adapter_model.safetensors": "99317eefb3178db36b3ec0e1738f360d17677ebac406f1403cf86e707c254ed4"
+      },
+      "head_checkpoint_sha256": "a655c1c6c4a091a946d27806c5eb69871dae8000e69e6ff5c93a3ea6706a6df4",
+      "head_deployment_file_sha256": "ef42a33335b41f8544ea6c90d607ad9e3790e1195b2c5e993ce6f143fd1fdb6c",
+      "training_dataset_report_file_sha256": "46f3b29a18c1e0f0aea4cee1078df0d5a7ea6c6d0a822b2564a96a8e5bd52800",
+      "training_dataset_report_sha256": "7c908c9cf0a614bfdf79b85cbe5f3cf1b6c7067a663369e6479e50f4abab81e5",
+      "wall_seconds": 936.567091807,
+      "peak_vram_mb_reported": 34195.7373046875,
+      "max_gradient_l2": 254.4957243323204,
+      "mean_training_losses": {
+        "skill": 1.2615007366281474,
+        "pointer": 2.096451070037359,
+        "destination": 0.4595350745521084
+      },
+      "training_fit_metrics": {
+        "skill_accuracy": 0.9487179487179487,
+        "skill_macro_f1": 0.3905814739688979,
+        "pointer_accuracy": 0.5405405405405406,
+        "pointer_macro_f1": 0.43219372495479125,
+        "destination_accuracy": 1.0,
+        "destination_macro_f1": 0.2857142857142857,
+        "joint_exact_match_over_supervised_heads": 0.5494505494505495
+      }
+    }
+  },
+  "claims": {
+    "training_performed": true,
+    "two_arm_bundle_load_replay_passed": true,
+    "training_fit_metrics_are_held_out": false,
+    "model_rollout_performed": false,
+    "formal_q_b_evaluation_performed": false,
+    "physical_execution_performed": false,
+    "pure_model_success_episodes": null,
+    "d2_triggered": false,
+    "teacher_used": false,
+    "privileged_truth_policy_input": false
+  },
+  "failures": [],
+  "blockers": [
+    "ADR0026_DECISION_BUNDLE_RUNTIME_NOT_IN_FORMAL_DEPLOYMENT_CLOSURE",
+    "FORMAL_Q_B_PHYSICAL_EVALUATION_NOT_RUN",
+    "PURE_MODEL_SUCCESS_REMAINS_UNMEASURED"
+  ],
+  "changed_files": [
+    "reports/m2c-s4-qwen-adr0026-training.json",
+    "reports/m2c-s4-qwen-adr0026-training.md",
+    "tests/unit/test_m2c_s4_qwen_adr0026_training.py"
+  ],
+  "one_next_command": "PYTHONPATH=src:scripts .venv/bin/python -m pytest -q tests/unit/test_m2c_s4_qwen_adr0026_training.py"
+}
