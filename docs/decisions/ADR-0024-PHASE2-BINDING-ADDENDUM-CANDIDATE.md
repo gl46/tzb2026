@@ -55,7 +55,7 @@ missing registry destination, and unsafe free-gap geometry all reject without
 producing a plan. The exact numeric candidate is
 `configs/m2c_exact_plan_synthesis_candidate_v1.json`; its transitive source
 closure is `configs/m2c_exact_plan_synthesis_dependencies_v1.json` and its
-implementation base commit is `d00c1a4e6ac29049125e2ed62ae479d4d3397bb0`.
+implementation base commit is `1b97b6edb7e3678dd134a113f678e9d8feda9175`.
 
 The query-only composition contract is also present at
 `src/xh_agent/policy/qrm_lite/formal_isaac_plan_synthesis_query_v1.py`. It
@@ -72,6 +72,19 @@ path A.3 safety binding; the bridge deliberately does not guess that mapping.
 There is also no reviewed production deployment receipt or eight-skill
 physical evidence, so the candidate remains non-executable and the production
 bindings remain `None`.
+
+The per-decision composition contract is now concrete rather than a protocol
+stub. `FormalIsaacExactPlanComponentSourceV1` assembles a fresh query-only Lula
+path provider, runtime-snapshot-bound attachment transition provider,
+complete-scene swept-collision provider, attached-object geometry resolver,
+A.3 callback coordinator, exact preflight verifier, and frozen-probe executor
+for each claimed plan. The enclosing factory cross-checks the same persistent
+scene mutation counter, attachment registry, captured state, plan digest,
+configuration, and deployment mode before returning the bundle. The controlled
+Panda collision query expands every 7-arm-joint sample plus one per-finger
+gripper position into the exact 9-joint executor/FK state. Local contract tests
+construct this complete graph without Kit or actuation; they are not real
+eight-skill receipts and do not authorize a production backend.
 
 The generic formal V4 episode-I/O contract is now implemented at
 `src/xh_agent/policy/qrm_lite/formal_isaac_episode_io_v4.py`. One shared

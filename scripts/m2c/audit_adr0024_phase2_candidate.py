@@ -61,25 +61,41 @@ EXACT_PLAN_SYNTHESIS_QUERY_PATH = Path(
     "src/xh_agent/policy/qrm_lite/formal_isaac_plan_synthesis_query_v1.py"
 )
 ACTIVE_SESSION_QUERY_PATH = Path("src/xh_agent/policy/qrm_lite/isaac_active_session_query_v1.py")
+PER_DECISION_BUNDLE_FACTORY_PATH = Path(
+    "src/xh_agent/policy/qrm_lite/formal_isaac_exact_plan_bundle_factory_v1.py"
+)
+PER_DECISION_COMPONENT_SOURCE_PATH = Path(
+    "src/xh_agent/policy/qrm_lite/formal_isaac_exact_plan_components_v1.py"
+)
+FORMAL_RUNTIME_FACTORY_PATH = Path(
+    "src/xh_agent/policy/qrm_lite/formal_isaac_runtime_factory_v4.py"
+)
 EXACT_PLAN_SYNTHESIS_CONFIG_SHA256 = (
-    "be7c55e6cd1db1f5b5f5a02cb74e89e0cabeb76a915d527a4943aa4bdde7279b"
+    "3b5947f5f81b06f8d9debae562979a714b4c6a2dc1a2e289001c23ce8e6c79d2"
 )
 EXACT_PLAN_SYNTHESIS_CONFIGURATION_SHA256 = (
-    "5795dd04a5928a55ea639f74318ce19f16cdeaf74ac05cadca3d54a3bfd2fa41"
+    "7a155984c8dd859788f22f912bbd401f3f6867f3760463f84c7f04c6e67b41c9"
 )
 EXACT_PLAN_SYNTHESIS_DEPENDENCIES_SHA256 = (
-    "21d222a9a021a877982685928ca88018c3f34640b28990f785493b4bf49e04ac"
+    "ececd27d30aaa1ca5b95f2192a91f0aba2405bad0ea4677ed450a1faac89eb97"
 )
 EXACT_PLAN_SYNTHESIS_BACKEND_SHA256 = (
-    "417f9f0a7c039a98bca90e527ec8e2461094cae9c206214053dc474187f31612"
+    "20dc25e744b3c698a068219de5a4d84362d30eb6cf224ca6dd66fb99dbd6fac5"
 )
 EXACT_PLAN_SYNTHESIS_QUERY_SHA256 = (
-    "c1ffa47a1b28850e8e797d4e3dcb2a04fe37ff9ba78e39852022706ebcbbd950"
+    "c71a2dae34b8924f33c35f8db8f7d2546f77ed089d4d72ee81f54be3ea37045b"
 )
-ACTIVE_SESSION_QUERY_SHA256 = "3f54330593dc3c5878f0e7f0a91a148f02887a2013206a74a40ffab2dbd36bf0"
-EXACT_PLAN_SYNTHESIS_IMPLEMENTATION_COMMIT = "d00c1a4e6ac29049125e2ed62ae479d4d3397bb0"
-FORMAL_EPISODE_IO_SHA256 = "270360830837c4928027858ffc88d1f12dc9d75f96297693086feb29749d88c0"
-FORMAL_EPISODE_IO_IMPLEMENTATION_COMMIT = "d2f2877f128e989678424ddbb0f4a117b69ae1c7"
+ACTIVE_SESSION_QUERY_SHA256 = "9a0f13f9f091cbf9bece4bc1725233c2e4110d06399b9614a02c53050b76afa8"
+PER_DECISION_BUNDLE_FACTORY_SHA256 = (
+    "12ec4d57deadd2f173a4b88d12837307a916538404645ed03c30f520fa37aa29"
+)
+PER_DECISION_COMPONENT_SOURCE_SHA256 = (
+    "0299042a2d5b3a575dacb8d5c6293d835aaf9479f4ac7c02b1418d5311e2570a"
+)
+FORMAL_RUNTIME_FACTORY_SHA256 = "6422a0f4879b11c85678054712cca33ab8ab64c0751def8313df585158824784"
+EXACT_PLAN_SYNTHESIS_IMPLEMENTATION_COMMIT = "1b97b6edb7e3678dd134a113f678e9d8feda9175"
+FORMAL_EPISODE_IO_SHA256 = "bf149f00014d8c487fa65cedec74a3eb4e3c8f70d3df7aae88b5bf3403439aa5"
+FORMAL_EPISODE_IO_IMPLEMENTATION_COMMIT = "961f370420b8c2073b4431751574a48502ce6c70"
 ADR_0024_PATH = Path("docs/decisions/ADR-0024-m2c-s4-unblock-directive.md")
 BINDING_NAMES = (
     "FORMAL_PHYSICAL_RUNNER_BINDING",
@@ -305,14 +321,28 @@ def load_candidate_config(project_root: Path) -> dict[str, Any]:
         "query_source_implementation_sha256": EXACT_PLAN_SYNTHESIS_QUERY_SHA256,
         "active_session_query_implementation_path": ACTIVE_SESSION_QUERY_PATH.as_posix(),
         "active_session_query_implementation_sha256": ACTIVE_SESSION_QUERY_SHA256,
+        "per_decision_bundle_factory_implementation_path": (
+            PER_DECISION_BUNDLE_FACTORY_PATH.as_posix()
+        ),
+        "per_decision_bundle_factory_implementation_sha256": (PER_DECISION_BUNDLE_FACTORY_SHA256),
+        "per_decision_component_source_implementation_path": (
+            PER_DECISION_COMPONENT_SOURCE_PATH.as_posix()
+        ),
+        "per_decision_component_source_implementation_sha256": (
+            PER_DECISION_COMPONENT_SOURCE_SHA256
+        ),
+        "formal_runtime_factory_implementation_path": FORMAL_RUNTIME_FACTORY_PATH.as_posix(),
+        "formal_runtime_factory_implementation_sha256": FORMAL_RUNTIME_FACTORY_SHA256,
         "implementation_commit": EXACT_PLAN_SYNTHESIS_IMPLEMENTATION_COMMIT,
         "registered_skill_count": 8,
         "runtime_parameter_adaptation_allowed": False,
         "physical_execution_claimed": False,
         "query_source_contract_active": True,
+        "per_decision_component_graph_contract_active": True,
         "public_track_collision_safety_binding_contract_active": True,
         "real_scene_safety_binding_source_bound": False,
         "real_query_source_bound": False,
+        "real_per_decision_component_graph_bound": False,
         "reviewed_production_deployment_bound": False,
         "formal_execution_eligible": False,
     }
@@ -381,6 +411,9 @@ def load_candidate_config(project_root: Path) -> dict[str, Any]:
     for path, expected in (
         (EXACT_PLAN_SYNTHESIS_QUERY_PATH, EXACT_PLAN_SYNTHESIS_QUERY_SHA256),
         (ACTIVE_SESSION_QUERY_PATH, ACTIVE_SESSION_QUERY_SHA256),
+        (PER_DECISION_BUNDLE_FACTORY_PATH, PER_DECISION_BUNDLE_FACTORY_SHA256),
+        (PER_DECISION_COMPONENT_SOURCE_PATH, PER_DECISION_COMPONENT_SOURCE_SHA256),
+        (FORMAL_RUNTIME_FACTORY_PATH, FORMAL_RUNTIME_FACTORY_SHA256),
         (FORMAL_EPISODE_IO_PATH, FORMAL_EPISODE_IO_SHA256),
     ):
         if _sha256(read_regular_file_once(project_root / path)) != expected:
@@ -573,6 +606,42 @@ def build_audit(project_root: Path) -> dict[str, Any]:
     ):
         if token not in episode_io_source:
             raise CandidateAuditFailure(f"formal Isaac episode I/O omitted marker: {token}")
+    component_source = read_regular_file_once(root / PER_DECISION_COMPONENT_SOURCE_PATH).decode(
+        "utf-8"
+    )
+    for token in (
+        "FormalIsaacExactPlanComponentSourceV1",
+        "LulaQueryOnlyPhasePathProviderV1",
+        "A3CompleteSceneSweptCollisionProviderV2",
+        "A3ExactPlanNonActuatingCallbacksV1",
+        "FrozenProbeExactPlanExecutorV1",
+        "snapshot_mutation_counters",
+    ):
+        if token not in component_source:
+            raise CandidateAuditFailure(
+                f"per-decision exact-plan component source omitted marker: {token}"
+            )
+    bundle_factory = read_regular_file_once(root / PER_DECISION_BUNDLE_FACTORY_PATH).decode("utf-8")
+    for token in (
+        "FormalIsaacPerDecisionExactPlanBundleFactoryV1",
+        "_validate_bundle_graph",
+        "claim_active_session_query_provider",
+        "build_bundle_components",
+        "formal exact-plan bundle construction mutated the active scene",
+    ):
+        if token not in bundle_factory:
+            raise CandidateAuditFailure(
+                f"per-decision exact-plan bundle factory omitted marker: {token}"
+            )
+    runtime_factory = read_regular_file_once(root / FORMAL_RUNTIME_FACTORY_PATH).decode("utf-8")
+    for token in (
+        "FormalIsaacV4RuntimeFactoryV1",
+        "FormalIsaacPerDecisionExactPlanBundleFactoryV1",
+        "_verify_immutable_source_inventory",
+        "per_decision_bundle_factory_binding_sha256",
+    ):
+        if token not in runtime_factory:
+            raise CandidateAuditFailure(f"formal V4 runtime factory omitted marker: {token}")
     attached_geometry = read_regular_file_once(root / ATTACHED_OBJECT_PHASE_GEOMETRY_PATH).decode(
         "utf-8"
     )
@@ -679,6 +748,16 @@ def build_audit(project_root: Path) -> dict[str, Any]:
         "a3_acm_evidence": candidate["a3_acm_evidence"],
         "a3_query_only_deployment_smoke": candidate["query_only_deployment_smoke"],
         "exact_plan_synthesis_candidate": candidate["exact_plan_synthesis_candidate"],
+        "per_decision_exact_plan_component_graph": {
+            "status": "PASS_CONTRACT_ONLY_NOT_PRODUCTION_BOUND",
+            "bundle_factory_implementation_sha256": PER_DECISION_BUNDLE_FACTORY_SHA256,
+            "component_source_implementation_sha256": PER_DECISION_COMPONENT_SOURCE_SHA256,
+            "runtime_factory_implementation_sha256": FORMAL_RUNTIME_FACTORY_SHA256,
+            "same_scene_mutation_counter_bound": True,
+            "complete_query_preflight_executor_graph_constructed": True,
+            "real_eight_skill_receipts_present": False,
+            "formal_authorization": False,
+        },
         "formal_isaac_episode_io_candidate": candidate["episode_io_candidate"],
         "formal_v4_host_local_hmac_verifier": {
             "status": "PASS_CONTRACT_ONLY_NO_REAL_HOST_RECEIPTS",

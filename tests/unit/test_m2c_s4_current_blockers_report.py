@@ -298,24 +298,28 @@ def test_phase2_query_only_evidence_remains_non_authorizing() -> None:
     assert phase2["real_runtime_snapshot_bound"] is False
     assert phase2["bound_plan_provider_contract_active"] is True
     assert phase2["exact_plan_synthesis_backend_contract_active"] is True
+    assert phase2["per_decision_exact_plan_component_graph_contract_active"] is True
+    assert phase2["real_per_decision_exact_plan_component_graph_bound"] is False
     synthesis = phase2["exact_plan_synthesis_configuration_candidate"]
     assert synthesis["sha256"] == _sha256(ROOT / synthesis["path"])
     assert synthesis["dependency_manifest_sha256"] == _sha256(
         ROOT / synthesis["dependency_manifest_path"]
     )
-    assert synthesis["implementation_commit"] == "d00c1a4e6ac29049125e2ed62ae479d4d3397bb0"
+    assert synthesis["implementation_commit"] == "1b97b6edb7e3678dd134a113f678e9d8feda9175"
     assert synthesis["registered_skill_count"] == 8
     assert synthesis["query_source_contract_active"] is True
+    assert synthesis["per_decision_component_graph_contract_active"] is True
     assert synthesis["public_track_collision_safety_binding_contract_active"] is True
     assert synthesis["real_scene_safety_binding_source_bound"] is False
     assert synthesis["real_query_source_bound"] is False
+    assert synthesis["real_per_decision_component_graph_bound"] is False
     assert synthesis["reviewed_production_deployment_bound"] is False
     assert synthesis["formal_execution_eligible"] is False
     assert phase2["real_bound_plan_synthesis_backend_bound"] is False
     assert phase2["formal_v4_episode_io_contract_active"] is True
     episode_io = phase2["formal_v4_episode_io_implementation"]
     assert episode_io["sha256"] == _sha256(ROOT / episode_io["path"])
-    assert episode_io["implementation_commit"] == ("d2f2877f128e989678424ddbb0f4a117b69ae1c7")
+    assert episode_io["implementation_commit"] == ("961f370420b8c2073b4431751574a48502ce6c70")
     assert phase2["formal_v4_shared_persistent_scene_owner_required"] is True
     assert phase2["formal_v4_public_failure_boundary_evidence_bound"] is True
     assert phase2["formal_v4_eight_capture_prefix_replay_bound"] is True

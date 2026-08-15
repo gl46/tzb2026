@@ -1,7 +1,7 @@
 # M2C S4 current blockers
 
 - Status: **BLOCKED_UNMEASURED_ZERO_ELIGIBLE_YIELD_AND_FORMAL_EXACT_PLAN_INTEGRATION**
-- Checked parent HEAD: `762fa7150e37320675aed5c25358fc6011f45aa4`
+- Checked parent HEAD: `1b97b6edb7e3678dd134a113f678e9d8feda9175`
 - Q-A: **PASSED**
 - Q-B: **UNMEASURED**
 - `pure_model_success_episodes`: **null**, not zero
@@ -24,6 +24,14 @@ ADR-0025 authorizes exactly two controlled-Panda start-state ACM pairs, each pro
 The corrected immutable query-only smoke executes 74 governed child-pair requests: 74 clear, zero collision rejection, and zero query failure. It starts neither Kit nor Isaac and performs zero articulation writes, simulation steps, or scene mutations. This closes the specific static-start ACM blocker but is not physical execution evidence.
 
 The Phase-2 candidate remains `CONTRACT_SMOKE_ONLY_BLOCKED_UNMEASURED`. Real eight-skill plan-specific A3 evidence, immutable deployment/import closure, the reviewed synthesis/episode-I/O deployment, the real exact-plan executor, deployed read-only FK, and real endpoint/host-HMAC evidence remain absent. The two active production bindings remain unset; the withdrawn B0-wrapper and trusted-host signing prerequisites are not reinstated.
+
+The local contract now constructs the full per-decision query-only path,
+runtime snapshot, attachment transition, complete-scene CCD, A3 callback,
+preflight, and frozen executor graph over one shared mutation counter. Its
+dependency manifest covers 69 exact repository/configuration inputs at
+implementation commit `1b97b6edb7e3678dd134a113f678e9d8feda9175`.
+This closes the composition stub only; it is not eight-skill physical evidence
+and the real per-decision graph remains unbound.
 
 The 2026-08-20 bundle-smoke checkpoint is unchanged.
 

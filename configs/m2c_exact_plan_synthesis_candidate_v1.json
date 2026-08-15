@@ -1,42 +1,42 @@
 {
   "schema_version": "FormalExactPlanSynthesisConfigurationV1",
   "revision": "M2C_ADR0024_EXACT_PLAN_SYNTHESIS_V1",
-  "immutable_commit": "d00c1a4e6ac29049125e2ed62ae479d4d3397bb0",
+  "immutable_commit": "1b97b6edb7e3678dd134a113f678e9d8feda9175",
   "container_image_digest": "sha256:783444c706538aa76cf5126e911ddc5e618779e6105305ad4af4260362a30aa9",
   "source_bindings": [
     {
       "schema_version": "ExactPlanSourceBindingV1",
       "role": "PRIMITIVE_ENTRYPOINT",
       "path": "src/xh_agent/policy/qrm_lite/exact_plan_primitive_bundle_v1.py",
-      "sha256": "e39649b2f86e3085180e33b5ace5d49f5ae36c13bc91880d426205215e017e10",
+      "sha256": "e655c6f284531f13e232342e85104574587cec3f2d821f8ba9971492ef8d27a5",
       "audit_only": true
     },
     {
       "schema_version": "ExactPlanSourceBindingV1",
       "role": "PREFLIGHT_IMPLEMENTATION",
       "path": "src/xh_agent/policy/qrm_lite/exact_plan_preflight_v1.py",
-      "sha256": "f16bcfd5e788b11244e6300470092f81e598547057b0372fce092084cebb06f4",
+      "sha256": "15c4aef2240bca31d75b19411851580b23fb6d84f8414082ffc3d977de95b54a",
       "audit_only": true
     },
     {
       "schema_version": "ExactPlanSourceBindingV1",
       "role": "EXECUTOR_IMPLEMENTATION",
       "path": "src/xh_agent/policy/qrm_lite/isaac_exact_plan_runtime_v1.py",
-      "sha256": "57712a3d573f35dc3acb656e8533bb01789200501d2d7bee20450e91223e8dbe",
+      "sha256": "acc9768ab052e31308ac8470891e78055189f6227eca9eb9cad578fdd3088eaa",
       "audit_only": true
     },
     {
       "schema_version": "ExactPlanSourceBindingV1",
       "role": "TRANSITIVE_DEPENDENCY_MANIFEST",
       "path": "configs/m2c_exact_plan_synthesis_dependencies_v1.json",
-      "sha256": "21d222a9a021a877982685928ca88018c3f34640b28990f785493b4bf49e04ac",
+      "sha256": "ececd27d30aaa1ca5b95f2192a91f0aba2405bad0ea4677ed450a1faac89eb97",
       "audit_only": true
     },
     {
       "schema_version": "ExactPlanSourceBindingV1",
       "role": "ISAAC_RUNTIME",
       "path": "src/xh_agent/policy/qrm_lite/formal_isaac_backend_v4.py",
-      "sha256": "747f2cc20decedcafbcfb6423769c75a7eb2e22658988254f2d5c029b6df336c",
+      "sha256": "439c67eab16a63ea5f885fafb32a78d99d86b0ccf951396934df747494b7d3d4",
       "audit_only": true
     },
     {
@@ -57,7 +57,7 @@
       "schema_version": "ExactPlanSourceBindingV1",
       "role": "SWEPT_COLLISION_ALGORITHM",
       "path": "src/xh_agent/policy/qrm_lite/a3_complete_scene_swept_collision_v2.py",
-      "sha256": "3108d1add125f7228acd5cb491e0f4c1b4ffc87db86b247e09a14225ef30aab3",
+      "sha256": "0d04c58b64d460ece30b9e85c94556193f5f297e1647e15e0b8118770325e0b6",
       "audit_only": true
     },
     {
@@ -131,7 +131,7 @@
     "/World/Robot/panda_leftfinger",
     "/World/Robot/panda_rightfinger"
   ],
-  "configuration_sha256": "5795dd04a5928a55ea639f74318ce19f16cdeaf74ac05cadca3d54a3bfd2fa41",
+  "configuration_sha256": "7a155984c8dd859788f22f912bbd401f3f6867f3760463f84c7f04c6e67b41c9",
   "teacher_used": false,
   "evaluator_identity_used": false,
   "task_spec_fallback_used": false,

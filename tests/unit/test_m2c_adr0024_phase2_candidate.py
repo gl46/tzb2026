@@ -59,11 +59,19 @@ def test_candidate_smoke_is_blocked_unmeasured_and_never_physical() -> None:
     assert synthesis["runtime_parameter_adaptation_allowed"] is False
     assert synthesis["physical_execution_claimed"] is False
     assert synthesis["query_source_contract_active"] is True
+    assert synthesis["per_decision_component_graph_contract_active"] is True
     assert synthesis["public_track_collision_safety_binding_contract_active"] is True
     assert synthesis["real_scene_safety_binding_source_bound"] is False
     assert synthesis["real_query_source_bound"] is False
+    assert synthesis["real_per_decision_component_graph_bound"] is False
     assert synthesis["reviewed_production_deployment_bound"] is False
     assert synthesis["formal_execution_eligible"] is False
+    component_graph = report["per_decision_exact_plan_component_graph"]
+    assert component_graph["status"] == "PASS_CONTRACT_ONLY_NOT_PRODUCTION_BOUND"
+    assert component_graph["same_scene_mutation_counter_bound"] is True
+    assert component_graph["complete_query_preflight_executor_graph_constructed"] is True
+    assert component_graph["real_eight_skill_receipts_present"] is False
+    assert component_graph["formal_authorization"] is False
     episode_io = report["formal_isaac_episode_io_candidate"]
     assert episode_io["shared_persistent_scene_owner_required"] is True
     assert episode_io["public_failure_boundary_evidence_bound"] is True
@@ -178,6 +186,9 @@ def test_candidate_config_requires_literal_none_bindings_and_exact_terminal_poli
         "backend_implementation_path",
         "query_source_implementation_path",
         "active_session_query_implementation_path",
+        "per_decision_bundle_factory_implementation_path",
+        "per_decision_component_source_implementation_path",
+        "formal_runtime_factory_implementation_path",
     ):
         sha_key = {
             "configuration_path": "configuration_file_sha256",
@@ -187,11 +198,32 @@ def test_candidate_config_requires_literal_none_bindings_and_exact_terminal_poli
             "active_session_query_implementation_path": (
                 "active_session_query_implementation_sha256"
             ),
+            "per_decision_bundle_factory_implementation_path": (
+                "per_decision_bundle_factory_implementation_sha256"
+            ),
+            "per_decision_component_source_implementation_path": (
+                "per_decision_component_source_implementation_sha256"
+            ),
+            "formal_runtime_factory_implementation_path": (
+                "formal_runtime_factory_implementation_sha256"
+            ),
         }[key]
         assert (
             synthesis[sha_key]
             == hashlib.sha256((PROJECT_ROOT / synthesis[key]).read_bytes()).hexdigest()
         )
+    dependencies = json.loads((PROJECT_ROOT / synthesis["dependency_manifest_path"]).read_text())[
+        "dependencies"
+    ]
+    assert len(dependencies) == 69
+    for path in (
+        "src/xh_agent/policy/qrm_lite/formal_isaac_exact_plan_bundle_factory_v1.py",
+        "src/xh_agent/policy/qrm_lite/formal_isaac_exact_plan_components_v1.py",
+        "src/xh_agent/policy/qrm_lite/a3_complete_scene_swept_collision_v2.py",
+        "src/xh_agent/policy/qrm_lite/controlled_panda_fk_v1.py",
+        "src/xh_agent/policy/qrm_lite/isaac_exact_plan_runtime_v1.py",
+    ):
+        assert dependencies[path] == hashlib.sha256((PROJECT_ROOT / path).read_bytes()).hexdigest()
     episode_io = candidate["episode_io_candidate"]
     assert (
         episode_io["implementation_sha256"]
@@ -199,7 +231,7 @@ def test_candidate_config_requires_literal_none_bindings_and_exact_terminal_poli
             (PROJECT_ROOT / episode_io["implementation_path"]).read_bytes()
         ).hexdigest()
     )
-    assert episode_io["implementation_commit"] == ("d2f2877f128e989678424ddbb0f4a117b69ae1c7")
+    assert episode_io["implementation_commit"] == ("961f370420b8c2073b4431751574a48502ce6c70")
 
 
 def test_candidate_source_tamper_and_false_physical_claim_fail_closed(tmp_path: Path) -> None:
@@ -222,5 +254,7 @@ def test_candidate_addendum_explicitly_disclaims_addendum_binding_and_runs() -> 
     assert "not an accepted binding addendum" in content
     assert "A_OFFICIAL_UPSTREAM_SRDF" in content
     assert "All 74 governed child-pair requests were clear" in content
+    assert "FormalIsaacExactPlanComponentSourceV1" in content
+    assert "exact 9-joint executor/FK state" in content
     assert "No training, Isaac scene startup, physical action, Q-B" in content
     assert "Teacher used: **false**" in content
