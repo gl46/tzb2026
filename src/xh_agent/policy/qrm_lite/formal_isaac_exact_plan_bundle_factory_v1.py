@@ -37,10 +37,12 @@ from xh_agent.policy.qrm_lite.exact_plan_primitive_bundle_v1 import (
     M2CExactPlanPrimitivePlanV1,
 )
 from xh_agent.policy.qrm_lite.formal_isaac_a3_runtime_snapshot_v1 import (
+    IMPLEMENTATION_REPO_PATH as RUNTIME_SNAPSHOT_IMPLEMENTATION_REPO_PATH,
     FormalIsaacA3RuntimeReadinessSourceV1,
     FormalIsaacA3RuntimeSnapshotProviderV1,
 )
 from xh_agent.policy.qrm_lite.formal_isaac_plan_synthesis_query_v1 import (
+    IMPLEMENTATION_REPO_PATH as PLAN_SYNTHESIS_QUERY_IMPLEMENTATION_REPO_PATH,
     FormalIsaacPlanSynthesisStateQueryV1,
 )
 from xh_agent.policy.qrm_lite.formal_split_runner_v2 import (
@@ -48,6 +50,7 @@ from xh_agent.policy.qrm_lite.formal_split_runner_v2 import (
     canonical_sha256,
 )
 from xh_agent.policy.qrm_lite.isaac_active_session_query_v1 import (
+    IMPLEMENTATION_REPO_PATH as ACTIVE_SESSION_QUERY_IMPLEMENTATION_REPO_PATH,
     IsaacActiveSessionQueryProviderV1,
 )
 from xh_agent.policy.qrm_lite.isaac_exact_plan_runtime_v1 import (
@@ -112,6 +115,18 @@ class FormalIsaacExactPlanBundleFactoryBindingV1(_FrozenModel):
     component_source_implementation_sha256: str = Field(pattern=SHA256_PATTERN)
     runtime_readiness_source_implementation_path: str = Field(min_length=1)
     runtime_readiness_source_implementation_sha256: str = Field(pattern=SHA256_PATTERN)
+    runtime_snapshot_provider_implementation_path: Literal[
+        "src/xh_agent/policy/qrm_lite/formal_isaac_a3_runtime_snapshot_v1.py"
+    ] = RUNTIME_SNAPSHOT_IMPLEMENTATION_REPO_PATH
+    runtime_snapshot_provider_implementation_sha256: str = Field(pattern=SHA256_PATTERN)
+    plan_synthesis_query_implementation_path: Literal[
+        "src/xh_agent/policy/qrm_lite/formal_isaac_plan_synthesis_query_v1.py"
+    ] = PLAN_SYNTHESIS_QUERY_IMPLEMENTATION_REPO_PATH
+    plan_synthesis_query_implementation_sha256: str = Field(pattern=SHA256_PATTERN)
+    active_session_query_implementation_path: Literal[
+        "src/xh_agent/policy/qrm_lite/isaac_active_session_query_v1.py"
+    ] = ACTIVE_SESSION_QUERY_IMPLEMENTATION_REPO_PATH
+    active_session_query_implementation_sha256: str = Field(pattern=SHA256_PATTERN)
     primitive_bundle_deployment_sha256: str = Field(pattern=SHA256_PATTERN)
     a3_deployment_binding_sha256: str = Field(pattern=SHA256_PATTERN)
     complete_preflight_configuration_sha256: str = Field(pattern=SHA256_PATTERN)
@@ -198,6 +213,19 @@ class FormalIsaacPerDecisionExactPlanBundleFactoryV1:
         self.implementation_sha256 = hashlib.sha256(
             read_regular_file_once(self.project_root / IMPLEMENTATION_REPO_PATH)
         ).hexdigest()
+        self.runtime_snapshot_provider_implementation_sha256 = hashlib.sha256(
+            read_regular_file_once(self.project_root / RUNTIME_SNAPSHOT_IMPLEMENTATION_REPO_PATH)
+        ).hexdigest()
+        self.plan_synthesis_query_implementation_sha256 = hashlib.sha256(
+            read_regular_file_once(
+                self.project_root / PLAN_SYNTHESIS_QUERY_IMPLEMENTATION_REPO_PATH
+            )
+        ).hexdigest()
+        self.active_session_query_implementation_sha256 = hashlib.sha256(
+            read_regular_file_once(
+                self.project_root / ACTIVE_SESSION_QUERY_IMPLEMENTATION_REPO_PATH
+            )
+        ).hexdigest()
         component_path = _safe_source_path(
             self.project_root,
             component_source.implementation_path,
@@ -208,8 +236,18 @@ class FormalIsaacPerDecisionExactPlanBundleFactoryV1:
         self._consumed_plan_sha256: set[str] = set()
 
         counter = plan_synthesis_query.active_session_factory.mutation_counter_source
+        active_configuration = getattr(
+            plan_synthesis_query.active_session_factory,
+            "configuration",
+            None,
+        )
         if (
             component_source.implementation_sha256 != self.component_source_implementation_sha256
+            or plan_synthesis_query.implementation_sha256
+            != self.plan_synthesis_query_implementation_sha256
+            or active_configuration is None
+            or active_configuration.query_adapter_implementation_sha256
+            != self.active_session_query_implementation_sha256
             or readiness_source.mutation_counter_source is not counter
             or component_source.mutation_counter_source is not counter
             or component_source.active_attachment_source
@@ -264,6 +302,15 @@ class FormalIsaacPerDecisionExactPlanBundleFactoryV1:
             "component_source_implementation_sha256": (self.component_source_implementation_sha256),
             "runtime_readiness_source_implementation_path": readiness.implementation_path,
             "runtime_readiness_source_implementation_sha256": (readiness.implementation_sha256),
+            "runtime_snapshot_provider_implementation_sha256": (
+                self.runtime_snapshot_provider_implementation_sha256
+            ),
+            "plan_synthesis_query_implementation_sha256": (
+                self.plan_synthesis_query_implementation_sha256
+            ),
+            "active_session_query_implementation_sha256": (
+                self.active_session_query_implementation_sha256
+            ),
             "primitive_bundle_deployment_sha256": canonical_sha256(self.primitive_binding),
             "a3_deployment_binding_sha256": canonical_sha256(a3_binding),
             "complete_preflight_configuration_sha256": (self.configuration.configuration_sha256),

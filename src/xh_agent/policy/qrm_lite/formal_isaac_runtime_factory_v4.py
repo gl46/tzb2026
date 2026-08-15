@@ -27,7 +27,6 @@ from xh_agent.perception.public_track_associator_v2 import (
 )
 from xh_agent.policy.qrm_lite.exact_plan_primitive_bundle_v1 import (
     ExactPlanPrimitiveDeploymentBindingV1,
-    M2CExactPlanPrimitiveBundleV1,
 )
 from xh_agent.policy.qrm_lite.formal_bound_plan_provider_v1 import (
     FormalBoundExactPlanProviderV1,
@@ -43,6 +42,10 @@ from xh_agent.policy.qrm_lite.formal_isaac_backend_v4 import (
 from xh_agent.policy.qrm_lite.formal_isaac_episode_io_v4 import (
     FormalIsaacEpisodeIODeploymentBindingV1,
     FormalIsaacEpisodeIOV4,
+)
+from xh_agent.policy.qrm_lite.formal_isaac_exact_plan_bundle_factory_v1 import (
+    FormalIsaacExactPlanBundleFactoryBindingV1,
+    FormalIsaacPerDecisionExactPlanBundleFactoryV1,
 )
 from xh_agent.policy.qrm_lite.formal_public_observation_provider_v4 import (
     ReplayableFormalPublicObservationProviderV4,
@@ -86,6 +89,7 @@ class FormalIsaacV4RuntimeFactoryBindingV1(_FrozenModel):
     episode_io_deployment_binding_sha256: str = Field(pattern=SHA256_PATTERN)
     bound_plan_provider_deployment_sha256: str = Field(pattern=SHA256_PATTERN)
     primitive_bundle_deployment_sha256: str = Field(pattern=SHA256_PATTERN)
+    per_decision_bundle_factory_binding_sha256: str = Field(pattern=SHA256_PATTERN)
     immutable_commit: str = Field(pattern=r"^[0-9a-f]{40}$")
     container_image_digest: str = Field(pattern=r"^sha256:[0-9a-f]{64}$")
     transitive_dependency_manifest_sha256: str = Field(pattern=SHA256_PATTERN)
@@ -121,6 +125,7 @@ class FormalIsaacV4RuntimeAssemblyReceiptV1(_FrozenModel):
     episode_io_deployment_binding_sha256: str = Field(pattern=SHA256_PATTERN)
     bound_plan_provider_deployment_sha256: str = Field(pattern=SHA256_PATTERN)
     primitive_bundle_deployment_sha256: str = Field(pattern=SHA256_PATTERN)
+    per_decision_bundle_factory_binding_sha256: str = Field(pattern=SHA256_PATTERN)
     association_deployment_sha256: str = Field(pattern=SHA256_PATTERN)
     declared_attribute_binding_sha256: str = Field(pattern=SHA256_PATTERN)
     runtime_registry_sha256: str = Field(pattern=SHA256_PATTERN)
@@ -183,6 +188,7 @@ def _source_inventory(
     binding: FormalIsaacV4RuntimeFactoryBindingV1,
     endpoint: IsaacEndpointBindingV4,
     episode_io_binding: FormalIsaacEpisodeIODeploymentBindingV1,
+    per_decision_binding: FormalIsaacExactPlanBundleFactoryBindingV1,
 ) -> tuple[tuple[str, str], ...]:
     requested = (
         (binding.factory_implementation_path, binding.factory_implementation_sha256),
@@ -204,6 +210,30 @@ def _source_inventory(
         (
             episode_io_binding.capture_source_implementation_path,
             episode_io_binding.capture_source_implementation_sha256,
+        ),
+        (
+            per_decision_binding.factory_implementation_path,
+            per_decision_binding.factory_implementation_sha256,
+        ),
+        (
+            per_decision_binding.component_source_implementation_path,
+            per_decision_binding.component_source_implementation_sha256,
+        ),
+        (
+            per_decision_binding.runtime_readiness_source_implementation_path,
+            per_decision_binding.runtime_readiness_source_implementation_sha256,
+        ),
+        (
+            per_decision_binding.runtime_snapshot_provider_implementation_path,
+            per_decision_binding.runtime_snapshot_provider_implementation_sha256,
+        ),
+        (
+            per_decision_binding.plan_synthesis_query_implementation_path,
+            per_decision_binding.plan_synthesis_query_implementation_sha256,
+        ),
+        (
+            per_decision_binding.active_session_query_implementation_path,
+            per_decision_binding.active_session_query_implementation_sha256,
         ),
     )
     by_path: dict[str, str] = {}
@@ -262,12 +292,14 @@ def _validate_contract_graph(
     declared_attribute_binding: PublicDeclaredTargetAttributeBindingV4,
     provider_deployment: FormalBoundPlanProviderDeploymentV1,
     bundle_deployment: ExactPlanPrimitiveDeploymentBindingV1,
+    per_decision_binding: FormalIsaacExactPlanBundleFactoryBindingV1,
 ) -> None:
     expected = {
         "endpoint_binding_sha256": canonical_sha256(endpoint),
         "episode_io_deployment_binding_sha256": canonical_sha256(episode_io_binding),
         "bound_plan_provider_deployment_sha256": canonical_sha256(provider_deployment),
         "primitive_bundle_deployment_sha256": canonical_sha256(bundle_deployment),
+        "per_decision_bundle_factory_binding_sha256": (per_decision_binding.binding_sha256),
         "immutable_commit": endpoint.immutable_commit,
         "container_image_digest": endpoint.container_image_digest,
         "transitive_dependency_manifest_sha256": (endpoint.transitive_dependency_manifest_sha256),
@@ -326,6 +358,17 @@ def _validate_contract_graph(
     role_hashes = {item.role: item.sha256 for item in bundle_deployment.source_bindings}
     if role_hashes["PRIMITIVE_ENTRYPOINT"] != endpoint.primitive_bundle_sha256:
         raise ValueError("formal V4 primitive entrypoint differs from endpoint binding")
+    if (
+        per_decision_binding.primitive_bundle_deployment_sha256
+        != canonical_sha256(bundle_deployment)
+        or per_decision_binding.a3_deployment_binding_sha256
+        != endpoint.a3_deployment_binding_sha256
+        or per_decision_binding.immutable_commit != endpoint.immutable_commit
+        or per_decision_binding.container_image_digest != endpoint.container_image_digest
+        or per_decision_binding.transitive_dependency_manifest_sha256
+        != endpoint.transitive_dependency_manifest_sha256
+    ):
+        raise ValueError("formal V4 per-decision factory crosses endpoint deployment")
 
 
 class FormalIsaacV4RuntimeFactoryV1:
@@ -343,7 +386,7 @@ class FormalIsaacV4RuntimeFactoryV1:
         declared_attribute_binding: PublicDeclaredTargetAttributeBindingV4,
         bound_plan_provider: FormalBoundExactPlanProviderV1,
         bound_plan_provider_deployment: FormalBoundPlanProviderDeploymentV1,
-        primitive_bundle: M2CExactPlanPrimitiveBundleV1 | PerDecisionExactPlanBundleRuntimeV1,
+        primitive_bundle: PerDecisionExactPlanBundleRuntimeV1,
         primitive_bundle_deployment: ExactPlanPrimitiveDeploymentBindingV1,
         runtime_registry_sha256: str,
         now_ns: Callable[[], int] = time.time_ns,
@@ -358,11 +401,19 @@ class FormalIsaacV4RuntimeFactoryV1:
             raise TypeError("formal V4 runtime factory requires replayable observations")
         if not isinstance(bound_plan_provider, FormalBoundExactPlanProviderV1):
             raise TypeError("formal V4 runtime factory requires the bound plan provider")
-        if not isinstance(
-            primitive_bundle,
-            (M2CExactPlanPrimitiveBundleV1, PerDecisionExactPlanBundleRuntimeV1),
+        if not isinstance(primitive_bundle, PerDecisionExactPlanBundleRuntimeV1):
+            raise TypeError(
+                "formal V4 runtime factory requires the per-decision exact primitive bundle"
+            )
+        per_decision_factory = primitive_bundle.factory
+        if (
+            not isinstance(
+                per_decision_factory,
+                FormalIsaacPerDecisionExactPlanBundleFactoryV1,
+            )
+            or per_decision_factory.binding is None
         ):
-            raise TypeError("formal V4 runtime factory requires the exact primitive bundle")
+            raise TypeError("formal V4 runtime factory requires the reviewed Isaac bundle factory")
         binding = FormalIsaacV4RuntimeFactoryBindingV1.model_validate(
             binding.model_dump(mode="json")
         )
@@ -384,6 +435,9 @@ class FormalIsaacV4RuntimeFactoryV1:
         bundle_deployment = ExactPlanPrimitiveDeploymentBindingV1.model_validate(
             primitive_bundle_deployment.model_dump(mode="json")
         )
+        per_decision_binding = FormalIsaacExactPlanBundleFactoryBindingV1.model_validate(
+            per_decision_factory.binding.model_dump(mode="json")
+        )
         _validate_contract_graph(
             binding=binding,
             endpoint=endpoint_binding,
@@ -392,6 +446,7 @@ class FormalIsaacV4RuntimeFactoryV1:
             declared_attribute_binding=declared_attribute_binding,
             provider_deployment=provider_deployment,
             bundle_deployment=bundle_deployment,
+            per_decision_binding=per_decision_binding,
         )
         if _sha256(Path(__file__)) != binding.factory_implementation_sha256:
             raise ValueError("loaded formal V4 runtime factory bytes differ from binding")
@@ -399,6 +454,7 @@ class FormalIsaacV4RuntimeFactoryV1:
             binding=binding,
             endpoint=endpoint_binding,
             episode_io_binding=episode_io_binding,
+            per_decision_binding=per_decision_binding,
         )
         _verify_immutable_source_inventory(
             project_root,
@@ -416,9 +472,17 @@ class FormalIsaacV4RuntimeFactoryV1:
             or not bound_plan_provider.formal_execution_eligible
             or bound_plan_provider.implementation_sha256
             != endpoint_binding.bound_plan_provider_sha256
+            or getattr(bound_plan_provider.backend, "query_source", None)
+            is not per_decision_factory.plan_synthesis_query
             or primitive_bundle.project_root != project_root
             or primitive_bundle.binding != bundle_deployment
             or not primitive_bundle.formal_execution_eligible
+            or per_decision_factory.project_root != project_root
+            or per_decision_factory.primitive_binding != bundle_deployment
+            or per_decision_factory.a3_deployment_binding is None
+            or canonical_sha256(per_decision_factory.a3_deployment_binding)
+            != endpoint_binding.a3_deployment_binding_sha256
+            or not per_decision_factory.formal_execution_eligible
             or runtime_registry_sha256 != endpoint_binding.runtime_registry_sha256
         ):
             raise ValueError("formal V4 runtime objects cross reviewed deployment")
@@ -447,6 +511,7 @@ class FormalIsaacV4RuntimeFactoryV1:
             "episode_io_deployment_binding_sha256": canonical_sha256(episode_io_binding),
             "bound_plan_provider_deployment_sha256": canonical_sha256(provider_deployment),
             "primitive_bundle_deployment_sha256": canonical_sha256(bundle_deployment),
+            "per_decision_bundle_factory_binding_sha256": (per_decision_binding.binding_sha256),
             "association_deployment_sha256": (association_deployment.deployment_binding_sha256),
             "declared_attribute_binding_sha256": declared_attribute_binding.binding_sha256,
             "runtime_registry_sha256": runtime_registry_sha256,

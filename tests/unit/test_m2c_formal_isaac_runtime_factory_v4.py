@@ -14,7 +14,9 @@ from xh_agent.perception.public_track_associator_v2 import (
 from xh_agent.policy.qrm_lite.exact_plan_primitive_bundle_v1 import (
     ExactPlanPrimitiveDeploymentBindingV1,
     ExactPlanSourceBindingV1,
-    M2CExactPlanPrimitiveBundleV1,
+)
+from xh_agent.policy.qrm_lite.exact_plan_preflight_v1 import (
+    ExactPlanA3DeploymentBindingV2,
 )
 from xh_agent.policy.qrm_lite.formal_bound_plan_provider_v1 import (
     FormalBoundExactPlanProviderV1,
@@ -23,6 +25,17 @@ from xh_agent.policy.qrm_lite.formal_bound_plan_provider_v1 import (
 from xh_agent.policy.qrm_lite.formal_isaac_episode_io_v4 import (
     FormalIsaacEpisodeIODeploymentBindingV1,
     FormalIsaacEpisodeIOV4,
+)
+from xh_agent.policy.qrm_lite.formal_isaac_exact_plan_bundle_factory_v1 import (
+    ACTIVE_SESSION_QUERY_IMPLEMENTATION_REPO_PATH,
+    IMPLEMENTATION_REPO_PATH as PER_DECISION_FACTORY_REPO_PATH,
+    PLAN_SYNTHESIS_QUERY_IMPLEMENTATION_REPO_PATH,
+    RUNTIME_SNAPSHOT_IMPLEMENTATION_REPO_PATH,
+    FormalIsaacExactPlanBundleFactoryBindingV1,
+    FormalIsaacPerDecisionExactPlanBundleFactoryV1,
+)
+from xh_agent.policy.qrm_lite.formal_exact_plan_runtime_v1 import (
+    PerDecisionExactPlanBundleRuntimeV1,
 )
 from xh_agent.policy.qrm_lite.formal_isaac_runtime_factory_v4 import (
     BOUND_PROVIDER_REPO_PATH,
@@ -56,6 +69,10 @@ SOURCE_PATHS = (
     EXACT_RUNTIME_REPO_PATH,
     BOUND_PROVIDER_REPO_PATH,
     PRIMITIVE_BUNDLE_REPO_PATH,
+    PER_DECISION_FACTORY_REPO_PATH,
+    RUNTIME_SNAPSHOT_IMPLEMENTATION_REPO_PATH,
+    PLAN_SYNTHESIS_QUERY_IMPLEMENTATION_REPO_PATH,
+    ACTIVE_SESSION_QUERY_IMPLEMENTATION_REPO_PATH,
     SCENE_OWNER_REPO_PATH,
     REGISTRY_REPO_PATH,
 )
@@ -184,11 +201,94 @@ def _contracts(
     PublicDeclaredTargetAttributeBindingV4,
     FormalBoundPlanProviderDeploymentV1,
     ExactPlanPrimitiveDeploymentBindingV1,
+    ExactPlanA3DeploymentBindingV2,
+    FormalIsaacExactPlanBundleFactoryBindingV1,
     FormalIsaacV4RuntimeFactoryBindingV1,
 ]:
     project, commit, hashes = _project(tmp_path)
     association = _association(hashes[SCENE_OWNER_REPO_PATH])
     attribute = _attribute()
+    image = "sha256:" + "5" * 64
+    transitive_manifest_sha256 = "6" * 64
+    source_bindings = tuple(
+        ExactPlanSourceBindingV1(
+            role=role,  # type: ignore[arg-type]
+            path=PRIMITIVE_BUNDLE_REPO_PATH,
+            sha256=hashes[PRIMITIVE_BUNDLE_REPO_PATH],
+        )
+        for role in SOURCE_ROLES
+    )
+    phase_schema = tuple((skill, "8" * 64) for skill in SKILLS)
+    provider = FormalBoundPlanProviderDeploymentV1(
+        adr_0022_sha256="9" * 64,
+        adr_0024_sha256="a" * 64,
+        binding_addendum_sha256="b" * 64,
+        unlock_config_sha256="c" * 64,
+        immutable_commit=commit,
+        container_image_digest=image,
+        provider_implementation_sha256=hashes[BOUND_PROVIDER_REPO_PATH],
+        synthesis_backend_implementation_sha256="d" * 64,
+        query_source_implementation_sha256=hashes[PLAN_SYNTHESIS_QUERY_IMPLEMENTATION_REPO_PATH],
+        source_bindings=source_bindings,
+        phase_schema_by_skill=phase_schema,
+    )
+    bundle = ExactPlanPrimitiveDeploymentBindingV1(
+        adr_sha256=provider.adr_0022_sha256,
+        superseding_adr_sha256=provider.adr_0024_sha256,
+        binding_addendum_sha256=provider.binding_addendum_sha256,
+        unlock_config_sha256=provider.unlock_config_sha256,
+        immutable_commit=commit,
+        container_image_digest=image,
+        source_bindings=source_bindings,
+        phase_schema_by_skill=phase_schema,
+        execution_mode="REAL_ISAAC",
+    )
+    a3_payload = {
+        "schema_version": "ExactPlanA3DeploymentBindingV2",
+        "status": "ACCEPTED_PHASE2_BINDING_ADDENDUM",
+        "accepted_adr_sha256": ("62c14028df1ad91e4d3c4282c4775e33149292e9bcf10add2d505be8c7424689"),
+        "binding_addendum_sha256": bundle.binding_addendum_sha256,
+        "unlock_config_sha256": bundle.unlock_config_sha256,
+        "immutable_commit": commit,
+        "container_image_digest": image,
+        "preflight_implementation_path": (
+            "src/xh_agent/policy/qrm_lite/exact_plan_preflight_v1.py"
+        ),
+        "preflight_implementation_sha256": "1" * 64,
+        "callback_implementation_path": (
+            "src/xh_agent/policy/qrm_lite/a3_exact_plan_callbacks_v1.py"
+        ),
+        "callback_implementation_sha256": "2" * 64,
+        "complete_preflight_configuration_sha256": "3" * 64,
+        "plan_source_bindings_sha256": canonical_sha256(bundle.source_bindings),
+        "phase_schema_by_skill": bundle.phase_schema_by_skill,
+        "session_audit_implementation_sha256": "4" * 64,
+        "host_hmac_verifier_sha256": "7" * 64,
+        "entry_gate_sha256": "e" * 64,
+        "formal_physical_runner_binding": ("scripts/m2c/formal_runner.py", "f" * 64),
+        "formal_deployment_closure_binding": (
+            commit,
+            image,
+            transitive_manifest_sha256,
+        ),
+        "frozen_b0_runtime_wrapper_binding": None,
+        "offline_wire_authentication_verifier_binding": None,
+        "reviewed_addendum_accepted": True,
+        "immutable_git_tree_required": True,
+        "session_bound_execution_receipt_required": True,
+        "host_hmac_post_execution_replay_required": True,
+        "trusted_host_signature_required": False,
+        "launcher_attestation_required": False,
+        "teacher_used": False,
+        "privileged_truth_policy_input": False,
+    }
+    a3_draft = ExactPlanA3DeploymentBindingV2.model_construct(
+        **a3_payload,
+        binding_sha256="0" * 64,
+    )
+    a3_payload = a3_draft.model_dump(mode="json", exclude={"binding_sha256"})
+    a3_payload["binding_sha256"] = canonical_sha256(a3_payload)
+    a3 = ExactPlanA3DeploymentBindingV2.model_validate(a3_payload)
     endpoint = IsaacEndpointBindingV4(
         endpoint_base_url="http://127.0.0.1:18765",
         host="labserver",
@@ -204,7 +304,7 @@ def _contracts(
         bound_plan_provider_sha256=hashes[BOUND_PROVIDER_REPO_PATH],
         primitive_bundle_path=PRIMITIVE_BUNDLE_REPO_PATH,
         primitive_bundle_sha256=hashes[PRIMITIVE_BUNDLE_REPO_PATH],
-        a3_deployment_binding_sha256="4" * 64,
+        a3_deployment_binding_sha256=canonical_sha256(a3),
         runtime_registry_path=REGISTRY_REPO_PATH,
         runtime_registry_sha256=hashes[REGISTRY_REPO_PATH],
         association_deployment_sha256=association.deployment_binding_sha256,
@@ -213,8 +313,8 @@ def _contracts(
             attribute.selector_source_implementation_sha256
         ),
         immutable_commit=commit,
-        container_image_digest="sha256:" + "5" * 64,
-        transitive_dependency_manifest_sha256="6" * 64,
+        container_image_digest=image,
+        transitive_dependency_manifest_sha256=transitive_manifest_sha256,
     )
     episode_payload = {
         "schema_version": "FormalIsaacEpisodeIODeploymentBindingV1",
@@ -244,39 +344,45 @@ def _contracts(
     }
     episode_payload["deployment_binding_sha256"] = canonical_sha256(episode_payload)
     episode = FormalIsaacEpisodeIODeploymentBindingV1.model_validate(episode_payload)
-    source_bindings = tuple(
-        ExactPlanSourceBindingV1(
-            role=role,  # type: ignore[arg-type]
-            path=PRIMITIVE_BUNDLE_REPO_PATH,
-            sha256=hashes[PRIMITIVE_BUNDLE_REPO_PATH],
-        )
-        for role in SOURCE_ROLES
+    per_decision_payload = {
+        "schema_version": "FormalIsaacExactPlanBundleFactoryBindingV1",
+        "factory_implementation_sha256": hashes[PER_DECISION_FACTORY_REPO_PATH],
+        "component_source_implementation_path": PRIMITIVE_BUNDLE_REPO_PATH,
+        "component_source_implementation_sha256": hashes[PRIMITIVE_BUNDLE_REPO_PATH],
+        "runtime_readiness_source_implementation_path": PRIMITIVE_BUNDLE_REPO_PATH,
+        "runtime_readiness_source_implementation_sha256": hashes[PRIMITIVE_BUNDLE_REPO_PATH],
+        "runtime_snapshot_provider_implementation_sha256": hashes[
+            RUNTIME_SNAPSHOT_IMPLEMENTATION_REPO_PATH
+        ],
+        "plan_synthesis_query_implementation_sha256": hashes[
+            PLAN_SYNTHESIS_QUERY_IMPLEMENTATION_REPO_PATH
+        ],
+        "active_session_query_implementation_sha256": hashes[
+            ACTIVE_SESSION_QUERY_IMPLEMENTATION_REPO_PATH
+        ],
+        "primitive_bundle_deployment_sha256": canonical_sha256(bundle),
+        "a3_deployment_binding_sha256": canonical_sha256(a3),
+        "complete_preflight_configuration_sha256": (a3.complete_preflight_configuration_sha256),
+        "immutable_commit": commit,
+        "container_image_digest": image,
+        "transitive_dependency_manifest_sha256": transitive_manifest_sha256,
+        "same_persistent_scene_required": True,
+        "one_fresh_bundle_per_decision": True,
+        "construction_must_be_non_actuating": True,
+        "formal_execution_eligible": True,
+        "teacher_used": False,
+        "privileged_truth_policy_input": False,
+    }
+    per_decision_draft = FormalIsaacExactPlanBundleFactoryBindingV1.model_construct(
+        **per_decision_payload,
+        binding_sha256="0" * 64,
     )
-    phase_schema = tuple((skill, "8" * 64) for skill in SKILLS)
-    provider = FormalBoundPlanProviderDeploymentV1(
-        adr_0022_sha256="9" * 64,
-        adr_0024_sha256="a" * 64,
-        binding_addendum_sha256="b" * 64,
-        unlock_config_sha256="c" * 64,
-        immutable_commit=commit,
-        container_image_digest=endpoint.container_image_digest,
-        provider_implementation_sha256=hashes[BOUND_PROVIDER_REPO_PATH],
-        synthesis_backend_implementation_sha256="d" * 64,
-        query_source_implementation_sha256="e" * 64,
-        source_bindings=source_bindings,
-        phase_schema_by_skill=phase_schema,
+    per_decision_payload = per_decision_draft.model_dump(
+        mode="json",
+        exclude={"binding_sha256"},
     )
-    bundle = ExactPlanPrimitiveDeploymentBindingV1(
-        adr_sha256=provider.adr_0022_sha256,
-        superseding_adr_sha256=provider.adr_0024_sha256,
-        binding_addendum_sha256=provider.binding_addendum_sha256,
-        unlock_config_sha256=provider.unlock_config_sha256,
-        immutable_commit=commit,
-        container_image_digest=endpoint.container_image_digest,
-        source_bindings=source_bindings,
-        phase_schema_by_skill=phase_schema,
-        execution_mode="REAL_ISAAC",
-    )
+    per_decision_payload["binding_sha256"] = canonical_sha256(per_decision_payload)
+    per_decision = FormalIsaacExactPlanBundleFactoryBindingV1.model_validate(per_decision_payload)
     factory_payload = {
         "schema_version": "FormalIsaacV4RuntimeFactoryBindingV1",
         "factory_implementation_path": IMPLEMENTATION_REPO_PATH,
@@ -285,6 +391,7 @@ def _contracts(
         "episode_io_deployment_binding_sha256": canonical_sha256(episode),
         "bound_plan_provider_deployment_sha256": canonical_sha256(provider),
         "primitive_bundle_deployment_sha256": canonical_sha256(bundle),
+        "per_decision_bundle_factory_binding_sha256": per_decision.binding_sha256,
         "immutable_commit": commit,
         "container_image_digest": endpoint.container_image_digest,
         "transitive_dependency_manifest_sha256": (endpoint.transitive_dependency_manifest_sha256),
@@ -300,7 +407,18 @@ def _contracts(
     }
     factory_payload["binding_sha256"] = canonical_sha256(factory_payload)
     factory = FormalIsaacV4RuntimeFactoryBindingV1.model_validate(factory_payload)
-    return project, endpoint, episode, association, attribute, provider, bundle, factory
+    return (
+        project,
+        endpoint,
+        episode,
+        association,
+        attribute,
+        provider,
+        bundle,
+        a3,
+        per_decision,
+        factory,
+    )
 
 
 class _Lifecycle:
@@ -328,6 +446,8 @@ def _objects(
     attribute: PublicDeclaredTargetAttributeBindingV4,
     provider_deployment: FormalBoundPlanProviderDeploymentV1,
     bundle_deployment: ExactPlanPrimitiveDeploymentBindingV1,
+    a3_deployment: ExactPlanA3DeploymentBindingV2,
+    per_decision_binding: FormalIsaacExactPlanBundleFactoryBindingV1,
 ):
     episode_io = object.__new__(FormalIsaacEpisodeIOV4)
     episode_io.binding = episode_binding
@@ -341,20 +461,43 @@ def _objects(
     provider = object.__new__(FormalBoundExactPlanProviderV1)
     provider.project_root = project
     provider.mode = "REAL_ISAAC"
-    provider.backend = SimpleNamespace(real_isaac=True, mocked_physics=False)
+    plan_synthesis_query = object()
+    provider.backend = SimpleNamespace(
+        real_isaac=True,
+        mocked_physics=False,
+        query_source=plan_synthesis_query,
+    )
     provider.deployment = provider_deployment
     provider.implementation_sha256 = endpoint.bound_plan_provider_sha256
-    bundle = object.__new__(M2CExactPlanPrimitiveBundleV1)
+    per_decision_factory = object.__new__(FormalIsaacPerDecisionExactPlanBundleFactoryV1)
+    per_decision_factory.project_root = project
+    per_decision_factory.mode = "REAL_ISAAC"
+    per_decision_factory.binding = per_decision_binding
+    per_decision_factory.primitive_binding = bundle_deployment
+    per_decision_factory.a3_deployment_binding = a3_deployment
+    per_decision_factory.plan_synthesis_query = plan_synthesis_query
+    per_decision_factory.component_source = SimpleNamespace(formal_execution_eligible=True)
+    bundle = object.__new__(PerDecisionExactPlanBundleRuntimeV1)
     bundle.project_root = project
     bundle.binding = bundle_deployment
-    bundle.preflight_verifier = object()
-    bundle.executor = SimpleNamespace(real_isaac=True)
+    bundle.factory = per_decision_factory
     return episode_io, observations, provider, bundle
 
 
 def _factory(tmp_path: Path):  # noqa: ANN202
     contracts = _contracts(tmp_path)
-    project, endpoint, episode, association, attribute, provider, bundle, factory = contracts
+    (
+        project,
+        endpoint,
+        episode,
+        association,
+        attribute,
+        provider,
+        bundle,
+        a3,
+        per_decision,
+        factory,
+    ) = contracts
     episode_io, observations, provider_object, bundle_object = _objects(
         project=project,
         endpoint=endpoint,
@@ -363,6 +506,8 @@ def _factory(tmp_path: Path):  # noqa: ANN202
         attribute=attribute,
         provider_deployment=provider,
         bundle_deployment=bundle,
+        a3_deployment=a3,
+        per_decision_binding=per_decision,
     )
     instance = FormalIsaacV4RuntimeFactoryV1(
         project_root=project,
@@ -383,7 +528,18 @@ def _factory(tmp_path: Path):  # noqa: ANN202
 
 def test_factory_composes_one_backend_without_starting_scene(tmp_path: Path) -> None:
     instance, contracts, objects = _factory(tmp_path)
-    _, endpoint, episode, association, attribute, provider, bundle, factory = contracts
+    (
+        _,
+        endpoint,
+        episode,
+        association,
+        attribute,
+        provider,
+        bundle,
+        _,
+        per_decision,
+        factory,
+    ) = contracts
     episode_io, observations, provider_object, bundle_object = objects
     receipt = instance.assembly.receipt
     assert instance.assembly.backend.lifecycle is episode_io.lifecycle
@@ -397,14 +553,70 @@ def test_factory_composes_one_backend_without_starting_scene(tmp_path: Path) -> 
     assert receipt.declared_attribute_binding_sha256 == attribute.binding_sha256
     assert receipt.bound_plan_provider_deployment_sha256 == canonical_sha256(provider)
     assert receipt.primitive_bundle_deployment_sha256 == canonical_sha256(bundle)
+    assert receipt.per_decision_bundle_factory_binding_sha256 == per_decision.binding_sha256
     assert receipt.physical_execution_performed is False
     assert receipt.scene_started is False
     assert receipt.model_inference_performed is False
 
 
-def test_factory_rejects_crossed_capture_source_before_backend(tmp_path: Path) -> None:
-    contracts = _contracts(tmp_path)
-    project, endpoint, episode, association, attribute, provider, bundle, factory = contracts
+def test_factory_rejects_static_bundle_before_backend(tmp_path: Path) -> None:
+    (
+        project,
+        endpoint,
+        episode,
+        association,
+        attribute,
+        provider,
+        bundle,
+        a3,
+        per_decision,
+        factory,
+    ) = _contracts(tmp_path)
+    episode_io, observations, provider_object, _ = _objects(
+        project=project,
+        endpoint=endpoint,
+        episode_binding=episode,
+        association=association,
+        attribute=attribute,
+        provider_deployment=provider,
+        bundle_deployment=bundle,
+        a3_deployment=a3,
+        per_decision_binding=per_decision,
+    )
+    with pytest.raises(TypeError, match="per-decision"):
+        FormalIsaacV4RuntimeFactoryV1(
+            project_root=project,
+            binding=factory,
+            endpoint_binding=endpoint,
+            episode_io=episode_io,
+            observation_provider=observations,
+            association_deployment=association,
+            declared_attribute_binding=attribute,
+            bound_plan_provider=provider_object,
+            bound_plan_provider_deployment=provider,
+            primitive_bundle=SimpleNamespace(  # type: ignore[arg-type]
+                project_root=project,
+                binding=bundle,
+                formal_execution_eligible=True,
+            ),
+            primitive_bundle_deployment=bundle,
+            runtime_registry_sha256=endpoint.runtime_registry_sha256,
+        )
+
+
+def test_factory_rejects_crossed_plan_query_source(tmp_path: Path) -> None:
+    (
+        project,
+        endpoint,
+        episode,
+        association,
+        attribute,
+        provider,
+        bundle,
+        a3,
+        per_decision,
+        factory,
+    ) = _contracts(tmp_path)
     episode_io, observations, provider_object, bundle_object = _objects(
         project=project,
         endpoint=endpoint,
@@ -413,6 +625,96 @@ def test_factory_rejects_crossed_capture_source_before_backend(tmp_path: Path) -
         attribute=attribute,
         provider_deployment=provider,
         bundle_deployment=bundle,
+        a3_deployment=a3,
+        per_decision_binding=per_decision,
+    )
+    provider_object.backend.query_source = object()
+    with pytest.raises(ValueError, match="objects cross"):
+        FormalIsaacV4RuntimeFactoryV1(
+            project_root=project,
+            binding=factory,
+            endpoint_binding=endpoint,
+            episode_io=episode_io,
+            observation_provider=observations,
+            association_deployment=association,
+            declared_attribute_binding=attribute,
+            bound_plan_provider=provider_object,
+            bound_plan_provider_deployment=provider,
+            primitive_bundle=bundle_object,
+            primitive_bundle_deployment=bundle,
+            runtime_registry_sha256=endpoint.runtime_registry_sha256,
+        )
+
+
+def test_factory_rejects_dirty_per_decision_source(tmp_path: Path) -> None:
+    (
+        project,
+        endpoint,
+        episode,
+        association,
+        attribute,
+        provider,
+        bundle,
+        a3,
+        per_decision,
+        factory,
+    ) = _contracts(tmp_path)
+    episode_io, observations, provider_object, bundle_object = _objects(
+        project=project,
+        endpoint=endpoint,
+        episode_binding=episode,
+        association=association,
+        attribute=attribute,
+        provider_deployment=provider,
+        bundle_deployment=bundle,
+        a3_deployment=a3,
+        per_decision_binding=per_decision,
+    )
+    (project / RUNTIME_SNAPSHOT_IMPLEMENTATION_REPO_PATH).write_text(
+        "tampered\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="source digest differs"):
+        FormalIsaacV4RuntimeFactoryV1(
+            project_root=project,
+            binding=factory,
+            endpoint_binding=endpoint,
+            episode_io=episode_io,
+            observation_provider=observations,
+            association_deployment=association,
+            declared_attribute_binding=attribute,
+            bound_plan_provider=provider_object,
+            bound_plan_provider_deployment=provider,
+            primitive_bundle=bundle_object,
+            primitive_bundle_deployment=bundle,
+            runtime_registry_sha256=endpoint.runtime_registry_sha256,
+        )
+
+
+def test_factory_rejects_crossed_capture_source_before_backend(tmp_path: Path) -> None:
+    contracts = _contracts(tmp_path)
+    (
+        project,
+        endpoint,
+        episode,
+        association,
+        attribute,
+        provider,
+        bundle,
+        a3,
+        per_decision,
+        factory,
+    ) = contracts
+    episode_io, observations, provider_object, bundle_object = _objects(
+        project=project,
+        endpoint=endpoint,
+        episode_binding=episode,
+        association=association,
+        attribute=attribute,
+        provider_deployment=provider,
+        bundle_deployment=bundle,
+        a3_deployment=a3,
+        per_decision_binding=per_decision,
     )
     observations.source = _CaptureSource(endpoint.capture_source_implementation_sha256)
     with pytest.raises(ValueError, match="objects cross"):
@@ -434,7 +736,18 @@ def test_factory_rejects_crossed_capture_source_before_backend(tmp_path: Path) -
 
 def test_factory_rejects_dirty_runtime_source(tmp_path: Path) -> None:
     contracts = _contracts(tmp_path)
-    project, endpoint, episode, association, attribute, provider, bundle, factory = contracts
+    (
+        project,
+        endpoint,
+        episode,
+        association,
+        attribute,
+        provider,
+        bundle,
+        a3,
+        per_decision,
+        factory,
+    ) = contracts
     episode_io, observations, provider_object, bundle_object = _objects(
         project=project,
         endpoint=endpoint,
@@ -443,6 +756,8 @@ def test_factory_rejects_dirty_runtime_source(tmp_path: Path) -> None:
         attribute=attribute,
         provider_deployment=provider,
         bundle_deployment=bundle,
+        a3_deployment=a3,
+        per_decision_binding=per_decision,
     )
     (project / REGISTRY_REPO_PATH).write_text("tampered: true\n", encoding="utf-8")
     with pytest.raises(ValueError, match="source digest differs"):
@@ -464,7 +779,18 @@ def test_factory_rejects_dirty_runtime_source(tmp_path: Path) -> None:
 
 def test_factory_allows_binding_only_descendant_commit(tmp_path: Path) -> None:
     contracts = _contracts(tmp_path)
-    project, endpoint, episode, association, attribute, provider, bundle, factory = contracts
+    (
+        project,
+        endpoint,
+        episode,
+        association,
+        attribute,
+        provider,
+        bundle,
+        a3,
+        per_decision,
+        factory,
+    ) = contracts
     episode_io, observations, provider_object, bundle_object = _objects(
         project=project,
         endpoint=endpoint,
@@ -473,6 +799,8 @@ def test_factory_allows_binding_only_descendant_commit(tmp_path: Path) -> None:
         attribute=attribute,
         provider_deployment=provider,
         bundle_deployment=bundle,
+        a3_deployment=a3,
+        per_decision_binding=per_decision,
     )
     binding_file = project / "configs" / "binding-only.json"
     binding_file.parent.mkdir(parents=True, exist_ok=True)
@@ -505,9 +833,18 @@ def test_factory_binding_rejects_digest_tamper(tmp_path: Path) -> None:
 
 
 def test_factory_rejects_untyped_episode_io(tmp_path: Path) -> None:
-    project, endpoint, episode, association, attribute, provider, bundle, factory = _contracts(
-        tmp_path
-    )
+    (
+        project,
+        endpoint,
+        episode,
+        association,
+        attribute,
+        provider,
+        bundle,
+        a3,
+        per_decision,
+        factory,
+    ) = _contracts(tmp_path)
     _, observations, provider_object, bundle_object = _objects(
         project=project,
         endpoint=endpoint,
@@ -516,6 +853,8 @@ def test_factory_rejects_untyped_episode_io(tmp_path: Path) -> None:
         attribute=attribute,
         provider_deployment=provider,
         bundle_deployment=bundle,
+        a3_deployment=a3,
+        per_decision_binding=per_decision,
     )
     with pytest.raises(TypeError, match="FormalIsaacEpisodeIOV4"):
         FormalIsaacV4RuntimeFactoryV1(

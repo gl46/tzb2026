@@ -27,6 +27,9 @@ from xh_agent.policy.qrm_lite.formal_exact_plan_synthesis_v1 import (
     ConfiguredFormalExactPlanSynthesisBackendV1,
 )
 from xh_agent.policy.qrm_lite.formal_isaac_exact_plan_bundle_factory_v1 import (
+    ACTIVE_SESSION_QUERY_IMPLEMENTATION_REPO_PATH,
+    PLAN_SYNTHESIS_QUERY_IMPLEMENTATION_REPO_PATH,
+    RUNTIME_SNAPSHOT_IMPLEMENTATION_REPO_PATH,
     FormalIsaacExactPlanBundleFactoryBindingV1,
     FormalIsaacExactPlanBundleFactoryUnavailable,
     FormalIsaacPerDecisionExactPlanBundleFactoryV1,
@@ -426,6 +429,15 @@ def test_real_binding_cross_checks_transitive_manifest(tmp_path: Path) -> None:
         ).read_bytes()
     ).hexdigest()
     component_sha256 = hashlib.sha256((ROOT / SOURCE_PATH).read_bytes()).hexdigest()
+    runtime_snapshot_sha256 = hashlib.sha256(
+        (ROOT / RUNTIME_SNAPSHOT_IMPLEMENTATION_REPO_PATH).read_bytes()
+    ).hexdigest()
+    plan_synthesis_query_sha256 = hashlib.sha256(
+        (ROOT / PLAN_SYNTHESIS_QUERY_IMPLEMENTATION_REPO_PATH).read_bytes()
+    ).hexdigest()
+    active_session_query_sha256 = hashlib.sha256(
+        (ROOT / ACTIVE_SESSION_QUERY_IMPLEMENTATION_REPO_PATH).read_bytes()
+    ).hexdigest()
     binding_payload = {
         "schema_version": "FormalIsaacExactPlanBundleFactoryBindingV1",
         "factory_implementation_sha256": implementation_sha256,
@@ -433,6 +445,9 @@ def test_real_binding_cross_checks_transitive_manifest(tmp_path: Path) -> None:
         "component_source_implementation_sha256": component_sha256,
         "runtime_readiness_source_implementation_path": SOURCE_PATH,
         "runtime_readiness_source_implementation_sha256": readiness.implementation_sha256,
+        "runtime_snapshot_provider_implementation_sha256": runtime_snapshot_sha256,
+        "plan_synthesis_query_implementation_sha256": plan_synthesis_query_sha256,
+        "active_session_query_implementation_sha256": active_session_query_sha256,
         "primitive_bundle_deployment_sha256": canonical_sha256(primitive),
         "a3_deployment_binding_sha256": canonical_sha256(a3),
         "complete_preflight_configuration_sha256": configuration.configuration_sha256,
@@ -463,6 +478,9 @@ def test_real_binding_cross_checks_transitive_manifest(tmp_path: Path) -> None:
     factory.readiness_source = readiness
     factory.implementation_sha256 = implementation_sha256
     factory.component_source_implementation_sha256 = component_sha256
+    factory.runtime_snapshot_provider_implementation_sha256 = runtime_snapshot_sha256
+    factory.plan_synthesis_query_implementation_sha256 = plan_synthesis_query_sha256
+    factory.active_session_query_implementation_sha256 = active_session_query_sha256
     factory.primitive_binding = primitive
     factory.configuration = configuration
 
