@@ -154,7 +154,10 @@ def test_query_composes_one_mutation_free_state(
     )
     assert (snapshot.state.attached_public_track_id is not None) is attached
     assert (snapshot.state.active_attachment_receipt_sha256 is not None) is attached
-    assert snapshot.receipt.state_sha256 == snapshot.state.state_sha256
+    assert snapshot.receipt.plan_synthesis_state_sha256 == snapshot.state.state_sha256
+    assert snapshot.receipt.state_sha256 == snapshot.state.active_session_state_sha256
+    assert snapshot.receipt.state_sha256 != snapshot.state.state_sha256
+    assert snapshot.receipt.state_units == "rad_7_plus_per_finger_m"
     assert snapshot.receipt.query_source_implementation_sha256 == query.implementation_sha256
 
 
@@ -182,6 +185,17 @@ def test_query_source_drives_the_frozen_grasp_plan(tmp_path: Path) -> None:
     assert result.preplan_state_receipt.query_source_implementation_sha256 == (
         query.implementation_sha256
     )
+    assert result.bound_plan.inputs.plan_synthesis_state_sha256 == (
+        result.preplan_state_receipt.plan_synthesis_state_sha256
+    )
+    assert result.bound_plan.inputs.preplan_state_sha256 == (
+        result.preplan_state_receipt.state_sha256
+    )
+    active_session = query.claim_active_session_query_provider(result.bound_plan)
+    active_state = active_session.read_active_state(result.bound_plan)
+    assert active_state.state_sha256 == result.bound_plan.inputs.preplan_state_sha256
+    with pytest.raises(FormalIsaacPlanSynthesisQueryUnavailable, match="already claimed"):
+        query.claim_active_session_query_provider(result.bound_plan)
 
 
 def test_query_consumes_request_before_any_retry() -> None:
@@ -191,6 +205,43 @@ def test_query_consumes_request_before_any_retry() -> None:
 
     with pytest.raises(FormalIsaacPlanSynthesisQueryUnavailable, match="already consumed"):
         query.query_plan_synthesis_state(request=request, observation=request.observation)
+
+
+def test_unclaimed_state_blocks_another_decision() -> None:
+    request, _ = _request_and_mapping("GRASP")
+    query, _ = _query()
+    query.query_plan_synthesis_state(request=request, observation=request.observation)
+    other = request.model_copy(update={"run_id": "other-formal-run"})
+
+    with pytest.raises(FormalIsaacPlanSynthesisQueryUnavailable, match="not bound"):
+        query.query_plan_synthesis_state(request=other, observation=other.observation)
+
+
+def test_crossed_plan_consumes_captured_provider(tmp_path: Path) -> None:
+    request, mapping = _request_and_mapping("GRASP")
+    query, _ = _query()
+    backend = ConfiguredFormalExactPlanSynthesisBackendV1(
+        project_root=tmp_path,
+        mode="CONTRACT_TEST",
+        configuration=_configuration(tmp_path),
+        query_source=query,
+        deployment=None,
+        clock_ns=lambda: request.observation.captured_at_ns + 4,
+    )
+    result = backend.synthesize_bound_plan(
+        request=request,
+        observation=request.observation,
+        mapping=mapping,
+    )
+    crossed_inputs = result.bound_plan.inputs.model_copy(
+        update={"plan_synthesis_state_sha256": "f" * 64}
+    )
+    crossed = result.bound_plan.model_copy(update={"inputs": crossed_inputs})
+
+    with pytest.raises(FormalIsaacPlanSynthesisQueryUnavailable, match="crosses"):
+        query.claim_active_session_query_provider(crossed)
+    with pytest.raises(FormalIsaacPlanSynthesisQueryUnavailable, match="already claimed"):
+        query.claim_active_session_query_provider(result.bound_plan)
 
 
 def test_query_rejects_crossed_public_target() -> None:

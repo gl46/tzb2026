@@ -91,10 +91,11 @@ class FormalPreplanStateReceiptV1(_FrozenModel):
     observation_id: str = Field(min_length=1)
     capture_receipt_sha256: str = Field(pattern=SHA256_PATTERN)
     formal_observation_sha256: str = Field(pattern=SHA256_PATTERN)
+    plan_synthesis_state_sha256: str = Field(pattern=SHA256_PATTERN)
     state_sha256: str = Field(pattern=SHA256_PATTERN)
     state_frame: Literal["world"] = "world"
-    state_dimensions: int = Field(gt=0)
-    state_units: str = Field(min_length=1)
+    state_dimensions: Literal[8] = 8
+    state_units: Literal["rad_7_plus_per_finger_m"] = "rad_7_plus_per_finger_m"
     state_timestamp_ns: int = Field(gt=0)
     freshness_limit_ns: int = Field(gt=0)
     query_source_implementation_sha256: str = Field(pattern=SHA256_PATTERN)
@@ -111,6 +112,8 @@ class FormalPreplanStateReceiptV1(_FrozenModel):
 
     @model_validator(mode="after")
     def receipt_is_canonical(self) -> "FormalPreplanStateReceiptV1":
+        if self.plan_synthesis_state_sha256 == self.state_sha256:
+            raise ValueError("formal synthesis and physical state digests coincide")
         expected = canonical_sha256(self.model_dump(mode="json", exclude={"receipt_sha256"}))
         if self.receipt_sha256 != expected:
             raise ValueError("formal pre-plan state receipt digest differs")
@@ -290,6 +293,7 @@ class FormalBoundExactPlanProviderV1:
             "observation_id": observation.observation_id,
             "capture_receipt_sha256": observation.capture_receipt_sha256,
             "formal_observation_sha256": observation.wire_sha256,
+            "plan_synthesis_state_sha256": plan.inputs.plan_synthesis_state_sha256,
             "state_sha256": plan.inputs.preplan_state_sha256,
             "state_frame": plan.inputs.preplan_state_frame,
             "state_dimensions": plan.inputs.preplan_state_dimensions,

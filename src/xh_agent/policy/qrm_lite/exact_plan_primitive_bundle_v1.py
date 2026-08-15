@@ -145,10 +145,11 @@ class ExactPlanA1InputsV1(FrozenModel):
     target_track_id: str | None = None
     destination_cell: str | None = Field(default=None, pattern=r"^BIN_CELL_[0-5]$")
     resolved_execution_parameters_sha256: str = Field(pattern=SHA256_PATTERN)
+    plan_synthesis_state_sha256: str = Field(pattern=SHA256_PATTERN)
     preplan_state_sha256: str = Field(pattern=SHA256_PATTERN)
     preplan_state_frame: Literal["world"] = "world"
-    preplan_state_dimensions: int = Field(gt=0)
-    preplan_state_units: str = Field(min_length=1)
+    preplan_state_dimensions: Literal[8] = 8
+    preplan_state_units: Literal["rad_7_plus_per_finger_m"] = "rad_7_plus_per_finger_m"
     preplan_state_timestamp_ns: int = Field(gt=0)
     preplan_state_freshness_limit_ns: int = Field(gt=0)
     plan_constructed_at_ns: int = Field(gt=0)
@@ -170,6 +171,8 @@ class ExactPlanA1InputsV1(FrozenModel):
 
     @model_validator(mode="after")
     def state_is_fresh_and_finite(self) -> "ExactPlanA1InputsV1":
+        if self.plan_synthesis_state_sha256 == self.preplan_state_sha256:
+            raise ValueError("plan-synthesis and physical pre-plan state digests coincide")
         values = (
             self.controller_frequency_hz,
             self.convergence_tolerance_m,

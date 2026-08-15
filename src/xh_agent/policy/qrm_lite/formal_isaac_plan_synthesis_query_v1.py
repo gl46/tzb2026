@@ -34,6 +34,9 @@ from xh_agent.policy.qrm_lite.formal_split_runner_v2 import (
     SHA256_PATTERN,
     canonical_sha256,
 )
+from xh_agent.policy.qrm_lite.exact_plan_primitive_bundle_v1 import (
+    M2CExactPlanPrimitivePlanV1,
+)
 from xh_agent.policy.qrm_lite.formal_split_runner_v4 import IsaacExecuteRequestV4
 from xh_agent.policy.qrm_lite.isaac_active_session_query_v1 import (
     FormalIsaacActiveSessionQueryRuntimeV1,
@@ -252,6 +255,14 @@ class FormalIsaacPlanSynthesisStateQueryV1:
         self.real_isaac = mode == "REAL_ISAAC"
         self.mocked_physics = mode == "CONTRACT_TEST"
         self._consumed_request_sha256: set[str] = set()
+        self._pending_active_session: (
+            tuple[
+                str,
+                str,
+                IsaacActiveSessionQueryProviderV1,
+            ]
+            | None
+        ) = None
 
         counter = active_session_factory.mutation_counter_source
         if counter is not scene_safety_source.mutation_counter_source:
@@ -356,6 +367,10 @@ class FormalIsaacPlanSynthesisStateQueryV1:
             raise FormalIsaacPlanSynthesisQueryUnavailable(
                 "plan-synthesis query request was already consumed"
             )
+        if self._pending_active_session is not None:
+            raise FormalIsaacPlanSynthesisQueryUnavailable(
+                "prior plan-synthesis state was not bound to its exact plan"
+            )
         self._consumed_request_sha256.add(request_sha256)
 
         active_session = self.active_session_factory.create_active_session_query_provider()
@@ -418,6 +433,10 @@ class FormalIsaacPlanSynthesisStateQueryV1:
             "active_session_runtime_receipt_sha256": runtime.receipt_sha256,
             "scene_safety_binding_receipt_sha256": binding.receipt_sha256,
             "scene_geometry_receipt_sha256": binding.scene_geometry_receipt_sha256,
+            "active_session_state_sha256": runtime.state_sha256,
+            "active_session_state_timestamp_ns": runtime.observed_at_ns,
+            "active_session_state_dimensions": 8,
+            "active_session_state_units": "rad_7_plus_per_finger_m",
             "active_attachment_receipt_sha256": binding.active_attachment_receipt_sha256,
             "end_effector_position_world_m": runtime.end_effector_world_m,
             "end_effector_orientation_world_wxyz": runtime.end_effector_world_wxyz,
@@ -448,11 +467,12 @@ class FormalIsaacPlanSynthesisStateQueryV1:
             "observation_id": state.observation_id,
             "capture_receipt_sha256": state.capture_receipt_sha256,
             "formal_observation_sha256": state.formal_observation_sha256,
-            "state_sha256": state.state_sha256,
+            "plan_synthesis_state_sha256": state.state_sha256,
+            "state_sha256": state.active_session_state_sha256,
             "state_frame": "world",
-            "state_dimensions": 8,
-            "state_units": "world_m,normalized_wxyz,gripper_m",
-            "state_timestamp_ns": state.state_timestamp_ns,
+            "state_dimensions": state.active_session_state_dimensions,
+            "state_units": state.active_session_state_units,
+            "state_timestamp_ns": state.active_session_state_timestamp_ns,
             "freshness_limit_ns": self.freshness_limit_ns,
             "query_source_implementation_sha256": self.implementation_sha256,
             "articulation_target_writes": 0,
@@ -469,4 +489,38 @@ class FormalIsaacPlanSynthesisStateQueryV1:
             **receipt_payload,
             receipt_sha256=canonical_sha256(receipt_payload),
         )
+        self._pending_active_session = (
+            state.state_sha256,
+            context_sha256,
+            active_session,
+        )
         return FormalPlanSynthesisSnapshotV1(state=state, receipt=receipt)
+
+    def claim_active_session_query_provider(
+        self,
+        plan: M2CExactPlanPrimitivePlanV1,
+    ) -> IsaacActiveSessionQueryProviderV1:
+        """Consume the exact provider that captured ``plan``'s physical state."""
+
+        pending = self._pending_active_session
+        if pending is None:
+            raise FormalIsaacPlanSynthesisQueryUnavailable(
+                "plan-synthesis active-session provider is absent or already claimed"
+            )
+        # Consume before validation.  A crossed plan must not make the captured
+        # physical state retryable under a different immutable plan.
+        self._pending_active_session = None
+        synthesis_sha256, context_sha256, provider = pending
+        cached = provider.cached_preplan_state(context_sha256=context_sha256)
+        inputs = plan.inputs
+        if (
+            inputs.plan_synthesis_state_sha256 != synthesis_sha256
+            or inputs.preplan_state_sha256 != cached.state_sha256
+            or inputs.preplan_state_timestamp_ns != cached.observed_at_ns
+            or inputs.preplan_state_dimensions != 8
+            or inputs.preplan_state_units != "rad_7_plus_per_finger_m"
+        ):
+            raise FormalIsaacPlanSynthesisQueryUnavailable(
+                "bound plan crosses its captured active-session state"
+            )
+        return provider

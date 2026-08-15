@@ -186,6 +186,10 @@ class FormalPlanSynthesisStateV1(_FrozenModel):
     active_session_runtime_receipt_sha256: str = Field(pattern=SHA256_PATTERN)
     scene_safety_binding_receipt_sha256: str = Field(pattern=SHA256_PATTERN)
     scene_geometry_receipt_sha256: str = Field(pattern=SHA256_PATTERN)
+    active_session_state_sha256: str = Field(pattern=SHA256_PATTERN)
+    active_session_state_timestamp_ns: int = Field(gt=0)
+    active_session_state_dimensions: Literal[8] = 8
+    active_session_state_units: Literal["rad_7_plus_per_finger_m"] = "rad_7_plus_per_finger_m"
     active_attachment_receipt_sha256: str | None = Field(
         default=None,
         pattern=SHA256_PATTERN,
@@ -233,6 +237,8 @@ class FormalPlanSynthesisStateV1(_FrozenModel):
             self.active_attachment_receipt_sha256 is None
         ):
             raise ValueError("query-only attachment identity lacks its execution receipt")
+        if self.active_session_state_timestamp_ns >= self.state_timestamp_ns:
+            raise ValueError("scene-safety state does not follow active-session capture")
         expected = canonical_sha256(self.model_dump(mode="json", exclude={"state_sha256"}))
         if self.state_sha256 != expected:
             raise ValueError("query-only plan-synthesis state digest differs")
@@ -253,11 +259,12 @@ class FormalPlanSynthesisSnapshotV1(_FrozenModel):
             "observation_id": self.state.observation_id,
             "capture_receipt_sha256": self.state.capture_receipt_sha256,
             "formal_observation_sha256": self.state.formal_observation_sha256,
-            "state_sha256": self.state.state_sha256,
+            "plan_synthesis_state_sha256": self.state.state_sha256,
+            "state_sha256": self.state.active_session_state_sha256,
             "state_frame": "world",
-            "state_dimensions": 8,
-            "state_units": "world_m,normalized_wxyz,gripper_m",
-            "state_timestamp_ns": self.state.state_timestamp_ns,
+            "state_dimensions": self.state.active_session_state_dimensions,
+            "state_units": self.state.active_session_state_units,
+            "state_timestamp_ns": self.state.active_session_state_timestamp_ns,
         }
         if any(getattr(self.receipt, name) != value for name, value in expected.items()):
             raise ValueError("query-only state receipt crosses its canonical state")
@@ -964,8 +971,8 @@ class ConfiguredFormalExactPlanSynthesisBackendV1:
             raise ExactPlanUnavailable("query-only synthesis state crosses request/observation")
         cfg = self.configuration
         if (
-            state.state_timestamp_ns <= observation.captured_at_ns
-            or state.state_timestamp_ns - observation.captured_at_ns
+            state.active_session_state_timestamp_ns <= observation.captured_at_ns
+            or state.active_session_state_timestamp_ns - observation.captured_at_ns
             > cfg.preplan_freshness_limit_ns
             or snapshot.receipt.freshness_limit_ns != cfg.preplan_freshness_limit_ns
         ):
@@ -1029,10 +1036,11 @@ class ConfiguredFormalExactPlanSynthesisBackendV1:
                 else None
             ),
             resolved_execution_parameters_sha256=canonical_sha256(mapping.execution_parameters),
-            preplan_state_sha256=state.state_sha256,
-            preplan_state_dimensions=8,
-            preplan_state_units="world_m,normalized_wxyz,gripper_m",
-            preplan_state_timestamp_ns=state.state_timestamp_ns,
+            plan_synthesis_state_sha256=state.state_sha256,
+            preplan_state_sha256=state.active_session_state_sha256,
+            preplan_state_dimensions=state.active_session_state_dimensions,
+            preplan_state_units=state.active_session_state_units,
+            preplan_state_timestamp_ns=state.active_session_state_timestamp_ns,
             preplan_state_freshness_limit_ns=cfg.preplan_freshness_limit_ns,
             plan_constructed_at_ns=constructed_at_ns,
             controller_frequency_hz=cfg.controller_frequency_hz,

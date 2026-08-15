@@ -254,6 +254,10 @@ class _QuerySource:
             "active_session_runtime_receipt_sha256": "6" * 64,
             "scene_safety_binding_receipt_sha256": "7" * 64,
             "scene_geometry_receipt_sha256": "8" * 64,
+            "active_session_state_sha256": "4" * 64,
+            "active_session_state_timestamp_ns": observation.captured_at_ns + 1,
+            "active_session_state_dimensions": 8,
+            "active_session_state_units": "rad_7_plus_per_finger_m",
             "active_attachment_receipt_sha256": (
                 "5" * 64 if self.attached_public_track_id is not None else None
             ),
@@ -268,7 +272,7 @@ class _QuerySource:
                 "/World/M1B/partition_bin/link",
                 "/World/M1B/work_table/link",
             ],
-            "state_timestamp_ns": observation.captured_at_ns + 1,
+            "state_timestamp_ns": observation.captured_at_ns + 2,
             "articulation_target_writes": 0,
             "simulation_steps": 0,
             "scene_mutations": 0,
@@ -290,11 +294,12 @@ class _QuerySource:
             "observation_id": state.observation_id,
             "capture_receipt_sha256": state.capture_receipt_sha256,
             "formal_observation_sha256": state.formal_observation_sha256,
-            "state_sha256": state.state_sha256,
+            "plan_synthesis_state_sha256": state.state_sha256,
+            "state_sha256": state.active_session_state_sha256,
             "state_frame": "world",
-            "state_dimensions": 8,
-            "state_units": "world_m,normalized_wxyz,gripper_m",
-            "state_timestamp_ns": state.state_timestamp_ns,
+            "state_dimensions": state.active_session_state_dimensions,
+            "state_units": state.active_session_state_units,
+            "state_timestamp_ns": state.active_session_state_timestamp_ns,
             "freshness_limit_ns": 1_000_000,
             "query_source_implementation_sha256": self.implementation_sha256,
             "articulation_target_writes": 0,
@@ -335,7 +340,7 @@ def _backend(
         configuration=_configuration(tmp_path),
         query_source=query,
         deployment=None,
-        clock_ns=lambda: request.observation.captured_at_ns + 2,
+        clock_ns=lambda: request.observation.captured_at_ns + 3,
     )
     return backend, query
 
@@ -413,7 +418,7 @@ def test_attachment_state_mismatch_fails_before_any_plan(
         configuration=_configuration(tmp_path),
         query_source=query,
         deployment=None,
-        clock_ns=lambda: request.observation.captured_at_ns + 2,
+        clock_ns=lambda: request.observation.captured_at_ns + 3,
     )
 
     with pytest.raises(ExactPlanUnavailable, match="attachment"):
@@ -444,7 +449,10 @@ def test_non_top_down_regrasp_and_stale_query_fail_closed(tmp_path: Path) -> Non
     stale_backend, _ = _backend(
         tmp_path,
         skill="REGRASP",
-        query_updates={"state_timestamp_ns": request.observation.captured_at_ns + 1_000_001},
+        query_updates={
+            "active_session_state_timestamp_ns": (request.observation.captured_at_ns + 1_000_001),
+            "state_timestamp_ns": request.observation.captured_at_ns + 1_000_002,
+        },
     )
     _, valid_mapping = _request_and_mapping("REGRASP")
     with pytest.raises(ExactPlanUnavailable, match="stale"):
@@ -512,7 +520,7 @@ def test_configuration_and_state_digests_are_not_self_asserted(tmp_path: Path) -
         configuration=_configuration(tmp_path),
         query_source=query,
         deployment=None,
-        clock_ns=lambda: request.observation.captured_at_ns + 2,
+        clock_ns=lambda: request.observation.captured_at_ns + 3,
     )
     _, mapping = _request_and_mapping("GRASP")
     with pytest.raises(ExactPlanUnavailable, match="crosses request/observation"):

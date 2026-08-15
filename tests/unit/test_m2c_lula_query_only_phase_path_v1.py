@@ -339,6 +339,7 @@ def _plan(phases: tuple[ExactExecutionPhaseV2, ...]) -> M2CExactPlanPrimitivePla
             runtime_action=wire.runtime_action,
             target_track_id=wire.target_track_id,
             resolved_execution_parameters_sha256=wire.execution_parameters_sha256,
+            plan_synthesis_state_sha256="b" * 64,
             preplan_state_sha256=preplan_state_sha256,
             preplan_state_dimensions=8,
             preplan_state_units="rad_7_plus_per_finger_m",

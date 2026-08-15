@@ -61,6 +61,7 @@ class _Backend:
             "observation_id": observation.observation_id,
             "capture_receipt_sha256": observation.capture_receipt_sha256,
             "formal_observation_sha256": observation.wire_sha256,
+            "plan_synthesis_state_sha256": plan.inputs.plan_synthesis_state_sha256,
             "state_sha256": plan.inputs.preplan_state_sha256,
             "state_frame": plan.inputs.preplan_state_frame,
             "state_dimensions": plan.inputs.preplan_state_dimensions,
