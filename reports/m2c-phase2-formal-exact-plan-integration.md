@@ -1,7 +1,7 @@
 # M2C Phase-2 formal exact-plan integration audit
 
 - Status: **BLOCKED_UNMEASURED_FORMAL_EXACT_PLAN_INTEGRATION**
-- Checked HEAD: `c9a004b7bd147c6558e88d95d1251199c5bcb313`
+- Checked HEAD: `3b86d4c997a6e2a7229c6e8149200b166fa32d77`
 - Formal execution eligible: **false**
 - Physical execution / training by this audit: **false / false**
 
@@ -63,20 +63,20 @@ by that same formal V4 Phase-2 evidence index.
 - `REAL_ISAAC_RAW_PUBLIC_FRAME_SOURCE_NOT_BOUND`
 - `REAL_FORMAL_V4_ISAAC_HTTP_SERVICE_BACKEND_FACTORY_NOT_BOUND`
 - `PLAN_SPECIFIC_A3_PREFLIGHT_AND_EIGHT_SKILL_EXECUTION_UNMEASURED`
-- `TWO_ACTIVE_PRODUCTION_BINDINGS_UNSET`
 
 ## Safe implementation order
 
-1. `BIND_REAL_QUERY_ONLY_PLAN_SYNTHESIS_BACKEND`
-2. `BIND_REAL_ISAAC_RAW_PUBLIC_FRAME_SOURCE`
-3. `BIND_REAL_FORMAL_V4_ISAAC_HTTP_SERVICE_BACKEND_FACTORY`
-4. `REPLAY_PLAN_SPECIFIC_A3_PREFLIGHT_FOR_ALL_EIGHT_SKILLS`
-5. `COLLECT_REAL_PHASE2_V2_EVIDENCE_INDEX_AND_REVIEW_TWO_ACTIVE_BINDINGS`
+1. `TRAIN_NO_TEACHER_S4_QWEN_DECISION_LEVEL_BUNDLE`
+2. `BIND_REAL_QUERY_ONLY_PLAN_SYNTHESIS_BACKEND`
+3. `BIND_REAL_ISAAC_RAW_PUBLIC_FRAME_SOURCE`
+4. `BIND_REAL_FORMAL_V4_ISAAC_HTTP_SERVICE_BACKEND_FACTORY`
+5. `REPLAY_PLAN_SPECIFIC_A3_PREFLIGHT_FOR_ALL_EIGHT_SKILLS`
+6. `COLLECT_REAL_PHASE2_V2_EVIDENCE_INDEX`
 
-This is a structural, unmeasured blocker—not a model failure and not a
-permission failure. The two active production bindings remain unset; the two
-withdrawn compatibility sentinels remain `None`. Teacher and privileged
-simulator truth were not used.
+This is a structural, unmeasured formal-Q-B blocker—not a model failure. The
+two source bindings are applied for no-Teacher S4 training; the two withdrawn
+compatibility sentinels remain `None`. Teacher and privileged simulator truth
+were not used.
 
 Verification: `PYTHONPATH=src:scripts .venv/bin/pytest -q tests/unit/test_m2c_phase2_a3_native_load_smoke.py tests/unit/test_m2c_formal_isaac_persistent_scene_v4.py tests/unit/test_m2c_formal_isaac_episode_io_v4.py tests/unit/test_m2c_formal_isaac_backend_v4.py` ->
 **19 passed**, 0 failed.

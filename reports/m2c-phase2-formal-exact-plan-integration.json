@@ -3,10 +3,9 @@
     "REAL_BOUND_PLAN_SYNTHESIS_BACKEND_NOT_BOUND",
     "REAL_ISAAC_RAW_PUBLIC_FRAME_SOURCE_NOT_BOUND",
     "REAL_FORMAL_V4_ISAAC_HTTP_SERVICE_BACKEND_FACTORY_NOT_BOUND",
-    "PLAN_SPECIFIC_A3_PREFLIGHT_AND_EIGHT_SKILL_EXECUTION_UNMEASURED",
-    "TWO_ACTIVE_PRODUCTION_BINDINGS_UNSET"
+    "PLAN_SPECIFIC_A3_PREFLIGHT_AND_EIGHT_SKILL_EXECUTION_UNMEASURED"
   ],
-  "checked_head_commit": "c9a004b7bd147c6558e88d95d1251199c5bcb313",
+  "checked_head_commit": "3b86d4c997a6e2a7229c6e8149200b166fa32d77",
   "formal_backend": {
     "legacy_v2_construct_exact_plan_is_rejection_stub": true,
     "legacy_v2_execute_exact_plan_is_rejection_stub": true,
@@ -67,17 +66,25 @@
   },
   "next_command": ".venv/bin/pytest -q tests/unit/test_m2c_phase2_formal_exact_plan_integration.py",
   "next_implementation_order": [
+    "TRAIN_NO_TEACHER_S4_QWEN_DECISION_LEVEL_BUNDLE",
     "BIND_REAL_QUERY_ONLY_PLAN_SYNTHESIS_BACKEND",
     "BIND_REAL_ISAAC_RAW_PUBLIC_FRAME_SOURCE",
     "BIND_REAL_FORMAL_V4_ISAAC_HTTP_SERVICE_BACKEND_FACTORY",
     "REPLAY_PLAN_SPECIFIC_A3_PREFLIGHT_FOR_ALL_EIGHT_SKILLS",
-    "COLLECT_REAL_PHASE2_V2_EVIDENCE_INDEX_AND_REVIEW_TWO_ACTIVE_BINDINGS"
+    "COLLECT_REAL_PHASE2_V2_EVIDENCE_INDEX"
   ],
   "physical_execution_performed_by_this_audit": false,
   "privileged_truth_policy_input": false,
   "production_bindings": {
-    "FORMAL_DEPLOYMENT_CLOSURE_BINDING": null,
-    "FORMAL_PHYSICAL_RUNNER_BINDING": null,
+    "FORMAL_DEPLOYMENT_CLOSURE_BINDING": [
+      "3b86d4c997a6e2a7229c6e8149200b166fa32d77",
+      "sha256:783444c706538aa76cf5126e911ddc5e618779e6105305ad4af4260362a30aa9",
+      "684c81dcb00d0abf33095bc704e7550d9bb64400b367d2b5da9324aeb85c8993"
+    ],
+    "FORMAL_PHYSICAL_RUNNER_BINDING": [
+      "scripts/m2c/run_formal_model_owned_chain_v4.py",
+      "799caecdb12f73b5e6ea226eb2b983e4fbe4c08482f7ed037ae33c2168068eef"
+    ],
     "FROZEN_B0_RUNTIME_WRAPPER_BINDING": null,
     "OFFLINE_WIRE_AUTHENTICATION_VERIFIER_BINDING": null
   },
@@ -185,7 +192,7 @@
     },
     {
       "path": "src/xh_agent/policy/qrm_lite/s4_entry_gate.py",
-      "sha256": "c9819b4fe80e08612e6bd6c37eaf8be2eb0c8cc7db7e7e1b3d720c2f7328bc50"
+      "sha256": "6dccd0644d67a36cb0b4d94ccf21ea2f932e680489984d8d304a2ec439033f2d"
     },
     {
       "path": "configs/m2c_adr0024_phase2_binding_candidate.json",

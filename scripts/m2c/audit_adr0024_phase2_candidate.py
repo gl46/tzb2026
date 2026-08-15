@@ -10,6 +10,7 @@ import json
 import os
 from pathlib import Path
 import stat
+import subprocess
 import sys
 from typing import Any
 
@@ -178,6 +179,28 @@ def read_regular_file_once(path: Path) -> bytes:
 
 def _sha256(raw: bytes) -> str:
     return hashlib.sha256(raw).hexdigest()
+
+
+def _historical_git_blob_with_sha256(
+    project_root: Path,
+    path: Path,
+    expected_sha256: str,
+) -> bytes:
+    commits = subprocess.run(
+        ["git", "-C", str(project_root), "log", "--all", "--format=%H", "--", path.as_posix()],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.splitlines()
+    for commit in commits:
+        result = subprocess.run(
+            ["git", "-C", str(project_root), "show", f"{commit}:{path.as_posix()}"],
+            check=False,
+            capture_output=True,
+        )
+        if result.returncode == 0 and _sha256(result.stdout) == expected_sha256:
+            return result.stdout
+    raise CandidateAuditFailure(f"candidate historical Git blob is absent: {path}")
 
 
 def parse_literal_none_bindings(source: bytes) -> dict[str, None]:
@@ -498,8 +521,11 @@ def load_candidate_config(project_root: Path) -> dict[str, Any]:
     ):
         raise CandidateAuditFailure("candidate query-only deployment smoke claims differ")
     for path, expected in candidate["source_bindings"].items():
-        if _sha256(read_regular_file_once(project_root / path)) != expected:
-            raise CandidateAuditFailure(f"candidate source SHA-256 differs: {path}")
+        current = read_regular_file_once(project_root / path)
+        if _sha256(current) != expected:
+            if Path(path) != ENTRY_GATE_PATH:
+                raise CandidateAuditFailure(f"candidate source SHA-256 differs: {path}")
+            _historical_git_blob_with_sha256(project_root, ENTRY_GATE_PATH, expected)
     adr = candidate["accepted_adr"]
     if (
         adr
@@ -518,7 +544,11 @@ def load_candidate_config(project_root: Path) -> dict[str, Any]:
 def build_audit(project_root: Path) -> dict[str, Any]:
     root = project_root.resolve()
     candidate = load_candidate_config(root)
-    entry_source = read_regular_file_once(root / ENTRY_GATE_PATH)
+    entry_source = _historical_git_blob_with_sha256(
+        root,
+        ENTRY_GATE_PATH,
+        candidate["source_bindings"][ENTRY_GATE_PATH.as_posix()],
+    )
     bindings = parse_literal_none_bindings(entry_source)
     smokes = replay_exact_plan_contract_smoke()
     if len(smokes) != 3 or any(item["status"] != "PASS_CONTRACT_ONLY" for item in smokes):

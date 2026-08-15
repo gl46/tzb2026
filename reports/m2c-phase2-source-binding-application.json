@@ -1,0 +1,90 @@
+{
+  "active_bindings": {
+    "FORMAL_DEPLOYMENT_CLOSURE_BINDING": [
+      "3b86d4c997a6e2a7229c6e8149200b166fa32d77",
+      "sha256:783444c706538aa76cf5126e911ddc5e618779e6105305ad4af4260362a30aa9",
+      "684c81dcb00d0abf33095bc704e7550d9bb64400b367d2b5da9324aeb85c8993"
+    ],
+    "FORMAL_PHYSICAL_RUNNER_BINDING": [
+      "scripts/m2c/run_formal_model_owned_chain_v4.py",
+      "799caecdb12f73b5e6ea226eb2b983e4fbe4c08482f7ed037ae33c2168068eef"
+    ]
+  },
+  "binding_addendum": {
+    "path": "docs/decisions/ADR-0022-BINDING-ADDENDUM.md",
+    "sha256": "712fe64e60bf31b67d1eb5552bc2e9a9cfa96c43b07c4e7f2ebbc3a57207078b",
+    "status": "ACCEPTED_PHASE2_BINDING_ADDENDUM"
+  },
+  "binding_application_commit_policy": "DESCENDANT_BINDING_ONLY_COMMIT_NO_SELF_HASH",
+  "checked_at_asia_shanghai": "2026-08-15",
+  "contract_evidence": {
+    "a3_acm_query_only_smoke": {
+      "path": "reports/m2c-phase2-a3-acm-smoke.json",
+      "sha256": "80320998f4b652b48d73aa45b0ae65a5353a424699d6d2aad7d7ef618db137df"
+    },
+    "a3_native_load_smoke": {
+      "path": "reports/m2c-phase2-a3-native-load-smoke.json",
+      "sha256": "7ff1b0e2452f886d92648be117b1a6215a6392738364a90817d4c2f7eff95f8b"
+    },
+    "adr0024_candidate": {
+      "path": "configs/m2c_adr0024_phase2_binding_candidate.json",
+      "sha256": "fa63b048371a5fe465a60a4b37ecff30fd83f3e22dfd0963b0806666ad62ead6"
+    },
+    "adr0026_decision_loader_smoke": {
+      "path": "reports/m2c-s4-qwen-adr0026-decision-contract-smoke.json",
+      "sha256": "fc4f6ee6f94c547ec73cd9bdf82ade3bb447e42897edb42f85f2e0564d4ac422"
+    },
+    "formal_exact_plan_integration": {
+      "path": "reports/m2c-phase2-formal-exact-plan-integration.json",
+      "sha256": "85189c6bdd2513b655c6866bed3e14f8a6bff889e1119093bbe66900ce60198d"
+    }
+  },
+  "evidence_claims": {
+    "formal_q_b_evaluation_authorized_by_this_report": false,
+    "physical_execution_performed": false,
+    "privileged_truth_policy_input": false,
+    "q_b_evaluation_performed": false,
+    "s4_no_teacher_training_authorized": true,
+    "teacher_used": false,
+    "training_performed": false
+  },
+  "implementation_snapshot": {
+    "commit": "3b86d4c997a6e2a7229c6e8149200b166fa32d77",
+    "repository_tree_sha1": "14d7659ac76b9a0b1f4e0fec0bc9d6175894a8bf"
+  },
+  "remaining_formal_q_b_evidence": [
+    "TRAINED_QWEN_ADAPTER_AND_HEAD_BUNDLE",
+    "SELECTED_SCENE_SDF_AND_RUNTIME_ASSET_CLOSURE",
+    "REVIEWED_REAL_ISAAC_HTTP_BACKEND_FACTORY",
+    "MODEL_AND_ISAAC_HOST_AUDITS",
+    "SINGLE_USE_CHALLENGE_CONSUMPTION",
+    "PLAN_SPECIFIC_A3_AND_EXECUTION_RECEIPTS"
+  ],
+  "schema_version": "M2CPhase2SourceBindingApplicationV1",
+  "source_closure": {
+    "container_image_digest": "sha256:783444c706538aa76cf5126e911ddc5e618779e6105305ad4af4260362a30aa9",
+    "executable_file_count": 59,
+    "generated_inside_bound_container": true,
+    "git_mode_map_sha256": "494bd161d4c582b27b0d0ec3f1c032d76680e7be46e5b6603610ebc024197a4e",
+    "local_evidence_root": "/Users/gl/tzb-m2c-evidence/m2c-phase2-source-closure-3b86d4c",
+    "manifest_file_sha256": "684c81dcb00d0abf33095bc704e7550d9bb64400b367d2b5da9324aeb85c8993",
+    "receipt_file_sha256": "c2268a1723aa4230fed85870ab9c7ed3e836f48e5a355a9472ee809dbc64313f",
+    "receipt_sha256": "650c9869665c48c1cbc927c8ebf6054ea282f5e8d6d038e8592d14674b2ea1e0",
+    "remote_evidence_root": "/var/tmp/xh-data/isaac-industrial/m2c/phase2-source-closure-3b86d4c/evidence/source-closure",
+    "replayed_inside_bound_container": true,
+    "request_file_sha256": "e554c47cb7365d800d888ec4856e51ac0d4cc11731c00cd05e47d3900f7fd16f",
+    "request_sha256": "d198aeb2fb37079328d1be714d5d827b5c13b834e4c1aaa31865a0561c5f4213",
+    "tracked_file_count": 1258
+  },
+  "source_closure_git_tool": {
+    "host_binary_sha256": "2a8c18fbf43da9f692d75474c72bea9dfd796c260b0f3dfe456376abc3bbd668",
+    "host_git_core_mounted_read_only": true,
+    "semantic_runtime_input": false,
+    "version": "2.43.0"
+  },
+  "status": "PASS_SOURCE_BINDINGS_APPLIED",
+  "withdrawn_bindings": {
+    "FROZEN_B0_RUNTIME_WRAPPER_BINDING": null,
+    "OFFLINE_WIRE_AUTHENTICATION_VERIFIER_BINDING": null
+  }
+}

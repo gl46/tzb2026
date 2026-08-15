@@ -41,7 +41,7 @@ def test_request_binds_current_frozen_b0_bytes_and_absent_active_session_surface
     assert "run_unchanged_b0_active_session_v1" not in functions
 
 
-def test_request_does_not_unlock_any_source_binding() -> None:
+def test_later_source_unlock_keeps_request_withdrawn_bindings_none() -> None:
     source = ENTRY_GATE.read_text()
     tree = ast.parse(source, filename=str(ENTRY_GATE))
     expected = {
@@ -57,4 +57,14 @@ def test_request_does_not_unlock_any_source_binding() -> None:
         if node.target.id in expected:
             observed[node.target.id] = ast.literal_eval(node.value)
 
-    assert observed == {name: None for name in expected}
+    assert observed["FORMAL_PHYSICAL_RUNNER_BINDING"] == (
+        "scripts/m2c/run_formal_model_owned_chain_v4.py",
+        "799caecdb12f73b5e6ea226eb2b983e4fbe4c08482f7ed037ae33c2168068eef",
+    )
+    assert observed["FORMAL_DEPLOYMENT_CLOSURE_BINDING"] == (
+        "3b86d4c997a6e2a7229c6e8149200b166fa32d77",
+        "sha256:783444c706538aa76cf5126e911ddc5e618779e6105305ad4af4260362a30aa9",
+        "684c81dcb00d0abf33095bc704e7550d9bb64400b367d2b5da9324aeb85c8993",
+    )
+    assert observed["FROZEN_B0_RUNTIME_WRAPPER_BINDING"] is None
+    assert observed["OFFLINE_WIRE_AUTHENTICATION_VERIFIER_BINDING"] is None

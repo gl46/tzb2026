@@ -9,6 +9,7 @@ import pytest
 from m2c.audit_adr0022_phase2_unlock import (
     AuditFailure,
     BLOCKERS,
+    EXPECTED_APPLIED_BINDINGS,
     FROZEN_SOURCE_SHA256,
     UNLOCK_BINDING_NAMES,
     _verify_frozen_sources,
@@ -23,11 +24,11 @@ from m2c.audit_adr0022_phase2_unlock import (
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 
-def test_phase2_contract_smoke_passes_but_unlock_remains_blocked() -> None:
+def test_phase2_contract_smoke_passes_and_source_unlock_is_applied() -> None:
     report = build_audit(PROJECT_ROOT)
 
-    assert report["status"] == "BLOCKED"
-    assert report["unlock_authorized"] is False
+    assert report["status"] == "SOURCE_BINDINGS_APPLIED_Q_B_BLOCKED"
+    assert report["unlock_authorized"] is True
     assert report["contract_smoke_status"] == "PASS_CONTRACT_ONLY"
     assert report["contract_smoke_is_physical_evidence"] is False
     assert [item["name"] for item in report["contract_smokes"]] == [
@@ -42,11 +43,14 @@ def test_phase2_contract_smoke_passes_but_unlock_remains_blocked() -> None:
     assert report["contract_smokes"][-1]["false_physical_b0_attribution_rejected"]
     assert report["blockers"] == list(BLOCKERS)
     assert report["phase_2_files"] == {
-        "binding_addendum_present": False,
-        "unlock_config_present": False,
+        "binding_addendum_present": True,
+        "unlock_config_present": True,
         "generated_by_this_audit": False,
     }
-    assert report["entry_gate"]["bindings"] == {name: None for name in UNLOCK_BINDING_NAMES}
+    assert report["entry_gate"]["bindings"] == {
+        name: list(value) if isinstance(value, tuple) else value
+        for name, value in EXPECTED_APPLIED_BINDINGS.items()
+    }
     assert report["governance"] == {
         "training_executed": False,
         "isaac_executed": False,
@@ -56,7 +60,7 @@ def test_phase2_contract_smoke_passes_but_unlock_remains_blocked() -> None:
         "privileged_truth_policy_input": False,
         "b0_modified": False,
         "safety_gate_weakened": False,
-        "binding_changed": False,
+        "binding_changed": True,
         "addendum_or_unlock_config_generated": False,
         "contract_fixture_counted_as_model_owned_physical_evidence": False,
     }
@@ -91,16 +95,19 @@ def test_frozen_source_tamper_is_rejected(tmp_path: Path) -> None:
         _verify_frozen_sources(tmp_path)
 
 
-def test_json_and_markdown_reports_are_deterministic_and_explicitly_blocked() -> None:
+def test_json_and_markdown_reports_are_deterministic_and_keep_q_b_blocked() -> None:
     report = build_audit(PROJECT_ROOT)
     parsed = json.loads(render_json(report))
     markdown = render_markdown(report).decode()
 
     assert parsed == report
-    assert "Status: **BLOCKED**" in markdown
+    assert "Status: **SOURCE_BINDINGS_APPLIED_Q_B_BLOCKED**" in markdown
     assert "PASS_CONTRACT_ONLY" in markdown
     assert "Physical or formal evidence produced: **false**" in markdown
-    assert "`FORMAL_PHYSICAL_RUNNER_BINDING = None`" in markdown
+    assert (
+        "`FORMAL_PHYSICAL_RUNNER_BINDING = ['scripts/m2c/run_formal_model_owned_chain_v4.py'"
+        in markdown
+    )
     assert "`EIGHT_SKILL_PHYSICAL_PHASE_VALIDATION_MISSING`" in markdown
 
 

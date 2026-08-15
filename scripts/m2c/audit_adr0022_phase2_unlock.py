@@ -59,7 +59,7 @@ UNLOCK_CONFIG_PATH = Path("configs/m2c_s4_unlock_bindings.json")
 
 FROZEN_SOURCE_SHA256 = {
     ADR_PATH.as_posix(): "4538eb980b66dc0945d1f016325f6c3c5679c87b97b9986e25253e67a2cc3ef1",
-    BUNDLE_PATH.as_posix(): "e39649b2f86e3085180e33b5ace5d49f5ae36c13bc91880d426205215e017e10",
+    BUNDLE_PATH.as_posix(): "e655c6f284531f13e232342e85104574587cec3f2d821f8ba9971492ef8d27a5",
     WRAPPER_PATH.as_posix(): "5e2df2329725c79ec073c3ec34b87158787411d386b9ba13d0d4bc1d790642b8",
 }
 UNLOCK_BINDING_NAMES = (
@@ -74,8 +74,20 @@ BLOCKERS = (
     "NODE2_LABSERVER_HOST_HMAC_RECEIPTS_MISSING",
     "REAL_ENDPOINT_STARTUP_SESSION_EVIDENCE_MISSING",
     "EIGHT_SKILL_PHYSICAL_PHASE_VALIDATION_MISSING",
-    "TWO_ACTIVE_PRODUCTION_BINDINGS_UNSET",
 )
+EXPECTED_APPLIED_BINDINGS: dict[str, object] = {
+    "FORMAL_PHYSICAL_RUNNER_BINDING": (
+        "scripts/m2c/run_formal_model_owned_chain_v4.py",
+        "799caecdb12f73b5e6ea226eb2b983e4fbe4c08482f7ed037ae33c2168068eef",
+    ),
+    "FORMAL_DEPLOYMENT_CLOSURE_BINDING": (
+        "3b86d4c997a6e2a7229c6e8149200b166fa32d77",
+        "sha256:783444c706538aa76cf5126e911ddc5e618779e6105305ad4af4260362a30aa9",
+        "684c81dcb00d0abf33095bc704e7550d9bb64400b367d2b5da9324aeb85c8993",
+    ),
+    "FROZEN_B0_RUNTIME_WRAPPER_BINDING": None,
+    "OFFLINE_WIRE_AUTHENTICATION_VERIFIER_BINDING": None,
+}
 SOURCE_ROLES = (
     "PRIMITIVE_ENTRYPOINT",
     "PREFLIGHT_IMPLEMENTATION",
@@ -157,8 +169,12 @@ def _verify_frozen_sources(project_root: Path) -> list[dict[str, str]]:
     return records
 
 
-def parse_unlock_bindings(source: bytes) -> dict[str, None]:
-    """Require one literal top-level ``None`` assignment for each binding."""
+def parse_unlock_bindings(
+    source: bytes,
+    *,
+    expected: dict[str, object] | None = None,
+) -> dict[str, object]:
+    """Require one exact literal top-level assignment for each binding."""
 
     try:
         tree = ast.parse(source.decode("utf-8"))
@@ -173,12 +189,18 @@ def parse_unlock_bindings(source: bytes) -> dict[str, None]:
             for target in node.targets:
                 if isinstance(target, ast.Name) and target.id in assignments:
                     assignments[target.id].append(node.value)
+    parsed: dict[str, object] = {}
+    expected = expected or {name: None for name in UNLOCK_BINDING_NAMES}
     for name, values in assignments.items():
-        if len(values) != 1 or not (
-            isinstance(values[0], ast.Constant) and values[0].value is None
-        ):
-            raise AuditFailure(f"unlock binding is absent, duplicated, or not literal None: {name}")
-    return {name: None for name in UNLOCK_BINDING_NAMES}
+        if len(values) != 1:
+            raise AuditFailure(f"unlock binding is absent or duplicated: {name}")
+        try:
+            parsed[name] = ast.literal_eval(values[0])
+        except (ValueError, TypeError) as exc:
+            raise AuditFailure(f"unlock binding is not a literal: {name}") from exc
+        if parsed[name] != expected[name]:
+            raise AuditFailure(f"unlock binding differs from expected source state: {name}")
+    return parsed
 
 
 def _phase(index: int, name: str, x: float) -> ExactExecutionPhaseV2:
@@ -598,27 +620,32 @@ def build_audit(project_root: Path) -> dict[str, Any]:
     project_root = project_root.resolve()
     sources = _verify_frozen_sources(project_root)
     entry_source = read_regular_file_once(project_root / ENTRY_GATE_PATH)
-    bindings = parse_unlock_bindings(entry_source)
+    parsed_bindings = parse_unlock_bindings(entry_source, expected=EXPECTED_APPLIED_BINDINGS)
+    bindings = {
+        name: list(value) if isinstance(value, tuple) else value
+        for name, value in parsed_bindings.items()
+    }
     smokes = [*replay_exact_plan_contract_smoke(), replay_b0_contract_smoke(project_root)]
     if any(item["status"] != "PASS_CONTRACT_ONLY" for item in smokes):
         raise AuditFailure("not every Phase-2 contract smoke passed")
     return {
         "schema_version": SCHEMA_VERSION,
-        "status": "BLOCKED",
-        "unlock_authorized": False,
+        "status": "SOURCE_BINDINGS_APPLIED_Q_B_BLOCKED",
+        "unlock_authorized": True,
         "contract_smoke_status": "PASS_CONTRACT_ONLY",
         "contract_smoke_is_physical_evidence": False,
         "accepted_adr": {
             "path": ADR_PATH.as_posix(),
             "sha256": FROZEN_SOURCE_SHA256[ADR_PATH.as_posix()],
-            "status": "ACCEPTED_BUT_PHASE_2_BINDING_ADDENDUM_REQUIRED",
+            "status": "ACCEPTED_AND_PHASE_2_SOURCE_BINDINGS_APPLIED",
         },
         "frozen_sources": sources,
         "entry_gate": {
             "path": ENTRY_GATE_PATH.as_posix(),
             "sha256": _sha256(entry_source),
             "bindings": bindings,
-            "all_four_bindings_literal_none": True,
+            "two_active_bindings_applied": True,
+            "withdrawn_compatibility_bindings_literal_none": True,
         },
         "phase_2_files": {
             "binding_addendum_present": (project_root / ADDENDUM_PATH).exists(),
@@ -636,15 +663,15 @@ def build_audit(project_root: Path) -> dict[str, Any]:
             "privileged_truth_policy_input": False,
             "b0_modified": False,
             "safety_gate_weakened": False,
-            "binding_changed": False,
+            "binding_changed": True,
             "addendum_or_unlock_config_generated": False,
             "contract_fixture_counted_as_model_owned_physical_evidence": False,
         },
         "disposition": (
-            "Offline ADR-0022/ADR-0024 contract smoke passed, but Phase-2 remains "
-            "BLOCKED. No active source binding may be set until every listed real "
-            "deployment, session/HMAC, startup, and eight-skill physical-validation "
-            "artifact exists and is independently replayed."
+            "Offline ADR-0022/ADR-0024 contract smoke and the complete source closure "
+            "passed, so the two source bindings are applied for no-Teacher S4 training. "
+            "Formal Q-B remains blocked until every listed model, deployment, session/HMAC, "
+            "startup, and plan-specific physical artifact exists and is replayed."
         ),
     }
 
@@ -659,21 +686,21 @@ def render_markdown(report: dict[str, Any]) -> bytes:
         f"- `{item['name']}`: `{item['status']}` (contract-only; no physical evidence)"
         for item in report["contract_smokes"]
     )
-    binding_lines = "\n".join(f"- `{name} = None`" for name in bindings)
+    binding_lines = "\n".join(f"- `{name} = {value!r}`" for name, value in bindings.items())
     blocker_lines = "\n".join(f"- `{value}`" for value in report["blockers"])
     content = f"""# M2C S4 ADR-0022 Phase-2 unlock audit
 
-- Status: **BLOCKED**
-- Unlock authorized: **false**
+- Status: **SOURCE_BINDINGS_APPLIED_Q_B_BLOCKED**
+- Source unlock authorized: **true**
 - Offline contract smoke: **PASS_CONTRACT_ONLY**
 - Physical or formal evidence produced: **false**
 - Teacher used: **false**
 - Privileged truth policy input: **false**
 
-The offline Phase-2 contract behaves fail-closed, but it does not satisfy the
-deployment and physical prerequisites for an entry binding. No addendum or
-unlock config was generated by this audit, and no training, Isaac run, formal
-SMOKE, or Q-B evaluation was executed.
+The offline Phase-2 contract and complete Git-tree source closure passed. The
+two active source bindings are applied for the no-Teacher S4 trainer. This audit
+did not run training, Isaac, formal SMOKE, or Q-B, and it is not physical
+evidence.
 
 ## Contract smoke replay
 
@@ -684,7 +711,8 @@ SMOKE, or Q-B evaluation was executed.
 {binding_lines}
 
 Both active bindings and both withdrawn compatibility sentinels were parsed
-directly from `{report["entry_gate"]["path"]}` and remain literal `None`.
+directly from `{report["entry_gate"]["path"]}`. The withdrawn sentinels remain
+literal `None`.
 
 ## Blocking evidence still missing
 

@@ -1,0 +1,21 @@
+{
+  "FORMAL_DEPLOYMENT_CLOSURE_BINDING": [
+    "3b86d4c997a6e2a7229c6e8149200b166fa32d77",
+    "sha256:783444c706538aa76cf5126e911ddc5e618779e6105305ad4af4260362a30aa9",
+    "684c81dcb00d0abf33095bc704e7550d9bb64400b367d2b5da9324aeb85c8993"
+  ],
+  "FORMAL_PHYSICAL_RUNNER_BINDING": [
+    "scripts/m2c/run_formal_model_owned_chain_v4.py",
+    "799caecdb12f73b5e6ea226eb2b983e4fbe4c08482f7ed037ae33c2168068eef"
+  ],
+  "FROZEN_B0_RUNTIME_WRAPPER_BINDING": null,
+  "OFFLINE_WIRE_AUTHENTICATION_VERIFIER_BINDING": null,
+  "adr_path": "docs/decisions/ADR-0024-m2c-s4-unblock-directive.md",
+  "applied_to_source": true,
+  "binding_addendum_path": "docs/decisions/ADR-0022-BINDING-ADDENDUM.md",
+  "binding_addendum_sha256": "712fe64e60bf31b67d1eb5552bc2e9a9cfa96c43b07c4e7f2ebbc3a57207078b",
+  "privileged_truth_policy_input": false,
+  "schema_version": "M2CS4UnlockBindingV2",
+  "status": "APPLIED_TO_REVIEWED_SOURCE",
+  "teacher_used": false
+}

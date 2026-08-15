@@ -62,6 +62,19 @@ PRODUCTION_BINDINGS = (
     "FROZEN_B0_RUNTIME_WRAPPER_BINDING",
     "OFFLINE_WIRE_AUTHENTICATION_VERIFIER_BINDING",
 )
+EXPECTED_PRODUCTION_BINDINGS: dict[str, object] = {
+    "FORMAL_PHYSICAL_RUNNER_BINDING": (
+        "scripts/m2c/run_formal_model_owned_chain_v4.py",
+        "799caecdb12f73b5e6ea226eb2b983e4fbe4c08482f7ed037ae33c2168068eef",
+    ),
+    "FORMAL_DEPLOYMENT_CLOSURE_BINDING": (
+        "3b86d4c997a6e2a7229c6e8149200b166fa32d77",
+        "sha256:783444c706538aa76cf5126e911ddc5e618779e6105305ad4af4260362a30aa9",
+        "684c81dcb00d0abf33095bc704e7550d9bb64400b367d2b5da9324aeb85c8993",
+    ),
+    "FROZEN_B0_RUNTIME_WRAPPER_BINDING": None,
+    "OFFLINE_WIRE_AUTHENTICATION_VERIFIER_BINDING": None,
+}
 
 REQUIRED_A1_FIELDS = frozenset(
     {
@@ -151,17 +164,29 @@ def _method_raises_without_return(
     raise AuditError(f"method is absent: {class_name}.{method_name}")
 
 
-def _none_bindings(module: ast.Module) -> dict[str, None]:
-    result: dict[str, None] = {}
+def _phase2_bindings(module: ast.Module) -> dict[str, object]:
+    assignments: dict[str, list[ast.expr]] = {name: [] for name in PRODUCTION_BINDINGS}
     for node in module.body:
-        if not isinstance(node, ast.AnnAssign) or not isinstance(node.target, ast.Name):
-            continue
-        if node.target.id in PRODUCTION_BINDINGS and isinstance(node.value, ast.Constant):
-            if node.value.value is None:
-                result[node.target.id] = None
-    if set(result) != set(PRODUCTION_BINDINGS):
-        raise AuditError("one or more production bindings are not literal None")
-    return result
+        if (
+            isinstance(node, ast.AnnAssign)
+            and isinstance(node.target, ast.Name)
+            and node.target.id in assignments
+            and node.value is not None
+        ):
+            assignments[node.target.id].append(node.value)
+    result: dict[str, object] = {}
+    for name, values in assignments.items():
+        if len(values) != 1:
+            raise AuditError(f"production binding is absent or duplicated: {name}")
+        try:
+            result[name] = ast.literal_eval(values[0])
+        except (ValueError, TypeError) as exc:
+            raise AuditError(f"production binding is not a literal: {name}") from exc
+    if result != EXPECTED_PRODUCTION_BINDINGS:
+        raise AuditError("Phase-2 production bindings differ from the reviewed application")
+    return {
+        name: list(value) if isinstance(value, tuple) else value for name, value in result.items()
+    }
 
 
 def _production_plan_constructor_calls(paths: Iterable[Path]) -> list[str]:
@@ -341,7 +366,7 @@ def build_report() -> dict[str, Any]:
     )
     if not runtime_bridge_active:
         raise AuditError("formal V4 backend lost exact-plan/terminal integration")
-    bindings = _none_bindings(entry)
+    bindings = _phase2_bindings(entry)
     preflight_classes = {item.name for item in preflight.body if isinstance(item, ast.ClassDef)}
     preflight_functions = {
         item.name for item in preflight.body if isinstance(item, ast.FunctionDef)
@@ -426,7 +451,6 @@ def build_report() -> dict[str, Any]:
             "REAL_ISAAC_RAW_PUBLIC_FRAME_SOURCE_NOT_BOUND",
             "REAL_FORMAL_V4_ISAAC_HTTP_SERVICE_BACKEND_FACTORY_NOT_BOUND",
             "PLAN_SPECIFIC_A3_PREFLIGHT_AND_EIGHT_SKILL_EXECUTION_UNMEASURED",
-            "TWO_ACTIVE_PRODUCTION_BINDINGS_UNSET",
         ],
         "verification": {
             "command": (
@@ -440,11 +464,12 @@ def build_report() -> dict[str, Any]:
             "failed": 0,
         },
         "next_implementation_order": [
+            "TRAIN_NO_TEACHER_S4_QWEN_DECISION_LEVEL_BUNDLE",
             "BIND_REAL_QUERY_ONLY_PLAN_SYNTHESIS_BACKEND",
             "BIND_REAL_ISAAC_RAW_PUBLIC_FRAME_SOURCE",
             "BIND_REAL_FORMAL_V4_ISAAC_HTTP_SERVICE_BACKEND_FACTORY",
             "REPLAY_PLAN_SPECIFIC_A3_PREFLIGHT_FOR_ALL_EIGHT_SKILLS",
-            "COLLECT_REAL_PHASE2_V2_EVIDENCE_INDEX_AND_REVIEW_TWO_ACTIVE_BINDINGS",
+            "COLLECT_REAL_PHASE2_V2_EVIDENCE_INDEX",
         ],
         "next_command": (
             ".venv/bin/pytest -q tests/unit/test_m2c_phase2_formal_exact_plan_integration.py"
@@ -525,10 +550,10 @@ by that same formal V4 Phase-2 evidence index.
 
 {order}
 
-This is a structural, unmeasured blocker—not a model failure and not a
-permission failure. The two active production bindings remain unset; the two
-withdrawn compatibility sentinels remain `None`. Teacher and privileged
-simulator truth were not used.
+This is a structural, unmeasured formal-Q-B blocker—not a model failure. The
+two source bindings are applied for no-Teacher S4 training; the two withdrawn
+compatibility sentinels remain `None`. Teacher and privileged simulator truth
+were not used.
 
 Verification: `{report["verification"]["command"]}` ->
 **{report["verification"]["passed"]} passed**, 0 failed.

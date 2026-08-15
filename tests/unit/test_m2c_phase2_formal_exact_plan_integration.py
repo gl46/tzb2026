@@ -5,7 +5,10 @@ import json
 from pathlib import Path
 import subprocess
 
-from m2c.audit_phase2_formal_exact_plan_integration import build_report
+from m2c.audit_phase2_formal_exact_plan_integration import (
+    EXPECTED_PRODUCTION_BINDINGS,
+    build_report,
+)
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -123,4 +126,8 @@ def test_audit_separates_implemented_contracts_from_missing_formal_path() -> Non
         "FROZEN_B0_RUNTIME_WRAPPER_BINDING",
         "OFFLINE_WIRE_AUTHENTICATION_VERIFIER_BINDING",
     }
-    assert all(value is None for value in report["production_bindings"].values())
+    assert report["production_bindings"] == {
+        name: list(value) if isinstance(value, tuple) else value
+        for name, value in EXPECTED_PRODUCTION_BINDINGS.items()
+    }
+    assert "TWO_ACTIVE_PRODUCTION_BINDINGS_UNSET" not in report["blockers"]

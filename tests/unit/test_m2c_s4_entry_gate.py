@@ -484,7 +484,18 @@ def test_arbitrary_hash_files_cannot_pass_even_if_runner_binding_is_patched(
     )
 
 
-def test_missing_formal_runner_freeze_blocks_even_complete_bundle(tmp_path: Path) -> None:
+def test_missing_formal_runner_freeze_blocks_even_complete_bundle(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    monkeypatch.setattr(
+        "xh_agent.policy.qrm_lite.s4_entry_gate.FORMAL_PHYSICAL_RUNNER_BINDING",
+        None,
+    )
+    monkeypatch.setattr(
+        "xh_agent.policy.qrm_lite.s4_entry_gate.FORMAL_DEPLOYMENT_CLOSURE_BINDING",
+        None,
+    )
     local = tmp_path / "local.json"
     _local_receipt(local)
     physical = _physical_receipt(tmp_path)
