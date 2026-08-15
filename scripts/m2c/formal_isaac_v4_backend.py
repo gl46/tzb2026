@@ -547,6 +547,10 @@ class FormalIsaacV4BackendV2:
             "rgb_bytes": rgb_bytes,
             "depth_bytes": depth_bytes,
             "snapshots": snapshots,
+            # V4 association consumes the detector's current unassociated
+            # public components.  The legacy snapshots remain available only
+            # to this V2 backend's historical public-role logic.
+            "unassociated_public_results": tuple(public_results),
             "public_tracks": public_tracks,
             "canonical_slots": list(slots.track_ids),
             "rgb_uri": f"dataset://{base}.png",

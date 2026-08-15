@@ -6,7 +6,7 @@ from typing import Any
 
 import pytest
 
-from test_m2c_formal_isaac_endpoint_v4 import _binding, _observations
+from test_m2c_formal_isaac_endpoint_v4 import _binding, _execute_request, _observations
 from test_m2c_formal_isaac_episode_io_v4 import _execution_responses
 from test_m2c_formal_public_observation_v4 import _depth, _rgb
 from test_m2c_path_blocked_supervision_v4 import (
@@ -30,6 +30,7 @@ from xh_agent.policy.qrm_lite.formal_public_observation_v4 import (
 )
 from xh_agent.policy.qrm_lite.formal_split_runner_v2 import canonical_sha256
 from xh_agent.policy.qrm_lite.formal_split_runner_v4 import (
+    PublicExecutedIntentHistoryItemV2,
     IsaacFinalizeRequestV4,
     IsaacStartRequestV4,
 )
@@ -138,6 +139,8 @@ class _Source:
     def __init__(self, policy_captures: list[PublicAssociationCaptureV2]) -> None:
         self.policy_captures = policy_captures
         self.calls: list[dict[str, Any]] = []
+        self.pending_public_skill: LastPhysicallyExecutedPublicSkillV2 | None = None
+        self.execution_commit_pending = False
 
     def capture_raw_public_frame_v4(self, **kwargs: Any) -> FormalIsaacRawPublicFrameV4:
         self.calls.append(dict(kwargs))
@@ -174,23 +177,15 @@ class _Source:
                 **raw,
                 capture_receipt_sha256=canonical_sha256(raw),
             )
-            last_skill = LastPhysicallyExecutedPublicSkillV2(
-                skill_name="LIFT",
-                started_at_ns=8_001,
-                completed_at_ns=8_020,
-            )
+            if not self.execution_commit_pending:
+                raise AssertionError("final capture lacks a committed operation")
+            last_skill = self.pending_public_skill
         else:
             selected = self.policy_captures[index]
-            last_skill = (
-                None
-                if index == 0
-                else LastPhysicallyExecutedPublicSkillV2(
-                    skill_name="LIFT",
-                    started_at_ns=(index - 1) * 1_000 + 1_001,
-                    completed_at_ns=(index - 1) * 1_000 + 1_020,
-                )
-            )
-        return _frame(
+            if index > 0 and not self.execution_commit_pending:
+                raise AssertionError("policy capture lacks a committed operation")
+            last_skill = None if index == 0 else self.pending_public_skill
+        frame = _frame(
             run_id=str(kwargs["run_id"]),
             session_id=str(kwargs["session_id"]),
             capture_index=index,
@@ -199,6 +194,26 @@ class _Source:
             association_capture=selected,
             last_skill=last_skill,
         )
+        if index > 0:
+            self.execution_commit_pending = False
+            self.pending_public_skill = None
+        return frame
+
+    def commit_public_execution_v4(self, **kwargs: Any) -> None:
+        self.calls.append({"commit_public_execution_v4": dict(kwargs)})
+        if self.execution_commit_pending:
+            raise AssertionError("duplicate fake execution commit")
+        receipt = kwargs["receipt"]
+        self.pending_public_skill = (
+            LastPhysicallyExecutedPublicSkillV2(
+                skill_name=receipt.selected_skill,
+                started_at_ns=receipt.started_at_ns,
+                completed_at_ns=receipt.completed_at_ns,
+            )
+            if receipt.robot_actuation_executed
+            else None
+        )
+        self.execution_commit_pending = True
 
 
 def _start_request() -> IsaacStartRequestV4:
@@ -239,6 +254,7 @@ def test_scene_owner_builds_eight_capture_chain_and_public_final_evidence(
     assert start.public_failure_boundary_evidence_sha256 != "0" * 64
 
     packets = []
+    history: tuple[PublicExecutedIntentHistoryItemV2, ...] = ()
     for index, response in enumerate(responses):
         previous_completed = (
             50 if index == 0 else responses[index - 1].execution_receipts[0].completed_at_ns
@@ -254,6 +270,30 @@ def test_scene_owner_builds_eight_capture_chain_and_public_final_evidence(
         assert packets[-1].capture.previous_capture_receipt_sha256 == (
             None if index == 0 else packets[index - 1].capture.capture_receipt_sha256
         )
+        request = _execute_request(
+            observations[index],
+            index=index,
+            history=history,
+        ).model_copy(update={"session_id": start.session_id})
+        receipt_payload = response.execution_receipts[0].model_dump(mode="json")
+        receipt_payload["receipt_id"] = f"{start.session_id}-execution-{index}"
+        receipt_payload["receipt_sha256"] = canonical_sha256(
+            {key: value for key, value in receipt_payload.items() if key != "receipt_sha256"}
+        )
+        receipt = type(response.execution_receipts[0]).model_validate(receipt_payload)
+        owner.commit_public_execution_v4(request=request, receipt=receipt)
+        if index < 7:
+            history = (
+                *history,
+                PublicExecutedIntentHistoryItemV2(
+                    decision_index=index,
+                    selected_skill=str(response.mapping.canonical_skill),
+                    target_track_id=response.mapping.target_track_id,
+                    destination_cell=None,
+                    physical_receipt_sha256=receipt.receipt_sha256,
+                    execution_attribution="MODEL_SELECTED_REGISTERED_SKILL",
+                ),
+            )
 
     last = responses[-1]
     finalize = IsaacFinalizeRequestV4(
@@ -269,7 +309,10 @@ def test_scene_owner_builds_eight_capture_chain_and_public_final_evidence(
     assert final.final_task_success is False
     assert final.outcome_used_as_policy_input is False
     assert final.privileged_truth_policy_input is False
-    assert [item["capture_index"] for item in source.calls] == [-1, *range(9)]
+    assert [item["capture_index"] for item in source.calls if "capture_index" in item] == [
+        -1,
+        *range(9),
+    ]
 
 
 def test_scene_owner_rejects_more_than_frozen_detection_capacity() -> None:
@@ -306,6 +349,45 @@ def test_scene_owner_rejects_more_than_frozen_detection_capacity() -> None:
             session_id=start.session_id,
             decision_index=0,
             previous_execution_completed_at_ns=start.failure_observed_at_ns,
+        )
+
+
+def test_scene_owner_rejects_raw_skill_different_from_committed_receipt(
+    tmp_path: Path,
+) -> None:
+    endpoint = _binding(_observations()[0])
+    responses, observations = _execution_responses(tmp_path, endpoint)
+    captures = [item.observation.association_history[-1].capture for item in observations]
+    source = _Source(captures)
+    owner = _owner(source)
+    start = owner.establish_public_failure_boundary_v4(_start_request())
+    owner.capture_public_v4(
+        run_id=start.run_id,
+        session_id=start.session_id,
+        decision_index=0,
+        previous_execution_completed_at_ns=start.failure_observed_at_ns,
+    )
+    request = _execute_request(observations[0], index=0).model_copy(
+        update={"session_id": start.session_id}
+    )
+    receipt_payload = responses[0].execution_receipts[0].model_dump(mode="json")
+    receipt_payload["receipt_id"] = f"{start.session_id}-execution-0"
+    receipt_payload["receipt_sha256"] = canonical_sha256(
+        {key: value for key, value in receipt_payload.items() if key != "receipt_sha256"}
+    )
+    receipt = type(responses[0].execution_receipts[0]).model_validate(receipt_payload)
+    owner.commit_public_execution_v4(request=request, receipt=receipt)
+    source.pending_public_skill = LastPhysicallyExecutedPublicSkillV2(
+        skill_name="REGRASP" if receipt.selected_skill != "REGRASP" else "LIFT",
+        started_at_ns=receipt.started_at_ns,
+        completed_at_ns=receipt.completed_at_ns,
+    )
+    with pytest.raises(ValueError, match="differs from committed public operation"):
+        owner.capture_public_v4(
+            run_id=start.run_id,
+            session_id=start.session_id,
+            decision_index=1,
+            previous_execution_completed_at_ns=receipt.completed_at_ns,
         )
 
 

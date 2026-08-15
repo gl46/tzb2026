@@ -82,6 +82,15 @@ class _Lifecycle:
         self.implementation_sha256 = binding.physical_backend_sha256
         self.start_calls = 0
         self.finalize_calls = 0
+        self.execution_commits: list[tuple[IsaacExecuteRequestV4, Any]] = []
+
+    def commit_public_execution_v4(
+        self,
+        *,
+        request: IsaacExecuteRequestV4,
+        receipt: Any,
+    ) -> None:
+        self.execution_commits.append((request, receipt))
 
     def start_episode(
         self,
@@ -362,6 +371,7 @@ def test_backend_composes_exact_eight_cycle_and_public_finalize(tmp_path: Path) 
     )
     assert finalized.final_task_success is False
     assert lifecycle.start_calls == lifecycle.finalize_calls == 1
+    assert [item[0].decision_index for item in lifecycle.execution_commits] == list(range(8))
     assert len(provider.calls) == plan_provider.calls == bundle.execute_calls == 8
 
 

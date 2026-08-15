@@ -144,6 +144,13 @@ class FormalIsaacEpisodeLifecycleV4(Protocol):
         execution_responses: tuple[IsaacExecuteResponseV4, ...],
     ) -> FormalIsaacFinalEvaluationReceiptV4: ...
 
+    def commit_public_execution_v4(
+        self,
+        *,
+        request: IsaacExecuteRequestV4,
+        receipt: ModelDecisionExecutionReceiptV4,
+    ) -> None: ...
+
 
 _STALE_REJECTIONS = {
     MappingRejectionV2.INVALID_POINTER,
@@ -549,6 +556,13 @@ class FormalIsaacBackendCoordinatorV4:
             bundle_receipt=bundle_receipt,
         )
         passed = bundle_receipt.status == "PASS"
+        if passed:
+            # Commit the exact public operation identity to the same scene
+            # source before a subsequent public capture can be exposed.
+            self.lifecycle.commit_public_execution_v4(
+                request=request,
+                receipt=receipt,
+            )
         response = IsaacExecuteResponseV4(
             run_id=request.run_id,
             session_id=request.session_id,

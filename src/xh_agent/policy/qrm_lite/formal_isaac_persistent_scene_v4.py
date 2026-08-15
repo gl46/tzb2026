@@ -55,8 +55,10 @@ from xh_agent.policy.qrm_lite.formal_split_runner_v2 import (
 )
 from xh_agent.policy.qrm_lite.formal_split_runner_v4 import (
     IsaacExecuteResponseV4,
+    IsaacExecuteRequestV4,
     IsaacFinalizeRequestV4,
     IsaacStartRequestV4,
+    ModelDecisionExecutionReceiptV4,
 )
 from xh_agent.policy.qrm_lite.path_blocked_supervision_v4 import (
     PublicDeclaredTargetAttributeBindingV4,
@@ -132,6 +134,13 @@ class FormalIsaacRawPublicFrameSourceV4(Protocol):
         label: Literal["FAILURE_BOUNDARY", "POLICY_INPUT", "FINAL_EVALUATION"],
         previous_execution_completed_at_ns: int,
     ) -> FormalIsaacRawPublicFrameV4: ...
+
+    def commit_public_execution_v4(
+        self,
+        *,
+        request: IsaacExecuteRequestV4,
+        receipt: ModelDecisionExecutionReceiptV4,
+    ) -> None: ...
 
 
 def _world_position(
@@ -219,7 +228,53 @@ class FormalIsaacPersistentSceneOwnerCoreV4:
         self._session_id: str | None = None
         self._failure_observed_at_ns = 0
         self._captures: tuple[PublicAssociationCaptureV2, ...] = ()
+        self._execution_commit_pending = False
+        self._expected_public_skill: LastPhysicallyExecutedPublicSkillV2 | None = None
         self._terminal = False
+
+    def commit_public_execution_v4(
+        self,
+        *,
+        request: IsaacExecuteRequestV4,
+        receipt: ModelDecisionExecutionReceiptV4,
+    ) -> None:
+        """Commit one completed operation to the same raw scene source.
+
+        The callback carries no model logits, outcome predicate, simulator
+        identity, or planning input.  It only lets the subsequent public
+        capture bind the public skill name and execution time authorized by
+        ADR-0024's HAND_CARRY hypothesis.
+        """
+
+        if (
+            self._terminal
+            or (request.run_id, request.session_id) != (self._run_id, self._session_id)
+            or request.decision_index != len(self._captures) - 1
+            or self._execution_commit_pending
+            or receipt.receipt_id != f"{request.session_id}-execution-{request.decision_index}"
+            or receipt.completed_at_ns <= request.observation.captured_at_ns
+        ):
+            raise ValueError("formal V4 execution commit crosses scene-owner history")
+        self.source.commit_public_execution_v4(request=request, receipt=receipt)
+        self._expected_public_skill = (
+            LastPhysicallyExecutedPublicSkillV2(
+                skill_name=receipt.selected_skill,
+                started_at_ns=receipt.started_at_ns,
+                completed_at_ns=receipt.completed_at_ns,
+            )
+            if receipt.robot_actuation_executed
+            else None
+        )
+        self._execution_commit_pending = True
+
+    def _consume_execution_commit(self, frame: FormalIsaacRawPublicFrameV4) -> None:
+        if (
+            not self._execution_commit_pending
+            or frame.last_physically_executed_public_skill != self._expected_public_skill
+        ):
+            raise ValueError("formal V4 raw frame differs from committed public operation")
+        self._execution_commit_pending = False
+        self._expected_public_skill = None
 
     def _validate_raw(
         self,
@@ -409,8 +464,11 @@ class FormalIsaacPersistentSceneOwnerCoreV4:
             label="POLICY_INPUT",
             previous_execution_completed_at_ns=previous_execution_completed_at_ns,
         )
-        if (decision_index == 0) != (frame.last_physically_executed_public_skill is None):
-            raise ValueError("formal V4 raw frame last-skill chain differs")
+        if decision_index == 0:
+            if frame.last_physically_executed_public_skill is not None:
+                raise ValueError("formal V4 first policy frame unexpectedly has a prior skill")
+        else:
+            self._consume_execution_commit(frame)
         capture = self._capture_from_frame(frame, include_in_policy_history=True)
         return FormalPublicCapturePacketV4(
             run_id=run_id,
@@ -494,6 +552,7 @@ class FormalIsaacPersistentSceneOwnerCoreV4:
             label="FINAL_EVALUATION",
             previous_execution_completed_at_ns=last_receipt.completed_at_ns,
         )
+        self._consume_execution_commit(frame)
         final_capture = self._capture_from_frame(
             frame,
             include_in_policy_history=False,

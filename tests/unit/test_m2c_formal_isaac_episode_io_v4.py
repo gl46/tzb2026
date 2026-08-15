@@ -35,6 +35,7 @@ from xh_agent.policy.qrm_lite.formal_public_observation_provider_v4 import (
 from xh_agent.policy.qrm_lite.formal_split_runner_v2 import canonical_sha256
 from xh_agent.policy.qrm_lite.formal_split_runner_v4 import (
     IsaacEndpointBindingV4,
+    IsaacExecuteRequestV4,
     IsaacExecuteResponseV4,
     IsaacFinalizeRequestV4,
     IsaacStartRequestV4,
@@ -197,6 +198,7 @@ class _Owner:
         self.start_calls = 0
         self.capture_calls = 0
         self.final_calls = 0
+        self.execution_commits: list[tuple[IsaacExecuteRequestV4, Any]] = []
 
     def establish_public_failure_boundary_v4(
         self,
@@ -232,6 +234,14 @@ class _Owner:
     def capture_public_v4(self, **_kwargs: Any) -> FormalPublicCapturePacketV4:
         self.capture_calls += 1
         return self.packets.pop(0)
+
+    def commit_public_execution_v4(
+        self,
+        *,
+        request: IsaacExecuteRequestV4,
+        receipt: Any,
+    ) -> None:
+        self.execution_commits.append((request, receipt))
 
     def evaluate_public_outcome_v4(
         self,
@@ -328,6 +338,7 @@ def test_episode_io_binds_one_scene_owner_across_start_capture_and_finalize(
         declared_attribute_binding=declared_attribute,
     )
     provider.begin_session(run_id=start.run_id, session_id=start.session_id)
+    history: tuple[PublicExecutedIntentHistoryItemV2, ...] = ()
     for index, response in enumerate(responses):
         previous_completed = (
             50 if index == 0 else responses[index - 1].execution_receipts[0].completed_at_ns
@@ -342,6 +353,33 @@ def test_episode_io_binds_one_scene_owner_across_start_capture_and_finalize(
         assert observation.observation.capture_receipt_sha256 == (
             observations[index].observation.capture_receipt_sha256
         )
+        execution_request = _execute_request(
+            observation,
+            index=index,
+            history=history,
+        ).model_copy(update={"session_id": start.session_id})
+        receipt_payload = response.execution_receipts[0].model_dump(mode="json")
+        receipt_payload["receipt_id"] = f"{start.session_id}-execution-{index}"
+        receipt_payload["receipt_sha256"] = canonical_sha256(
+            {key: value for key, value in receipt_payload.items() if key != "receipt_sha256"}
+        )
+        execution_receipt = type(response.execution_receipts[0]).model_validate(receipt_payload)
+        episode_io.lifecycle.commit_public_execution_v4(
+            request=execution_request,
+            receipt=execution_receipt,
+        )
+        if index < 7:
+            history = (
+                *history,
+                PublicExecutedIntentHistoryItemV2(
+                    decision_index=index,
+                    selected_skill=str(response.mapping.canonical_skill),
+                    target_track_id=response.mapping.target_track_id,
+                    destination_cell=None,
+                    physical_receipt_sha256=response.execution_receipts[0].receipt_sha256,
+                    execution_attribution="MODEL_SELECTED_REGISTERED_SKILL",
+                ),
+            )
     last = responses[-1]
     finalize_request = IsaacFinalizeRequestV4(
         run_id=start.run_id,
@@ -356,6 +394,7 @@ def test_episode_io_binds_one_scene_owner_across_start_capture_and_finalize(
     assert final.final_task_success is False
     assert final.public_evaluation_evidence_sha256 == "d" * 64
     assert (owner.start_calls, owner.capture_calls, owner.final_calls) == (1, 8, 1)
+    assert len(owner.execution_commits) == 8
 
 
 def test_episode_io_rejects_source_drift_before_owner_contact(tmp_path: Path) -> None:

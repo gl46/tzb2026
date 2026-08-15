@@ -41,9 +41,11 @@ from xh_agent.policy.qrm_lite.formal_split_runner_v2 import (
 )
 from xh_agent.policy.qrm_lite.formal_split_runner_v4 import (
     IsaacEndpointBindingV4,
+    IsaacExecuteRequestV4,
     IsaacExecuteResponseV4,
     IsaacFinalizeRequestV4,
     IsaacStartRequestV4,
+    ModelDecisionExecutionReceiptV4,
 )
 from xh_agent.policy.qrm_lite.m2c_hard_freeze import (
     M2CExperimentAction,
@@ -287,6 +289,13 @@ class FormalIsaacPersistentSceneOwnerV4(Protocol):
         execution_responses: tuple[IsaacExecuteResponseV4, ...],
     ) -> FormalIsaacSceneFinalEvidenceV4: ...
 
+    def commit_public_execution_v4(
+        self,
+        *,
+        request: IsaacExecuteRequestV4,
+        receipt: ModelDecisionExecutionReceiptV4,
+    ) -> None: ...
+
 
 class _SharedEpisodeIOSessionV4:
     def __init__(
@@ -310,6 +319,8 @@ class _SharedEpisodeIOSessionV4:
         self._session_id: str | None = None
         self._next_capture_index = 0
         self._previous_completed_at_ns = 0
+        self._last_capture_at_ns = 0
+        self._committed_execution_count = 0
         self._poisoned = False
         self._terminal = False
 
@@ -425,7 +436,7 @@ class _SharedEpisodeIOSessionV4:
                 )
                 or (
                     decision_index > 0
-                    and previous_execution_completed_at_ns <= self._previous_completed_at_ns
+                    and previous_execution_completed_at_ns != self._previous_completed_at_ns
                 )
             ):
                 raise ValueError("formal V4 public capture order/time differs")
@@ -452,9 +463,34 @@ class _SharedEpisodeIOSessionV4:
             ):
                 raise ValueError("formal V4 public capture packet crosses deployment")
             self._next_capture_index += 1
+            self._last_capture_at_ns = packet.capture.timestamp_ns
             self._previous_completed_at_ns = previous_execution_completed_at_ns
             self._poisoned = False
             return packet
+
+    def commit_public_execution_v4(
+        self,
+        *,
+        request: IsaacExecuteRequestV4,
+        receipt: ModelDecisionExecutionReceiptV4,
+    ) -> None:
+        with self._lock:
+            self._guard()
+            if (
+                self._terminal
+                or (request.run_id, request.session_id) != (self._run_id, self._session_id)
+                or request.decision_index != self._committed_execution_count
+                or self._next_capture_index != request.decision_index + 1
+                or receipt.receipt_id != f"{request.session_id}-execution-{request.decision_index}"
+                or receipt.started_at_ns <= self._last_capture_at_ns
+                or receipt.completed_at_ns <= receipt.started_at_ns
+            ):
+                raise ValueError("formal V4 execution commit crosses episode history")
+            self._poisoned = True
+            self.owner.commit_public_execution_v4(request=request, receipt=receipt)
+            self._previous_completed_at_ns = receipt.completed_at_ns
+            self._committed_execution_count += 1
+            self._poisoned = False
 
     def finalize_episode(
         self,
@@ -553,6 +589,14 @@ class FormalIsaacEpisodeLifecycleAdapterV4:
             request,
             execution_responses=execution_responses,
         )
+
+    def commit_public_execution_v4(
+        self,
+        *,
+        request: IsaacExecuteRequestV4,
+        receipt: ModelDecisionExecutionReceiptV4,
+    ) -> None:
+        self._session.commit_public_execution_v4(request=request, receipt=receipt)
 
 
 class FormalIsaacPublicCaptureSourceAdapterV4:
