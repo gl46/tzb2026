@@ -35,6 +35,7 @@ from xh_agent.policy.qrm_lite.formal_bound_plan_provider_v1 import (
 )
 from xh_agent.policy.qrm_lite.formal_exact_plan_runtime_v1 import (
     FormalExactPlanRuntimeV1,
+    PerDecisionExactPlanBundleRuntimeV1,
 )
 from xh_agent.policy.qrm_lite.formal_isaac_backend_v4 import (
     FormalIsaacBackendCoordinatorV4,
@@ -342,7 +343,7 @@ class FormalIsaacV4RuntimeFactoryV1:
         declared_attribute_binding: PublicDeclaredTargetAttributeBindingV4,
         bound_plan_provider: FormalBoundExactPlanProviderV1,
         bound_plan_provider_deployment: FormalBoundPlanProviderDeploymentV1,
-        primitive_bundle: M2CExactPlanPrimitiveBundleV1,
+        primitive_bundle: M2CExactPlanPrimitiveBundleV1 | PerDecisionExactPlanBundleRuntimeV1,
         primitive_bundle_deployment: ExactPlanPrimitiveDeploymentBindingV1,
         runtime_registry_sha256: str,
         now_ns: Callable[[], int] = time.time_ns,
@@ -357,7 +358,10 @@ class FormalIsaacV4RuntimeFactoryV1:
             raise TypeError("formal V4 runtime factory requires replayable observations")
         if not isinstance(bound_plan_provider, FormalBoundExactPlanProviderV1):
             raise TypeError("formal V4 runtime factory requires the bound plan provider")
-        if not isinstance(primitive_bundle, M2CExactPlanPrimitiveBundleV1):
+        if not isinstance(
+            primitive_bundle,
+            (M2CExactPlanPrimitiveBundleV1, PerDecisionExactPlanBundleRuntimeV1),
+        ):
             raise TypeError("formal V4 runtime factory requires the exact primitive bundle")
         binding = FormalIsaacV4RuntimeFactoryBindingV1.model_validate(
             binding.model_dump(mode="json")

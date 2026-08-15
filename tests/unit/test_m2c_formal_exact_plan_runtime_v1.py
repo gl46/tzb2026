@@ -5,7 +5,11 @@ from typing import Any
 
 import pytest
 
-from test_m2c_exact_plan_primitive_bundle_v1 import _make_plan, _make_binding_files
+from test_m2c_exact_plan_primitive_bundle_v1 import (
+    _binding,
+    _make_binding_files,
+    _make_plan,
+)
 from test_m2c_formal_public_observation_v4 import _formal
 from xh_agent.policy.qrm_lite.exact_plan_primitive_bundle_v1 import (
     ExactPlanBundleExecutionReceiptV1,
@@ -17,6 +21,7 @@ from xh_agent.policy.qrm_lite.exact_plan_primitive_bundle_v1 import (
 )
 from xh_agent.policy.qrm_lite.formal_exact_plan_runtime_v1 import (
     FormalExactPlanRuntimeV1,
+    PerDecisionExactPlanBundleRuntimeV1,
     canonical_runtime_mapping_sha256_v1,
 )
 from xh_agent.policy.qrm_lite.formal_split_runner_v2 import (
@@ -347,3 +352,111 @@ def test_mapping_digest_excludes_gate_trace_but_binds_semantics() -> None:
     assert canonical_runtime_mapping_sha256_v1(original) != (
         canonical_runtime_mapping_sha256_v1(changed_target)
     )
+
+
+class _ProductionBundle(_Bundle):
+    formal_execution_eligible = True
+
+    def __init__(self, *, project_root: Path, binding: Any, execute_error: bool = False) -> None:
+        super().__init__(execute_error=execute_error)
+        self.project_root = project_root.resolve()
+        self.binding = binding
+
+
+class _BundleFactory:
+    formal_execution_eligible = True
+
+    def __init__(self, *, project_root: Path, binding: Any) -> None:
+        self.project_root = project_root
+        self.binding = binding
+        self.bundles: list[_ProductionBundle] = []
+
+    def build_bundle(self, _plan: M2CExactPlanPrimitivePlanV1) -> _ProductionBundle:
+        bundle = _ProductionBundle(project_root=self.project_root, binding=self.binding)
+        self.bundles.append(bundle)
+        return bundle
+
+
+def _production_binding(tmp_path: Path):  # noqa: ANN202
+    bindings = _make_binding_files(tmp_path)
+    plan = _make_plan(bindings)
+    raw = _binding(tmp_path, bindings, plan).model_dump(mode="json")
+    raw["execution_mode"] = "REAL_ISAAC"
+    return type(_binding(tmp_path, bindings, plan)).model_validate(raw)
+
+
+def test_per_decision_runtime_rotates_single_use_bundle_for_distinct_plans(
+    tmp_path: Path,
+) -> None:
+    binding = _production_binding(tmp_path)
+    factory = _BundleFactory(project_root=tmp_path, binding=binding)
+    rotating = PerDecisionExactPlanBundleRuntimeV1(
+        project_root=tmp_path,
+        binding=binding,
+        factory=factory,
+    )
+    first = _bound_plan(tmp_path)
+    second_raw = first.model_dump(mode="json")
+    second_raw["inputs"]["decision_index"] = 1
+    second_raw["exact_execution_plan"]["decision_index"] = 1
+    second_raw["exact_execution_plan_sha256"] = canonical_sha256(second_raw["exact_execution_plan"])
+    second_raw["bound_plan_sha256"] = canonical_sha256(
+        {key: value for key, value in second_raw.items() if key != "bound_plan_sha256"}
+    )
+    second = M2CExactPlanPrimitivePlanV1.model_validate(second_raw)
+
+    first_preflight = rotating.preflight(first)
+    first_receipt = rotating.execute(first, first_preflight)
+    second_preflight = rotating.preflight(second)
+    second_receipt = rotating.execute(second, second_preflight)
+
+    assert first_receipt.status == second_receipt.status == "PASS"
+    assert len(factory.bundles) == 2
+    assert factory.bundles[0] is not factory.bundles[1]
+    assert all(bundle.preflight_calls == bundle.execute_calls == 1 for bundle in factory.bundles)
+
+
+def test_per_decision_runtime_consumes_failed_factory_attempt(tmp_path: Path) -> None:
+    binding = _production_binding(tmp_path)
+
+    class _FailingFactory(_BundleFactory):
+        def build_bundle(self, _plan: M2CExactPlanPrimitivePlanV1) -> _ProductionBundle:
+            raise ExactPlanUnavailable("production graph unavailable")
+
+    rotating = PerDecisionExactPlanBundleRuntimeV1(
+        project_root=tmp_path,
+        binding=binding,
+        factory=_FailingFactory(project_root=tmp_path, binding=binding),
+    )
+    plan = _bound_plan(tmp_path)
+    with pytest.raises(ExactPlanUnavailable, match="production graph unavailable"):
+        rotating.preflight(plan)
+    with pytest.raises(ExactPlanUnavailable, match="already consumed"):
+        rotating.preflight(plan)
+
+
+def test_per_decision_runtime_consumes_before_executor_exception(tmp_path: Path) -> None:
+    binding = _production_binding(tmp_path)
+
+    class _FailingExecutionFactory(_BundleFactory):
+        def build_bundle(self, _plan: M2CExactPlanPrimitivePlanV1) -> _ProductionBundle:
+            bundle = _ProductionBundle(
+                project_root=self.project_root,
+                binding=self.binding,
+                execute_error=True,
+            )
+            self.bundles.append(bundle)
+            return bundle
+
+    factory = _FailingExecutionFactory(project_root=tmp_path, binding=binding)
+    rotating = PerDecisionExactPlanBundleRuntimeV1(
+        project_root=tmp_path,
+        binding=binding,
+        factory=factory,
+    )
+    plan = _bound_plan(tmp_path)
+    preflight = rotating.preflight(plan)
+    with pytest.raises(RuntimeError, match="response lost"):
+        rotating.execute(plan, preflight)
+    with pytest.raises(ExactPlanUnavailable, match="absent or differs"):
+        rotating.execute(plan, preflight)

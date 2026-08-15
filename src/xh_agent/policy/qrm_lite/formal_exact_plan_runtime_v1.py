@@ -9,11 +9,13 @@ preflight, and exposes one single-use execution attempt.
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any, Literal, Protocol
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from xh_agent.policy.qrm_lite.exact_plan_primitive_bundle_v1 import (
+    ExactPlanPrimitiveDeploymentBindingV1,
     ExactPlanBundleExecutionReceiptV1,
     ExactPlanPreflightReceiptV1,
     ExactPlanUnavailable,
@@ -106,6 +108,105 @@ class ExactPlanBundleRuntimeV1(Protocol):
         plan: M2CExactPlanPrimitivePlanV1,
         preflight: ExactPlanPreflightReceiptV1,
     ) -> ExactPlanBundleExecutionReceiptV1: ...
+
+
+class ExactPlanBundleFactoryV1(Protocol):
+    """Create one fresh, deployment-bound bundle for one immutable plan."""
+
+    formal_execution_eligible: bool
+
+    def build_bundle(
+        self,
+        plan: M2CExactPlanPrimitivePlanV1,
+    ) -> ExactPlanBundleRuntimeV1: ...
+
+
+class PerDecisionExactPlanBundleRuntimeV1:
+    """Rotate single-use A.3 callbacks/executor once per model decision.
+
+    The underlying A.3 preflight callback graph and the Isaac exact-plan
+    executor deliberately poison themselves after one bound plan.  A formal
+    episode contains up to eight distinct model decisions, so reusing one
+    bundle would either fail on decision two or require an unsafe reset.  This
+    coordinator instead asks a reviewed factory for a fresh bundle after the
+    plan has been frozen.  Creation/preflight attempts are consumed before the
+    callback and execution attempts are consumed before possible actuation.
+    """
+
+    def __init__(
+        self,
+        *,
+        project_root: Path,
+        binding: ExactPlanPrimitiveDeploymentBindingV1,
+        factory: ExactPlanBundleFactoryV1,
+    ) -> None:
+        self.project_root = project_root.resolve()
+        self.binding = ExactPlanPrimitiveDeploymentBindingV1.model_validate(
+            binding.model_dump(mode="json")
+        )
+        self.factory = factory
+        self._consumed_plan_sha256: set[str] = set()
+        self._active: tuple[str, str, ExactPlanBundleRuntimeV1] | None = None
+
+    @property
+    def formal_execution_eligible(self) -> bool:
+        return bool(
+            self.binding.execution_mode == "REAL_ISAAC" and self.factory.formal_execution_eligible
+        )
+
+    def preflight(
+        self,
+        plan: M2CExactPlanPrimitivePlanV1,
+    ) -> ExactPlanPreflightReceiptV1:
+        plan_sha256 = plan.bound_plan_sha256
+        if not self.formal_execution_eligible:
+            raise ExactPlanUnavailable("per-decision exact-plan factory is not production-bound")
+        if self._active is not None:
+            raise ExactPlanUnavailable("a per-decision exact-plan bundle is already active")
+        if plan_sha256 in self._consumed_plan_sha256:
+            raise ExactPlanUnavailable("per-decision exact-plan bundle was already consumed")
+
+        # A factory/preflight exception must not make the same dynamic plan
+        # retryable or eligible for cherry-picking under a new callback graph.
+        self._consumed_plan_sha256.add(plan_sha256)
+        bundle = self.factory.build_bundle(plan)
+        if (
+            getattr(bundle, "formal_execution_eligible", False) is not True
+            or getattr(bundle, "project_root", None) != self.project_root
+            or getattr(bundle, "binding", None) != self.binding
+        ):
+            raise ExactPlanUnavailable(
+                "per-decision exact-plan factory returned a crossed deployment"
+            )
+        receipt = bundle.preflight(plan)
+        if receipt.bound_plan_sha256 != plan_sha256:
+            raise ExactPlanUnavailable("per-decision preflight crossed its bound plan")
+        self._active = (plan_sha256, receipt.receipt_sha256, bundle)
+        return receipt
+
+    def execute(
+        self,
+        plan: M2CExactPlanPrimitivePlanV1,
+        preflight: ExactPlanPreflightReceiptV1,
+    ) -> ExactPlanBundleExecutionReceiptV1:
+        active = self._active
+        if (
+            active is None
+            or active[0] != plan.bound_plan_sha256
+            or active[1] != preflight.receipt_sha256
+        ):
+            raise ExactPlanUnavailable("per-decision exact-plan bundle is absent or differs")
+        bundle = active[2]
+        # Clear before the executor call; a lost receipt after physical motion
+        # must never expose the same bundle or plan for a retry.
+        self._active = None
+        receipt = bundle.execute(plan, preflight)
+        if (
+            receipt.bound_plan_sha256 != plan.bound_plan_sha256
+            or receipt.preflight_receipt_sha256 != preflight.receipt_sha256
+        ):
+            raise ExactPlanUnavailable("per-decision execution crossed plan/preflight")
+        return receipt
 
 
 class PreparedFormalExactPlanV1(_FrozenModel):
