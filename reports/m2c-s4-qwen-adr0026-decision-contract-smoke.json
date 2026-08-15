@@ -1,0 +1,90 @@
+{
+  "accepted_adr": {
+    "path": "docs/decisions/ADR-0026-m2c-terminal-step-diagnosis.md",
+    "sha256": "ba24b65435b19b3a7700bb7caba83a01d98897a8999aee54af5c2370d410c180"
+  },
+  "blockers": [
+    "ADR0026_DECISION_BUNDLE_RUNTIME_NOT_IN_FORMAL_DEPLOYMENT_CLOSURE",
+    "FORMAL_PHYSICAL_RUNNER_BINDING_UNSET",
+    "FORMAL_DEPLOYMENT_CLOSURE_BINDING_UNSET"
+  ],
+  "checked_head_commit": "d3464fe5722665942aaca2e7be5ffa6289034b0d",
+  "contract_smoke": {
+    "checkpoint_written": false,
+    "episodes_checked": 39,
+    "optimizer_steps": 0,
+    "pointer_rows_masked": 14,
+    "pointer_rows_supervised": 259,
+    "privileged_truth_policy_input": false,
+    "prompts_sha256": "63e19a83c9f1bb63a125f34838e8689e1d48319ed7a1387d05cf835264dafa9f",
+    "public_asset_files_verified": 546,
+    "rows_checked": 273,
+    "source_raw_files_verified": 39,
+    "teacher_used": false,
+    "training_executed": false
+  },
+  "dataset": {
+    "combined_v4_sha256": "78c28350fd59c74df018724c44aa6705785909fcc7607d0ad0e27d7148efd86d",
+    "dataset_manifest": {
+      "canonical_sha256": "9e2e93b2b9fb95dcf632a8a6350b6fc6f70c2eb5de1cd8ae2bea5041f4b1dcbb",
+      "path": "artifacts/m2c/s4-decision-level-supervision-adr0026-v1/dataset-manifest.json",
+      "sha256": "9d1b15412b193ef2662ce518fc2bf19016116c70ab026c581c68bb40cb10e03a"
+    },
+    "packaging_report": {
+      "path": "reports/m2c-s4-decision-level-supervision-adr0026.json",
+      "sha256": "a6e7ead4f8ea885c54d197fc9af35d824a030ddafd5406a45a32988670731ac3"
+    },
+    "s6_evaluation_manifest": {
+      "canonical_sha256": "0ce322d948dac851d7a26053af0207e563a69bb0127c462312cdad9badafe419",
+      "path": "configs/m2c_s6_evaluation_keys.json",
+      "sha256": "ce1440966d31dda6b3f0e06c41a19dc654ebc734a6597d6346ec9df3c5f0d2ba"
+    },
+    "v3_excluded_shard": {
+      "path": "artifacts/m2c/s4-decision-level-supervision-adr0026-v1/decision-level-v3.jsonl",
+      "sha256": "7ed0be257347a223980e90893f13ee20fc6e92f6494359eb3a83cc403cf79086"
+    },
+    "v4_shard": {
+      "path": "artifacts/m2c/s4-decision-level-supervision-adr0026-v1/decision-level-v4.jsonl",
+      "sha256": "78c28350fd59c74df018724c44aa6705785909fcc7607d0ad0e27d7148efd86d"
+    },
+    "v4_training_manifests": [
+      {
+        "canonical_sha256": "525cd393fd4264ef7d47691d142616d4fc59c068c25336f43fe3b54f8753a034",
+        "path": "configs/m2c_s4_v4_training_keys.json",
+        "sha256": "83a672f439521dc2c6263225851ec54cbd80de052af835a6590a7e02443b79c4"
+      },
+      {
+        "canonical_sha256": "efb69cfc509abca6ed98b7ab476b8d4f3f154aa1d2f2c417fa8f439a5422f34f",
+        "path": "configs/m2c_s4_v4_training_keys_extension1.json",
+        "sha256": "9fcc971f5bdf0787692b6d2de9be81885fe164e4b78b34fac214d6467c64e164"
+      }
+    ]
+  },
+  "implementation": [
+    {
+      "path": "scripts/m2c/qwen_coarse_v4.py",
+      "sha256": "b6337bfd51d526992c2381d209e76915e0062bb1b60b551edd0e58665324d543"
+    },
+    {
+      "path": "scripts/m2c/qwen_decision_level_v4.py",
+      "sha256": "d6c3120a4e5d502bc0c2283db292c42c92d00e7a1abd9d65e8898b9b527867ab"
+    },
+    {
+      "path": "scripts/m2c/train_qwen_decision_level_v4.py",
+      "sha256": "7bd1579af938a5ecd1ef8ccd7ae5383039a2a8406577112fec7260084047d437"
+    }
+  ],
+  "next_command": "PYTHONPATH=src:scripts uv run python scripts/m2c/check_adr0022_binding_addendum_readiness.py",
+  "phase2_binding_state": {
+    "FORMAL_DEPLOYMENT_CLOSURE_BINDING": null,
+    "FORMAL_PHYSICAL_RUNNER_BINDING": null,
+    "FROZEN_B0_RUNTIME_WRAPPER_BINDING": null,
+    "OFFLINE_WIRE_AUTHENTICATION_VERIFIER_BINDING": null
+  },
+  "schema_version": "M2CS4QwenADR0026DecisionContractSmokeReportV1",
+  "status": "PASS_DECISION_DATA_AND_TRAINING_CONTRACT_BLOCKED_BEFORE_REAL_TRAINING",
+  "timeline": {
+    "bundle_smoke_checkpoint_asia_shanghai": "2026-08-20",
+    "checked_at_asia_shanghai": "2026-08-15"
+  }
+}
