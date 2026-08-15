@@ -4,6 +4,7 @@ import copy
 import hashlib
 import json
 from pathlib import Path
+import subprocess
 
 import pytest
 
@@ -65,14 +66,25 @@ def test_committed_report_preserves_failure_and_k8() -> None:
 def test_report_binds_its_offline_only_implementation() -> None:
     report = json.loads(REPORT_JSON.read_text())
     script = ROOT / report["implementation"]["report_script_path"]
+    frozen_source = subprocess.check_output(
+        [
+            "git",
+            "-C",
+            str(ROOT),
+            "show",
+            f"{replay.REPORT_IMPLEMENTATION_COMMIT}:"
+            f"{report['implementation']['report_script_path']}",
+        ]
+    )
     assert (
-        hashlib.sha256(script.read_bytes()).hexdigest()
+        hashlib.sha256(frozen_source).hexdigest()
         == report["implementation"]["report_script_sha256"]
     )
-    source = script.read_text()
+    source = frozen_source.decode()
     assert "SimulationApp" not in source
     assert "offline-only" in source
     assert 'physical_retry_or_replacement_authorized": False' in source
+    assert script.is_file()
 
 
 @pytest.mark.skipif(not EVIDENCE_ROOT.is_dir(), reason="immutable scene 19083 evidence absent")

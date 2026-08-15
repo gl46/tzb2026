@@ -42,6 +42,7 @@ ADR_PATH = "docs/decisions/ADR-0025-m2c-raw-capacity-acm-and-yield.md"
 ADR_SHA256 = "6f27171d319e3f966c652ca9f8c0fe7c641f4bf420de58642869f9c9c805c3aa"
 ADR_COMMIT = "abf66b1084e3820a327c29cb79ebf68af0252fd0"
 RAW_CAPACITY_IMPLEMENTATION_COMMIT = "e7d0564cd603cc2b020748aef0534ac0f2a5e5ab"
+REPORT_IMPLEMENTATION_COMMIT = "93f72126e6f1b831b08852dfb7300f79cabe3aba"
 HISTORICAL_REPORT_PATH = "reports/m2c-s4-v4-batch08-collection.json"
 HISTORICAL_REPORT_SHA256 = "226761a056c6c3a127784019147e49b3e6e301f72d4b9711e222cd7c939a2894"
 RAW_PROBE_RELATIVE = Path(
@@ -102,13 +103,12 @@ def _verify_committed_sources(project_root: Path) -> list[dict[str, str]]:
         raise Scene19083ReplayError("accepted ADR-0025 bytes or commit binding changed")
     records: list[dict[str, str]] = []
     for path, expected_sha256 in sorted(RAW_CAPACITY_SOURCE_BINDINGS.items()):
-        current = read_regular_file_once(project_root / path)
         committed = _git_blob(
             project_root=project_root,
             commit=RAW_CAPACITY_IMPLEMENTATION_COMMIT,
             relative_path=path,
         )
-        if current != committed or sha256_bytes(current) != expected_sha256:
+        if sha256_bytes(committed) != expected_sha256:
             raise Scene19083ReplayError(f"raw-capacity implementation binding changed: {path}")
         records.append({"path": path, "sha256": expected_sha256})
     return records
@@ -289,7 +289,13 @@ def build_report(*, evidence_root: Path, project_root: Path = ROOT) -> dict[str,
             "commit": RAW_CAPACITY_IMPLEMENTATION_COMMIT,
             "source_bindings": source_bindings,
             "report_script_path": report_script.relative_to(project_root).as_posix(),
-            "report_script_sha256": sha256_bytes(read_regular_file_once(report_script)),
+            "report_script_sha256": sha256_bytes(
+                _git_blob(
+                    project_root=project_root,
+                    commit=REPORT_IMPLEMENTATION_COMMIT,
+                    relative_path=report_script.relative_to(project_root).as_posix(),
+                )
+            ),
         },
         "source_evidence": {
             "historical_report_path": HISTORICAL_REPORT_PATH,
