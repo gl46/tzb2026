@@ -1,0 +1,88 @@
+{
+  "campaign_can_satisfy_frozen_denominator": false,
+  "campaign_id": "m2c-s4-terminal-regrasp-diagnostic-v1",
+  "consumed_run_count": 1,
+  "decision": null,
+  "evidence_inventory": [
+    {
+      "path": "ledger/.diagnostic-ledger.lock",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "ledger/claim-00.json",
+      "sha256": "c34771300c75e4c29c8a5edd587666d57bb0896c3d79aaa2da07ebe0a50239b7",
+      "size": 2122
+    },
+    {
+      "path": "evidence/run-00-43daae8539741547/authorization/diagnostic-claim.json",
+      "sha256": "c34771300c75e4c29c8a5edd587666d57bb0896c3d79aaa2da07ebe0a50239b7",
+      "size": 2122
+    },
+    {
+      "path": "evidence/run-00-43daae8539741547/derived/terminal-regrasp-diagnostic-probe.py",
+      "sha256": "8a5b7189d8b67eec6cbc9d9c56a7edd24f6c4089b753cad8a15c39db29037603",
+      "size": 187500
+    },
+    {
+      "path": "evidence/run-00-43daae8539741547/job-receipt.json",
+      "sha256": "c765bdf529475c650de6ccfb05cf7461526664bd78762489a78e69db5705e5cd",
+      "size": 1942
+    },
+    {
+      "path": "evidence/run-00-43daae8539741547/stage/console.log",
+      "sha256": "ac97620b9ab790388e09f57162b6abdbedbd3af89218abf0534d792a4b1d1d74",
+      "size": 570
+    },
+    {
+      "path": "evidence/run-00-43daae8539741547/terminal-receipt.json",
+      "sha256": "5dd4e49f59a6a6ccea535f9782802ef5fddb6994952d975792eaf1873bab60fb",
+      "size": 610
+    }
+  ],
+  "evidence_inventory_sha256": "6166422cd3c7afcefb891c77951a5fa8433fa494406d0b78bdf328a2edda070a",
+  "failed_run": {
+    "blocker": "generated M1B scene must contain 6..12 objects, got 4",
+    "blocker_class": "PRE_ACTION_SCENE_SCHEMA_MISMATCH",
+    "claim_semantic_sha256": "fd516ae7641f9def229cc23e3455c4f10661b24bcb8ad097bc456297bf9bd90b",
+    "claim_sha256": "c34771300c75e4c29c8a5edd587666d57bb0896c3d79aaa2da07ebe0a50239b7",
+    "condition": "C1_NO_BLOCKER",
+    "job_receipt_sha256": "c765bdf529475c650de6ccfb05cf7461526664bd78762489a78e69db5705e5cd",
+    "ordinal": 0,
+    "physical_action_outcome": "NOT_AVAILABLE",
+    "probe_launched": false,
+    "raw_terminal_measurement_present": false,
+    "run_id": "m2c-s4-terminal-diagnostic-43daae8539741547a9aac8bb6dead4b26cf4036bd593e3f2d7efd25981c6fd17",
+    "stage_completed": false,
+    "stage_console_sha256": "ac97620b9ab790388e09f57162b6abdbedbd3af89218abf0534d792a4b1d1d74",
+    "terminal_receipt_semantic_sha256": "aa18c7823ca9acc00d0781bb1fa228fcee8399a02b9e74f4fb0bd091e1b36ad8",
+    "terminal_receipt_sha256": "5dd4e49f59a6a6ccea535f9782802ef5fddb6994952d975792eaf1873bab60fb"
+  },
+  "further_diagnostic_execution_authorized": false,
+  "governing_adr": {
+    "introduced_commit": "a87ba0bd6360579ccc1011ecc1f6cc5921c3fa13",
+    "path": "docs/decisions/ADR-0026-m2c-terminal-step-diagnosis.md",
+    "sha256": "ba24b65435b19b3a7700bb7caba83a01d98897a8999aee54af5c2370d410c180",
+    "status": "ACCEPTED_HUMAN_ADR"
+  },
+  "implementation": {
+    "path": "scripts/m2c/audit_terminal_regrasp_diagnostic_incomplete.py",
+    "sha256": "4e9c50683a88ea0d1821dd71409442ebb3be5378cc1fbf73122959ec780828cf"
+  },
+  "preregistration": {
+    "content_sha256": "100fc76d2a751865d8a63f504a0180b6875421fe80039f0b742a5a1b20d25a2d",
+    "file_sha256": "003e7ef6352de4d76fc31e709454cc8483b8f6bac5e654b24de6ae8bbec5f6d7",
+    "introduced_commit": "89b8d9b0f3525d82af65e7a77fa9ecd6da9234bf",
+    "path": "/Users/gl/tzb-qrm-lite/docs/decisions/M2C-S4-TERMINAL-REGRASP-DIAGNOSTIC-PREREG.json"
+  },
+  "privileged_truth_policy_input": false,
+  "r1_r2_r3_evaluation_allowed": false,
+  "report_content_sha256": "d755e32934d026c75c95b84e38ca2918be0d08fa221c8d220fcbac36903718b3",
+  "retry_or_replacement_authorized": false,
+  "schema_version": "M2CTerminalRegraspDiagnosticIncompleteAuditV1",
+  "status": "BLOCKED_INCOMPLETE_PRE_ACTION_SCHEMA_MISMATCH",
+  "teacher_used": false,
+  "training_collection_authorized": false,
+  "unrun_count": 35,
+  "valid_terminal_measurements": 0
+}

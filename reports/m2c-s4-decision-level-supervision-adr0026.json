@@ -1,0 +1,271 @@
+{
+  "accepted_adr": {
+    "path": "docs/decisions/ADR-0026-m2c-terminal-step-diagnosis.md",
+    "section": "4",
+    "sha256": "ba24b65435b19b3a7700bb7caba83a01d98897a8999aee54af5c2370d410c180"
+  },
+  "blockers": [
+    "CURRENT_QWEN_LOADERS_REQUIRE_EPISODE_ATOMIC_REVISION_SPECIFIC_INPUT",
+    "DIAGNOSTIC_ABLATION_INCOMPLETE_PRE_ACTION_SCHEMA_GATE_NO_RETRY_ALLOWED",
+    "FORMAL_Q_B_REMAINS_UNMEASURED"
+  ],
+  "checkpoint": {
+    "bundle_smoke_asia_shanghai": "2026-08-20",
+    "unchanged": true
+  },
+  "dataset_manifest": {
+    "manifest_sha256": "9e2e93b2b9fb95dcf632a8a6350b6fc6f70c2eb5de1cd8ae2bea5041f4b1dcbb",
+    "path": "artifacts/m2c/s4-decision-level-supervision-adr0026-v1/dataset-manifest.json",
+    "sha256": "9d1b15412b193ef2662ce518fc2bf19016116c70ab026c581c68bb40cb10e03a"
+  },
+  "eligibility_amendment": {
+    "episode_terminal_outcome_label_present_on_every_row": true,
+    "historical_episode_atomic_predicate_changed_in_place": false,
+    "new_versioned_decision_level_predicate": true,
+    "q_b_success_definition_changed": false,
+    "steps_0_through_6_require_every_gate_pass": true,
+    "terminal_step_requires_physical_success": true
+  },
+  "episode_inventory_sha256": "5e943957d163607e94a4d0da645fe568f259a1945d11e390b8ed0019add8edfe",
+  "episode_mix": {
+    "failed": 49,
+    "successful": 0,
+    "terminal_physically_failed": 48,
+    "terminal_physically_successful": 1
+  },
+  "evidence_claims": {
+    "collection_performed": false,
+    "existing_episode_outcomes_reinterpreted": false,
+    "formal_q_b_evaluation_performed": false,
+    "model_rollout_performed": false,
+    "physical_execution_performed": false,
+    "privileged_truth_policy_input": false,
+    "teacher_used": false,
+    "training_performed": false
+  },
+  "implementation": {
+    "path": "scripts/m2c/package_s4_decision_level_supervision_adr0026.py",
+    "sha256": "5dcf828ad4b488acd7f53c63bd7837db81ac6637140b5504b2ded8700ff628a0"
+  },
+  "one_next_command": "PYTHONPATH=src:scripts uv run python scripts/m2c/package_s4_decision_level_supervision_adr0026.py --evidence-base /Users/gl/tzb-m2c-evidence --expected-manifest artifacts/m2c/s4-decision-level-supervision-adr0026-v1/dataset-manifest.json",
+  "replay": {
+    "complete_chains_replayed": 49,
+    "decision_index_counts": {
+      "0": 49,
+      "1": 49,
+      "2": 49,
+      "3": 49,
+      "4": 49,
+      "5": 49,
+      "6": 49,
+      "7": 1
+    },
+    "decision_rows_packaged": 344,
+    "decision_rows_v3": 71,
+    "decision_rows_v4": 273,
+    "episode_terminal_outcomes": {
+      "LIFTED_BUT_PUBLIC_SUCCESS_PREDICATE_REJECTED": 1,
+      "TERMINAL_CONTACT_OR_CONTROLLER_GATE_REJECTED": 31,
+      "TERMINAL_PREGRASP_IK_GATE_REJECTED": 17
+    },
+    "head_supervision": {
+      "destination_rows": 344,
+      "pointer_masked_rows": 14,
+      "pointer_rows": 330,
+      "skill_rows": 344
+    },
+    "pointer_masked_decisions": [
+      {
+        "decision_index": 1,
+        "episode_id": "m2c-s4-v4-train-bcfcf461c4f4071abaf657c174371d8dbc106396fe6602a480189cb3305875cf-failure-191217",
+        "matched_key": "m2c-s4-v4-train-bcfcf461c4f4071abaf657c174371d8dbc106396fe6602a480189cb3305875cf",
+        "reason": "PUBLIC_TARGET_OUTSIDE_REPLAYED_K8_POINTER_HEAD_MASKED",
+        "scene_seed": 19121
+      },
+      {
+        "decision_index": 1,
+        "episode_id": "m2c-s4-v4-train-a5b3587fbd26ecf3e82b12ea31f75b820ffcd22a6402fb4488f89451390708aa-failure-191467",
+        "matched_key": "m2c-s4-v4-train-a5b3587fbd26ecf3e82b12ea31f75b820ffcd22a6402fb4488f89451390708aa",
+        "reason": "PUBLIC_TARGET_OUTSIDE_REPLAYED_K8_POINTER_HEAD_MASKED",
+        "scene_seed": 19146
+      },
+      {
+        "decision_index": 1,
+        "episode_id": "m2c-s4-v4-train-94ddb675ff2e5e7354554cbf45941ae35e161c525842538f8659c31bc7c96733-failure-191737",
+        "matched_key": "m2c-s4-v4-train-94ddb675ff2e5e7354554cbf45941ae35e161c525842538f8659c31bc7c96733",
+        "reason": "PUBLIC_TARGET_OUTSIDE_REPLAYED_K8_POINTER_HEAD_MASKED",
+        "scene_seed": 19173
+      },
+      {
+        "decision_index": 1,
+        "episode_id": "m2c-s4-v4-train-29be2b36f9cf5648edd36d72250effd09001b825e2bcb712a58ce63ca22c9237-failure-191917",
+        "matched_key": "m2c-s4-v4-train-29be2b36f9cf5648edd36d72250effd09001b825e2bcb712a58ce63ca22c9237",
+        "reason": "PUBLIC_TARGET_OUTSIDE_REPLAYED_K8_POINTER_HEAD_MASKED",
+        "scene_seed": 19191
+      },
+      {
+        "decision_index": 1,
+        "episode_id": "m2c-s4-v4-train-3ad162004af4415bae3ac4f4f937d4d6799abed4e4e5df6b06fa426a64eb7aee-failure-192317",
+        "matched_key": "m2c-s4-v4-train-3ad162004af4415bae3ac4f4f937d4d6799abed4e4e5df6b06fa426a64eb7aee",
+        "reason": "PUBLIC_TARGET_OUTSIDE_REPLAYED_K8_POINTER_HEAD_MASKED",
+        "scene_seed": 19231
+      },
+      {
+        "decision_index": 1,
+        "episode_id": "m2c-s4-v4-train-b9215a0c744235f6357a769655cb38d63192a4b9bd434f56d408bb733e72c182-failure-192657",
+        "matched_key": "m2c-s4-v4-train-b9215a0c744235f6357a769655cb38d63192a4b9bd434f56d408bb733e72c182",
+        "reason": "PUBLIC_TARGET_OUTSIDE_REPLAYED_K8_POINTER_HEAD_MASKED",
+        "scene_seed": 19265
+      },
+      {
+        "decision_index": 2,
+        "episode_id": "m2c-s4-v4-train-ac9592dd1891a0259a09097606871c8668224881b6db63316dfe8b087f83b406-failure-192917",
+        "matched_key": "m2c-s4-v4-train-ac9592dd1891a0259a09097606871c8668224881b6db63316dfe8b087f83b406",
+        "reason": "PUBLIC_TARGET_OUTSIDE_REPLAYED_K8_POINTER_HEAD_MASKED",
+        "scene_seed": 19291
+      },
+      {
+        "decision_index": 4,
+        "episode_id": "m2c-s4-v4-train-ac9592dd1891a0259a09097606871c8668224881b6db63316dfe8b087f83b406-failure-192917",
+        "matched_key": "m2c-s4-v4-train-ac9592dd1891a0259a09097606871c8668224881b6db63316dfe8b087f83b406",
+        "reason": "PUBLIC_TARGET_OUTSIDE_REPLAYED_K8_POINTER_HEAD_MASKED",
+        "scene_seed": 19291
+      },
+      {
+        "decision_index": 1,
+        "episode_id": "m2c-s4-v4-train-a6eb7a686719d35ba032874a82c81370572244245607c1d77ebc07dca3d4d8f6-failure-193057",
+        "matched_key": "m2c-s4-v4-train-a6eb7a686719d35ba032874a82c81370572244245607c1d77ebc07dca3d4d8f6",
+        "reason": "PUBLIC_TARGET_OUTSIDE_REPLAYED_K8_POINTER_HEAD_MASKED",
+        "scene_seed": 19305
+      },
+      {
+        "decision_index": 1,
+        "episode_id": "m2c-s4-v4-train-f9907adeb10cb0e056a6d0b17f72e09e76e59d0a178c8257c5ad208be088e4cc-failure-220027",
+        "matched_key": "m2c-s4-v4-train-f9907adeb10cb0e056a6d0b17f72e09e76e59d0a178c8257c5ad208be088e4cc",
+        "reason": "PUBLIC_TARGET_OUTSIDE_REPLAYED_K8_POINTER_HEAD_MASKED",
+        "scene_seed": 22002
+      },
+      {
+        "decision_index": 1,
+        "episode_id": "m2c-s4-v4-train-bf7938de3ff478e437c6a5ed919a622505c59c292e402d7f0397e2f60d13fb72-failure-220227",
+        "matched_key": "m2c-s4-v4-train-bf7938de3ff478e437c6a5ed919a622505c59c292e402d7f0397e2f60d13fb72",
+        "reason": "PUBLIC_TARGET_OUTSIDE_REPLAYED_K8_POINTER_HEAD_MASKED",
+        "scene_seed": 22022
+      },
+      {
+        "decision_index": 2,
+        "episode_id": "m2c-s4-v4-train-bf7938de3ff478e437c6a5ed919a622505c59c292e402d7f0397e2f60d13fb72-failure-220227",
+        "matched_key": "m2c-s4-v4-train-bf7938de3ff478e437c6a5ed919a622505c59c292e402d7f0397e2f60d13fb72",
+        "reason": "PUBLIC_TARGET_OUTSIDE_REPLAYED_K8_POINTER_HEAD_MASKED",
+        "scene_seed": 22022
+      },
+      {
+        "decision_index": 4,
+        "episode_id": "m2c-s4-v4-train-33325d094b264d6b0c526c4f6b540f9f5c60dc038f30c2db7542659d38b30305-failure-220447",
+        "matched_key": "m2c-s4-v4-train-33325d094b264d6b0c526c4f6b540f9f5c60dc038f30c2db7542659d38b30305",
+        "reason": "PUBLIC_TARGET_OUTSIDE_REPLAYED_K8_POINTER_HEAD_MASKED",
+        "scene_seed": 22044
+      },
+      {
+        "decision_index": 1,
+        "episode_id": "m2c-s4-v4-train-dc5715316cad6e42faf074a9b6715f76e2df7bd0d267c3cf88037fdc5f8c50a7-failure-190837",
+        "matched_key": "m2c-s4-v4-train-dc5715316cad6e42faf074a9b6715f76e2df7bd0d267c3cf88037fdc5f8c50a7",
+        "reason": "PUBLIC_TARGET_OUTSIDE_REPLAYED_K8_POINTER_HEAD_MASKED",
+        "scene_seed": 19083
+      }
+    ],
+    "prefix_episodes_admitted": 49,
+    "prefix_episodes_excluded": 0,
+    "row_terminal_outcomes": {
+      "LIFTED_BUT_PUBLIC_SUCCESS_PREDICATE_REJECTED": 8,
+      "TERMINAL_CONTACT_OR_CONTROLLER_GATE_REJECTED": 217,
+      "TERMINAL_PREGRASP_IK_GATE_REJECTED": 119
+    }
+  },
+  "revision_separation": {
+    "mixed_schema_rows_in_one_shard": false,
+    "silent_v3_to_v4_upgrade_performed": false,
+    "v3_rows": 71,
+    "v4_rows": 273
+  },
+  "schema_version": "M2CS4ADR0026DecisionLevelPackagingReportV1",
+  "source_reports": [
+    {
+      "path": "reports/m2c-s4-v3-path-blocked-train-collection-batch03.json",
+      "sha256": "0fe177565b6d842fa6e1fc80a8d1e0822283d3557aeb41d56c36140e4dbacb57"
+    },
+    {
+      "path": "reports/m2c-s4-v3-path-blocked-train-collection.json",
+      "sha256": "c505ec6517d7a766768f72cd14fc49d1919cff234dc2d8fbee1877104b41480d"
+    },
+    {
+      "path": "reports/m2c-s4-v4-batch09-collection.json",
+      "sha256": "97a8c00e99d28e6eff306fcdf349e97dff4366508bca79487dce55f37137ac2c"
+    },
+    {
+      "path": "reports/m2c-s4-v4-batch10-collection.json",
+      "sha256": "ee6414efcf02a71959e501bdd91edf3d86f9003c978a495790d8cfb6fc99b83a"
+    },
+    {
+      "path": "reports/m2c-s4-v4-batch11-collection.json",
+      "sha256": "c010e89cd457be341a1d8d62d2ef95d98c5a5b81eca8117b0d9d2e130f9a6d19"
+    },
+    {
+      "path": "reports/m2c-s4-v4-batch12-collection.json",
+      "sha256": "405848262c0f3b99d5421d4e37c0c68c58de0a0b2feda3232921c9820cdb2c70"
+    },
+    {
+      "path": "reports/m2c-s4-v4-batch13-collection.json",
+      "sha256": "117c5f7d3b41e80ad1d41a8c494260b43d325e99166e27793cd660d180971e7b"
+    },
+    {
+      "path": "reports/m2c-s4-v4-batch14-collection.json",
+      "sha256": "e796c08e6d8c0994c7378f978e315850dbb5c0b4aab2d029ce4bf196176a0773"
+    },
+    {
+      "path": "reports/m2c-s4-v4-batch15-collection.json",
+      "sha256": "d93cfc5fcc1ac9b29f59a07673c283afea18d4b806ab1b8e5d8bd5b576ad3420"
+    },
+    {
+      "path": "reports/m2c-s4-v4-batch16-collection.json",
+      "sha256": "d1fcaeadfcae9451394cad54b25b783e62942d50b5852a18e2317ccc015e9ee1"
+    },
+    {
+      "path": "reports/m2c-s4-v4-batch17-collection.json",
+      "sha256": "a279ddd178a82e99b24ada70d48389f5e83344bc21cd4e9a77d1b63dc333b217"
+    },
+    {
+      "path": "reports/m2c-s4-v4-batch18-collection.json",
+      "sha256": "a27116aa00f379f1ea461342b34ec8f7f621a8e916ca1f9eae0c63f86aa6d59b"
+    },
+    {
+      "path": "reports/m2c-s4-v4-batch19-collection.json",
+      "sha256": "dd103b06ac945cceb5816393bfff7b82a2f5ab77b8c8b077dff1b48a4d61d030"
+    },
+    {
+      "path": "reports/m2c-s4-v4-batch20-collection.json",
+      "sha256": "ec2dc5c0f38befc88ff7a2cde08b699f349081df234092123c6bc85b382066d3"
+    },
+    {
+      "path": "reports/m2c-s4-v4-batch21-collection.json",
+      "sha256": "53f9842a8679a44c876531764ea48456a5675475c9305383a2a17cfd3586e6c7"
+    },
+    {
+      "path": "reports/m2c-s4-v4-batch22-collection.json",
+      "sha256": "c8ca9c690468d41ba33d9eebe4d43de4a6336d5397be7ad51e3a07701a9626a6"
+    },
+    {
+      "path": "reports/m2c-s4-v4-batch23-collection.json",
+      "sha256": "970177ff0932a24e7b2a92f45793bad55c46aa4d9ff95c62b8de263bb52a4cdc"
+    },
+    {
+      "path": "reports/m2c-s4-v4-scene19083-offline-raw-capacity-replay.json",
+      "sha256": "d467216f96d0e0cbb3ba307faa8dcc3d76fe602be70903f59e7e7321ebf09736"
+    }
+  ],
+  "source_yield_audit": {
+    "path": "reports/m2c-s4-training-eligibility-yield-adr0025.json",
+    "sha256": "d5d4a524f391b1bdd24706fb02f92f867862d229b764400453124725e55cc78f"
+  },
+  "status": "PASS_PACKAGED_DECISION_LEVEL_SUPERVISION"
+}
