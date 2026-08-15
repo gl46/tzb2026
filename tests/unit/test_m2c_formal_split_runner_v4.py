@@ -85,6 +85,34 @@ def _bundle() -> QwenBundleRuntimeBindingV4:
     )
 
 
+def test_v4_runtime_binding_discriminates_adr0026_dataset_sources() -> None:
+    payload = _bundle().model_dump(mode="json")
+    payload.update(
+        {
+            "bundle_manifest_schema_version": ("M2CQwenADR0026DecisionBundleManifestV1"),
+            "training_contract_revision": "ADR0026_DECISION_LEVEL_PREFIX_0_6_V1",
+            "training_dataset_report_file_sha256": "e" * 64,
+            "training_dataset_report_sha256": "f" * 64,
+            "source_training_manifests": [
+                {"file_sha256": "1" * 64, "canonical_sha256": "2" * 64},
+                {"file_sha256": "3" * 64, "canonical_sha256": "4" * 64},
+            ],
+        }
+    )
+    decision = QwenBundleRuntimeBindingV4.model_validate(payload)
+    assert decision.training_contract_revision == ("ADR0026_DECISION_LEVEL_PREFIX_0_6_V1")
+    assert len(decision.source_training_manifests) == 2
+
+    payload["training_contract_revision"] = "EPISODE_ATOMIC_V4_V1"
+    with pytest.raises(ValueError, match="schema and training contract differ"):
+        QwenBundleRuntimeBindingV4.model_validate(payload)
+
+    payload = _bundle().model_dump(mode="json")
+    payload["training_dataset_report_sha256"] = "f" * 64
+    with pytest.raises(ValueError, match="ADR-0026-only sources"):
+        QwenBundleRuntimeBindingV4.model_validate(payload)
+
+
 def _request(
     observation: FormalPublicObservationV4 | None = None,
 ) -> FormalInferenceRequestV4:

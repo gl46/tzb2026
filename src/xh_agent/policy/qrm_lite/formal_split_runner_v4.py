@@ -72,6 +72,12 @@ FORMAL_ISAAC_FINALIZE_PATH_V4 = "/v1/m2c/isaac-v4/finalize"
 QWEN_ARCHITECTURE_REVISION_V4 = "M2C_Q012_V4"
 PUBLIC_OBSERVATION_REVISION_V4 = "FormalPublicObservationV4"
 PUBLIC_TRACK_ASSOCIATOR_REVISION_V4 = "PublicTrackAssociatorV2"
+EPISODE_ATOMIC_BUNDLE_CONTRACT_V4 = "EPISODE_ATOMIC_V4_V1"
+ADR0026_DECISION_BUNDLE_CONTRACT_V4 = "ADR0026_DECISION_LEVEL_PREFIX_0_6_V1"
+BUNDLE_CONTRACT_CHOICES_V4 = (
+    EPISODE_ATOMIC_BUNDLE_CONTRACT_V4,
+    ADR0026_DECISION_BUNDLE_CONTRACT_V4,
+)
 
 _T = TypeVar("_T", bound=BaseModel)
 IsaacWireMessageTypeV4 = Literal[
@@ -90,6 +96,13 @@ class StrictModel(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
 
+class QwenSourceTrainingManifestBindingV4(StrictModel):
+    """One exact TRAIN manifest consumed by a versioned Qwen V4 bundle."""
+
+    file_sha256: str = Field(pattern=SHA256_PATTERN)
+    canonical_sha256: str = Field(pattern=SHA256_PATTERN)
+
+
 class QwenBundleRuntimeBindingV4(StrictModel):
     """Exact V4 trained bundle and offline model snapshot used by node2."""
 
@@ -102,6 +115,14 @@ class QwenBundleRuntimeBindingV4(StrictModel):
     pointer_class_count: Literal[9] = 9
     model_id: Literal[QWEN_MODEL_ID] = QWEN_MODEL_ID
     model_revision: Literal[QWEN_MODEL_REVISION] = QWEN_MODEL_REVISION
+    bundle_manifest_schema_version: Literal[
+        "M2CQwenCoarseV4BundleManifestV1",
+        "M2CQwenADR0026DecisionBundleManifestV1",
+    ] = "M2CQwenCoarseV4BundleManifestV1"
+    training_contract_revision: Literal[
+        "EPISODE_ATOMIC_V4_V1",
+        "ADR0026_DECISION_LEVEL_PREFIX_0_6_V1",
+    ] = "EPISODE_ATOMIC_V4_V1"
     bundle_manifest_file_sha256: str = Field(pattern=SHA256_PATTERN)
     bundle_tree_sha256: str = Field(pattern=SHA256_PATTERN)
     bundle_sha256: str = Field(pattern=SHA256_PATTERN)
@@ -113,6 +134,15 @@ class QwenBundleRuntimeBindingV4(StrictModel):
     training_dataset_sha256: str = Field(pattern=SHA256_PATTERN)
     training_manifest_file_sha256: str = Field(pattern=SHA256_PATTERN)
     training_manifest_sha256: str = Field(pattern=SHA256_PATTERN)
+    training_dataset_report_file_sha256: str | None = Field(
+        default=None,
+        pattern=SHA256_PATTERN,
+    )
+    training_dataset_report_sha256: str | None = Field(
+        default=None,
+        pattern=SHA256_PATTERN,
+    )
+    source_training_manifests: tuple[QwenSourceTrainingManifestBindingV4, ...] = ()
     s6_manifest_file_sha256: str = Field(pattern=SHA256_PATTERN)
     s6_manifest_sha256: str = Field(pattern=SHA256_PATTERN)
     association_deployment_sha256: str = Field(pattern=SHA256_PATTERN)
@@ -137,6 +167,32 @@ class QwenBundleRuntimeBindingV4(StrictModel):
         )
         if not path.is_absolute() or tuple(path.parts[-3:]) != expected_suffix.parts:
             raise ValueError("formal V4 Qwen cache is not the frozen revision snapshot")
+        decision_contract = (
+            self.bundle_manifest_schema_version == "M2CQwenADR0026DecisionBundleManifestV1"
+        )
+        if decision_contract != (
+            self.training_contract_revision == "ADR0026_DECISION_LEVEL_PREFIX_0_6_V1"
+        ):
+            raise ValueError("formal V4 bundle schema and training contract differ")
+        if decision_contract:
+            if (
+                self.training_dataset_report_file_sha256 is None
+                or self.training_dataset_report_sha256 is None
+                or len(self.source_training_manifests) != 2
+                or list(self.source_training_manifests)
+                != sorted(
+                    self.source_training_manifests,
+                    key=lambda item: (item.file_sha256, item.canonical_sha256),
+                )
+                or len(set(self.source_training_manifests)) != 2
+            ):
+                raise ValueError("ADR-0026 runtime binding lacks exact dataset sources")
+        elif (
+            self.training_dataset_report_file_sha256 is not None
+            or self.training_dataset_report_sha256 is not None
+            or self.source_training_manifests
+        ):
+            raise ValueError("episode-atomic V4 binding contains ADR-0026-only sources")
         return self
 
 

@@ -32,6 +32,11 @@ from m2c.qwen_coarse_v4 import (
     load_bundle_v4,
     sha256_tree_v4,
 )
+from m2c.qwen_decision_level_v4 import (
+    DECISION_BUNDLE_MANIFEST_NAME,
+    LoadedADR0026DecisionBundleV4,
+    load_adr0026_decision_bundle_v4,
+)
 from m2c.serve_qwen_coarse_v2 import _resolve_materialized_model_snapshot
 from xh_agent.policy.qrm_lite.backbone import Qwen35Backbone
 from xh_agent.policy.qrm_lite.formal_split_runner_v2 import (
@@ -47,6 +52,9 @@ from xh_agent.policy.qrm_lite.executed_intent_history_v2 import (
     PublicExecutedIntentHistoryItemV2,
 )
 from xh_agent.policy.qrm_lite.formal_split_runner_v4 import (
+    ADR0026_DECISION_BUNDLE_CONTRACT_V4,
+    BUNDLE_CONTRACT_CHOICES_V4,
+    EPISODE_ATOMIC_BUNDLE_CONTRACT_V4,
     FORMAL_INFERENCE_PATH_V4,
     FORMAL_WIRE_PROTOCOL_V4,
     FormalInferenceRequestV4,
@@ -65,6 +73,7 @@ from xh_agent.policy.qrm_lite.m2c_hard_freeze import (
 
 
 SHA256_PATTERN = r"^[0-9a-f]{64}$"
+FormalLoadedQwenBundleV4 = LoadedM2CQwenCoarseV4Bundle | LoadedADR0026DecisionBundleV4
 
 
 def _sha256_argument(raw: str) -> str:
@@ -76,7 +85,7 @@ def _sha256_argument(raw: str) -> str:
 @dataclass
 class RuntimeV4:
     binding: QwenBundleRuntimeBindingV4
-    bundle: LoadedM2CQwenCoarseV4Bundle
+    bundle: FormalLoadedQwenBundleV4
     backbone: Qwen35Backbone
     head_hashes: dict[str, str]
     secret: bytes
@@ -441,6 +450,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="M2C Qwen V4 formal inference endpoint")
     parser.add_argument("--bundle-root", type=Path, required=True)
     parser.add_argument("--expected-bundle-sha256", type=_sha256_argument, required=True)
+    parser.add_argument(
+        "--bundle-contract",
+        choices=BUNDLE_CONTRACT_CHOICES_V4,
+        default=EPISODE_ATOMIC_BUNDLE_CONTRACT_V4,
+    )
     parser.add_argument("--model-id", default=QWEN_MODEL_ID, choices=(QWEN_MODEL_ID,))
     parser.add_argument("--revision", default=QWEN_MODEL_REVISION, choices=(QWEN_MODEL_REVISION,))
     parser.add_argument("--cache-dir", type=Path, required=True)
@@ -472,12 +486,20 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 def _binding_from_verified_bundle_v4(
     args: argparse.Namespace,
     *,
-    loaded: LoadedM2CQwenCoarseV4Bundle,
+    loaded: FormalLoadedQwenBundleV4,
     model_snapshot: Path,
     bundle_manifest_raw: bytes,
     bundle_tree_sha256: str,
 ) -> QwenBundleRuntimeBindingV4:
     manifest = loaded.manifest
+    bundle_contract = getattr(
+        args,
+        "bundle_contract",
+        EPISODE_ATOMIC_BUNDLE_CONTRACT_V4,
+    )
+    decision_contract = manifest.schema_version == "M2CQwenADR0026DecisionBundleManifestV1"
+    if decision_contract != (bundle_contract == ADR0026_DECISION_BUNDLE_CONTRACT_V4):
+        raise ValueError("V4 bundle schema differs from the explicit runtime contract")
     if manifest.model_id != args.model_id or manifest.model_revision != args.revision:
         raise ValueError("V4 bundle base model differs from formal service")
     if manifest.bundle_sha256 != args.expected_bundle_sha256:
@@ -496,7 +518,23 @@ def _binding_from_verified_bundle_v4(
         "destination_b",
     }:
         raise ValueError("V4 runtime did not load the exact three heads")
+    if decision_contract:
+        training_manifest_file_sha256 = manifest.training_dataset_manifest_file_sha256
+        training_manifest_sha256 = manifest.training_dataset_manifest_sha256
+        training_dataset_report_file_sha256 = manifest.training_dataset_report_file_sha256
+        training_dataset_report_sha256 = manifest.training_dataset_report_sha256
+        source_training_manifests = tuple(
+            item.model_dump(mode="json") for item in manifest.source_training_manifests
+        )
+    else:
+        training_manifest_file_sha256 = manifest.training_manifest_file_sha256
+        training_manifest_sha256 = manifest.training_manifest_sha256
+        training_dataset_report_file_sha256 = None
+        training_dataset_report_sha256 = None
+        source_training_manifests = ()
     return QwenBundleRuntimeBindingV4(
+        bundle_manifest_schema_version=manifest.schema_version,
+        training_contract_revision=bundle_contract,
         bundle_manifest_file_sha256=hashlib.sha256(bundle_manifest_raw).hexdigest(),
         bundle_tree_sha256=bundle_tree_sha256,
         bundle_sha256=manifest.bundle_sha256,
@@ -506,8 +544,11 @@ def _binding_from_verified_bundle_v4(
         checkpoint_binding_sha256=manifest.head_deployment.checkpoint_binding_sha256,
         adapter_tree_sha256=manifest.adapter_tree_sha256,
         training_dataset_sha256=manifest.training_dataset_sha256,
-        training_manifest_file_sha256=manifest.training_manifest_file_sha256,
-        training_manifest_sha256=manifest.training_manifest_sha256,
+        training_manifest_file_sha256=training_manifest_file_sha256,
+        training_manifest_sha256=training_manifest_sha256,
+        training_dataset_report_file_sha256=training_dataset_report_file_sha256,
+        training_dataset_report_sha256=training_dataset_report_sha256,
+        source_training_manifests=source_training_manifests,
         s6_manifest_file_sha256=manifest.s6_manifest_file_sha256,
         s6_manifest_sha256=manifest.s6_manifest_sha256,
         association_deployment_sha256=args.association_deployment_sha256,
@@ -526,13 +567,22 @@ def load_runtime(args: argparse.Namespace) -> RuntimeV4:
         raise ValueError("formal V4 service requires the canonical Qwen revision")
     if not args.local_files_only:
         raise ValueError("formal V4 inference must be local-files-only")
-    manifest_path = args.bundle_root / BUNDLE_MANIFEST_NAME
+    decision_contract = args.bundle_contract == ADR0026_DECISION_BUNDLE_CONTRACT_V4
+    manifest_path = args.bundle_root / (
+        DECISION_BUNDLE_MANIFEST_NAME if decision_contract else BUNDLE_MANIFEST_NAME
+    )
     manifest_before = _read_regular_file_once(manifest_path)
     tree_before = sha256_tree_v4(args.bundle_root)
-    loaded = load_bundle_v4(
-        args.bundle_root,
-        expected_bundle_sha256=args.expected_bundle_sha256,
-    )
+    if decision_contract:
+        loaded = load_adr0026_decision_bundle_v4(
+            args.bundle_root,
+            expected_bundle_sha256=args.expected_bundle_sha256,
+        )
+    else:
+        loaded = load_bundle_v4(
+            args.bundle_root,
+            expected_bundle_sha256=args.expected_bundle_sha256,
+        )
     manifest_after = _read_regular_file_once(manifest_path)
     tree_after = sha256_tree_v4(args.bundle_root)
     if manifest_before != manifest_after or tree_before != tree_after:

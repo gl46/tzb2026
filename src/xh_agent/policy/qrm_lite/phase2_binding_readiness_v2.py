@@ -479,9 +479,8 @@ def _verify_deployment_assets_against_formal_v3(
         bundle_manifest = json.loads(payload_by_role["QWEN_BUNDLE_MANIFEST"])
     except (KeyError, json.JSONDecodeError, UnicodeDecodeError) as error:
         raise ReadinessFailure("Qwen bundle manifest deployment asset is invalid JSON") from error
-    expected_bundle_fields = {
-        "schema_version": "M2CQwenCoarseV4BundleManifestV1",
-        "status": "TRAINED_QWEN_LORA_M2C_Q012_V4",
+    expected_bundle_fields: dict[str, object] = {
+        "schema_version": bundle.bundle_manifest_schema_version,
         "architecture_revision": bundle.architecture_revision,
         "public_track_associator_revision": bundle.public_track_associator_revision,
         "public_track_candidate_revision": bundle.public_track_candidate_revision,
@@ -493,8 +492,6 @@ def _verify_deployment_assets_against_formal_v3(
         "head_checkpoint_sha256": bundle.head_checkpoint_sha256,
         "head_deployment_file_sha256": bundle.head_deployment_file_sha256,
         "training_dataset_sha256": bundle.training_dataset_sha256,
-        "training_manifest_file_sha256": bundle.training_manifest_file_sha256,
-        "training_manifest_sha256": bundle.training_manifest_sha256,
         "s6_manifest_file_sha256": bundle.s6_manifest_file_sha256,
         "s6_manifest_sha256": bundle.s6_manifest_sha256,
         "bundle_sha256": bundle.bundle_sha256,
@@ -503,6 +500,28 @@ def _verify_deployment_assets_against_formal_v3(
         "teacher_used": False,
         "privileged_truth_policy_input": False,
     }
+    if bundle.training_contract_revision == "ADR0026_DECISION_LEVEL_PREFIX_0_6_V1":
+        expected_bundle_fields.update(
+            {
+                "status": ("TRAINED_QWEN_LORA_M2C_Q012_V4_ADR0026_DECISION_LEVEL"),
+                "training_contract_revision": bundle.training_contract_revision,
+                "training_dataset_report_file_sha256": (bundle.training_dataset_report_file_sha256),
+                "training_dataset_report_sha256": (bundle.training_dataset_report_sha256),
+                "training_dataset_manifest_file_sha256": (bundle.training_manifest_file_sha256),
+                "training_dataset_manifest_sha256": bundle.training_manifest_sha256,
+                "source_training_manifests": [
+                    item.model_dump(mode="json") for item in bundle.source_training_manifests
+                ],
+            }
+        )
+    else:
+        expected_bundle_fields.update(
+            {
+                "status": "TRAINED_QWEN_LORA_M2C_Q012_V4",
+                "training_manifest_file_sha256": bundle.training_manifest_file_sha256,
+                "training_manifest_sha256": bundle.training_manifest_sha256,
+            }
+        )
     if (
         not isinstance(bundle_manifest, dict)
         or any(bundle_manifest.get(key) != value for key, value in expected_bundle_fields.items())

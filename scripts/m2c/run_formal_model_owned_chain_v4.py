@@ -29,6 +29,11 @@ from m2c.qwen_coarse_v4 import (
     load_bundle_v4,
     sha256_tree_v4,
 )
+from m2c.qwen_decision_level_v4 import (
+    DECISION_BUNDLE_MANIFEST_NAME,
+    LoadedADR0026DecisionBundleV4,
+    load_adr0026_decision_bundle_v4,
+)
 from xh_agent.policy.qrm_lite.formal_split_host_v4 import (
     FormalV4RunInputs,
     M2CFormalSplitRunnerEvidenceV4,
@@ -40,9 +45,13 @@ from xh_agent.policy.qrm_lite.formal_split_runner_v2 import (
     read_hmac_secret,
 )
 from xh_agent.policy.qrm_lite.formal_split_runner_v4 import (
+    ADR0026_DECISION_BUNDLE_CONTRACT_V4,
+    BUNDLE_CONTRACT_CHOICES_V4,
+    EPISODE_ATOMIC_BUNDLE_CONTRACT_V4,
     FORMAL_INFERENCE_PATH_V4,
     IsaacEndpointBindingV4,
     QwenBundleRuntimeBindingV4,
+    QwenSourceTrainingManifestBindingV4,
 )
 from xh_agent.policy.qrm_lite.m2c_hard_freeze import (
     M2CExperimentAction,
@@ -64,6 +73,7 @@ from xh_agent.policy.qrm_lite.skill_registry_v2 import (
 
 
 WIRE_CHALLENGE_MANIFEST_SCHEMA = "M2CS4WireChallengeManifestV1"
+FormalLoadedQwenBundleV4 = LoadedM2CQwenCoarseV4Bundle | LoadedADR0026DecisionBundleV4
 
 
 def partial_failure_output_path(formal_output: Path) -> Path:
@@ -163,6 +173,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--registry", type=Path, required=True)
     parser.add_argument("--bundle-root", type=Path, required=True)
     parser.add_argument("--expected-bundle-sha256", required=True)
+    parser.add_argument(
+        "--bundle-contract",
+        choices=BUNDLE_CONTRACT_CHOICES_V4,
+        default=EPISODE_ATOMIC_BUNDLE_CONTRACT_V4,
+    )
     parser.add_argument("--model-id", default=QWEN_MODEL_ID, choices=(QWEN_MODEL_ID,))
     parser.add_argument("--revision", default=QWEN_MODEL_REVISION, choices=(QWEN_MODEL_REVISION,))
     parser.add_argument("--qwen-runtime-binding", type=Path, required=True)
@@ -233,12 +248,36 @@ def _validate_challenge(args: argparse.Namespace) -> None:
 def _validate_loaded_bundle(
     *,
     args: argparse.Namespace,
-    loaded: LoadedM2CQwenCoarseV4Bundle,
+    loaded: FormalLoadedQwenBundleV4,
     binding: QwenBundleRuntimeBindingV4,
 ) -> None:
     manifest = loaded.manifest
+    decision_contract = args.bundle_contract == ADR0026_DECISION_BUNDLE_CONTRACT_V4
+    if decision_contract != (manifest.schema_version == "M2CQwenADR0026DecisionBundleManifestV1"):
+        raise ValueError("formal V4 runner bundle schema differs from explicit contract")
+    if decision_contract:
+        manifest_path = args.bundle_root / DECISION_BUNDLE_MANIFEST_NAME
+        training_manifest_file_sha256 = manifest.training_dataset_manifest_file_sha256
+        training_manifest_sha256 = manifest.training_dataset_manifest_sha256
+        training_dataset_report_file_sha256 = manifest.training_dataset_report_file_sha256
+        training_dataset_report_sha256 = manifest.training_dataset_report_sha256
+        source_training_manifests = tuple(
+            QwenSourceTrainingManifestBindingV4.model_validate(item.model_dump(mode="json"))
+            for item in manifest.source_training_manifests
+        )
+        expected_status = "TRAINED_QWEN_LORA_M2C_Q012_V4_ADR0026_DECISION_LEVEL"
+    else:
+        manifest_path = args.bundle_root / BUNDLE_MANIFEST_NAME
+        training_manifest_file_sha256 = manifest.training_manifest_file_sha256
+        training_manifest_sha256 = manifest.training_manifest_sha256
+        training_dataset_report_file_sha256 = None
+        training_dataset_report_sha256 = None
+        source_training_manifests = ()
+        expected_status = "TRAINED_QWEN_LORA_M2C_Q012_V4"
     expected = {
-        "bundle_manifest_file_sha256": _sha256_regular(args.bundle_root / BUNDLE_MANIFEST_NAME),
+        "bundle_manifest_schema_version": manifest.schema_version,
+        "training_contract_revision": args.bundle_contract,
+        "bundle_manifest_file_sha256": _sha256_regular(manifest_path),
         "bundle_tree_sha256": sha256_tree_v4(args.bundle_root),
         "bundle_sha256": manifest.bundle_sha256,
         "head_checkpoint_sha256": manifest.head_checkpoint_sha256,
@@ -247,8 +286,11 @@ def _validate_loaded_bundle(
         "checkpoint_binding_sha256": manifest.head_deployment.checkpoint_binding_sha256,
         "adapter_tree_sha256": manifest.adapter_tree_sha256,
         "training_dataset_sha256": manifest.training_dataset_sha256,
-        "training_manifest_file_sha256": manifest.training_manifest_file_sha256,
-        "training_manifest_sha256": manifest.training_manifest_sha256,
+        "training_manifest_file_sha256": training_manifest_file_sha256,
+        "training_manifest_sha256": training_manifest_sha256,
+        "training_dataset_report_file_sha256": training_dataset_report_file_sha256,
+        "training_dataset_report_sha256": training_dataset_report_sha256,
+        "source_training_manifests": source_training_manifests,
         "s6_manifest_file_sha256": manifest.s6_manifest_file_sha256,
         "s6_manifest_sha256": manifest.s6_manifest_sha256,
         "failure_context": manifest.failure_context,
@@ -261,7 +303,7 @@ def _validate_loaded_bundle(
     if mismatches:
         raise ValueError(f"formal V4 runtime binding differs from trained bundle: {mismatches}")
     if (
-        manifest.status != "TRAINED_QWEN_LORA_M2C_Q012_V4"
+        manifest.status != expected_status
         or manifest.model_id != args.model_id
         or manifest.model_revision != args.revision
         or manifest.bundle_sha256 != args.expected_bundle_sha256
@@ -277,10 +319,16 @@ def validate_configuration(args: argparse.Namespace) -> ValidatedConfigurationV4
     if not 0.0 < args.request_timeout_seconds <= 300.0:
         raise ValueError("formal V4 request timeout must be in (0, 300] seconds")
     _validate_challenge(args)
-    loaded = load_bundle_v4(
-        args.bundle_root,
-        expected_bundle_sha256=args.expected_bundle_sha256,
-    )
+    if args.bundle_contract == ADR0026_DECISION_BUNDLE_CONTRACT_V4:
+        loaded = load_adr0026_decision_bundle_v4(
+            args.bundle_root,
+            expected_bundle_sha256=args.expected_bundle_sha256,
+        )
+    else:
+        loaded = load_bundle_v4(
+            args.bundle_root,
+            expected_bundle_sha256=args.expected_bundle_sha256,
+        )
     bundle = QwenBundleRuntimeBindingV4.model_validate(_json_object(args.qwen_runtime_binding))
     _validate_loaded_bundle(args=args, loaded=loaded, binding=bundle)
     endpoint = IsaacEndpointBindingV4.model_validate(_json_object(args.isaac_endpoint_binding))

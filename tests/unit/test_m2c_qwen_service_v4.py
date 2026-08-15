@@ -15,6 +15,12 @@ import pytest
 from m2c.qwen_coarse_v4 import (
     BUNDLE_MANIFEST_NAME,
     initialize_numpy_heads_v4,
+    sha256_tree_v4,
+)
+from m2c.qwen_decision_level_v4 import (
+    DECISION_BUNDLE_MANIFEST_NAME,
+    load_adr0026_decision_bundle_v4,
+    write_adr0026_decision_bundle_v4,
 )
 from m2c.serve_qwen_coarse_v4 import (
     AppendOnlyQwenAuditLogV4,
@@ -30,6 +36,7 @@ from test_m2c_path_blocked_supervision_v4 import (
     journal,
     session_receipt,
 )
+from test_m2c_qwen_decision_level_v4 import _dataset_report
 from xh_agent.perception.public_track_associator_v2 import PublicTrackAssociatorV2
 from xh_agent.policy.qrm_lite.executed_intent_history_v2 import (
     PublicExecutedIntentHistoryItemV2,
@@ -40,6 +47,7 @@ from xh_agent.policy.qrm_lite.formal_public_observation_v4 import (
     public_asset_inline_v4,
 )
 from xh_agent.policy.qrm_lite.formal_split_runner_v4 import (
+    ADR0026_DECISION_BUNDLE_CONTRACT_V4,
     FormalInferenceRequestV4,
     build_inference_response_from_logits_v4,
     sign_inference_request_v4,
@@ -408,6 +416,7 @@ def test_v4_service_builds_binding_only_from_exact_manifest_and_cache(
     monkeypatch.setattr("m2c.serve_qwen_coarse_v4.sha256_tree", lambda _path: cache_sha)
     frozen = _bundle()
     manifest = SimpleNamespace(
+        schema_version="M2CQwenCoarseV4BundleManifestV1",
         model_id=frozen.model_id,
         model_revision=frozen.model_revision,
         bundle_sha256=frozen.bundle_sha256,
@@ -466,6 +475,77 @@ def test_v4_service_builds_binding_only_from_exact_manifest_and_cache(
             model_snapshot=model_snapshot,
             bundle_manifest_raw=b"exact-v4-bundle-manifest",
             bundle_tree_sha256="e" * 64,
+        )
+
+
+def test_v4_service_binds_exact_adr0026_decision_bundle_sources(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    bundle_root = tmp_path / "decision-bundle"
+    (bundle_root / "adapter").mkdir(parents=True)
+    (bundle_root / "adapter" / "adapter.bin").write_bytes(b"decision-adapter")
+    cache_sha = "8" * 64
+    manifest = write_adr0026_decision_bundle_v4(
+        bundle_root,
+        heads=initialize_numpy_heads_v4(16, 20260815),
+        model_id="Qwen/Qwen3.5-4B",
+        model_revision="851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a",
+        base_model_snapshot_tree_sha256=cache_sha,
+        failure_context="on",
+        dataset_report=_dataset_report(),
+        seed=20260815,
+        optimizer_steps=7,
+    )
+    loaded = load_adr0026_decision_bundle_v4(
+        bundle_root,
+        expected_bundle_sha256=manifest.bundle_sha256,
+    )
+    model_snapshot = (
+        tmp_path
+        / "cache/models--Qwen--Qwen3.5-4B/snapshots/851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a"
+    )
+    model_snapshot.mkdir(parents=True)
+    monkeypatch.setattr("m2c.serve_qwen_coarse_v4.sha256_tree", lambda _path: cache_sha)
+    args = SimpleNamespace(
+        bundle_contract=ADR0026_DECISION_BUNDLE_CONTRACT_V4,
+        expected_bundle_sha256=manifest.bundle_sha256,
+        model_id=manifest.model_id,
+        revision=manifest.model_revision,
+        cache_tree_sha256=cache_sha,
+        association_deployment_sha256="1" * 64,
+        capture_source_implementation_sha256="2" * 64,
+        declared_attribute_selector_implementation_sha256="3" * 64,
+    )
+    raw = (bundle_root / DECISION_BUNDLE_MANIFEST_NAME).read_bytes()
+    binding = _binding_from_verified_bundle_v4(
+        args,
+        loaded=loaded,
+        model_snapshot=model_snapshot,
+        bundle_manifest_raw=raw,
+        bundle_tree_sha256=sha256_tree_v4(bundle_root),
+    )
+
+    assert binding.bundle_manifest_schema_version == ("M2CQwenADR0026DecisionBundleManifestV1")
+    assert binding.training_contract_revision == ADR0026_DECISION_BUNDLE_CONTRACT_V4
+    assert binding.training_manifest_file_sha256 == (manifest.training_dataset_manifest_file_sha256)
+    assert binding.training_manifest_sha256 == manifest.training_dataset_manifest_sha256
+    assert binding.training_dataset_report_file_sha256 == (
+        manifest.training_dataset_report_file_sha256
+    )
+    assert binding.training_dataset_report_sha256 == (manifest.training_dataset_report_sha256)
+    assert [item.model_dump(mode="json") for item in binding.source_training_manifests] == [
+        item.model_dump(mode="json") for item in manifest.source_training_manifests
+    ]
+
+    args.bundle_contract = "EPISODE_ATOMIC_V4_V1"
+    with pytest.raises(ValueError, match="explicit runtime contract"):
+        _binding_from_verified_bundle_v4(
+            args,
+            loaded=loaded,
+            model_snapshot=model_snapshot,
+            bundle_manifest_raw=raw,
+            bundle_tree_sha256=sha256_tree_v4(bundle_root),
         )
 
 

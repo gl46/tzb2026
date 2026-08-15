@@ -10,6 +10,13 @@ import pytest
 from pydantic import ValidationError
 
 from m2c import run_formal_model_owned_chain_v4 as host_cli
+from m2c.qwen_coarse_v4 import initialize_numpy_heads_v4, sha256_tree_v4
+from m2c.qwen_decision_level_v4 import (
+    DECISION_BUNDLE_MANIFEST_NAME,
+    load_adr0026_decision_bundle_v4,
+    write_adr0026_decision_bundle_v4,
+)
+from m2c.serve_qwen_coarse_v4 import _binding_from_verified_bundle_v4
 from test_m2c_formal_isaac_endpoint_v4 import (
     SECRET as ISAAC_SECRET,
     _endpoint,
@@ -19,12 +26,14 @@ from test_m2c_formal_split_runner_v4 import (
     _bundle,
     _logits,
 )
+from test_m2c_qwen_decision_level_v4 import _dataset_report
 from xh_agent.policy.qrm_lite.formal_split_host_v4 import (
     FormalV4RunInputs,
     M2CFormalSplitRunnerEvidenceV4,
     run_formal_v4_episode,
 )
 from xh_agent.policy.qrm_lite.formal_split_runner_v4 import (
+    ADR0026_DECISION_BUNDLE_CONTRACT_V4,
     FORMAL_INFERENCE_PATH_V4,
     FORMAL_ISAAC_CAPTURE_PATH_V4,
     FORMAL_ISAAC_EXECUTE_PATH_V4,
@@ -351,6 +360,60 @@ def test_formal_v4_cli_contract_check_contacts_nothing_and_writes_nothing(
     assert output["status"] == "CONTRACT_ONLY_NO_ENDPOINT_CONTACT_NO_PHYSICAL_RECEIPT"
     assert output["output_written"] is False
     assert not (tmp_path / "formal.json").exists()
+
+
+def test_formal_v4_cli_validates_adr0026_decision_bundle_contract(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    bundle_root = tmp_path / "decision-bundle"
+    (bundle_root / "adapter").mkdir(parents=True)
+    (bundle_root / "adapter" / "adapter.bin").write_bytes(b"decision-adapter")
+    cache_sha = "8" * 64
+    manifest = write_adr0026_decision_bundle_v4(
+        bundle_root,
+        heads=initialize_numpy_heads_v4(16, 20260815),
+        model_id="Qwen/Qwen3.5-4B",
+        model_revision="851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a",
+        base_model_snapshot_tree_sha256=cache_sha,
+        failure_context="off",
+        dataset_report=_dataset_report(),
+        seed=20260815,
+        optimizer_steps=7,
+    )
+    loaded = load_adr0026_decision_bundle_v4(
+        bundle_root,
+        expected_bundle_sha256=manifest.bundle_sha256,
+    )
+    model_snapshot = (
+        tmp_path
+        / "cache/models--Qwen--Qwen3.5-4B/snapshots/851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a"
+    )
+    model_snapshot.mkdir(parents=True)
+    monkeypatch.setattr("m2c.serve_qwen_coarse_v4.sha256_tree", lambda _path: cache_sha)
+    args = SimpleNamespace(
+        bundle_root=bundle_root,
+        bundle_contract=ADR0026_DECISION_BUNDLE_CONTRACT_V4,
+        expected_bundle_sha256=manifest.bundle_sha256,
+        model_id=manifest.model_id,
+        revision=manifest.model_revision,
+        cache_tree_sha256=cache_sha,
+        association_deployment_sha256="1" * 64,
+        capture_source_implementation_sha256="2" * 64,
+        declared_attribute_selector_implementation_sha256="3" * 64,
+    )
+    binding = _binding_from_verified_bundle_v4(
+        args,
+        loaded=loaded,
+        model_snapshot=model_snapshot,
+        bundle_manifest_raw=(bundle_root / DECISION_BUNDLE_MANIFEST_NAME).read_bytes(),
+        bundle_tree_sha256=sha256_tree_v4(bundle_root),
+    )
+
+    host_cli._validate_loaded_bundle(args=args, loaded=loaded, binding=binding)
+    crossed = binding.model_copy(update={"training_dataset_report_sha256": "0" * 64})
+    with pytest.raises(ValueError, match="runtime binding differs"):
+        host_cli._validate_loaded_bundle(args=args, loaded=loaded, binding=crossed)
 
 
 def test_formal_v4_cli_run_real_reloads_ledger_before_keys_or_transport(
