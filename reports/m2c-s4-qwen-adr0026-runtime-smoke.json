@@ -1,0 +1,148 @@
+{
+  "schema_version": "M2CS4QwenADR0026RuntimeStartupSmokeReportV1",
+  "status": "PASS_TWO_ARM_REAL_QWEN_RUNTIME_STARTUP_NOT_Q_B",
+  "as_of_asia_shanghai": "2026-08-15",
+  "implementation_commit": "01883be7f976810b2850c43fb956d764e8df496f",
+  "accepted_adr": {
+    "path": "docs/decisions/ADR-0026-m2c-terminal-step-diagnosis.md",
+    "sha256": "ba24b65435b19b3a7700bb7caba83a01d98897a8999aee54af5c2370d410c180",
+    "section": "4"
+  },
+  "source_bindings": [
+    {
+      "path": "scripts/m2c/serve_qwen_coarse_v4.py",
+      "sha256": "e86fc9edeab26247e27901ff9eaf4a4f123e5d3a16612fa6334a03234e3d85c7"
+    },
+    {
+      "path": "scripts/m2c/run_formal_model_owned_chain_v4.py",
+      "sha256": "f5b0e0ed4bef0936910f2bf09541b615a7fe1843acde5974b8d51b37b0cdc681"
+    },
+    {
+      "path": "src/xh_agent/policy/qrm_lite/formal_split_runner_v4.py",
+      "sha256": "d440af8d297bd4ac93d27e63739ac0bca7f796b12e6534a3873bdd699c8fa404"
+    },
+    {
+      "path": "src/xh_agent/policy/qrm_lite/phase2_binding_readiness_v2.py",
+      "sha256": "79c864487e6dda4e881c6233a0e5d6dc383fc75ca852631a6501e9de052cb1bd"
+    },
+    {
+      "path": "reports/m2c-s4-qwen-adr0026-training.json",
+      "sha256": "b6b39286314824f67eed066179f5a0223bc11f448d0f7f4123943b5b0fc53b45"
+    }
+  ],
+  "execution_environment": {
+    "host": "node2",
+    "repository_path": "/home/gl/m2c-qrm-lite-81dbb5e",
+    "repository_commit": "01883be7f976810b2850c43fb956d764e8df496f",
+    "accelerator": "NVIDIA A100-SXM4-80GB",
+    "model_id": "Qwen/Qwen3.5-4B",
+    "model_revision": "851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a",
+    "model_cache_tree_sha256": "aefef289a0ece7d9baf7d1a0decd040830c82c1510222ff0cada7f23e024e6aa",
+    "local_files_only": true,
+    "fast_transformers_runtime_path_available": false,
+    "identical_pytorch_fallback_used_for_both_arms": true,
+    "remote_evidence_root": "/home/gl/m2c-qwen-adr0026-runtime-smoke.XhVbOC",
+    "local_evidence_root": "/Users/gl/tzb-m2c-evidence/m2c-s4-adr0026-qwen-runtime-smoke-01883be"
+  },
+  "command_contract": {
+    "entrypoint": "scripts/m2c/serve_qwen_coarse_v4.py",
+    "bundle_contract": "ADR0026_DECISION_LEVEL_PREFIX_0_6_V1",
+    "startup_check_only": true,
+    "local_files_only": true,
+    "binding_output_create_only": true,
+    "audit_output_create_only": true,
+    "http_service_started": false,
+    "wire_requests_received": 0,
+    "isaac_started": false,
+    "physical_execution_performed": false,
+    "formal_q_b_evaluation_performed": false,
+    "teacher_used": false,
+    "privileged_truth_policy_input": false
+  },
+  "contract_smoke_only_inputs": {
+    "association_deployment_sha256": "33edf369614da846b99bb108111c731640f858ceb7a64e99c90381aa24f54c74",
+    "capture_source_implementation_sha256": "3fdf311cdae0fed357c354c8422ab54077187faf5c00eab6d8f6ebba38df9c99",
+    "declared_attribute_selector_implementation_sha256": "49e60395a0c31270bd19db48af108f59b2ad6a81a6d53e9b2a096a74b27c2d69",
+    "production_deployment_evidence": false,
+    "physical_policy_input_used": false
+  },
+  "arms": {
+    "FC": {
+      "failure_context": "on",
+      "bundle_root": "/home/gl/xh-data/m2c-s4-adr0026/qwen-v4-fc-on-seed-20260815",
+      "bundle_sha256": "6e7cb272445a64413d6adbe687431172816148f2bd571ada28ec7075fc2dd2a2",
+      "bundle_tree_sha256": "881d2c6ef1291b7dafc0cb7a7dcab4fe384ea422478ebac165810e697ba445f4",
+      "binding_path": "/Users/gl/tzb-m2c-evidence/m2c-s4-adr0026-qwen-runtime-smoke-01883be/fc-binding.json",
+      "binding_file_sha256": "8e6bf609885ef08b8dcc0c6659a3f989a1197a9eab1e6ffc23b8e1d754420586",
+      "audit_path": "/Users/gl/tzb-m2c-evidence/m2c-s4-adr0026-qwen-runtime-smoke-01883be/fc-audit.jsonl",
+      "audit_file_sha256": "228b8ad0441098ec8c276bb2bf763184902d5d4b5fbd78fa22d391260d013178",
+      "service_id": "48e1093343994feaa5b4ec0294920ba7",
+      "exit_code": 0
+    },
+    "NO_FC": {
+      "failure_context": "off",
+      "bundle_root": "/home/gl/xh-data/m2c-s4-adr0026/qwen-v4-nofc-off-seed-20260815",
+      "bundle_sha256": "1b6757dc66bbabc939858f477537e18ef9797edce2c57c95f7ae6f4423c72138",
+      "bundle_tree_sha256": "74f494aea0ee47da25d564d954b998bb3d291bc6461f19546c79754b9ac8b81e",
+      "binding_path": "/Users/gl/tzb-m2c-evidence/m2c-s4-adr0026-qwen-runtime-smoke-01883be/nofc-binding.json",
+      "binding_file_sha256": "55ed7f31845442a37178271edd78f3f0952ec7a97336f7d32dfbc0e0b746ecb5",
+      "audit_path": "/Users/gl/tzb-m2c-evidence/m2c-s4-adr0026-qwen-runtime-smoke-01883be/nofc-audit.jsonl",
+      "audit_file_sha256": "2a2e56aa6ee151de3799bfac537ca5cbd061397353b698da33a54d8e655066e6",
+      "service_id": "45576dcfe3ae40c685f015a9739ec6d1",
+      "exit_code": 0
+    }
+  },
+  "shared_runtime_binding": {
+    "schema_version": "QwenBundleRuntimeBindingV4",
+    "bundle_manifest_schema_version": "M2CQwenADR0026DecisionBundleManifestV1",
+    "training_contract_revision": "ADR0026_DECISION_LEVEL_PREFIX_0_6_V1",
+    "architecture_revision": "M2C_Q012_V4",
+    "public_observation_revision": "FormalPublicObservationV4",
+    "public_track_associator_revision": "PublicTrackAssociatorV2",
+    "public_track_candidate_revision": "PublicTrackCandidateV4",
+    "public_track_candidate_count": 8,
+    "pointer_class_count": 9,
+    "source_training_manifests": [
+      {
+        "file_sha256": "83a672f439521dc2c6263225851ec54cbd80de052af835a6590a7e02443b79c4",
+        "canonical_sha256": "525cd393fd4264ef7d47691d142616d4fc59c068c25336f43fe3b54f8753a034"
+      },
+      {
+        "file_sha256": "9fcc971f5bdf0787692b6d2de9be81885fe164e4b78b34fac214d6467c64e164",
+        "canonical_sha256": "efb69cfc509abca6ed98b7ab476b8d4f3f154aa1d2f2c417fa8f439a5422f34f"
+      }
+    ],
+    "training_dataset_report_file_sha256": "46f3b29a18c1e0f0aea4cee1078df0d5a7ea6c6d0a822b2564a96a8e5bd52800",
+    "training_dataset_report_sha256": "7c908c9cf0a614bfdf79b85cbe5f3cf1b6c7067a663369e6479e50f4abab81e5",
+    "training_dataset_sha256": "78c28350fd59c74df018724c44aa6705785909fcc7607d0ad0e27d7148efd86d",
+    "teacher_used": false,
+    "privileged_truth_policy_input": false,
+    "physical_evaluation_executed": false
+  },
+  "claims": {
+    "both_trained_bundles_loaded": true,
+    "real_qwen_backbone_loaded": true,
+    "real_lora_adapter_loaded": true,
+    "three_heads_loaded": true,
+    "runtime_binding_published": true,
+    "startup_audit_published": true,
+    "model_rollout_performed": false,
+    "formal_q_b_evaluation_performed": false,
+    "physical_execution_performed": false,
+    "pure_model_success_episodes": null,
+    "d2_triggered": false
+  },
+  "failures": [],
+  "blockers": [
+    "REVIEWED_PRODUCTION_ASSOCIATION_AND_ATTRIBUTE_DEPLOYMENT_EVIDENCE_MISSING",
+    "FORMAL_ISAAC_SCENE_ASSET_AND_HOST_SESSION_EVIDENCE_MISSING",
+    "FORMAL_Q_B_PHYSICAL_EPISODES_NOT_RUN",
+    "PURE_MODEL_SUCCESS_REMAINS_UNMEASURED"
+  ],
+  "changed_files": [
+    "reports/m2c-s4-qwen-adr0026-runtime-smoke.json",
+    "reports/m2c-s4-qwen-adr0026-runtime-smoke.md",
+    "tests/unit/test_m2c_s4_qwen_adr0026_runtime_smoke.py"
+  ],
+  "one_next_command": "PYTHONPATH=src:scripts .venv/bin/python -m pytest -q tests/unit/test_m2c_s4_qwen_adr0026_runtime_smoke.py"
+}

@@ -1,13 +1,13 @@
 {
   "active_bindings": {
     "FORMAL_DEPLOYMENT_CLOSURE_BINDING": [
-      "3b86d4c997a6e2a7229c6e8149200b166fa32d77",
+      "01883be7f976810b2850c43fb956d764e8df496f",
       "sha256:783444c706538aa76cf5126e911ddc5e618779e6105305ad4af4260362a30aa9",
-      "684c81dcb00d0abf33095bc704e7550d9bb64400b367d2b5da9324aeb85c8993"
+      "2d6fef06f9b143799ee35186bd9e06237ead5014e8803565c3d646d57994e0d4"
     ],
     "FORMAL_PHYSICAL_RUNNER_BINDING": [
       "scripts/m2c/run_formal_model_owned_chain_v4.py",
-      "799caecdb12f73b5e6ea226eb2b983e4fbe4c08482f7ed037ae33c2168068eef"
+      "f5b0e0ed4bef0936910f2bf09541b615a7fe1843acde5974b8d51b37b0cdc681"
     ]
   },
   "binding_addendum": {
@@ -36,7 +36,11 @@
     },
     "formal_exact_plan_integration": {
       "path": "reports/m2c-phase2-formal-exact-plan-integration.json",
-      "sha256": "85189c6bdd2513b655c6866bed3e14f8a6bff889e1119093bbe66900ce60198d"
+      "sha256": "982f21b338751300b30183ef75122ae21a3216efe73ff5b90225cddd5da55165"
+    },
+    "qwen_adr0026_runtime_startup_smoke": {
+      "path": "reports/m2c-s4-qwen-adr0026-runtime-smoke.json",
+      "sha256": "cda7027d92d0888c0a735533516aacf7c4d21e5210be36b806e195212e441aad"
     }
   },
   "evidence_claims": {
@@ -49,11 +53,10 @@
     "training_performed": false
   },
   "implementation_snapshot": {
-    "commit": "3b86d4c997a6e2a7229c6e8149200b166fa32d77",
-    "repository_tree_sha1": "14d7659ac76b9a0b1f4e0fec0bc9d6175894a8bf"
+    "commit": "01883be7f976810b2850c43fb956d764e8df496f",
+    "repository_tree_sha1": "8a2db4c9bf9d10489c2e2a5dc4a57c98f56c2d65"
   },
   "remaining_formal_q_b_evidence": [
-    "TRAINED_QWEN_ADAPTER_AND_HEAD_BUNDLE",
     "SELECTED_SCENE_SDF_AND_RUNTIME_ASSET_CLOSURE",
     "REVIEWED_REAL_ISAAC_HTTP_BACKEND_FACTORY",
     "MODEL_AND_ISAAC_HOST_AUDITS",
@@ -65,16 +68,16 @@
     "container_image_digest": "sha256:783444c706538aa76cf5126e911ddc5e618779e6105305ad4af4260362a30aa9",
     "executable_file_count": 59,
     "generated_inside_bound_container": true,
-    "git_mode_map_sha256": "494bd161d4c582b27b0d0ec3f1c032d76680e7be46e5b6603610ebc024197a4e",
-    "local_evidence_root": "/Users/gl/tzb-m2c-evidence/m2c-phase2-source-closure-3b86d4c",
-    "manifest_file_sha256": "684c81dcb00d0abf33095bc704e7550d9bb64400b367d2b5da9324aeb85c8993",
-    "receipt_file_sha256": "c2268a1723aa4230fed85870ab9c7ed3e836f48e5a355a9472ee809dbc64313f",
-    "receipt_sha256": "650c9869665c48c1cbc927c8ebf6054ea282f5e8d6d038e8592d14674b2ea1e0",
-    "remote_evidence_root": "/var/tmp/xh-data/isaac-industrial/m2c/phase2-source-closure-3b86d4c/evidence/source-closure",
+    "git_mode_map_sha256": "a72c1721cb049066097baf5ee3b0ef147c83c1edfaf7a1d57ba8c551051f5933",
+    "local_evidence_root": "/Users/gl/tzb-m2c-evidence/m2c-phase2-source-closure-01883be",
+    "manifest_file_sha256": "2d6fef06f9b143799ee35186bd9e06237ead5014e8803565c3d646d57994e0d4",
+    "receipt_file_sha256": "8da50dc5f57d9297bdff9c0e38d293fbcf3aa8e804902837bf9d85030b6e682a",
+    "receipt_sha256": "97b0fd906767f4cb0d576138dc529608549a77acae195c385135f5728e8f7931",
+    "remote_evidence_root": "/var/tmp/xh-data/isaac-industrial/m2c/phase2-source-closure-01883be/evidence/source-closure",
     "replayed_inside_bound_container": true,
-    "request_file_sha256": "e554c47cb7365d800d888ec4856e51ac0d4cc11731c00cd05e47d3900f7fd16f",
-    "request_sha256": "d198aeb2fb37079328d1be714d5d827b5c13b834e4c1aaa31865a0561c5f4213",
-    "tracked_file_count": 1258
+    "request_file_sha256": "58a7c8b5b1630b6389ad6ce35625b6b3ded30b05ce321f7d02f1b4874762bde7",
+    "request_sha256": "9aa8978a7887326fe8de4521c7d1906c95cd16cc3d6a9e7f4fe4a50cc384840c",
+    "tracked_file_count": 1265
   },
   "source_closure_git_tool": {
     "host_binary_sha256": "2a8c18fbf43da9f692d75474c72bea9dfd796c260b0f3dfe456376abc3bbd668",

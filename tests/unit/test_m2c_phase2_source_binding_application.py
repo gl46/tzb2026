@@ -27,12 +27,12 @@ from xh_agent.policy.qrm_lite.s4_entry_gate import (
 ROOT = Path(__file__).resolve().parents[2]
 CONFIG_PATH = ROOT / "configs/m2c_s4_unlock_bindings.json"
 REPORT_PATH = ROOT / "reports/m2c-phase2-source-binding-application.json"
-IMPLEMENTATION_COMMIT = "3b86d4c997a6e2a7229c6e8149200b166fa32d77"
-IMPLEMENTATION_TREE = "14d7659ac76b9a0b1f4e0fec0bc9d6175894a8bf"
+IMPLEMENTATION_COMMIT = "01883be7f976810b2850c43fb956d764e8df496f"
+IMPLEMENTATION_TREE = "8a2db4c9bf9d10489c2e2a5dc4a57c98f56c2d65"
 IMAGE = "sha256:783444c706538aa76cf5126e911ddc5e618779e6105305ad4af4260362a30aa9"
-MANIFEST_SHA256 = "684c81dcb00d0abf33095bc704e7550d9bb64400b367d2b5da9324aeb85c8993"
+MANIFEST_SHA256 = "2d6fef06f9b143799ee35186bd9e06237ead5014e8803565c3d646d57994e0d4"
 RUNNER_PATH = "scripts/m2c/run_formal_model_owned_chain_v4.py"
-RUNNER_SHA256 = "799caecdb12f73b5e6ea226eb2b983e4fbe4c08482f7ed037ae33c2168068eef"
+RUNNER_SHA256 = "f5b0e0ed4bef0936910f2bf09541b615a7fe1843acde5974b8d51b37b0cdc681"
 ADDENDUM_PATH = "docs/decisions/ADR-0022-BINDING-ADDENDUM.md"
 ADDENDUM_SHA256 = "712fe64e60bf31b67d1eb5552bc2e9a9cfa96c43b07c4e7f2ebbc3a57207078b"
 
@@ -96,7 +96,7 @@ def test_complete_git_tree_reconstructs_the_applied_manifest() -> None:
         IMPLEMENTATION_TREE
     )
     assert hashlib.sha256(manifest_bytes).hexdigest() == MANIFEST_SHA256
-    assert len(files) == report["source_closure"]["tracked_file_count"] == 1258
+    assert len(files) == report["source_closure"]["tracked_file_count"] == 1265
     assert sum(mode == "100755" for mode in modes.values()) == 59
     assert canonical_sha256(modes) == report["source_closure"]["git_mode_map_sha256"]
     assert files[RUNNER_PATH] == RUNNER_SHA256
@@ -139,7 +139,7 @@ def test_source_closure_request_and_receipt_are_canonical() -> None:
         "repository_tree_sha1": IMPLEMENTATION_TREE,
         "container_image_digest": IMAGE,
         "request_sha256": request.request_sha256,
-        "tracked_file_count": 1258,
+        "tracked_file_count": 1265,
         "executable_file_count": 59,
         "git_mode_map_sha256": closure["git_mode_map_sha256"],
         "transitive_import_manifest_path": "transitive-import-manifest.json",
@@ -204,6 +204,13 @@ def test_binding_report_does_not_claim_physical_or_q_b_evidence() -> None:
         "teacher_used": False,
         "training_performed": False,
     }
-    assert len(report["remaining_formal_q_b_evidence"]) == 6
+    assert report["remaining_formal_q_b_evidence"] == [
+        "SELECTED_SCENE_SDF_AND_RUNTIME_ASSET_CLOSURE",
+        "REVIEWED_REAL_ISAAC_HTTP_BACKEND_FACTORY",
+        "MODEL_AND_ISAAC_HOST_AUDITS",
+        "SINGLE_USE_CHALLENGE_CONSUMPTION",
+        "PLAN_SPECIFIC_A3_AND_EXECUTION_RECEIPTS",
+    ]
+    assert "qwen_adr0026_runtime_startup_smoke" in report["contract_evidence"]
     for item in report["contract_evidence"].values():
         assert hashlib.sha256((ROOT / item["path"]).read_bytes()).hexdigest() == item["sha256"]

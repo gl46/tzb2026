@@ -10,6 +10,8 @@ from m2c.audit_adr0024_phase2_candidate import (
     BINDING_NAMES,
     CandidateAuditFailure,
     EXPECTED_BLOCKERS,
+    _git_blob_at_commit_with_sha256,
+    _historical_git_blob_with_sha256,
     build_audit,
     load_candidate_config,
     parse_literal_none_bindings,
@@ -125,20 +127,20 @@ def test_candidate_config_requires_literal_none_bindings_and_exact_terminal_poli
         )
 
     candidate = load_candidate_config(PROJECT_ROOT)
-    executor_path = "src/xh_agent/policy/qrm_lite/isaac_exact_plan_runtime_v1.py"
-    assert (
-        candidate["source_bindings"][executor_path]
-        == hashlib.sha256((PROJECT_ROOT / executor_path).read_bytes()).hexdigest()
-    )
+    for path, expected in candidate["source_bindings"].items():
+        current = PROJECT_ROOT / path
+        if current.is_file() and hashlib.sha256(current.read_bytes()).hexdigest() == expected:
+            continue
+        assert (
+            hashlib.sha256(
+                _historical_git_blob_with_sha256(PROJECT_ROOT, Path(path), expected)
+            ).hexdigest()
+            == expected
+        )
     assert candidate["b0_policy"]["invalid_or_rejected_action_policy"] == (
         "TERMINAL_NO_PHYSICAL_EXECUTION"
     )
     assert not candidate["b0_policy"]["runtime_wrapper_required"]
-    callback_path = "src/xh_agent/policy/qrm_lite/a3_exact_plan_callbacks_v1.py"
-    assert (
-        candidate["source_bindings"][callback_path]
-        == hashlib.sha256((PROJECT_ROOT / callback_path).read_bytes()).hexdigest()
-    )
     for complete_scene_path in (
         "scripts/m2c/formal_isaac_v4_backend.py",
         "src/xh_agent/policy/qrm_lite/a3_attached_object_phase_geometry_v1.py",
@@ -148,37 +150,16 @@ def test_candidate_config_requires_literal_none_bindings_and_exact_terminal_poli
         "src/xh_agent/policy/qrm_lite/a3_complete_scene_swept_collision_v2.py",
         "src/xh_agent/policy/qrm_lite/formal_isaac_mutation_counter_v1.py",
     ):
-        assert (
-            candidate["source_bindings"][complete_scene_path]
-            == hashlib.sha256((PROJECT_ROOT / complete_scene_path).read_bytes()).hexdigest()
-        )
-    assert (
-        candidate["source_bindings"]["src/xh_agent/policy/qrm_lite/formal_split_host_v4.py"]
-        == hashlib.sha256(
-            (PROJECT_ROOT / "src/xh_agent/policy/qrm_lite/formal_split_host_v4.py").read_bytes()
-        ).hexdigest()
-    )
-    assert (
-        candidate["source_bindings"]["scripts/m2c/run_formal_model_owned_chain_v4.py"]
-        == hashlib.sha256(
-            (PROJECT_ROOT / "scripts/m2c/run_formal_model_owned_chain_v4.py").read_bytes()
-        ).hexdigest()
-    )
-    assert (
-        candidate["source_bindings"]["scripts/m2c/serve_formal_isaac_endpoint_v4.py"]
-        == hashlib.sha256(
-            (PROJECT_ROOT / "scripts/m2c/serve_formal_isaac_endpoint_v4.py").read_bytes()
-        ).hexdigest()
-    )
+        assert complete_scene_path in candidate["source_bindings"]
+    assert "src/xh_agent/policy/qrm_lite/formal_split_host_v4.py" in candidate["source_bindings"]
+    assert "scripts/m2c/run_formal_model_owned_chain_v4.py" in candidate["source_bindings"]
+    assert "scripts/m2c/serve_formal_isaac_endpoint_v4.py" in candidate["source_bindings"]
     for path in (
         "src/xh_agent/policy/qrm_lite/offline_wire_auth_v4.py",
         "scripts/m2c/verify_formal_wire_auth_v4.py",
         "src/xh_agent/policy/qrm_lite/formal_isaac_episode_io_v4.py",
     ):
-        assert (
-            candidate["source_bindings"][path]
-            == hashlib.sha256((PROJECT_ROOT / path).read_bytes()).hexdigest()
-        )
+        assert path in candidate["source_bindings"]
     synthesis = candidate["exact_plan_synthesis_candidate"]
     for key in (
         "configuration_path",
@@ -208,10 +189,22 @@ def test_candidate_config_requires_literal_none_bindings_and_exact_terminal_poli
                 "formal_runtime_factory_implementation_sha256"
             ),
         }[key]
-        assert (
-            synthesis[sha_key]
-            == hashlib.sha256((PROJECT_ROOT / synthesis[key]).read_bytes()).hexdigest()
-        )
+        expected = synthesis[sha_key]
+        path = Path(synthesis[key])
+        if key in {"configuration_path", "dependency_manifest_path"}:
+            assert hashlib.sha256((PROJECT_ROOT / path).read_bytes()).hexdigest() == expected
+        else:
+            assert (
+                hashlib.sha256(
+                    _git_blob_at_commit_with_sha256(
+                        PROJECT_ROOT,
+                        synthesis["implementation_commit"],
+                        path,
+                        expected,
+                    )
+                ).hexdigest()
+                == expected
+            )
     dependencies = json.loads((PROJECT_ROOT / synthesis["dependency_manifest_path"]).read_text())[
         "dependencies"
     ]
@@ -223,15 +216,31 @@ def test_candidate_config_requires_literal_none_bindings_and_exact_terminal_poli
         "src/xh_agent/policy/qrm_lite/controlled_panda_fk_v1.py",
         "src/xh_agent/policy/qrm_lite/isaac_exact_plan_runtime_v1.py",
     ):
-        assert dependencies[path] == hashlib.sha256((PROJECT_ROOT / path).read_bytes()).hexdigest()
+        expected = dependencies[path]
+        assert (
+            hashlib.sha256(
+                _git_blob_at_commit_with_sha256(
+                    PROJECT_ROOT,
+                    synthesis["implementation_commit"],
+                    Path(path),
+                    expected,
+                )
+            ).hexdigest()
+            == expected
+        )
     episode_io = candidate["episode_io_candidate"]
-    assert (
-        episode_io["implementation_sha256"]
-        == hashlib.sha256(
-            (PROJECT_ROOT / episode_io["implementation_path"]).read_bytes()
-        ).hexdigest()
-    )
     assert episode_io["implementation_commit"] == ("961f370420b8c2073b4431751574a48502ce6c70")
+    assert (
+        hashlib.sha256(
+            _git_blob_at_commit_with_sha256(
+                PROJECT_ROOT,
+                episode_io["implementation_commit"],
+                Path(episode_io["implementation_path"]),
+                episode_io["implementation_sha256"],
+            )
+        ).hexdigest()
+        == episode_io["implementation_sha256"]
+    )
 
 
 def test_candidate_source_tamper_and_false_physical_claim_fail_closed(tmp_path: Path) -> None:

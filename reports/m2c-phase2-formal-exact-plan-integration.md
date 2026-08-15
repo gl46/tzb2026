@@ -1,7 +1,7 @@
 # M2C Phase-2 formal exact-plan integration audit
 
 - Status: **BLOCKED_UNMEASURED_FORMAL_EXACT_PLAN_INTEGRATION**
-- Checked HEAD: `3b86d4c997a6e2a7229c6e8149200b166fa32d77`
+- Checked HEAD: `01883be7f976810b2850c43fb956d764e8df496f`
 - Formal execution eligible: **false**
 - Physical execution / training by this audit: **false / false**
 
@@ -66,7 +66,7 @@ by that same formal V4 Phase-2 evidence index.
 
 ## Safe implementation order
 
-1. `TRAIN_NO_TEACHER_S4_QWEN_DECISION_LEVEL_BUNDLE`
+1. `BIND_REVIEWED_PRODUCTION_ASSOCIATION_AND_ATTRIBUTE_DEPLOYMENT`
 2. `BIND_REAL_QUERY_ONLY_PLAN_SYNTHESIS_BACKEND`
 3. `BIND_REAL_ISAAC_RAW_PUBLIC_FRAME_SOURCE`
 4. `BIND_REAL_FORMAL_V4_ISAAC_HTTP_SERVICE_BACKEND_FACTORY`

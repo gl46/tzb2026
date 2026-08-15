@@ -94,16 +94,16 @@ QWEN_TRAIN_REPORT_NAME = "train_report.json"
 # receipt and does not bypass the later model/scene/host/session evidence gate.
 FORMAL_PHYSICAL_RUNNER_BINDING: tuple[str, str] | None = (
     "scripts/m2c/run_formal_model_owned_chain_v4.py",
-    "799caecdb12f73b5e6ea226eb2b983e4fbe4c08482f7ed037ae33c2168068eef",
+    "f5b0e0ed4bef0936910f2bf09541b615a7fe1843acde5974b8d51b37b0cdc681",
 )
 # A runner/source hash is not a deployment identity. Unlocking this binding
 # still requires the immutable implementation commit, container image, and
 # complete transitive-import manifest. ADR-0024 withdrew the runtime B0
 # wrapper; INVALID/preflight rejection is terminal NO_PHYSICAL_EXECUTION.
 FORMAL_DEPLOYMENT_CLOSURE_BINDING: tuple[str, str, str] | None = (
-    "3b86d4c997a6e2a7229c6e8149200b166fa32d77",
+    "01883be7f976810b2850c43fb956d764e8df496f",
     "sha256:783444c706538aa76cf5126e911ddc5e618779e6105305ad4af4260362a30aa9",
-    "684c81dcb00d0abf33095bc704e7550d9bb64400b367d2b5da9324aeb85c8993",
+    "2d6fef06f9b143799ee35186bd9e06237ead5014e8803565c3d646d57994e0d4",
 )
 # Compatibility sentinel withdrawn by ADR-0024 section 2. It must remain None
 # and is not an unlock requirement or an execution path.

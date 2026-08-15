@@ -203,6 +203,22 @@ def _historical_git_blob_with_sha256(
     raise CandidateAuditFailure(f"candidate historical Git blob is absent: {path}")
 
 
+def _git_blob_at_commit_with_sha256(
+    project_root: Path,
+    commit: str,
+    path: Path,
+    expected_sha256: str,
+) -> bytes:
+    result = subprocess.run(
+        ["git", "-C", str(project_root), "show", f"{commit}:{path.as_posix()}"],
+        check=False,
+        capture_output=True,
+    )
+    if result.returncode != 0 or _sha256(result.stdout) != expected_sha256:
+        raise CandidateAuditFailure(f"candidate Git blob differs at {commit}: {path.as_posix()}")
+    return result.stdout
+
+
 def parse_literal_none_bindings(source: bytes) -> dict[str, None]:
     try:
         tree = ast.parse(source.decode("utf-8"))
@@ -423,24 +439,34 @@ def load_candidate_config(project_root: Path) -> dict[str, Any]:
         or dependencies["privileged_truth_policy_input"] is not False
     ):
         raise CandidateAuditFailure("candidate exact-plan dependency manifest fields differ")
+    dependency_commit = dependencies["implementation_commit"]
     for path, expected in dependencies["dependencies"].items():
-        if _sha256(read_regular_file_once(project_root / path)) != expected:
-            raise CandidateAuditFailure(f"exact-plan synthesis dependency differs: {path}")
-    if (
-        _sha256(read_regular_file_once(project_root / EXACT_PLAN_SYNTHESIS_BACKEND_PATH))
-        != EXACT_PLAN_SYNTHESIS_BACKEND_SHA256
-    ):
-        raise CandidateAuditFailure("candidate exact-plan synthesis backend SHA-256 differs")
+        _git_blob_at_commit_with_sha256(
+            project_root,
+            dependency_commit,
+            Path(path),
+            expected,
+        )
     for path, expected in (
+        (EXACT_PLAN_SYNTHESIS_BACKEND_PATH, EXACT_PLAN_SYNTHESIS_BACKEND_SHA256),
         (EXACT_PLAN_SYNTHESIS_QUERY_PATH, EXACT_PLAN_SYNTHESIS_QUERY_SHA256),
         (ACTIVE_SESSION_QUERY_PATH, ACTIVE_SESSION_QUERY_SHA256),
         (PER_DECISION_BUNDLE_FACTORY_PATH, PER_DECISION_BUNDLE_FACTORY_SHA256),
         (PER_DECISION_COMPONENT_SOURCE_PATH, PER_DECISION_COMPONENT_SOURCE_SHA256),
         (FORMAL_RUNTIME_FACTORY_PATH, FORMAL_RUNTIME_FACTORY_SHA256),
-        (FORMAL_EPISODE_IO_PATH, FORMAL_EPISODE_IO_SHA256),
     ):
-        if _sha256(read_regular_file_once(project_root / path)) != expected:
-            raise CandidateAuditFailure(f"candidate query-only synthesis source differs: {path}")
+        _git_blob_at_commit_with_sha256(
+            project_root,
+            dependency_commit,
+            path,
+            expected,
+        )
+    _git_blob_at_commit_with_sha256(
+        project_root,
+        FORMAL_EPISODE_IO_IMPLEMENTATION_COMMIT,
+        FORMAL_EPISODE_IO_PATH,
+        FORMAL_EPISODE_IO_SHA256,
+    )
     native_report_raw = read_regular_file_once(project_root / NATIVE_BUILD_REPORT_PATH)
     if _sha256(native_report_raw) != native["report_sha256"]:
         raise CandidateAuditFailure("candidate native-build report SHA-256 differs")
@@ -521,11 +547,12 @@ def load_candidate_config(project_root: Path) -> dict[str, Any]:
     ):
         raise CandidateAuditFailure("candidate query-only deployment smoke claims differ")
     for path, expected in candidate["source_bindings"].items():
-        current = read_regular_file_once(project_root / path)
+        try:
+            current = read_regular_file_once(project_root / path)
+        except OSError:
+            current = b""
         if _sha256(current) != expected:
-            if Path(path) != ENTRY_GATE_PATH:
-                raise CandidateAuditFailure(f"candidate source SHA-256 differs: {path}")
-            _historical_git_blob_with_sha256(project_root, ENTRY_GATE_PATH, expected)
+            _historical_git_blob_with_sha256(project_root, Path(path), expected)
     adr = candidate["accepted_adr"]
     if (
         adr
