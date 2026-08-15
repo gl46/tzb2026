@@ -1,0 +1,55 @@
+{
+  "builder_image_id": "sha256:01d3c57bde2ce5ff1655ab5739d0729ae7ea035be2ac56bd391a4357e3c4307e",
+  "closed_blockers": [
+    "NATIVE_MODULE_LOAD_IN_FROZEN_ISAAC_IMAGE_UNMEASURED",
+    "STATIC_HOME_STATE_A3_QUERY_UNMEASURED"
+  ],
+  "dependency_bundle": {
+    "all_bytes_read_only": true,
+    "audited_bullet_header_count": 12,
+    "inventory_sha256": "3641a84b2e0befd0225f6127fd613c10bbc2b2abe615bce1fc28491e4533586d",
+    "path": "/Users/gl/tzb-m2c-evidence/phase2-a3-runtime-deps-v3-3641a84b2e0befd0225f6127fd613c10bbc2b2abe615bce1fc28491e4533586d",
+    "payload_file_count": 19
+  },
+  "evidence_claims": {
+    "articulation_target_writes": 0,
+    "deployment_query_completed": true,
+    "formal_execution_eligible": false,
+    "isaac_started": false,
+    "physical_execution_performed": false,
+    "privileged_truth_policy_input": false,
+    "q_b_evaluation_performed": false,
+    "scene_mutations": 0,
+    "simulation_steps": 0,
+    "static_state_preflight_clear": true,
+    "teacher_used": false,
+    "training_performed": false
+  },
+  "immutable_commit": "a64ee76ec298a025f4021245211e1208847bebf0",
+  "one_next_command": "run the immutable formal V4 endpoint contract smoke with the same native/FK closure; do not set either active binding until plan-specific eight-skill evidence and deployment closure pass",
+  "query": {
+    "clear_result_count": 74,
+    "collision_rejection_count": 0,
+    "query_failure_count": 0,
+    "receipt_sha256": "d640b1ca05270b63a19e048b9c89e0a7c9e71b2ed0fe06497773d0647f948afc",
+    "request_segment_count": 74,
+    "request_sha256": "9eda09cde631cdea9da62d9dad68507d332ba7e52f8edef087ac8fbdcba89c18",
+    "static_state_preflight_clear": true
+  },
+  "remaining_blockers": [
+    "EIGHT_SKILL_REAL_ISAAC_PHASE_VALIDATION_MISSING",
+    "IMMUTABLE_DEPLOYMENT_COMMIT_CONTAINER_IMPORT_ASSET_CLOSURE_MISSING",
+    "REAL_EXACT_PLAN_ISAAC_EXECUTOR_MISSING",
+    "REAL_SESSION_ENDPOINT_STARTUP_AND_HOST_HMAC_ATTESTATION_MISSING"
+  ],
+  "runtime_image_id": "sha256:783444c706538aa76cf5126e911ddc5e618779e6105305ad4af4260362a30aa9",
+  "schema_version": "M2CPhase2A3NativeLoadSmokeAuditV1",
+  "smoke_evidence": {
+    "exit_code": 0,
+    "path": "/Users/gl/tzb-m2c-evidence/phase2-a3-native-load-smoke-a64ee76",
+    "report_sha256": "6b05f5923e20632c38a394758884e1a7d00ef8b27577cea915b7f323d0a1121f",
+    "stderr_empty": true,
+    "stdout_matches_report": true
+  },
+  "status": "PASS_QUERY_ONLY_NATIVE_LOAD_IN_FROZEN_ISAAC_IMAGE"
+}
