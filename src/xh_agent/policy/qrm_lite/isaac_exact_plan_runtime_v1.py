@@ -295,6 +295,24 @@ class ActiveSessionMutationRecorderV1(Protocol):
     def record_attachment_mutations(self, count: int = 1) -> None: ...
 
 
+class ActiveSessionAttachmentRegistryV1(Protocol):
+    def commit_attachment(
+        self,
+        *,
+        public_track_id: str,
+        external_contact_path: str,
+        bound_plan_sha256: str,
+        phase_sha256: str,
+    ) -> Any: ...
+
+    def commit_removal(
+        self,
+        *,
+        bound_plan_sha256: str,
+        phase_sha256: str,
+    ) -> Any: ...
+
+
 class FrozenProbePreflightUnavailableV1:
     """Fail-closed preflight adapter for the currently frozen helper surface."""
 
@@ -420,6 +438,7 @@ class FrozenProbeExactPlanExecutorV1:
             PublicReassociationPhaseReceiptV1,
         ],
         mutation_counter_source: ActiveSessionMutationRecorderV1 | None = None,
+        attachment_state_registry: ActiveSessionAttachmentRegistryV1 | None = None,
         deployment_binding: ExactPlanPrimitiveDeploymentBindingV1 | None = None,
     ) -> None:
         self.project_root = project_root.resolve()
@@ -436,6 +455,7 @@ class FrozenProbeExactPlanExecutorV1:
         self.capture_public = capture_public
         self.reassociate_public = reassociate_public
         self.mutation_counter_source = mutation_counter_source
+        self.attachment_state_registry = attachment_state_registry
         self.deployment_binding = deployment_binding
         self.implementation_sha256 = _file_sha256(Path(__file__))
         self._authorized_plan: str | None = None
@@ -468,6 +488,10 @@ class FrozenProbeExactPlanExecutorV1:
         if self.mutation_counter_source is None:
             raise ExactPlanRuntimeUnavailable(
                 "REAL_ISAAC executor requires the shared active-session mutation counter"
+            )
+        if self.attachment_state_registry is None:
+            raise ExactPlanRuntimeUnavailable(
+                "REAL_ISAAC executor requires the shared active-session attachment registry"
             )
         binding = self.deployment_binding
         if binding is None or binding.execution_mode != "REAL_ISAAC":
@@ -618,7 +642,11 @@ class FrozenProbeExactPlanExecutorV1:
             "phase_sha256": phase.phase_sha256,
         }
 
-    def _execute_attach(self, phase: ExactPlanPhaseContractV1) -> dict[str, object]:
+    def _execute_attach(
+        self,
+        plan: M2CExactPlanPrimitivePlanV1,
+        phase: ExactPlanPhaseContractV1,
+    ) -> dict[str, object]:
         wire = phase.phase
         entity = self._attachment_candidate
         if entity is None or self._attachment_candidate_phase_index != wire.phase_index - 1:
@@ -637,27 +665,53 @@ class FrozenProbeExactPlanExecutorV1:
         self.mutation_counter_source.record_scene_mutations()
         self.mutation_counter_source.record_attachment_mutations()
         self.probe._attach_preserving_pose(entity, self.hand_prim, object_prim)
+        attachment_receipt_sha256 = None
+        if self.attachment_state_registry is not None:
+            attachment = self.attachment_state_registry.commit_attachment(
+                public_track_id=plan.inputs.target_track_id,
+                external_contact_path=object_path,
+                bound_plan_sha256=plan.bound_plan_sha256,
+                phase_sha256=phase.phase_sha256,
+            )
+            attachment_receipt_sha256 = str(attachment.receipt_sha256)
+        elif self.real_isaac:
+            raise ExactPlanRuntimeUnavailable("active attachment registry is unavailable")
         # Entity identity is actuation-internal and intentionally absent from
         # the public/persistent model-path audit projection.
         return {
             "command": wire.command,
             "attachment_status": "PASS",
             "selector": wire.contact_entity_selection,
+            "active_attachment_receipt_sha256": attachment_receipt_sha256,
             "phase_sha256": phase.phase_sha256,
         }
 
-    def _execute_remove(self, phase: ExactPlanPhaseContractV1) -> dict[str, object]:
+    def _execute_remove(
+        self,
+        plan: M2CExactPlanPrimitivePlanV1,
+        phase: ExactPlanPhaseContractV1,
+    ) -> dict[str, object]:
         self._phase_operation_started = True
         if self.mutation_counter_source is None:
             raise ExactPlanRuntimeUnavailable("attachment mutation counter is unavailable")
         self.mutation_counter_source.record_scene_mutations()
         self.mutation_counter_source.record_attachment_mutations()
         self.probe._remove_attachment()
+        removal_receipt_sha256 = None
+        if self.attachment_state_registry is not None:
+            removal = self.attachment_state_registry.commit_removal(
+                bound_plan_sha256=plan.bound_plan_sha256,
+                phase_sha256=phase.phase_sha256,
+            )
+            removal_receipt_sha256 = str(removal.receipt_sha256)
+        elif self.real_isaac:
+            raise ExactPlanRuntimeUnavailable("active attachment registry is unavailable")
         self._attachment_candidate = None
         self._attachment_candidate_phase_index = None
         return {
             "command": phase.phase.command,
             "attachment_removal_status": "PASS",
+            "attachment_removal_receipt_sha256": removal_receipt_sha256,
             "phase_sha256": phase.phase_sha256,
         }
 
@@ -710,9 +764,9 @@ class FrozenProbeExactPlanExecutorV1:
         if command == "GRIPPER_POSITION":
             return self._execute_gripper(phase)
         if command == "ATTACH_CONTACT_ENTITY":
-            return self._execute_attach(phase)
+            return self._execute_attach(plan, phase)
         if command == "REMOVE_ATTACHMENT":
-            return self._execute_remove(phase)
+            return self._execute_remove(plan, phase)
         if command == "PUBLIC_RGBD_CAPTURE":
             return self._execute_capture(plan, phase)
         if command == "PUBLIC_TRACK_REASSOCIATION":

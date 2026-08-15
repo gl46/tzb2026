@@ -315,6 +315,7 @@ def _executor(
     probe: _Probe,
     journal: _Journal,
     mutation_counter: _MutationCounter | None = None,
+    attachment_registry: _AttachmentRegistry | None = None,
 ):
     return FrozenProbeExactPlanExecutorV1(
         project_root=PROJECT_ROOT,
@@ -330,6 +331,7 @@ def _executor(
         capture_public=_capture,
         reassociate_public=_reassociate,
         mutation_counter_source=mutation_counter,
+        attachment_state_registry=attachment_registry,
     )
 
 
@@ -345,12 +347,27 @@ class _MutationCounter:
         self.attachment_mutations += count
 
 
+class _AttachmentRegistry:
+    def __init__(self) -> None:
+        self.attachments = 0
+        self.removals = 0
+
+    def commit_attachment(self, **_kwargs: Any) -> SimpleNamespace:
+        self.attachments += 1
+        return SimpleNamespace(receipt_sha256="c" * 64)
+
+    def commit_removal(self, **_kwargs: Any) -> SimpleNamespace:
+        self.removals += 1
+        return SimpleNamespace(receipt_sha256="d" * 64)
+
+
 def test_attachment_mutations_are_recorded_before_frozen_helpers(tmp_path: Path) -> None:
     plan = _plan(tmp_path)
     probe = _Probe()
     probe.RigidPrim = lambda path: SimpleNamespace(path=path)
     counter = _MutationCounter()
-    executor = _executor(plan, probe, _Journal(), counter)
+    registry = _AttachmentRegistry()
+    executor = _executor(plan, probe, _Journal(), counter, registry)
     executor._attachment_candidate = "cylinder_01"
     executor._attachment_candidate_phase_index = 0
     attach = SimpleNamespace(
@@ -367,13 +384,15 @@ def test_attachment_mutations_are_recorded_before_frozen_helpers(tmp_path: Path)
         phase_sha256="b" * 64,
     )
 
-    executor._execute_attach(attach)
-    executor._execute_remove(remove)
+    executor._execute_attach(plan, attach)
+    executor._execute_remove(plan, remove)
 
     assert probe.attachment_calls == 1
     assert probe.removal_calls == 1
     assert counter.scene_mutations == 2
     assert counter.attachment_mutations == 2
+    assert registry.attachments == 1
+    assert registry.removals == 1
 
 
 def test_frozen_probe_preflight_is_explicitly_unavailable_before_any_command(
@@ -527,6 +546,7 @@ def test_real_isaac_construction_requires_counter_and_reviewed_deployment_bindin
             capture_public=_capture,
             reassociate_public=_reassociate,
             mutation_counter_source=_MutationCounter(),
+            attachment_state_registry=_AttachmentRegistry(),
             deployment_binding=None,
         )
     assert probe.pose_calls == []
