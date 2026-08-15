@@ -1,0 +1,241 @@
+{
+  "campaign_can_satisfy_frozen_denominator": false,
+  "campaign_id": "m2c-s4-terminal-regrasp-diagnostic-v2",
+  "consumed_run_count": 1,
+  "decision": null,
+  "evidence_inventory": [
+    {
+      "path": "ledger/.diagnostic-ledger.lock",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "ledger/claim-00.json",
+      "sha256": "223d5511591bbcd0a3134308d08c7b9b1125a0b96b1269f99e54f4da802bf21d",
+      "size": 2125
+    },
+    {
+      "path": "evidence/run-00-cd8bf785b0f7f800/authorization/diagnostic-claim.json",
+      "sha256": "223d5511591bbcd0a3134308d08c7b9b1125a0b96b1269f99e54f4da802bf21d",
+      "size": 2125
+    },
+    {
+      "path": "evidence/run-00-cd8bf785b0f7f800/derived/terminal-regrasp-diagnostic-probe-v2.py",
+      "sha256": "a6e080d51ef43f0111e7d061c95dfb880a497cb20aa43e2729ab055ba7866d34",
+      "size": 187543
+    },
+    {
+      "path": "evidence/run-00-cd8bf785b0f7f800/job-receipt.json",
+      "sha256": "caadac76a27dc9151b88e12a42bbc5e112321bed3398db2cfc7f7c1d7ed08806",
+      "size": 1945
+    },
+    {
+      "path": "evidence/run-00-cd8bf785b0f7f800/probe/console.log",
+      "sha256": "c19cc223f780e21cd24e81c577f7f5b586fd67e18af4990dca1286e7de4005e8",
+      "size": 37604
+    },
+    {
+      "path": "evidence/run-00-cd8bf785b0f7f800/stage/console.log",
+      "sha256": "5b5f9c57ecad7c145a18a5421e3e9a29259489e89c0f0dd6d6e3f86bf011da01",
+      "size": 44340
+    },
+    {
+      "path": "evidence/run-00-cd8bf785b0f7f800/stage/front_rgbd/depth/000000.npy",
+      "sha256": "9db73dafe3d132306052ca8951a19e4c4726d01d26b798762b12c1d8eb32e0c7",
+      "size": 1228928
+    },
+    {
+      "path": "evidence/run-00-cd8bf785b0f7f800/stage/front_rgbd/instance/000000.png",
+      "sha256": "3ec624a1e8ace5f62ffda58d01500044947d7c5de7ff0667b67c51262ef87bd9",
+      "size": 8186
+    },
+    {
+      "path": "evidence/run-00-cd8bf785b0f7f800/stage/front_rgbd/instance_labels.json",
+      "sha256": "4542f2d725bdb673ca65af223ceb372248cf6d98cd2fbd2e18629081089b94e6",
+      "size": 2113
+    },
+    {
+      "path": "evidence/run-00-cd8bf785b0f7f800/stage/front_rgbd/rgb/000000.png",
+      "sha256": "7f37153d429c0e42a5c651f01fa4199c0c0e55802105ed348c556908d556779d",
+      "size": 73884
+    },
+    {
+      "path": "evidence/run-00-cd8bf785b0f7f800/stage/front_rgbd/semantic/000000.png",
+      "sha256": "4cfad08df79aeb94e0b6d26ef258cb70c74d329db404aafc4f06a5896b203e1a",
+      "size": 7768
+    },
+    {
+      "path": "evidence/run-00-cd8bf785b0f7f800/stage/front_rgbd/semantic_labels.json",
+      "sha256": "6477a9e56b64e8cd5f0632a5ed4ee9615e55f3e18631b641cb2e06ad4d2d56ac",
+      "size": 471
+    },
+    {
+      "path": "evidence/run-00-cd8bf785b0f7f800/stage/m1b_physics_scene.usdc",
+      "sha256": "67505d314ad65ae9c86d09bca0828463d1488c8a531ff05e6726ebc56a8b76d6",
+      "size": 9973890
+    },
+    {
+      "path": "evidence/run-00-cd8bf785b0f7f800/stage/m1b_scene.usda",
+      "sha256": "9a8ef85ce679acd1b6d22dbeb80e5d9203a7eb91958363b1d0eb648461976654",
+      "size": 22842509
+    },
+    {
+      "path": "evidence/run-00-cd8bf785b0f7f800/stage/metrics.json",
+      "sha256": "8dbf98c272fc16a866f6e3e0af6c46e47109d09df32f80e3c553186f545ccd19",
+      "size": 11492
+    },
+    {
+      "path": "evidence/run-00-cd8bf785b0f7f800/stage/overhead_rgbd/depth/000000.npy",
+      "sha256": "674e7f0d3c721922837bfea6f6b2eac226e58c6701c49b0347e459012a99b2f3",
+      "size": 1228928
+    },
+    {
+      "path": "evidence/run-00-cd8bf785b0f7f800/stage/overhead_rgbd/instance/000000.png",
+      "sha256": "cb2d93057fd77f4f30d5af94fe47823a10f790c3f3494cfce5945ef55e3e387d",
+      "size": 4348
+    },
+    {
+      "path": "evidence/run-00-cd8bf785b0f7f800/stage/overhead_rgbd/instance_labels.json",
+      "sha256": "eff22c08bcb843b3ddb6db8e1248fa66ab23ab049c9e358413f0d4f3549e59a5",
+      "size": 1875
+    },
+    {
+      "path": "evidence/run-00-cd8bf785b0f7f800/stage/overhead_rgbd/rgb/000000.png",
+      "sha256": "17457ef2cf6e2fc733199bdcb0f34537ce2538296848e078c88bab5f2558ebd2",
+      "size": 102918
+    },
+    {
+      "path": "evidence/run-00-cd8bf785b0f7f800/stage/overhead_rgbd/semantic/000000.png",
+      "sha256": "79122f3aa37a8f9ba160dbf3eb2267e9ce583d002d91ddad842330979d458d69",
+      "size": 186264
+    },
+    {
+      "path": "evidence/run-00-cd8bf785b0f7f800/stage/overhead_rgbd/semantic_labels.json",
+      "sha256": "6477a9e56b64e8cd5f0632a5ed4ee9615e55f3e18631b641cb2e06ad4d2d56ac",
+      "size": 471
+    },
+    {
+      "path": "evidence/run-00-cd8bf785b0f7f800/stage/policy_rgbd/depth/000000.npy",
+      "sha256": "31895b48fb8e5fe0e243b83603c49c7dc605a18c27d2e74542f7cd7a9212919b",
+      "size": 1228928
+    },
+    {
+      "path": "evidence/run-00-cd8bf785b0f7f800/stage/policy_rgbd/instance/000000.png",
+      "sha256": "33478383ea9852794e8035578a66d0913549229b4f51fffc146af5f67d4c08bd",
+      "size": 8908
+    },
+    {
+      "path": "evidence/run-00-cd8bf785b0f7f800/stage/policy_rgbd/instance_labels.json",
+      "sha256": "4542f2d725bdb673ca65af223ceb372248cf6d98cd2fbd2e18629081089b94e6",
+      "size": 2113
+    },
+    {
+      "path": "evidence/run-00-cd8bf785b0f7f800/stage/policy_rgbd/rgb/000000.png",
+      "sha256": "dcd074a1f558b35708e5b60c3b4cda9a1f7b7651d4ec82898946e7385cecd3e5",
+      "size": 87550
+    },
+    {
+      "path": "evidence/run-00-cd8bf785b0f7f800/stage/policy_rgbd/semantic/000000.png",
+      "sha256": "7dd7377a9d0a4c8584c3010e876b6ff9fc1afd214ecb14eb134e8bb3d67b7659",
+      "size": 8131
+    },
+    {
+      "path": "evidence/run-00-cd8bf785b0f7f800/stage/policy_rgbd/semantic_labels.json",
+      "sha256": "6477a9e56b64e8cd5f0632a5ed4ee9615e55f3e18631b641cb2e06ad4d2d56ac",
+      "size": 471
+    },
+    {
+      "path": "evidence/run-00-cd8bf785b0f7f800/stage/runtime_frames.jsonl",
+      "sha256": "0439616ab539cdc5a47c394cbffe0e3eeefa78d988f6acd445b3fa11820854b1",
+      "size": 1762
+    },
+    {
+      "path": "evidence/run-00-cd8bf785b0f7f800/stage/side_rgbd/depth/000000.npy",
+      "sha256": "43f706323bbf8d968171c7590d53516a12865dc12c5bf5b6a876bd3e8a583df0",
+      "size": 1228928
+    },
+    {
+      "path": "evidence/run-00-cd8bf785b0f7f800/stage/side_rgbd/instance/000000.png",
+      "sha256": "a46062927eda5d7f94c75f94247bb8dee827766922ed5c0a66fd735233b463e4",
+      "size": 7767
+    },
+    {
+      "path": "evidence/run-00-cd8bf785b0f7f800/stage/side_rgbd/instance_labels.json",
+      "sha256": "4542f2d725bdb673ca65af223ceb372248cf6d98cd2fbd2e18629081089b94e6",
+      "size": 2113
+    },
+    {
+      "path": "evidence/run-00-cd8bf785b0f7f800/stage/side_rgbd/rgb/000000.png",
+      "sha256": "c59572bc18062bb746397f647c33f15497e0ac0bc05d8fd9d2d7a20f4dd3d3ff",
+      "size": 76612
+    },
+    {
+      "path": "evidence/run-00-cd8bf785b0f7f800/stage/side_rgbd/semantic/000000.png",
+      "sha256": "8d50a625bc1244fa5d42964fb2700f8f4cb3edc912380631c3a9c97867130720",
+      "size": 4410
+    },
+    {
+      "path": "evidence/run-00-cd8bf785b0f7f800/stage/side_rgbd/semantic_labels.json",
+      "sha256": "6477a9e56b64e8cd5f0632a5ed4ee9615e55f3e18631b641cb2e06ad4d2d56ac",
+      "size": 471
+    },
+    {
+      "path": "evidence/run-00-cd8bf785b0f7f800/stage/supervision_frames.jsonl",
+      "sha256": "7d6ca7efda4782035888e8d7247106f555464053a44762ff9877d651120e4b80",
+      "size": 1509
+    },
+    {
+      "path": "evidence/run-00-cd8bf785b0f7f800/terminal-receipt.json",
+      "sha256": "ac977309070490c6e49c322999916b0b59b08f8364224d2118c0a8a91083d1c8",
+      "size": 696
+    }
+  ],
+  "evidence_inventory_sha256": "512546516383e8e14e81eb4a8efe949df06c8173c6d0d310211ea8d2b53724f6",
+  "failed_run": {
+    "blocker": "M2B public RGB-D capture requires a failure injection",
+    "blocker_class": "PUBLIC_CAPTURE_SETUP_REQUIRES_LEGACY_FAILURE_INJECTION",
+    "claim_semantic_sha256": "908772064b05811223914785acac6784c7d9209cfe54c4386b3e77c1cc03df5b",
+    "claim_sha256": "223d5511591bbcd0a3134308d08c7b9b1125a0b96b1269f99e54f4da802bf21d",
+    "condition": "C1_NO_BLOCKER",
+    "controller_initialized": false,
+    "derived_probe_sha256": "a6e080d51ef43f0111e7d061c95dfb880a497cb20aa43e2729ab055ba7866d34",
+    "job_receipt_sha256": "caadac76a27dc9151b88e12a42bbc5e112321bed3398db2cfc7f7c1d7ed08806",
+    "kit_started": true,
+    "ordinal": 0,
+    "physical_action_outcome": "NOT_AVAILABLE",
+    "probe_console_sha256": "c19cc223f780e21cd24e81c577f7f5b586fd67e18af4990dca1286e7de4005e8",
+    "raw_terminal_measurement_present": false,
+    "run_id": "m2c-s4-terminal-diagnostic-cd8bf785b0f7f800d3d40bf984f10cb2aab33bb3be61876112a73aed14c1ebb0",
+    "stage_completed": true,
+    "terminal_primitive_called": false,
+    "terminal_receipt_semantic_sha256": "ae4c540694081bf3e66a6dfb45c6a7a82d9a423c10346b12ab26c31cfa364527",
+    "terminal_receipt_sha256": "ac977309070490c6e49c322999916b0b59b08f8364224d2118c0a8a91083d1c8"
+  },
+  "further_v2_execution_authorized": false,
+  "governing_adr": {
+    "introduced_commit": "a87ba0bd6360579ccc1011ecc1f6cc5921c3fa13",
+    "path": "docs/decisions/ADR-0026-m2c-terminal-step-diagnosis.md",
+    "sha256": "ba24b65435b19b3a7700bb7caba83a01d98897a8999aee54af5c2370d410c180",
+    "status": "ACCEPTED_HUMAN_ADR"
+  },
+  "implementation": {
+    "path": "scripts/m2c/audit_terminal_regrasp_diagnostic_v2_incomplete.py",
+    "sha256": "faaaa41609c90a9f6473aa43bdba606c67139217f891f7c664d5ebd90ac5f398"
+  },
+  "preregistration": {
+    "content_sha256": "cd9ce349e696891531a1089e582f0ca98672efb778fa12510322c464fbc5923b",
+    "file_sha256": "063f70c1501e0efc1e7d74a0336c4e8f4962b9c147ab44cc71ef304c7a6bfa0c",
+    "introduced_commit": "0b81ad8f8c35d55100a2923d903121edd9a7ae91",
+    "path": "/Users/gl/tzb-qrm-lite/docs/decisions/M2C-S4-TERMINAL-REGRASP-DIAGNOSTIC-V2-PREREG.json"
+  },
+  "privileged_truth_policy_input": false,
+  "r1_r2_r3_evaluation_allowed": false,
+  "report_content_sha256": "f24166fe6ba89d67a532e653a196de191a8d8eab787e03400240043db5136344",
+  "retry_or_replacement_authorized": false,
+  "schema_version": "M2CTerminalRegraspDiagnosticIncompleteAuditV2",
+  "status": "BLOCKED_INCOMPLETE_PUBLIC_CAPTURE_SETUP_MISMATCH",
+  "teacher_used": false,
+  "training_collection_authorized": false,
+  "unrun_count": 35,
+  "valid_terminal_measurements": 0
+}
