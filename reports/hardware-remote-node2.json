@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-15T13:58:37.362372+00:00",
+  "generated_at": "2026-07-17T11:14:50.447385+00:00",
   "host_alias": "node2",
   "items": {
     "colcon": {
@@ -47,7 +47,7 @@
     },
     "gpu_processes": {
       "status": "FOUND",
-      "value": "4189629, /home/gxh/miniconda3/envs/model_test/bin/python3.11;2605116, python"
+      "value": "4189629, /home/gxh/miniconda3/envs/model_test/bin/python3.11"
     },
     "gz_ros2_control": {
       "status": "FOUND",
@@ -78,7 +78,7 @@
     },
     "ram": {
       "status": "FOUND",
-      "value": "251Gi total, 224Gi available"
+      "value": "251Gi total, 232Gi available"
     },
     "relevant_environment": {
       "status": "FOUND",
@@ -106,7 +106,7 @@
     },
     "swap": {
       "status": "FOUND",
-      "value": "8.0Gi total, 1.1Gi used"
+      "value": "8.0Gi total, 1.2Gi used"
     },
     "time_sync_offset": {
       "status": "UNKNOWN",

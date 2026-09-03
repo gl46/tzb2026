@@ -1,0 +1,233 @@
+{
+  "schema_version": "M2CFullRepositoryTestReceiptV1",
+  "generated_by": "tzb-fe",
+  "purpose": "Close external-review v8 blocker 3. This receipt supplies the recorded shell commands, raw outputs, node ids, exit codes where established, and environment for FOUR CAPTURED COMMANDS executed on 2026-09-01: A (bare pytest), B (pytest over the full-repository-minus-one-ignored-collection-error-file selector), C (pytest over the qwen_brain lane), and D (a filesystem change scan — a find command, NOT a test run). The 2026-08-31 run is TRANSCRIPT_ATTESTED — the 2026-08-31 shell command and its result line (including all 14 failed node ids) are recorded in the producing session transcript at tool_use line 15075 / tool_result line 15076, with uuids and timestamps. See TRANSCRIPT-RECOVERY-20260831-RUN.json. Still NOT established: full stdout (the command piped through `tail -25`), pytest's exit code (no pipefail / PIPESTATUS), process argv (shell command text only), and package self-containment (the transcript is external).",
+  "repository": "/Users/gl/projects/xh-202607-qwen-brain",
+  "environment": {
+    "python": "3.13.12 (project .venv)",
+    "pytest": "8.4.2",
+    "PYTHONPATH": "src",
+    "host": "local macOS workstation"
+  },
+  "run_A_bare": {
+    "purpose": "Demonstrate that a bare invocation aborts on a collection error",
+    "continue_on_collection_errors": false,
+    "exit_code": 2,
+    "collection_status": "ERROR",
+    "collection_error": "tests/unit/test_m2c_s3_dataset.py — FileNotFoundError: artifacts/m2b/dataset-v2.jsonl",
+    "result_line": "1 error in 0.91s",
+    "stdout_file": "runA-stdout.txt",
+    "stdout_sha256": "2342f667aa9a5e54018e889cb689441a1e2b4333f7b6e507be0d2105b62664fe",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "environment": {
+      "PYTHONPATH": "src"
+    },
+    "recorded_shell_command": "PYTHONPATH=src .venv/bin/python -m pytest -q",
+    "argv_status": "NOT_ESTABLISHED",
+    "argv_note": "This is the RECORDED SHELL COMMAND, not the process argv. PYTHONPATH=src is an environment assignment and never appears in sys.argv. Any glob is expanded by the shell before exec. The package contains stdout, stderr and exit codes but no shell xtrace and no captured sys.argv, so the actual argv is NOT established."
+  },
+  "run_C_qwen_brain_lane": {
+    "purpose": "Raw evidence for the qwen_brain lane result asserted in this receipt. Added 2026-09-01 after m2c-exec's pre-scan found that this receipt asserted facts with no corresponding raw artifact in the directory — the exact defect this receipt was created to fix.",
+    "exit_code": 0,
+    "result_line": "359 passed, 4 skipped in 4.03s",
+    "stdout_file": "runC-qwenbrain-stdout.txt",
+    "stdout_sha256": "377b110cd32dd602d13218247cb0130bbea99e57ac3bd2513d68f5def7ed7b2c",
+    "stderr_file": "runC-qwenbrain-stderr.txt",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "exit_file": "runC-qwenbrain-exit.txt",
+    "environment": {
+      "PYTHONPATH": "src"
+    },
+    "recorded_shell_command": "PYTHONPATH=src .venv/bin/python -m pytest -q tests/unit/test_qwen_brain_*.py",
+    "argv_status": "NOT_ESTABLISHED",
+    "argv_note": "Recorded shell command, not process argv. PYTHONPATH=src is an environment assignment; the trailing token is a shell glob expanded before exec and the expansion was not captured.",
+    "duplicate_record_note": "This run is recorded TWICE in this receipt: under run_C_qwen_brain_lane and under qwen_brain_lane_zero_failures_observed_2026_09_01. Both describe the SAME execution, not two runs. The duplication is how an inconsistency survived once: the argv mislabel was fixed in one object and left in the other. Any future edit must touch both."
+  },
+  "run_D_repository_change_scan": {
+    "purpose": "Raw evidence for the repository change-scan. NOTE: an earlier draft called this the 'zero byte change' assertion. That name was wrong — this command compares mtimes over a partial scope, and its own output is non-empty. See what_run_D_actually_supports.",
+    "captured_at_local": "2026-09-01 02:13:17 +0800",
+    "output_file": "runD-find-changed-since-0831-1700.txt",
+    "output_sha256": "0f238608728ad814feb3d279377aad051d069eb482d81b92b67e9ac776912762",
+    "result": "The scan returned exactly three paths: QWEN_BRAIN_VNEXT_VLA_INTEGRATION_SPEC.md (documentation) and two .pytest_cache entries. No source, test, or config path appeared in the returned set.",
+    "scope_limit": "The command excludes .git, __pycache__, .venv and artifacts. It establishes that, within the scanned scope, no source/test/config file has an MTIME LATER than the threshold. It does NOT establish that such files are byte-identical — mtime is not a digest — and it says nothing about the excluded trees.",
+    "command_kind": "FILESYSTEM_CHANGE_SCAN_NOT_A_TEST_RUN",
+    "argv_status": "NOT_ESTABLISHED — the raw header records the command TEXT, which is the correct predicate for it"
+  },
+  "found_by": "m2c-exec pre-scan, 2026-09-01, across many rounds. It observed in turn: unsupported assertions; an over-strong causal claim about 47 failures; an mtime scan described as byte evidence; a universal claim drawn from one observation; field NAMES asserting what their own bodies disclaimed; shell command text labelled as process argv; a pipeline whose exit code was masked by tail; and a provenance artifact that altered the text it quoted. Two evidence gaps were closed by re-running and capturing; a third — the 2026-08-31 run — was closed by transcript recovery after this receipt had already recorded, and then ignored, its own note that the transcript had not been searched.",
+  "in_package_verifiable_scope": {
+    "verifiable": [
+      "run A (2026-09-01): a bare invocation aborts on a collection error, exit 2",
+      "run B (2026-09-01): the full-repository-MINUS-ONE-IGNORED-FILE result, its collected and failed node ids, and the internal consistency of the stated counts",
+      "run C (2026-09-01): the qwen_brain lane result, 359 passed / 4 skipped / zero failures observed",
+      "run D (2026-09-01): the change-scan output as captured — an mtime scan over a partial scope"
+    ],
+    "not_verifiable_from_this_package": [
+      "the FULL stdout of the 2026-08-31 run — the command piped through `tail -25`, so only the tail was ever recorded",
+      "pytest's exit code for the 2026-08-31 run — the pipeline had no pipefail and PIPESTATUS was not inspected, so the shell reported tail's status",
+      "process argv for ANY of these commands — only shell command text was recorded",
+      "that the freeze gate caused all 47 of the additional failures — one file of nineteen was sampled",
+      "that the qwen_brain lane is 'unaffected by' the gate — zero failures were observed there once; the causal claim was not tested",
+      "byte identity of repository source/test/config files between the two dated measurements — run D compares mtimes, not digests. This does NOT say byte identity is unverifiable in general: the raw files in this directory carry their own sha256."
+    ],
+    "transcript_attested_not_package_self_contained": "The 2026-08-31 command text, result line and 14 failed node ids ARE recorded — in the producing session transcript, which is external to this package. A recipient must be given TRANSCRIPT-RECOVERY-20260831-RUN.json to check them."
+  },
+  "RESOLVED_THE_135_SELECTOR_WAS_RECOVERED_2026_09_01": {
+    "prior_status": "This receipt previously recorded that the seven-file selector was nowhere recorded and that 135 was therefore not reproducible from the package. That is SUPERSEDED.",
+    "how_it_was_resolved": "The qwen-brain lane located the producing transcript event (session 72ad7a26 line 28990, tool_use_id call_nYTAHkEm5lGLLoL7OnetWd8l, timestamp 2026-08-30T20:08:53.263Z) and the successful tool-result at line 28996, recovering the exact ordered seven paths and argv. No guessing, no trial combinations, no pytest rerun.",
+    "recovery_artifact": "/private/tmp/m2c-s5-current-frozen-regression-selector-recovery-20260901-v1.json, 8864 bytes, sha256 0c9eb21068ec1342d1aefbf4d3049d2f0253d74a60ac137fd26817bf97f3c2d4",
+    "tzb_fe_independent_confirmation": "tzb-fe executed the recovered argv list directly (no shell) on 2026-09-01 and obtained '135 passed in 1.61s', exit 0. NOTE: unlike runs A/B/C in this receipt, the recovered 135 selector IS a genuine process argv — interpreter path, -m, pytest, -q, seven absolute paths, with no environment assignment and no glob — so calling it argv is accurate there.",
+    "seven_files_in_order": [
+      "tests/unit/test_qwen_brain_contracts_v1.py",
+      "tests/unit/test_qwen_brain_semantic_validator_v1.py",
+      "tests/unit/test_qwen_brain_semantic_validator_v2.py",
+      "tests/unit/test_qwen_brain_semantic_client_v2.py",
+      "tests/unit/test_qwen_brain_semantic_path_v2.py",
+      "tests/unit/test_qwen_brain_s5_icl_v3.py",
+      "tests/unit/test_qwen_brain_s5_canonical_icl_v1.py"
+    ],
+    "boundary_that_must_travel_with_it": "What was recovered is the SELECTOR. The seven files' current digests are labelled CURRENT_AT_2026-09-01_RECOVERY_NOT_ASSERTED_AS_ORIGINAL_P1_IDENTITY. Recovering which files were run does not establish that those files held their P1-era bytes.",
+    "note": "tzb-fe had judged this irrecoverable after obtaining 69 rather than 135 from a three-file subset and declining to guess further. Declining to guess was correct; concluding irrecoverable was premature. The record existed in the transcript."
+  },
+  "run_B_full_repository_minus_one_ignored_file": {
+    "purpose": "Repository-wide run with the single known collection error excluded",
+    "selector_kind": "FULL_REPOSITORY_MINUS_ONE_IGNORED_FILE",
+    "repository_scope": "FULL_MINUS_ONE_IGNORED_COLLECTION_ERROR_FILE",
+    "exit_code": 1,
+    "run_date_local": "2026-09-01",
+    "result_line": "61 failed, 1886 passed, 5 skipped in 109.94s",
+    "collected_nodeid_count": 1952,
+    "collected_nodeids_file": "runB-collected-nodeids.txt",
+    "collected_nodeids_sha256": "dc9aae9612a2fc072da4266164592f1c634541aa0c587c9ff6ff2e1829c3b3d2",
+    "failed_nodeids_file": "runB-failed-nodeids.txt",
+    "failed_nodeids_sha256": "550a8ff0024ebbabc97168b4197596a26503089ccd55fb12a8cc501b0baca326",
+    "stdout_file": "runB-stdout.txt",
+    "stdout_sha256": "bce6dbde807c08a2d0445b663034abb4aa9aeeb382a321fb8551753ccc31743c",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "scope_wording_rule": "Every citation of this run must carry 'minus one ignored collection-error file'. The recorded shell command contains --ignore=tests/unit/test_m2c_s3_dataset.py. Calling it 'full repository' is the same scope defect this receipt exists to correct. NOTE: this is command TEXT; the process argv was not captured.",
+    "environment": {
+      "PYTHONPATH": "src"
+    },
+    "recorded_shell_command": "PYTHONPATH=src .venv/bin/python -m pytest -q --ignore=tests/unit/test_m2c_s3_dataset.py",
+    "argv_status": "NOT_ESTABLISHED",
+    "argv_note": "This is the RECORDED SHELL COMMAND, not the process argv. PYTHONPATH=src is an environment assignment and never appears in sys.argv. Any glob is expanded by the shell before exec. The package contains stdout, stderr and exit codes but no shell xtrace and no captured sys.argv, so the actual argv is NOT established."
+  },
+  "qwen_brain_lane_zero_failures_observed_2026_09_01": {
+    "purpose": "This is the lane that carries every claim we make externally.",
+    "result": "359 passed, 4 skipped, ZERO FAILURES OBSERVED on 2026-09-01",
+    "run_date_local": "2026-09-01",
+    "significance": "All 61 failures observed in the 2026-09-01 run are test_m2c_*; none is in qwen_brain. This is ONE observation of zero failures in that lane on that date. It does not establish that the lane is 'unaffected by the freeze gate' — that is a causal claim we did not test.",
+    "environment": {
+      "PYTHONPATH": "src"
+    },
+    "recorded_shell_command": "PYTHONPATH=src .venv/bin/python -m pytest -q tests/unit/test_qwen_brain_*.py",
+    "argv_status": "NOT_ESTABLISHED",
+    "argv_note": "This is the RECORDED SHELL COMMAND, not the process argv. PYTHONPATH=src is an environment assignment and never appears in sys.argv. Any glob is expanded by the shell before exec. The package contains stdout, stderr and exit codes but no shell xtrace and no captured sys.argv, so the actual argv is NOT established. The trailing token is a SHELL GLOB. It was expanded by the shell before exec; the expanded ordered file list was NOT captured. That the glob did expand is inferable from the run succeeding — an unexpanded literal path would not have been found by pytest — but the expansion itself is an inference, not a record.",
+    "duplicate_record_note": "This run is recorded TWICE in this receipt: under run_C_qwen_brain_lane and under qwen_brain_lane_zero_failures_observed_2026_09_01. Both describe the SAME execution, not two runs. The duplication is how an inconsistency survived once: the argv mislabel was fixed in one object and left in the other. Any future edit must touch both."
+  },
+  "DATE_STAMPED_MEASUREMENTS_DIFFER_2026_08_31_VS_2026_09_01": {
+    "previously_published": "14 failed / 1933 passed / 5 skipped over the full-repository-minus-one-ignored-collection-error-file selector, measured 2026-08-31. STATUS UPGRADED 2026-09-01: TRANSCRIPT_ATTESTED — the 2026-08-31 command and its result line are recorded in the producing session transcript (tool_use line 15075 / tool_result line 15076, with uuids and timestamps). See TRANSCRIPT-RECOVERY-20260831-RUN.json. This is an EXTERNAL record, not a captured stdout artifact: the command piped through `tail -25`.",
+    "measured_today": "61 failed / 1886 passed / 5 skipped over the full-repository-minus-one-ignored-collection-error-file, measured 2026-09-01, with the recorded shell command, raw stdout/stderr, collected and failed node ids, and the shell exit code captured. Process argv was NOT captured for this run either — only command text.",
+    "interpretation": "The count differs by 47 across the freeze boundary. Within the scanned scope no source, test, or config file has an mtime later than the threshold — this is mtime evidence, not byte evidence. The freeze-gate mechanism was established on a SAMPLED failing file (tests/unit/test_m2c_formal_split_host_v4.py). Per-test attribution was NOT performed. Therefore: the boundary coincidence and the mechanism are established; 'all 47 are caused by the gate' is NOT, and 'zero bytes changed' is NOT.",
+    "what_this_forbids_saying": [
+      "'the repository-wide failure count is 14' — that was one execution on 2026-08-31 over the full-repository-minus-one-ignored-collection-error-file, and the same selector reported 61 on 2026-09-01",
+      "any citation of either figure without naming the date and the full-repository-minus-one-ignored-collection-error-file selector, and without noting that the 2026-08-31 record is TRANSCRIPT_ATTESTED and external to this package",
+      "'not a single byte changed' — run D is mtime evidence over a partial scope, and its output is not even empty",
+      "'all 47 additional failures are caused by the freeze gate' — one file of nineteen was sampled",
+      "'the 47 are all experiment-execution paths' — not verified per test",
+      "'these failures are harmless' — no per-test diagnosis was done",
+      "'the qwen_brain lane is unaffected by the gate' — one observation of zero failures is not a causal test",
+      "any statement of an exit code for the 2026-08-31 run — the pipeline masked it"
+    ],
+    "what_this_permits_saying": "As of 2026-09-01, a pytest run over the full-repository-minus-one-ignored-collection-error-file selector reports 61 failed / 1886 passed / 5 skipped; 61/61 failures are in the M2C governance lane. The 2026-08-31 run used the SAME selector — this is now independently checkable from the recovered transcript tool_use event, not merely asserted — and its recorded result line was 14 failed / 1933 passed / 5 skipped. The arithmetic difference is 47. Within the scanned scope no source/test/config file has an MTIME later than 2026-08-31 17:00 — mtime evidence, not byte evidence. The freeze-gate mechanism is demonstrated on ONE sampled failing file of nineteen. Per-failure attribution was not performed.",
+    "previously_published_evidence_status": {
+      "status": "TRANSCRIPT_ATTESTED — the 2026-08-31 shell command and its result line (including all 14 failed node ids) are recorded in the producing session transcript at tool_use line 15075 / tool_result line 15076, with uuids and timestamps. See TRANSCRIPT-RECOVERY-20260831-RUN.json. Still NOT established: full stdout (the command piped through `tail -25`), pytest's exit code (no pipefail / PIPESTATUS), process argv (shell command text only), and package self-containment (the transcript is external).",
+      "value": "14 failed / 1933 passed / 5 skipped, measured 2026-08-31 by tzb-fe",
+      "why_no_raw_artifact": "The 2026-08-31 run's stdout was not captured at the time. This receipt did not exist yet.",
+      "consequence": "Any material citing 14 failed must name the date and the full-repository-minus-one-ignored-collection-error-file selector, and mark the record TRANSCRIPT_ATTESTED with the transcript being external to this package. It must not be presented as a package-self-contained fact, and no exit code may be attached to it.",
+      "the_lesson_stated_plainly": "A measurement must carry the date it was taken, and a raw capture at the time is worth more than any later reconstruction. This figure was NOT captured into the package — but it WAS recorded in the producing transcript, and we found it only after being pushed to look. The lesson is not 'declare your gaps clearly'; we had already written the gap down. The lesson is that writing a gap down is not the same as going to look.",
+      "superseded_overclaim": "An earlier draft said 'Running the identical command on any date from 2026-09-01 onward yields 61 failed'. That predicts every future date from a single observation. One run is not a series.",
+      "observed_status_only": {
+        "OBSERVED_2026_09_01": "One execution over the same recorded selector returned 61 failed.",
+        "TRANSCRIPT_ATTESTED_2026_08_31": "Command text, result line and all 14 failed node ids recorded in the transcript.",
+        "NOT_REPRODUCED_BY_US": "We have not re-executed the 2026-08-31 run.",
+        "NO_REPRODUCIBILITY_CONCLUSION_IS_DRAWN": "Neither direction is claimed."
+      },
+      "upgrade_record": {
+        "prior_status": "PROJECT_REPORTED / NOT_IN_PACKAGE_EVIDENCE / no raw artifact / not reproduced",
+        "what_changed": "tzb-fe searched the producing session transcript — the same forensic method the qwen-brain lane used for the seven-file selector — and recovered the RECORDED SHELL COMMAND TEXT (not process argv), the result line, and all 14 failed node ids.",
+        "why_this_is_the_third_instance": "Tonight we declared the seven-file selector unrecoverable and were wrong. We then wrote, in this very receipt, that we had NOT searched the transcript for the 2026-08-31 stdout. We left that caution sitting there and did not act on it until prompted. Writing down that you have not looked is not the same as looking.",
+        "artifact": "TRANSCRIPT-RECOVERY-20260831-RUN.json",
+        "still_not_established": [
+          "full stdout — the command piped through tail -25",
+          "package self-containment — the transcript is external",
+          "reproducibility in either direction"
+        ],
+        "prior_status_now_superseded_everywhere": "Earlier drafts of this receipt said PROJECT_REPORTED, 'no raw artifact', and 'we did not search the transcript'. All three are SUPERSEDED. They are retained only inside this upgrade_record as history; any occurrence elsewhere in this file is a bug."
+      }
+    },
+    "sampling_disclosure": {
+      "files_with_failures": 19,
+      "files_sampled_for_root_cause": 1,
+      "sampled_file": "tests/unit/test_m2c_formal_split_host_v4.py",
+      "note": "One sample does not establish a cause for 47. Stating the sample size is the difference between a demonstrated mechanism and an assumed one."
+    },
+    "what_run_D_actually_supports": {
+      "supported": "Within the scanned scope, no source, test, or configuration file has an mtime later than 2026-08-31 17:00. The scan returned exactly three paths: QWEN_BRAIN_VNEXT_VLA_INTEGRATION_SPEC.md (a documentation file) and two .pytest_cache entries.",
+      "NOT_supported_1_mtime_is_not_a_digest": "find -newermt compares modification times, not content. A file could be rewritten with identical bytes, or modified and its mtime restored. Byte identity would require digests taken before and after; no digest of the 2026-08-31 repository state exists.",
+      "NOT_supported_2_excluded_trees": "The scan excludes .git, __pycache__, .venv and artifacts. It says nothing about those trees.",
+      "NOT_supported_3_the_scan_is_not_empty": "run D returned three paths, so it is not an empty result. But a NEWER MTIME DOES NOT PROVE A BYTE CHANGE — touch alters mtime without altering content. The correct predicate is that 'not a single byte changed' is UNSUPPORTED by this evidence, not that it is CONTRADICTED by it. An earlier draft of this very field said 'contradicted', which claimed our own evidence refuted the sentence when it merely fails to support it. Same defect class as everything else in this record: a predicate stronger than what the artifact carries — this time in the negative direction.",
+      "superseded_overclaims": [
+        "repository_bytes_changed_between_runs: false",
+        "evidence_that_bytes_did_not_change: ...",
+        "仓库一个字节都没变",
+        "仓库字节变化:无"
+      ],
+      "correct_form": "在 find 的扫描范围内,没有 source/test/config 文件的 mtime 晚于 2026-08-31 17:00;扫描确实返回了三条路径,均为文档或缓存。这是 mtime 证据,不是字节证据。"
+    },
+    "candidate_explanation_not_established_root_cause": {
+      "field_renamed_from": "root_cause",
+      "why_renamed": "The key asserted causation that the body of this same record disclaims. A field NAME is a claim. This is the same defect as naming run_D's purpose 'zero byte change' — the label asserted what the content denied.",
+      "candidate_explanation": "A pre-registered hard freeze date gate activated at the day boundary and is a candidate explanation for the count difference.",
+      "what_supports_it": [
+        "the 47 count difference coincides with the gate's activation instant",
+        "one sampled failing file raises M2CHardFreezeError",
+        "within the scanned scope no source/test/config file has a later mtime"
+      ],
+      "what_would_be_needed_to_call_it_the_root_cause": "per-test attribution across all 47, which was not performed (19 files had failures; 1 was sampled)",
+      "gate": {
+        "module": "src/xh_agent/policy/qrm_lite/m2c_hard_freeze.py",
+        "constant": "M2C_HARD_FREEZE_LOCAL_ISO = 2026-09-01T00:00:00+08:00",
+        "unix_ns": 1788192000000000000,
+        "raised_error": "M2CHardFreezeError: M2C_HARD_FREEZE_ACTIVE:Q_B_EVALUATION:new experiment execution forbidden on/after 2026-09-01T00:00:00+08:00",
+        "module_docstring_intent": "The human goal fixes 2026-09-01 in Asia/Shanghai as the first instant at which new experiment execution is forbidden."
+      }
+    },
+    "key_renamed_from": "MATERIAL_CORRECTION_THE_PUBLISHED_NUMBER_IS_DATE_DEPENDENT",
+    "why_renamed": "The old key asserted that the number IS date-dependent — a causal claim. What we hold is two date-stamped measurements that differ, recorded by different means: the 2026-09-01 one captured into this package, the 2026-08-31 one attested by the external producing transcript. 'They differ' is observed; 'the date causes it' is a candidate explanation."
+  },
+  "raw_files_referenced_by_this_receipt": {
+    "note": "Previously named files_in_this_directory, which promised a directory listing the leaf did not deliver.",
+    "raw_artifacts": [
+      "TRANSCRIPT-RECOVERY-20260831-RUN.json",
+      "recovered-20260831-failed-nodeids.txt",
+      "runA-stderr.txt",
+      "runA-stdout.txt",
+      "runB-collected-nodeids.txt",
+      "runB-failed-nodeids.txt",
+      "runB-stderr.txt",
+      "runB-stdout.txt",
+      "runC-qwenbrain-exit.txt",
+      "runC-qwenbrain-stderr.txt",
+      "runC-qwenbrain-stdout.txt",
+      "runD-find-changed-since-0831-1700.txt"
+    ],
+    "this_receipt": "FULLREPO-TEST-RECEIPT.json — its own digest cannot be embedded in itself",
+    "directory_member_count": 13
+  },
+  "terminology_correction_2026_09_01": {
+    "found_by": "m2c-exec",
+    "what_was_wrong": "Three fields were named exact_argv while holding shell command text. PYTHONPATH=src is an env assignment, not argv; a glob is expanded pre-exec.",
+    "why_it_is_the_same_defect_class": "The label claimed a stronger evidence type than the artifact carries — argv implies a captured process invocation; we have a shell string we typed. Same family as calling an mtime scan byte evidence and calling a find a test run.",
+    "note_on_the_135_recovery": "The seven-file selector recovery is NOT affected: its recovered list is a genuine argv (interpreter path, -m, pytest, -q, seven absolute paths) with no environment assignment and no glob, and tzb-fe executed it directly as a list without a shell."
+  }
+}

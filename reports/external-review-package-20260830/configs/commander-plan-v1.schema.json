@@ -1,0 +1,461 @@
+{
+  "$defs": {
+    "AttachContactEntityParametersV1": {
+      "additionalProperties": false,
+      "properties": {
+        "planner_resolution_required": {
+          "const": true,
+          "title": "Planner Resolution Required",
+          "type": "boolean"
+        },
+        "target_ref": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_.:-]{0,127}$",
+          "title": "Target Ref",
+          "type": "string"
+        },
+        "contact_policy": {
+          "const": "BOUND_BILATERAL_CONTACT",
+          "title": "Contact Policy",
+          "type": "string"
+        }
+      },
+      "required": [
+        "planner_resolution_required",
+        "target_ref",
+        "contact_policy"
+      ],
+      "title": "AttachContactEntityParametersV1",
+      "type": "object"
+    },
+    "AttachContactEntitySkillStepV1": {
+      "additionalProperties": false,
+      "properties": {
+        "step_id": {
+          "pattern": "^s[1-9][0-9]*$",
+          "title": "Step Id",
+          "type": "string"
+        },
+        "depends_on": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Depends On",
+          "type": "array"
+        },
+        "primitive": {
+          "const": "ATTACH_CONTACT_ENTITY",
+          "title": "Primitive",
+          "type": "string"
+        },
+        "parameters": {
+          "$ref": "#/$defs/AttachContactEntityParametersV1"
+        }
+      },
+      "required": [
+        "step_id",
+        "primitive",
+        "parameters"
+      ],
+      "title": "AttachContactEntitySkillStepV1",
+      "type": "object"
+    },
+    "CartesianPoseParametersV1": {
+      "additionalProperties": false,
+      "properties": {
+        "planner_resolution_required": {
+          "const": true,
+          "title": "Planner Resolution Required",
+          "type": "boolean"
+        },
+        "pose_ref": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_.:-]{0,127}$",
+          "title": "Pose Ref",
+          "type": "string"
+        }
+      },
+      "required": [
+        "planner_resolution_required",
+        "pose_ref"
+      ],
+      "title": "CartesianPoseParametersV1",
+      "type": "object"
+    },
+    "CartesianPoseSkillStepV1": {
+      "additionalProperties": false,
+      "properties": {
+        "step_id": {
+          "pattern": "^s[1-9][0-9]*$",
+          "title": "Step Id",
+          "type": "string"
+        },
+        "depends_on": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Depends On",
+          "type": "array"
+        },
+        "primitive": {
+          "const": "CARTESIAN_POSE",
+          "title": "Primitive",
+          "type": "string"
+        },
+        "parameters": {
+          "$ref": "#/$defs/CartesianPoseParametersV1"
+        }
+      },
+      "required": [
+        "step_id",
+        "primitive",
+        "parameters"
+      ],
+      "title": "CartesianPoseSkillStepV1",
+      "type": "object"
+    },
+    "CommanderAgentV1": {
+      "enum": [
+        "A",
+        "B",
+        "C"
+      ],
+      "title": "CommanderAgentV1",
+      "type": "string"
+    },
+    "CommanderPredicateNameV1": {
+      "enum": [
+        "IMAGE_CLEAR",
+        "REGION_COUNT_RESOLVED",
+        "TARGET_TRACK_BOUND",
+        "DESTINATION_REGISTERED",
+        "AGENT_AVAILABLE",
+        "NO_SAFETY_BLOCKER",
+        "GRASP_CONFIRMED",
+        "PARTS_PACKED",
+        "BIN_READY",
+        "BIN_AT_DESTINATION",
+        "TASK_COMPLETE",
+        "FRESH_PUBLIC_OBSERVATION"
+      ],
+      "title": "CommanderPredicateNameV1",
+      "type": "string"
+    },
+    "CommanderPredicateV1": {
+      "additionalProperties": false,
+      "properties": {
+        "predicate": {
+          "$ref": "#/$defs/CommanderPredicateNameV1"
+        },
+        "arguments": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Arguments",
+          "type": "object"
+        }
+      },
+      "required": [
+        "predicate"
+      ],
+      "title": "CommanderPredicateV1",
+      "type": "object"
+    },
+    "CommanderSubtaskV1": {
+      "additionalProperties": false,
+      "properties": {
+        "agent": {
+          "$ref": "#/$defs/CommanderAgentV1"
+        },
+        "skill_plan": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "ATTACH_CONTACT_ENTITY": "#/$defs/AttachContactEntitySkillStepV1",
+                "CARTESIAN_POSE": "#/$defs/CartesianPoseSkillStepV1",
+                "GRIPPER_POSITION": "#/$defs/GripperPositionSkillStepV1",
+                "PUBLIC_RGBD_CAPTURE": "#/$defs/PublicRgbdCaptureSkillStepV1",
+                "PUBLIC_TRACK_REASSOCIATION": "#/$defs/PublicTrackReassociationSkillStepV1",
+                "REMOVE_ATTACHMENT": "#/$defs/RemoveAttachmentSkillStepV1"
+              },
+              "propertyName": "primitive"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/CartesianPoseSkillStepV1"
+              },
+              {
+                "$ref": "#/$defs/GripperPositionSkillStepV1"
+              },
+              {
+                "$ref": "#/$defs/AttachContactEntitySkillStepV1"
+              },
+              {
+                "$ref": "#/$defs/RemoveAttachmentSkillStepV1"
+              },
+              {
+                "$ref": "#/$defs/PublicRgbdCaptureSkillStepV1"
+              },
+              {
+                "$ref": "#/$defs/PublicTrackReassociationSkillStepV1"
+              }
+            ]
+          },
+          "maxItems": 32,
+          "minItems": 1,
+          "title": "Skill Plan",
+          "type": "array"
+        },
+        "preconditions": {
+          "items": {
+            "$ref": "#/$defs/CommanderPredicateV1"
+          },
+          "minItems": 1,
+          "title": "Preconditions",
+          "type": "array"
+        },
+        "expected_postconditions": {
+          "items": {
+            "$ref": "#/$defs/CommanderPredicateV1"
+          },
+          "minItems": 1,
+          "title": "Expected Postconditions",
+          "type": "array"
+        }
+      },
+      "required": [
+        "agent",
+        "skill_plan",
+        "preconditions",
+        "expected_postconditions"
+      ],
+      "title": "CommanderSubtaskV1",
+      "type": "object"
+    },
+    "GripperPositionParametersV1": {
+      "additionalProperties": false,
+      "properties": {
+        "planner_resolution_required": {
+          "const": true,
+          "title": "Planner Resolution Required",
+          "type": "boolean"
+        },
+        "position_ref": {
+          "enum": [
+            "OPEN",
+            "CLOSE"
+          ],
+          "title": "Position Ref",
+          "type": "string"
+        }
+      },
+      "required": [
+        "planner_resolution_required",
+        "position_ref"
+      ],
+      "title": "GripperPositionParametersV1",
+      "type": "object"
+    },
+    "GripperPositionSkillStepV1": {
+      "additionalProperties": false,
+      "properties": {
+        "step_id": {
+          "pattern": "^s[1-9][0-9]*$",
+          "title": "Step Id",
+          "type": "string"
+        },
+        "depends_on": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Depends On",
+          "type": "array"
+        },
+        "primitive": {
+          "const": "GRIPPER_POSITION",
+          "title": "Primitive",
+          "type": "string"
+        },
+        "parameters": {
+          "$ref": "#/$defs/GripperPositionParametersV1"
+        }
+      },
+      "required": [
+        "step_id",
+        "primitive",
+        "parameters"
+      ],
+      "title": "GripperPositionSkillStepV1",
+      "type": "object"
+    },
+    "PublicRgbdCaptureParametersV1": {
+      "additionalProperties": false,
+      "properties": {
+        "observation_ref": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_.:-]{0,127}$",
+          "title": "Observation Ref",
+          "type": "string"
+        }
+      },
+      "required": [
+        "observation_ref"
+      ],
+      "title": "PublicRgbdCaptureParametersV1",
+      "type": "object"
+    },
+    "PublicRgbdCaptureSkillStepV1": {
+      "additionalProperties": false,
+      "properties": {
+        "step_id": {
+          "pattern": "^s[1-9][0-9]*$",
+          "title": "Step Id",
+          "type": "string"
+        },
+        "depends_on": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Depends On",
+          "type": "array"
+        },
+        "primitive": {
+          "const": "PUBLIC_RGBD_CAPTURE",
+          "title": "Primitive",
+          "type": "string"
+        },
+        "parameters": {
+          "$ref": "#/$defs/PublicRgbdCaptureParametersV1"
+        }
+      },
+      "required": [
+        "step_id",
+        "primitive",
+        "parameters"
+      ],
+      "title": "PublicRgbdCaptureSkillStepV1",
+      "type": "object"
+    },
+    "PublicTrackReassociationParametersV1": {
+      "additionalProperties": false,
+      "properties": {
+        "target_ref": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_.:-]{0,127}$",
+          "title": "Target Ref",
+          "type": "string"
+        }
+      },
+      "required": [
+        "target_ref"
+      ],
+      "title": "PublicTrackReassociationParametersV1",
+      "type": "object"
+    },
+    "PublicTrackReassociationSkillStepV1": {
+      "additionalProperties": false,
+      "properties": {
+        "step_id": {
+          "pattern": "^s[1-9][0-9]*$",
+          "title": "Step Id",
+          "type": "string"
+        },
+        "depends_on": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Depends On",
+          "type": "array"
+        },
+        "primitive": {
+          "const": "PUBLIC_TRACK_REASSOCIATION",
+          "title": "Primitive",
+          "type": "string"
+        },
+        "parameters": {
+          "$ref": "#/$defs/PublicTrackReassociationParametersV1"
+        }
+      },
+      "required": [
+        "step_id",
+        "primitive",
+        "parameters"
+      ],
+      "title": "PublicTrackReassociationSkillStepV1",
+      "type": "object"
+    },
+    "RemoveAttachmentParametersV1": {
+      "additionalProperties": false,
+      "properties": {
+        "planner_resolution_required": {
+          "const": true,
+          "title": "Planner Resolution Required",
+          "type": "boolean"
+        },
+        "target_ref": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_.:-]{0,127}$",
+          "title": "Target Ref",
+          "type": "string"
+        }
+      },
+      "required": [
+        "planner_resolution_required",
+        "target_ref"
+      ],
+      "title": "RemoveAttachmentParametersV1",
+      "type": "object"
+    },
+    "RemoveAttachmentSkillStepV1": {
+      "additionalProperties": false,
+      "properties": {
+        "step_id": {
+          "pattern": "^s[1-9][0-9]*$",
+          "title": "Step Id",
+          "type": "string"
+        },
+        "depends_on": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Depends On",
+          "type": "array"
+        },
+        "primitive": {
+          "const": "REMOVE_ATTACHMENT",
+          "title": "Primitive",
+          "type": "string"
+        },
+        "parameters": {
+          "$ref": "#/$defs/RemoveAttachmentParametersV1"
+        }
+      },
+      "required": [
+        "step_id",
+        "primitive",
+        "parameters"
+      ],
+      "title": "RemoveAttachmentSkillStepV1",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Exact required wire shape; refusal is ``subtasks=[]`` plus ``REFUSE:``.",
+  "properties": {
+    "subtasks": {
+      "items": {
+        "$ref": "#/$defs/CommanderSubtaskV1"
+      },
+      "maxItems": 12,
+      "title": "Subtasks",
+      "type": "array"
+    },
+    "rationale": {
+      "maxLength": 4000,
+      "minLength": 1,
+      "title": "Rationale",
+      "type": "string"
+    }
+  },
+  "required": [
+    "subtasks",
+    "rationale"
+  ],
+  "title": "CommanderPlanV1",
+  "type": "object"
+}

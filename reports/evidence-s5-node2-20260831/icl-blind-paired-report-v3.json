@@ -1,0 +1,101 @@
+{
+  "baseline_report_sha256": "9c993adad53cefd0694374d6473ba499356edbe6613f0248721b34393a096c52",
+  "benefit_claim_authorized": false,
+  "benefit_claim_note": "Final A2 classification requires both primary split reports, manual-blind non-regression, complete evidence, and no contract or safety regression.",
+  "candidate_report_sha256": "6f9e0d91d538418eb0071c0fd41edecb8f2ce46a7866b8eef4b00b2963ca5b29",
+  "canonical_evaluation_read": false,
+  "case_count": 45,
+  "claim_classification": "PENDING_CROSS_SPLIT_FINAL_CLASSIFICATION",
+  "component_count": 3,
+  "config_sha256": "8be0babad75426b6ca378ae5129beda65b4d47eed8bff297083f373c626ae9d8",
+  "evidence_role": "PRIMARY_PAIRED_EVALUATION",
+  "expected_component_count": 3,
+  "experiment_identity": "s5-icl-v3",
+  "metrics": {
+    "expectation_match": {
+      "candidate_minus_baseline": 0.0,
+      "case_count": 45,
+      "ci_lower": 0.0,
+      "ci_upper": 0.0,
+      "cluster_count": 3,
+      "cluster_unit": "FROZEN_GRAPH_COMPONENT",
+      "exact_mcnemar": {
+        "discordant_count": 0,
+        "method": "TWO_SIDED_EXACT_BINOMIAL_ON_DISCORDANT_PAIRS",
+        "n00": 14,
+        "n01": 0,
+        "n10": 0,
+        "n11": 31,
+        "net_improvement_count": 0,
+        "p_value": 1.0
+      },
+      "interval_presentation": "UNSTABLE_LOW_CLUSTER_COUNT_DO_NOT_PRESENT_AS_ORDINARY_STABLE_STATISTICAL_INTERVAL",
+      "method": "PAIRED_CLUSTER_BOOTSTRAP_PERCENTILE_95_PERCENT",
+      "replicates": 10000,
+      "seed": 20260830,
+      "stability_flags": [
+        "UNSTABLE_LOW_CLUSTER_COUNT"
+      ],
+      "stable_statistical_interval": false
+    },
+    "primitive_checks_pass": {
+      "candidate_minus_baseline": 0.0,
+      "case_count": 45,
+      "ci_lower": 0.0,
+      "ci_upper": 0.0,
+      "cluster_count": 3,
+      "cluster_unit": "FROZEN_GRAPH_COMPONENT",
+      "interval_presentation": "UNSTABLE_LOW_CLUSTER_COUNT_DO_NOT_PRESENT_AS_ORDINARY_STABLE_STATISTICAL_INTERVAL",
+      "method": "PAIRED_CLUSTER_BOOTSTRAP_PERCENTILE_95_PERCENT",
+      "replicates": 10000,
+      "seed": 20260830,
+      "stability_flags": [
+        "UNSTABLE_LOW_CLUSTER_COUNT"
+      ],
+      "stable_statistical_interval": false
+    },
+    "reassociation_boundary_pass": {
+      "candidate_minus_baseline": 0.022222222222222223,
+      "case_count": 45,
+      "ci_lower": 0.0,
+      "ci_upper": 0.07142857142857142,
+      "cluster_count": 3,
+      "cluster_unit": "FROZEN_GRAPH_COMPONENT",
+      "interval_presentation": "UNSTABLE_LOW_CLUSTER_COUNT_DO_NOT_PRESENT_AS_ORDINARY_STABLE_STATISTICAL_INTERVAL",
+      "method": "PAIRED_CLUSTER_BOOTSTRAP_PERCENTILE_95_PERCENT",
+      "replicates": 10000,
+      "seed": 20260830,
+      "stability_flags": [
+        "UNSTABLE_LOW_CLUSTER_COUNT"
+      ],
+      "stable_statistical_interval": false
+    },
+    "strict_valid": {
+      "candidate_minus_baseline": 0.022222222222222223,
+      "case_count": 45,
+      "ci_lower": 0.0,
+      "ci_upper": 0.07142857142857142,
+      "cluster_count": 3,
+      "cluster_unit": "FROZEN_GRAPH_COMPONENT",
+      "interval_presentation": "UNSTABLE_LOW_CLUSTER_COUNT_DO_NOT_PRESENT_AS_ORDINARY_STABLE_STATISTICAL_INTERVAL",
+      "method": "PAIRED_CLUSTER_BOOTSTRAP_PERCENTILE_95_PERCENT",
+      "replicates": 10000,
+      "seed": 20260830,
+      "stability_flags": [
+        "UNSTABLE_LOW_CLUSTER_COUNT"
+      ],
+      "stable_statistical_interval": false
+    }
+  },
+  "practical_difference_minimum": 0.05,
+  "primary_ci_not_negative": true,
+  "primary_point_gate_pass": false,
+  "primary_test_or_blind_definition_changed": false,
+  "schema_version": "QwenBrainS5PairedEvaluationReportV3",
+  "split": "MANUAL_BLIND",
+  "stability_flags": [
+    "UNSTABLE_LOW_CLUSTER_COUNT"
+  ],
+  "stable_statistical_interval": false,
+  "status": "PASS"
+}

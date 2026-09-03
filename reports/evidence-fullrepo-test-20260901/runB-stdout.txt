@@ -1,0 +1,3564 @@
+........................................................................ [  3%]
+........................................................................ [  7%]
+........................................................................ [ 11%]
+........................................................................ [ 14%]
+........................................................................ [ 18%]
+........................................................................ [ 22%]
+........................................................................ [ 25%]
+........................................................................ [ 29%]
+......................F................................................. [ 33%]
+.F.FFFFFFFFFF.F..F...................................................... [ 36%]
+......................FFFFF....F.F...................................... [ 40%]
+..........................................................F............. [ 44%]
+..........................................................FFFFFF........ [ 47%]
+........................................................................ [ 51%]
+........................................................................ [ 55%]
+........................................................FF..F.......F..F [ 59%]
+...................F....................s.FFFFF..FFFFF.................. [ 62%]
+............FF.F...............F....F.F........F...............F........ [ 66%]
+........................................................................ [ 70%]
+........................................................................ [ 73%]
+............................FF..F....................................... [ 77%]
+............F......FF...FF.F............................................ [ 81%]
+........................................................................ [ 84%]
+........................................................................ [ 88%]
+.................................................................ss.ss.. [ 92%]
+........................................................................ [ 95%]
+........................................................................ [ 99%]
+........                                                                 [100%]
+=================================== FAILURES ===================================
+_______________ test_real_provider_requires_reviewed_deployment ________________
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_real_provider_requires_re0')
+
+    def test_real_provider_requires_reviewed_deployment(tmp_path: Path) -> None:
+        backend = _Backend(tmp_path, real_isaac=True, mocked_physics=False)
+        with pytest.raises(ExactPlanUnavailable, match="deployment differs"):
+>           FormalBoundExactPlanProviderV1(
+                project_root=tmp_path,
+                mode="REAL_ISAAC",
+                backend=backend,
+                deployment=None,
+            )
+
+tests/unit/test_m2c_formal_bound_plan_provider_v1.py:184: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/xh_agent/policy/qrm_lite/formal_bound_plan_provider_v1.py:216: in __init__
+    require_pre_freeze(M2CExperimentAction.Q_B_EVALUATION)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+action = <M2CExperimentAction.Q_B_EVALUATION: 'Q_B_EVALUATION'>
+
+    def require_pre_freeze(
+        action: M2CExperimentAction,
+    ) -> datetime:
+        """Allow ``action`` only before the fixed Asia/Shanghai hard freeze.
+    
+        Invalid clock/timezone inputs fail closed instead of being interpreted as
+        local time.  There is deliberately no timestamp/configuration override in
+        this API; tests replace the system clock function at the module boundary.
+        """
+    
+        if not isinstance(action, M2CExperimentAction):
+            raise M2CHardFreezeError("M2C_HARD_FREEZE_ACTION_INVALID")
+        freeze = _freeze_datetime()
+        try:
+            observed_ns = time.time_ns()
+            if type(observed_ns) is not int or observed_ns <= 0:
+                raise ValueError("system time_ns is not a positive integer")
+            # Compare the integer clock directly at the boundary so float
+            # rounding cannot admit an instant on/after the freeze.
+            if observed_ns >= M2C_HARD_FREEZE_UNIX_NS:
+>               raise M2CHardFreezeError(
+                    "M2C_HARD_FREEZE_ACTIVE:"
+                    f"{action.value}:new experiment execution forbidden on/after "
+                    f"{M2C_HARD_FREEZE_LOCAL_ISO}"
+                )
+E               xh_agent.policy.qrm_lite.m2c_hard_freeze.M2CHardFreezeError: M2C_HARD_FREEZE_ACTIVE:Q_B_EVALUATION:new experiment execution forbidden on/after 2026-09-01T00:00:00+08:00
+
+src/xh_agent/policy/qrm_lite/m2c_hard_freeze.py:81: M2CHardFreezeError
+__ test_state_machine_requires_start_capture_execute_order_and_binds_capture ___
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_state_machine_requires_st0')
+
+    def test_state_machine_requires_start_capture_execute_order_and_binds_capture(
+        tmp_path: Path,
+    ) -> None:
+        endpoint, backend = _endpoint(tmp_path)
+        with pytest.raises(RuntimeError, match="capture is not the next"):
+>           endpoint.handle(
+                FORMAL_ISAAC_CAPTURE_PATH,
+                sign_wire_message(
+                    "ISAAC_CAPTURE_REQUEST",
+                    IsaacCaptureRequestV2(
+                        run_id="run-contract-only",
+                        session_id="contract-session-not-physics",
+                        decision_index=0,
+                    ),
+                    SECRET,
+                ).model_dump(mode="json"),
+            )
+
+tests/unit/test_m2c_formal_isaac_endpoint_v2.py:391: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/xh_agent/policy/qrm_lite/formal_isaac_endpoint_v2.py:192: in handle
+    require_pre_freeze(M2CExperimentAction.Q_B_EVALUATION)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+action = <M2CExperimentAction.Q_B_EVALUATION: 'Q_B_EVALUATION'>
+
+    def require_pre_freeze(
+        action: M2CExperimentAction,
+    ) -> datetime:
+        """Allow ``action`` only before the fixed Asia/Shanghai hard freeze.
+    
+        Invalid clock/timezone inputs fail closed instead of being interpreted as
+        local time.  There is deliberately no timestamp/configuration override in
+        this API; tests replace the system clock function at the module boundary.
+        """
+    
+        if not isinstance(action, M2CExperimentAction):
+            raise M2CHardFreezeError("M2C_HARD_FREEZE_ACTION_INVALID")
+        freeze = _freeze_datetime()
+        try:
+            observed_ns = time.time_ns()
+            if type(observed_ns) is not int or observed_ns <= 0:
+                raise ValueError("system time_ns is not a positive integer")
+            # Compare the integer clock directly at the boundary so float
+            # rounding cannot admit an instant on/after the freeze.
+            if observed_ns >= M2C_HARD_FREEZE_UNIX_NS:
+>               raise M2CHardFreezeError(
+                    "M2C_HARD_FREEZE_ACTIVE:"
+                    f"{action.value}:new experiment execution forbidden on/after "
+                    f"{M2C_HARD_FREEZE_LOCAL_ISO}"
+                )
+E               xh_agent.policy.qrm_lite.m2c_hard_freeze.M2CHardFreezeError: M2C_HARD_FREEZE_ACTIVE:Q_B_EVALUATION:new experiment execution forbidden on/after 2026-09-01T00:00:00+08:00
+
+src/xh_agent/policy/qrm_lite/m2c_hard_freeze.py:81: M2CHardFreezeError
+
+During handling of the above exception, another exception occurred:
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_state_machine_requires_st0')
+
+    def test_state_machine_requires_start_capture_execute_order_and_binds_capture(
+        tmp_path: Path,
+    ) -> None:
+        endpoint, backend = _endpoint(tmp_path)
+>       with pytest.raises(RuntimeError, match="capture is not the next"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E        Regex: 'capture is not the next'
+E        Input: 'M2C_HARD_FREEZE_ACTIVE:Q_B_EVALUATION:new experiment execution forbidden on/after 2026-09-01T00:00:00+08:00'
+
+tests/unit/test_m2c_formal_isaac_endpoint_v2.py:390: AssertionError
+________ test_exactly_eight_cycles_share_one_session_and_finalize_once _________
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_exactly_eight_cycles_shar0')
+
+    def test_exactly_eight_cycles_share_one_session_and_finalize_once(tmp_path: Path) -> None:
+        endpoint, backend = _endpoint(tmp_path)
+>       start = _call(
+            endpoint,
+            path=FORMAL_ISAAC_START_PATH,
+            message_type="ISAAC_START_REQUEST",
+            payload=_start_request(endpoint.binding),
+            response_type="ISAAC_START_RESPONSE",
+            response_model=IsaacStartResponseV2,
+        )
+
+tests/unit/test_m2c_formal_isaac_endpoint_v2.py:452: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_m2c_formal_isaac_endpoint_v2.py:361: in _call
+    response = endpoint.handle(path, raw)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/xh_agent/policy/qrm_lite/formal_isaac_endpoint_v2.py:192: in handle
+    require_pre_freeze(M2CExperimentAction.Q_B_EVALUATION)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+action = <M2CExperimentAction.Q_B_EVALUATION: 'Q_B_EVALUATION'>
+
+    def require_pre_freeze(
+        action: M2CExperimentAction,
+    ) -> datetime:
+        """Allow ``action`` only before the fixed Asia/Shanghai hard freeze.
+    
+        Invalid clock/timezone inputs fail closed instead of being interpreted as
+        local time.  There is deliberately no timestamp/configuration override in
+        this API; tests replace the system clock function at the module boundary.
+        """
+    
+        if not isinstance(action, M2CExperimentAction):
+            raise M2CHardFreezeError("M2C_HARD_FREEZE_ACTION_INVALID")
+        freeze = _freeze_datetime()
+        try:
+            observed_ns = time.time_ns()
+            if type(observed_ns) is not int or observed_ns <= 0:
+                raise ValueError("system time_ns is not a positive integer")
+            # Compare the integer clock directly at the boundary so float
+            # rounding cannot admit an instant on/after the freeze.
+            if observed_ns >= M2C_HARD_FREEZE_UNIX_NS:
+>               raise M2CHardFreezeError(
+                    "M2C_HARD_FREEZE_ACTIVE:"
+                    f"{action.value}:new experiment execution forbidden on/after "
+                    f"{M2C_HARD_FREEZE_LOCAL_ISO}"
+                )
+E               xh_agent.policy.qrm_lite.m2c_hard_freeze.M2CHardFreezeError: M2C_HARD_FREEZE_ACTIVE:Q_B_EVALUATION:new experiment execution forbidden on/after 2026-09-01T00:00:00+08:00
+
+src/xh_agent/policy/qrm_lite/m2c_hard_freeze.py:81: M2CHardFreezeError
+______ test_bad_hmac_is_rejected_and_persisted_without_backend_execution _______
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_bad_hmac_is_rejected_and_0')
+
+    def test_bad_hmac_is_rejected_and_persisted_without_backend_execution(tmp_path: Path) -> None:
+        endpoint, backend = _endpoint(tmp_path)
+        signed = sign_wire_message(
+            "ISAAC_START_REQUEST",
+            _start_request(endpoint.binding),
+            SECRET,
+        ).model_dump(mode="json")
+        signed["hmac_sha256"] = "0" * 64
+        with pytest.raises(ValueError, match="HMAC"):
+>           endpoint.handle(FORMAL_ISAAC_START_PATH, signed)
+
+tests/unit/test_m2c_formal_isaac_endpoint_v2.py:534: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/xh_agent/policy/qrm_lite/formal_isaac_endpoint_v2.py:192: in handle
+    require_pre_freeze(M2CExperimentAction.Q_B_EVALUATION)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+action = <M2CExperimentAction.Q_B_EVALUATION: 'Q_B_EVALUATION'>
+
+    def require_pre_freeze(
+        action: M2CExperimentAction,
+    ) -> datetime:
+        """Allow ``action`` only before the fixed Asia/Shanghai hard freeze.
+    
+        Invalid clock/timezone inputs fail closed instead of being interpreted as
+        local time.  There is deliberately no timestamp/configuration override in
+        this API; tests replace the system clock function at the module boundary.
+        """
+    
+        if not isinstance(action, M2CExperimentAction):
+            raise M2CHardFreezeError("M2C_HARD_FREEZE_ACTION_INVALID")
+        freeze = _freeze_datetime()
+        try:
+            observed_ns = time.time_ns()
+            if type(observed_ns) is not int or observed_ns <= 0:
+                raise ValueError("system time_ns is not a positive integer")
+            # Compare the integer clock directly at the boundary so float
+            # rounding cannot admit an instant on/after the freeze.
+            if observed_ns >= M2C_HARD_FREEZE_UNIX_NS:
+>               raise M2CHardFreezeError(
+                    "M2C_HARD_FREEZE_ACTIVE:"
+                    f"{action.value}:new experiment execution forbidden on/after "
+                    f"{M2C_HARD_FREEZE_LOCAL_ISO}"
+                )
+E               xh_agent.policy.qrm_lite.m2c_hard_freeze.M2CHardFreezeError: M2C_HARD_FREEZE_ACTIVE:Q_B_EVALUATION:new experiment execution forbidden on/after 2026-09-01T00:00:00+08:00
+
+src/xh_agent/policy/qrm_lite/m2c_hard_freeze.py:81: M2CHardFreezeError
+___ test_invalid_mapping_is_terminal_and_never_executes_unfrozen_b0_fallback ___
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_invalid_mapping_is_termin0')
+
+    def test_invalid_mapping_is_terminal_and_never_executes_unfrozen_b0_fallback(
+        tmp_path: Path,
+    ) -> None:
+        endpoint, backend = _endpoint(tmp_path)
+>       start = _call(
+            endpoint,
+            path=FORMAL_ISAAC_START_PATH,
+            message_type="ISAAC_START_REQUEST",
+            payload=_start_request(endpoint.binding),
+            response_type="ISAAC_START_RESPONSE",
+            response_model=IsaacStartResponseV2,
+        )
+
+tests/unit/test_m2c_formal_isaac_endpoint_v2.py:545: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_m2c_formal_isaac_endpoint_v2.py:361: in _call
+    response = endpoint.handle(path, raw)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/xh_agent/policy/qrm_lite/formal_isaac_endpoint_v2.py:192: in handle
+    require_pre_freeze(M2CExperimentAction.Q_B_EVALUATION)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+action = <M2CExperimentAction.Q_B_EVALUATION: 'Q_B_EVALUATION'>
+
+    def require_pre_freeze(
+        action: M2CExperimentAction,
+    ) -> datetime:
+        """Allow ``action`` only before the fixed Asia/Shanghai hard freeze.
+    
+        Invalid clock/timezone inputs fail closed instead of being interpreted as
+        local time.  There is deliberately no timestamp/configuration override in
+        this API; tests replace the system clock function at the module boundary.
+        """
+    
+        if not isinstance(action, M2CExperimentAction):
+            raise M2CHardFreezeError("M2C_HARD_FREEZE_ACTION_INVALID")
+        freeze = _freeze_datetime()
+        try:
+            observed_ns = time.time_ns()
+            if type(observed_ns) is not int or observed_ns <= 0:
+                raise ValueError("system time_ns is not a positive integer")
+            # Compare the integer clock directly at the boundary so float
+            # rounding cannot admit an instant on/after the freeze.
+            if observed_ns >= M2C_HARD_FREEZE_UNIX_NS:
+>               raise M2CHardFreezeError(
+                    "M2C_HARD_FREEZE_ACTIVE:"
+                    f"{action.value}:new experiment execution forbidden on/after "
+                    f"{M2C_HARD_FREEZE_LOCAL_ISO}"
+                )
+E               xh_agent.policy.qrm_lite.m2c_hard_freeze.M2CHardFreezeError: M2C_HARD_FREEZE_ACTIVE:Q_B_EVALUATION:new experiment execution forbidden on/after 2026-09-01T00:00:00+08:00
+
+src/xh_agent/policy/qrm_lite/m2c_hard_freeze.py:81: M2CHardFreezeError
+______ test_backend_execute_exception_poisons_session_and_prevents_retry _______
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_backend_execute_exception0')
+
+    def test_backend_execute_exception_poisons_session_and_prevents_retry(
+        tmp_path: Path,
+    ) -> None:
+        endpoint, backend = _endpoint(tmp_path)
+>       start = _call(
+            endpoint,
+            path=FORMAL_ISAAC_START_PATH,
+            message_type="ISAAC_START_REQUEST",
+            payload=_start_request(endpoint.binding),
+            response_type="ISAAC_START_RESPONSE",
+            response_model=IsaacStartResponseV2,
+        )
+
+tests/unit/test_m2c_formal_isaac_endpoint_v2.py:646: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_m2c_formal_isaac_endpoint_v2.py:361: in _call
+    response = endpoint.handle(path, raw)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/xh_agent/policy/qrm_lite/formal_isaac_endpoint_v2.py:192: in handle
+    require_pre_freeze(M2CExperimentAction.Q_B_EVALUATION)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+action = <M2CExperimentAction.Q_B_EVALUATION: 'Q_B_EVALUATION'>
+
+    def require_pre_freeze(
+        action: M2CExperimentAction,
+    ) -> datetime:
+        """Allow ``action`` only before the fixed Asia/Shanghai hard freeze.
+    
+        Invalid clock/timezone inputs fail closed instead of being interpreted as
+        local time.  There is deliberately no timestamp/configuration override in
+        this API; tests replace the system clock function at the module boundary.
+        """
+    
+        if not isinstance(action, M2CExperimentAction):
+            raise M2CHardFreezeError("M2C_HARD_FREEZE_ACTION_INVALID")
+        freeze = _freeze_datetime()
+        try:
+            observed_ns = time.time_ns()
+            if type(observed_ns) is not int or observed_ns <= 0:
+                raise ValueError("system time_ns is not a positive integer")
+            # Compare the integer clock directly at the boundary so float
+            # rounding cannot admit an instant on/after the freeze.
+            if observed_ns >= M2C_HARD_FREEZE_UNIX_NS:
+>               raise M2CHardFreezeError(
+                    "M2C_HARD_FREEZE_ACTIVE:"
+                    f"{action.value}:new experiment execution forbidden on/after "
+                    f"{M2C_HARD_FREEZE_LOCAL_ISO}"
+                )
+E               xh_agent.policy.qrm_lite.m2c_hard_freeze.M2CHardFreezeError: M2C_HARD_FREEZE_ACTIVE:Q_B_EVALUATION:new experiment execution forbidden on/after 2026-09-01T00:00:00+08:00
+
+src/xh_agent/policy/qrm_lite/m2c_hard_freeze.py:81: M2CHardFreezeError
+________ test_signed_failed_execution_receipt_aborts_persistent_session ________
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_signed_failed_execution_r0')
+
+    def test_signed_failed_execution_receipt_aborts_persistent_session(
+        tmp_path: Path,
+    ) -> None:
+        endpoint, backend = _endpoint(tmp_path)
+>       start = _call(
+            endpoint,
+            path=FORMAL_ISAAC_START_PATH,
+            message_type="ISAAC_START_REQUEST",
+            payload=_start_request(endpoint.binding),
+            response_type="ISAAC_START_RESPONSE",
+            response_model=IsaacStartResponseV2,
+        )
+
+tests/unit/test_m2c_formal_isaac_endpoint_v2.py:702: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_m2c_formal_isaac_endpoint_v2.py:361: in _call
+    response = endpoint.handle(path, raw)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/xh_agent/policy/qrm_lite/formal_isaac_endpoint_v2.py:192: in handle
+    require_pre_freeze(M2CExperimentAction.Q_B_EVALUATION)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+action = <M2CExperimentAction.Q_B_EVALUATION: 'Q_B_EVALUATION'>
+
+    def require_pre_freeze(
+        action: M2CExperimentAction,
+    ) -> datetime:
+        """Allow ``action`` only before the fixed Asia/Shanghai hard freeze.
+    
+        Invalid clock/timezone inputs fail closed instead of being interpreted as
+        local time.  There is deliberately no timestamp/configuration override in
+        this API; tests replace the system clock function at the module boundary.
+        """
+    
+        if not isinstance(action, M2CExperimentAction):
+            raise M2CHardFreezeError("M2C_HARD_FREEZE_ACTION_INVALID")
+        freeze = _freeze_datetime()
+        try:
+            observed_ns = time.time_ns()
+            if type(observed_ns) is not int or observed_ns <= 0:
+                raise ValueError("system time_ns is not a positive integer")
+            # Compare the integer clock directly at the boundary so float
+            # rounding cannot admit an instant on/after the freeze.
+            if observed_ns >= M2C_HARD_FREEZE_UNIX_NS:
+>               raise M2CHardFreezeError(
+                    "M2C_HARD_FREEZE_ACTIVE:"
+                    f"{action.value}:new experiment execution forbidden on/after "
+                    f"{M2C_HARD_FREEZE_LOCAL_ISO}"
+                )
+E               xh_agent.policy.qrm_lite.m2c_hard_freeze.M2CHardFreezeError: M2C_HARD_FREEZE_ACTIVE:Q_B_EVALUATION:new experiment execution forbidden on/after 2026-09-01T00:00:00+08:00
+
+src/xh_agent/policy/qrm_lite/m2c_hard_freeze.py:81: M2CHardFreezeError
+_____ test_v4_state_machine_runs_exact_eight_cycle_contract_and_finalizes ______
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_v4_state_machine_runs_exa0')
+
+    def test_v4_state_machine_runs_exact_eight_cycle_contract_and_finalizes(
+        tmp_path: Path,
+    ) -> None:
+        endpoint, backend, observations = _endpoint(tmp_path)
+>       start = _start(endpoint)
+                ^^^^^^^^^^^^^^^^
+
+tests/unit/test_m2c_formal_isaac_endpoint_v4.py:646: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_m2c_formal_isaac_endpoint_v4.py:609: in _start
+    return _call(
+tests/unit/test_m2c_formal_isaac_endpoint_v4.py:580: in _call
+    response = endpoint.handle(path, raw)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/xh_agent/policy/qrm_lite/formal_isaac_endpoint_v4.py:157: in handle
+    require_pre_freeze(M2CExperimentAction.Q_B_EVALUATION)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+action = <M2CExperimentAction.Q_B_EVALUATION: 'Q_B_EVALUATION'>
+
+    def require_pre_freeze(
+        action: M2CExperimentAction,
+    ) -> datetime:
+        """Allow ``action`` only before the fixed Asia/Shanghai hard freeze.
+    
+        Invalid clock/timezone inputs fail closed instead of being interpreted as
+        local time.  There is deliberately no timestamp/configuration override in
+        this API; tests replace the system clock function at the module boundary.
+        """
+    
+        if not isinstance(action, M2CExperimentAction):
+            raise M2CHardFreezeError("M2C_HARD_FREEZE_ACTION_INVALID")
+        freeze = _freeze_datetime()
+        try:
+            observed_ns = time.time_ns()
+            if type(observed_ns) is not int or observed_ns <= 0:
+                raise ValueError("system time_ns is not a positive integer")
+            # Compare the integer clock directly at the boundary so float
+            # rounding cannot admit an instant on/after the freeze.
+            if observed_ns >= M2C_HARD_FREEZE_UNIX_NS:
+>               raise M2CHardFreezeError(
+                    "M2C_HARD_FREEZE_ACTIVE:"
+                    f"{action.value}:new experiment execution forbidden on/after "
+                    f"{M2C_HARD_FREEZE_LOCAL_ISO}"
+                )
+E               xh_agent.policy.qrm_lite.m2c_hard_freeze.M2CHardFreezeError: M2C_HARD_FREEZE_ACTIVE:Q_B_EVALUATION:new experiment execution forbidden on/after 2026-09-01T00:00:00+08:00
+
+src/xh_agent/policy/qrm_lite/m2c_hard_freeze.py:81: M2CHardFreezeError
+________ test_v4_invalid_mapping_is_terminal_no_action_and_cannot_retry ________
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_v4_invalid_mapping_is_ter0')
+
+    def test_v4_invalid_mapping_is_terminal_no_action_and_cannot_retry(tmp_path: Path) -> None:
+        endpoint, _, observations = _endpoint(tmp_path)
+>       start = _start(endpoint)
+                ^^^^^^^^^^^^^^^^
+
+tests/unit/test_m2c_formal_isaac_endpoint_v4.py:708: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_m2c_formal_isaac_endpoint_v4.py:609: in _start
+    return _call(
+tests/unit/test_m2c_formal_isaac_endpoint_v4.py:580: in _call
+    response = endpoint.handle(path, raw)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/xh_agent/policy/qrm_lite/formal_isaac_endpoint_v4.py:157: in handle
+    require_pre_freeze(M2CExperimentAction.Q_B_EVALUATION)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+action = <M2CExperimentAction.Q_B_EVALUATION: 'Q_B_EVALUATION'>
+
+    def require_pre_freeze(
+        action: M2CExperimentAction,
+    ) -> datetime:
+        """Allow ``action`` only before the fixed Asia/Shanghai hard freeze.
+    
+        Invalid clock/timezone inputs fail closed instead of being interpreted as
+        local time.  There is deliberately no timestamp/configuration override in
+        this API; tests replace the system clock function at the module boundary.
+        """
+    
+        if not isinstance(action, M2CExperimentAction):
+            raise M2CHardFreezeError("M2C_HARD_FREEZE_ACTION_INVALID")
+        freeze = _freeze_datetime()
+        try:
+            observed_ns = time.time_ns()
+            if type(observed_ns) is not int or observed_ns <= 0:
+                raise ValueError("system time_ns is not a positive integer")
+            # Compare the integer clock directly at the boundary so float
+            # rounding cannot admit an instant on/after the freeze.
+            if observed_ns >= M2C_HARD_FREEZE_UNIX_NS:
+>               raise M2CHardFreezeError(
+                    "M2C_HARD_FREEZE_ACTIVE:"
+                    f"{action.value}:new experiment execution forbidden on/after "
+                    f"{M2C_HARD_FREEZE_LOCAL_ISO}"
+                )
+E               xh_agent.policy.qrm_lite.m2c_hard_freeze.M2CHardFreezeError: M2C_HARD_FREEZE_ACTIVE:Q_B_EVALUATION:new experiment execution forbidden on/after 2026-09-01T00:00:00+08:00
+
+src/xh_agent/policy/qrm_lite/m2c_hard_freeze.py:81: M2CHardFreezeError
+________ test_v4_execute_response_audit_failure_poisoned_without_retry _________
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_v4_execute_response_audit0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1105b62b0>
+
+    def test_v4_execute_response_audit_failure_poisoned_without_retry(
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        endpoint, backend, observations = _endpoint(tmp_path)
+>       start = _start(endpoint)
+                ^^^^^^^^^^^^^^^^
+
+tests/unit/test_m2c_formal_isaac_endpoint_v4.py:755: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_m2c_formal_isaac_endpoint_v4.py:609: in _start
+    return _call(
+tests/unit/test_m2c_formal_isaac_endpoint_v4.py:580: in _call
+    response = endpoint.handle(path, raw)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/xh_agent/policy/qrm_lite/formal_isaac_endpoint_v4.py:157: in handle
+    require_pre_freeze(M2CExperimentAction.Q_B_EVALUATION)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+action = <M2CExperimentAction.Q_B_EVALUATION: 'Q_B_EVALUATION'>
+
+    def require_pre_freeze(
+        action: M2CExperimentAction,
+    ) -> datetime:
+        """Allow ``action`` only before the fixed Asia/Shanghai hard freeze.
+    
+        Invalid clock/timezone inputs fail closed instead of being interpreted as
+        local time.  There is deliberately no timestamp/configuration override in
+        this API; tests replace the system clock function at the module boundary.
+        """
+    
+        if not isinstance(action, M2CExperimentAction):
+            raise M2CHardFreezeError("M2C_HARD_FREEZE_ACTION_INVALID")
+        freeze = _freeze_datetime()
+        try:
+            observed_ns = time.time_ns()
+            if type(observed_ns) is not int or observed_ns <= 0:
+                raise ValueError("system time_ns is not a positive integer")
+            # Compare the integer clock directly at the boundary so float
+            # rounding cannot admit an instant on/after the freeze.
+            if observed_ns >= M2C_HARD_FREEZE_UNIX_NS:
+>               raise M2CHardFreezeError(
+                    "M2C_HARD_FREEZE_ACTIVE:"
+                    f"{action.value}:new experiment execution forbidden on/after "
+                    f"{M2C_HARD_FREEZE_LOCAL_ISO}"
+                )
+E               xh_agent.policy.qrm_lite.m2c_hard_freeze.M2CHardFreezeError: M2C_HARD_FREEZE_ACTIVE:Q_B_EVALUATION:new experiment execution forbidden on/after 2026-09-01T00:00:00+08:00
+
+src/xh_agent/policy/qrm_lite/m2c_hard_freeze.py:81: M2CHardFreezeError
+_ test_v4_endpoint_replays_dynamic_a1_inputs_and_rejects_self_consistent_splice _
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_v4_endpoint_replays_dynam0')
+
+    def test_v4_endpoint_replays_dynamic_a1_inputs_and_rejects_self_consistent_splice(
+        tmp_path: Path,
+    ) -> None:
+        endpoint, backend, observations = _endpoint(
+            tmp_path,
+            plan_input_updates={"rgb_sha256": "f" * 64},
+        )
+>       start = _start(endpoint)
+                ^^^^^^^^^^^^^^^^
+
+tests/unit/test_m2c_formal_isaac_endpoint_v4.py:817: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_m2c_formal_isaac_endpoint_v4.py:609: in _start
+    return _call(
+tests/unit/test_m2c_formal_isaac_endpoint_v4.py:580: in _call
+    response = endpoint.handle(path, raw)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/xh_agent/policy/qrm_lite/formal_isaac_endpoint_v4.py:157: in handle
+    require_pre_freeze(M2CExperimentAction.Q_B_EVALUATION)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+action = <M2CExperimentAction.Q_B_EVALUATION: 'Q_B_EVALUATION'>
+
+    def require_pre_freeze(
+        action: M2CExperimentAction,
+    ) -> datetime:
+        """Allow ``action`` only before the fixed Asia/Shanghai hard freeze.
+    
+        Invalid clock/timezone inputs fail closed instead of being interpreted as
+        local time.  There is deliberately no timestamp/configuration override in
+        this API; tests replace the system clock function at the module boundary.
+        """
+    
+        if not isinstance(action, M2CExperimentAction):
+            raise M2CHardFreezeError("M2C_HARD_FREEZE_ACTION_INVALID")
+        freeze = _freeze_datetime()
+        try:
+            observed_ns = time.time_ns()
+            if type(observed_ns) is not int or observed_ns <= 0:
+                raise ValueError("system time_ns is not a positive integer")
+            # Compare the integer clock directly at the boundary so float
+            # rounding cannot admit an instant on/after the freeze.
+            if observed_ns >= M2C_HARD_FREEZE_UNIX_NS:
+>               raise M2CHardFreezeError(
+                    "M2C_HARD_FREEZE_ACTIVE:"
+                    f"{action.value}:new experiment execution forbidden on/after "
+                    f"{M2C_HARD_FREEZE_LOCAL_ISO}"
+                )
+E               xh_agent.policy.qrm_lite.m2c_hard_freeze.M2CHardFreezeError: M2C_HARD_FREEZE_ACTIVE:Q_B_EVALUATION:new experiment execution forbidden on/after 2026-09-01T00:00:00+08:00
+
+src/xh_agent/policy/qrm_lite/m2c_hard_freeze.py:81: M2CHardFreezeError
+_______ test_v4_state_machine_rejects_out_of_order_and_nonprefix_capture _______
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_v4_state_machine_rejects_0')
+
+    def test_v4_state_machine_rejects_out_of_order_and_nonprefix_capture(
+        tmp_path: Path,
+    ) -> None:
+        endpoint, backend, observations = _endpoint(tmp_path)
+        with pytest.raises(RuntimeError, match="not the next"):
+>           endpoint.handle(
+                FORMAL_ISAAC_CAPTURE_PATH_V4,
+                sign_isaac_wire_message_v4(
+                    "ISAAC_CAPTURE_REQUEST_V4",
+                    IsaacCaptureRequestV4(
+                        run_id="contract-v4-run",
+                        session_id="contract-v4-session",
+                        decision_index=0,
+                    ),
+                    SECRET,
+                ).model_dump(mode="json"),
+            )
+
+tests/unit/test_m2c_formal_isaac_endpoint_v4.py:860: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/xh_agent/policy/qrm_lite/formal_isaac_endpoint_v4.py:157: in handle
+    require_pre_freeze(M2CExperimentAction.Q_B_EVALUATION)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+action = <M2CExperimentAction.Q_B_EVALUATION: 'Q_B_EVALUATION'>
+
+    def require_pre_freeze(
+        action: M2CExperimentAction,
+    ) -> datetime:
+        """Allow ``action`` only before the fixed Asia/Shanghai hard freeze.
+    
+        Invalid clock/timezone inputs fail closed instead of being interpreted as
+        local time.  There is deliberately no timestamp/configuration override in
+        this API; tests replace the system clock function at the module boundary.
+        """
+    
+        if not isinstance(action, M2CExperimentAction):
+            raise M2CHardFreezeError("M2C_HARD_FREEZE_ACTION_INVALID")
+        freeze = _freeze_datetime()
+        try:
+            observed_ns = time.time_ns()
+            if type(observed_ns) is not int or observed_ns <= 0:
+                raise ValueError("system time_ns is not a positive integer")
+            # Compare the integer clock directly at the boundary so float
+            # rounding cannot admit an instant on/after the freeze.
+            if observed_ns >= M2C_HARD_FREEZE_UNIX_NS:
+>               raise M2CHardFreezeError(
+                    "M2C_HARD_FREEZE_ACTIVE:"
+                    f"{action.value}:new experiment execution forbidden on/after "
+                    f"{M2C_HARD_FREEZE_LOCAL_ISO}"
+                )
+E               xh_agent.policy.qrm_lite.m2c_hard_freeze.M2CHardFreezeError: M2C_HARD_FREEZE_ACTIVE:Q_B_EVALUATION:new experiment execution forbidden on/after 2026-09-01T00:00:00+08:00
+
+src/xh_agent/policy/qrm_lite/m2c_hard_freeze.py:81: M2CHardFreezeError
+
+During handling of the above exception, another exception occurred:
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_v4_state_machine_rejects_0')
+
+    def test_v4_state_machine_rejects_out_of_order_and_nonprefix_capture(
+        tmp_path: Path,
+    ) -> None:
+        endpoint, backend, observations = _endpoint(tmp_path)
+>       with pytest.raises(RuntimeError, match="not the next"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E        Regex: 'not the next'
+E        Input: 'M2C_HARD_FREEZE_ACTIVE:Q_B_EVALUATION:new experiment execution forbidden on/after 2026-09-01T00:00:00+08:00'
+
+tests/unit/test_m2c_formal_isaac_endpoint_v4.py:859: AssertionError
+___ test_episode_io_binds_one_scene_owner_across_start_capture_and_finalize ____
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_episode_io_binds_one_scen0')
+
+    def test_episode_io_binds_one_scene_owner_across_start_capture_and_finalize(
+        tmp_path: Path,
+    ) -> None:
+        project, binding, endpoint, association, declared_attribute = _deployment_fixture(tmp_path)
+        responses, observations = _execution_responses(tmp_path, endpoint)
+        owner = _Owner(
+            implementation_sha256=binding.scene_owner_implementation_sha256,
+            packets=_packets(
+                source_sha256=binding.capture_source_implementation_sha256,
+                responses=responses,
+                observations=observations,
+            ),
+        )
+        episode_io = FormalIsaacEpisodeIOV4(
+            project_root=project,
+            mode="REAL_ISAAC",
+            binding=binding,
+            endpoint_binding=endpoint,
+            association_deployment=association,
+            declared_attribute_binding=declared_attribute,
+            owner=owner,
+        )
+        start_request = _start_request(endpoint)
+>       start = episode_io.lifecycle.start_episode(start_request)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_m2c_formal_isaac_episode_io_v4.py:332: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/xh_agent/policy/qrm_lite/formal_isaac_episode_io_v4.py:580: in start_episode
+    return self._session.start_episode(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/xh_agent/policy/qrm_lite/formal_isaac_episode_io_v4.py:343: in start_episode
+    self._guard()
+src/xh_agent/policy/qrm_lite/formal_isaac_episode_io_v4.py:337: in _guard
+    require_pre_freeze(M2CExperimentAction.Q_B_EVALUATION)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+action = <M2CExperimentAction.Q_B_EVALUATION: 'Q_B_EVALUATION'>
+
+    def require_pre_freeze(
+        action: M2CExperimentAction,
+    ) -> datetime:
+        """Allow ``action`` only before the fixed Asia/Shanghai hard freeze.
+    
+        Invalid clock/timezone inputs fail closed instead of being interpreted as
+        local time.  There is deliberately no timestamp/configuration override in
+        this API; tests replace the system clock function at the module boundary.
+        """
+    
+        if not isinstance(action, M2CExperimentAction):
+            raise M2CHardFreezeError("M2C_HARD_FREEZE_ACTION_INVALID")
+        freeze = _freeze_datetime()
+        try:
+            observed_ns = time.time_ns()
+            if type(observed_ns) is not int or observed_ns <= 0:
+                raise ValueError("system time_ns is not a positive integer")
+            # Compare the integer clock directly at the boundary so float
+            # rounding cannot admit an instant on/after the freeze.
+            if observed_ns >= M2C_HARD_FREEZE_UNIX_NS:
+>               raise M2CHardFreezeError(
+                    "M2C_HARD_FREEZE_ACTIVE:"
+                    f"{action.value}:new experiment execution forbidden on/after "
+                    f"{M2C_HARD_FREEZE_LOCAL_ISO}"
+                )
+E               xh_agent.policy.qrm_lite.m2c_hard_freeze.M2CHardFreezeError: M2C_HARD_FREEZE_ACTIVE:Q_B_EVALUATION:new experiment execution forbidden on/after 2026-09-01T00:00:00+08:00
+
+src/xh_agent/policy/qrm_lite/m2c_hard_freeze.py:81: M2CHardFreezeError
+___________ test_episode_io_start_evidence_mismatch_consumes_attempt ___________
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_episode_io_start_evidence0')
+
+    def test_episode_io_start_evidence_mismatch_consumes_attempt(tmp_path: Path) -> None:
+        project, binding, endpoint, association, declared_attribute = _deployment_fixture(tmp_path)
+        owner = _Owner(
+            implementation_sha256=binding.scene_owner_implementation_sha256,
+            packets=[],
+        )
+        original = owner.establish_public_failure_boundary_v4
+    
+        def crossed(request: IsaacStartRequestV4) -> FormalIsaacSceneStartEvidenceV4:
+            evidence = original(request)
+            raw = evidence.model_dump(mode="json")
+            raw["matched_key"] = "crossed-key"
+            raw["evidence_sha256"] = canonical_sha256(
+                {key: value for key, value in raw.items() if key != "evidence_sha256"}
+            )
+            return FormalIsaacSceneStartEvidenceV4.model_validate(raw)
+    
+        owner.establish_public_failure_boundary_v4 = crossed  # type: ignore[method-assign]
+        episode_io = FormalIsaacEpisodeIOV4(
+            project_root=project,
+            mode="REAL_ISAAC",
+            binding=binding,
+            endpoint_binding=endpoint,
+            association_deployment=association,
+            declared_attribute_binding=declared_attribute,
+            owner=owner,
+        )
+        request = _start_request(endpoint)
+        with pytest.raises(ValueError, match="crosses request/deployment"):
+>           episode_io.lifecycle.start_episode(request)
+
+tests/unit/test_m2c_formal_isaac_episode_io_v4.py:479: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/xh_agent/policy/qrm_lite/formal_isaac_episode_io_v4.py:580: in start_episode
+    return self._session.start_episode(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/xh_agent/policy/qrm_lite/formal_isaac_episode_io_v4.py:343: in start_episode
+    self._guard()
+src/xh_agent/policy/qrm_lite/formal_isaac_episode_io_v4.py:337: in _guard
+    require_pre_freeze(M2CExperimentAction.Q_B_EVALUATION)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+action = <M2CExperimentAction.Q_B_EVALUATION: 'Q_B_EVALUATION'>
+
+    def require_pre_freeze(
+        action: M2CExperimentAction,
+    ) -> datetime:
+        """Allow ``action`` only before the fixed Asia/Shanghai hard freeze.
+    
+        Invalid clock/timezone inputs fail closed instead of being interpreted as
+        local time.  There is deliberately no timestamp/configuration override in
+        this API; tests replace the system clock function at the module boundary.
+        """
+    
+        if not isinstance(action, M2CExperimentAction):
+            raise M2CHardFreezeError("M2C_HARD_FREEZE_ACTION_INVALID")
+        freeze = _freeze_datetime()
+        try:
+            observed_ns = time.time_ns()
+            if type(observed_ns) is not int or observed_ns <= 0:
+                raise ValueError("system time_ns is not a positive integer")
+            # Compare the integer clock directly at the boundary so float
+            # rounding cannot admit an instant on/after the freeze.
+            if observed_ns >= M2C_HARD_FREEZE_UNIX_NS:
+>               raise M2CHardFreezeError(
+                    "M2C_HARD_FREEZE_ACTIVE:"
+                    f"{action.value}:new experiment execution forbidden on/after "
+                    f"{M2C_HARD_FREEZE_LOCAL_ISO}"
+                )
+E               xh_agent.policy.qrm_lite.m2c_hard_freeze.M2CHardFreezeError: M2C_HARD_FREEZE_ACTIVE:Q_B_EVALUATION:new experiment execution forbidden on/after 2026-09-01T00:00:00+08:00
+
+src/xh_agent/policy/qrm_lite/m2c_hard_freeze.py:81: M2CHardFreezeError
+_______ test_formal_v4_host_runs_exact_eight_model_cycles_and_finalizes ________
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_formal_v4_host_runs_exact0')
+
+    def test_formal_v4_host_runs_exact_eight_model_cycles_and_finalizes(tmp_path: Path) -> None:
+>       evidence, endpoint, _, transport = _run(tmp_path)
+                                           ^^^^^^^^^^^^^^
+
+tests/unit/test_m2c_formal_split_host_v4.py:207: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_m2c_formal_split_host_v4.py:196: in _run
+    evidence = run_formal_v4_episode(
+src/xh_agent/policy/qrm_lite/formal_split_host_v4.py:719: in run_formal_v4_episode
+    raw_start_response = transport.post_isaac(
+tests/unit/test_m2c_formal_split_host_v4.py:75: in post_isaac
+    return self.endpoint.handle(path, payload)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/xh_agent/policy/qrm_lite/formal_isaac_endpoint_v4.py:157: in handle
+    require_pre_freeze(M2CExperimentAction.Q_B_EVALUATION)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+action = <M2CExperimentAction.Q_B_EVALUATION: 'Q_B_EVALUATION'>
+
+    def require_pre_freeze(
+        action: M2CExperimentAction,
+    ) -> datetime:
+        """Allow ``action`` only before the fixed Asia/Shanghai hard freeze.
+    
+        Invalid clock/timezone inputs fail closed instead of being interpreted as
+        local time.  There is deliberately no timestamp/configuration override in
+        this API; tests replace the system clock function at the module boundary.
+        """
+    
+        if not isinstance(action, M2CExperimentAction):
+            raise M2CHardFreezeError("M2C_HARD_FREEZE_ACTION_INVALID")
+        freeze = _freeze_datetime()
+        try:
+            observed_ns = time.time_ns()
+            if type(observed_ns) is not int or observed_ns <= 0:
+                raise ValueError("system time_ns is not a positive integer")
+            # Compare the integer clock directly at the boundary so float
+            # rounding cannot admit an instant on/after the freeze.
+            if observed_ns >= M2C_HARD_FREEZE_UNIX_NS:
+>               raise M2CHardFreezeError(
+                    "M2C_HARD_FREEZE_ACTIVE:"
+                    f"{action.value}:new experiment execution forbidden on/after "
+                    f"{M2C_HARD_FREEZE_LOCAL_ISO}"
+                )
+E               xh_agent.policy.qrm_lite.m2c_hard_freeze.M2CHardFreezeError: M2C_HARD_FREEZE_ACTIVE:Q_B_EVALUATION:new experiment execution forbidden on/after 2026-09-01T00:00:00+08:00
+
+src/xh_agent/policy/qrm_lite/m2c_hard_freeze.py:81: M2CHardFreezeError
+__ test_formal_v4_host_derives_strict_pure_success_only_from_signed_finalizer __
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_formal_v4_host_derives_st0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10ff70cd0>
+
+    def test_formal_v4_host_derives_strict_pure_success_only_from_signed_finalizer(
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        endpoint, backend, _ = _endpoint(tmp_path)
+    
+        def successful_finalize(request: IsaacFinalizeRequestV4) -> IsaacFinalizeResponseV4:
+            return IsaacFinalizeResponseV4(
+                run_id=request.run_id,
+                session_id=request.session_id,
+                evaluated_at_ns=backend.observations[-1].captured_at_ns + 30,
+                final_task_success=True,
+            )
+    
+        monkeypatch.setattr(backend, "finalize", successful_finalize)
+>       evidence = run_formal_v4_episode(
+            inputs=_inputs(endpoint),
+            registry=load_registry_v2(ROOT / "configs/qrm_runtime_mapping_v2.yaml"),
+            qwen_secret=QWEN_SECRET,
+            isaac_secret=ISAAC_SECRET,
+            transport=_InMemoryTransport(endpoint),
+        )
+
+tests/unit/test_m2c_formal_split_host_v4.py:248: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/xh_agent/policy/qrm_lite/formal_split_host_v4.py:719: in run_formal_v4_episode
+    raw_start_response = transport.post_isaac(
+tests/unit/test_m2c_formal_split_host_v4.py:75: in post_isaac
+    return self.endpoint.handle(path, payload)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/xh_agent/policy/qrm_lite/formal_isaac_endpoint_v4.py:157: in handle
+    require_pre_freeze(M2CExperimentAction.Q_B_EVALUATION)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+action = <M2CExperimentAction.Q_B_EVALUATION: 'Q_B_EVALUATION'>
+
+    def require_pre_freeze(
+        action: M2CExperimentAction,
+    ) -> datetime:
+        """Allow ``action`` only before the fixed Asia/Shanghai hard freeze.
+    
+        Invalid clock/timezone inputs fail closed instead of being interpreted as
+        local time.  There is deliberately no timestamp/configuration override in
+        this API; tests replace the system clock function at the module boundary.
+        """
+    
+        if not isinstance(action, M2CExperimentAction):
+            raise M2CHardFreezeError("M2C_HARD_FREEZE_ACTION_INVALID")
+        freeze = _freeze_datetime()
+        try:
+            observed_ns = time.time_ns()
+            if type(observed_ns) is not int or observed_ns <= 0:
+                raise ValueError("system time_ns is not a positive integer")
+            # Compare the integer clock directly at the boundary so float
+            # rounding cannot admit an instant on/after the freeze.
+            if observed_ns >= M2C_HARD_FREEZE_UNIX_NS:
+>               raise M2CHardFreezeError(
+                    "M2C_HARD_FREEZE_ACTIVE:"
+                    f"{action.value}:new experiment execution forbidden on/after "
+                    f"{M2C_HARD_FREEZE_LOCAL_ISO}"
+                )
+E               xh_agent.policy.qrm_lite.m2c_hard_freeze.M2CHardFreezeError: M2C_HARD_FREEZE_ACTIVE:Q_B_EVALUATION:new experiment execution forbidden on/after 2026-09-01T00:00:00+08:00
+
+src/xh_agent/policy/qrm_lite/m2c_hard_freeze.py:81: M2CHardFreezeError
+_ test_formal_v4_host_keeps_invalid_model_choice_as_terminal_false_without_retry _
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_formal_v4_host_keeps_inva0')
+
+    def test_formal_v4_host_keeps_invalid_model_choice_as_terminal_false_without_retry(
+        tmp_path: Path,
+    ) -> None:
+>       evidence, endpoint, _, transport = _run(
+            tmp_path,
+            # LIFT with a model-selected NONE pointer is an invalid registry
+            # request.  The host must forward it unchanged and stop on the Isaac
+            # terminal-no-action response instead of substituting a target.
+            selected_pointers=(8,) + (0,) * 7,
+        )
+
+tests/unit/test_m2c_formal_split_host_v4.py:264: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_m2c_formal_split_host_v4.py:196: in _run
+    evidence = run_formal_v4_episode(
+src/xh_agent/policy/qrm_lite/formal_split_host_v4.py:719: in run_formal_v4_episode
+    raw_start_response = transport.post_isaac(
+tests/unit/test_m2c_formal_split_host_v4.py:75: in post_isaac
+    return self.endpoint.handle(path, payload)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/xh_agent/policy/qrm_lite/formal_isaac_endpoint_v4.py:157: in handle
+    require_pre_freeze(M2CExperimentAction.Q_B_EVALUATION)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+action = <M2CExperimentAction.Q_B_EVALUATION: 'Q_B_EVALUATION'>
+
+    def require_pre_freeze(
+        action: M2CExperimentAction,
+    ) -> datetime:
+        """Allow ``action`` only before the fixed Asia/Shanghai hard freeze.
+    
+        Invalid clock/timezone inputs fail closed instead of being interpreted as
+        local time.  There is deliberately no timestamp/configuration override in
+        this API; tests replace the system clock function at the module boundary.
+        """
+    
+        if not isinstance(action, M2CExperimentAction):
+            raise M2CHardFreezeError("M2C_HARD_FREEZE_ACTION_INVALID")
+        freeze = _freeze_datetime()
+        try:
+            observed_ns = time.time_ns()
+            if type(observed_ns) is not int or observed_ns <= 0:
+                raise ValueError("system time_ns is not a positive integer")
+            # Compare the integer clock directly at the boundary so float
+            # rounding cannot admit an instant on/after the freeze.
+            if observed_ns >= M2C_HARD_FREEZE_UNIX_NS:
+>               raise M2CHardFreezeError(
+                    "M2C_HARD_FREEZE_ACTIVE:"
+                    f"{action.value}:new experiment execution forbidden on/after "
+                    f"{M2C_HARD_FREEZE_LOCAL_ISO}"
+                )
+E               xh_agent.policy.qrm_lite.m2c_hard_freeze.M2CHardFreezeError: M2C_HARD_FREEZE_ACTIVE:Q_B_EVALUATION:new experiment execution forbidden on/after 2026-09-01T00:00:00+08:00
+
+src/xh_agent/policy/qrm_lite/m2c_hard_freeze.py:81: M2CHardFreezeError
+______ test_formal_v4_host_rejects_hmac_tamper_and_crossed_qwen_response _______
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_formal_v4_host_rejects_hm0')
+
+    def test_formal_v4_host_rejects_hmac_tamper_and_crossed_qwen_response(tmp_path: Path) -> None:
+        endpoint, _, _ = _endpoint(tmp_path / "hmac")
+        with pytest.raises(ValueError, match="HMAC mismatch"):
+>           run_formal_v4_episode(
+                inputs=_inputs(endpoint),
+                registry=load_registry_v2(ROOT / "configs/qrm_runtime_mapping_v2.yaml"),
+                qwen_secret=QWEN_SECRET,
+                isaac_secret=ISAAC_SECRET,
+                transport=_InMemoryTransport(endpoint, tamper_qwen_hmac=True),
+            )
+
+tests/unit/test_m2c_formal_split_host_v4.py:292: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/xh_agent/policy/qrm_lite/formal_split_host_v4.py:719: in run_formal_v4_episode
+    raw_start_response = transport.post_isaac(
+tests/unit/test_m2c_formal_split_host_v4.py:75: in post_isaac
+    return self.endpoint.handle(path, payload)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/xh_agent/policy/qrm_lite/formal_isaac_endpoint_v4.py:157: in handle
+    require_pre_freeze(M2CExperimentAction.Q_B_EVALUATION)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+action = <M2CExperimentAction.Q_B_EVALUATION: 'Q_B_EVALUATION'>
+
+    def require_pre_freeze(
+        action: M2CExperimentAction,
+    ) -> datetime:
+        """Allow ``action`` only before the fixed Asia/Shanghai hard freeze.
+    
+        Invalid clock/timezone inputs fail closed instead of being interpreted as
+        local time.  There is deliberately no timestamp/configuration override in
+        this API; tests replace the system clock function at the module boundary.
+        """
+    
+        if not isinstance(action, M2CExperimentAction):
+            raise M2CHardFreezeError("M2C_HARD_FREEZE_ACTION_INVALID")
+        freeze = _freeze_datetime()
+        try:
+            observed_ns = time.time_ns()
+            if type(observed_ns) is not int or observed_ns <= 0:
+                raise ValueError("system time_ns is not a positive integer")
+            # Compare the integer clock directly at the boundary so float
+            # rounding cannot admit an instant on/after the freeze.
+            if observed_ns >= M2C_HARD_FREEZE_UNIX_NS:
+>               raise M2CHardFreezeError(
+                    "M2C_HARD_FREEZE_ACTIVE:"
+                    f"{action.value}:new experiment execution forbidden on/after "
+                    f"{M2C_HARD_FREEZE_LOCAL_ISO}"
+                )
+E               xh_agent.policy.qrm_lite.m2c_hard_freeze.M2CHardFreezeError: M2C_HARD_FREEZE_ACTIVE:Q_B_EVALUATION:new experiment execution forbidden on/after 2026-09-01T00:00:00+08:00
+
+src/xh_agent/policy/qrm_lite/m2c_hard_freeze.py:81: M2CHardFreezeError
+________ test_formal_v4_evidence_rejects_posthoc_wire_or_summary_tamper ________
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_formal_v4_evidence_reject0')
+
+    def test_formal_v4_evidence_rejects_posthoc_wire_or_summary_tamper(tmp_path: Path) -> None:
+>       evidence, _, _, _ = _run(tmp_path)
+                            ^^^^^^^^^^^^^^
+
+tests/unit/test_m2c_formal_split_host_v4.py:312: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_m2c_formal_split_host_v4.py:196: in _run
+    evidence = run_formal_v4_episode(
+src/xh_agent/policy/qrm_lite/formal_split_host_v4.py:719: in run_formal_v4_episode
+    raw_start_response = transport.post_isaac(
+tests/unit/test_m2c_formal_split_host_v4.py:75: in post_isaac
+    return self.endpoint.handle(path, payload)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/xh_agent/policy/qrm_lite/formal_isaac_endpoint_v4.py:157: in handle
+    require_pre_freeze(M2CExperimentAction.Q_B_EVALUATION)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+action = <M2CExperimentAction.Q_B_EVALUATION: 'Q_B_EVALUATION'>
+
+    def require_pre_freeze(
+        action: M2CExperimentAction,
+    ) -> datetime:
+        """Allow ``action`` only before the fixed Asia/Shanghai hard freeze.
+    
+        Invalid clock/timezone inputs fail closed instead of being interpreted as
+        local time.  There is deliberately no timestamp/configuration override in
+        this API; tests replace the system clock function at the module boundary.
+        """
+    
+        if not isinstance(action, M2CExperimentAction):
+            raise M2CHardFreezeError("M2C_HARD_FREEZE_ACTION_INVALID")
+        freeze = _freeze_datetime()
+        try:
+            observed_ns = time.time_ns()
+            if type(observed_ns) is not int or observed_ns <= 0:
+                raise ValueError("system time_ns is not a positive integer")
+            # Compare the integer clock directly at the boundary so float
+            # rounding cannot admit an instant on/after the freeze.
+            if observed_ns >= M2C_HARD_FREEZE_UNIX_NS:
+>               raise M2CHardFreezeError(
+                    "M2C_HARD_FREEZE_ACTIVE:"
+                    f"{action.value}:new experiment execution forbidden on/after "
+                    f"{M2C_HARD_FREEZE_LOCAL_ISO}"
+                )
+E               xh_agent.policy.qrm_lite.m2c_hard_freeze.M2CHardFreezeError: M2C_HARD_FREEZE_ACTIVE:Q_B_EVALUATION:new experiment execution forbidden on/after 2026-09-01T00:00:00+08:00
+
+src/xh_agent/policy/qrm_lite/m2c_hard_freeze.py:81: M2CHardFreezeError
+____ test_formal_v4_cli_refuses_existing_output_before_consuming_challenge _____
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_formal_v4_cli_refuses_exi0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x110354050>
+
+    def test_formal_v4_cli_refuses_existing_output_before_consuming_challenge(
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        endpoint, _, _ = _endpoint(tmp_path / "endpoint")
+        configuration = _configuration(endpoint)
+        output = tmp_path / "formal.json"
+        output.write_text("existing\n", encoding="utf-8")
+        monkeypatch.setattr(host_cli, "validate_configuration", lambda _args: configuration)
+        monkeypatch.setattr(
+            host_cli,
+            "consume_wire_challenge_create_only",
+            lambda **_kwargs: pytest.fail("existing output consumed the one-shot challenge"),
+        )
+    
+        with pytest.raises(FileExistsError, match="refusing to overwrite"):
+>           host_cli.main(_cli_argv(tmp_path))
+
+tests/unit/test_m2c_formal_split_host_v4.py:471: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/m2c/run_formal_model_owned_chain_v4.py:480: in main
+    require_pre_freeze(M2CExperimentAction.Q_B_EVALUATION)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+action = <M2CExperimentAction.Q_B_EVALUATION: 'Q_B_EVALUATION'>
+
+    def require_pre_freeze(
+        action: M2CExperimentAction,
+    ) -> datetime:
+        """Allow ``action`` only before the fixed Asia/Shanghai hard freeze.
+    
+        Invalid clock/timezone inputs fail closed instead of being interpreted as
+        local time.  There is deliberately no timestamp/configuration override in
+        this API; tests replace the system clock function at the module boundary.
+        """
+    
+        if not isinstance(action, M2CExperimentAction):
+            raise M2CHardFreezeError("M2C_HARD_FREEZE_ACTION_INVALID")
+        freeze = _freeze_datetime()
+        try:
+            observed_ns = time.time_ns()
+            if type(observed_ns) is not int or observed_ns <= 0:
+                raise ValueError("system time_ns is not a positive integer")
+            # Compare the integer clock directly at the boundary so float
+            # rounding cannot admit an instant on/after the freeze.
+            if observed_ns >= M2C_HARD_FREEZE_UNIX_NS:
+>               raise M2CHardFreezeError(
+                    "M2C_HARD_FREEZE_ACTIVE:"
+                    f"{action.value}:new experiment execution forbidden on/after "
+                    f"{M2C_HARD_FREEZE_LOCAL_ISO}"
+                )
+E               xh_agent.policy.qrm_lite.m2c_hard_freeze.M2CHardFreezeError: M2C_HARD_FREEZE_ACTIVE:Q_B_EVALUATION:new experiment execution forbidden on/after 2026-09-01T00:00:00+08:00
+
+src/xh_agent/policy/qrm_lite/m2c_hard_freeze.py:81: M2CHardFreezeError
+_____ test_formal_v4_cli_unexpected_failure_writes_only_ineligible_sidecar _____
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_formal_v4_cli_unexpected_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x11039d470>
+
+    def test_formal_v4_cli_unexpected_failure_writes_only_ineligible_sidecar(
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        endpoint, _, _ = _endpoint(tmp_path / "endpoint")
+        configuration = _configuration(endpoint)
+        inputs = _inputs(endpoint)
+        monkeypatch.setattr(host_cli, "validate_configuration", lambda _args: configuration)
+        monkeypatch.setattr(host_cli, "consume_wire_challenge_create_only", lambda **_kwargs: None)
+        monkeypatch.setattr(
+            host_cli,
+            "_inputs_from_canonical_ledger",
+            lambda *_args, **_kwargs: inputs,
+        )
+    
+        def fail(
+            _args: Any,
+            *,
+            configuration: Any,
+            audit: host_cli.HostPartialRunAuditV4,
+        ) -> Any:
+            del configuration
+            audit.record("DECISION_0_CAPTURE_REQUEST", {"schema_version": "test-only"})
+            raise RuntimeError("transport failed closed")
+    
+        monkeypatch.setattr(host_cli, "run_real", fail)
+        with pytest.raises(RuntimeError, match="transport failed closed"):
+>           host_cli.main(_cli_argv(tmp_path))
+
+tests/unit/test_m2c_formal_split_host_v4.py:517: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/m2c/run_formal_model_owned_chain_v4.py:480: in main
+    require_pre_freeze(M2CExperimentAction.Q_B_EVALUATION)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+action = <M2CExperimentAction.Q_B_EVALUATION: 'Q_B_EVALUATION'>
+
+    def require_pre_freeze(
+        action: M2CExperimentAction,
+    ) -> datetime:
+        """Allow ``action`` only before the fixed Asia/Shanghai hard freeze.
+    
+        Invalid clock/timezone inputs fail closed instead of being interpreted as
+        local time.  There is deliberately no timestamp/configuration override in
+        this API; tests replace the system clock function at the module boundary.
+        """
+    
+        if not isinstance(action, M2CExperimentAction):
+            raise M2CHardFreezeError("M2C_HARD_FREEZE_ACTION_INVALID")
+        freeze = _freeze_datetime()
+        try:
+            observed_ns = time.time_ns()
+            if type(observed_ns) is not int or observed_ns <= 0:
+                raise ValueError("system time_ns is not a positive integer")
+            # Compare the integer clock directly at the boundary so float
+            # rounding cannot admit an instant on/after the freeze.
+            if observed_ns >= M2C_HARD_FREEZE_UNIX_NS:
+>               raise M2CHardFreezeError(
+                    "M2C_HARD_FREEZE_ACTIVE:"
+                    f"{action.value}:new experiment execution forbidden on/after "
+                    f"{M2C_HARD_FREEZE_LOCAL_ISO}"
+                )
+E               xh_agent.policy.qrm_lite.m2c_hard_freeze.M2CHardFreezeError: M2C_HARD_FREEZE_ACTIVE:Q_B_EVALUATION:new experiment execution forbidden on/after 2026-09-01T00:00:00+08:00
+
+src/xh_agent/policy/qrm_lite/m2c_hard_freeze.py:81: M2CHardFreezeError
+
+During handling of the above exception, another exception occurred:
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_formal_v4_cli_unexpected_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x11039d470>
+
+    def test_formal_v4_cli_unexpected_failure_writes_only_ineligible_sidecar(
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        endpoint, _, _ = _endpoint(tmp_path / "endpoint")
+        configuration = _configuration(endpoint)
+        inputs = _inputs(endpoint)
+        monkeypatch.setattr(host_cli, "validate_configuration", lambda _args: configuration)
+        monkeypatch.setattr(host_cli, "consume_wire_challenge_create_only", lambda **_kwargs: None)
+        monkeypatch.setattr(
+            host_cli,
+            "_inputs_from_canonical_ledger",
+            lambda *_args, **_kwargs: inputs,
+        )
+    
+        def fail(
+            _args: Any,
+            *,
+            configuration: Any,
+            audit: host_cli.HostPartialRunAuditV4,
+        ) -> Any:
+            del configuration
+            audit.record("DECISION_0_CAPTURE_REQUEST", {"schema_version": "test-only"})
+            raise RuntimeError("transport failed closed")
+    
+        monkeypatch.setattr(host_cli, "run_real", fail)
+>       with pytest.raises(RuntimeError, match="transport failed closed"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E        Regex: 'transport failed closed'
+E        Input: 'M2C_HARD_FREEZE_ACTIVE:Q_B_EVALUATION:new experiment execution forbidden on/after 2026-09-01T00:00:00+08:00'
+
+tests/unit/test_m2c_formal_split_host_v4.py:516: AssertionError
+_ test_real_isaac_construction_requires_counter_and_reviewed_deployment_binding _
+
+    def test_real_isaac_construction_requires_counter_and_reviewed_deployment_binding() -> None:
+        probe = _Probe()
+        with pytest.raises(ExactPlanRuntimeUnavailable, match="mutation counter"):
+>           FrozenProbeExactPlanExecutorV1(
+                project_root=PROJECT_ROOT,
+                mode="REAL_ISAAC",
+                probe=probe,
+                robot=object(),
+                hand_prim=object(),
+                contact_collector=object(),
+                sensors={},
+                contact_views={},
+                journal=_Journal(),
+                state_digest=lambda: ZERO,
+                capture_public=_capture,
+                reassociate_public=_reassociate,
+                deployment_binding=None,
+            )
+
+tests/unit/test_m2c_isaac_exact_plan_runtime_v1.py:520: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/xh_agent/policy/qrm_lite/isaac_exact_plan_runtime_v1.py:479: in __init__
+    require_pre_freeze(M2CExperimentAction.FORMAL_ISAAC_SERVICE)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+action = <M2CExperimentAction.FORMAL_ISAAC_SERVICE: 'FORMAL_ISAAC_SERVICE'>
+
+    def require_pre_freeze(
+        action: M2CExperimentAction,
+    ) -> datetime:
+        """Allow ``action`` only before the fixed Asia/Shanghai hard freeze.
+    
+        Invalid clock/timezone inputs fail closed instead of being interpreted as
+        local time.  There is deliberately no timestamp/configuration override in
+        this API; tests replace the system clock function at the module boundary.
+        """
+    
+        if not isinstance(action, M2CExperimentAction):
+            raise M2CHardFreezeError("M2C_HARD_FREEZE_ACTION_INVALID")
+        freeze = _freeze_datetime()
+        try:
+            observed_ns = time.time_ns()
+            if type(observed_ns) is not int or observed_ns <= 0:
+                raise ValueError("system time_ns is not a positive integer")
+            # Compare the integer clock directly at the boundary so float
+            # rounding cannot admit an instant on/after the freeze.
+            if observed_ns >= M2C_HARD_FREEZE_UNIX_NS:
+>               raise M2CHardFreezeError(
+                    "M2C_HARD_FREEZE_ACTIVE:"
+                    f"{action.value}:new experiment execution forbidden on/after "
+                    f"{M2C_HARD_FREEZE_LOCAL_ISO}"
+                )
+E               xh_agent.policy.qrm_lite.m2c_hard_freeze.M2CHardFreezeError: M2C_HARD_FREEZE_ACTIVE:FORMAL_ISAAC_SERVICE:new experiment execution forbidden on/after 2026-09-01T00:00:00+08:00
+
+src/xh_agent/policy/qrm_lite/m2c_hard_freeze.py:81: M2CHardFreezeError
+_ test_v4_host_local_hmac_receipts_replay_finalized_and_terminalized_runs[False-node_counts0-lab_counts0-FINALIZED] _
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_v4_host_local_hmac_receip0')
+terminal = False, node_counts = (16, 8, 8), lab_counts = (36, 18, 18)
+completion = 'FINALIZED'
+
+    @pytest.mark.parametrize(
+        ("terminal", "node_counts", "lab_counts", "completion"),
+        [
+            (False, (16, 8, 8), (36, 18, 18), "FINALIZED"),
+            (True, (2, 1, 1), (6, 3, 3), "TERMINAL_NO_PHYSICAL_EXECUTION"),
+        ],
+    )
+    def test_v4_host_local_hmac_receipts_replay_finalized_and_terminalized_runs(
+        tmp_path: Path,
+        terminal: bool,
+        node_counts: tuple[int, int, int],
+        lab_counts: tuple[int, int, int],
+        completion: str,
+    ) -> None:
+>       formal, consumption, qwen, service, session = _episode(
+            tmp_path,
+            terminal=terminal,
+        )
+
+tests/unit/test_m2c_offline_wire_auth_v4.py:229: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_m2c_offline_wire_auth_v4.py:189: in _episode
+    evidence = run_formal_v4_episode(
+src/xh_agent/policy/qrm_lite/formal_split_host_v4.py:719: in run_formal_v4_episode
+    raw_start_response = transport.post_isaac(
+tests/unit/test_m2c_formal_split_host_v4.py:75: in post_isaac
+    return self.endpoint.handle(path, payload)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/xh_agent/policy/qrm_lite/formal_isaac_endpoint_v4.py:157: in handle
+    require_pre_freeze(M2CExperimentAction.Q_B_EVALUATION)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+action = <M2CExperimentAction.Q_B_EVALUATION: 'Q_B_EVALUATION'>
+
+    def require_pre_freeze(
+        action: M2CExperimentAction,
+    ) -> datetime:
+        """Allow ``action`` only before the fixed Asia/Shanghai hard freeze.
+    
+        Invalid clock/timezone inputs fail closed instead of being interpreted as
+        local time.  There is deliberately no timestamp/configuration override in
+        this API; tests replace the system clock function at the module boundary.
+        """
+    
+        if not isinstance(action, M2CExperimentAction):
+            raise M2CHardFreezeError("M2C_HARD_FREEZE_ACTION_INVALID")
+        freeze = _freeze_datetime()
+        try:
+            observed_ns = time.time_ns()
+            if type(observed_ns) is not int or observed_ns <= 0:
+                raise ValueError("system time_ns is not a positive integer")
+            # Compare the integer clock directly at the boundary so float
+            # rounding cannot admit an instant on/after the freeze.
+            if observed_ns >= M2C_HARD_FREEZE_UNIX_NS:
+>               raise M2CHardFreezeError(
+                    "M2C_HARD_FREEZE_ACTIVE:"
+                    f"{action.value}:new experiment execution forbidden on/after "
+                    f"{M2C_HARD_FREEZE_LOCAL_ISO}"
+                )
+E               xh_agent.policy.qrm_lite.m2c_hard_freeze.M2CHardFreezeError: M2C_HARD_FREEZE_ACTIVE:Q_B_EVALUATION:new experiment execution forbidden on/after 2026-09-01T00:00:00+08:00
+
+src/xh_agent/policy/qrm_lite/m2c_hard_freeze.py:81: M2CHardFreezeError
+_ test_v4_host_local_hmac_receipts_replay_finalized_and_terminalized_runs[True-node_counts1-lab_counts1-TERMINAL_NO_PHYSICAL_EXECUTION] _
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_v4_host_local_hmac_receip1')
+terminal = True, node_counts = (2, 1, 1), lab_counts = (6, 3, 3)
+completion = 'TERMINAL_NO_PHYSICAL_EXECUTION'
+
+    @pytest.mark.parametrize(
+        ("terminal", "node_counts", "lab_counts", "completion"),
+        [
+            (False, (16, 8, 8), (36, 18, 18), "FINALIZED"),
+            (True, (2, 1, 1), (6, 3, 3), "TERMINAL_NO_PHYSICAL_EXECUTION"),
+        ],
+    )
+    def test_v4_host_local_hmac_receipts_replay_finalized_and_terminalized_runs(
+        tmp_path: Path,
+        terminal: bool,
+        node_counts: tuple[int, int, int],
+        lab_counts: tuple[int, int, int],
+        completion: str,
+    ) -> None:
+>       formal, consumption, qwen, service, session = _episode(
+            tmp_path,
+            terminal=terminal,
+        )
+
+tests/unit/test_m2c_offline_wire_auth_v4.py:229: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_m2c_offline_wire_auth_v4.py:189: in _episode
+    evidence = run_formal_v4_episode(
+src/xh_agent/policy/qrm_lite/formal_split_host_v4.py:719: in run_formal_v4_episode
+    raw_start_response = transport.post_isaac(
+tests/unit/test_m2c_formal_split_host_v4.py:75: in post_isaac
+    return self.endpoint.handle(path, payload)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/xh_agent/policy/qrm_lite/formal_isaac_endpoint_v4.py:157: in handle
+    require_pre_freeze(M2CExperimentAction.Q_B_EVALUATION)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+action = <M2CExperimentAction.Q_B_EVALUATION: 'Q_B_EVALUATION'>
+
+    def require_pre_freeze(
+        action: M2CExperimentAction,
+    ) -> datetime:
+        """Allow ``action`` only before the fixed Asia/Shanghai hard freeze.
+    
+        Invalid clock/timezone inputs fail closed instead of being interpreted as
+        local time.  There is deliberately no timestamp/configuration override in
+        this API; tests replace the system clock function at the module boundary.
+        """
+    
+        if not isinstance(action, M2CExperimentAction):
+            raise M2CHardFreezeError("M2C_HARD_FREEZE_ACTION_INVALID")
+        freeze = _freeze_datetime()
+        try:
+            observed_ns = time.time_ns()
+            if type(observed_ns) is not int or observed_ns <= 0:
+                raise ValueError("system time_ns is not a positive integer")
+            # Compare the integer clock directly at the boundary so float
+            # rounding cannot admit an instant on/after the freeze.
+            if observed_ns >= M2C_HARD_FREEZE_UNIX_NS:
+>               raise M2CHardFreezeError(
+                    "M2C_HARD_FREEZE_ACTIVE:"
+                    f"{action.value}:new experiment execution forbidden on/after "
+                    f"{M2C_HARD_FREEZE_LOCAL_ISO}"
+                )
+E               xh_agent.policy.qrm_lite.m2c_hard_freeze.M2CHardFreezeError: M2C_HARD_FREEZE_ACTIVE:Q_B_EVALUATION:new experiment execution forbidden on/after 2026-09-01T00:00:00+08:00
+
+src/xh_agent/policy/qrm_lite/m2c_hard_freeze.py:81: M2CHardFreezeError
+______ test_v4_hmac_verifier_rejects_qwen_hmac_and_isaac_lifecycle_tamper ______
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_v4_hmac_verifier_rejects_0')
+
+    def test_v4_hmac_verifier_rejects_qwen_hmac_and_isaac_lifecycle_tamper(
+        tmp_path: Path,
+    ) -> None:
+>       formal, consumption, qwen, service, session = _episode(tmp_path)
+                                                      ^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_m2c_offline_wire_auth_v4.py:277: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_m2c_offline_wire_auth_v4.py:189: in _episode
+    evidence = run_formal_v4_episode(
+src/xh_agent/policy/qrm_lite/formal_split_host_v4.py:719: in run_formal_v4_episode
+    raw_start_response = transport.post_isaac(
+tests/unit/test_m2c_formal_split_host_v4.py:75: in post_isaac
+    return self.endpoint.handle(path, payload)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/xh_agent/policy/qrm_lite/formal_isaac_endpoint_v4.py:157: in handle
+    require_pre_freeze(M2CExperimentAction.Q_B_EVALUATION)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+action = <M2CExperimentAction.Q_B_EVALUATION: 'Q_B_EVALUATION'>
+
+    def require_pre_freeze(
+        action: M2CExperimentAction,
+    ) -> datetime:
+        """Allow ``action`` only before the fixed Asia/Shanghai hard freeze.
+    
+        Invalid clock/timezone inputs fail closed instead of being interpreted as
+        local time.  There is deliberately no timestamp/configuration override in
+        this API; tests replace the system clock function at the module boundary.
+        """
+    
+        if not isinstance(action, M2CExperimentAction):
+            raise M2CHardFreezeError("M2C_HARD_FREEZE_ACTION_INVALID")
+        freeze = _freeze_datetime()
+        try:
+            observed_ns = time.time_ns()
+            if type(observed_ns) is not int or observed_ns <= 0:
+                raise ValueError("system time_ns is not a positive integer")
+            # Compare the integer clock directly at the boundary so float
+            # rounding cannot admit an instant on/after the freeze.
+            if observed_ns >= M2C_HARD_FREEZE_UNIX_NS:
+>               raise M2CHardFreezeError(
+                    "M2C_HARD_FREEZE_ACTIVE:"
+                    f"{action.value}:new experiment execution forbidden on/after "
+                    f"{M2C_HARD_FREEZE_LOCAL_ISO}"
+                )
+E               xh_agent.policy.qrm_lite.m2c_hard_freeze.M2CHardFreezeError: M2C_HARD_FREEZE_ACTIVE:Q_B_EVALUATION:new experiment execution forbidden on/after 2026-09-01T00:00:00+08:00
+
+src/xh_agent/policy/qrm_lite/m2c_hard_freeze.py:81: M2CHardFreezeError
+____ test_v4_hmac_verifier_rejects_late_consumption_and_non_suffix_session _____
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_v4_hmac_verifier_rejects_1')
+
+    def test_v4_hmac_verifier_rejects_late_consumption_and_non_suffix_session(
+        tmp_path: Path,
+    ) -> None:
+>       formal, consumption, qwen, service, session = _episode(
+            tmp_path,
+            consumed_at_ns=102,
+        )
+
+tests/unit/test_m2c_offline_wire_auth_v4.py:314: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_m2c_offline_wire_auth_v4.py:189: in _episode
+    evidence = run_formal_v4_episode(
+src/xh_agent/policy/qrm_lite/formal_split_host_v4.py:719: in run_formal_v4_episode
+    raw_start_response = transport.post_isaac(
+tests/unit/test_m2c_formal_split_host_v4.py:75: in post_isaac
+    return self.endpoint.handle(path, payload)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/xh_agent/policy/qrm_lite/formal_isaac_endpoint_v4.py:157: in handle
+    require_pre_freeze(M2CExperimentAction.Q_B_EVALUATION)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+action = <M2CExperimentAction.Q_B_EVALUATION: 'Q_B_EVALUATION'>
+
+    def require_pre_freeze(
+        action: M2CExperimentAction,
+    ) -> datetime:
+        """Allow ``action`` only before the fixed Asia/Shanghai hard freeze.
+    
+        Invalid clock/timezone inputs fail closed instead of being interpreted as
+        local time.  There is deliberately no timestamp/configuration override in
+        this API; tests replace the system clock function at the module boundary.
+        """
+    
+        if not isinstance(action, M2CExperimentAction):
+            raise M2CHardFreezeError("M2C_HARD_FREEZE_ACTION_INVALID")
+        freeze = _freeze_datetime()
+        try:
+            observed_ns = time.time_ns()
+            if type(observed_ns) is not int or observed_ns <= 0:
+                raise ValueError("system time_ns is not a positive integer")
+            # Compare the integer clock directly at the boundary so float
+            # rounding cannot admit an instant on/after the freeze.
+            if observed_ns >= M2C_HARD_FREEZE_UNIX_NS:
+>               raise M2CHardFreezeError(
+                    "M2C_HARD_FREEZE_ACTIVE:"
+                    f"{action.value}:new experiment execution forbidden on/after "
+                    f"{M2C_HARD_FREEZE_LOCAL_ISO}"
+                )
+E               xh_agent.policy.qrm_lite.m2c_hard_freeze.M2CHardFreezeError: M2C_HARD_FREEZE_ACTIVE:Q_B_EVALUATION:new experiment execution forbidden on/after 2026-09-01T00:00:00+08:00
+
+src/xh_agent/policy/qrm_lite/m2c_hard_freeze.py:81: M2CHardFreezeError
+____________ test_v4_receipt_schema_rejects_claimed_count_inflation ____________
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_v4_receipt_schema_rejects0')
+
+    def test_v4_receipt_schema_rejects_claimed_count_inflation(tmp_path: Path) -> None:
+>       formal, consumption, qwen, _, _ = _episode(tmp_path, terminal=True)
+                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_m2c_offline_wire_auth_v4.py:344: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_m2c_offline_wire_auth_v4.py:189: in _episode
+    evidence = run_formal_v4_episode(
+src/xh_agent/policy/qrm_lite/formal_split_host_v4.py:719: in run_formal_v4_episode
+    raw_start_response = transport.post_isaac(
+tests/unit/test_m2c_formal_split_host_v4.py:75: in post_isaac
+    return self.endpoint.handle(path, payload)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/xh_agent/policy/qrm_lite/formal_isaac_endpoint_v4.py:157: in handle
+    require_pre_freeze(M2CExperimentAction.Q_B_EVALUATION)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+action = <M2CExperimentAction.Q_B_EVALUATION: 'Q_B_EVALUATION'>
+
+    def require_pre_freeze(
+        action: M2CExperimentAction,
+    ) -> datetime:
+        """Allow ``action`` only before the fixed Asia/Shanghai hard freeze.
+    
+        Invalid clock/timezone inputs fail closed instead of being interpreted as
+        local time.  There is deliberately no timestamp/configuration override in
+        this API; tests replace the system clock function at the module boundary.
+        """
+    
+        if not isinstance(action, M2CExperimentAction):
+            raise M2CHardFreezeError("M2C_HARD_FREEZE_ACTION_INVALID")
+        freeze = _freeze_datetime()
+        try:
+            observed_ns = time.time_ns()
+            if type(observed_ns) is not int or observed_ns <= 0:
+                raise ValueError("system time_ns is not a positive integer")
+            # Compare the integer clock directly at the boundary so float
+            # rounding cannot admit an instant on/after the freeze.
+            if observed_ns >= M2C_HARD_FREEZE_UNIX_NS:
+>               raise M2CHardFreezeError(
+                    "M2C_HARD_FREEZE_ACTIVE:"
+                    f"{action.value}:new experiment execution forbidden on/after "
+                    f"{M2C_HARD_FREEZE_LOCAL_ISO}"
+                )
+E               xh_agent.policy.qrm_lite.m2c_hard_freeze.M2CHardFreezeError: M2C_HARD_FREEZE_ACTIVE:Q_B_EVALUATION:new experiment execution forbidden on/after 2026-09-01T00:00:00+08:00
+
+src/xh_agent/policy/qrm_lite/m2c_hard_freeze.py:81: M2CHardFreezeError
+_____ test_v4_host_local_cli_publishes_create_only_receipt_without_secret ______
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_v4_host_local_cli_publish0')
+capsys = <_pytest.capture.CaptureFixture object at 0x10fd39810>
+
+    def test_v4_host_local_cli_publishes_create_only_receipt_without_secret(
+        tmp_path: Path,
+        capsys: pytest.CaptureFixture[str],
+    ) -> None:
+>       formal, consumption, qwen, _, _ = _episode(tmp_path / "episode", terminal=True)
+                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_m2c_offline_wire_auth_v4.py:376: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_m2c_offline_wire_auth_v4.py:189: in _episode
+    evidence = run_formal_v4_episode(
+src/xh_agent/policy/qrm_lite/formal_split_host_v4.py:719: in run_formal_v4_episode
+    raw_start_response = transport.post_isaac(
+tests/unit/test_m2c_formal_split_host_v4.py:75: in post_isaac
+    return self.endpoint.handle(path, payload)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/xh_agent/policy/qrm_lite/formal_isaac_endpoint_v4.py:157: in handle
+    require_pre_freeze(M2CExperimentAction.Q_B_EVALUATION)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+action = <M2CExperimentAction.Q_B_EVALUATION: 'Q_B_EVALUATION'>
+
+    def require_pre_freeze(
+        action: M2CExperimentAction,
+    ) -> datetime:
+        """Allow ``action`` only before the fixed Asia/Shanghai hard freeze.
+    
+        Invalid clock/timezone inputs fail closed instead of being interpreted as
+        local time.  There is deliberately no timestamp/configuration override in
+        this API; tests replace the system clock function at the module boundary.
+        """
+    
+        if not isinstance(action, M2CExperimentAction):
+            raise M2CHardFreezeError("M2C_HARD_FREEZE_ACTION_INVALID")
+        freeze = _freeze_datetime()
+        try:
+            observed_ns = time.time_ns()
+            if type(observed_ns) is not int or observed_ns <= 0:
+                raise ValueError("system time_ns is not a positive integer")
+            # Compare the integer clock directly at the boundary so float
+            # rounding cannot admit an instant on/after the freeze.
+            if observed_ns >= M2C_HARD_FREEZE_UNIX_NS:
+>               raise M2CHardFreezeError(
+                    "M2C_HARD_FREEZE_ACTIVE:"
+                    f"{action.value}:new experiment execution forbidden on/after "
+                    f"{M2C_HARD_FREEZE_LOCAL_ISO}"
+                )
+E               xh_agent.policy.qrm_lite.m2c_hard_freeze.M2CHardFreezeError: M2C_HARD_FREEZE_ACTIVE:Q_B_EVALUATION:new experiment execution forbidden on/after 2026-09-01T00:00:00+08:00
+
+src/xh_agent/policy/qrm_lite/m2c_hard_freeze.py:81: M2CHardFreezeError
+__________ test_exact_human_adr_and_all_frozen_bindings_authorize_qb ___________
+
+    def test_exact_human_adr_and_all_frozen_bindings_authorize_qb() -> None:
+        result = qb_adr_gate.evaluate_qb_adr_gate(ROOT)
+>       assert result["status"] == "PASS_Q_B_HUMAN_ADR_GATE"
+E       AssertionError: assert 'BLOCKED_HUMAN_ADR_REQUIRED' == 'PASS_Q_B_HUMAN_ADR_GATE'
+E         
+E         - PASS_Q_B_HUMAN_ADR_GATE
+E         + BLOCKED_HUMAN_ADR_REQUIRED
+
+tests/unit/test_m2c_qb_adr_gate.py:18: AssertionError
+_______ test_gate_constants_equal_the_committed_and_local_evidence_bytes _______
+
+    def test_gate_constants_equal_the_committed_and_local_evidence_bytes() -> None:
+        assert sha256(ROOT / qb_adr_gate.ADR_PATH) == qb_adr_gate.ADR_SHA256
+        assert (
+            sha256(ROOT / qb_adr_gate.PREREGISTRATION_PATH)
+            == qb_adr_gate.PREREGISTRATION_SHA256
+        )
+        assert sha256(ROOT / qb_adr_gate.B0_FREEZE_PATH) == qb_adr_gate.B0_FREEZE_SHA256
+        assert (
+            sha256(ROOT / qb_adr_gate.V4_MANIFEST_PATH)
+            == qb_adr_gate.V4_MANIFEST_SHA256
+        )
+>       assert sha256(ROOT / qb_adr_gate.DATASET_PATH) == qb_adr_gate.DATASET_SHA256
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_m2c_qb_adr_gate.py:44: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_m2c_qb_adr_gate.py:13: in sha256
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+                          ^^^^^^^^^^^^^^^^^
+../../.local/share/uv/python/cpython-3.13.12-macos-aarch64-none/lib/python3.13/pathlib/_abc.py:625: in read_bytes
+    with self.open(mode='rb') as f:
+         ^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/gl/projects/xh-202607-qwen-brain/artifacts/m2c/dataset-v3.jsonl')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/gl/projects/xh-202607-qwen-brain/artifacts/m2c/dataset-v3.jsonl'
+
+../../.local/share/uv/python/cpython-3.13.12-macos-aarch64-none/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+___ test_adr0026_qwen_contract_report_binds_current_bytes_and_stays_blocked ____
+
+    def test_adr0026_qwen_contract_report_binds_current_bytes_and_stays_blocked() -> None:
+        report = json.loads(REPORT.read_text())
+        assert report["status"] == (
+            "PASS_DECISION_DATA_AND_TRAINING_CONTRACT_BLOCKED_BEFORE_REAL_TRAINING"
+        )
+        for binding in [
+            report["accepted_adr"],
+            report["dataset"]["packaging_report"],
+            report["dataset"]["dataset_manifest"],
+            report["dataset"]["v3_excluded_shard"],
+            report["dataset"]["v4_shard"],
+            report["dataset"]["s6_evaluation_manifest"],
+            *report["dataset"]["v4_training_manifests"],
+            *report["implementation"],
+        ]:
+>           assert _sha256(ROOT / binding["path"]) == binding["sha256"]
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_m2c_qwen_adr0026_contract_smoke_report.py:31: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_m2c_qwen_adr0026_contract_smoke_report.py:13: in _sha256
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+                          ^^^^^^^^^^^^^^^^^
+../../.local/share/uv/python/cpython-3.13.12-macos-aarch64-none/lib/python3.13/pathlib/_abc.py:625: in read_bytes
+    with self.open(mode='rb') as f:
+         ^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/gl/projects/xh-202607-qwen-brain/artifacts/m2c/s4-decision-level-supervision-adr0026-v1/dataset-manifest.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/gl/projects/xh-202607-qwen-brain/artifacts/m2c/s4-decision-level-supervision-adr0026-v1/dataset-manifest.json'
+
+../../.local/share/uv/python/cpython-3.13.12-macos-aarch64-none/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+__________ test_train_dry_run_never_enters_real_trainer_or_overwrites __________
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_train_dry_run_never_enter0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10e8d6120>
+
+    def test_train_dry_run_never_enters_real_trainer_or_overwrites(
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        dataset, manifest, _ = _dataset(tmp_path)
+        output = tmp_path / "dry-run"
+        invoked: list[bool] = []
+    
+        def forbidden_real_train(*_args, **_kwargs):
+            invoked.append(True)
+            raise AssertionError("real trainer entered")
+    
+        monkeypatch.setattr("m2c.train_qwen_coarse_v2._real_train", forbidden_real_train)
+        args = [
+            "--dataset",
+            str(dataset),
+            "--dataset-manifest",
+            str(manifest),
+            "--dataset-root",
+            str(tmp_path),
+            "--training-keys",
+            str(TRAINING_KEYS),
+            "--evaluation-keys",
+            str(EVALUATION_KEYS),
+            "--output-root",
+            str(output),
+            "--failure-context",
+            "on",
+            "--dry-run",
+        ]
+>       assert train_main(args) == 0
+               ^^^^^^^^^^^^^^^^
+
+tests/unit/test_m2c_qwen_coarse_v2.py:558: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/m2c/train_qwen_coarse_v2.py:859: in main
+    require_pre_freeze(M2CExperimentAction.TRAINING)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+action = <M2CExperimentAction.TRAINING: 'TRAINING'>
+
+    def require_pre_freeze(
+        action: M2CExperimentAction,
+    ) -> datetime:
+        """Allow ``action`` only before the fixed Asia/Shanghai hard freeze.
+    
+        Invalid clock/timezone inputs fail closed instead of being interpreted as
+        local time.  There is deliberately no timestamp/configuration override in
+        this API; tests replace the system clock function at the module boundary.
+        """
+    
+        if not isinstance(action, M2CExperimentAction):
+            raise M2CHardFreezeError("M2C_HARD_FREEZE_ACTION_INVALID")
+        freeze = _freeze_datetime()
+        try:
+            observed_ns = time.time_ns()
+            if type(observed_ns) is not int or observed_ns <= 0:
+                raise ValueError("system time_ns is not a positive integer")
+            # Compare the integer clock directly at the boundary so float
+            # rounding cannot admit an instant on/after the freeze.
+            if observed_ns >= M2C_HARD_FREEZE_UNIX_NS:
+>               raise M2CHardFreezeError(
+                    "M2C_HARD_FREEZE_ACTIVE:"
+                    f"{action.value}:new experiment execution forbidden on/after "
+                    f"{M2C_HARD_FREEZE_LOCAL_ISO}"
+                )
+E               xh_agent.policy.qrm_lite.m2c_hard_freeze.M2CHardFreezeError: M2C_HARD_FREEZE_ACTIVE:TRAINING:new experiment execution forbidden on/after 2026-09-01T00:00:00+08:00
+
+src/xh_agent/policy/qrm_lite/m2c_hard_freeze.py:81: M2CHardFreezeError
+____________ test_m2b_init_rejected_before_dataset_or_model_loading ____________
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_m2b_init_rejected_before_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10fb93a80>
+
+    def test_m2b_init_rejected_before_dataset_or_model_loading(
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        entered: list[str] = []
+    
+        def forbidden_dataset_load(*_args, **_kwargs):
+            entered.append("dataset")
+            raise AssertionError("dataset loader entered")
+    
+        def forbidden_real_train(*_args, **_kwargs):
+            entered.append("trainer")
+            raise AssertionError("real trainer entered")
+    
+        monkeypatch.setattr(
+            "m2c.train_qwen_coarse_v2.load_training_dataset",
+            forbidden_dataset_load,
+        )
+        monkeypatch.setattr("m2c.train_qwen_coarse_v2._real_train", forbidden_real_train)
+        with pytest.raises(ValueError, match="initialization_source must be NONE"):
+>           train_main(
+                [
+                    "--dataset",
+                    str(tmp_path / "absent-dataset.jsonl"),
+                    "--dataset-manifest",
+                    str(tmp_path / "absent-manifest.json"),
+                    "--dataset-root",
+                    str(tmp_path / "absent-assets"),
+                    "--training-keys",
+                    str(TRAINING_KEYS),
+                    "--evaluation-keys",
+                    str(EVALUATION_KEYS),
+                    "--output-root",
+                    str(tmp_path / "m2c-output"),
+                    "--failure-context",
+                    "on",
+                    "--m2b-init-adapter",
+                    str(tmp_path / "arbitrary-peft"),
+                ]
+            )
+
+tests/unit/test_m2c_qwen_coarse_v2.py:629: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/m2c/train_qwen_coarse_v2.py:859: in main
+    require_pre_freeze(M2CExperimentAction.TRAINING)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+action = <M2CExperimentAction.TRAINING: 'TRAINING'>
+
+    def require_pre_freeze(
+        action: M2CExperimentAction,
+    ) -> datetime:
+        """Allow ``action`` only before the fixed Asia/Shanghai hard freeze.
+    
+        Invalid clock/timezone inputs fail closed instead of being interpreted as
+        local time.  There is deliberately no timestamp/configuration override in
+        this API; tests replace the system clock function at the module boundary.
+        """
+    
+        if not isinstance(action, M2CExperimentAction):
+            raise M2CHardFreezeError("M2C_HARD_FREEZE_ACTION_INVALID")
+        freeze = _freeze_datetime()
+        try:
+            observed_ns = time.time_ns()
+            if type(observed_ns) is not int or observed_ns <= 0:
+                raise ValueError("system time_ns is not a positive integer")
+            # Compare the integer clock directly at the boundary so float
+            # rounding cannot admit an instant on/after the freeze.
+            if observed_ns >= M2C_HARD_FREEZE_UNIX_NS:
+>               raise M2CHardFreezeError(
+                    "M2C_HARD_FREEZE_ACTIVE:"
+                    f"{action.value}:new experiment execution forbidden on/after "
+                    f"{M2C_HARD_FREEZE_LOCAL_ISO}"
+                )
+E               xh_agent.policy.qrm_lite.m2c_hard_freeze.M2CHardFreezeError: M2C_HARD_FREEZE_ACTIVE:TRAINING:new experiment execution forbidden on/after 2026-09-01T00:00:00+08:00
+
+src/xh_agent/policy/qrm_lite/m2c_hard_freeze.py:81: M2CHardFreezeError
+______________ test_real_main_timeout_keeps_formal_output_absent _______________
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_real_main_timeout_keeps_f0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1105e2f20>
+
+    def test_real_main_timeout_keeps_formal_output_absent(
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        output = tmp_path / "real-output"
+        captured: dict[str, float | Path] = {}
+    
+        def fake_load(*_args, **_kwargs):
+            return [], _dataset_report()
+    
+        def fake_real_train(
+            fake_args,
+            _samples,
+            _dataset_report_value,
+            *,
+            whole_run_started_monotonic: float,
+            deadline_monotonic: float,
+        ):
+            captured["started"] = whole_run_started_monotonic
+            captured["deadline"] = deadline_monotonic
+            captured["staging"] = fake_args.output_root
+            fake_args.output_root.mkdir()
+            return {"status": "WOULD_PASS_INSIDE_BUDGET"}
+    
+        moments = iter((100.0, 100.1, 101.0, 102.0, 105.0, 109.0, 110.0))
+        monkeypatch.setattr(
+            "m2c.train_qwen_coarse_v2.time.monotonic",
+            lambda: next(moments),
+        )
+        monkeypatch.setattr(
+            "m2c.train_qwen_coarse_v2.load_training_dataset",
+            fake_load,
+        )
+        monkeypatch.setattr(
+            "m2c.train_qwen_coarse_v2._real_train",
+            fake_real_train,
+        )
+        with pytest.raises(TimeoutError, match=WALL_BUDGET_ERROR):
+>           train_main(
+                [
+                    "--dataset",
+                    str(tmp_path / "dataset.jsonl"),
+                    "--dataset-manifest",
+                    str(tmp_path / "dataset-manifest.json"),
+                    "--dataset-root",
+                    str(tmp_path / "assets"),
+                    "--training-keys",
+                    str(TRAINING_KEYS),
+                    "--evaluation-keys",
+                    str(EVALUATION_KEYS),
+                    "--output-root",
+                    str(output),
+                    "--failure-context",
+                    "on",
+                    "--max-wall-seconds",
+                    "10",
+                ]
+            )
+
+tests/unit/test_m2c_qwen_coarse_v2.py:1081: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/m2c/train_qwen_coarse_v2.py:859: in main
+    require_pre_freeze(M2CExperimentAction.TRAINING)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+action = <M2CExperimentAction.TRAINING: 'TRAINING'>
+
+    def require_pre_freeze(
+        action: M2CExperimentAction,
+    ) -> datetime:
+        """Allow ``action`` only before the fixed Asia/Shanghai hard freeze.
+    
+        Invalid clock/timezone inputs fail closed instead of being interpreted as
+        local time.  There is deliberately no timestamp/configuration override in
+        this API; tests replace the system clock function at the module boundary.
+        """
+    
+        if not isinstance(action, M2CExperimentAction):
+            raise M2CHardFreezeError("M2C_HARD_FREEZE_ACTION_INVALID")
+        freeze = _freeze_datetime()
+        try:
+            observed_ns = time.time_ns()
+            if type(observed_ns) is not int or observed_ns <= 0:
+                raise ValueError("system time_ns is not a positive integer")
+            # Compare the integer clock directly at the boundary so float
+            # rounding cannot admit an instant on/after the freeze.
+            if observed_ns >= M2C_HARD_FREEZE_UNIX_NS:
+>               raise M2CHardFreezeError(
+                    "M2C_HARD_FREEZE_ACTIVE:"
+                    f"{action.value}:new experiment execution forbidden on/after "
+                    f"{M2C_HARD_FREEZE_LOCAL_ISO}"
+                )
+E               xh_agent.policy.qrm_lite.m2c_hard_freeze.M2CHardFreezeError: M2C_HARD_FREEZE_ACTIVE:TRAINING:new experiment execution forbidden on/after 2026-09-01T00:00:00+08:00
+
+src/xh_agent/policy/qrm_lite/m2c_hard_freeze.py:81: M2CHardFreezeError
+_______ test_exact_eight_signed_pairs_are_committed_then_cleanly_stopped _______
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_exact_eight_signed_pairs_0')
+
+    def test_exact_eight_signed_pairs_are_committed_then_cleanly_stopped(tmp_path: Path) -> None:
+        session, audit = _session(tmp_path)
+        requests: list[dict[str, object]] = []
+        responses: list[dict[str, object]] = []
+        for index in range(8):
+            signed = sign_inference_request(_request(index), SECRET).model_dump(mode="json")
+            requests.append(signed)
+>           response = session.handle(signed)
+                       ^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_m2c_qwen_service_audit.py:223: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/m2c/serve_qwen_coarse_v2.py:222: in handle
+    require_pre_freeze(M2CExperimentAction.Q_B_EVALUATION)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+action = <M2CExperimentAction.Q_B_EVALUATION: 'Q_B_EVALUATION'>
+
+    def require_pre_freeze(
+        action: M2CExperimentAction,
+    ) -> datetime:
+        """Allow ``action`` only before the fixed Asia/Shanghai hard freeze.
+    
+        Invalid clock/timezone inputs fail closed instead of being interpreted as
+        local time.  There is deliberately no timestamp/configuration override in
+        this API; tests replace the system clock function at the module boundary.
+        """
+    
+        if not isinstance(action, M2CExperimentAction):
+            raise M2CHardFreezeError("M2C_HARD_FREEZE_ACTION_INVALID")
+        freeze = _freeze_datetime()
+        try:
+            observed_ns = time.time_ns()
+            if type(observed_ns) is not int or observed_ns <= 0:
+                raise ValueError("system time_ns is not a positive integer")
+            # Compare the integer clock directly at the boundary so float
+            # rounding cannot admit an instant on/after the freeze.
+            if observed_ns >= M2C_HARD_FREEZE_UNIX_NS:
+>               raise M2CHardFreezeError(
+                    "M2C_HARD_FREEZE_ACTIVE:"
+                    f"{action.value}:new experiment execution forbidden on/after "
+                    f"{M2C_HARD_FREEZE_LOCAL_ISO}"
+                )
+E               xh_agent.policy.qrm_lite.m2c_hard_freeze.M2CHardFreezeError: M2C_HARD_FREEZE_ACTIVE:Q_B_EVALUATION:new experiment execution forbidden on/after 2026-09-01T00:00:00+08:00
+
+src/xh_agent/policy/qrm_lite/m2c_hard_freeze.py:81: M2CHardFreezeError
+_ test_invalid_sequence_or_identity_is_rejected_and_poisons_session[first0-None-exact 0..7] _
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_invalid_sequence_or_ident0')
+first = FormalInferenceRequestV2(schema_version='FormalInferenceRequestV2', protocol='M2C_FORMAL_SPLIT_RUNNER_V2', run_id='for...ne], teacher_used=False, privileged_truth_policy_input=False), teacher_used=False, privileged_truth_policy_input=False)
+second = None, match = 'exact 0..7'
+
+    @pytest.mark.parametrize(
+        ("first", "second", "match"),
+        [
+            (_request(1), None, "exact 0..7"),
+            (_request(0), _request(1, run_id="crossed-run"), "run_id"),
+            (
+                _request(0),
+                _request(1, challenge_nonce="d" * 64),
+                "challenge nonce",
+            ),
+        ],
+    )
+    def test_invalid_sequence_or_identity_is_rejected_and_poisons_session(
+        tmp_path: Path,
+        first: FormalInferenceRequestV2,
+        second: FormalInferenceRequestV2 | None,
+        match: str,
+    ) -> None:
+        session, audit = _session(tmp_path)
+        if second is None:
+            attempted = first
+        else:
+            session.handle(sign_inference_request(first, SECRET).model_dump(mode="json"))
+            attempted = second
+        with pytest.raises((RuntimeError, ValueError), match=match):
+>           session.handle(sign_inference_request(attempted, SECRET).model_dump(mode="json"))
+
+tests/unit/test_m2c_qwen_service_audit.py:289: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/m2c/serve_qwen_coarse_v2.py:222: in handle
+    require_pre_freeze(M2CExperimentAction.Q_B_EVALUATION)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+action = <M2CExperimentAction.Q_B_EVALUATION: 'Q_B_EVALUATION'>
+
+    def require_pre_freeze(
+        action: M2CExperimentAction,
+    ) -> datetime:
+        """Allow ``action`` only before the fixed Asia/Shanghai hard freeze.
+    
+        Invalid clock/timezone inputs fail closed instead of being interpreted as
+        local time.  There is deliberately no timestamp/configuration override in
+        this API; tests replace the system clock function at the module boundary.
+        """
+    
+        if not isinstance(action, M2CExperimentAction):
+            raise M2CHardFreezeError("M2C_HARD_FREEZE_ACTION_INVALID")
+        freeze = _freeze_datetime()
+        try:
+            observed_ns = time.time_ns()
+            if type(observed_ns) is not int or observed_ns <= 0:
+                raise ValueError("system time_ns is not a positive integer")
+            # Compare the integer clock directly at the boundary so float
+            # rounding cannot admit an instant on/after the freeze.
+            if observed_ns >= M2C_HARD_FREEZE_UNIX_NS:
+>               raise M2CHardFreezeError(
+                    "M2C_HARD_FREEZE_ACTIVE:"
+                    f"{action.value}:new experiment execution forbidden on/after "
+                    f"{M2C_HARD_FREEZE_LOCAL_ISO}"
+                )
+E               xh_agent.policy.qrm_lite.m2c_hard_freeze.M2CHardFreezeError: M2C_HARD_FREEZE_ACTIVE:Q_B_EVALUATION:new experiment execution forbidden on/after 2026-09-01T00:00:00+08:00
+
+src/xh_agent/policy/qrm_lite/m2c_hard_freeze.py:81: M2CHardFreezeError
+
+During handling of the above exception, another exception occurred:
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_invalid_sequence_or_ident0')
+first = FormalInferenceRequestV2(schema_version='FormalInferenceRequestV2', protocol='M2C_FORMAL_SPLIT_RUNNER_V2', run_id='for...ne], teacher_used=False, privileged_truth_policy_input=False), teacher_used=False, privileged_truth_policy_input=False)
+second = None, match = 'exact 0..7'
+
+    @pytest.mark.parametrize(
+        ("first", "second", "match"),
+        [
+            (_request(1), None, "exact 0..7"),
+            (_request(0), _request(1, run_id="crossed-run"), "run_id"),
+            (
+                _request(0),
+                _request(1, challenge_nonce="d" * 64),
+                "challenge nonce",
+            ),
+        ],
+    )
+    def test_invalid_sequence_or_identity_is_rejected_and_poisons_session(
+        tmp_path: Path,
+        first: FormalInferenceRequestV2,
+        second: FormalInferenceRequestV2 | None,
+        match: str,
+    ) -> None:
+        session, audit = _session(tmp_path)
+        if second is None:
+            attempted = first
+        else:
+            session.handle(sign_inference_request(first, SECRET).model_dump(mode="json"))
+            attempted = second
+>       with pytest.raises((RuntimeError, ValueError), match=match):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E        Regex: 'exact 0..7'
+E        Input: 'M2C_HARD_FREEZE_ACTIVE:Q_B_EVALUATION:new experiment execution forbidden on/after 2026-09-01T00:00:00+08:00'
+
+tests/unit/test_m2c_qwen_service_audit.py:288: AssertionError
+_ test_invalid_sequence_or_identity_is_rejected_and_poisons_session[first1-second1-run_id] _
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_invalid_sequence_or_ident1')
+first = FormalInferenceRequestV2(schema_version='FormalInferenceRequestV2', protocol='M2C_FORMAL_SPLIT_RUNNER_V2', run_id='for...ne], teacher_used=False, privileged_truth_policy_input=False), teacher_used=False, privileged_truth_policy_input=False)
+second = FormalInferenceRequestV2(schema_version='FormalInferenceRequestV2', protocol='M2C_FORMAL_SPLIT_RUNNER_V2', run_id='cro...ne], teacher_used=False, privileged_truth_policy_input=False), teacher_used=False, privileged_truth_policy_input=False)
+match = 'run_id'
+
+    @pytest.mark.parametrize(
+        ("first", "second", "match"),
+        [
+            (_request(1), None, "exact 0..7"),
+            (_request(0), _request(1, run_id="crossed-run"), "run_id"),
+            (
+                _request(0),
+                _request(1, challenge_nonce="d" * 64),
+                "challenge nonce",
+            ),
+        ],
+    )
+    def test_invalid_sequence_or_identity_is_rejected_and_poisons_session(
+        tmp_path: Path,
+        first: FormalInferenceRequestV2,
+        second: FormalInferenceRequestV2 | None,
+        match: str,
+    ) -> None:
+        session, audit = _session(tmp_path)
+        if second is None:
+            attempted = first
+        else:
+>           session.handle(sign_inference_request(first, SECRET).model_dump(mode="json"))
+
+tests/unit/test_m2c_qwen_service_audit.py:286: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/m2c/serve_qwen_coarse_v2.py:222: in handle
+    require_pre_freeze(M2CExperimentAction.Q_B_EVALUATION)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+action = <M2CExperimentAction.Q_B_EVALUATION: 'Q_B_EVALUATION'>
+
+    def require_pre_freeze(
+        action: M2CExperimentAction,
+    ) -> datetime:
+        """Allow ``action`` only before the fixed Asia/Shanghai hard freeze.
+    
+        Invalid clock/timezone inputs fail closed instead of being interpreted as
+        local time.  There is deliberately no timestamp/configuration override in
+        this API; tests replace the system clock function at the module boundary.
+        """
+    
+        if not isinstance(action, M2CExperimentAction):
+            raise M2CHardFreezeError("M2C_HARD_FREEZE_ACTION_INVALID")
+        freeze = _freeze_datetime()
+        try:
+            observed_ns = time.time_ns()
+            if type(observed_ns) is not int or observed_ns <= 0:
+                raise ValueError("system time_ns is not a positive integer")
+            # Compare the integer clock directly at the boundary so float
+            # rounding cannot admit an instant on/after the freeze.
+            if observed_ns >= M2C_HARD_FREEZE_UNIX_NS:
+>               raise M2CHardFreezeError(
+                    "M2C_HARD_FREEZE_ACTIVE:"
+                    f"{action.value}:new experiment execution forbidden on/after "
+                    f"{M2C_HARD_FREEZE_LOCAL_ISO}"
+                )
+E               xh_agent.policy.qrm_lite.m2c_hard_freeze.M2CHardFreezeError: M2C_HARD_FREEZE_ACTIVE:Q_B_EVALUATION:new experiment execution forbidden on/after 2026-09-01T00:00:00+08:00
+
+src/xh_agent/policy/qrm_lite/m2c_hard_freeze.py:81: M2CHardFreezeError
+_ test_invalid_sequence_or_identity_is_rejected_and_poisons_session[first2-second2-challenge nonce] _
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_invalid_sequence_or_ident2')
+first = FormalInferenceRequestV2(schema_version='FormalInferenceRequestV2', protocol='M2C_FORMAL_SPLIT_RUNNER_V2', run_id='for...ne], teacher_used=False, privileged_truth_policy_input=False), teacher_used=False, privileged_truth_policy_input=False)
+second = FormalInferenceRequestV2(schema_version='FormalInferenceRequestV2', protocol='M2C_FORMAL_SPLIT_RUNNER_V2', run_id='for...ne], teacher_used=False, privileged_truth_policy_input=False), teacher_used=False, privileged_truth_policy_input=False)
+match = 'challenge nonce'
+
+    @pytest.mark.parametrize(
+        ("first", "second", "match"),
+        [
+            (_request(1), None, "exact 0..7"),
+            (_request(0), _request(1, run_id="crossed-run"), "run_id"),
+            (
+                _request(0),
+                _request(1, challenge_nonce="d" * 64),
+                "challenge nonce",
+            ),
+        ],
+    )
+    def test_invalid_sequence_or_identity_is_rejected_and_poisons_session(
+        tmp_path: Path,
+        first: FormalInferenceRequestV2,
+        second: FormalInferenceRequestV2 | None,
+        match: str,
+    ) -> None:
+        session, audit = _session(tmp_path)
+        if second is None:
+            attempted = first
+        else:
+>           session.handle(sign_inference_request(first, SECRET).model_dump(mode="json"))
+
+tests/unit/test_m2c_qwen_service_audit.py:286: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/m2c/serve_qwen_coarse_v2.py:222: in handle
+    require_pre_freeze(M2CExperimentAction.Q_B_EVALUATION)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+action = <M2CExperimentAction.Q_B_EVALUATION: 'Q_B_EVALUATION'>
+
+    def require_pre_freeze(
+        action: M2CExperimentAction,
+    ) -> datetime:
+        """Allow ``action`` only before the fixed Asia/Shanghai hard freeze.
+    
+        Invalid clock/timezone inputs fail closed instead of being interpreted as
+        local time.  There is deliberately no timestamp/configuration override in
+        this API; tests replace the system clock function at the module boundary.
+        """
+    
+        if not isinstance(action, M2CExperimentAction):
+            raise M2CHardFreezeError("M2C_HARD_FREEZE_ACTION_INVALID")
+        freeze = _freeze_datetime()
+        try:
+            observed_ns = time.time_ns()
+            if type(observed_ns) is not int or observed_ns <= 0:
+                raise ValueError("system time_ns is not a positive integer")
+            # Compare the integer clock directly at the boundary so float
+            # rounding cannot admit an instant on/after the freeze.
+            if observed_ns >= M2C_HARD_FREEZE_UNIX_NS:
+>               raise M2CHardFreezeError(
+                    "M2C_HARD_FREEZE_ACTIVE:"
+                    f"{action.value}:new experiment execution forbidden on/after "
+                    f"{M2C_HARD_FREEZE_LOCAL_ISO}"
+                )
+E               xh_agent.policy.qrm_lite.m2c_hard_freeze.M2CHardFreezeError: M2C_HARD_FREEZE_ACTIVE:Q_B_EVALUATION:new experiment execution forbidden on/after 2026-09-01T00:00:00+08:00
+
+src/xh_agent/policy/qrm_lite/m2c_hard_freeze.py:81: M2CHardFreezeError
+______ test_request_after_eight_responses_is_rejected_and_never_inferred _______
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_request_after_eight_respo0')
+
+    def test_request_after_eight_responses_is_rejected_and_never_inferred(tmp_path: Path) -> None:
+        calls: list[int] = []
+    
+        def counted(runtime: object, request: FormalInferenceRequestV2):
+            calls.append(request.decision_index)
+            return _predict(runtime, request)
+    
+        audit = AppendOnlyQwenAuditLogV2(tmp_path / "audit")
+        session = FormalQwenServiceSessionV2(
+            runtime=SimpleNamespace(binding=_bundle(), secret=SECRET),  # type: ignore[arg-type]
+            audit=audit,
+            predictor=counted,  # type: ignore[arg-type]
+        )
+        for index in range(8):
+>           session.handle(sign_inference_request(_request(index), SECRET).model_dump(mode="json"))
+
+tests/unit/test_m2c_qwen_service_audit.py:320: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/m2c/serve_qwen_coarse_v2.py:222: in handle
+    require_pre_freeze(M2CExperimentAction.Q_B_EVALUATION)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+action = <M2CExperimentAction.Q_B_EVALUATION: 'Q_B_EVALUATION'>
+
+    def require_pre_freeze(
+        action: M2CExperimentAction,
+    ) -> datetime:
+        """Allow ``action`` only before the fixed Asia/Shanghai hard freeze.
+    
+        Invalid clock/timezone inputs fail closed instead of being interpreted as
+        local time.  There is deliberately no timestamp/configuration override in
+        this API; tests replace the system clock function at the module boundary.
+        """
+    
+        if not isinstance(action, M2CExperimentAction):
+            raise M2CHardFreezeError("M2C_HARD_FREEZE_ACTION_INVALID")
+        freeze = _freeze_datetime()
+        try:
+            observed_ns = time.time_ns()
+            if type(observed_ns) is not int or observed_ns <= 0:
+                raise ValueError("system time_ns is not a positive integer")
+            # Compare the integer clock directly at the boundary so float
+            # rounding cannot admit an instant on/after the freeze.
+            if observed_ns >= M2C_HARD_FREEZE_UNIX_NS:
+>               raise M2CHardFreezeError(
+                    "M2C_HARD_FREEZE_ACTIVE:"
+                    f"{action.value}:new experiment execution forbidden on/after "
+                    f"{M2C_HARD_FREEZE_LOCAL_ISO}"
+                )
+E               xh_agent.policy.qrm_lite.m2c_hard_freeze.M2CHardFreezeError: M2C_HARD_FREEZE_ACTIVE:Q_B_EVALUATION:new experiment execution forbidden on/after 2026-09-01T00:00:00+08:00
+
+src/xh_agent/policy/qrm_lite/m2c_hard_freeze.py:81: M2CHardFreezeError
+___________ test_v4_service_commits_exact_eight_pairs_and_clean_stop ___________
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_v4_service_commits_exact_0')
+
+    def test_v4_service_commits_exact_eight_pairs_and_clean_stop(tmp_path: Path) -> None:
+        requests = _requests()
+        audit = AppendOnlyQwenAuditLogV4(tmp_path / "audit")
+        runtime = SimpleNamespace(binding=_bundle(), secret=SECRET)
+        session = FormalQwenServiceSessionV4(
+            runtime=runtime,  # type: ignore[arg-type]
+            audit=audit,
+            predictor=_predict,  # type: ignore[arg-type]
+        )
+        for index, request in enumerate(requests):
+            raw = sign_inference_request_v4(request, SECRET).model_dump(mode="json")
+>           response = session.handle(raw)
+                       ^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_m2c_qwen_service_v4.py:289: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/m2c/serve_qwen_coarse_v4.py:322: in handle
+    require_pre_freeze(M2CExperimentAction.Q_B_EVALUATION)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+action = <M2CExperimentAction.Q_B_EVALUATION: 'Q_B_EVALUATION'>
+
+    def require_pre_freeze(
+        action: M2CExperimentAction,
+    ) -> datetime:
+        """Allow ``action`` only before the fixed Asia/Shanghai hard freeze.
+    
+        Invalid clock/timezone inputs fail closed instead of being interpreted as
+        local time.  There is deliberately no timestamp/configuration override in
+        this API; tests replace the system clock function at the module boundary.
+        """
+    
+        if not isinstance(action, M2CExperimentAction):
+            raise M2CHardFreezeError("M2C_HARD_FREEZE_ACTION_INVALID")
+        freeze = _freeze_datetime()
+        try:
+            observed_ns = time.time_ns()
+            if type(observed_ns) is not int or observed_ns <= 0:
+                raise ValueError("system time_ns is not a positive integer")
+            # Compare the integer clock directly at the boundary so float
+            # rounding cannot admit an instant on/after the freeze.
+            if observed_ns >= M2C_HARD_FREEZE_UNIX_NS:
+>               raise M2CHardFreezeError(
+                    "M2C_HARD_FREEZE_ACTIVE:"
+                    f"{action.value}:new experiment execution forbidden on/after "
+                    f"{M2C_HARD_FREEZE_LOCAL_ISO}"
+                )
+E               xh_agent.policy.qrm_lite.m2c_hard_freeze.M2CHardFreezeError: M2C_HARD_FREEZE_ACTIVE:Q_B_EVALUATION:new experiment execution forbidden on/after 2026-09-01T00:00:00+08:00
+
+src/xh_agent/policy/qrm_lite/m2c_hard_freeze.py:81: M2CHardFreezeError
+___________ test_v4_service_rejects_reused_capture_before_predictor ____________
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_v4_service_rejects_reused0')
+
+    def test_v4_service_rejects_reused_capture_before_predictor(tmp_path: Path) -> None:
+        requests = _requests()
+        audit = AppendOnlyQwenAuditLogV4(tmp_path / "audit")
+        calls: list[int] = []
+    
+        def counted(runtime: object, request: FormalInferenceRequestV4):  # noqa: ANN202
+            calls.append(request.decision_index)
+            return _predict(runtime, request)
+    
+        session = FormalQwenServiceSessionV4(
+            runtime=SimpleNamespace(binding=_bundle(), secret=SECRET),  # type: ignore[arg-type]
+            audit=audit,
+            predictor=counted,  # type: ignore[arg-type]
+        )
+>       session.handle(sign_inference_request_v4(requests[0], SECRET).model_dump(mode="json"))
+
+tests/unit/test_m2c_qwen_service_v4.py:324: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/m2c/serve_qwen_coarse_v4.py:322: in handle
+    require_pre_freeze(M2CExperimentAction.Q_B_EVALUATION)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+action = <M2CExperimentAction.Q_B_EVALUATION: 'Q_B_EVALUATION'>
+
+    def require_pre_freeze(
+        action: M2CExperimentAction,
+    ) -> datetime:
+        """Allow ``action`` only before the fixed Asia/Shanghai hard freeze.
+    
+        Invalid clock/timezone inputs fail closed instead of being interpreted as
+        local time.  There is deliberately no timestamp/configuration override in
+        this API; tests replace the system clock function at the module boundary.
+        """
+    
+        if not isinstance(action, M2CExperimentAction):
+            raise M2CHardFreezeError("M2C_HARD_FREEZE_ACTION_INVALID")
+        freeze = _freeze_datetime()
+        try:
+            observed_ns = time.time_ns()
+            if type(observed_ns) is not int or observed_ns <= 0:
+                raise ValueError("system time_ns is not a positive integer")
+            # Compare the integer clock directly at the boundary so float
+            # rounding cannot admit an instant on/after the freeze.
+            if observed_ns >= M2C_HARD_FREEZE_UNIX_NS:
+>               raise M2CHardFreezeError(
+                    "M2C_HARD_FREEZE_ACTIVE:"
+                    f"{action.value}:new experiment execution forbidden on/after "
+                    f"{M2C_HARD_FREEZE_LOCAL_ISO}"
+                )
+E               xh_agent.policy.qrm_lite.m2c_hard_freeze.M2CHardFreezeError: M2C_HARD_FREEZE_ACTIVE:Q_B_EVALUATION:new experiment execution forbidden on/after 2026-09-01T00:00:00+08:00
+
+src/xh_agent/policy/qrm_lite/m2c_hard_freeze.py:81: M2CHardFreezeError
+___________ test_v4_service_rejects_request_bundle_before_predictor ____________
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_v4_service_rejects_reques0')
+
+    def test_v4_service_rejects_request_bundle_before_predictor(tmp_path: Path) -> None:
+        request = _requests()[0]
+        payload = request.model_dump(mode="json")
+        payload["bundle"]["bundle_sha256"] = "f" * 64
+        crossed = FormalInferenceRequestV4.model_validate(payload)
+        audit = AppendOnlyQwenAuditLogV4(tmp_path / "audit")
+        session = FormalQwenServiceSessionV4(
+            runtime=SimpleNamespace(binding=_bundle(), secret=SECRET),  # type: ignore[arg-type]
+            audit=audit,
+            predictor=lambda *_args: pytest.fail("predictor must not run"),  # type: ignore[arg-type]
+        )
+        with pytest.raises(ValueError, match="loaded runtime binding"):
+>           session.handle(sign_inference_request_v4(crossed, SECRET).model_dump(mode="json"))
+
+tests/unit/test_m2c_qwen_service_v4.py:350: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/m2c/serve_qwen_coarse_v4.py:322: in handle
+    require_pre_freeze(M2CExperimentAction.Q_B_EVALUATION)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+action = <M2CExperimentAction.Q_B_EVALUATION: 'Q_B_EVALUATION'>
+
+    def require_pre_freeze(
+        action: M2CExperimentAction,
+    ) -> datetime:
+        """Allow ``action`` only before the fixed Asia/Shanghai hard freeze.
+    
+        Invalid clock/timezone inputs fail closed instead of being interpreted as
+        local time.  There is deliberately no timestamp/configuration override in
+        this API; tests replace the system clock function at the module boundary.
+        """
+    
+        if not isinstance(action, M2CExperimentAction):
+            raise M2CHardFreezeError("M2C_HARD_FREEZE_ACTION_INVALID")
+        freeze = _freeze_datetime()
+        try:
+            observed_ns = time.time_ns()
+            if type(observed_ns) is not int or observed_ns <= 0:
+                raise ValueError("system time_ns is not a positive integer")
+            # Compare the integer clock directly at the boundary so float
+            # rounding cannot admit an instant on/after the freeze.
+            if observed_ns >= M2C_HARD_FREEZE_UNIX_NS:
+>               raise M2CHardFreezeError(
+                    "M2C_HARD_FREEZE_ACTIVE:"
+                    f"{action.value}:new experiment execution forbidden on/after "
+                    f"{M2C_HARD_FREEZE_LOCAL_ISO}"
+                )
+E               xh_agent.policy.qrm_lite.m2c_hard_freeze.M2CHardFreezeError: M2C_HARD_FREEZE_ACTIVE:Q_B_EVALUATION:new experiment execution forbidden on/after 2026-09-01T00:00:00+08:00
+
+src/xh_agent/policy/qrm_lite/m2c_hard_freeze.py:81: M2CHardFreezeError
+_____ test_v4_service_rejects_history_that_does_not_extend_prior_response ______
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_v4_service_rejects_histor0')
+
+    def test_v4_service_rejects_history_that_does_not_extend_prior_response(
+        tmp_path: Path,
+    ) -> None:
+        requests = _requests()
+        audit = AppendOnlyQwenAuditLogV4(tmp_path / "audit")
+        calls: list[int] = []
+    
+        def counted(runtime: object, request: FormalInferenceRequestV4):  # noqa: ANN202
+            calls.append(request.decision_index)
+            return _predict(runtime, request)
+    
+        session = FormalQwenServiceSessionV4(
+            runtime=SimpleNamespace(binding=_bundle(), secret=SECRET),  # type: ignore[arg-type]
+            audit=audit,
+            predictor=counted,  # type: ignore[arg-type]
+        )
+>       session.handle(sign_inference_request_v4(requests[0], SECRET).model_dump(mode="json"))
+
+tests/unit/test_m2c_qwen_service_v4.py:369: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/m2c/serve_qwen_coarse_v4.py:322: in handle
+    require_pre_freeze(M2CExperimentAction.Q_B_EVALUATION)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+action = <M2CExperimentAction.Q_B_EVALUATION: 'Q_B_EVALUATION'>
+
+    def require_pre_freeze(
+        action: M2CExperimentAction,
+    ) -> datetime:
+        """Allow ``action`` only before the fixed Asia/Shanghai hard freeze.
+    
+        Invalid clock/timezone inputs fail closed instead of being interpreted as
+        local time.  There is deliberately no timestamp/configuration override in
+        this API; tests replace the system clock function at the module boundary.
+        """
+    
+        if not isinstance(action, M2CExperimentAction):
+            raise M2CHardFreezeError("M2C_HARD_FREEZE_ACTION_INVALID")
+        freeze = _freeze_datetime()
+        try:
+            observed_ns = time.time_ns()
+            if type(observed_ns) is not int or observed_ns <= 0:
+                raise ValueError("system time_ns is not a positive integer")
+            # Compare the integer clock directly at the boundary so float
+            # rounding cannot admit an instant on/after the freeze.
+            if observed_ns >= M2C_HARD_FREEZE_UNIX_NS:
+>               raise M2CHardFreezeError(
+                    "M2C_HARD_FREEZE_ACTIVE:"
+                    f"{action.value}:new experiment execution forbidden on/after "
+                    f"{M2C_HARD_FREEZE_LOCAL_ISO}"
+                )
+E               xh_agent.policy.qrm_lite.m2c_hard_freeze.M2CHardFreezeError: M2C_HARD_FREEZE_ACTIVE:Q_B_EVALUATION:new experiment execution forbidden on/after 2026-09-01T00:00:00+08:00
+
+src/xh_agent/policy/qrm_lite/m2c_hard_freeze.py:81: M2CHardFreezeError
+_____ test_v4_service_rejects_predictor_pointer_splice_before_audit_commit _____
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_v4_service_rejects_predic0')
+
+    def test_v4_service_rejects_predictor_pointer_splice_before_audit_commit(
+        tmp_path: Path,
+    ) -> None:
+        request = _requests()[0]
+    
+        def crossed_predictor(runtime: object, active: FormalInferenceRequestV4):  # noqa: ANN202
+            response = _predict(runtime, active)
+            payload = response.model_dump(mode="json")
+            payload["intent"]["target_track_id"] = active.observation.canonical_slots[1]
+            return response.model_validate(payload)
+    
+        audit = AppendOnlyQwenAuditLogV4(tmp_path / "audit")
+        session = FormalQwenServiceSessionV4(
+            runtime=SimpleNamespace(binding=_bundle(), secret=SECRET),  # type: ignore[arg-type]
+            audit=audit,
+            predictor=crossed_predictor,  # type: ignore[arg-type]
+        )
+        with pytest.raises(ValueError, match="decoded pointer differs"):
+>           session.handle(sign_inference_request_v4(request, SECRET).model_dump(mode="json"))
+
+tests/unit/test_m2c_qwen_service_v4.py:397: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/m2c/serve_qwen_coarse_v4.py:322: in handle
+    require_pre_freeze(M2CExperimentAction.Q_B_EVALUATION)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+action = <M2CExperimentAction.Q_B_EVALUATION: 'Q_B_EVALUATION'>
+
+    def require_pre_freeze(
+        action: M2CExperimentAction,
+    ) -> datetime:
+        """Allow ``action`` only before the fixed Asia/Shanghai hard freeze.
+    
+        Invalid clock/timezone inputs fail closed instead of being interpreted as
+        local time.  There is deliberately no timestamp/configuration override in
+        this API; tests replace the system clock function at the module boundary.
+        """
+    
+        if not isinstance(action, M2CExperimentAction):
+            raise M2CHardFreezeError("M2C_HARD_FREEZE_ACTION_INVALID")
+        freeze = _freeze_datetime()
+        try:
+            observed_ns = time.time_ns()
+            if type(observed_ns) is not int or observed_ns <= 0:
+                raise ValueError("system time_ns is not a positive integer")
+            # Compare the integer clock directly at the boundary so float
+            # rounding cannot admit an instant on/after the freeze.
+            if observed_ns >= M2C_HARD_FREEZE_UNIX_NS:
+>               raise M2CHardFreezeError(
+                    "M2C_HARD_FREEZE_ACTIVE:"
+                    f"{action.value}:new experiment execution forbidden on/after "
+                    f"{M2C_HARD_FREEZE_LOCAL_ISO}"
+                )
+E               xh_agent.policy.qrm_lite.m2c_hard_freeze.M2CHardFreezeError: M2C_HARD_FREEZE_ACTIVE:Q_B_EVALUATION:new experiment execution forbidden on/after 2026-09-01T00:00:00+08:00
+
+src/xh_agent/policy/qrm_lite/m2c_hard_freeze.py:81: M2CHardFreezeError
+_____ test_s3_plan_is_deterministic_outcome_blind_and_full_coverage_bound ______
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_s3_plan_is_deterministic_0')
+
+    def test_s3_plan_is_deterministic_outcome_blind_and_full_coverage_bound(
+        tmp_path: Path,
+    ) -> None:
+        output = tmp_path / "source"
+>       plan = generate_plan(
+            template_path=TEMPLATE,
+            urdf_path=URDF,
+            output_root=output,
+        )
+
+tests/unit/test_m2c_s3_collection_plan.py:24: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/m2c/build_s3_collection_plan.py:90: in generate_plan
+    if sha256_file(BASE_DATASET) != (
+       ^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/m2c/build_headroom_domain.py:44: in sha256_file
+    return sha256_bytes(path.read_bytes())
+                        ^^^^^^^^^^^^^^^^^
+../../.local/share/uv/python/cpython-3.13.12-macos-aarch64-none/lib/python3.13/pathlib/_abc.py:625: in read_bytes
+    with self.open(mode='rb') as f:
+         ^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/gl/projects/xh-202607-qwen-brain/artifacts/m2b/dataset-v2.jsonl')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/gl/projects/xh-202607-qwen-brain/artifacts/m2b/dataset-v2.jsonl'
+
+../../.local/share/uv/python/cpython-3.13.12-macos-aarch64-none/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+_________ test_s3_plan_hashes_every_source_and_keeps_path_blocked_raw __________
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_s3_plan_hashes_every_sour0')
+
+    def test_s3_plan_hashes_every_source_and_keeps_path_blocked_raw(
+        tmp_path: Path,
+    ) -> None:
+>       plan = generate_plan(
+            template_path=TEMPLATE,
+            urdf_path=URDF,
+            output_root=tmp_path / "source",
+        )
+
+tests/unit/test_m2c_s3_collection_plan.py:69: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/m2c/build_s3_collection_plan.py:90: in generate_plan
+    if sha256_file(BASE_DATASET) != (
+       ^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/m2c/build_headroom_domain.py:44: in sha256_file
+    return sha256_bytes(path.read_bytes())
+                        ^^^^^^^^^^^^^^^^^
+../../.local/share/uv/python/cpython-3.13.12-macos-aarch64-none/lib/python3.13/pathlib/_abc.py:625: in read_bytes
+    with self.open(mode='rb') as f:
+         ^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/gl/projects/xh-202607-qwen-brain/artifacts/m2b/dataset-v2.jsonl')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/gl/projects/xh-202607-qwen-brain/artifacts/m2b/dataset-v2.jsonl'
+
+../../.local/share/uv/python/cpython-3.13.12-macos-aarch64-none/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+___________________ test_s3_plan_pins_frozen_runtime_hashes ____________________
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_s3_plan_pins_frozen_runti0')
+
+    def test_s3_plan_pins_frozen_runtime_hashes(tmp_path: Path) -> None:
+>       plan = generate_plan(
+            template_path=TEMPLATE,
+            urdf_path=URDF,
+            output_root=tmp_path / "source",
+        )
+
+tests/unit/test_m2c_s3_collection_plan.py:107: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/m2c/build_s3_collection_plan.py:90: in generate_plan
+    if sha256_file(BASE_DATASET) != (
+       ^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/m2c/build_headroom_domain.py:44: in sha256_file
+    return sha256_bytes(path.read_bytes())
+                        ^^^^^^^^^^^^^^^^^
+../../.local/share/uv/python/cpython-3.13.12-macos-aarch64-none/lib/python3.13/pathlib/_abc.py:625: in read_bytes
+    with self.open(mode='rb') as f:
+         ^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/gl/projects/xh-202607-qwen-brain/artifacts/m2b/dataset-v2.jsonl')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/gl/projects/xh-202607-qwen-brain/artifacts/m2b/dataset-v2.jsonl'
+
+../../.local/share/uv/python/cpython-3.13.12-macos-aarch64-none/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+_________ test_current_s3_artifact_replays_official_public_projection __________
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_current_s3_artifact_repla0')
+
+    def test_current_s3_artifact_replays_official_public_projection(tmp_path: Path) -> None:
+        evidence = ROOT / "artifacts/m2c/dataset-v3.jsonl"
+        manifest = tmp_path / "manifest.json"
+        manifest.write_text(
+            json.dumps(
+                {
+                    "schema_version": "M2CS3PublicCategoryVocabularyInputManifestV1",
+                    "evidence_files": [
+                        {
+                            "path": str(evidence),
+>                           "sha256": hashlib.sha256(evidence.read_bytes()).hexdigest(),
+                                                     ^^^^^^^^^^^^^^^^^^^^^
+                        }
+                    ],
+                    "teacher_used": False,
+                    "privileged_truth_policy_input": False,
+                }
+            )
+        )
+
+tests/unit/test_m2c_s3_public_category_vocabulary.py:228: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../.local/share/uv/python/cpython-3.13.12-macos-aarch64-none/lib/python3.13/pathlib/_abc.py:625: in read_bytes
+    with self.open(mode='rb') as f:
+         ^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/gl/projects/xh-202607-qwen-brain/artifacts/m2c/dataset-v3.jsonl')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/gl/projects/xh-202607-qwen-brain/artifacts/m2c/dataset-v3.jsonl'
+
+../../.local/share/uv/python/cpython-3.13.12-macos-aarch64-none/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+_______ test_no_physical_receipt_blocks_evaluation_but_not_adr_training ________
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_no_physical_receipt_block0')
+
+    def test_no_physical_receipt_blocks_evaluation_but_not_adr_training(tmp_path: Path) -> None:
+        local = tmp_path / "local.json"
+        _local_receipt(local)
+        result = evaluate_s4_entry_gate(ROOT, local_receipt_path=local)
+>       assert result["local_contract_tests_passed"] is True
+E       assert False is True
+
+tests/unit/test_m2c_s4_entry_gate.py:412: AssertionError
+___ test_arbitrary_hash_files_cannot_pass_even_if_runner_binding_is_patched ____
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_arbitrary_hash_files_cann0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1105ef8c0>
+
+    def test_arbitrary_hash_files_cannot_pass_even_if_runner_binding_is_patched(
+        tmp_path: Path,
+        monkeypatch,
+    ) -> None:
+        local = tmp_path / "local.json"
+        _local_receipt(local)
+        physical = _physical_receipt(tmp_path)
+        runner = json.loads(physical.read_text())
+        monkeypatch.setattr(
+            "xh_agent.policy.qrm_lite.s4_entry_gate.FORMAL_PHYSICAL_RUNNER_BINDING",
+            (
+                runner["runner_implementation_path"],
+                runner["runner_implementation_sha256"],
+            ),
+        )
+        result = evaluate_s4_entry_gate(
+            ROOT,
+            local_receipt_path=local,
+            physical_receipt_path=physical,
+        )
+        assert result["status"] == "BLOCKED_FORMAL_Q_B_EVALUATION"
+>       assert result["local_contract_tests_passed"] is True
+E       assert False is True
+
+tests/unit/test_m2c_s4_entry_gate.py:479: AssertionError
+__________ test_implementation_commit_may_be_ancestor_but_must_exist ___________
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_implementation_commit_may0')
+
+    def test_implementation_commit_may_be_ancestor_but_must_exist(tmp_path: Path) -> None:
+        local = tmp_path / "local.json"
+        _local_receipt(local, commit=FROZEN_KEY_MANIFEST_COMMIT)
+        result = evaluate_s4_entry_gate(ROOT, local_receipt_path=local)
+>       assert result["local_contract_tests_passed"] is True
+E       assert False is True
+
+tests/unit/test_m2c_s4_entry_gate.py:749: AssertionError
+_______ test_adr0026_two_arm_training_report_is_source_bound_and_honest ________
+
+    def test_adr0026_two_arm_training_report_is_source_bound_and_honest() -> None:
+        report = _report()
+        assert report["schema_version"] == "M2CS4QwenADR0026TwoArmTrainingReportV1"
+        assert report["status"] == "PASS_TWO_ARM_A100_TRAINING_NOT_Q_B"
+        assert report["training_source_commit"] == ("81dbb5efe4010fc34162f4113122d11feed04165")
+    
+        for binding in report["source_bindings"]:
+            path = ROOT / binding["path"]
+>           assert path.is_file()
+E           AssertionError: assert False
+E            +  where False = is_file()
+E            +    where is_file = PosixPath('/Users/gl/projects/xh-202607-qwen-brain/artifacts/m2c/s4-decision-level-supervision-adr0026-v1/dataset-manifest.json').is_file
+
+tests/unit/test_m2c_s4_qwen_adr0026_training.py:30: AssertionError
+__________ test_status_fails_closed_when_terminal_evidence_is_missing __________
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_status_fails_closed_when_0')
+
+    def test_status_fails_closed_when_terminal_evidence_is_missing(tmp_path: Path) -> None:
+        reports = tmp_path / "reports"
+        reports.mkdir()
+        completed, payload = run_status(reports)
+        assert completed.returncode == 2
+        assert payload["goal_complete"] is False
+        assert payload["fc_gain_over_b0"] is None
+        assert payload["pure_model_success_episodes"] is None
+        assert payload["teacher_used"] is False
+        assert payload["privileged_truth_policy_input"] is False
+        assert payload["world_model_mainline_replaced"] is False
+        assert payload["completion_gates"]["teacher_free"] is False
+>       assert payload["stage_route"] == "S2_IN_PROGRESS_UNMEASURED"
+E       AssertionError: assert 'D1_S2_DEADLINE_UNMEASURED' == 'S2_IN_PROGRESS_UNMEASURED'
+E         
+E         - S2_IN_PROGRESS_UNMEASURED
+E         + D1_S2_DEADLINE_UNMEASURED
+
+tests/unit/test_m2c_status.py:185: AssertionError
+_______________ test_status_rejects_synthetic_terminal_summaries _______________
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_status_rejects_synthetic_0')
+
+    def test_status_rejects_synthetic_terminal_summaries(tmp_path: Path) -> None:
+        reports = tmp_path / "reports"
+        reports.mkdir()
+        complete_fixtures(reports)
+        completed, payload = run_status(reports)
+        assert completed.returncode == 2
+        assert payload["goal_complete"] is False
+        assert payload["status"] == "PARTIAL"
+        assert payload["pure_model_success_episodes"] is None
+        assert payload["fc_gain_over_b0"] is None
+        assert payload["fc_gain_over_b0_confidence_interval"] is None
+        assert payload["model_decisions_executed"] == 0
+        assert payload["teacher_used"] is False
+        assert payload["system_verdict"] == "EVIDENCE_PENDING"
+>       assert payload["stage_route"] == "S4_IN_PROGRESS_UNMEASURED"
+E       AssertionError: assert 'S4_DEADLINE_...ED_UNMEASURED' == 'S4_IN_PROGRESS_UNMEASURED'
+E         
+E         - S4_IN_PROGRESS_UNMEASURED
+E         + S4_DEADLINE_BLOCKED_UNMEASURED
+
+tests/unit/test_m2c_status.py:215: AssertionError
+________ test_status_rejects_q_a_summary_when_per_key_outcomes_disagree ________
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_status_rejects_q_a_summar0')
+
+    def test_status_rejects_q_a_summary_when_per_key_outcomes_disagree(
+        tmp_path: Path,
+    ) -> None:
+        reports = tmp_path / "reports"
+        reports.mkdir()
+        complete_fixtures(reports)
+        s2_path = reports / "m2c-s2-exploration-v4.json"
+        s2 = json.loads(s2_path.read_text())
+        s2["b0_executions"][0]["final_task_success"] = True
+        s2_path.write_text(json.dumps(s2))
+    
+        completed, payload = run_status(reports)
+    
+        assert completed.returncode == 2
+>       assert payload["stage_route"] == "S2_IN_PROGRESS_UNMEASURED"
+E       AssertionError: assert 'D1_S2_DEADLINE_UNMEASURED' == 'S2_IN_PROGRESS_UNMEASURED'
+E         
+E         - S2_IN_PROGRESS_UNMEASURED
+E         + D1_S2_DEADLINE_UNMEASURED
+
+tests/unit/test_m2c_status.py:290: AssertionError
+______________ test_v4_train_replays_data_before_model_or_output _______________
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_v4_train_replays_data_bef0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x11047e2e0>
+
+    def test_v4_train_replays_data_before_model_or_output(
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        entered: list[str] = []
+    
+        def fake_loader(*_args: object, **_kwargs: object) -> None:
+            entered.append("data")
+            raise ValueError("BLOCKED_ZERO_ELIGIBLE_V4_PACKAGES")
+    
+        def forbidden_snapshot(*_args: object, **_kwargs: object) -> None:
+            entered.append("model")
+            raise AssertionError("model cache resolved before data replay")
+    
+        monkeypatch.setattr("m2c.train_qwen_coarse_v4.load_training_packages_v4", fake_loader)
+        monkeypatch.setattr("m2c.train_qwen_coarse_v4._require_phase2_training_bindings", lambda: None)
+        monkeypatch.setattr(
+            "m2c.train_qwen_coarse_v4._resolve_local_revision_snapshot",
+            forbidden_snapshot,
+        )
+        with pytest.raises(ValueError, match="BLOCKED_ZERO_ELIGIBLE_V4_PACKAGES"):
+>           main(_base_args(tmp_path))
+
+tests/unit/test_m2c_train_qwen_coarse_v4.py:103: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/m2c/train_qwen_coarse_v4.py:593: in main
+    require_pre_freeze(M2CExperimentAction.TRAINING)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+action = <M2CExperimentAction.TRAINING: 'TRAINING'>
+
+    def require_pre_freeze(
+        action: M2CExperimentAction,
+    ) -> datetime:
+        """Allow ``action`` only before the fixed Asia/Shanghai hard freeze.
+    
+        Invalid clock/timezone inputs fail closed instead of being interpreted as
+        local time.  There is deliberately no timestamp/configuration override in
+        this API; tests replace the system clock function at the module boundary.
+        """
+    
+        if not isinstance(action, M2CExperimentAction):
+            raise M2CHardFreezeError("M2C_HARD_FREEZE_ACTION_INVALID")
+        freeze = _freeze_datetime()
+        try:
+            observed_ns = time.time_ns()
+            if type(observed_ns) is not int or observed_ns <= 0:
+                raise ValueError("system time_ns is not a positive integer")
+            # Compare the integer clock directly at the boundary so float
+            # rounding cannot admit an instant on/after the freeze.
+            if observed_ns >= M2C_HARD_FREEZE_UNIX_NS:
+>               raise M2CHardFreezeError(
+                    "M2C_HARD_FREEZE_ACTIVE:"
+                    f"{action.value}:new experiment execution forbidden on/after "
+                    f"{M2C_HARD_FREEZE_LOCAL_ISO}"
+                )
+E               xh_agent.policy.qrm_lite.m2c_hard_freeze.M2CHardFreezeError: M2C_HARD_FREEZE_ACTIVE:TRAINING:new experiment execution forbidden on/after 2026-09-01T00:00:00+08:00
+
+src/xh_agent/policy/qrm_lite/m2c_hard_freeze.py:81: M2CHardFreezeError
+______ test_v4_main_publishes_only_a_complete_create_only_training_result ______
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_v4_main_publishes_only_a_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x11047eac0>
+capsys = <_pytest.capture.CaptureFixture object at 0x10fe22780>
+
+    def test_v4_main_publishes_only_a_complete_create_only_training_result(
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+        capsys: pytest.CaptureFixture[str],
+    ) -> None:
+        cache, snapshot = _cache_snapshot(tmp_path)
+        args = [*_base_args(tmp_path), "--cache-dir", str(cache)]
+        entered: list[str] = []
+    
+        monkeypatch.setattr("m2c.train_qwen_coarse_v4._require_phase2_training_bindings", lambda: None)
+        monkeypatch.setattr(
+            "m2c.train_qwen_coarse_v4.load_training_packages_v4",
+            lambda *_args, **_kwargs: ([], object()),
+        )
+    
+        def fake_train(
+            _args: object,
+            _samples: object,
+            _dataset_report: object,
+            *,
+            snapshot: Path,
+            expected_snapshot_tree_sha256: str,
+            staging_root: Path,
+            started: float,
+            deadline: float,
+        ) -> dict[str, object]:
+            assert snapshot == snapshot.resolve()
+            assert len(expected_snapshot_tree_sha256) == 64
+            assert started < deadline
+            assert not staging_root.exists()
+            staging_root.mkdir(parents=True)
+            (staging_root / "qwen_coarse_v4_bundle.json").write_text('{"complete":true}\n')
+            entered.append("train")
+            return {
+                "schema_version": "M2CQwenCoarseV4TrainReportV1",
+                "status": "PASS_TRAINED_QWEN_LORA_M2C_Q012_V4_NOT_PHYSICAL_EVALUATION",
+                "teacher_used": False,
+                "privileged_truth_policy_input": False,
+            }
+    
+        monkeypatch.setattr("m2c.train_qwen_coarse_v4._train", fake_train)
+>       assert main(args) == 0
+               ^^^^^^^^^^
+
+tests/unit/test_m2c_train_qwen_coarse_v4.py:280: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/m2c/train_qwen_coarse_v4.py:593: in main
+    require_pre_freeze(M2CExperimentAction.TRAINING)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+action = <M2CExperimentAction.TRAINING: 'TRAINING'>
+
+    def require_pre_freeze(
+        action: M2CExperimentAction,
+    ) -> datetime:
+        """Allow ``action`` only before the fixed Asia/Shanghai hard freeze.
+    
+        Invalid clock/timezone inputs fail closed instead of being interpreted as
+        local time.  There is deliberately no timestamp/configuration override in
+        this API; tests replace the system clock function at the module boundary.
+        """
+    
+        if not isinstance(action, M2CExperimentAction):
+            raise M2CHardFreezeError("M2C_HARD_FREEZE_ACTION_INVALID")
+        freeze = _freeze_datetime()
+        try:
+            observed_ns = time.time_ns()
+            if type(observed_ns) is not int or observed_ns <= 0:
+                raise ValueError("system time_ns is not a positive integer")
+            # Compare the integer clock directly at the boundary so float
+            # rounding cannot admit an instant on/after the freeze.
+            if observed_ns >= M2C_HARD_FREEZE_UNIX_NS:
+>               raise M2CHardFreezeError(
+                    "M2C_HARD_FREEZE_ACTIVE:"
+                    f"{action.value}:new experiment execution forbidden on/after "
+                    f"{M2C_HARD_FREEZE_LOCAL_ISO}"
+                )
+E               xh_agent.policy.qrm_lite.m2c_hard_freeze.M2CHardFreezeError: M2C_HARD_FREEZE_ACTIVE:TRAINING:new experiment execution forbidden on/after 2026-09-01T00:00:00+08:00
+
+src/xh_agent/policy/qrm_lite/m2c_hard_freeze.py:81: M2CHardFreezeError
+______ test_v4_main_never_publishes_training_failure_or_deadline_crossing ______
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_v4_main_never_publishes_t0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x11047fc40>
+
+    def test_v4_main_never_publishes_training_failure_or_deadline_crossing(
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        cache, _snapshot = _cache_snapshot(tmp_path)
+        args = [*_base_args(tmp_path), "--cache-dir", str(cache)]
+        monkeypatch.setattr("m2c.train_qwen_coarse_v4._require_phase2_training_bindings", lambda: None)
+        monkeypatch.setattr(
+            "m2c.train_qwen_coarse_v4.load_training_packages_v4",
+            lambda *_args, **_kwargs: ([], object()),
+        )
+    
+        def failed_train(*_args: object, staging_root: Path, **_kwargs: object) -> None:
+            staging_root.mkdir(parents=True)
+            (staging_root / "partial.bin").write_bytes(b"partial")
+            raise RuntimeError("optimizer failure")
+    
+        monkeypatch.setattr("m2c.train_qwen_coarse_v4._train", failed_train)
+        with pytest.raises(RuntimeError, match="optimizer failure"):
+>           main(args)
+
+tests/unit/test_m2c_train_qwen_coarse_v4.py:312: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/m2c/train_qwen_coarse_v4.py:593: in main
+    require_pre_freeze(M2CExperimentAction.TRAINING)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+action = <M2CExperimentAction.TRAINING: 'TRAINING'>
+
+    def require_pre_freeze(
+        action: M2CExperimentAction,
+    ) -> datetime:
+        """Allow ``action`` only before the fixed Asia/Shanghai hard freeze.
+    
+        Invalid clock/timezone inputs fail closed instead of being interpreted as
+        local time.  There is deliberately no timestamp/configuration override in
+        this API; tests replace the system clock function at the module boundary.
+        """
+    
+        if not isinstance(action, M2CExperimentAction):
+            raise M2CHardFreezeError("M2C_HARD_FREEZE_ACTION_INVALID")
+        freeze = _freeze_datetime()
+        try:
+            observed_ns = time.time_ns()
+            if type(observed_ns) is not int or observed_ns <= 0:
+                raise ValueError("system time_ns is not a positive integer")
+            # Compare the integer clock directly at the boundary so float
+            # rounding cannot admit an instant on/after the freeze.
+            if observed_ns >= M2C_HARD_FREEZE_UNIX_NS:
+>               raise M2CHardFreezeError(
+                    "M2C_HARD_FREEZE_ACTIVE:"
+                    f"{action.value}:new experiment execution forbidden on/after "
+                    f"{M2C_HARD_FREEZE_LOCAL_ISO}"
+                )
+E               xh_agent.policy.qrm_lite.m2c_hard_freeze.M2CHardFreezeError: M2C_HARD_FREEZE_ACTIVE:TRAINING:new experiment execution forbidden on/after 2026-09-01T00:00:00+08:00
+
+src/xh_agent/policy/qrm_lite/m2c_hard_freeze.py:81: M2CHardFreezeError
+
+During handling of the above exception, another exception occurred:
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_v4_main_never_publishes_t0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x11047fc40>
+
+    def test_v4_main_never_publishes_training_failure_or_deadline_crossing(
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        cache, _snapshot = _cache_snapshot(tmp_path)
+        args = [*_base_args(tmp_path), "--cache-dir", str(cache)]
+        monkeypatch.setattr("m2c.train_qwen_coarse_v4._require_phase2_training_bindings", lambda: None)
+        monkeypatch.setattr(
+            "m2c.train_qwen_coarse_v4.load_training_packages_v4",
+            lambda *_args, **_kwargs: ([], object()),
+        )
+    
+        def failed_train(*_args: object, staging_root: Path, **_kwargs: object) -> None:
+            staging_root.mkdir(parents=True)
+            (staging_root / "partial.bin").write_bytes(b"partial")
+            raise RuntimeError("optimizer failure")
+    
+        monkeypatch.setattr("m2c.train_qwen_coarse_v4._train", failed_train)
+>       with pytest.raises(RuntimeError, match="optimizer failure"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E        Regex: 'optimizer failure'
+E        Input: 'M2C_HARD_FREEZE_ACTIVE:TRAINING:new experiment execution forbidden on/after 2026-09-01T00:00:00+08:00'
+
+tests/unit/test_m2c_train_qwen_coarse_v4.py:311: AssertionError
+_________ test_decision_train_requires_bindings_before_replaying_data __________
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_decision_train_requires_b0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1106066d0>
+
+    def test_decision_train_requires_bindings_before_replaying_data(
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        entered: list[str] = []
+    
+        def blocked() -> None:
+            entered.append("bindings")
+            raise RuntimeError("active Phase-2 bindings")
+    
+        monkeypatch.setattr(
+            "m2c.train_qwen_decision_level_v4._require_phase2_training_bindings", blocked
+        )
+        monkeypatch.setattr(
+            "m2c.train_qwen_decision_level_v4.load_adr0026_decision_dataset_v4",
+            lambda **_kwargs: entered.append("data"),
+        )
+        with pytest.raises(RuntimeError, match="active Phase-2 bindings"):
+>           main(_base_args(tmp_path))
+
+tests/unit/test_m2c_train_qwen_decision_level_v4.py:115: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/m2c/train_qwen_decision_level_v4.py:400: in main
+    require_pre_freeze(M2CExperimentAction.TRAINING)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+action = <M2CExperimentAction.TRAINING: 'TRAINING'>
+
+    def require_pre_freeze(
+        action: M2CExperimentAction,
+    ) -> datetime:
+        """Allow ``action`` only before the fixed Asia/Shanghai hard freeze.
+    
+        Invalid clock/timezone inputs fail closed instead of being interpreted as
+        local time.  There is deliberately no timestamp/configuration override in
+        this API; tests replace the system clock function at the module boundary.
+        """
+    
+        if not isinstance(action, M2CExperimentAction):
+            raise M2CHardFreezeError("M2C_HARD_FREEZE_ACTION_INVALID")
+        freeze = _freeze_datetime()
+        try:
+            observed_ns = time.time_ns()
+            if type(observed_ns) is not int or observed_ns <= 0:
+                raise ValueError("system time_ns is not a positive integer")
+            # Compare the integer clock directly at the boundary so float
+            # rounding cannot admit an instant on/after the freeze.
+            if observed_ns >= M2C_HARD_FREEZE_UNIX_NS:
+>               raise M2CHardFreezeError(
+                    "M2C_HARD_FREEZE_ACTIVE:"
+                    f"{action.value}:new experiment execution forbidden on/after "
+                    f"{M2C_HARD_FREEZE_LOCAL_ISO}"
+                )
+E               xh_agent.policy.qrm_lite.m2c_hard_freeze.M2CHardFreezeError: M2C_HARD_FREEZE_ACTIVE:TRAINING:new experiment execution forbidden on/after 2026-09-01T00:00:00+08:00
+
+src/xh_agent/policy/qrm_lite/m2c_hard_freeze.py:81: M2CHardFreezeError
+
+During handling of the above exception, another exception occurred:
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_decision_train_requires_b0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1106066d0>
+
+    def test_decision_train_requires_bindings_before_replaying_data(
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        entered: list[str] = []
+    
+        def blocked() -> None:
+            entered.append("bindings")
+            raise RuntimeError("active Phase-2 bindings")
+    
+        monkeypatch.setattr(
+            "m2c.train_qwen_decision_level_v4._require_phase2_training_bindings", blocked
+        )
+        monkeypatch.setattr(
+            "m2c.train_qwen_decision_level_v4.load_adr0026_decision_dataset_v4",
+            lambda **_kwargs: entered.append("data"),
+        )
+>       with pytest.raises(RuntimeError, match="active Phase-2 bindings"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E        Regex: 'active Phase-2 bindings'
+E        Input: 'M2C_HARD_FREEZE_ACTIVE:TRAINING:new experiment execution forbidden on/after 2026-09-01T00:00:00+08:00'
+
+tests/unit/test_m2c_train_qwen_decision_level_v4.py:114: AssertionError
+___________ test_decision_train_replays_data_before_model_or_output ____________
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_decision_train_replays_da0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x11048c4b0>
+
+    def test_decision_train_replays_data_before_model_or_output(
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        entered: list[str] = []
+    
+        def loader(**_kwargs: object) -> None:
+            entered.append("data")
+            raise ValueError("replay failure")
+    
+        monkeypatch.setattr(
+            "m2c.train_qwen_decision_level_v4._require_phase2_training_bindings",
+            lambda: None,
+        )
+        monkeypatch.setattr("m2c.train_qwen_decision_level_v4.load_adr0026_decision_dataset_v4", loader)
+        monkeypatch.setattr(
+            "m2c.train_qwen_decision_level_v4._resolve_local_revision_snapshot",
+            lambda *_args: entered.append("model"),
+        )
+        with pytest.raises(ValueError, match="replay failure"):
+>           main(_base_args(tmp_path))
+
+tests/unit/test_m2c_train_qwen_decision_level_v4.py:139: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/m2c/train_qwen_decision_level_v4.py:400: in main
+    require_pre_freeze(M2CExperimentAction.TRAINING)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+action = <M2CExperimentAction.TRAINING: 'TRAINING'>
+
+    def require_pre_freeze(
+        action: M2CExperimentAction,
+    ) -> datetime:
+        """Allow ``action`` only before the fixed Asia/Shanghai hard freeze.
+    
+        Invalid clock/timezone inputs fail closed instead of being interpreted as
+        local time.  There is deliberately no timestamp/configuration override in
+        this API; tests replace the system clock function at the module boundary.
+        """
+    
+        if not isinstance(action, M2CExperimentAction):
+            raise M2CHardFreezeError("M2C_HARD_FREEZE_ACTION_INVALID")
+        freeze = _freeze_datetime()
+        try:
+            observed_ns = time.time_ns()
+            if type(observed_ns) is not int or observed_ns <= 0:
+                raise ValueError("system time_ns is not a positive integer")
+            # Compare the integer clock directly at the boundary so float
+            # rounding cannot admit an instant on/after the freeze.
+            if observed_ns >= M2C_HARD_FREEZE_UNIX_NS:
+>               raise M2CHardFreezeError(
+                    "M2C_HARD_FREEZE_ACTIVE:"
+                    f"{action.value}:new experiment execution forbidden on/after "
+                    f"{M2C_HARD_FREEZE_LOCAL_ISO}"
+                )
+E               xh_agent.policy.qrm_lite.m2c_hard_freeze.M2CHardFreezeError: M2C_HARD_FREEZE_ACTIVE:TRAINING:new experiment execution forbidden on/after 2026-09-01T00:00:00+08:00
+
+src/xh_agent/policy/qrm_lite/m2c_hard_freeze.py:81: M2CHardFreezeError
+________ test_decision_train_publishes_only_complete_create_only_result ________
+
+tmp_path = PosixPath('/private/var/folders/wq/5rtkddgj4gdbdr1fzcvnkn5w0000gn/T/pytest-of-gl/pytest-2765/test_decision_train_publishes_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1106069e0>
+capsys = <_pytest.capture.CaptureFixture object at 0x10fe24ef0>
+
+    def test_decision_train_publishes_only_complete_create_only_result(
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+        capsys: pytest.CaptureFixture[str],
+    ) -> None:
+        cache, _snapshot = _cache_snapshot(tmp_path)
+        args = [*_base_args(tmp_path), "--cache-dir", str(cache)]
+        loaded = object()
+        monkeypatch.setattr(
+            "m2c.train_qwen_decision_level_v4._require_phase2_training_bindings",
+            lambda: None,
+        )
+        monkeypatch.setattr(
+            "m2c.train_qwen_decision_level_v4.load_adr0026_decision_dataset_v4",
+            lambda **_kwargs: loaded,
+        )
+    
+        def fake_train(
+            _args: object,
+            replayed: object,
+            *,
+            snapshot: Path,
+            expected_snapshot_tree_sha256: str,
+            staging_root: Path,
+            started: float,
+            deadline: float,
+        ) -> dict[str, object]:
+            assert replayed is loaded
+            assert snapshot == snapshot.resolve()
+            assert len(expected_snapshot_tree_sha256) == 64
+            assert started < deadline
+            assert not staging_root.exists()
+            staging_root.mkdir(parents=True)
+            (staging_root / "qwen_adr0026_decision_v4_bundle.json").write_text('{"complete":true}\n')
+            return {
+                "schema_version": "M2CQwenCoarseV4ADR0026TrainReportV1",
+                "status": "PASS_TRAINED_QWEN_LORA_M2C_Q012_V4_ADR0026_NOT_PHYSICAL_EVALUATION",
+                "teacher_used": False,
+                "privileged_truth_policy_input": False,
+            }
+    
+        monkeypatch.setattr("m2c.train_qwen_decision_level_v4._train", fake_train)
+>       assert main(args) == 0
+               ^^^^^^^^^^
+
+tests/unit/test_m2c_train_qwen_decision_level_v4.py:209: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/m2c/train_qwen_decision_level_v4.py:400: in main
+    require_pre_freeze(M2CExperimentAction.TRAINING)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+action = <M2CExperimentAction.TRAINING: 'TRAINING'>
+
+    def require_pre_freeze(
+        action: M2CExperimentAction,
+    ) -> datetime:
+        """Allow ``action`` only before the fixed Asia/Shanghai hard freeze.
+    
+        Invalid clock/timezone inputs fail closed instead of being interpreted as
+        local time.  There is deliberately no timestamp/configuration override in
+        this API; tests replace the system clock function at the module boundary.
+        """
+    
+        if not isinstance(action, M2CExperimentAction):
+            raise M2CHardFreezeError("M2C_HARD_FREEZE_ACTION_INVALID")
+        freeze = _freeze_datetime()
+        try:
+            observed_ns = time.time_ns()
+            if type(observed_ns) is not int or observed_ns <= 0:
+                raise ValueError("system time_ns is not a positive integer")
+            # Compare the integer clock directly at the boundary so float
+            # rounding cannot admit an instant on/after the freeze.
+            if observed_ns >= M2C_HARD_FREEZE_UNIX_NS:
+>               raise M2CHardFreezeError(
+                    "M2C_HARD_FREEZE_ACTIVE:"
+                    f"{action.value}:new experiment execution forbidden on/after "
+                    f"{M2C_HARD_FREEZE_LOCAL_ISO}"
+                )
+E               xh_agent.policy.qrm_lite.m2c_hard_freeze.M2CHardFreezeError: M2C_HARD_FREEZE_ACTIVE:TRAINING:new experiment execution forbidden on/after 2026-09-01T00:00:00+08:00
+
+src/xh_agent/policy/qrm_lite/m2c_hard_freeze.py:81: M2CHardFreezeError
+=========================== short test summary info ============================
+FAILED tests/unit/test_m2c_formal_bound_plan_provider_v1.py::test_real_provider_requires_reviewed_deployment
+FAILED tests/unit/test_m2c_formal_isaac_endpoint_v2.py::test_state_machine_requires_start_capture_execute_order_and_binds_capture
+FAILED tests/unit/test_m2c_formal_isaac_endpoint_v2.py::test_exactly_eight_cycles_share_one_session_and_finalize_once
+FAILED tests/unit/test_m2c_formal_isaac_endpoint_v2.py::test_bad_hmac_is_rejected_and_persisted_without_backend_execution
+FAILED tests/unit/test_m2c_formal_isaac_endpoint_v2.py::test_invalid_mapping_is_terminal_and_never_executes_unfrozen_b0_fallback
+FAILED tests/unit/test_m2c_formal_isaac_endpoint_v2.py::test_backend_execute_exception_poisons_session_and_prevents_retry
+FAILED tests/unit/test_m2c_formal_isaac_endpoint_v2.py::test_signed_failed_execution_receipt_aborts_persistent_session
+FAILED tests/unit/test_m2c_formal_isaac_endpoint_v4.py::test_v4_state_machine_runs_exact_eight_cycle_contract_and_finalizes
+FAILED tests/unit/test_m2c_formal_isaac_endpoint_v4.py::test_v4_invalid_mapping_is_terminal_no_action_and_cannot_retry
+FAILED tests/unit/test_m2c_formal_isaac_endpoint_v4.py::test_v4_execute_response_audit_failure_poisoned_without_retry
+FAILED tests/unit/test_m2c_formal_isaac_endpoint_v4.py::test_v4_endpoint_replays_dynamic_a1_inputs_and_rejects_self_consistent_splice
+FAILED tests/unit/test_m2c_formal_isaac_endpoint_v4.py::test_v4_state_machine_rejects_out_of_order_and_nonprefix_capture
+FAILED tests/unit/test_m2c_formal_isaac_episode_io_v4.py::test_episode_io_binds_one_scene_owner_across_start_capture_and_finalize
+FAILED tests/unit/test_m2c_formal_isaac_episode_io_v4.py::test_episode_io_start_evidence_mismatch_consumes_attempt
+FAILED tests/unit/test_m2c_formal_split_host_v4.py::test_formal_v4_host_runs_exact_eight_model_cycles_and_finalizes
+FAILED tests/unit/test_m2c_formal_split_host_v4.py::test_formal_v4_host_derives_strict_pure_success_only_from_signed_finalizer
+FAILED tests/unit/test_m2c_formal_split_host_v4.py::test_formal_v4_host_keeps_invalid_model_choice_as_terminal_false_without_retry
+FAILED tests/unit/test_m2c_formal_split_host_v4.py::test_formal_v4_host_rejects_hmac_tamper_and_crossed_qwen_response
+FAILED tests/unit/test_m2c_formal_split_host_v4.py::test_formal_v4_evidence_rejects_posthoc_wire_or_summary_tamper
+FAILED tests/unit/test_m2c_formal_split_host_v4.py::test_formal_v4_cli_refuses_existing_output_before_consuming_challenge
+FAILED tests/unit/test_m2c_formal_split_host_v4.py::test_formal_v4_cli_unexpected_failure_writes_only_ineligible_sidecar
+FAILED tests/unit/test_m2c_isaac_exact_plan_runtime_v1.py::test_real_isaac_construction_requires_counter_and_reviewed_deployment_binding
+FAILED tests/unit/test_m2c_offline_wire_auth_v4.py::test_v4_host_local_hmac_receipts_replay_finalized_and_terminalized_runs[False-node_counts0-lab_counts0-FINALIZED]
+FAILED tests/unit/test_m2c_offline_wire_auth_v4.py::test_v4_host_local_hmac_receipts_replay_finalized_and_terminalized_runs[True-node_counts1-lab_counts1-TERMINAL_NO_PHYSICAL_EXECUTION]
+FAILED tests/unit/test_m2c_offline_wire_auth_v4.py::test_v4_hmac_verifier_rejects_qwen_hmac_and_isaac_lifecycle_tamper
+FAILED tests/unit/test_m2c_offline_wire_auth_v4.py::test_v4_hmac_verifier_rejects_late_consumption_and_non_suffix_session
+FAILED tests/unit/test_m2c_offline_wire_auth_v4.py::test_v4_receipt_schema_rejects_claimed_count_inflation
+FAILED tests/unit/test_m2c_offline_wire_auth_v4.py::test_v4_host_local_cli_publishes_create_only_receipt_without_secret
+FAILED tests/unit/test_m2c_qb_adr_gate.py::test_exact_human_adr_and_all_frozen_bindings_authorize_qb
+FAILED tests/unit/test_m2c_qb_adr_gate.py::test_gate_constants_equal_the_committed_and_local_evidence_bytes
+FAILED tests/unit/test_m2c_qwen_adr0026_contract_smoke_report.py::test_adr0026_qwen_contract_report_binds_current_bytes_and_stays_blocked
+FAILED tests/unit/test_m2c_qwen_coarse_v2.py::test_train_dry_run_never_enters_real_trainer_or_overwrites
+FAILED tests/unit/test_m2c_qwen_coarse_v2.py::test_m2b_init_rejected_before_dataset_or_model_loading
+FAILED tests/unit/test_m2c_qwen_coarse_v2.py::test_real_main_timeout_keeps_formal_output_absent
+FAILED tests/unit/test_m2c_qwen_service_audit.py::test_exact_eight_signed_pairs_are_committed_then_cleanly_stopped
+FAILED tests/unit/test_m2c_qwen_service_audit.py::test_invalid_sequence_or_identity_is_rejected_and_poisons_session[first0-None-exact 0..7]
+FAILED tests/unit/test_m2c_qwen_service_audit.py::test_invalid_sequence_or_identity_is_rejected_and_poisons_session[first1-second1-run_id]
+FAILED tests/unit/test_m2c_qwen_service_audit.py::test_invalid_sequence_or_identity_is_rejected_and_poisons_session[first2-second2-challenge nonce]
+FAILED tests/unit/test_m2c_qwen_service_audit.py::test_request_after_eight_responses_is_rejected_and_never_inferred
+FAILED tests/unit/test_m2c_qwen_service_v4.py::test_v4_service_commits_exact_eight_pairs_and_clean_stop
+FAILED tests/unit/test_m2c_qwen_service_v4.py::test_v4_service_rejects_reused_capture_before_predictor
+FAILED tests/unit/test_m2c_qwen_service_v4.py::test_v4_service_rejects_request_bundle_before_predictor
+FAILED tests/unit/test_m2c_qwen_service_v4.py::test_v4_service_rejects_history_that_does_not_extend_prior_response
+FAILED tests/unit/test_m2c_qwen_service_v4.py::test_v4_service_rejects_predictor_pointer_splice_before_audit_commit
+FAILED tests/unit/test_m2c_s3_collection_plan.py::test_s3_plan_is_deterministic_outcome_blind_and_full_coverage_bound
+FAILED tests/unit/test_m2c_s3_collection_plan.py::test_s3_plan_hashes_every_source_and_keeps_path_blocked_raw
+FAILED tests/unit/test_m2c_s3_collection_plan.py::test_s3_plan_pins_frozen_runtime_hashes
+FAILED tests/unit/test_m2c_s3_public_category_vocabulary.py::test_current_s3_artifact_replays_official_public_projection
+FAILED tests/unit/test_m2c_s4_entry_gate.py::test_no_physical_receipt_blocks_evaluation_but_not_adr_training
+FAILED tests/unit/test_m2c_s4_entry_gate.py::test_arbitrary_hash_files_cannot_pass_even_if_runner_binding_is_patched
+FAILED tests/unit/test_m2c_s4_entry_gate.py::test_implementation_commit_may_be_ancestor_but_must_exist
+FAILED tests/unit/test_m2c_s4_qwen_adr0026_training.py::test_adr0026_two_arm_training_report_is_source_bound_and_honest
+FAILED tests/unit/test_m2c_status.py::test_status_fails_closed_when_terminal_evidence_is_missing
+FAILED tests/unit/test_m2c_status.py::test_status_rejects_synthetic_terminal_summaries
+FAILED tests/unit/test_m2c_status.py::test_status_rejects_q_a_summary_when_per_key_outcomes_disagree
+FAILED tests/unit/test_m2c_train_qwen_coarse_v4.py::test_v4_train_replays_data_before_model_or_output
+FAILED tests/unit/test_m2c_train_qwen_coarse_v4.py::test_v4_main_publishes_only_a_complete_create_only_training_result
+FAILED tests/unit/test_m2c_train_qwen_coarse_v4.py::test_v4_main_never_publishes_training_failure_or_deadline_crossing
+FAILED tests/unit/test_m2c_train_qwen_decision_level_v4.py::test_decision_train_requires_bindings_before_replaying_data
+FAILED tests/unit/test_m2c_train_qwen_decision_level_v4.py::test_decision_train_replays_data_before_model_or_output
+FAILED tests/unit/test_m2c_train_qwen_decision_level_v4.py::test_decision_train_publishes_only_complete_create_only_result
+61 failed, 1886 passed, 5 skipped in 109.94s (0:01:49)

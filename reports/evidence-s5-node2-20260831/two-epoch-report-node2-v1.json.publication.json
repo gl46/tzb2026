@@ -1,0 +1,27 @@
+{
+  "adapter_destination": "/home/gl/xh-202607-qwen-s5/adapter-two-epoch-node2-v1",
+  "adapter_tree_sha256": "8a09f56a4a77c0127c0f1c2008efb8726e11d4a9b0c56f526a9934ce0a88f0b9",
+  "prepared_receipt": "/home/gl/xh-202607-qwen-s5/two-epoch-report-node2-v1.json.prepared.json",
+  "prepared_receipt_sha256": "3e85204b9323d9ed6592200dd2e248c81d518331df6dff21de44278f88c383ee",
+  "publication_primitive": "LINUX_RENAMEAT2_RENAME_NOREPLACE",
+  "published_manifest": [
+    {
+      "path": "README.md",
+      "sha256": "3fe9362e504f23ec4ea437cacb13409f50e5f358baea4acfe7568da6c178e795",
+      "size": 5224
+    },
+    {
+      "path": "adapter_config.json",
+      "sha256": "68cea134577e32dd6b0779064f4f114dcd209ae158ed6c5426df51afb6f61f05",
+      "size": 1170
+    },
+    {
+      "path": "adapter_model.safetensors",
+      "sha256": "1931b1e7080580fa7e3cc49a23353978f43a492c2d5dc19efbe19bba21b193eb",
+      "size": 79230936
+    }
+  ],
+  "reconciled_after_interruption": false,
+  "schema_version": "QwenBrainS5AdapterPublicationReceiptV1",
+  "status": "PUBLISHED"
+}

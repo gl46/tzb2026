@@ -1,0 +1,157 @@
+{
+  "campaign_disposition": "HALTED_WITH_SEVEN_PHYSICAL_ORDINALS_UNCONSUMED",
+  "implementation_candidate": {
+    "disposition": "LOCAL_UNCOMMITTED_BYTES_PRESERVED_NO_GOVERNED_LANDING",
+    "head_commit": "d8a0b777d1b5aa77c4ed79e4490184396688c4ef",
+    "known_incomplete_surfaces": [
+      "typed_preflight05_durable_semantic_gate",
+      "physical_receipt_cross_checks_and_r3_runtime",
+      "r3_audit_and_combined_completion",
+      "detached_single_dispatch_no_redispatch_invoker",
+      "h_double_prime_to_s_double_prime_to_p_double_prime_exact_update_governance"
+    ],
+    "modified_path_count": 2,
+    "modified_paths": [
+      "rc/xh_agent/policy/qrm_lite/v5_existence_successor_campaign_v2.py",
+      "tests/unit/test_m2c_v5_existence_successor_campaign_v2.py"
+    ],
+    "tree": "3b17b4ebedab6350c11cb76ec4638baffc972cf2"
+  },
+  "last_authoritative_readonly_r2_state": {
+    "ordinal04_claim_state": "PRESENT_ORPHAN",
+    "r2_claim_count": 1,
+    "r2_terminal04": "ABSENT",
+    "r2_terminal_count": 0,
+    "source": "M2C_STATE.md ordinal04 delayed-cancellation orphan attribution and immutable triage",
+    "unconsumed_ordinal_count": 7,
+    "unconsumed_ordinals": [
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11
+    ]
+  },
+  "ordinal04_readonly_triage": {
+    "path": "/private/tmp/m2c-r13239-r2-successor-ordinal04-halt-triage-v1.json",
+    "sha256": "bebb5c309e83f6207768f9b777a06102c12c5198d2e050581662c138db8ad3d5"
+  },
+  "repair_design": {
+    "path": "/private/tmp/m2c-r13239-r3-native-tail-orphan-minimal-diff-design-v1.json",
+    "sha256": "2f018ecc626c8f2754ac86314e5fce995c4dd912676dbd7cabc9ea595b882785"
+  },
+  "safety": {
+    "audit_executed": false,
+    "cleanup_or_mutation_of_r2_residue": false,
+    "fabricated_missing_host_artifacts": false,
+    "ordinal05_invoked": false,
+    "push": false,
+    "replacement_ordinal04": false,
+    "retry_ordinal04": false
+  },
+  "schema_version": "M2CR13239R3HonestHaltedCampaignReportV1",
+  "statistical_claim": null,
+  "statistical_claim_status": "PROHIBITED_IN_TEMPLATE_AND_NO_PARTIAL_SUCCESS_CLAIM",
+  "status": "HONEST_HALTED_CAMPAIGN",
+  "template_identity": {
+    "path": "/private/tmp/m2c-r13239-r3-honest-halted-campaign-report-template-v1.json",
+    "sha256": "a228878a5d754af44913a954d597c574ac484a0d5e6b8ec1baf80ab4e79be855"
+  },
+  "timing_projection": {
+    "basis": "LOWER_BOUND_FROM_CURRENT_IMPLEMENTATION_GAPS_WITH_NO_FAILURE_CYCLE_RESERVE",
+    "h_double_prime_package_deadline_local": "2026-08-30T05:30:00+08:00",
+    "h_double_prime_package_delivered": false,
+    "halt_threshold_local": "2026-08-30T10:00:00+08:00",
+    "local_h_double_prime_remaining": [
+      {
+        "minutes": 35,
+        "segment": "typed_preflight05_and_durable_semantic_gate"
+      },
+      {
+        "minutes": 50,
+        "segment": "r3_physical_receipt_adapters_and_runtime"
+      },
+      {
+        "minutes": 45,
+        "segment": "r3_audit_and_combined_completion"
+      },
+      {
+        "minutes": 35,
+        "segment": "detached_single_dispatch_invoker_and_static_proof"
+      },
+      {
+        "minutes": 45,
+        "segment": "exact_update_governance_adr_tests_full_gates_review_package"
+      }
+    ],
+    "post_review_remaining": [
+      {
+        "minutes": 55,
+        "segment": "coordinator_review_hsp_landing"
+      },
+      {
+        "minutes": 45,
+        "segment": "formal_batches_and_preflight"
+      },
+      {
+        "minutes": 40,
+        "segment": "detached_ordinals05_11_and_final_audit"
+      }
+    ],
+    "projected_full_completion_local": "2026-08-30T10:42:40+08:00",
+    "total_remaining_minutes": 350
+  },
+  "trigger": "PROJECTED_FULL_COMPLETION_EXCEEDS_2026-08-30T10:00:00+08:00",
+  "triggered_at_local": "2026-08-30T04:52:40+08:00",
+  "triggered_at_ns": 1788036760872758016,
+  "truthful_consumed_outcomes": [
+    {
+      "authority": "P_DOUBLE_PRIME_TERMINAL",
+      "ordinal": 0,
+      "task_outcome": "FAILURE",
+      "task_success": false
+    },
+    {
+      "authority": "P_DOUBLE_PRIME_TERMINAL",
+      "ordinal": 1,
+      "task_outcome": "FAILURE",
+      "task_success": false
+    },
+    {
+      "authority": "P_DOUBLE_PRIME_TERMINAL",
+      "ordinal": 2,
+      "task_outcome": "FAILURE",
+      "task_success": false
+    },
+    {
+      "authority": "P_DOUBLE_PRIME_HISTORY_PLUS_SUCCESSOR_RECOVERY",
+      "ordinal": 3,
+      "status": "POSE_GATE_REJECTED",
+      "task_outcome": "FAILURE",
+      "task_success": false
+    },
+    {
+      "absence_reason": "ORPHANED_BY_CONTROL_CHANNEL_CANCELLATION_POST_MEASUREMENT",
+      "authority": "R2_NATIVE_ORPHAN_MEASUREMENT_PENDING_R3_GOVERNED_CLOSURE",
+      "claim_state": "PRESENT_ORPHAN",
+      "measurement_outcome_variant": "NORMAL_REGRASP",
+      "measurement_validator": "PASS",
+      "normal_terminal_closure": "ABSENT_AND_MUST_NOT_BE_FABRICATED",
+      "ordinal": 4,
+      "task_outcome": "FAILURE",
+      "task_success": false
+    }
+  ],
+  "unconsumed_ordinal_count": 7,
+  "unconsumed_ordinals": [
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11
+  ]
+}

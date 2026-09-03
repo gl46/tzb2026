@@ -1,0 +1,101 @@
+{
+  "baseline_report_sha256": "76f7d6b83e400670773a343b875b31659eec372f90b2420ea9724222cc753c95",
+  "benefit_claim_authorized": false,
+  "benefit_claim_note": "DEV is a tuning split already seen by both arms and is supporting evidence only; it cannot establish training benefit.",
+  "candidate_report_sha256": "c243d1fb018b8f1a93e4833c57817653ee97d2013f1313e915240161395070ef",
+  "canonical_evaluation_read": false,
+  "case_count": 78,
+  "claim_classification": "SUPPORTING_EVIDENCE_ONLY",
+  "component_count": 6,
+  "config_sha256": "8be0babad75426b6ca378ae5129beda65b4d47eed8bff297083f373c626ae9d8",
+  "evidence_role": "TUNING_SPLIT_SUPPORTING_ANALYSIS_ONLY_BOTH_ARMS_HAVE_SEEN_DEV",
+  "expected_component_count": 6,
+  "experiment_identity": "s5-icl-v3",
+  "metrics": {
+    "expectation_match": {
+      "candidate_minus_baseline": 0.0,
+      "case_count": 78,
+      "ci_lower": -0.03896103896103896,
+      "ci_upper": 0.0375,
+      "cluster_count": 6,
+      "cluster_unit": "FROZEN_GRAPH_COMPONENT",
+      "exact_mcnemar": {
+        "discordant_count": 2,
+        "method": "TWO_SIDED_EXACT_BINOMIAL_ON_DISCORDANT_PAIRS",
+        "n00": 13,
+        "n01": 1,
+        "n10": 1,
+        "n11": 63,
+        "net_improvement_count": 0,
+        "p_value": 1.0
+      },
+      "interval_presentation": "UNSTABLE_LOW_CLUSTER_COUNT_DO_NOT_PRESENT_AS_ORDINARY_STABLE_STATISTICAL_INTERVAL",
+      "method": "PAIRED_CLUSTER_BOOTSTRAP_PERCENTILE_95_PERCENT",
+      "replicates": 10000,
+      "seed": 20260830,
+      "stability_flags": [
+        "UNSTABLE_LOW_CLUSTER_COUNT"
+      ],
+      "stable_statistical_interval": false
+    },
+    "primitive_checks_pass": {
+      "candidate_minus_baseline": 0.0,
+      "case_count": 78,
+      "ci_lower": -0.03896103896103896,
+      "ci_upper": 0.0375,
+      "cluster_count": 6,
+      "cluster_unit": "FROZEN_GRAPH_COMPONENT",
+      "interval_presentation": "UNSTABLE_LOW_CLUSTER_COUNT_DO_NOT_PRESENT_AS_ORDINARY_STABLE_STATISTICAL_INTERVAL",
+      "method": "PAIRED_CLUSTER_BOOTSTRAP_PERCENTILE_95_PERCENT",
+      "replicates": 10000,
+      "seed": 20260830,
+      "stability_flags": [
+        "UNSTABLE_LOW_CLUSTER_COUNT"
+      ],
+      "stable_statistical_interval": false
+    },
+    "reassociation_boundary_pass": {
+      "candidate_minus_baseline": 0.0,
+      "case_count": 78,
+      "ci_lower": 0.0,
+      "ci_upper": 0.0,
+      "cluster_count": 6,
+      "cluster_unit": "FROZEN_GRAPH_COMPONENT",
+      "interval_presentation": "UNSTABLE_LOW_CLUSTER_COUNT_DO_NOT_PRESENT_AS_ORDINARY_STABLE_STATISTICAL_INTERVAL",
+      "method": "PAIRED_CLUSTER_BOOTSTRAP_PERCENTILE_95_PERCENT",
+      "replicates": 10000,
+      "seed": 20260830,
+      "stability_flags": [
+        "UNSTABLE_LOW_CLUSTER_COUNT"
+      ],
+      "stable_statistical_interval": false
+    },
+    "strict_valid": {
+      "candidate_minus_baseline": 0.0,
+      "case_count": 78,
+      "ci_lower": 0.0,
+      "ci_upper": 0.0,
+      "cluster_count": 6,
+      "cluster_unit": "FROZEN_GRAPH_COMPONENT",
+      "interval_presentation": "UNSTABLE_LOW_CLUSTER_COUNT_DO_NOT_PRESENT_AS_ORDINARY_STABLE_STATISTICAL_INTERVAL",
+      "method": "PAIRED_CLUSTER_BOOTSTRAP_PERCENTILE_95_PERCENT",
+      "replicates": 10000,
+      "seed": 20260830,
+      "stability_flags": [
+        "UNSTABLE_LOW_CLUSTER_COUNT"
+      ],
+      "stable_statistical_interval": false
+    }
+  },
+  "practical_difference_minimum": 0.05,
+  "primary_ci_not_negative": false,
+  "primary_point_gate_pass": false,
+  "primary_test_or_blind_definition_changed": false,
+  "schema_version": "QwenBrainS5PairedEvaluationReportV3",
+  "split": "DEV",
+  "stability_flags": [
+    "UNSTABLE_LOW_CLUSTER_COUNT"
+  ],
+  "stable_statistical_interval": false,
+  "status": "PASS"
+}

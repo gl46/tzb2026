@@ -1,0 +1,178 @@
+{
+  "schema_version": "QwenBrainS5IclConfigV3",
+  "experiment_identity": "s5-icl-v3",
+  "protocol_v1_status": "CREATED_AND_CLOSED_TOMBSTONE",
+  "protocol_v1_evaluation_effect": "NIL",
+  "protocol_v2_status": "CREATED_AND_CLOSED_REAL_EVALUATION_DECODE_IN_PYTEST",
+  "protocol_v2_evaluation_effect": "INHERITED_FROZEN_DEV_SELECTION_ONLY",
+  "protocol_v2_frozen_scientific_content_inherited": true,
+  "protocol_v2_closure_disclosure": "A splitter pytest decoded the real frozen monolithic V4 dataset into temporary outputs before the authoritative unique splitter; temporary outputs were naturally removed, but the decode closes V2 under the same mechanical standard as V1.",
+  "evaluation_code_test_data_policy": "SYNTHETIC_FIXTURES_ONLY_NO_REAL_MONOLITHIC_OR_SPLIT_FILES",
+  "model": "Qwen3.8-27B",
+  "system_prompt_sha256": "41e3c4d779eed97b3c669126126995eff3b2691f6a34156812a8191ec00bd4d9",
+  "runtime": {
+    "host": "node2",
+    "accelerator": "NVIDIA A100-SXM4-80GB",
+    "cuda_device_index": 0,
+    "snapshot_path": "/home/gl/qwen38-27b-mtp/Qwen3.8-27B",
+    "snapshot_tree_sha256": "187d7847a7de61b1d26c0f1a09354d2b880d499bee23fd208543fa15b77b52da",
+    "snapshot_regular_file_count": 32,
+    "training_venv_path": "/home/gl/xh-202607-qwen-s5/.venv-s5",
+    "environment_identity_report_path": "/home/gl/xh-202607-qwen-s5/preflight/environment-identity-node2-v1.json",
+    "environment_identity_sha256": "28a6726f72f9a26405549a9ae667190bf0c14ba10374d5a8ebb3d75e6af6dc6a",
+    "tokenizer_config_sha256": "b11349aafa7cdc6a320767cf7ceb29ed82f7eda5d65e8e0819e76f0ce947bf27",
+    "tokenizer_json_sha256": "0997f410c57a1f4e53b09e4be8f4a172d90edd9564368fb0847030937229b9f3",
+    "chat_template_sha256": "c3cf9e34abf4f9e36c2d72165aa9c132d3e2a725b6c2586aaa3a8af9d7a81041",
+    "preprocessor_config_sha256": "27225450ac9c6529872ee1924fcb0962ff5634834f817040f444118116f4e516",
+    "base_dtype": "bfloat16",
+    "local_files_only": true,
+    "direct_transformers_no_service": true,
+    "deterministic_algorithms": true,
+    "cudnn_benchmark": false,
+    "matmul_precision": "highest"
+  },
+  "data": {
+    "train_sha256": "3d3675e919babaf2e967c5162a84e699c0f2986f7b7557a466d3c8d1fa0945a8",
+    "dev_sha256": "f0218a6d2267a59b3426d35632906a300d7e1b56b0039037e5ff1fc6799332e7",
+    "reconstruction_manifest_sha256": "f2ed379bc88c3c79d9e34bbdeb1ea8c8c89714304de5f04dbb0106b65aca7634",
+    "frozen_dataset_sha256_binding": "749316f5adf4f2db3df4a5a9c76bc5604d5060f80cb899c222609ae4e4003f3a",
+    "train_rows": 428,
+    "train_sources": 374,
+    "train_components": 34,
+    "dev_rows": 78,
+    "dev_sources": 66,
+    "dev_components": 6,
+    "unique_image_count": 440,
+    "total_image_bytes": 39606063,
+    "image_set_sha256": "29cab593f28abea6f4a57f5471cfb1d29f9fd4efa0252d00f11afa782bc1e0eb",
+    "node2_materialization_root": "/home/gl/xh-202607-qwen-s5/icl-input-v2",
+    "node2_image_root": "/home/gl/xh-202607-qwen-s5/icl-input-v2/images",
+    "node2_image_manifest_path": "/home/gl/xh-202607-qwen-s5/icl-input-v2/image-manifest-v2.json",
+    "allowed_builder_splits": [
+      "TRAIN",
+      "DEV"
+    ],
+    "evaluation_rows_read": false,
+    "evaluation_rows_materialized": false
+  },
+  "policies": [
+    {
+      "policy_id": "zero_shot_v2",
+      "shot_count": 0,
+      "demo_selection": "NONE"
+    },
+    {
+      "policy_id": "two_shot_family_first_v2",
+      "shot_count": 2,
+      "demo_selection": "SAME_FAMILY_THEN_GLOBAL_SHA256_V2"
+    },
+    {
+      "policy_id": "four_shot_family_cover_v2",
+      "shot_count": 4,
+      "demo_selection": "TARGET_FAMILY_THEN_OTHER_FAMILIES_SHA256_V2"
+    }
+  ],
+  "messages": {
+    "representation": "MULTIMODAL_MULTI_TURN_V2",
+    "demo_turn_pair": "INDEPENDENT_USER_IMAGE_INSTRUCTION_PUBLIC_CONTEXT_THEN_ASSISTANT_CANONICAL_JSON",
+    "target_turn": "INDEPENDENT_USER_IMAGE_INSTRUCTION_PUBLIC_CONTEXT",
+    "zero_shot_target_turn_identical": true,
+    "demo_order": "SELECTION_PRIORITY_THEN_SHA256_SAMPLE_ID_ASCENDING_V2",
+    "per_case_exclusions": [
+      "SAME_COMPONENT",
+      "SAME_SOURCE_IDENTITY",
+      "SAME_IMAGE_SHA256"
+    ],
+    "image_resolution_policy": "SAME_AS_SINGLE_IMAGE_RUNTIME_NO_ICL_SPECIFIC_TRANSFORM",
+    "image_content_order": "IMAGE_THEN_TEXT"
+  },
+  "decoding": {
+    "temperature": 0.0,
+    "max_tokens": 2048,
+    "enable_thinking": false,
+    "guided_json": false,
+    "max_attempts": 1,
+    "retry_or_schema_correction_allowed": false
+  },
+  "dev_selection": {
+    "primary_metric": "EXPECTATION_MATCH_RATE",
+    "secondary_metrics_in_order": [
+      "STRICT_VALID_RATE",
+      "PRIMITIVE_CHECK_PASS_RATE",
+      "REASSOCIATION_BOUNDARY_PASS_RATE"
+    ],
+    "tie_break": "LOWER_SHOT_COUNT_THEN_POLICY_ID_ASCENDING",
+    "all_78_rows_in_denominator": true,
+    "policy_freeze_create_only": true
+  },
+  "paired_evaluation_preregistration": {
+    "comparison": "TRAINED_LORA_VS_DEV_SELECTED_ICL_BASELINE",
+    "selected_policy_id": "two_shot_family_first_v2",
+    "selected_shot_count": 2,
+    "closed_v2_protocol_config_sha256": "a79a55a3c3b0dc036d1853431d92aed10a54326f1bdaad7bcbd8efdbb1e0729a",
+    "historical_dev_execution_config_sha256": "8d6ba48cf26462796bdb01d7bb876ee10e06e3296d1d72d331dec97dc6aecb7f",
+    "selected_policy_artifact_sha256": "95c881d2d907d3ded7ec51c21fb95802c6fa8a3b809d214887ded19659e29ef6",
+    "selected_base_dev_report_sha256": "76f7d6b83e400670773a343b875b31659eec372f90b2420ea9724222cc753c95",
+    "selected_dev_request_manifest_sha256": "e555b43f3428e2836d343ad11fee1b961271dba15752f966c8ad584e74b54ff1",
+    "trained_adapter_tree_sha256": "8a09f56a4a77c0127c0f1c2008efb8726e11d4a9b0c56f526a9934ce0a88f0b9",
+    "binary_primary_metric": "EXPECTATION_MATCH",
+    "paired_transition_table": "N11_N10_N01_N00",
+    "exact_mcnemar": "TWO_SIDED_EXACT_BINOMIAL_ON_DISCORDANT_PAIRS",
+    "cluster_bootstrap_replicates": 10000,
+    "cluster_unit": "FROZEN_GRAPH_COMPONENT",
+    "confidence_interval": "PERCENTILE_95_PERCENT",
+    "bootstrap_seed": 20260830,
+    "expected_component_counts": {
+      "DEV": 6,
+      "MANUAL_BLIND": 3,
+      "SYNTHETIC_TEST": 2
+    },
+    "low_cluster_count_threshold": 8,
+    "low_cluster_count_flag": "UNSTABLE_LOW_CLUSTER_COUNT",
+    "unstable_interval_presentation": "DO_NOT_PRESENT_AS_ORDINARY_STABLE_STATISTICAL_INTERVAL",
+    "practical_difference_minimum": 0.05,
+    "practical_difference_interpretation": "AT_LEAST_ONE_FEWER_ERROR_PER_TWENTY_INDEPENDENT_EPISODES",
+    "benefit_gate": "POINT_DELTA_GTE_0_05_AND_CI_LOWER_NOT_NEGATIVE_AND_MANUAL_BLIND_NONREGRESSION_AND_COMPLETE_EVIDENCE_AND_NO_CONTRACT_OR_SAFETY_REGRESSION_AND_NO_UNSTABLE_INTERVAL",
+    "claim_levels": [
+      "FULL_TRAINING_BENEFIT",
+      "POINT_ESTIMATE_BENEFIT_UNSTABLE_CLUSTER_COUNT",
+      "NO_BENEFIT_EVIDENCE"
+    ],
+    "directional_claim_text": "点估计收益，评测集聚类规模不足以给出稳定区间",
+    "full_benefit_disallows_unstable_interval": true,
+    "paired_dev_rows": 78,
+    "paired_dev_supporting_only": true,
+    "paired_dev_tuning_split": true,
+    "paired_dev_both_arms_have_seen_split": true,
+    "paired_dev_before_test_read": true,
+    "synthetic_test_rows": 22,
+    "manual_blind_rows": 45,
+    "read_once_order": [
+      "FREEZE_DEV_SELECTED_POLICY",
+      "FREEZE_PAIRED_EVALUATION_PREREGISTRATION_WITH_A1_A2_A3",
+      "ATTEST_EXISTING_DEV_SELECTION_CREATE_ONLY",
+      "RUN_TRAINED_LORA_SELECTED_TWO_SHOT_PAIRED_DEV_SUPPORTING_ANALYSIS",
+      "RUN_UNIQUE_READ_ONCE_SPLITTER_AND_EXACT_RECONSTRUCTION_ATTESTATION",
+      "EVALUATE_SYNTHETIC_TEST_ONCE",
+      "EVALUATE_MANUAL_BLIND_ONCE"
+    ],
+    "canonical_evaluation_separately_gated": true
+  },
+  "publication": {
+    "request_manifest_create_only": true,
+    "raw_attempt_create_only": true,
+    "dev_report_create_only": true,
+    "policy_freeze_create_only": true,
+    "paired_report_create_only": true
+  },
+  "forbidden_actions": [
+    "OPEN_MONOLITHIC_DATASET_IN_ICL_BUILDER_OR_DEV_RUNNER",
+    "READ_OR_MATERIALIZE_SYNTHETIC_TEST_BEFORE_BOTH_FREEZES",
+    "READ_OR_MATERIALIZE_MANUAL_BLIND_BEFORE_BOTH_FREEZES",
+    "CANONICAL_EVALUATION",
+    "BASELINE_ENDPOINT_MUTATION",
+    "POLICY_SELECTION_ON_TEST_OR_BLIND",
+    "MODEL_BENEFIT_CLAIM_BEFORE_PAIRED_EVALUATION"
+  ],
+  "no_remote_action_authorized_by_config": true
+}

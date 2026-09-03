@@ -1,0 +1,69 @@
+{
+  "schema_version": "M2CTranscriptProvenanceRecoveryV1",
+  "recovered_by": "tzb-fe",
+  "recovered_date_local": "2026-09-01",
+  "what_was_recovered": "The exact command and the tool-result output of the 2026-08-31 repository-wide pytest run, previously recorded in this package as PROJECT_REPORTED with no artifact.",
+  "why_this_matters": "For several hours this package asserted that the 2026-08-31 figure had no raw artifact and had not been reproduced. That was true of the package. It was NOT true of the record: the producing session transcript contained both the tool_use and the tool_result. This is the THIRD time tonight that an 'we do not have it' assumption was wrong, and the first time it was about tzb-fe's own session.",
+  "method": "Same forensic method the qwen-brain lane used to recover the seven-file selector: locate the tool_use and tool_result events in the producing session transcript by line number, uuid and timestamp. No guessing, no re-running.",
+  "transcript": {
+    "path": "/Users/gl/.claude/projects/-Users-gl-tzb/5ae1238c-9d80-4d6f-8a32-52da6b130e9c.jsonl",
+    "size_at_recovery_bytes": 38375290,
+    "size_is_not_an_identity": "This transcript is append-only and still growing; its size and whole-file digest change as the session continues. Do not treat either as an identity. The stable anchors are the two event lines below."
+  },
+  "tool_use_event": {
+    "line": 15075,
+    "uuid": "a9026788-b982-467c-811c-09a57a7e627a",
+    "timestamp_utc": "2026-08-31T07:54:46.470Z",
+    "tool_use_id": "toolu_013dkGTV1E3xn3dHo8fnuBez"
+  },
+  "tool_result_event": {
+    "line": 15076,
+    "uuid": "8ca5b205-1da7-4abb-8f19-3c656e727422",
+    "timestamp_utc": "2026-08-31T07:58:34.601Z"
+  },
+  "exact_command_as_recorded": "cd /Users/gl/projects/xh-202607-qwen-brain\nls .venv/bin/python 2>/dev/null && V=.venv/bin/python || V=python3\necho \"python: $($V --version 2>&1)\"\necho \"=== 全仓 pytest(忽略已知 collection error) ===\"\nPYTHONPATH=src $V -m pytest -q --ignore=tests/unit/test_m2c_s3_dataset.py 2>&1 | tail -25",
+  "selector_identical_to_2026_09_01_run_B": "The --ignore selector text is identical in both recorded shell commands. This is a comparison of recorded command TEXT, not of process argv, since neither run's argv was captured.",
+  "recorded_result_line": "14 failed, 1933 passed, 5 skipped in 225.51s (0:03:45)",
+  "tool_result_text": ".venv/bin/python\npython: Python 3.13.12\n=== 全仓 pytest(忽略已知 collection error) ===\n    \n        assert completed.returncode == 2\n>       assert payload[\"stage_route\"] == \"S2_IN_PROGRESS_UNMEASURED\"\nE       AssertionError: assert 'D1_S2_DEADLINE_UNMEASURED' == 'S2_IN_PROGRESS_UNMEASURED'\nE         \nE         - S2_IN_PROGRESS_UNMEASURED\nE         + D1_S2_DEADLINE_UNMEASURED\n\ntests/unit/test_m2c_status.py:290: AssertionError\n=========================== short test summary info ============================\nFAILED tests/unit/test_m2c_qb_adr_gate.py::test_exact_human_adr_and_all_frozen_bindings_authorize_qb\nFAILED tests/unit/test_m2c_qb_adr_gate.py::test_gate_constants_equal_the_committed_and_local_evidence_bytes\nFAILED tests/unit/test_m2c_qwen_adr0026_contract_smoke_report.py::test_adr0026_qwen_contract_report_binds_current_bytes_and_stays_blocked\nFAILED tests/unit/test_m2c_s3_collection_plan.py::test_s3_plan_is_deterministic_outcome_blind_and_full_coverage_bound\nFAILED tests/unit/test_m2c_s3_collection_plan.py::test_s3_plan_hashes_every_source_and_keeps_path_blocked_raw\nFAILED tests/unit/test_m2c_s3_collection_plan.py::test_s3_plan_pins_frozen_runtime_hashes\nFAILED tests/unit/test_m2c_s3_public_category_vocabulary.py::test_current_s3_artifact_replays_official_public_projection\nFAILED tests/unit/test_m2c_s4_entry_gate.py::test_no_physical_receipt_blocks_evaluation_but_not_adr_training\nFAILED tests/unit/test_m2c_s4_entry_gate.py::test_arbitrary_hash_files_cannot_pass_even_if_runner_binding_is_patched\nFAILED tests/unit/test_m2c_s4_entry_gate.py::test_implementation_commit_may_be_ancestor_but_must_exist\nFAILED tests/unit/test_m2c_s4_qwen_adr0026_training.py::test_adr0026_two_arm_training_report_is_source_bound_and_honest\nFAILED tests/unit/test_m2c_status.py::test_status_fails_closed_when_terminal_evidence_is_missing\nFAILED tests/unit/test_m2c_status.py::test_status_rejects_synthetic_terminal_summaries\nFAILED tests/unit/test_m2c_status.py::test_status_rejects_q_a_summary_when_per_key_outcomes_disagree\n14 failed, 1933 passed, 5 skipped in 225.51s (0:03:45)\nShell cwd was reset to /Users/gl/tzb",
+  "tool_result_text_sha256": "7b891d2ca47e8f5b80099bd8c1490cd1097eccdd84877cca6e11f6a90ca94f1a",
+  "evidence_status_upgrade": {
+    "from": "PROJECT_REPORTED / NOT_IN_PACKAGE_EVIDENCE / no raw artifact",
+    "to": "TRANSCRIPT_ATTESTED — the command and result are recorded in the producing session transcript with line, uuid and timestamp",
+    "what_is_still_NOT_established": [
+      "This is not a captured stdout artifact: the command piped through `tail -25`, so only the tail of the output was ever recorded.",
+      "The transcript is external to the delivery package; a recipient must be given this recovery record to check it.",
+      "Reproducibility is still not claimed in either direction — one recorded execution on 2026-08-31, one on 2026-09-01."
+    ]
+  },
+  "correction_to_prior_statements": "Every earlier statement in this package that the 2026-08-31 figure has 'no raw artifact' was accurate about the PACKAGE and misleading about the RECORD. The honest earlier form should have been 'not captured into this package, and we have not searched the transcript'. We had in fact written exactly that caution about this very figure and then did not act on it until prompted.",
+  "recovered_failed_nodeids": {
+    "count": 14,
+    "file": "recovered-20260831-failed-nodeids.txt",
+    "sha256": "d0ef0d57d9192c23e5dfd78fa37d00a184b1848d8236ed48058227ceba731c7b",
+    "all_in_test_m2c_prefix": true,
+    "note": "The tail -25 window happened to contain the complete short test summary, so all 14 failed node ids were recorded. This means the 2026-08-31 failure DISTRIBUTION is also transcript-attested, not merely project-reported. It does NOT mean the full stdout was captured."
+  },
+  "environment_assignments": {
+    "PYTHONPATH": "src"
+  },
+  "recorded_shell_command_note": "The recovered text is a SHELL COMMAND, not process argv. PYTHONPATH=src is an environment assignment and never enters sys.argv. `V` was a shell variable resolved to .venv/bin/python. The actual process argv was NOT captured.",
+  "argv_status": "NOT_ESTABLISHED",
+  "exit_code_status": {
+    "status": "NOT_ESTABLISHED",
+    "reason": "The command ends in `2>&1 | tail -25`. With no `set -o pipefail` and no PIPESTATUS inspection, the shell reports tail's status, not pytest's.",
+    "also_not_a_substitute": "The Bash tool's own is_error=false does NOT stand in for pytest's return code either — it reflects the tool invocation, not the piped process. Only the RESULT TEXT may be bound to this run; no exit code may."
+  },
+  "command_fidelity_note": "This is the verbatim value of the tool_use input.command field, taken with no substitution. An earlier draft applied a backslash-n replacement while extracting, which made the stored text differ from the transcript byte-for-byte. A provenance artifact that alters what it quotes is worse than none.",
+  "command_sha256": "67efb50001ee7816b8a728230e83ed0a6d7fa8690cdd3bcae0b5f08e047c2973",
+  "event_byte_digests": {
+    "tool_use_line_15075": {
+      "sha256": "11b893ae86adfc6c69dce8c52d186f33158392616a9d0b4738e0f3ed61a62e19",
+      "bytes": 1787
+    },
+    "tool_result_line_15076": {
+      "sha256": "9572458ea4f97d0e5b2749c371a99c51119a64a36cec5fd9ddee367bff88b653",
+      "bytes": 5086
+    },
+    "note": "These are digests of the raw JSONL lines as stored, which do not change when the session appends further events."
+  }
+}

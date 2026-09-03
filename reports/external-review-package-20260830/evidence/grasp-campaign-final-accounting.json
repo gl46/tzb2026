@@ -1,0 +1,368 @@
+{
+  "aggregate_accounting": {
+    "descriptive_result": "B0_VALID_ACCOUNTED_OUTCOME_SUCCESSES_0_OF_5",
+    "formal_r3_orphan_closures_present": 0,
+    "formal_terminals_present": 3,
+    "legacy_terminalized_failures": 3,
+    "ordinal04_valid_measurement_failures_with_missing_formal_closure": 1,
+    "physical_raw_records_present": 4,
+    "retrospective_recovery03_failures": 1,
+    "unconsumed_ordinals": 7,
+    "valid_accounted_b0_failures": 5,
+    "valid_accounted_b0_outcomes": 5,
+    "valid_accounted_b0_successes": 0
+  },
+  "campaign": {
+    "deadline_extension_received": false,
+    "deadline_local": "2026-08-30T12:00:00+08:00",
+    "official_disposition": "HALTED_WITH_SEVEN_PHYSICAL_ORDINALS_UNCONSUMED",
+    "official_disposition_authority": "M2C_STATE.md §5 coordinator entry dated 2026-08-30 12:2x",
+    "official_halt_report": {
+      "mode": "0400",
+      "path": "/private/tmp/m2c-r13239-r3-honest-halted-campaign-report-v1.json",
+      "sha256": "84ceadfc64c5852b384db455134c4cf6d5dc858823f2698c316cb37d5fcda134",
+      "size_bytes": 5031
+    },
+    "prespecified_ordinal_count": 12
+  },
+  "content_sha256": "9e7d6f2ecbf5e321ed86321564f3b0d4b980ead4536c09e63f97198458992079",
+  "generated_at_local": "2026-08-30T12:35:12+08:00",
+  "generated_at_ns": 1788064512363384000,
+  "local_r3_repair_evidence": {
+    "candidate_path_identities": [
+      {
+        "mode": "0755",
+        "path": "/private/tmp/m2c-r13239-successor-implementation-51de5c9-v1/scripts/m2c/audit_v5_existence_successor_campaign_v2.py",
+        "repository_relative_path": "scripts/m2c/audit_v5_existence_successor_campaign_v2.py",
+        "sha256": "c1a4ecde76b2fecac3330cdd20dbf7c32b24c928d511c87e007fb3eae991f58b",
+        "size_bytes": 87364
+      },
+      {
+        "mode": "0755",
+        "path": "/private/tmp/m2c-r13239-successor-implementation-51de5c9-v1/scripts/m2c/close_v5_existence_successor_native_orphan_v3.py",
+        "repository_relative_path": "scripts/m2c/close_v5_existence_successor_native_orphan_v3.py",
+        "sha256": "57e624e08155cb5ee3e61ad667043fcf75140f6e8c0cc21c4b486ecf36aa1045",
+        "size_bytes": 3471
+      },
+      {
+        "mode": "0755",
+        "path": "/private/tmp/m2c-r13239-successor-implementation-51de5c9-v1/scripts/m2c/preflight_v5_existence_successor_authorization_v2.py",
+        "repository_relative_path": "scripts/m2c/preflight_v5_existence_successor_authorization_v2.py",
+        "sha256": "f6d35382be9f8c8794d3557adff7f3e25770acb0d35c1f96bb06a1f4847162c9",
+        "size_bytes": 59775
+      },
+      {
+        "mode": "0755",
+        "path": "/private/tmp/m2c-r13239-successor-implementation-51de5c9-v1/scripts/m2c/run_v5_existence_successor_probe_v2.py",
+        "repository_relative_path": "scripts/m2c/run_v5_existence_successor_probe_v2.py",
+        "sha256": "fbd75b30b9d5882852391c8923a06fb1065d49befd4d40646bcc297fa7672682",
+        "size_bytes": 55600
+      },
+      {
+        "mode": "0644",
+        "path": "/private/tmp/m2c-r13239-successor-implementation-51de5c9-v1/src/xh_agent/policy/qrm_lite/v5_existence_successor_campaign_v2.py",
+        "repository_relative_path": "src/xh_agent/policy/qrm_lite/v5_existence_successor_campaign_v2.py",
+        "sha256": "ab23374cf3ff268d97f00a18b54183ae175983e417a48e05153af8340bec4322",
+        "size_bytes": 397535
+      },
+      {
+        "mode": "0644",
+        "path": "/private/tmp/m2c-r13239-successor-implementation-51de5c9-v1/tests/unit/test_m2c_v5_existence_successor_campaign_v2.py",
+        "repository_relative_path": "tests/unit/test_m2c_v5_existence_successor_campaign_v2.py",
+        "sha256": "e99ab592aba09d8836efd737b27bb1e296ee6564e10b18e8bf17514b0a0662cf",
+        "size_bytes": 427039
+      }
+    ],
+    "candidate_root": "/private/tmp/m2c-r13239-successor-implementation-51de5c9-v1",
+    "changes_official_campaign_outcome": false,
+    "detached_invoker_local_dynamic_safety": {
+      "container_invocations": 0,
+      "formal_mutations": 0,
+      "ordinal_consumptions": 0,
+      "real_ssh_invocations": 0,
+      "redispatches": 0,
+      "signal_api_used": false,
+      "status": "PASS"
+    },
+    "disposition": "PRESERVED_LOCAL_UNCOMMITTED_REPAIR_DESIGN_EVIDENCE_ONLY",
+    "git_status_porcelain": [
+      " M scripts/m2c/audit_v5_existence_successor_campaign_v2.py",
+      " M scripts/m2c/preflight_v5_existence_successor_authorization_v2.py",
+      " M scripts/m2c/run_v5_existence_successor_probe_v2.py",
+      " M src/xh_agent/policy/qrm_lite/v5_existence_successor_campaign_v2.py",
+      " M tests/unit/test_m2c_v5_existence_successor_campaign_v2.py",
+      "?? scripts/m2c/close_v5_existence_successor_native_orphan_v3.py"
+    ],
+    "governed_or_formal_execution": "NEVER_PERFORMED",
+    "head_commit": "d8a0b777d1b5aa77c4ed79e4490184396688c4ef",
+    "head_tree": "3b17b4ebedab6350c11cb76ec4638baffc972cf2",
+    "module_test_gate": {
+      "authority": "M2C_STATE.md §5 entry R3 H″ final full-module/static gates",
+      "failed": 0,
+      "passed": 326,
+      "status": "PASS"
+    },
+    "static_gates": {
+      "authority": "M2C_STATE.md §5 entry R3 H″ final full-module/static gates",
+      "candidate_path_count": 6,
+      "git_diff_check": "PASS",
+      "pinned_python_compile": "PASS",
+      "ruff_0_16_5": "PASS"
+    }
+  },
+  "open_governance_item": {
+    "frozen_design_chain_label": "H-double-prime to S-double-prime to P-double-prime with regenerated stage/prereg artifacts.",
+    "future_restart_requirement": "A new user instruction and fresh governed design must resolve prereg/stage/update-chain semantics before any formal restart.",
+    "gap": "The local candidate has no R3 preregistration/stage schema or builder and the R2 committed-prereg loader requires update-chain semantics incompatible with silently landing H-double-prime above P-prime.",
+    "official_halt_disposition": "No S-double-prime or P-double-prime artifact was fabricated; no halted-context governance landing is needed.",
+    "runtime_design_fact": "The local R3 runtime adopts the committed R2 P-prime preregistration.",
+    "status": "OPEN_UNRESOLVED_DOCUMENTED_NO_FABRICATION"
+  },
+  "ordinal04_truthfulness": {
+    "classification": "DELAYED_CONTROL_CHANNEL_CANCELLATION_POST_MEASUREMENT_ORPHAN",
+    "committed_measurement_validator": "PASS_READ_ONLY",
+    "formal_r3_closure_executed": false,
+    "missing_artifacts_fabricated": false,
+    "retry_or_replacement_performed": false,
+    "task_outcome": "FAILURE",
+    "task_success": false,
+    "terminal_reconstructed": false
+  },
+  "ordinal_accounting": [
+    {
+      "accounting_status": "LEGACY_TERMINALIZED_FAILURE",
+      "authority": "P_DOUBLE_PRIME_TERMINAL",
+      "campaign_outcome_status": "VALID_ACCOUNTED_B0_FAILURE",
+      "claim_status": "PRESENT",
+      "consumption_status": "CONSUMED",
+      "ordinal": 0,
+      "physical_raw_record_status": "PRESENT_VALIDATED",
+      "task_outcome": "FAILURE",
+      "task_success": false,
+      "terminal_status": "PRESENT"
+    },
+    {
+      "accounting_status": "LEGACY_TERMINALIZED_FAILURE",
+      "authority": "P_DOUBLE_PRIME_TERMINAL",
+      "campaign_outcome_status": "VALID_ACCOUNTED_B0_FAILURE",
+      "claim_status": "PRESENT",
+      "consumption_status": "CONSUMED",
+      "ordinal": 1,
+      "physical_raw_record_status": "PRESENT_VALIDATED",
+      "task_outcome": "FAILURE",
+      "task_success": false,
+      "terminal_status": "PRESENT"
+    },
+    {
+      "accounting_status": "LEGACY_TERMINALIZED_FAILURE",
+      "authority": "P_DOUBLE_PRIME_TERMINAL",
+      "campaign_outcome_status": "VALID_ACCOUNTED_B0_FAILURE",
+      "claim_status": "PRESENT",
+      "consumption_status": "CONSUMED",
+      "ordinal": 2,
+      "physical_raw_record_status": "PRESENT_VALIDATED",
+      "task_outcome": "FAILURE",
+      "task_success": false,
+      "terminal_status": "PRESENT"
+    },
+    {
+      "accounting_status": "CONSUMED_WITH_ZERO_CONSUMPTION_RETROSPECTIVE_RECOVERY_FAILURE",
+      "authority": "P_DOUBLE_PRIME_HISTORY_PLUS_SUCCESSOR_RECOVERY",
+      "campaign_outcome_status": "VALID_ACCOUNTED_B0_FAILURE",
+      "claim_status": "PRESENT",
+      "consumption_status": "CONSUMED",
+      "ordinal": 3,
+      "physical_raw_record_status": "ABSENT_NOT_EXPECTED_FOR_POSE_GATE_REJECTION",
+      "recovery_status": "POSE_GATE_REJECTED",
+      "task_outcome": "FAILURE",
+      "task_success": false,
+      "terminal_status": "ABSENT_MUST_NOT_BE_FABRICATED"
+    },
+    {
+      "absence_reason": "ORPHANED_BY_CONTROL_CHANNEL_CANCELLATION_POST_MEASUREMENT",
+      "accounting_status": "VALID_MEASUREMENT_FAILURE_WITH_CONTROL_CHANNEL_TRUNCATED_ACCOUNTING",
+      "authority": "R2_NATIVE_ORPHAN_MEASUREMENT",
+      "campaign_outcome_status": "VALID_ACCOUNTED_B0_FAILURE",
+      "claim_status": "PRESENT_ORPHAN",
+      "consumption_status": "CONSUMED",
+      "formal_orphan_closure_status": "ABSENT_R3_DESIGNED_AND_LOCALLY_TESTED_BUT_NEVER_FORMALLY_PUBLISHED",
+      "measurement_outcome_variant": "NORMAL_REGRASP",
+      "measurement_validator": "PASS",
+      "missing_host_artifacts_not_fabricated": [
+        "container-receipt.json",
+        "container-id.txt",
+        "console.log",
+        "terminal-04.json"
+      ],
+      "ordinal": 4,
+      "physical_raw_record_status": "PRESENT_VALIDATED",
+      "task_outcome": "FAILURE",
+      "task_success": false,
+      "terminal_status": "ABSENT_AND_MUST_NOT_BE_FABRICATED"
+    },
+    {
+      "accounting_status": "UNCONSUMED_OFFICIAL_HALT_SUFFIX",
+      "authority": null,
+      "campaign_outcome_status": "NO_OUTCOME",
+      "claim_status": "ABSENT",
+      "consumption_status": "UNCONSUMED",
+      "ordinal": 5,
+      "physical_raw_record_status": "ABSENT",
+      "task_outcome": null,
+      "task_success": null,
+      "terminal_status": "ABSENT"
+    },
+    {
+      "accounting_status": "UNCONSUMED_OFFICIAL_HALT_SUFFIX",
+      "authority": null,
+      "campaign_outcome_status": "NO_OUTCOME",
+      "claim_status": "ABSENT",
+      "consumption_status": "UNCONSUMED",
+      "ordinal": 6,
+      "physical_raw_record_status": "ABSENT",
+      "task_outcome": null,
+      "task_success": null,
+      "terminal_status": "ABSENT"
+    },
+    {
+      "accounting_status": "UNCONSUMED_OFFICIAL_HALT_SUFFIX",
+      "authority": null,
+      "campaign_outcome_status": "NO_OUTCOME",
+      "claim_status": "ABSENT",
+      "consumption_status": "UNCONSUMED",
+      "ordinal": 7,
+      "physical_raw_record_status": "ABSENT",
+      "task_outcome": null,
+      "task_success": null,
+      "terminal_status": "ABSENT"
+    },
+    {
+      "accounting_status": "UNCONSUMED_OFFICIAL_HALT_SUFFIX",
+      "authority": null,
+      "campaign_outcome_status": "NO_OUTCOME",
+      "claim_status": "ABSENT",
+      "consumption_status": "UNCONSUMED",
+      "ordinal": 8,
+      "physical_raw_record_status": "ABSENT",
+      "task_outcome": null,
+      "task_success": null,
+      "terminal_status": "ABSENT"
+    },
+    {
+      "accounting_status": "UNCONSUMED_OFFICIAL_HALT_SUFFIX",
+      "authority": null,
+      "campaign_outcome_status": "NO_OUTCOME",
+      "claim_status": "ABSENT",
+      "consumption_status": "UNCONSUMED",
+      "ordinal": 9,
+      "physical_raw_record_status": "ABSENT",
+      "task_outcome": null,
+      "task_success": null,
+      "terminal_status": "ABSENT"
+    },
+    {
+      "accounting_status": "UNCONSUMED_OFFICIAL_HALT_SUFFIX",
+      "authority": null,
+      "campaign_outcome_status": "NO_OUTCOME",
+      "claim_status": "ABSENT",
+      "consumption_status": "UNCONSUMED",
+      "ordinal": 10,
+      "physical_raw_record_status": "ABSENT",
+      "task_outcome": null,
+      "task_success": null,
+      "terminal_status": "ABSENT"
+    },
+    {
+      "accounting_status": "UNCONSUMED_OFFICIAL_HALT_SUFFIX",
+      "authority": null,
+      "campaign_outcome_status": "NO_OUTCOME",
+      "claim_status": "ABSENT",
+      "consumption_status": "UNCONSUMED",
+      "ordinal": 11,
+      "physical_raw_record_status": "ABSENT",
+      "task_outcome": null,
+      "task_success": null,
+      "terminal_status": "ABSENT"
+    }
+  ],
+  "preserved_supporting_evidence": [
+    {
+      "mode": "0400",
+      "path": "/private/tmp/m2c-r13239-r3-honest-halted-campaign-report-v1.json",
+      "sha256": "84ceadfc64c5852b384db455134c4cf6d5dc858823f2698c316cb37d5fcda134",
+      "size_bytes": 5031
+    },
+    {
+      "mode": "0400",
+      "path": "/private/tmp/m2c-r13239-r3-honest-halted-campaign-report-template-v1.json",
+      "sha256": "a228878a5d754af44913a954d597c574ac484a0d5e6b8ec1baf80ab4e79be855",
+      "size_bytes": 2491
+    },
+    {
+      "mode": "0400",
+      "path": "/private/tmp/m2c-r13239-r3-native-tail-orphan-minimal-diff-design-v1.json",
+      "sha256": "2f018ecc626c8f2754ac86314e5fce995c4dd912676dbd7cabc9ea595b882785",
+      "size_bytes": 8867
+    },
+    {
+      "mode": "0400",
+      "path": "/private/tmp/m2c-r13239-r2-successor-ordinal04-halt-triage-v1.json",
+      "sha256": "bebb5c309e83f6207768f9b777a06102c12c5198d2e050581662c138db8ad3d5",
+      "size_bytes": 24291
+    },
+    {
+      "mode": "0644",
+      "path": "/private/tmp/m2c-r13239-r3-ast-symbol-diff-v1.json",
+      "sha256": "798a3e9638831892be766558a5ffd4d6b466754af0fdbb92f6baf72e03b02846",
+      "size_bytes": 50286
+    },
+    {
+      "mode": "0644",
+      "path": "/private/tmp/m2c-r13239-r3-tracked-diff-u0-v1.patch",
+      "sha256": "bd999e9b0efb6ee57f7f7181a22b4295cc357fe22a016a2e08658d64fa0c3e43",
+      "size_bytes": 998425
+    },
+    {
+      "mode": "0700",
+      "path": "/private/tmp/m2c-r13239-r3-successor-detached-physical-invoker-v1.py",
+      "sha256": "1cbbbd35333bf9d9eb91a527cd555e2e0d60dc7d12c20a8a64b6bb526ffec694",
+      "size_bytes": 52721
+    },
+    {
+      "mode": "0700",
+      "path": "/private/tmp/m2c-r13239-r3-detached-invoker-local-lifecycle-test-v1.py",
+      "sha256": "467e6a2f81afabe765095487fa4c4754a66a0e655a9762714e361ca418a782c6",
+      "size_bytes": 26770
+    },
+    {
+      "mode": "0644",
+      "path": "/private/tmp/m2c-r13239-r3-invoker-self-check-v3.json",
+      "sha256": "325b698fb9593b651b0526da060b4a7ae76280288defba461fcc63e2ee538aec",
+      "size_bytes": 830
+    },
+    {
+      "mode": "0644",
+      "path": "/private/tmp/m2c-r13239-r3-invoker-local-lifecycle-test-result-v4.json",
+      "sha256": "397a3c79d89b3777754db6418e84be1b7a38c98c040fa14ddd177ce66ba29371",
+      "size_bytes": 2518
+    }
+  ],
+  "purpose": "PPT_AND_REPORT_CITABLE_CAMPAIGN_ACCOUNTING",
+  "schema_version": "M2CR13239CampaignFinalAccountingSummaryV1",
+  "statistical_interpretation": {
+    "allowed_descriptive_statement": "Five valid accounted B0 outcomes were failures; seven prescribed ordinals were never consumed.",
+    "formal_12_outcome_judgment": null,
+    "prohibited_overclaim": "Do not present 0/5 as the prespecified 12-outcome hypothesis-test result or as a completed 12-shot campaign.",
+    "reason": "PRESPECIFIED_12_OUTCOME_DENOMINATOR_INCOMPLETE_SEVEN_ORDINALS_UNCONSUMED",
+    "status": "NO_FORMAL_STATISTICAL_JUDGMENT"
+  },
+  "status": "OFFICIAL_HONEST_HALT_FINAL_ACCOUNTING",
+  "stop_line_accounting": {
+    "commit_after_official_halt": false,
+    "formal_campaign_audit_executed": false,
+    "formal_mutation_after_official_halt": false,
+    "ordinal05_through_11_consumed": false,
+    "push_after_official_halt": false,
+    "r3_governance_landing_performed": false
+  }
+}

@@ -1,0 +1,7 @@
+# command: find . -newermt '2026-08-31 17:00' -type f -not -path './.git/*' -not -path '*/__pycache__/*' -not -path './.venv/*' -not -path './artifacts/*'
+# cwd: /Users/gl/projects/xh-202607-qwen-brain
+# captured_at_local: 2026-09-01 02:13:17 +0800
+# ---
+./QWEN_BRAIN_VNEXT_VLA_INTEGRATION_SPEC.md
+./.pytest_cache/v/cache/nodeids
+./.pytest_cache/v/cache/lastfailed

@@ -1,0 +1,53 @@
+{
+  "baseline_or_candidate_answers_read": false,
+  "components_sha256": "86ecc1193b53c59cce8d3f59877eb5c9434110baa3f9fc9d35940c2584cdcf74",
+  "config_sha256": "b00fa1781c9cfffa1a852957ad81e0ab428d42cae00e3bf0641516a449b418b2",
+  "counterfactual_pair_count": 39,
+  "cross_split_text_comparison_count": 95,
+  "dataset_report_sha256": "94e6aafd8ca50c0d8fa4484982b160bb3b023c31448948feb50c07db180ad349",
+  "dataset_sha256": "749316f5adf4f2db3df4a5a9c76bc5604d5060f80cb899c222609ae4e4003f3a",
+  "denylist_sha256": "0b0fce612d9fe6b85c99f307ca70328ca567c3726ea1eca6e0517afbc16b7893",
+  "error_count": 0,
+  "error_reason_counts": {},
+  "errors": [],
+  "exact_cross_split_normalized_hash_collisions": 0,
+  "exact_generated_canonical_hash_collisions": 0,
+  "family_counts": {
+    "CONTRACT_REFUSAL": 165,
+    "RECOVERY_EXHAUSTION_REPLAN": 162,
+    "REGISTERED_SYMBOLIC_RELOCATION": 168,
+    "VISUAL_CONDITION_SELECTION": 78
+  },
+  "max_cross_split_text_jaccard": 0.06976744186046512,
+  "max_generated_canonical_text_jaccard": 0.07462686567164178,
+  "max_rows_per_source": 2,
+  "process_role": "INDEPENDENT_GENERATED_DATASET_AUDITOR",
+  "projection_sha256": "c86068cfbc7de89c33e8a73a3c7cd0afef20cccdde66a495b12eebdd62544512",
+  "row_count": 573,
+  "schema_version": "QwenBrainS5GeneratedDatasetAuditV4",
+  "split_counts": {
+    "DEV": 78,
+    "MANUAL_BLIND": 45,
+    "SYNTHETIC_TEST": 22,
+    "TRAIN": 428
+  },
+  "status": "PASS",
+  "template_registry_sha256": "3dd3208566f63da10f2ef8569db12c7e71aafd479d07814ffdeb8420f6e9a728",
+  "text_similarity_0_6_to_0_9_count": 0,
+  "training_projection": {
+    "epochs": 2,
+    "fixed_overhead_seconds": 1215.1444481429644,
+    "full_accumulation_groups": 53,
+    "gradient_accumulation": 16,
+    "microsteps": 856,
+    "optimizer_overhead_included": false,
+    "optimizer_updates": 54,
+    "partial_final_group_size": 8,
+    "projected_hours_before_optimizer_overhead": 0.8376755856094469,
+    "projected_seconds_before_optimizer_overhead": 3015.6321081940087,
+    "runtime_multiplier": 1.15,
+    "steady_seconds_per_microstep": 1.8290203779470176,
+    "train_rows": 428
+  },
+  "unique_source_count": 495
+}

@@ -1,0 +1,26 @@
+{
+  "compute_processes": [
+    {
+      "pid": 3239742,
+      "process_name": "python",
+      "used_memory_mib": 6960
+    }
+  ],
+  "gpu": {
+    "index": 0,
+    "memory_free_mib": 74171,
+    "memory_total_mib": 81920,
+    "memory_used_mib": 6983,
+    "name": "NVIDIA A100-SXM4-80GB",
+    "utilization_gpu_percent": 23
+  },
+  "policy": {
+    "external_processes_recorded_not_stopped": true,
+    "immediate_abort_reserved_gib": 74,
+    "max_allocated_gib": 70,
+    "max_reserved_gib": 72,
+    "memory_allocation_fail_closed": true
+  },
+  "run_identity": "two-epoch-node2-v1",
+  "schema_version": "QwenBrainS5Node2GpuProcessEvidenceV1"
+}

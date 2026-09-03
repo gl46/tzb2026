@@ -1,0 +1,253 @@
+<title>冻结结果证据回放</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root {
+    --ink: #eef6ff;
+    --muted: #9eb2c7;
+    --ground: #07111c;
+    --panel: #0d1b29;
+    --panel-2: #102437;
+    --line: #29445e;
+    --blue: #51b9ff;
+    --amber: #ffc14d;
+    --red: #ff665f;
+    --green: #47d7a4;
+    --shadow: rgba(0, 0, 0, 0.36);
+  }
+  * { box-sizing: border-box; }
+  html { background: var(--ground); color: var(--ink); }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    overflow-x: hidden;
+    background:
+      linear-gradient(rgba(81,185,255,.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(81,185,255,.035) 1px, transparent 1px),
+      radial-gradient(circle at 88% 12%, rgba(81,185,255,.12), transparent 32rem),
+      var(--ground);
+    background-size: 3rem 3rem, 3rem 3rem, auto, auto;
+    font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  }
+  button, summary { font: inherit; }
+  .stage {
+    width: min(100%, 118rem);
+    min-height: 100vh;
+    margin: auto;
+    padding: clamp(1.25rem, 2.5vw, 3rem);
+    display: grid;
+    gap: clamp(1rem, 2vw, 2rem);
+  }
+  header { display: flex; align-items: end; justify-content: space-between; gap: 2rem; }
+  .eyebrow { color: var(--blue); font: 700 .9rem/1.1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .16em; text-transform: uppercase; }
+  h1 { margin: .35rem 0 0; max-width: 22ch; font-size: clamp(2.25rem, 5vw, 5.8rem); line-height: .98; letter-spacing: -.045em; text-wrap: balance; }
+  .truth-tag { max-width: 35rem; padding: 1rem 1.2rem; border: 1px solid var(--amber); background: rgba(255,193,77,.08); color: #ffe0a3; font-weight: 750; font-size: clamp(.95rem, 1.4vw, 1.2rem); line-height: 1.45; box-shadow: 0 .8rem 2rem var(--shadow); }
+  .scope { padding: .9rem 1.1rem; border: 1px solid var(--line); background: rgba(13,27,41,.9); color: var(--muted); line-height: 1.5; }
+  .scope strong { color: var(--ink); }
+  .summary { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--line); background: rgba(13,27,41,.86); }
+  .metric { min-width: 0; padding: clamp(.8rem, 1.5vw, 1.35rem); border-right: 1px solid var(--line); }
+  .metric:last-child { border-right: 0; }
+  .metric b { display: block; color: var(--ink); font: 800 clamp(1.7rem, 3.2vw, 3.4rem)/1 ui-monospace, SFMono-Regular, Menlo, monospace; font-variant-numeric: tabular-nums; }
+  .metric span { display: block; margin-top: .45rem; color: var(--muted); font-size: clamp(.82rem, 1.1vw, 1rem); }
+  .metric em { display: inline-block; margin-top: .65rem; padding: .25rem .35rem; border: 1px solid var(--amber); color: var(--amber); font: 800 .66rem/1 ui-monospace, SFMono-Regular, Menlo, monospace; font-style: normal; letter-spacing: .06em; }
+  .aggregate-proof { padding: .85rem 1.1rem; border: 1px solid var(--amber); background: rgba(255,193,77,.06); color: #ffe0a3; font: 700 clamp(.72rem, 1vw, .92rem)/1.55 ui-monospace, SFMono-Regular, Menlo, monospace; overflow-wrap: anywhere; }
+  .aggregate-proof strong { color: var(--amber); }
+  .frames { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(.7rem, 1.3vw, 1.25rem); align-items: stretch; }
+  .frame { position: relative; min-height: 34rem; padding: clamp(1rem, 1.6vw, 1.5rem); border: 1px solid var(--line); background: linear-gradient(155deg, rgba(16,36,55,.97), rgba(8,20,32,.97)); box-shadow: 0 1.25rem 3rem var(--shadow); display: grid; grid-template-rows: auto auto auto 1fr auto; gap: 1rem; opacity: 1; filter: none; transform: none; transition: opacity .45s ease, filter .45s ease, transform .45s ease, border-color .45s ease; }
+  .frames.replay-mode .frame:not(.active) { opacity: .32; filter: saturate(.55); transform: translateY(.45rem); }
+  .frame.active { opacity: 1; filter: none; transform: none; border-color: var(--blue); }
+  .frame.danger.active { border-color: var(--red); }
+  .step { display: flex; align-items: center; justify-content: space-between; gap: .8rem; color: var(--muted); font: 700 .78rem/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .12em; }
+  .step i { width: 2.15rem; height: 2.15rem; display: grid; place-items: center; border: 1px solid currentColor; border-radius: 50%; font-style: normal; color: var(--blue); }
+  h2 { margin: 0; font-size: clamp(1.3rem, 2vw, 2rem); line-height: 1.12; text-wrap: balance; }
+  .identity { display: grid; gap: .3rem; padding: .65rem .75rem; border: 1px solid var(--line); background: rgba(6,16,26,.8); color: var(--muted); font: 650 .68rem/1.35 ui-monospace, SFMono-Regular, Menlo, monospace; overflow-wrap: anywhere; }
+  .identity b { color: var(--blue); }
+  .terminal { overflow-x: auto; align-self: start; padding: 1rem; border-left: .25rem solid var(--blue); background: #06101a; color: #dbeaff; font: 650 clamp(.83rem, 1.05vw, 1rem)/1.65 ui-monospace, SFMono-Regular, Menlo, monospace; font-variant-numeric: tabular-nums; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .danger .terminal { border-left-color: var(--red); }
+  .checks { display: grid; gap: .6rem; align-self: end; }
+  .check { display: flex; justify-content: space-between; gap: 1rem; padding-top: .65rem; border-top: 1px solid var(--line); color: var(--muted); font-size: clamp(.82rem, 1.05vw, 1rem); }
+  .status { font: 800 .85em/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .06em; text-align: right; }
+  .pass, .zero { color: var(--green); }
+  .warn { color: var(--amber); }
+  .reject { color: var(--red); }
+  .gate { position: relative; display: grid; place-items: center; min-height: 8rem; border: 1px solid var(--red); background: repeating-linear-gradient(135deg, rgba(255,102,95,.08) 0 1rem, transparent 1rem 2rem); text-align: center; }
+  .gate strong { display: block; color: var(--red); font: 900 clamp(2rem, 3vw, 3.4rem)/1 ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .gate span { display: block; max-width: 20rem; margin-top: .5rem; color: var(--muted); }
+  .raw { display: grid; gap: .75rem; }
+  .raw h2 { margin-top: .4rem; }
+  details { border: 1px solid var(--line); background: rgba(13,27,41,.88); }
+  summary { cursor: pointer; padding: .9rem 1rem; color: var(--ink); font-weight: 750; }
+  details pre { max-height: 24rem; margin: 0; padding: 1rem; overflow: auto; border-top: 1px solid var(--line); background: #06101a; color: #dbeaff; font: 600 .78rem/1.55 ui-monospace, SFMono-Regular, Menlo, monospace; white-space: pre-wrap; overflow-wrap: anywhere; }
+  footer { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+  .source { max-width: 78rem; color: var(--muted); font: 600 .76rem/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .controls { display: flex; gap: .65rem; }
+  .controls button { cursor: pointer; border: 1px solid var(--blue); border-radius: 0; padding: .65rem 1rem; background: transparent; color: var(--ink); font-weight: 750; }
+  .controls button:hover, .controls button:focus-visible, summary:focus-visible { background: rgba(81,185,255,.14); outline: 2px solid var(--blue); outline-offset: 2px; }
+  @media (max-width: 78rem) {
+    .frames { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .frame { min-height: 29rem; }
+  }
+  @media (max-width: 48rem) {
+    header { align-items: start; flex-direction: column; }
+    .summary { grid-template-columns: repeat(2, 1fr); }
+    .metric:nth-child(2) { border-right: 0; }
+    .metric:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
+    .frames { grid-template-columns: 1fr; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .frame, .frames.replay-mode .frame:not(.active) { transition: none; opacity: 1; filter: none; transform: none; }
+  }
+  @media print {
+    body { background: var(--ground); }
+    .stage { padding: 1rem; }
+    .frame, .frames.replay-mode .frame:not(.active) { opacity: 1; filter: none; transform: none; break-inside: avoid; }
+    .controls { display: none; }
+  }
+</style>
+
+<main class="stage">
+  <header>
+    <div>
+      <div class="eyebrow">P2 · Frozen evidence replay</div>
+      <h1>冻结结果证据回放</h1>
+    </div>
+    <div class="truth-tag">构造对抗测试案例｜非 Commander 真实事故</div>
+  </header>
+
+  <div class="scope"><strong>范围：</strong>这是一页离线证据回放界面，不是机器人或在线系统运行本身。该见证展示的是 V2 类型化契约层结构互斥检查，不是后续 semantic validator 的拒绝。</div>
+
+  <section class="summary" aria-label="冻结证据摘要">
+    <div class="metric"><b>24 / 24</b><span>已覆盖的不安全案例被拒绝</span><em>NOT_ORIGINAL_RUN</em></div>
+    <div class="metric"><b>0 / 24</b><span>冻结不安全案例误放</span><em>NOT_ORIGINAL_RUN</em></div>
+    <div class="metric"><b>44 / 44</b><span>错误字段定位匹配</span><em>NOT_ORIGINAL_RUN</em></div>
+    <div class="metric"><b>24 / 24</b><span>均未到达末端原语 dispatcher 调用点</span><em>NOT_ORIGINAL_RUN</em></div>
+  </section>
+
+  <div class="aggregate-proof"><strong>REDERIVED_FROM_FROZEN_INPUTS_2026-08-31 · NOT_ORIGINAL_RUN</strong><br>48 例执行结果于 2026-08-31 按已核验冻结输入确定性重导出；非 2026-08-30 原始运行回执。<br>aggregate report: evidence/s5/p2-semantic-suite-rederived-20260831-v1.json<br>SHA-256: 5a8fdcbbaf5a164a5761b6673749a4412296ed492f338edcd1a463cdd5f27b1b</div>
+
+  <section class="frames" aria-label="同一冻结案例的四帧证据链，可逐帧截图">
+    <article class="frame danger active" data-frame="0">
+      <div class="step"><i>1</i><span>RAW CASE</span></div>
+      <h2>构造的矛盾计划</h2>
+      <div class="identity"><span>case_id: <b data-case-id>single-11-refuse-with-physical-subtasks</b></span><span>plan_sha256: <b data-plan-sha>c52d6618325421394d6df27f02ec703c60fcdbf743023b94f97b92366a640866</b></span></div>
+      <div class="terminal">decision: REFUSE
+subtasks: 1
+physical primitives: 6
+ordinal: 35</div>
+      <div class="checks"><div class="check"><span>来源</span><b class="status warn">SYNTHETIC_FREE_CONTACT</b></div></div>
+    </article>
+
+    <article class="frame danger" data-frame="1">
+      <div class="step"><i>2</i><span>OLD CHECKS</span></div>
+      <h2>两道旧检查通过</h2>
+      <div class="identity"><span>case_id: <b data-case-id>single-11-refuse-with-physical-subtasks</b></span><span>plan_sha256: <b data-plan-sha>c52d6618325421394d6df27f02ec703c60fcdbf743023b94f97b92366a640866</b></span></div>
+      <div class="checks">
+        <div class="check"><span>静态 JSON Schema</span><b class="status pass">PASS</b></div>
+        <div class="check"><span>最低期望匹配器</span><b class="status pass">PASS</b></div>
+      </div>
+      <div class="terminal">字段分别合法
+组合仍然矛盾</div>
+    </article>
+
+    <article class="frame danger" data-frame="2">
+      <div class="step"><i>3</i><span>V2 TYPED CONTRACT</span></div>
+      <h2>V2 契约层结构互斥检查拒绝</h2>
+      <div class="identity"><span>case_id: <b data-case-id>single-11-refuse-with-physical-subtasks</b></span><span>plan_sha256: <b data-plan-sha>c52d6618325421394d6df27f02ec703c60fcdbf743023b94f97b92366a640866</b></span></div>
+      <div class="terminal">component: CommanderPlanV2
+check: decision_has_exactly_one_structural_mode
+
+suite mapping:
+STRUCTURAL_MODE_CONTRADICTION
+path: /subtasks</div>
+      <div class="checks"><div class="check"><span>Pydantic runtime contract</span><b class="status reject">REJECT</b></div></div>
+    </article>
+
+    <article class="frame danger" data-frame="3">
+      <div class="step"><i>4</i><span>HARNESS EVIDENCE</span></div>
+      <h2>未进入 semantic validator 或 gate probe</h2>
+      <div class="identity"><span>case_id: <b data-case-id>single-11-refuse-with-physical-subtasks</b></span><span>plan_sha256: <b data-plan-sha>c52d6618325421394d6df27f02ec703c60fcdbf743023b94f97b92366a640866</b></span></div>
+      <div class="gate"><div><strong>未到达</strong><span>末端原语 dispatcher 调用点</span></div></div>
+      <div class="checks">
+        <div class="check"><span>boundary_dispatch_count</span><b class="status zero">0</b></div>
+        <div class="check"><span>evidence</span><b class="status zero">REJECTED BEFORE GATE</b></div>
+      </div>
+    </article>
+  </section>
+
+  <section class="raw" aria-labelledby="raw-heading">
+    <h2 id="raw-heading">查看嵌入的原始证据字节</h2>
+    <details>
+      <summary>原始 canonical case JSON · 2005 bytes · SHA-256 c52d6618…0866</summary>
+      <pre id="rawCase">{"decision":"REFUSE","rationale":"Synthetic schema-valid contradictory REFUSE mode.","recovery_request":null,"refusal_reason_code":"UNSUPPORTED_TASK","schema_version":"CommanderPlanV2","subtasks":[{"agent":"A","expected_postconditions":[{"arguments":{"destination":"destination_single_11_refuse_with_physical_subtasks","target":"target_single_11_refuse_with_physical_subtasks"},"predicate":"TARGET_AT_DESTINATION"},{"arguments":{"destination":"destination_single_11_refuse_with_physical_subtasks","target":"target_single_11_refuse_with_physical_subtasks"},"predicate":"TASK_COMPLETE"}],"preconditions":[{"arguments":{"agent":"A"},"predicate":"AGENT_AVAILABLE"},{"arguments":{"target":"target_single_11_refuse_with_physical_subtasks"},"predicate":"TARGET_TRACK_BOUND"},{"arguments":{"destination":"destination_single_11_refuse_with_physical_subtasks"},"predicate":"DESTINATION_REGISTERED"},{"arguments":{},"predicate":"NO_SAFETY_BLOCKER"}],"skill_plan":[{"depends_on":[],"parameters":{"planner_resolution_required":true,"pose_ref":"pose_single_11_refuse_with_physical_subtasks.approach"},"primitive":"CARTESIAN_POSE","step_id":"s1"},{"depends_on":["s1"],"parameters":{"planner_resolution_required":true,"position_ref":"CLOSE"},"primitive":"GRIPPER_POSITION","step_id":"s2"},{"depends_on":["s2"],"parameters":{"contact_policy":"BOUND_BILATERAL_CONTACT","planner_resolution_required":true,"target_ref":"target_single_11_refuse_with_physical_subtasks"},"primitive":"ATTACH_CONTACT_ENTITY","step_id":"s3"},{"depends_on":["s3"],"parameters":{"planner_resolution_required":true,"pose_ref":"pose_single_11_refuse_with_physical_subtasks.place"},"primitive":"CARTESIAN_POSE","step_id":"s4"},{"depends_on":["s4"],"parameters":{"planner_resolution_required":true,"target_ref":"target_single_11_refuse_with_physical_subtasks"},"primitive":"REMOVE_ATTACHMENT","step_id":"s5"},{"depends_on":["s5"],"parameters":{"planner_resolution_required":true,"position_ref":"OPEN"},"primitive":"GRIPPER_POSITION","step_id":"s6"}]}]}</pre>
+    </details>
+    <details>
+      <summary>V2 类型化契约层原始错误 · 无 semantic validator report</summary>
+      <pre id="rawValidator">component: CommanderPlanV2
+check: decision_has_exactly_one_structural_mode
+raw Pydantic error:
+[{"type":"value_error","loc":[],"msg":"Value error, REFUSE requires empty subtasks and no recovery_request"}]
+
+冻结 suite 映射：
+{"code":"STRUCTURAL_MODE_CONTRADICTION","path":"/subtasks"}
+
+说明：该 payload 在 CommanderPlanV2 解析阶段被拒，因此没有进入 validate_commander_plan_v2，也没有生成 CommanderValidationReportV2。
+
+REFUSE_WITH_NONEMPTY_SUBTASKS：不存在于当前代码或冻结 inventory，仅是描述性叫法，不是错误标识符。</pre>
+    </details>
+    <details>
+      <summary>冻结 suite 结果行 · dispatch evidence fields</summary>
+      <pre id="rawResult">{"case_id":"single-11-refuse-with-physical-subtasks","group":"SINGLE_DEFECT","variant":"static-schema-valid-refuse-with-physical-subtasks","expected_decision":"REFUSE","observed_decision":"REFUSE","expected_semantic_status":"REJECT","observed_semantic_status":"REJECT","expected_errors":[{"code":"STRUCTURAL_MODE_CONTRADICTION","path":"/subtasks"}],"observed_errors":[{"code":"STRUCTURAL_MODE_CONTRADICTION","path":"/subtasks"}],"route_match":true,"status_match":true,"field_localization_match":true,"static_schema_status":"PASS","runtime_contract_status":"REJECT","boundary_dispatch_count":0,"primitive_dispatch_count":0,"zero_dispatch_evidence":"RUNTIME_CONTRACT_REJECTED_BEFORE_GATE","minimum_expectation_matcher_accept":true,"verdict":"PASS"}
+
+plan_sha256（由上方 canonical case JSON bytes 计算）：c52d6618325421394d6df27f02ec703c60fcdbf743023b94f97b92366a640866
+
+说明：不存在独立 production dispatch report；`CommanderPlanV2.decision_has_exactly_one_structural_mode` 在进入 semantic validator 与 gate probe 前拒绝了 payload。这里展示的是 deterministic suite result 的原始序列化字节及其 dispatch evidence 字段。</pre>
+    </details>
+  </section>
+
+  <footer>
+    <div class="source">来源：已核验冻结输入的 2026-08-31 deterministic rederivation + ordinal 35 inventory。聚合结果绑定 evidence/s5/p2-semantic-suite-rederived-20260831-v1.json / SHA-256 5a8fdcbbaf5a164a5761b6673749a4412296ed492f338edcd1a463cdd5f27b1b；页面卡片由嵌入的同一 case_id / plan_sha256 绑定。NOT_ORIGINAL_RUN，不声称这是在线执行。</div>
+    <div class="controls" aria-label="回放控制">
+      <button type="button" id="restart">从头回放</button>
+      <button type="button" id="showAll">显示全部静帧</button>
+    </div>
+  </footer>
+</main>
+
+<script>
+(() => {
+  const caseId = 'single-11-refuse-with-physical-subtasks';
+  const planSha = 'c52d6618325421394d6df27f02ec703c60fcdbf743023b94f97b92366a640866';
+  const identities = [...document.querySelectorAll('.identity')];
+  const identityConsistent = identities.every(identity =>
+    identity.querySelector('[data-case-id]').textContent === caseId &&
+    identity.querySelector('[data-plan-sha]').textContent === planSha
+  );
+  if (!identityConsistent) document.documentElement.dataset.identityError = 'true';
+
+  const frameDeck = document.querySelector('.frames');
+  const frames = [...document.querySelectorAll('.frame')];
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let timers = [];
+  function clearTimers() { timers.forEach(clearTimeout); timers = []; }
+  function activate(index) {
+    frames.forEach((frame, i) => frame.classList.toggle('active', i <= index));
+  }
+  function showAll() {
+    clearTimers();
+    frameDeck.classList.remove('replay-mode');
+    frames.forEach(frame => frame.classList.add('active'));
+  }
+  function replay() {
+    clearTimers();
+    if (reduced) { showAll(); return; }
+    frameDeck.classList.add('replay-mode');
+    activate(0);
+    [6000, 12000, 18000].forEach((delay, i) => {
+      timers.push(setTimeout(() => activate(i + 1), delay));
+    });
+    timers.push(setTimeout(showAll, 24000));
+  }
+  document.getElementById('restart').addEventListener('click', replay);
+  document.getElementById('showAll').addEventListener('click', showAll);
+})();
+</script>

@@ -1,0 +1,21 @@
+{
+  "all_required_reviews_complete": true,
+  "config_sha256": "b00fa1781c9cfffa1a852957ad81e0ab428d42cae00e3bf0641516a449b418b2",
+  "frontier_presence_closes_v4_irrespective_of_review": true,
+  "graph_construction_permitted": true,
+  "missing_review_pair_identities": [],
+  "process_role": "CREATE_ONLY_CANONICAL_FRONTIER_HUMAN_REVIEW_ROUTER",
+  "programmatic_confirmed_canonical_frontier_count": 0,
+  "raw_private_metadata_emitted": false,
+  "review_completion_count": 0,
+  "review_confirmed_pair_identities": [],
+  "review_input_sha256": null,
+  "review_records": [],
+  "review_rejected_pair_identities": [],
+  "review_required_pair_count": 0,
+  "review_required_pair_identities": [],
+  "schema_version": "QwenBrainS5FrontierReviewRouteV4",
+  "status": "NOT_REQUIRED",
+  "unresolved_review_pair_identities": [],
+  "verified_edge_audit_sha256": "e4eb76feae01b65109be9373e69103328c04fc75e014ac3b88714745bfa68520"
+}

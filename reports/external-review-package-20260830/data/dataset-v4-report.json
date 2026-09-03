@@ -1,0 +1,46 @@
+{
+  "canonical_answers_read": false,
+  "canonical_bytes_read": false,
+  "config_sha256": "b00fa1781c9cfffa1a852957ad81e0ab428d42cae00e3bf0641516a449b418b2",
+  "counterfactual_pair_count": 39,
+  "counterfactual_rows_serialized_first": true,
+  "family_counts": {
+    "CONTRACT_REFUSAL": 165,
+    "RECOVERY_EXHAUSTION_REPLAN": 162,
+    "REGISTERED_SYMBOLIC_RELOCATION": 168,
+    "VISUAL_CONDITION_SELECTION": 78
+  },
+  "input_roles": [
+    "components",
+    "config",
+    "denylist",
+    "projection",
+    "template_registry"
+  ],
+  "input_sha256": {
+    "components": "86ecc1193b53c59cce8d3f59877eb5c9434110baa3f9fc9d35940c2584cdcf74",
+    "config": "b00fa1781c9cfffa1a852957ad81e0ab428d42cae00e3bf0641516a449b418b2",
+    "denylist": "0b0fce612d9fe6b85c99f307ca70328ca567c3726ea1eca6e0517afbc16b7893",
+    "projection": "c86068cfbc7de89c33e8a73a3c7cd0afef20cccdde66a495b12eebdd62544512",
+    "template_registry": "3dd3208566f63da10f2ef8569db12c7e71aafd479d07814ffdeb8420f6e9a728"
+  },
+  "max_rows_observed_per_source": 2,
+  "padding_or_duplication_used": false,
+  "process_role": "FRESH_GENERATOR",
+  "row_count": 573,
+  "schema_version": "QwenBrainS5DatasetGenerationReportV4",
+  "split_counts": {
+    "DEV": 78,
+    "MANUAL_BLIND": 45,
+    "SYNTHETIC_TEST": 22,
+    "TRAIN": 428
+  },
+  "status": "PASS",
+  "unique_source_count": 495,
+  "visual_prompt_hidden_fields": [
+    "target_ref",
+    "approach_pose_ref",
+    "orientation_state",
+    "support_state"
+  ]
+}

@@ -1,0 +1,113 @@
+{
+  "complete_file_count": 16,
+  "complete_tree": [
+    {
+      "mode": "0o444",
+      "path": "ADR-0037-qwen-commander-s5-node2-training-migration.md",
+      "sha256": "b932cc5cab1d3e061ba5296b9bde11ed7804e3bb7466b60e96bdcf8c01d90060",
+      "size": 4768
+    },
+    {
+      "mode": "0o444",
+      "path": "QWEN_BRAIN_S5_TRAINING_AUTHORIZATION_NODE2.md",
+      "sha256": "880f8c79879ff059879774e6aeeffb69f04b0f5561e342aa06a7a3c3bdc606e7",
+      "size": 2735
+    },
+    {
+      "mode": "0o444",
+      "path": "configs/qwen_brain/s5-training-node2-v1.json",
+      "sha256": "7217d8480ebe0ae08cbb51c2f51ccf7225bf7244b020eb9b3cc9b81d4cedb01c",
+      "size": 5935
+    },
+    {
+      "mode": "0o444",
+      "path": "data/train-v4-reconstructed-v2.jsonl",
+      "sha256": "3d3675e919babaf2e967c5162a84e699c0f2986f7b7557a466d3c8d1fa0945a8",
+      "size": 1531716
+    },
+    {
+      "mode": "0o444",
+      "path": "scripts/qwen_brain/train_s5_lora_node2_v1.py",
+      "sha256": "5c646f89656d96698435a879271f24415adc0dabb72f4c7816a92fddc64bf363",
+      "size": 67495
+    },
+    {
+      "mode": "0o444",
+      "path": "scripts/qwen_brain/validate_s5_training_authorization_node2_v1.py",
+      "sha256": "f01444f6f748edeb5bdbda4fed81d49c56d1275b4ef0ec6cd5d77f8b48221d98",
+      "size": 1964
+    },
+    {
+      "mode": "0o444",
+      "path": "src/xh_agent/__init__.py",
+      "sha256": "f36a9ef55133821b206b46131182400c756697f35aaf3d6e864829a21de80643",
+      "size": 113
+    },
+    {
+      "mode": "0o444",
+      "path": "src/xh_agent/qwen_brain/__init__.py",
+      "sha256": "9e0bd44e15511994a02d4ac0d431378d515209c4e8a82d384d80f116e71968cb",
+      "size": 751
+    },
+    {
+      "mode": "0o444",
+      "path": "src/xh_agent/qwen_brain/client_v1.py",
+      "sha256": "1dc5e6a3083c26d24ea78450b352234639770bef21a00668697a8a725be21221",
+      "size": 9839
+    },
+    {
+      "mode": "0o444",
+      "path": "src/xh_agent/qwen_brain/contracts_v1.py",
+      "sha256": "9c755ba56bc0965d8d6138380da925e31232ab3ff72ff2be0487b87b72a0e1fe",
+      "size": 7330
+    },
+    {
+      "mode": "0o444",
+      "path": "src/xh_agent/qwen_brain/s5_data_v1.py",
+      "sha256": "e2f7015f5c41943b0b0c272b459ca8c55438e8499091b1ed6f197cbd92318810",
+      "size": 26337
+    },
+    {
+      "mode": "0o444",
+      "path": "src/xh_agent/qwen_brain/s5_lora_v1.py",
+      "sha256": "67b8c974ec3f07de61aec02344c4ed7212043b21ef55baf259a2ea752d2760fa",
+      "size": 25531
+    },
+    {
+      "mode": "0o444",
+      "path": "src/xh_agent/qwen_brain/s5_schemas_v1.py",
+      "sha256": "9b21b9130b9822eac9325556ffd9999ed6dfeb1592633ebfca035e3b3ba46f39",
+      "size": 25791
+    },
+    {
+      "mode": "0o444",
+      "path": "src/xh_agent/qwen_brain/s5_training_node2_v1.py",
+      "sha256": "8aacfb932a289d88879bb8aa66863c69bc4774ba88774665f06f8e767797186d",
+      "size": 11333
+    },
+    {
+      "mode": "0o444",
+      "path": "src/xh_agent/qwen_brain/s5_training_v1.py",
+      "sha256": "e61971c225bcdce7c222c128c980fb1692a9d6eef99aee0289cf547e701fcf4e",
+      "size": 18710
+    },
+    {
+      "mode": "0o444",
+      "path": "training-package-manifest-node2-v1.json",
+      "sha256": "666ecd839eff934ee4e2e82739bdad89f5cfdf1aade60487f0ea5db75bb0fb16",
+      "size": 4933
+    }
+  ],
+  "manifest_sha256": "666ecd839eff934ee4e2e82739bdad89f5cfdf1aade60487f0ea5db75bb0fb16",
+  "package": "/home/gl/xh-202607-qwen-s5/training-package-node2-v1",
+  "post_runtime_compute_apps": "",
+  "post_runtime_gpu_query": "0, NVIDIA A100-SXM4-80GB, 81920, 14, 81140, 0",
+  "runtime": "two-epoch-node2-v1",
+  "schema_version": "QwenBrainS5Node2PackagePostRuntimeRehashV1",
+  "status": "PASS",
+  "two_epoch_promotion_pass": true,
+  "two_epoch_report": "/home/gl/xh-202607-qwen-s5/two-epoch-report-node2-v1.json",
+  "two_epoch_report_sha256": "1513f6de2c641f3dd8f90883a5c71ac8fb0e92adc9fe1b1b60c872646000be06",
+  "two_epoch_status": "PASS",
+  "unchanged": true
+}
