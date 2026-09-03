@@ -1,0 +1,46 @@
+{
+  "schema_version": "M2CJobRegistrationV1",
+  "job_identity": "agent-demo-loop-v1",
+  "lane": "evaluate-serial-perception-gate",
+  "registered_by": "tzb-fe (tzb-c2)",
+  "registered_date_local": "2026-09-02",
+  "verdict": "REGISTERED — user directive 02:58 '别闲着,智能体有没有让其他 session 搞'",
+  "what_this_is": "赛题名'工业环境下物体感知识别与指令交互型智能体研发'。外部顾问(response-2)建议的头版:可运行的多模态工业智能体——场景图+指令 → JSON 技能计划 → 执行/拒绝/恢复。本 job 把今晚已验证的两段(串行感知闸门、27B 指挥体+语义验证)缝成一条可运行、可录像、每段权限等级可见的链。不是新能力,是把已有能力接成一个能跑给评委看的东西。",
+  "deliverable": {
+    "script": "/Users/gl/tzb-lanes/agent-demo-v1/agent_loop_v1.py — 输入 (image_path, instruction),输出一份 trace JSON",
+    "trace_stages": [
+      "S1 presence_gate: 27B PRESENT/ABSENT(复用 layered_pointing_v1/gate_worker.py 的 prompt 与请求控制,逐字节同)",
+      "S2 localization: Rex-Omni xyxy 框(复用冻结 Rex adapter),产出 PerceptionCandidate,authority=UNTRUSTED_NOT_TASKSPEC",
+      "S3 binding_boundary: 显式一段,说明 candidate→TaskSpec 需要 RGB-D 关联+标定(perception/public_track_associator_v2.py),RGB-only 不可达。demo 用 SYNTHETIC 绑定生成 TaskSpec,字段 binding_authority=DEMO_SYNTHETIC_NOT_TRUSTED",
+      "S4 commander: 27B → CommanderPlanV2(复用 repair-loop 的 system prompt 与 json_schema;采样用 v4 六参)",
+      "S5 validator: 冻结 semantic validator → EXECUTE/REFUSE/RECOVER + validation_report,k=0 不做修复",
+      "每段带 authority 标签、耗时、请求/响应 digest"
+    ],
+    "renderer": "trace → 按 §11 五宫格排版渲染(偷屏幕不偷运行时):左=场景图+Rex 框;右上=PerceptionCandidate(标 UNTRUSTED);右中=当前链路节点(用契约链状态填,不是行为树);右下=validator 期望/实际/错误码/处置;底=指令 + CommanderPlanV2。每条样例一张五宫格 PNG + 逐段帧。",
+    "sample_runs": "至少 3 条:一条目标在场且计划通过;一条目标不在场(闸门 ABSENT → REFUSE);一条计划被 validator 拒。图取自 PR-Bench 600 子集,指令取自其 expression。",
+    "second_deliverable_visual_reality_probe": {
+      "what": "外审全文最值钱的一段,今晚 text-only 消融已做了它的第 4 路。补齐四路:同一组问题分别送 (1) 真图 (2) 全黑图 (3) 打乱像素图 (4) 不传图,问可验证的事实(目标在不在、大致位置、数量)。",
+      "target": "node2:18767 的 27B。用 PR-Bench 600 子集里固定 20 张(create-once 选定,sha256 排序取前 20),每张 1 个问题。",
+      "output": "一张能力表:四路各自的回答分布 + 两两一致率。只出表,不出主张。四路几乎一致 → 图像可能没真进模型,这是要写进报告的风险项;差异明显 → 图像通路可信,写一句。",
+      "why_now": "提交时系统要对接院内从未表征过的 endpoint,同一脚本到时候直接对着院内 API 跑一遍。今晚先在 27B 上把脚本和口径定死。",
+      "cost": "80 次请求,max_tokens 小,十分钟内。"
+    }
+  },
+  "hard_lines": [
+    "不产生任何新的性能主张。trace 是演示,不是评测;不进任何数字工件。",
+    "S3 的 SYNTHETIC 绑定必须在 trace、帧、任何文字里标明 DEMO_SYNTHETIC_NOT_TRUSTED。把它说成真实 grounding 是 predicate-vs-artifact 缺陷,一律拦。",
+    "不改任何冻结源:validator、contract、schema、gate prompt、Rex adapter、repair-loop prompt 全部 import/复制,不改。",
+    "写根:/Users/gl/tzb-lanes/agent-demo-v1/(新建 create-only)。禁 reports/、禁 qwen-brain、禁 commit/push。",
+    "node2:18767 现在三条线共用(v4、契约可见 k=0、本 job)。停服务由 fresh-v4-repair-loop 执行,须三方都报 endpoint use complete 之后。本 job 完成时发 endpoint use complete 给 tzb-c2 与 fresh-v4-repair-loop。",
+    "不碰 PID 134346 或任何第三方进程。",
+    "五宫格里'当前节点'一格用契约链状态(gate→candidate→binding→commander→validator)填,禁止画成行为树——外审明确说 BT 会换掉 24/24 结论赖以成立的受测路径。"
+  ],
+  "why_this_lane": "它建了 layered_pointing_v1(S1+S2),有 node2 写根与 Rex 冻结身份,串行线已收口处于空闲。",
+  "deadline": "9/3 冻结前出 trace + 帧。9/3 后只许改渲染样式,不许改链。",
+  "authority_chain": "用户 02:58 '别闲着…智能体有没有让其他session搞';夜间代批 gen606;node2 GPU 既有授权。",
+  "design_input": {
+    "source": "state/v2/jobs/agent-design-input-20260901-gpt-plus-review.md — 用户 2026-09-01 10:06 发来的 GPT 设计 + 外审批评,压缩后曾丢失,9/2 03:1x 从原始记录恢复",
+    "review_verdict_adopted": "外审裁定:A/B/C 主线一毫米不动;GPT 架构不做(行为树/Gateway 全家桶/FoundationPose/多机器人四处过度设计,且 P0 在重建已冻结库存);只取四样零冻结风险小件——视觉真实性探针、降级话术、§11 演示排版、27B 图像链路排查单。本 job 严格落在这个裁定内:偷屏幕,不偷运行时。",
+    "what_this_job_is_not": "不是 GPT 设计的实现。不引入行为树、GoalSpec 新 schema、Model Gateway、技能库、FoundationPose、多机器人协调器中的任何一个。所有运行时组件均为已冻结的现有资产,只加缝合脚本与渲染器。"
+  }
+}

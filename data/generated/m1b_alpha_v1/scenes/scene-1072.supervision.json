@@ -1,0 +1,148 @@
+{
+  "scene_id": "IndustrialCylinderBenchmarkV1",
+  "seed": 1072,
+  "split": "train",
+  "part_count": 12,
+  "randomization": {
+    "material": "matte_metal",
+    "camera_offset_m": 0.0,
+    "light_intensity": 0.8258214725021541
+  },
+  "simulator_supervision": {
+    "training_and_evaluation_only": true,
+    "objects": [
+      {
+        "actual_sim_entity_id": "cylinder_01",
+        "category": "industrial_cylinder",
+        "orientation_state": "normal",
+        "position_3d_world": [
+          -0.12625787904050312,
+          0.27315769298557435,
+          0.5
+        ],
+        "yaw": -3.0004751874604167
+      },
+      {
+        "actual_sim_entity_id": "cylinder_02",
+        "category": "industrial_cylinder",
+        "orientation_state": "inverted",
+        "position_3d_world": [
+          -0.20543457827484796,
+          -0.12887905868746882,
+          0.5
+        ],
+        "yaw": 1.593517356382585
+      },
+      {
+        "actual_sim_entity_id": "cylinder_03",
+        "category": "industrial_cylinder",
+        "orientation_state": "tilted",
+        "position_3d_world": [
+          -0.2725158246863093,
+          0.2434578129553291,
+          0.48
+        ],
+        "yaw": 2.329508776096924
+      },
+      {
+        "actual_sim_entity_id": "cylinder_04",
+        "category": "industrial_cylinder",
+        "orientation_state": "normal",
+        "position_3d_world": [
+          -0.19181258029985343,
+          0.12667274911516507,
+          0.5
+        ],
+        "yaw": -0.04756082559717312
+      },
+      {
+        "actual_sim_entity_id": "cylinder_05",
+        "category": "industrial_cylinder",
+        "orientation_state": "inverted",
+        "position_3d_world": [
+          -0.27166534135027015,
+          0.13135701657419246,
+          0.5
+        ],
+        "yaw": -1.1553701408133927
+      },
+      {
+        "actual_sim_entity_id": "cylinder_06",
+        "category": "industrial_cylinder",
+        "orientation_state": "tilted",
+        "position_3d_world": [
+          -0.10313189354073315,
+          0.27006304433479966,
+          0.48
+        ],
+        "yaw": -1.6887006458419425
+      },
+      {
+        "actual_sim_entity_id": "cylinder_07",
+        "category": "industrial_cylinder",
+        "orientation_state": "normal",
+        "position_3d_world": [
+          -0.1641168770075515,
+          -0.08345312977528191,
+          0.5
+        ],
+        "yaw": 2.32089083755133
+      },
+      {
+        "actual_sim_entity_id": "cylinder_08",
+        "category": "industrial_cylinder",
+        "orientation_state": "inverted",
+        "position_3d_world": [
+          -0.25888661098522814,
+          0.03573541804319186,
+          0.5
+        ],
+        "yaw": 2.4550157154722587
+      },
+      {
+        "actual_sim_entity_id": "cylinder_09",
+        "category": "industrial_cylinder",
+        "orientation_state": "tilted",
+        "position_3d_world": [
+          -0.08712872603306598,
+          -0.16950340286249316,
+          0.48
+        ],
+        "yaw": -1.1451933122208633
+      },
+      {
+        "actual_sim_entity_id": "cylinder_10",
+        "category": "industrial_cylinder",
+        "orientation_state": "normal",
+        "position_3d_world": [
+          -0.14114744821906072,
+          0.09725474020645913,
+          0.5
+        ],
+        "yaw": 2.0366247554955645
+      },
+      {
+        "actual_sim_entity_id": "cylinder_11",
+        "category": "industrial_cylinder",
+        "orientation_state": "inverted",
+        "position_3d_world": [
+          -0.28686780413508417,
+          0.14583084310074085,
+          0.5
+        ],
+        "yaw": -0.7580508016801617
+      },
+      {
+        "actual_sim_entity_id": "cylinder_12",
+        "category": "industrial_cylinder",
+        "orientation_state": "tilted",
+        "position_3d_world": [
+          -0.10679285311694692,
+          0.19665900287298327,
+          0.48
+        ],
+        "yaw": 0.45380275844072626
+      }
+    ]
+  }
+}

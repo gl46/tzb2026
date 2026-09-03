@@ -1,0 +1,52 @@
+{
+  "schema": "M1BWrongObjectSnapshotReplayV1",
+  "source": "REAL_RGBD_SNAPSHOTS_FROM_M1B_ACCEPTANCE_R8",
+  "continuous_video": false,
+  "frame_hold_seconds": 2,
+  "frames": [
+    {
+      "index": 1,
+      "label": "pre_grasp",
+      "source": "/tmp/m1b-adr0013-public-wrong-object-20260724-r8/pre_rgbd/rgb.ppm",
+      "sha256": "154169e754e46f4a99d037e99b62a140c46f899cc5ebed2146f06e8ee3c0ebb3"
+    },
+    {
+      "index": 2,
+      "label": "near_grasp_1",
+      "source": "/tmp/m1b-adr0013-public-wrong-object-20260724-r8/deliberate-nontarget-public-grasp.near_rgbd/frame-01/rgb.ppm",
+      "sha256": "a3f8c997d944eb9d904a9c658a8f3a6d74a30ab24cb049ad04dad50b497270d2"
+    },
+    {
+      "index": 3,
+      "label": "near_grasp_2",
+      "source": "/tmp/m1b-adr0013-public-wrong-object-20260724-r8/deliberate-nontarget-public-grasp.near_rgbd/frame-02/rgb.ppm",
+      "sha256": "b4274143c227a88b672e45acddd1d3e2ff87e30f5c3beb28bc3e47b0e47e5237"
+    },
+    {
+      "index": 4,
+      "label": "near_grasp_3",
+      "source": "/tmp/m1b-adr0013-public-wrong-object-20260724-r8/deliberate-nontarget-public-grasp.near_rgbd/frame-03/rgb.ppm",
+      "sha256": "b703b3f58dfc9681551d6ee45f18230c4d922499254e68996bd3045efdee00ee"
+    },
+    {
+      "index": 5,
+      "label": "post_retreat_1",
+      "source": "/tmp/m1b-adr0013-public-wrong-object-20260724-r8/post_retreat_rgbd/frame-1/rgb.ppm",
+      "sha256": "19cbe02014c423cf5e8696d1b40e10225e84b158e5d7c8164f1a6374ee787c72"
+    },
+    {
+      "index": 6,
+      "label": "post_retreat_2",
+      "source": "/tmp/m1b-adr0013-public-wrong-object-20260724-r8/post_retreat_rgbd/frame-2/rgb.ppm",
+      "sha256": "72e3db17fdf06ab18bf66e77cc8f9b3e83213712d2b1d514fccd709c92c524b3"
+    },
+    {
+      "index": 7,
+      "label": "post_retreat_3",
+      "source": "/tmp/m1b-adr0013-public-wrong-object-20260724-r8/post_retreat_rgbd/frame-3/rgb.ppm",
+      "sha256": "73f62902e1d14a445f89d5913f87a5e2a80a469cd406e8e587adaedbff868ce7"
+    }
+  ],
+  "output": "/tmp/m1b-adr0013-wrong-object-replay/m1b-adr0013-wrong-object-replay.mp4",
+  "video_sha256": "cc3051864211f37a19cccd3de2c426bf1959769624c00a01d4ce02bcd8269a90"
+}

@@ -1,0 +1,12 @@
+{
+  "job": "cross-embodiment-v1",
+  "created": "2026-09-03T08:4x+0800 by tzb-fe (tzb-7c, sid 5ae1238c)",
+  "user_ruling": "2026-09-03 08:4x: 做第二台臂演示;labserver 走代理(clash/mihomo 127.0.0.1:7890)拉资产。研究建议 a7 完整版。",
+  "what": "同一份已验证计划 JSON,经 ExecutorPort 派给两份本体 profile(Franka Panda 现有 + 第二台臂,首选 UR10),各自只跑 CARTESIAN_POSE 到 approach 位,不抓。产出:两份 profile、两份轨迹回执(命令 approach 位 vs 达成末端位姿的 mm/deg 误差、关节轨迹)、计划 sha 两边一致的证明;有余力再渲每臂一帧。",
+  "who": "残差线 two-shot-canonical-gate(sid 72ad7a26),v28 渲完接手;GPU1。",
+  "when": "今天 24:00 冻结前出结果才算原创结果;23:00 前报 tzb-fe 以留落 state 时间;跑不完只交 profile 文件,叙述维持'设计性质'。",
+  "write_roots": ["/Users/gl/tzb-lanes/cross-embodiment-v1/", "labserver:/var/tmp/vnext-xemb-20260903/ (<=10 GB)"],
+  "hard_lines": ["0 ordinal 消费;冻结根只读;不改冻结 gate/validator/契约;ExecutorPort 挂在 gate 之后", "标 vNext 工程演示;不写'跨本体已验证'的泛化主张,只写'同一份计划 JSON、两份本体 profile、approach 位'", "代理只用于拉资产,下载物记 sha256 与来源 URL;不进冻结根"],
+  "asset_route": "首选 Isaac 官方 UR10 资产(经代理);备选 ros-industrial UR URDF 经 Isaac URDF importer 离线导入。第二臂基座放到 approach 位可达处并记进 profile。",
+  "wording_source": "/Users/gl/tzb-lanes/agent-design-review-v1/recommendations.md a7;/Users/gl/tzb-deliverables/judge-package-v1/config/embodiment/franka_panda.yaml 为 profile 模板"
+}

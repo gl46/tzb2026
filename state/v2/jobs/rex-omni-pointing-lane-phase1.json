@@ -1,0 +1,194 @@
+{
+  "schema_version": "M2CJobRegistrationV1",
+  "job_identity": "rex-omni-pointing-lane-phase1-strictwrap",
+  "supersedes_nothing": "phase-0 registration rex-omni-pointing-lane-phase0.json remains in force for everything it forbids; this packet only adds a write path and a task.",
+  "lane": "tzb-50",
+  "lane_session_id": "ef4db636-e7a8-4242-9b1d-f71a32e0008c",
+  "registered_by": "tzb-fe",
+  "registered_date_local": "2026-09-01",
+  "verdict": "REGISTERED — CPU ONLY, NO GPU, NO HOST, NO DOWNLOADS",
+
+  "trigger": {
+    "relayed_user_statement": "gpu我批准了",
+    "relayed_by": "tzb-50 (uds:/tmp/cc-socks/29880.sock)",
+    "how_tzb_fe_reads_it": "A class-level GPU authorization from the user, given directly in the tzb-50 session. tzb-fe records it and does NOT expand it. It is not a host allocation, not a card count, not a duration, not a write-path grant, not a download authorization, and not a scope approval.",
+    "lane_conduct": "tzb-50 refused to self-expand the sentence and asked for registration. That is the correct behaviour and is recorded as such."
+  },
+
+  "central_ruling": {
+    "id": "GPU_IS_NOT_THE_BINDING_CONSTRAINT",
+    "statement": "GPU authorization does not unblock this lane, because none of the three actual blockers are GPU blockers.",
+    "blockers": [
+      {
+        "id": "NO_SCALE",
+        "detail": "tzb-50's own phase-0 disposition is HALT_NO_VALID_POINTING_SCALE. Per that lane's report, the PR-Bench evaluator drops malformed JSON responses and emits no overall score. Starting a GPU probe before a strict-wrapped scorer exists spends cards to produce a number that cannot be compared to anything. This finding is tzb-50's; tzb-fe has not independently re-verified the evaluator's behaviour and does not assert it as its own observation.",
+        "cleared_by": "this packet"
+      },
+      {
+        "id": "NO_WRITE_ROOT",
+        "detail": "phase-0 set write_path = NONE. Nothing can be produced without one.",
+        "cleared_by": "this packet"
+      },
+      {
+        "id": "NO_HOST_ALLOCATION",
+        "detail": "The GPUs are on labserver / node2. Host access and GPU scheduling are a standing user carve-out that tzb-fe cannot rule on. 'gpu我批准了' authorizes the class of work; it does not allocate a host, a card count, or a duration. Until the user names host + cards + duration, no GPU job may start regardless of this registration.",
+        "cleared_by": "USER ONLY — still open"
+      }
+    ],
+    "consequence": "The first two are cleared here and require no GPU at all. The third stays with the user. Phase 1 is therefore fully executable today with zero cards."
+  },
+
+  "phase_1_task": {
+    "objective": "Build and prove a strict-wrapped pointing scorer. Nothing else.",
+    "why_this_first": "It is the gate on every downstream decision in this lane, it needs no weights, no GPU, and no host, and it is the artifact that converts HALT_NO_VALID_POINTING_SCALE from a dead end into a buildable scale.",
+    "required_properties": [
+      "A malformed or unparseable model response must be counted, not dropped. Silent exclusion is the defect being fixed.",
+      "The denominator must be fixed and published before any model is run, and must include malformed responses as wrong.",
+      "The scorer must emit an overall score, or fail loud. It must never return successfully with no score.",
+      "The wrapper must record, for each item, whether it was parsed, malformed, or absent — three states, not two.",
+      "If wrapping requires changing PR-Bench's internals such that our number is no longer comparable to any published PR-Bench number, that must be stated in the output, not glossed."
+    ],
+    "test_material": "Synthetic and hand-written responses only. No model needs to be run to prove a scorer fails loud — construct the malformed cases directly.",
+    "acceptance": [
+      "A pre-registered set of malformed inputs, each demonstrated to be counted rather than dropped.",
+      "A pre-registered set of well-formed inputs producing a score with an explicitly stated denominator.",
+      "One completely-returned run of the wrapper's own test set. An absence of visible errors is not acceptance.",
+      "A written statement of what the scale does NOT measure."
+    ],
+    "stop_conditions": [
+      "If the strict wrapper cannot be built without making the number incomparable to published PR-Bench figures, STOP and report. That is a finding, not a failure.",
+      "If the scale turns out to require the opaque internal IDs that made the frozen visual family defective, STOP — the same defect must not be rebuilt.",
+      "If any step needs a GPU, a host, or a weight download, STOP and escalate. Do not proceed under an assumption."
+    ]
+  },
+
+  "write_root_granted": {
+    "path": "/Users/gl/tzb-lanes/rex-omni-pointing-v1/",
+    "scope": "Exclusive to tzb-50. Create it; nothing else may be written outside it.",
+    "why_outside_both_repos": "brief-8 publishes repository-wide test figures for /Users/gl/tzb (61 failed / 1886 passed / 5 skipped, 2026-09-01) and for /Users/gl/projects/xh-202607-qwen-brain (359 passed / 4 skipped). Both must stay byte-stable through the 2026-09-03 freeze. Adding test-collectable files to either repo would drift a published number, and would also land inside the mtime change-scan whose scope is already a stated limitation. An outside-repo write root removes both risks entirely.",
+    "still_forbidden": [
+      "/Users/gl/tzb/reports/",
+      "/Users/gl/projects/xh-202607-qwen-brain/",
+      "semantic validators, contract layer, the 48-case suite, any frozen config",
+      "commit / push / bundle",
+      "subagents",
+      "any GPU job",
+      "any weight download",
+      "any host access (labserver / node2)"
+    ]
+  },
+
+  "gpu_packet": {
+    "status": "REGISTERED — bounded by tzb-fe under a user go-ahead",
+    "user_statement_2026_09_01": "让他干就行了",
+    "how_tzb_fe_reads_it": "The user declined to name host, cards, and duration and told tzb-fe to let the lane work. tzb-fe treats this as the host/GPU authorization it had asked for, and sets the numbers itself rather than bouncing the question back a second time. The bounds below are tzb-fe's, not the user's words; they are set in the tightening direction and disclosed here so the user can loosen any of them.",
+    "bounds_are_reused_not_invented": "≤2 GPUs and ≤2h come from the user's own prior grant of 2026-08-31 (auth.user_gpu_20260831, 'Task32 labserver GPU<=2h'). tzb-fe is applying an existing user-set scale, not authoring a new one.",
+
+    "host": {
+      "granted": ["node2", "chxy (fx@chxy)"],
+      "chxy_added_by_user_2026_09_01": "其实chxy的也可以用，所以不止两小时",
+      "what_chxy_is": "The QRM train/resident host (fx@chxy, present in ~/.ssh/config). Per qrm-lite Beta-1, Qwen training and residency live here; node2 was only ever the limited-recovery host used when M1B is idle. tzb-fe has not inspected chxy's cards and states nothing about them — tzb-50 must look and report.",
+      "refused": "labserver",
+      "why_not_labserver": "The labserver formal canonical face — P″ checkout, sealed sources 0555/25, ledger, evidence run-00..03, scratch — is frozen and 禁触 per host.formal_canonical. If a host turns out to lack the cards, come back — do not substitute labserver."
+    },
+    "gpus": "at most 2 concurrently",
+    "duration": {
+      "node2": "at most 2h per job, unchanged. node2 is shared — Beta-1 records it as available only for limited recovery when M1B is idle — so the cap here is contention, not caution.",
+      "chxy": "no hour cap. The user lifted it explicitly. Report at each completed stage instead of at a wall clock.",
+      "correction_to_the_earlier_packet": "The previous version of this packet said the 2h bound 'is what keeps SFT/GRPO out'. That was true mechanically and wrong as a reason. Removing the cap does NOT authorize training — see training_still_unauthorized below."
+    },
+    "occupancy_check_before_claiming_cards": {
+      "rule": "Look for existing jobs and residual processes on the host before launching. If residue is found: STOP and report. DO NOT clean it up.",
+      "authority": "User ruling of 2026-08-31 (auth.user_gpu_20260831): 发现残留须停报不得清理;清理需另次用户授权. Cleanup requires its own user authorization.",
+      "precedent": "incident.orphan_container — an orphan container was found on a GPU and its removal took a separate, explicitly scoped user authorization with per-command verification. Repeat that shape, not a convenient tidy-up.",
+      "extra_reason_on_chxy": "chxy is the QRM lane's resident host. Anything running there may belong to another lane."
+    },
+    "write_root_on_node2": "/home/gl/xh-202607-qrm-lite/rex-omni-pointing-v1/ (the path phase-0 proposed; now created and granted)",
+
+    "downloads": {
+      "allowed": "Weights for the candidates already vetted in phase-0, via domestically reachable mirrors (hf-mirror / ModelScope).",
+      "required_of_every_download": "Record sha256 and byte size on arrival. A download that is not digest-recorded did not happen, as far as any later claim is concerned.",
+      "note": "nvidia/LocateAnything-3B is ModelScope 404. Its domestic reachability must be tested through hf-mirror for the actual LFS objects, not inferred from an API metadata 200."
+    },
+
+    "order_of_work_unchanged": [
+      "1. phase-1 strict-wrapped scale first. It needs no cards; do not spend GPU time before it exists.",
+      "2. incumbent baseline — the already-served frozen Qwen3.8-27B on that scale. tzb-50 must establish where it is served and report; tzb-fe has not verified this.",
+      "3. only then candidates. beat-incumbent stands: nothing is selected against no baseline."
+    ],
+    "training_still_unauthorized": {
+      "statement": "A longer clock does not make training runnable. The blocker was never time.",
+      "why": [
+        "There is no scale. You cannot train toward a target you cannot measure, and phase-1 exists precisely because the measurement does not yet work.",
+        "There is no baseline. A trained result with no incumbent number beside it cannot support a beat-incumbent claim, which is the only adoption rule this project has.",
+        "A training run produces weights that would then want to be published, licensed, digest-recorded and defended. None of that is scoped."
+      ],
+      "consequence": "Training gets its own packet, requested after steps 1 and 2 of order_of_work land, with the target metric and the incumbent number already in hand. Do not open it earlier on the grounds that the cards are now free."
+    },
+    "not_authorized_by_this_packet": [
+      "any fine-tuning, SFT, GRPO, or visual-prompt training run",
+      "touching the labserver formal canonical face",
+      "writing into /Users/gl/tzb/reports/ or /Users/gl/projects/xh-202607-qwen-brain/",
+      "commit / push / bundle",
+      "subagents"
+    ]
+  },
+
+  "phase_1_acceptance": {
+    "verdict": "ACCEPTED with one required predicate correction",
+    "accepted_by": "tzb-fe",
+    "date_local": "2026-09-01",
+    "independently_verified_by_tzb_fe": [
+      "19 tests, exit code 0. Run without a pipe so the exit code is the runner's own. (tzb-fe's first attempt used ${PIPESTATUS[0]}, which is a bash-ism — zsh spells it $pipestatus and 1-indexes it — so that read came back empty. Same masking mechanism as the 2026-08-31 `| tail -25` defect; re-run clean.)",
+      "manifest sha256 = df8a532e87d48f4008085bd0a1997f781fa6a725fc72f39a4078c2414be61432, matching the df8a532e prefix the lane reported",
+      "12 manifest items, six task_types × 2 each (attribute / position / interaction / relation / commonsense / reject)",
+      "reject ground truth is exactly [] on both reject items",
+      "OFFICIAL_IOU_THRESHOLDS is bit-identical to this machine's np.arange(0.5,0.95,0.05) across all nine values, including the 0.6000000000000001 drift and the exclusion of 0.95",
+      "write root confined: 12 files, all under /Users/gl/tzb-lanes/rex-omni-pointing-v1/, nothing outside it",
+      "no drift in either frozen repo attributable to this lane"
+    ],
+    "bar_it_was_measured_against": "The acceptance criteria this packet set — pre-registered malformed set counted rather than dropped, fixed published denominator, one completely-returned run, a written does-not-measure statement. All four are met. Synthetic-only material was what this packet specified, so synthetic-only is not a shortfall.",
+
+    "required_correction": {
+      "id": "REIMPLEMENTATION_IS_NOT_A_WRAPPER",
+      "where": "README.md line ~81: 'The parsed per-item rule matches the released PR-Bench evaluator.'",
+      "problem": "The module is stdlib-only. It does not call the released evaluator; it reimplements the rule from reading the released source. 'Matches' is an equivalence claim, and equivalence between two implementations is established by running both on the same inputs and comparing — not by reading one and writing the other, however carefully. Nothing in a synthetic self-test can establish it, because the released evaluator was never executed. The word 'wrapper' compounds this: it reads as 'we wrap the official code'.",
+      "why_it_matters": "This sentence is load-bearing. The entire per-category comparability story rests on it, and comparability is the only reason the number would mean anything to an outside reader.",
+      "correct_predicate": "Reimplements the released per-item rule as read from the released source. Equivalence to the released evaluator has NOT been established by execution.",
+      "defect_class": "Same shape as the recurring one: the artifact is genuine and careful, the predicate attached to it reaches past what was done. Correct it now, before it propagates into a downstream artifact.",
+      "note": "The lane's own hedges elsewhere are correct and should stay — per-category comparability conditioned on all-parsed and same data/coordinate conditions, and strict overall permanently marked a wrapper diagnostic that is never an official PR-Bench overall."
+    }
+  },
+
+  "phase_2_registered": {
+    "job_identity": "rex-omni-pointing-lane-phase2-real-scale-and-incumbent",
+    "verdict": "REGISTERED",
+    "order": [
+      "2a. Real PR-Bench manifest + media. Downloads permitted under the gpu_packet download rules — domestic mirrors, sha256 and byte size recorded on arrival.",
+      "2b. DIFFERENTIAL TEST against the released evaluator. Run the released PR-Bench evaluator and this reimplementation on the same all-parsed inputs and compare per-item. This is the gate that converts the corrected predicate back into 'matches'. Until it passes, no comparability claim may be made against published PR-Bench figures.",
+      "2c. Incumbent baseline — the frozen Qwen3.8-27B on the real scale. See incumbent_premise_correction below."
+    ],
+    "incumbent_premise_correction": {
+      "id": "ALREADY_SERVED_WAS_NEVER_VERIFIED",
+      "tzb_fe_error": "phase-0 and this packet both described the incumbent as 'already multimodal and already served', and built the beat-incumbent adoption rule on top of it. tzb-fe never verified 'already served'. It was carried from an earlier summary and restated as a premise. Saying 'I have not verified this' to the lane did not make it acceptable to use as the foundation of a rule.",
+      "what_is_now_established": "Reported by tzb-50 on 2026-09-01 from a read of the exact configured path — NOT independently verified by tzb-fe, which has no standing node2 access: configs/qwen_brain/service-v1.json binds node2:18767, served_model_name Qwen3.8-27B, model_path /home/gl/qwen38-27b-mtp/Qwen3.8-27B, venv /home/gl/venvs/qwen38-vllm. That node2 path exists and holds config, preprocessor, tokenizer and all 18 expected safetensor shards. The same path is absent on labserver. The endpoint does not answer and node2 shows no occupancy.",
+      "correct_predicate": "The incumbent's configured assets are materialized on node2 and its service is NOT running. It is not, and was not, 'already served'.",
+      "does_this_break_the_delivered_package": "No. The frozen 48-case evidence is a synthetic harness (witness.synthetic_provenance: the witness cases are builder-constructed, with no Commander-generated artifact), so no delivered result depends on a live 27B. The architecture statements in CLAIMS-SHEET / defense-QA describe the configured Commander, and the configuration is real and materialized. No package change is required. This was checked, not assumed.",
+      "lane_conduct": "tzb-50 first reported 'no exact asset found' from a cache-only search, then retracted it on its own after reading the configured path, calling the earlier search insufficient. That retraction is the correct handling of an existence-negative drawn from a partial search."
+    },
+    "acceptance": [
+      "2b either passes with zero per-item divergence, or every divergence is enumerated with its cause. A divergence found and explained is a good outcome; a divergence unlooked-for is not.",
+      "The incumbent number is reported with its denominator, its malformed/absent counts, and its comparability marking.",
+      "If the released evaluator cannot be obtained or run, say so and stop at 2a — that is a finding, and it means the comparability claim stays retired rather than being asserted on rule-reading alone."
+    ],
+    "stop_conditions_carried_forward": "All phase-1 stop conditions remain. Additionally: if the real PR-Bench data turns out to require the model to emit an ID absent from its input, STOP — that is the frozen visual family's defect and it must not be rebuilt.",
+    "training_still_unauthorized": "Unchanged. Training gets its own packet after 2c produces an incumbent number."
+  },
+
+  "deadline_reality": {
+    "code_freeze_local": "2026-09-03",
+    "submission_local": "2026-09-05",
+    "ruling": "This lane cannot produce a submission-bearing result in the remaining window and must not be planned as one. Phase 1 output is vNext evidence. Nothing from this lane enters the deck, the claims sheet, or the delivery package before the freeze. If phase 1 lands cleanly it is cited, if at all, as future work with its scope stated.",
+    "priority_note": "The two items actually due on 9/5 — the PPT and the video — are still at zero and have no owner. This lane does not compete with them for the user's time."
+  }
+}

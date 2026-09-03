@@ -1,0 +1,64 @@
+{
+  "schema_version": "M2CJobRegistrationV1",
+  "job_identity": "vla-continuous-action-shield-contract-v1",
+  "lane_task_ref": "qwen-brain-owner Task #76",
+  "registered_by": "tzb-fe",
+  "registered_date_local": "2026-08-31",
+  "verdict": "REGISTER_WITH_THREE_AMENDMENTS",
+  "registration_is_not_authorization": "The user directed that the VLA lane should not sit idle. GPU/host authority remains the user's; this job is declared CPU-only with GPU=0, so no new scheduling authority is invoked.",
+
+  "scope_source": "Submitted by the lane as a full written scope in a cross-session message on 2026-08-31. The lane's text is the binding scope; this card records the ruling and the amendments, not a re-transcription.",
+
+  "goal": "Implement an offline, deterministic, fail-closed continuous-action shield core plus a constructed-violation contract test. No controller, no commands, no physical actuation, no simulator, no training, no service, and no capability/transfer/safety pass claim.",
+
+  "write_root": "/home/fx/vla-experiments/qwen-vnext-vla-molmoact2-franka-offline-pilot-v1/",
+  "write_rule": "create-only on new paths; no modification, deletion, or overwrite of existing Stage0/1A/checkpoint/source/receipt/log artifacts",
+  "forbidden_write_targets": [
+    "/Users/gl/projects/xh-202607-qwen-brain/  — must stay byte-stable through the 2026-09-03 freeze, because brief-8 publishes 'same-day repo-wide 14 failed / 1933 passed / 5 skipped' and new code would drift that number",
+    "/Users/gl/tzb/ and any reports/configs/frozen surface",
+    "no commit, no bundle, no push"
+  ],
+
+  "gates_actually_implemented_this_round": ["A STRUCTURAL", "B IDENTITY/BINDING/REPLAY", "C FRESHNESS/TIME ARITHMETIC", "D PREFIX LIFECYCLE", "E JOINT NUMERIC ALGORITHMS (synthetic CONTRACT_TEST_ONLY envelope)", "F RECEIPT/INVARIANTS"],
+
+  "gates_declared_unavailable_and_blocking": "exact FK/workspace/Cartesian v-a; singularity/manipulability; EEF IK residual; complete swept self/environment/attached collision; forbidden regions; exact phase contact allowlist; torque/effort; force/contact/impulse; gripper physical width/speed/direction. Any mandatory gate UNAVAILABLE forces final REJECTED/MANDATORY_GATE_UNAVAILABLE with zero commands. Permissive stubs are forbidden.",
+
+  "expected_final_label": "SHIELD_FAIL_CLOSED_CORE_IMPLEMENTED_MANDATORY_GATES_UNAVAILABLE",
+
+  "case_inventory": "52 = 48 single-perturbation violations (S01-S08 structural, B01-B08 binding, F01-F06 freshness, P01-P08 prefix, J01-J10 joint, A01-A08 availability) + 4 controls (C01-C04). Controls exist to prove the shield is not indiscriminately rejecting everything at the first gate; they too must never yield an executable accepted prefix.",
+
+  "tzb_fe_amendments": [
+    {
+      "id": "AMEND_1_PREREGISTER_THE_INVENTORY_BEFORE_RUNNING",
+      "requirement": "metadata/continuous-action-shield-contract-v1.json — containing all 52 case ids, their single perturbation, and their EXACT expected gate and failure code — must be written create-once and its sha256 recorded BEFORE the runner executes even once. The runner receipt must cite that digest.",
+      "reason": "Otherwise 'every violation was caught by its pre-registered gate' is a post-hoc statement. The whole value of this exercise is that the expectations were fixed before the results were seen. This is the same prereg discipline the campaign ledger uses.",
+      "failure_mode_prevented": "Silently adjusting an expected failure code after observing which gate actually fired, producing 48/48 by definition."
+    },
+    {
+      "id": "AMEND_2_STATE_WHAT_WAS_ESTABLISHED_NOT_ONLY_WHAT_IS_UNAVAILABLE",
+      "requirement": "The summary receipt must carry a positive findings field alongside the unavailability block: which gates are implemented and runnable, and that N/48 constructed violations were rejected by their pre-registered gate with zero controller commands.",
+      "reason": "The expected final label is dominated by MANDATORY_GATES_UNAVAILABLE. A reader could conclude nothing was established. That would be the mirror error of over-claiming — accurate labelling is not self-negation, and over-weakening is its own failure. Report the positive fact fully, then the boundary."
+    },
+    {
+      "id": "AMEND_3_PER_GATE_STATUS_IS_THE_PRIMARY_EVIDENCE",
+      "requirement": "Because every case ends REJECTED once a mandatory gate is UNAVAILABLE, the final verdict alone carries almost no information. The per-gate PASS/REJECT/UNAVAILABLE/NOT_APPLICABLE table is the primary evidence and must be first-class in both the per-case receipts and the summary. The four controls' value is precisely that gates A-D return PASS before the mandatory block.",
+      "reason": "Otherwise the receipt reads as '52/52 REJECTED', which is true and uninformative, and hides whether the gates discriminate at all."
+    }
+  ],
+
+  "acceptance": "As stated in the lane scope: exact 52 with fixed unique ordered ids; 48/48 violations rejected by their pre-registered exact gate/code; 4/4 controls pass their local gates and then fail closed on mandatory unavailability; production-mode accepted_prefix_count=0; controller_command_count=0; physical_actuation/simulator/training/service all false; every REJECTED carries accepted_prefix_sha256=null and executed_prefix_sha256=null; old remainder and replay rejected 100%; identical input reruns produce a semantically identical receipt digest; a create-only verifier independently checks all 52 receipts plus the summary; stdlib+numpy, CPU-only; py_compile and self-test pass.",
+
+  "explicitly_forbidden_claims": [
+    "calling a contract-only numeric test a Franka production envelope",
+    "calling partial gate coverage shield safety",
+    "reporting an UNAVAILABLE gate as PASS",
+    "relaxing any gate in order to turn the old criterion 6 into a PASS",
+    "any capability, transfer, or safety pass claim"
+  ],
+
+  "resources": {"gpu": 0, "cpu_only": true, "no_package_install": true, "estimate_hours": "4-6", "hard_cap_hours": 8},
+
+  "stop_lines": "any target path already exists or would need overwriting; GPU, package install, controller, simulator, physical actuation, or network service becomes necessary; a write outside the write root or onto a frozen file becomes necessary; production semantics/units/timing/asset identity cannot be exactly bound; any path would ACCEPT while a mandatory gate is UNAVAILABLE; any of the 52 cases behaves unexpectedly; the verifier does not independently pass. On any stop line: halt and report, never fabricate a placeholder PASS.",
+
+  "lane_readonly_disclosure_accepted": "The lane disclosed that chxy has numpy/torch but no scipy/pinocchio/hppfcl/trimesh/pybullet/roboticstoolbox/urdfpy, and no Panda/Franka URDF/XML was found there; it located FK and A3 collision modules inside the frozen qwen-brain repo but will not copy, import, or claim reuse of them, and will not promote the simplified control/contact URDF in /Users/gl/tzb/robot_ws into a high-fidelity shield asset. tzb-fe accepts this disposition: not reusing them is correct, and saying so explicitly is better than quietly depending on them."
+}

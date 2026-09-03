@@ -1,0 +1,5 @@
+{"schema_version":"M2CJobRegistrationV1","job_identity":"flash-trial-v1","registered_by":"tzb-fe (tzb-a5)","registered_date_local":"2026-09-03 01:1x",
+ "verdict":"REGISTERED — 用户 01:1x 指令:开子代理,用 b.ai qwen3.8-flash 替 27B 放进智能体链试试('比27b强')",
+ "what":"用 api.b.ai/v1(OpenAI 兼容,key 在 ~/.config/tzb/bai.env,不入 git/state)的 qwen3.8-flash 跑两件:①契约可见 k=0 24 例(复用 repair-loop-v1 冻结 runner,只换 endpoint/model),与 27B 的 21/24 对照;②agent-demo-v2 四案例把 S1/S4 的 27B 换成 flash,S2/S3/S5 不动。都是尝试,不进交付包。",
+ "ownership":{"subagent flash-trial (tzb-a5 派)":["/Users/gl/tzb-lanes/flash-trial-v1/** (create-only)"]},
+ "hard_lines":["不改任何冻结源(runner、prompt、schema、validator、demo v1/v2 工件);复制到自己目录再改 endpoint。","不产生对外主张;数字只报给协调。","不 commit/push;不碰 node2/labserver;chxy 只为 S2 起 LocateAnything 入口,用完停。key 不写进任何仓库/state 文件/消息。"]}

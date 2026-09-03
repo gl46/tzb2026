@@ -1,0 +1,88 @@
+{
+  "scene_id": "IndustrialCylinderBenchmarkV1",
+  "seed": 1153,
+  "split": "train",
+  "part_count": 6,
+  "randomization": {
+    "material": "matte_metal",
+    "camera_offset_m": 0.0,
+    "light_intensity": 1.0333415388101392
+  },
+  "simulator_supervision": {
+    "training_and_evaluation_only": true,
+    "objects": [
+      {
+        "actual_sim_entity_id": "cylinder_01",
+        "category": "industrial_cylinder",
+        "orientation_state": "normal",
+        "position_3d_world": [
+          -0.29217102371731707,
+          -0.16730405278021293,
+          0.5
+        ],
+        "incoming_region": "incoming_a",
+        "yaw": -0.5229963365161421
+      },
+      {
+        "actual_sim_entity_id": "cylinder_02",
+        "category": "industrial_cylinder",
+        "orientation_state": "inverted",
+        "position_3d_world": [
+          -0.1876628150690653,
+          0.28597547612420243,
+          0.5
+        ],
+        "incoming_region": "incoming_b",
+        "yaw": 2.4555989976508066
+      },
+      {
+        "actual_sim_entity_id": "cylinder_03",
+        "category": "industrial_cylinder",
+        "orientation_state": "tilted",
+        "position_3d_world": [
+          -0.2704218095034828,
+          -0.29447776896259714,
+          0.48
+        ],
+        "incoming_region": "incoming_a",
+        "yaw": 0.7338495409537273
+      },
+      {
+        "actual_sim_entity_id": "cylinder_04",
+        "category": "industrial_cylinder",
+        "orientation_state": "normal",
+        "position_3d_world": [
+          -0.2537601231056401,
+          0.08116554901813831,
+          0.5
+        ],
+        "incoming_region": "incoming_b",
+        "yaw": -1.775626656194548
+      },
+      {
+        "actual_sim_entity_id": "cylinder_05",
+        "category": "industrial_cylinder",
+        "orientation_state": "inverted",
+        "position_3d_world": [
+          -0.23995033377568145,
+          -0.08586325314595061,
+          0.5
+        ],
+        "incoming_region": "incoming_a",
+        "yaw": 1.8230439582417892
+      },
+      {
+        "actual_sim_entity_id": "cylinder_06",
+        "category": "industrial_cylinder",
+        "orientation_state": "tilted",
+        "position_3d_world": [
+          -0.38686508967970834,
+          0.14026307594553242,
+          0.48
+        ],
+        "incoming_region": "incoming_b",
+        "yaw": 2.9659860493027415
+      }
+    ]
+  }
+}

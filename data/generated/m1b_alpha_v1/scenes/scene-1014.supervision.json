@@ -1,0 +1,126 @@
+{
+  "scene_id": "IndustrialCylinderBenchmarkV1",
+  "seed": 1014,
+  "split": "val",
+  "part_count": 10,
+  "randomization": {
+    "material": "matte_metal",
+    "camera_offset_m": 0.0,
+    "light_intensity": 1.0545337222940172
+  },
+  "simulator_supervision": {
+    "training_and_evaluation_only": true,
+    "objects": [
+      {
+        "actual_sim_entity_id": "cylinder_01",
+        "category": "industrial_cylinder",
+        "orientation_state": "normal",
+        "position_3d_world": [
+          -0.42800445971084117,
+          -0.13774733230815514,
+          0.5
+        ],
+        "yaw": -0.4885900499724394
+      },
+      {
+        "actual_sim_entity_id": "cylinder_02",
+        "category": "industrial_cylinder",
+        "orientation_state": "inverted",
+        "position_3d_world": [
+          -0.19340858756942253,
+          0.06595396122557179,
+          0.5
+        ],
+        "yaw": -2.052001929279936
+      },
+      {
+        "actual_sim_entity_id": "cylinder_03",
+        "category": "industrial_cylinder",
+        "orientation_state": "tilted",
+        "position_3d_world": [
+          -0.09958777435485733,
+          -0.0057195432453167605,
+          0.48
+        ],
+        "yaw": 1.940699150892744
+      },
+      {
+        "actual_sim_entity_id": "cylinder_04",
+        "category": "industrial_cylinder",
+        "orientation_state": "normal",
+        "position_3d_world": [
+          -0.28405230518028474,
+          -0.0170388616810192,
+          0.5
+        ],
+        "yaw": -3.107709039666971
+      },
+      {
+        "actual_sim_entity_id": "cylinder_05",
+        "category": "industrial_cylinder",
+        "orientation_state": "inverted",
+        "position_3d_world": [
+          -0.354649584567204,
+          0.03567088369754562,
+          0.5
+        ],
+        "yaw": -2.211447376298264
+      },
+      {
+        "actual_sim_entity_id": "cylinder_06",
+        "category": "industrial_cylinder",
+        "orientation_state": "tilted",
+        "position_3d_world": [
+          -0.24849709257348124,
+          -0.2002743210880002,
+          0.48
+        ],
+        "yaw": 0.369701197772478
+      },
+      {
+        "actual_sim_entity_id": "cylinder_07",
+        "category": "industrial_cylinder",
+        "orientation_state": "normal",
+        "position_3d_world": [
+          -0.2460562800484431,
+          0.025833356808872776,
+          0.5
+        ],
+        "yaw": -1.9728827774331574
+      },
+      {
+        "actual_sim_entity_id": "cylinder_08",
+        "category": "industrial_cylinder",
+        "orientation_state": "inverted",
+        "position_3d_world": [
+          -0.34423860774065873,
+          0.1446954106948929,
+          0.5
+        ],
+        "yaw": -0.237398885469414
+      },
+      {
+        "actual_sim_entity_id": "cylinder_09",
+        "category": "industrial_cylinder",
+        "orientation_state": "tilted",
+        "position_3d_world": [
+          -0.25882466521397757,
+          0.005152698133999711,
+          0.48
+        ],
+        "yaw": -2.592301050789297
+      },
+      {
+        "actual_sim_entity_id": "cylinder_10",
+        "category": "industrial_cylinder",
+        "orientation_state": "normal",
+        "position_3d_world": [
+          -0.31335545367737694,
+          0.2106952003292471,
+          0.5
+        ],
+        "yaw": 0.28282652643014705
+      }
+    ]
+  }
+}

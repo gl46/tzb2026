@@ -1,0 +1,148 @@
+{
+  "scene_id": "IndustrialCylinderBenchmarkV1",
+  "seed": 1129,
+  "split": "train",
+  "part_count": 11,
+  "randomization": {
+    "material": "matte_metal",
+    "camera_offset_m": 0.0,
+    "light_intensity": 0.9456636984462627
+  },
+  "simulator_supervision": {
+    "training_and_evaluation_only": true,
+    "objects": [
+      {
+        "actual_sim_entity_id": "cylinder_01",
+        "category": "industrial_cylinder",
+        "orientation_state": "normal",
+        "position_3d_world": [
+          -0.26919004982031125,
+          -0.10929357450878519,
+          0.5
+        ],
+        "incoming_region": "incoming_a",
+        "yaw": 0.7714932748188503
+      },
+      {
+        "actual_sim_entity_id": "cylinder_02",
+        "category": "industrial_cylinder",
+        "orientation_state": "inverted",
+        "position_3d_world": [
+          -0.10479891678238368,
+          0.0910500835423081,
+          0.5
+        ],
+        "incoming_region": "incoming_b",
+        "yaw": -1.1435679150289124
+      },
+      {
+        "actual_sim_entity_id": "cylinder_03",
+        "category": "industrial_cylinder",
+        "orientation_state": "tilted",
+        "position_3d_world": [
+          -0.3858702805931985,
+          -0.26418770827446286,
+          0.48
+        ],
+        "incoming_region": "incoming_a",
+        "yaw": 0.8451146609665434
+      },
+      {
+        "actual_sim_entity_id": "cylinder_04",
+        "category": "industrial_cylinder",
+        "orientation_state": "normal",
+        "position_3d_world": [
+          -0.1066943297035633,
+          0.2939832395738376,
+          0.5
+        ],
+        "incoming_region": "incoming_b",
+        "yaw": -2.27875246730515
+      },
+      {
+        "actual_sim_entity_id": "cylinder_05",
+        "category": "industrial_cylinder",
+        "orientation_state": "inverted",
+        "position_3d_world": [
+          -0.2312457253584295,
+          -0.21043055263517274,
+          0.5
+        ],
+        "incoming_region": "incoming_a",
+        "yaw": 1.1753169052603711
+      },
+      {
+        "actual_sim_entity_id": "cylinder_06",
+        "category": "industrial_cylinder",
+        "orientation_state": "tilted",
+        "position_3d_world": [
+          -0.3294938207223442,
+          0.22297110910556905,
+          0.48
+        ],
+        "incoming_region": "incoming_b",
+        "yaw": -1.078189249698724
+      },
+      {
+        "actual_sim_entity_id": "cylinder_07",
+        "category": "industrial_cylinder",
+        "orientation_state": "normal",
+        "position_3d_world": [
+          -0.3013676232567519,
+          -0.3098911723711884,
+          0.5
+        ],
+        "incoming_region": "incoming_a",
+        "yaw": -2.2049002178919217
+      },
+      {
+        "actual_sim_entity_id": "cylinder_08",
+        "category": "industrial_cylinder",
+        "orientation_state": "inverted",
+        "position_3d_world": [
+          -0.2740681743013341,
+          0.08371315728009496,
+          0.5
+        ],
+        "incoming_region": "incoming_b",
+        "yaw": -0.4963286272610783
+      },
+      {
+        "actual_sim_entity_id": "cylinder_09",
+        "category": "industrial_cylinder",
+        "orientation_state": "tilted",
+        "position_3d_world": [
+          -0.3956771099064485,
+          -0.1687848042804611,
+          0.48
+        ],
+        "incoming_region": "incoming_a",
+        "yaw": -0.9378554918031332
+      },
+      {
+        "actual_sim_entity_id": "cylinder_10",
+        "category": "industrial_cylinder",
+        "orientation_state": "normal",
+        "position_3d_world": [
+          -0.4291343608335109,
+          0.12184447914224047,
+          0.5
+        ],
+        "incoming_region": "incoming_b",
+        "yaw": -0.8434875223769942
+      },
+      {
+        "actual_sim_entity_id": "cylinder_11",
+        "category": "industrial_cylinder",
+        "orientation_state": "inverted",
+        "position_3d_world": [
+          -0.12140460359736199,
+          -0.2732920741111434,
+          0.5
+        ],
+        "incoming_region": "incoming_a",
+        "yaw": 1.3480478194290413
+      }
+    ]
+  }
+}

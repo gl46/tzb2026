@@ -1,0 +1,29 @@
+{
+ "schema_version": "M2CJobRegistrationV1",
+ "job_identity": "judge-package-v1",
+ "registered_by": "tzb-fe (tzb-a5)",
+ "registered_date_local": "2026-09-03 02:1x",
+ "rulings_user_0210": {
+  "freeze": "9/3 24:00 冻结只管原有成果与主张;打包环境截止 9/4 24:00",
+  "judge_machine": "更正 02:2x:假设评委有 24 GB 显卡。大模型不是限制项(我们没微调它,可插拔):任何 OpenAI 兼容端点都行,flash API 为默认,本地 vLLM(27B 或量化版)为可选;越小越快越好但不是硬要求。LocateAnything-3B + LoRA 本地跑。",
+  "who": "flash-trial 子代理报完 B/C 后转做打包骨架;用户就寝,tzb-a5 夜间长跑"
+ },
+ "deliverable_shape": "评委在我们的 Isaac 场景+打包环境里现场输入自然语言指令 → 全链跑(S1 flash 存在闸门 → S2 LocateAnything text 本地 GPU → S3 Isaac RGB-D 真绑定 → S4 flash 指挥体 → S5 冻结验证器 → Isaac 执行原语)→ 五宫格实时显示感知框/任务分解/验证结论/执行状态。附:场景文件、环境定义(容器或 conda+Isaac)、README 一键起、flash key 用环境变量、27B 可选配置、跨本体说明(契约层与本体无关)、推理效率数(flash 延迟/token,LocateAnything 单请求时延)。",
+ "ownership": {
+  "subagent flash-trial→packaging (tzb-a5 派)": [
+   "/Users/gl/tzb-deliverables/judge-package-v1/** (create-only)"
+  ],
+  "build-auditable-agent-demo ef4db636": [
+   "/Users/gl/tzb-lanes/agent-demo-v3-isaac-rgbd/** (真绑定+现场入口原型)"
+  ],
+  "two-shot-canonical-gate 72ad7a26": [
+   "/Users/gl/tzb-lanes/isaac-residual-diagnosis-v1/** (抓取原语)"
+  ]
+ },
+ "hard_lines": [
+  "不改冻结源;vendored 副本带补丁。",
+  "不 commit/push;不进 reports/。",
+  "key 不进包内文件,README 写环境变量。",
+  "子代理不再派子代理。"
+ ]
+}

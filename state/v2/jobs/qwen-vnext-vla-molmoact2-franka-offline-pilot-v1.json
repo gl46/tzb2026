@@ -1,0 +1,180 @@
+{
+  "schema_version": "M2CJobRegistrationV1",
+  "job_identity": "qwen-vnext-vla-molmoact2-franka-offline-pilot-v1",
+  "registered_by": "tzb-fe",
+  "registered_date_local": "2026-08-31",
+  "registration_is_not_authorization": "GPU and host scheduling authority belongs to the user, not to tzb-fe. The user authorized chxy GPU use for this line directly. This record is project-governance registration under the CLAUDE.md rule that every concurrent lane must have its exact file and resource ownership written down before dispatch. It neither grants nor withholds anything.",
+  "owner": {
+    "lane": "qwen-brain-owner",
+    "session_id": "72ad7a26-9a33-4894-ba52-21a593ed7175"
+  },
+  "host_and_gpu": {
+    "host": "chxy",
+    "device": "GPU0 A100-80GB",
+    "mode": "SHARED_NON_PREEMPTIVE",
+    "foreign_process": {
+      "name": "fangzhou",
+      "pid": 962984,
+      "workload": "ComfyUI",
+      "measured_gpu_memory_gib": 34.5,
+      "disposition": "DO_NOT_STOP_MOVE_OR_DISTURB",
+      "note": "The user stated this is a dead process not actually occupying space. That statement conflicts with the lane's own nvidia-smi reading of 34.5 GiB. tzb-fe ruling: act on the measurement, not on the statement, because the correct action is identical under both readings — use only free memory and do not touch it. A defunct process may still hold a CUDA context. It is not ours under any reading."
+    },
+    "free_memory_measured_gib": 46.5,
+    "additional_allocation_ceiling_gib": 44
+  },
+  "scope_now": {
+    "allowed": [
+      "Stage0 source/config/license/action-mapping preflight",
+      "Stage1A pipeline-connectivity test ONLY (degraded input, no real wrist RGB)"
+    ],
+    "blocked_by_hardware_until_wrist_camera_installed_and_calibrated": [
+      "Stage1B: 20 episodes with real synchronized external+wrist RGB",
+      "Stage2 adaptation / fine-tune",
+      "any capability, task-success, or transfer measurement"
+    ],
+    "forbidden_in_this_registration": [
+      "training",
+      "simulator",
+      "externally exposed service",
+      "physical actuation"
+    ],
+    "expanding_scope_requires": "a new registration entry, not an edit to this one",
+    "stage1_split_rationale": "Stage1 was originally registered as one thing. After the wrist-camera gap was identified it names two different things: a pipeline test that can run now on degraded input, and a capability measurement that cannot. Splitting the NAME is the control. A single label spanning both is exactly how a pipeline result gets reported as a capability result."
+  },
+  "pinned_candidate": "allenai/MolmoAct2-DROID@d8c1abd8a27d8e859455bbe514df2bcc617db0fb",
+  "resource_envelope": {
+    "additional_gpu_memory_gib_max": 44,
+    "stage1_wall_clock_hours_max": 2,
+    "write_scope": "dedicated VLA experiment directory only",
+    "write_scope_forbidden": [
+      "/Users/gl/tzb/reports/",
+      "semantic validator",
+      "contract layer",
+      "48-case suite",
+      "any frozen config",
+      "any baseline artifact"
+    ],
+    "vcs": "NO_COMMIT_NO_PUSH"
+  },
+  "hard_stop_any_of": [
+    "joint order or normalization (stats/mask/mode) cannot be verified from immutable source — applies to ALL stages including Stage1A, because these determine whether the loaded tensor is even the thing we think it is",
+    "gripper physical unit/encoding or model-step wall-clock timing cannot be verified — HARD STOP FOR CONTROLLER MAPPING AND FOR STAGE1B ONWARD. NOT a stop for Stage1A, which issues no controller command; Stage1A must instead set controller_mapping_authorized=false and record these fields as UNVERIFIED.",
+    "license unclear",
+    "digest drift",
+    "OOM, or projected to exceed 44 GiB",
+    "would require stopping or relocating another party's process",
+    "a stale or malformed proposal is accepted",
+    "an unsafe synthetic chunk is accepted",
+    "any privileged simulator truth enters policy input",
+    "any contact with the frozen surface, a baseline artifact, or a shared process"
+  ],
+  "tzb_fe_added_conditions": [
+    {
+      "id": "WRIST_RGB_ABSENCE_MUST_BE_ON_THE_RECEIPT",
+      "condition": "The user has approved adding a wrist camera, but it is not installed yet. MolmoAct2-DROID expects synchronized external + wrist RGB. If Stage1 runs before the wrist camera exists, the run receipt MUST state, as a first-class field, that it ran without real wrist RGB and what stood in its place.",
+      "claim_boundary": "Such a run may support ONLY: schema validity, action-mapping verification, latency measurement, and shield plumbing. It may NOT support any statement about the model's manipulation capability, task success, or transfer to our Franka. A degraded-input run is a pipeline test, not a capability measurement.",
+      "rationale": "This is the same failure shape as the eight meta-layer findings on 2026-08-31: the number would be real and the label would be wrong. Naming the degradation before the run is cheaper than retracting a claim after it.",
+      "status": "SUPERSEDED_BY_STAGE_SPLIT: the condition is now enforced structurally by the Stage1A/Stage1B naming plus the mandatory receipt fields above, rather than by a written caution alone."
+    },
+    {
+      "id": "REPORT_FAILURE_AS_FAILURE",
+      "condition": "If Stage1 does not meet acceptance, report that. Do not revise acceptance criteria after seeing results to make them pass. Any criterion revision must be declared before the run that it applies to."
+    },
+    {
+      "id": "OOM_IS_NOT_A_REASON_TO_RECLAIM",
+      "condition": "If the job OOMs within the free-memory ceiling, report the OOM. Do not free memory by touching any process that is not ours. Return to tzb-fe, who will ask the user."
+    }
+  ],
+  "delivery": "dedicated mounted/cache dir, per-file SHA-256, tree digest, license bytes",
+  "state_at_registration": "Only read-only resource inspection and small HuggingFace API metadata calls performed. No shards downloaded, no model, service, inference, or training started.",
+  "stage1a_mandatory_receipt_fields": {
+    "real_wrist_rgb_present": "must be present and false",
+    "wrist_substitution_kind": "e.g. duplicated external RGB, or explicit placeholder",
+    "substitute_image_sha256": "required",
+    "capability_measurement_authorized": "must be present and false",
+    "supported_scope": [
+      "checkpoint loading",
+      "schema and action mapping",
+      "latency and VRAM",
+      "output shape and finiteness",
+      "offline shield connectivity"
+    ],
+    "unsupported_scope": [
+      "manipulation capability",
+      "task success rate",
+      "transfer to our Franka",
+      "any comparison against published benchmark numbers"
+    ]
+  },
+  "synchronization_hard_gates_for_stage1b": {
+    "external_to_wrist_ms_max": 10,
+    "camera_to_robot_state_ms_max": 10,
+    "group_span_ms_max": 15,
+    "offset_uncertainty_ms_max": 2,
+    "dropped_frame_rate_over_10min_max": 0.001,
+    "on_missing_or_non_monotonic_timestamp": "REJECT",
+    "note": "These are admission gates, not targets. They must be met by the installed hardware before Stage1B is registered."
+  },
+  "acceptance_original_stage1": [
+    "20/20 schema-valid finite (N,8) proposals",
+    "every action-mapping field verified from immutable source/config, not inferred",
+    "p95 latency supports the preset replan budget, or the budget is explicitly revised before Stage2",
+    ">=80% of episodes yield a non-empty offline-shield accepted prefix",
+    "all unsafe synthetic chunks rejected with zero controller commands"
+  ],
+  "acceptance_original_stage1_status": "RETAINED_AS_RECORD_APPLIES_TO_STAGE1B_ONLY. Two of its criteria (accepted-prefix rate, latency gate) are meaningless or misleading under degraded input and were removed from Stage1A.",
+  "acceptance_stage1a": [
+    "1. pinned allenai/MolmoAct2-DROID@d8c1abd8a27d8e859455bbe514df2bcc617db0fb loads against the recorded per-file SHA-256 and tree digest; the load directory identity matches the receipt identity.",
+    "2. all 20 requests write, as first-class receipt fields: stage=STAGE_1A_PIPELINE_ONLY, real_wrist_rgb_present=false, wrist_substitution_kind=DUPLICATED_EXTERNAL_RGB, substitute image SHA, capability_measurement_authorized=false. A missing field fails the entire run.",
+    "3. 20/20 outputs pass purely structural gates: request/observation/checkpoint identity match, schema valid, exactly 2-D (N,8), 1<=N<=15, all finite. This proves wire and inference connectivity ONLY.",
+    "4. every action-mapping field has an immutable source/config anchor: norm tag, state/action dim and names, joint order, control_mode, norm_mode + stats + mask, action_horizon, n_action_steps, gripper normalization. If gripper physical unit/encoding or model-step wall-clock timing still lack source evidence, mark them UNVERIFIED and forbid controller mapping — but this does not fail Stage1A loader connectivity.",
+    "5. latency, peak VRAM, and output-N distribution are RECORDED ONLY: no pass threshold, no interpretation as real dual-camera load or replan capability. OOM or exceeding 44 GiB still fails under the resource hard-stop.",
+    "6. synthetic shield contract tests, independent of model output: every constructed NaN/Inf, wrong shape/identity, stale, joint/workspace/velocity/collision/contact violation is REJECTED with controller_command_count=0. Any false accept fails. If the online shield is not yet implemented, record NOT_RUN — a documented design must never be reported as PASS."
+  ],
+  "stage1a_summary_label_allowed": [
+    "PIPELINE_CONNECTED_SHIELD_TESTS_NOT_RUN — wire works (criteria 1-3 pass) but criterion 6 could not run because no online shield is implemented yet",
+    "PIPELINE_CONNECTED — wire works AND criterion 6 actually ran and passed. Reserved; do not use while the shield is design-only.",
+    "PIPELINE_NOT_CONNECTED — the wire itself failed"
+  ],
+  "stage1a_summary_label_forbidden": [
+    "candidate passed",
+    "candidate usable",
+    "transfer",
+    "ready",
+    "works on our Franka",
+    "any phrasing that a reader could take as a capability or transfer statement"
+  ],
+  "tzb_fe_note_on_criterion_6": "Criterion 6 is the only real pass/fail in Stage1A, because it tests OUR code and does not depend on model input quality. Criteria 1-3 test connectivity; 4 records verification status; 5 records numbers. The NOT_RUN clause matters: on 2026-08-31 this project shipped a claim whose evidence artifact under-declared its own scope. A design document is not a test result.",
+  "hard_stop_disambiguation_2026_08_31": {
+    "conflict": "hard_stop_any_of[0] as originally written said unverifiable gripper unit or model-step timing was an unconditional hard stop, while acceptance_stage1a[4] said the same gap should be marked UNVERIFIED without failing Stage1A loader connectivity. Both were written by tzb-fe. They contradicted each other literally.",
+    "found_by": "qwen-brain-owner, before ignition, by reading the card rather than picking whichever rule suited the run",
+    "ruling": "The stop is scoped to where the risk is. Its purpose is to prevent issuing a wrong command to a real controller. Stage1A issues no controller command, so the stop does not bind there. Joint order and normalization remain an ALL-STAGE stop because they determine whether the loaded artifact is the thing we believe it is — that is an identity question, not a command-safety question.",
+    "verified_so_far": [
+      "generic joint_0..6",
+      "q01/q99 normalization mask",
+      "15-step action horizon"
+    ],
+    "still_unverified": [
+      "gripper physical unit/encoding",
+      "model-step wall-clock timing"
+    ],
+    "stage1a_consequence": "controller_mapping_authorized=false must appear as a first-class receipt field, and the two unverified items must be listed by name. Stage1B and any controller mapping remain blocked until both have immutable source evidence.",
+    "note": "A contradiction between two rules must be resolved by whoever wrote them, not by whoever is about to run the job. An executor choosing between conflicting rules is how a stop line quietly becomes optional."
+  },
+  "hard_stop_any_of_superseded_wording": "joint order, gripper unit, normalization, or model-step timing cannot be verified",
+  "summary_label_ruling_2026_08_31": {
+    "question": "If criteria 1-3 pass 20/20 but criterion 6 is honestly NOT_RUN (no implemented online shield), what should the top-level summary say?",
+    "asked_by": "qwen-brain-owner, before writing the ignition script, explicitly refusing to pick between two honest-but-different labels",
+    "option_a_rejected": "Bare PIPELINE_CONNECTED plus separate fields. Rejected not because it is false — it is true — but because the label is quotable without its qualifiers. Someone reads the summary line and stops. That is the mirror image of the 2026-08-31 lesson 'a correct label nobody can find is a wrong label': here it is a correct label that is found TOO easily relative to what limits it.",
+    "option_b_rejected": "Forcing PIPELINE_NOT_CONNECTED. Rejected because it is FALSE. If 20/20 proposals return schema-valid and finite, the pipeline IS connected. A label that misdescribes reality in the cautious direction is still a wrong label. The claims sheet already forbids this: accurate labelling is not self-negation, and over-weakening is its own failure.",
+    "ruling": "Weld the disqualifier into the label itself: PIPELINE_CONNECTED_SHIELD_TESTS_NOT_RUN. This is not a third category — it is the same category with its limit attached, so that anyone quoting the label quotes the limit. Structural, not a written caution. Same principle as replacing the video's 'do not cut this' annotation with boundaries distributed across four shots.",
+    "reserved": "PIPELINE_CONNECTED alone becomes available only once the shield is implemented and criterion 6 actually runs.",
+    "required_fields_unchanged": [
+      "acceptance_stage1a_complete: false",
+      "shield_contract_tests.status: NOT_RUN",
+      "controller_mapping_authorized: false"
+    ],
+    "the_actual_headline_of_stage1a": "The most important thing Stage1A will establish is not that the wire works. It is that the continuous-action shield — the component the entire VLA integration thesis depends on — exists today only as a design document in the spec, not as running code. Criterion 6 returning NOT_RUN is that finding. Report it as a finding, not as an unfortunate gap in an otherwise good result."
+  }
+}

@@ -1,0 +1,46 @@
+{
+ "schema_version": "M2CJobRegistrationV1",
+ "job_identity": "vnext-binding-gap-v1",
+ "registered_by": "tzb-fe (tzb-57)",
+ "registered_date_local": "2026-09-03 00:3x",
+ "verdict": "REGISTERED — 用户 00:3x 指令:两个会话一人一个问题",
+ "what_this_is": "项目唯一没过关的环节是像素框→三维坐标→动作的绑定。两条 vNext 工程线,都在 Isaac 里做,不进交付包,不回填任何冻结判定。",
+ "problem_1": {
+  "owner_sid": "72ad7a26 (现名 tzb-f5)",
+  "title": "查清 12 发 campaign 里末端偏约 95 mm 的原因",
+  "how": "在 Isaac 里重放冻结 family24 场景,每步读 prim 真值位姿(目标物体、hand、指尖中点),把残差拆成感知项(目标点 vs 物体真值)和运动链项(末端 vs 目标点);单独验证旋转约定假设(单位旋转 vs 旋转目标,误差消不消)。",
+  "writes": [
+   "/Users/gl/tzb-lanes/isaac-residual-diagnosis-v1/** (create-only)",
+   "labserver 工作目录自选 create-only,不碰任何 m2c-r13239 冻结根"
+  ]
+ },
+ "problem_2": {
+  "owner_sid": "ef4db636 (现名 build-auditable-agent-demo)",
+  "title": "把演示链的合成绑定换成真的:Isaac RGB-D → LocateAnything 框 → 深度反投影 → 世界系 → 真 TaskSpec",
+  "how": "Isaac 渲染 RGB-D 与相机内外参真值;LocateAnything text 模式出框(用 tzb-f5 的 chxy 入口);框内深度分割取中位深度反投影到世界系;生成 TaskSpec 走 S4/S5 不改;顺手修审查清单里两个感知 bug(躺倒圆柱 Z 偏移、半径修正)。",
+  "writes": [
+   "/Users/gl/tzb-lanes/agent-demo-v3-isaac-rgbd/** (create-only)",
+   "labserver 工作目录自选 create-only"
+  ]
+ },
+ "hard_lines": [
+  "不改冻结源与冻结 campaign 工件;结果标 vNext,不回填。",
+  "不产生对外主张;进不进 deck 由用户定。",
+  "禁 commit/push、禁子代理;labserver 只经 ssh chxy → root@10.13.28.6,磁盘 90% 满,不动他人进程。"
+ ],
+ "rules_20260903_0040": {
+  "ordinal": "Isaac 重放/渲染不消费 campaign ordinal。冻结账目(有效 5 / 成功 0 / 未消费 7)永不变;m2c-r13239 任何冻结根零写入;vNext 工件只写各自 lane 目录。",
+  "isaac_exclusive": "更新 00:5x:GPU1 上的 llama-server(用户自己的,pid 599936)已按用户指令停掉,两张 3080 都空。改为各用一张:demo lane(problem_2)GPU0,残差线(problem_1)GPU1,互不等待;每张卡上仍一次只跑一个 Isaac 进程;起前 nvidia-smi 看自己那张卡,起停仍互通知。",
+  "disk": "labserver 剩 81 GB。每 lane 在 /var/tmp/vnext-<lane>-20260903/ 下 create-only,总量 ≤10 GB,到 8 GB 停并报协调;不清任何他人文件;要更多找协调,协调问用户。"
+ },
+ "problem_3": {
+  "owner_sid": "72ad7a26 (two-shot-canonical-gate)",
+  "title": "在 Isaac 里抓起来一次",
+  "authorized": "用户 9/3 01:4x '让的';冻结为 9/3 24:00",
+  "how": "按 root-cause-findings 四条修:每命令前复位、指尖-物体真值打分、接近偏移在工具系加、记完整位姿;先找可达抓取姿态(侧向/斜向或调相对位置),再跑抓取:指尖-物体进 10/15/10 包络、夹爪合上、提起并保持。vNext 目录内做,冻结 campaign 代码零改动。",
+  "writes": [
+   "/Users/gl/tzb-lanes/isaac-residual-diagnosis-v1/** (create-only 续用)",
+   "labserver /var/tmp/vnext-residual-20260903/ ≤10GB, GPU1"
+  ]
+ }
+}

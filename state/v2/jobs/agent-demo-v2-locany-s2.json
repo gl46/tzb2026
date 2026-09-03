@@ -1,0 +1,41 @@
+{
+ "schema_version": "M2CJobRegistrationV1",
+ "job_identity": "agent-demo-v2-locany-s2",
+ "registered_by": "tzb-fe (tzb-c2)",
+ "registered_date_local": "2026-09-02 22:25",
+ "verdict": "REGISTERED — user directive 22:2x '把rexomni换成locateanything呗,现在还来得及'",
+ "what_this_is": "agent-demo-v1 的 S2 定位段从冻结 Rex-Omni 响应换成 LocateAnything-3B + 我们训的 visual-prompt LoRA(pilot GO adapter,formal-training-2000step-v3,bundle c7f56047)的**现场推理**。其余段(S1 27B 存在闸门、S3 SYNTHETIC 绑定、S4 27B 指挥体、S5 冻结语义验证器)逐字不动。仍是 DEMONSTRATION,不产生任何数字主张。",
+ "s2_semantics_ruling": "S2 模式二选一,由 two-shot-canonical-gate 在 600 张 text 模式粗测后直接告诉 demo lane:text 模式(类别名→框,基座权重,角色同 Rex,不需要示例框)只要不明显差于 Rex 就用 text;否则用 vp(pilot adapter,示例框作操作员输入,标 OPERATOR_EXEMPLAR_BOX)。两种都允许,demo lane 不必等我再裁。",
+ "deliverable": {
+  "chxy_infer_entry": "chxy:/home/fx/locateanything-vp-v1/source/locany_vp_infer_demo_v1.py(create-only):--mode text|vp;text 输入 (target_image, category_names),vp 输入 (target_image, exemplar_image, exemplar_box_xyxy) → 预测 xyxy 框列表 JSON;逐字复用 evaluate_visual_prompt_v1 系列的模型加载/prompt/解码路径,不新造;附 receipts/locany-vp-infer-demo-freeze-v1.json 绑定 adapter 与源 digest",
+  "agent_loop_v2": "/Users/gl/tzb-lanes/agent-demo-v2/agent_loop_v2.py(create-only 新目录):S2 调 chxy 推理入口(ssh 或 HTTP,由 owner 定),PerceptionCandidate.authority 仍为 UNTRUSTED_NOT_TASKSPEC,新增 source=LocateAnything-VP-LoRA-pilot",
+  "traces_frames": "/Users/gl/tzb-lanes/agent-demo-v2/agent-demo-traces-v2/ 与 agent-demo-frames-v2/{case}/frame-s1..s5.png + summary.png,同四个案例,五宫格布局不变,水印 DEMONSTRATION NOT EVALUATION / DEMO_SYNTHETIC_NOT_TRUSTED / OPERATOR_EXEMPLAR_BOX",
+  "completion": "/Users/gl/tzb-lanes/agent-demo-v2/agent-demo-completion-v2.json,守恒 PASS"
+ },
+ "ownership": {
+  "build-auditable-agent-demo [61881d]": [
+   "/Users/gl/tzb-lanes/agent-demo-v2/**"
+  ],
+  "tzb-fe": [
+   "state/v2/**",
+   "PPT P11 换帧(用 v2 summary.png)"
+  ],
+  "LocateAnything lane sessionId 72ad7a26 (名字不稳定:曾叫 two-shot-canonical-gate / tzb-f5;归属绑 sid 不绑名)": [
+   "chxy:/home/fx/locateanything-vp-v1/source/locany_vp_infer_demo_v1.py",
+   "chxy:/home/fx/locateanything-vp-v1/receipts/locany-vp-infer-demo-freeze-v1.json",
+   "/Users/gl/tzb-lanes/rex-omni-pointing-v1/locany-text-600-diagnostic-v1.json (create-only, DIAGNOSTIC)",
+   "chxy:/home/fx/locateanything-vp-v1/receipts/locany-vp-infer-demo-freeze-v1-amendment-v1.json (create-only)"
+  ]
+ },
+ "hard_lines": [
+  "不改任何冻结源(validator、contract、schema、gate prompt、repair-loop prompt、adapter 权重)。",
+  "不产生任何新的性能主张;交付物(deck/brief/报告)里不做 Rex 对比表述。内部同图逐行诊断(600 张 text 模式 vs Rex 冻结响应)允许,标 DIAGNOSTIC,只用于选 S2 模式和回答用户,不进交付物。",
+  "禁 commit/push、禁 reports/、禁子代理。"
+ ],
+ "deadline": "2026-09-03 12:00 前交 frames-v2/summary.png;P11 换帧在 PPT 最后一批一起做",
+ "not_in_scope": "GPT 设计的行为树执行器/技能库/RGB-D/6D 位姿/Isaac 场景——外审 9/1 裁主线不动,且 9/3 冻结前不可达;见 design.agent_input_recovered",
+ "revision": "2026-09-02 22:5x tzb-fe:S2 模式改为 text|vp 二选一(原文'不得用文本模式'作废);硬线精简为三条永久项。 22:5x:登记 600 张 text 诊断路径 owner=two-shot-canonical-gate;Rex 对比禁令限定为交付物表述,内部诊断放行。",
+ "ruling_20260902_2320": "归属冲突裁定:chxy 入口 locany_vp_infer_demo_v1.py(b5159bf8)与 freeze 回执(da827b6f)由 tzb-f5 写成、已冻结、demo lane 实测可用,即为权威;撞车的是同一会话 72ad7a26 被 resume 出的两个实例(名 tzb-f5 与 two-shot-canonical-gate);写成文件的那个实例为准,另一实例的 /private/tmp 等价实现废弃。归属仍在该 sid,不存在'已退出的持有者'。600 张 text 诊断与 amendment 回执均归 tzb-f5。S2 模式:tzb-f5 跑完 600 张直接告知 demo lane;若 09-03 00:30 仍无结论,demo lane 回落 vp 并注明超时回落。示例框口径(同类别另一实例、absent 案不给框)批准。",
+ "delivery_ruling_20260903_0000": "交付路径偏离接受:P11 取 attempt2-v3/agent-demo-frames-v3/{case}/summary.png(completion-v3 = DEMO_COVERAGE_COMPLETE);attempt1(frames-v2,OOM 致 INCOMPLETE)保留披露,不移动不覆盖;以 deliverable-frames-pointer-v2.json 为指针。S2 = text(基座无 adapter)。",
+ "ownership_note": "本项目会话名每次重开都变,同一 sid 可同时有多个实例;归属只绑 sessionId(~/.claude/sessions/*.json 的 sessionId 字段),名字仅作当时的送达地址。"
+}

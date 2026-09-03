@@ -1,0 +1,163 @@
+# Causal controllability suite for Teacher bake-off (BWM vs Cosmos3-Nano).
+# Priority: action causality over video aesthetics. GPU execution remains gated.
+schema_version: TeacherCausalSuiteV0
+suite_id: teacher-causal-v0
+checked_at: "2026-07-17"
+action_mapping_revision: EVAL_EE_DELTA_WORLD_M_GRIPPER_V0
+action_domain: ee_delta_world_m_gripper
+coordinate_frame: world
+units: m_rad_gripper01
+fps: 10.0
+embodiment: franka_panda_eval
+candidates: [bwm, cosmos3_nano]
+shared_scene:
+  scene_id: industrial-table-cylinder-bin-v0
+  language_task: pick cylinder and place into bin cell
+  objects: [cylinder, bin, table]
+  notes: >
+    Same initial RGB conditioning for all paired variants under a case.
+    Official Franka action mapping is still unverified; this suite uses an
+    explicit evaluation mapping only for relative Teacher comparison.
+cases:
+  - case_id: C1_static_hold
+    title: 静止对照
+    priority: P0_basic
+    purpose: detect free-running video prior when action is null
+    variants:
+      - variant_id: hold_open
+        description: keep current EE pose; gripper stays open
+        action_summary: hold_pose_open_gripper
+    pass_criteria:
+      - arm_does_not_self_move
+      - cylinder_does_not_teleport
+      - bin_and_background_stable
+    fail_modes:
+      - spontaneous_pick_or_place_story
+      - object_drift_without_contact
+    scoring_axes: [static_stability, no_spurious_motion]
+
+  - case_id: C2_left_right_opposite
+    title: 同一画面左右相反动作
+    priority: P0_controllability
+    purpose: opposite EE lateral deltas must reverse arm motion
+    variants:
+      - variant_id: move_left_10cm
+        description: EE translates -Y 0.10 m
+        action_summary: ee_delta_y_-0.10_open
+      - variant_id: move_right_10cm
+        description: EE translates +Y 0.10 m
+        action_summary: ee_delta_y_+0.10_open
+    pass_criteria:
+      - left_and_right_arm_motion_clearly_opposite
+      - non_target_objects_stable
+      - neither_variant_collapses_to_generic_grasp
+    fail_modes:
+      - both_variants_same_direction
+      - grasp_prior_overrides_lateral_command
+    scoring_axes: [direction_sign_consistency, object_identity, non_action_stability]
+    pair_metric: opposite_lateral_sign
+
+  - case_id: C3_grasp_vs_no_grasp
+    title: 抓取与不抓取反事实
+    priority: P0_critical
+    purpose: gripper close must be causal for object lift
+    variants:
+      - variant_id: approach_close_lift
+        description: approach cylinder, close gripper, lift
+        action_summary: approach_close_lift
+      - variant_id: approach_open_lift
+        description: same approach, keep gripper open, lift
+        action_summary: approach_open_lift
+    pass_criteria:
+      - closed_lift_carries_cylinder
+      - open_lift_leaves_cylinder_on_table
+      - only_gripper_differs_in_action
+    fail_modes:
+      - both_lift_object
+      - neither_lifts_object_when_closed
+      - object_sticks_without_closure
+    scoring_axes: [gripper_object_causality, contact_consistency]
+    pair_metric: grasp_counterfactual
+
+  - case_id: C4_empty_grasp_offset
+    title: 抓空测试
+    priority: P0_critical
+    purpose: offset miss must remain a failure, not auto-corrected success
+    variants:
+      - variant_id: offset_close_lift
+        description: approach 4 cm beside cylinder, close, lift
+        action_summary: approach_offset_0.04_close_lift
+    pass_criteria:
+      - cylinder_stays_on_table
+      - gripper_lifts_empty
+      - no_auto_success_correction
+    fail_modes:
+      - model_steers_into_successful_grasp
+      - object_teleports_into_gripper
+    scoring_axes: [failure_faithfulness, empty_grasp_honesty]
+
+  - case_id: C5_place_pose_variants
+    title: 放置位置与姿态测试
+    priority: P1_task
+    purpose: place cell/outside/sideways must not all become perfect upright bin insert
+    variants:
+      - variant_id: place_bin_r2c3_upright
+        description: move over bin row2 col3 and release upright
+        action_summary: place_bin_r2c3_upright_release
+      - variant_id: place_outside_bin_release
+        description: move outside bin footprint and release
+        action_summary: place_outside_release
+      - variant_id: place_above_bin_sideways_release
+        description: above bin with sideways orientation then release
+        action_summary: place_above_sideways_release
+    pass_criteria:
+      - r2c3_enters_target_cell_upright
+      - outside_release_lands_outside_bin
+      - sideways_release_is_unstable_or_collides_not_perfect_upright
+    fail_modes:
+      - all_variants_perfect_vertical_bin_insert
+      - destination_ignored
+    scoring_axes: [destination_sensitivity, pose_sensitivity, release_honesty]
+
+  - case_id: C6_recovery_after_failure
+    title: 失败后的恢复动作
+    priority: P1_recovery
+    purpose: recovery policy must differ from blind re-press after failure states
+    initial_failure_states:
+      - cylinder_tipped_at_cell_mouth
+      - cylinder_half_inserted
+      - cylinder_slipped_from_gripper
+      - adjacent_part_knocked_askew
+    variants:
+      - variant_id: press_down_again
+        description: from failed state, press downward again
+        action_summary: recovery_press_down
+      - variant_id: backoff_regrasp_place
+        description: backoff, reorient, regrasp, place normally
+        action_summary: recovery_backoff_regrasp_place
+    pass_criteria:
+      - press_down_does_not_magically_succeed_from_all_failures
+      - structured_recovery_differs_from_blind_press
+      - regrasp_path_shows_backoff_then_retry_structure
+    fail_modes:
+      - both_actions_instantly_succeed
+      - recovery_ignored_and_story_resets
+    scoring_axes: [recovery_structure, failure_state_persistence, action_difference]
+    pair_metric: recovery_contrast
+scoring_rubric:
+  scale: [0, 1, 2]
+  meanings:
+    0: clear fail / prior overrides action
+    1: partial / ambiguous
+    2: clear pass on the axis
+  critical_axes:
+    - gripper_object_causality
+    - failure_faithfulness
+    - direction_sign_consistency
+  ranking_rule: >
+    Prefer higher sum on critical axes; aesthetics and latency are secondary.
+    A model that invents successful grasps on C3/C4 is reject-recommended for Teacher use.
+execution_gates:
+  allow_gpu_run_env: ALLOW_TEACHER_GPU_RUN
+  default: blocked_template_only
+  notes: suite generation is CPU-only; inference requires explicit human gate

@@ -1,0 +1,77 @@
+{
+  "schema_version": "M2CJobRegistrationV1",
+  "job_identity": "rex-omni-pointing-lane-phase0",
+  "lane": "tzb-50",
+  "lane_session_id": "ef4db636-e7a8-4242-9b1d-f71a32e0008c",
+  "registered_by": "tzb-fe",
+  "registered_date_local": "2026-09-01",
+  "verdict": "REGISTERED",
+  "origin": "The user assigned the Rex-Omni pointing line to a new session and cleared the Qwen RESEARCH LICENSE for competition use on 2026-09-01.",
+  "phase_0_scope": {
+    "allowed": [
+      "read active state pointers",
+      "inventory existing incumbent-pointing interfaces, PR-Bench / Rex-Omni assets, and Isaac-to-point supervision inputs",
+      "draft a same-media beat-incumbent probe with explicit metrics, limitations, and the privileged-GT boundary"
+    ],
+    "write_path": "NONE — phase 0 is read-only by the lane's own declaration",
+    "forbidden": [
+      "training",
+      "GPU jobs",
+      "commit / push",
+      "subagents",
+      "/Users/gl/tzb/reports/",
+      "/Users/gl/projects/xh-202607-qwen-brain/",
+      "semantic validators, contract layer, the 48-case suite, any frozen config"
+    ]
+  },
+  "proposed_future_write_root_not_yet_created": "node2:/home/gl/xh-202607-qrm-lite/rex-omni-pointing-v1/",
+  "escalation_rule": "A separate job identity / host / card / duration / acceptance / stop packet must be sent to tzb-fe and registered before any GPU work or any write.",
+  "why_the_qwen_brain_repo_is_off_limits": "brief-8 publishes repository-wide test figures for /Users/gl/projects/xh-202607-qwen-brain. Adding code there before the 2026-09-03 freeze would drift those published numbers. The repo must stay byte-stable through the freeze.",
+  "tzb_fe_notes_for_phase_0": [
+    {
+      "id": "INCUMBENT_FIRST",
+      "note": "The probe's purpose is to measure whether the frozen Qwen3.8-27B — which is already multimodal and already served — can point. Any 3B/4B pointing model must beat it on the same scale before it earns a slot. The adoption rule is beat-incumbent, not newer-paper."
+    },
+    {
+      "id": "PRIVILEGED_GT_BOUNDARY_IS_PERMANENT",
+      "note": "Simulator ground truth may be used for SCORING only. It must never enter test-time policy input. P3 was cancelled for crossing this line. The probe design must separate the two explicitly, not by convention."
+    },
+    {
+      "id": "NO_SCALE_EXISTS_YET",
+      "note": "The object-table benchmark has no owner and is not being built. Without it there is no shared scale on which beat-incumbent can be decided. PR-Bench (released separately from Motto) may cover part of this. State plainly in the draft if the probe cannot be scored for lack of a scale — that is a finding, not a failure."
+    },
+    {
+      "id": "NO_POINTING_SUPERVISION_EXISTS_YET",
+      "note": "The frozen visual family is defective: expected answers require emitting an opaque internal ID (s5_track_...) absent from the input, so 0/12 is a task defect, not a capability result. That data cannot be reused as pointing supervision. Isaac carries GT pose and could be converted, but that conversion is its own engineering line."
+    },
+    {
+      "id": "CLAIM_DISCIPLINE",
+      "note": "Numbers carry test medium, conditions, and unsupported extrapolations. 'We did not verify X' must never be written as 'X is unverifiable'. A single observation never supports a universal claim. mtime is not byte evidence; probability is not verification. Declaring work complete requires one completely-returned scan, not an absence of visible errors."
+    }
+  ],
+  "verified_facts_handed_to_the_lane": {
+    "Qwen/Qwen3.5-4B": "HF 200, ModelScope 200, multimodal image-text-to-text; weights cached at node2:/home/gl/xh-202607-qrm-lite/hf-cache/manual/Qwen3.5-4B, 8.8 GB, DOWNLOAD_OK, revision 851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a; Apache-2.0 per model card audited 2026-07-18",
+    "Qwen/Qwen3.5-3B": "DOES NOT EXIST (HF 401 / MS 404)",
+    "IDEA-Research/Rex-Omni": "HF 200 and ModelScope 200; AWQ variant exists; fine-tuning code released including pointing-task SFT and GRPO; IDEA License 1.0 with a Qwen RESEARCH LICENSE base, cleared by the user for this competition",
+    "Motto (arXiv 2607.24407)": "real paper, bases Qwen3-VL-2B/4B; model checkpoints COMING SOON, no training code released; only architecture, single-image inference, and PR-Bench are available. Do not plan on using Motto weights.",
+    "negative_control": "fake-org/fake-model-xyz returned 401 — the 200s above are not a wildcard response",
+    "nvidia/LocateAnything-3B": "HF 200, ModelScope 404 (NOT domestically reachable — must be tested via hf-mirror for LFS, not just API metadata); base Qwen/Qwen2.5-3B-Instruct; license 'other' (read the terms, do not assume); downloads 113052, likes 2972; created 2026-03-02, lastModified 2026-06-12 (no new checkpoint in ~3 months). CRITICAL GAP: the released weights do NOT support visual-prompt inference out of the box — official wording is 'will be released in a future version' with no year, month, or roadmap. A visual-prompt LoRA fine-tuning script was released in June; the weights were not. Rex-Omni DOES support visual prompt."
+  },
+  "tzb_fe_routing_correction": "Earlier external advice referenced team members and lanes named 加三 and C 线. No such lanes exist in this project's ownership table. The registered lanes are tzb-fe, m2c-exec (isolate-prereg-loader-recovery), qwen-brain-owner (two-shot-canonical-gate), and now tzb-50. Any plan whose load-bearing step is assigned to a non-existent lane has no owner.",
+  "user_rulings_2026_09_01": {
+    "non_commercial_license": "acceptable — a non-commercial restriction does not block this competition use. Terms must still be read and recorded, not assumed.",
+    "netdisk_distribution": "acceptable for delivering weights to judges, but a SHA256 must accompany the link so the recipient can verify."
+  },
+  "candidate_set": [
+    "IDEA-Research/Rex-Omni",
+    "nvidia/LocateAnything-3B",
+    "the incumbent frozen Qwen3.8-27B"
+  ],
+  "decision_criteria_in_order": [
+    "1. beat the incumbent — can the frozen 27B, already multimodal and already served, point? Nothing can be selected against no baseline.",
+    "2. visual-prompt path — 'box one example, find the rest' is the industrial new-SKU action and the few-shot adaptation story",
+    "3. domestic reachability — the test machine cannot reach overseas hosts",
+    "4. license terms — read and record; probability is not verification"
+  ],
+  "why_visual_prompt_matters_here": "Show one sample part, find all like it. That is literally what happens when a new SKU arrives on a line. A model without that path can still do text-prompted detection, but it cannot do the few-shot adaptation story."
+}

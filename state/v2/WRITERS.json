@@ -1,0 +1,35 @@
+{
+  "_doc": "tzb-fe 单写。role→sessionId 绑定注册表(STATE-PROTOCOL-v2 裁定 A2)。statectl --session 取值是角色串(重启不变),自声明未验证,属写入纪律层,非安全属性(A3)。重启换绑须由 tzb-fe 改本文件并记一条显式 EVENT,不得静默接管。",
+  "_created_by": "tzb-5e (b7634e30) 依裁定 4A-2 建立;后续仅 tzb-fe 可改",
+  "_created_at": "2026-08-30T20:40+0800",
+  "roles": {
+    "tzb-fe": {
+      "streams": [
+        "M2C"
+      ],
+      "current_session_id": "5ae1238c-9d80-4d6f-8a32-52da6b130e9c",
+      "bound_at": "2026-08-30T20:52+0800",
+      "bound_by": "tzb-fe(裁定 A2;sessionId 由 ~/.claude/sessions/*.json 程序派生,未手打)",
+      "note": "协调会话;M2C_STATE.md:5「唯二写者」条款"
+    },
+    "m2c-exec": {
+      "streams": [
+        "M2C"
+      ],
+      "current_session_id": "5d964785-f435-4345-aaf2-3bd5bb214ef1",
+      "bound_at": "2026-08-30T20:52+0800",
+      "bound_by": "tzb-fe(裁定 A2;sessionId 由 ~/.claude/sessions/*.json 程序派生,未手打)",
+      "note": "M2C 执行会话;socket 79772,与既有路由记录一致"
+    },
+    "qwen-brain-owner": {
+      "streams": [
+        "QWEN"
+      ],
+      "current_session_id": "72ad7a26-9a33-4894-ba52-21a593ed7175",
+      "bound_at": "2026-08-30T20:40+0800",
+      "bound_by": "QWEN_BRAIN_STATE.md:3 既有条款(裁定 A2 要求初始钉此值)",
+      "note": "sessionId 由程序从 QWEN_BRAIN_STATE.md 派生,未手打"
+    }
+  },
+  "_amended_by": "tzb-fe 2026-08-30:绑定 tzb-fe / m2c-exec 两角色"
+}

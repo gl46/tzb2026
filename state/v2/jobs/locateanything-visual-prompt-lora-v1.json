@@ -1,0 +1,70 @@
+{
+  "schema_version": "M2CJobRegistrationV1",
+  "job_identity": "locateanything-visual-prompt-lora-v1",
+  "lane": "tzb-50",
+  "registered_by": "tzb-fe",
+  "registered_date_local": "2026-09-01",
+  "verdict": "REGISTERED — TRAINING AUTHORIZED",
+
+  "user_directives_2026_09_01": {
+    "training": "有100groce互联，无语了，你赶紧去下，权重放网盘就行，无所谓，好解决，目前这些条款无所谓了",
+    "reading": "This reverses the earlier same-day directive that put LoRA off the table. Training is now authorized by the user for this specific line. The user also asserted the 100G RoCE interconnect and waived the licensing question as a blocker.",
+    "earlier_directive_now_superseded": "我觉得lora不知道来不来的及视觉，实在不行我们就专攻rexomni — that instruction governed phase-3 (Rex-Omni inference), which continues unchanged. This packet is additional, not a replacement."
+  },
+
+  "objective": "Give LocateAnything-3B the visual-prompt capability that NVIDIA released a LoRA script for but did not release weights for, using the official script and auto-constructed COCO/LVIS reference-target pairs. Then measure it fairly against Rex-Omni.",
+
+  "why_this_is_worth_doing": "NVIDIA's released LocateAnything-3B weights do NOT support visual-prompt inference; the official wording is that it 'will be released in a future version' with no date, while the visual-prompt LoRA fine-tuning script WAS released in June. Producing that capability ourselves and measuring it honestly is a real engineering contribution. It is not an architectural innovation — the architecture, the script, and the default config are all NVIDIA's. Describe it as 工程复现 + 公平对照, never as a novel method.",
+
+  "hardware": {
+    "chxy": "1x A100-80GB, free as of 2026-09-01 14:09 after the user cleared PID 962984",
+    "node2": "1x A100-80GB, occupied by the phase-3 Rex-Omni run — do not contend",
+    "interconnect": "100G RoCE between the two hosts, ASSERTED BY THE USER on 2026-09-01. This is the user's statement about their own lab, recorded as such; tzb-fe has not measured it. If multi-node DDP is attempted, measure effective bandwidth first and record it — do not carry the asserted figure into any result artifact as a measured one.",
+    "correction_recorded": "An external estimate assumed '2x A100 80GB' as if in one box. We have one card per host on two hosts. The single-A100 estimate (5k steps, 3-6h) is the applicable one unless multi-node is actually stood up and measured."
+  },
+
+  "sequencing": {
+    "now_in_parallel": "START THE DATA DOWNLOAD IMMEDIATELY. It is I/O-bound and does not contend with the node2 GPU running Rex-Omni. COCO train2017 is ~19 GB plus LVIS annotations; today's 1.4 GB PR-Bench pull was redirected abroad by the mirror, so budget unknown time and disclose the actual transport chain.",
+    "training_starts": "On chxy, as soon as data is materialized and digest-recorded. Does not wait for Rex-Omni.",
+    "phase_3_unaffected": "The Rex-Omni head-to-head on node2 continues exactly as registered. This packet must not delay or alter it."
+  },
+
+  "first_shot_is_a_go_no_go": {
+    "size": "50k-100k auto-constructed pairs, 2k steps. Do not open with 5k/10k.",
+    "purpose": "Decide whether the direction works at all. A cheap negative here saves a day.",
+    "go_criterion": "Visual-prompt outputs become structurally valid and category-consistent at a rate clearly above the untrained checkpoint's. Pre-register what 'clearly above' means BEFORE the run.",
+    "no_go": "Report and stop. A negative at 2k steps is a finding, not a failure."
+  },
+
+  "data_construction": {
+    "shape": "Pick a category; crop a bbox of it from image A as the reference; take all bboxes of that category in image B as ground truth; emit as a visual-prompt sample with visual_prompt: true in meta.json so the official loader takes the visual-prompt path.",
+    "scope_is_category_level": "This trains 'box one bottle, find all bottles' — category-level visual prompt. That IS the new-SKU industrial story and it is the tractable target.",
+    "explicitly_out_of_scope": "Instance-level matching ('find THIS specific red cup in another camera view') is re-identification, needs cross-view/occlusion/pose data, and is not what category-level visual-prompt fine-tuning produces. Never let a category-level result be described as instance matching."
+  },
+
+  "the_benchmark_gap_that_must_not_be_papered_over": {
+    "problem": "Claiming the result 'approaches Rex-Omni' requires Rex-Omni scored on the SAME constructed visual-prompt benchmark. That benchmark does not exist yet and would be built from the same COCO/LVIS source we train on.",
+    "requirement": "Hold out a split that no training pair draws from, preregister it with a digest before training, and run Rex-Omni on it under identical conditions. Without that, the only honest statement is about our own before/after, with no Rex-Omni comparison at all.",
+    "forbidden": "Comparing our visual-prompt AP against any published Rex-Omni figure computed on a different benchmark."
+  },
+
+  "licensing_disposition": {
+    "user_ruling": "目前这些条款无所谓了 — the user has waived licensing as a blocker for proceeding.",
+    "what_still_stands_from_the_users_own_earlier_rulings": [
+      "Terms must be READ AND RECORDED, not assumed (phase-0: LocateAnything license is 'other' — read it).",
+      "Netdisk delivery to judges is acceptable and must carry a SHA256 so the recipient can verify."
+    ],
+    "note": "Proceeding is authorized. Recording what the terms actually say costs minutes and is the user's own standing instruction; it is not a gate on this work."
+  },
+
+  "write_root": "chxy:/home/fx/locateanything-vp-v1/ — create-only. Must not touch /home/fx/vla-experiments/ (VLA lane) or /home/fx/rex-omni-pointing-v1/ (phase-3).",
+
+  "stop_lines": [
+    "Any comparability condition of phase-3 would have to change — STOP. Phase-3 is independent and takes precedence.",
+    "The constructed data would require emitting an ID absent from the input — STOP.",
+    "Multi-node DDP is attempted without first measuring effective bandwidth — STOP and measure.",
+    "A result is about to be described as an architectural innovation, a novel method, or instance matching — STOP."
+  ],
+
+  "deadline_reality": "Freeze is 2026-09-03. The go/no-go at 2k steps should land well before it. Anything past the go/no-go is post-freeze work and does not enter the reviewed package."
+}

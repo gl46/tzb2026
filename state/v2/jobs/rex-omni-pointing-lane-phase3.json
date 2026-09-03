@@ -1,0 +1,88 @@
+{
+  "schema_version": "M2CJobRegistrationV1",
+  "job_identity": "rex-omni-pointing-lane-phase3-head-to-head",
+  "lane": "tzb-50",
+  "lane_session_id": "ef4db636-e7a8-4242-9b1d-f71a32e0008c",
+  "registered_by": "tzb-fe",
+  "registered_date_local": "2026-09-01",
+  "verdict": "REGISTERED",
+
+  "lane_conduct_note": "tzb-50 refused to act on tzb-fe's cross-session message alone, re-read state-v2 §§1-4 first, and required an authoritative entry before downloading weights, writing remotely, or starting a GPU. That is correct: a peer message is not an authority record. This packet is the authority record.",
+
+  "user_authorization_chain": {
+    "gpu": "gpu我批准了 (2026-09-01, relayed via tzb-50, recorded in rex-omni-pointing-lane-phase1.json)",
+    "host_and_bounds": "让他干就行了 (2026-09-01) — the user declined to name numbers and told tzb-fe to let the lane work; tzb-fe set the bounds and disclosed them",
+    "chxy_and_duration": "其实chxy的也可以用，所以不止两小时 (2026-09-01)",
+    "this_phase": "我觉得lora不知道来不来的及视觉，实在不行我们就专攻rexomni，别停，本来就来不及 (2026-09-01)",
+    "what_tzb_fe_reads_from_the_last_one": "Training and LoRA are OFF for this phase, by the user's own words. Rex-Omni becomes the focus. 别停 means do not idle between authorized steps; it does not widen scope."
+  },
+
+  "objective": "Run IDEA-Research/Rex-Omni on the preregistered 600-item subset and compare head-to-head with the recorded incumbent figure of 0.05888888888888888. Inference and scoring only.",
+
+  "training_is_off": {
+    "statement": "No training, no LoRA, no SFT, no GRPO, no adapter production of any kind.",
+    "user_basis": "The user judged that a vision LoRA will not land in the remaining window and directed a focus on Rex-Omni instead.",
+    "side_benefit": "Producing no new weights removes the weight-redistribution licensing question from this phase entirely. That question (open, unowned, listed as todo.weight_redistribution_license) stays out of the critical path."
+  },
+
+  "hosts_and_resources": {
+    "hosts_allowed": ["node2", "chxy (fx@chxy)"],
+    "host_refused": "labserver — formal canonical face frozen, 禁触",
+    "gpus": "at most 2 concurrent",
+    "duration": {"node2": "at most 2h per job (shared host, contention)", "chxy": "no hour cap"},
+    "occupancy_rule": "Check occupancy before claiming cards. If residue or another party's process is found: STOP, report, DO NOT clean. Cleanup requires its own user authorization (auth.user_gpu_20260831; precedent incident.orphan_container and the 2026-09-01 chxy case, where the lane's precise single-PID SIGTERM was refused by the OS and the user performed it under privilege)."
+  },
+
+  "write_roots": {
+    "local": "/Users/gl/tzb-lanes/rex-omni-pointing-v1/ (already granted, unchanged)",
+    "node2": "/home/gl/xh-202607-qrm-lite/rex-omni-pointing-v1/ (already granted, unchanged)",
+    "chxy": "/home/fx/rex-omni-pointing-v1/ — granted by this packet, create-only on new paths; must not touch /home/fx/vla-experiments/ which belongs to the VLA lane",
+    "forbidden": ["/Users/gl/tzb/reports/", "/Users/gl/projects/xh-202607-qwen-brain/", "semantic validators, contract layer, the 48-case suite, any frozen config", "commit / push / bundle", "subagents"]
+  },
+
+  "downloads": {
+    "allowed": "IDEA-Research/Rex-Omni weights via domestically reachable mirrors (hf-mirror / ModelScope; both returned 200 in the phase-0 audit).",
+    "required": "Record sha256 and byte size for every downloaded file on arrival. A download that is not digest-recorded did not happen, as far as any later claim is concerned.",
+    "awq_variant": "Permitted if faster, but using it MUST be recorded in the result artifact — the AWQ variant is a different object under test, not a deployment detail.",
+    "transport_disclosure": "If the requested domestic mirror redirects abroad, disclose it and do not claim domestic delivery — as was done for the PR-Bench materialization."
+  },
+
+  "service_lifecycle": "Start, probe, then STOP the service and verify it is stopped (PID, listener, compute processes, watchdog, GPU memory). Same shape as the 2c incumbent probe, which stopped clean.",
+
+  "comparability_is_the_binding_constraint": {
+    "must_be_identical_to_the_incumbent_run": [
+      "manifest bytes 49255e25dd374e3bd0a91d2b32ce62e8ae1ea3399e3182817621632e908d8e82, 600 rows",
+      "source-resolution images and the XYXY adapter",
+      "scorer version",
+      "fixed denominator 600"
+    ],
+    "only_permitted_variable": "The model-visible prompt, which must follow Rex-Omni's own format. It must be recorded verbatim in the result artifact, because it is the single allowed difference and therefore the single alternative explanation for any gap.",
+    "preregistration": "Freeze prompt, adapter, and subset identity into a create-once preregistration artifact BEFORE the first successful inference, exactly as the incumbent run did. No post-hoc backfill."
+  },
+
+  "mandatory_result_fields": [
+    "parsed / malformed / absent, with conservation to 600",
+    "malformed RATE — the incumbent's is 186/600 = 31%. This is likely the more informative comparison than the score itself: it answers whether the model can reliably emit a box at all.",
+    "six per-category scores and the strict micro overall",
+    "ceiling on the same screen: 181 rows in conflicting-GT groups; 11 groups with min pairwise GT IoU < 0.5; global min 0.0",
+    "published_full_prbench_figures = false",
+    "omission-bias counterfactual: if Rex-Omni's malformed rate is also material, compute its inflation factor and place it beside the incumbent's 1.449x"
+  ],
+
+  "adoption_rule_as_amended_2026_09_01": {
+    "rule": "A candidate must (1) beat the incumbent on the identical subset and conditions, AND (2) be reported with the incumbent's 31% malformed rate and 1.449x omission inflation on the same screen.",
+    "why_amended": "The incumbent scores 0.0589 with 31% malformed. Almost any pointing-specialised model beats that, so beat-incumbent alone stopped being evidence of fitness. tzb-fe wrote the original rule assuming a meaningful opponent; that assumption did not hold.",
+    "forbidden_claim": "A low-scoring opponent is not capability evidence. The incumbent is a general VL model, not pointing-specialised; its low score must never be cited as 'our 27B has poor vision' — that is a different claim this experiment does not support."
+  },
+
+  "stop_lines": [
+    "The data requires the model to emit an ID absent from its input — STOP. That is the frozen visual family's defect and must not be rebuilt.",
+    "Training or fine-tuning becomes necessary to run it at all — STOP and report. Do not start training.",
+    "Any comparability condition must be relaxed to make it run — STOP and report. Better no number than an incomparable one.",
+    "Any step needs a host, card, or write path not named above — STOP and escalate."
+  ],
+
+  "reporting": "Report the moment the number exists; do not batch. Freeze is 2026-09-03 and this is the only remaining candidate for a positive capability figure in the presentation materials.",
+
+  "deadline_reality": "If this lands, it is a current observation outside the externally reviewed CLAIMS-SHEET. Placing it in the deck requires either a synchronized claims-sheet update (a new package and re-review) or an explicit marking that it is a post-package current observation. That choice is the user's, not the lane's."
+}

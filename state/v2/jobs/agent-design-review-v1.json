@@ -1,0 +1,5 @@
+{"schema_version":"M2CJobRegistrationV1","job_identity":"agent-design-review-v1","registered_by":"tzb-fe (tzb-a5)","registered_date_local":"2026-09-03 01:4x",
+ "verdict":"REGISTERED — 用户指令:开子代理调研'大模型大脑 + 小模型 VLA'业界路线,对照我们的设计给优化建议",
+ "what":"调研 2025–2026 工业/具身智能体主流架构(Gemini Robotics 系、GR00T、π 系、Figure Helix 等),对照本项目(多模态大模型出结构化计划 → 契约层+语义验证器 → 确定性技能原语 → Isaac 执行;感知=LocateAnything+RGB-D 真绑定),给:①差距与共性;②评委按'智能体核心能力/中间过程可见/跨本体/推理效率'会看什么;③9/4 前可落地的低成本改进;④'已实现 vs 设计'分栏的架构叙述草稿。",
+ "ownership":{"subagent agent-design-review (tzb-a5 派)":["/Users/gl/tzb-lanes/agent-design-review-v1/** (create-only)"]},
+ "hard_lines":["只读项目文件,不改任何代码/交付物/state;输出全在自己目录。","引用外部资料要带 URL 与日期;不臆造论文数字。","不 commit/push,不派子代理。"]}

@@ -1,0 +1,39 @@
+{
+  "generation": 138,
+  "writers": [
+    "qwen-brain-owner"
+  ],
+  "grandfathered": [
+    "archive.path",
+    "archive.identity",
+    "archive.prefix_equal",
+    "archive.read_rule",
+    "lane.clone",
+    "auth.user_training",
+    "config.node2_strict",
+    "env.node2",
+    "pkg.immutable",
+    "snapshot.model",
+    "data.train_reconstructed",
+    "freeze.scientific",
+    "smoke32.pass",
+    "adapter.smoke",
+    "gpu.evidence",
+    "bound.no_write_governed",
+    "bound.no_isaac",
+    "bound.baseline_endpoint",
+    "bound.shared_gpu",
+    "bound.no_service",
+    "bound.no_sweep",
+    "bound.no_push",
+    "bound.immutable_pkg_runtime",
+    "bound.adapter_publish",
+    "todo.freeze_verify",
+    "todo.post_rehash",
+    "todo.icl_lane_isolation"
+  ],
+  "legacy": {
+    "path": "/Users/gl/tzb/QWEN_BRAIN_STATE.md",
+    "sha256": "4515ae2214ce5395db64b887c82246c41ed191ea48433f897f6e90ebede0a9cb"
+  }
+}

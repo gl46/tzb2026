@@ -1,0 +1,277 @@
+{
+  "active_session_configuration": {
+    "arm_dof_indices": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "articulation_dof_names": [
+      "panda_joint1",
+      "panda_joint2",
+      "panda_joint3",
+      "panda_joint4",
+      "panda_joint5",
+      "panda_joint6",
+      "panda_joint7",
+      "panda_finger_joint2",
+      "panda_finger_joint1"
+    ],
+    "configuration_sha256": "92093649e9e13b67392b94be5c71e479daf640ab469337971cef85911da6c9e7",
+    "container_image_digest": "sha256:783444c706538aa76cf5126e911ddc5e618779e6105305ad4af4260362a30aa9",
+    "controller_configuration_sha256": "a3ff559a7a073f52c28458fe47814a5dc34711fe559f80ad2c012a7c9b9acb31",
+    "expected_arm_max_abs_effort": [
+      87.0,
+      87.0,
+      87.0,
+      87.0,
+      12.0,
+      12.0,
+      12.0
+    ],
+    "expected_gripper_max_abs_effort": 20.0,
+    "expected_gripper_mimic_max_abs_effort": 0.0,
+    "gripper_coordinate_semantics": "PER_FINGER_OPENING_M",
+    "gripper_dof_index": 7,
+    "gripper_dof_name": "panda_finger_joint2",
+    "gripper_mimic_dof_index": 8,
+    "gripper_mimic_dof_name": "panda_finger_joint1",
+    "gripper_mimic_multiplier": 1.0,
+    "gripper_mimic_offset_m": 0.0,
+    "gripper_mimic_source_sha256": "44fc25985237243e4c9e8de59171f5b774121bbd3238cbde23d3de47eb033e18",
+    "hand_path": "/World/Robot/panda_hand",
+    "joint_limit_source_sha256": "6678ff409d60f074283805879f53edaa939ead34f97a5a961ee67f6229b44ba8",
+    "joint_names": [
+      "panda_joint1",
+      "panda_joint2",
+      "panda_joint3",
+      "panda_joint4",
+      "panda_joint5",
+      "panda_joint6",
+      "panda_joint7"
+    ],
+    "maximum_effort_abs_tolerance": 1e-06,
+    "maximum_gripper_mimic_error_m": 0.001,
+    "maximum_pose_quaternion_norm_error": 1e-06,
+    "mutation_counter_implementation_sha256": "cd8a67fc2bc8b40e2d63f36898ea9be643659af9ac486aa985d8dd07fc7b3908",
+    "observation_clock": "HOST_TIME_NS_AFTER_PUBLIC_CAPTURE",
+    "privileged_truth_policy_input_allowed": false,
+    "query_adapter_implementation_sha256": "a9f4bf9f0c9773b8979f49ead2409e1c80510516b20915a1e37137014db00e07",
+    "query_only_required": true,
+    "rigid_prim_runtime_type": "isaacsim.core.experimental.prims.impl.rigid_prim.RigidPrim",
+    "robot_root_path": "/World/Robot/panda_link0",
+    "robot_runtime_type": "isaacsim.robot.experimental.manipulators.examples.franka.franka.Franka",
+    "runtime_owner_implementation_path": "src/xh_agent/policy/qrm_lite/formal_isaac_persistent_scene_v4.py",
+    "runtime_owner_implementation_sha256": "b9728412c940eec5d3848997476cad8d90abcacec41a5eaf727fe6963e9e4ec4",
+    "schema_version": "IsaacActiveSessionQueryConfigurationV1",
+    "scope": "REAL_ISAAC_6_0_1",
+    "teacher_allowed": false
+  },
+  "attachment_monitor_configuration": {
+    "active_registry_type": "FormalIsaacActiveAttachmentRegistryV2",
+    "attachment_transition_implementation_sha256": "25fb997f0fbb0c7007c8b5a469b1fd853afbc1a7874577ac268252ce174a193e",
+    "configuration_sha256": "ade54c963b787118819b05d21ff3c52ec4b6aa0f72588ac31e1c2b87e3f70231",
+    "query_only_preflight": true,
+    "runtime_readiness_implementation_sha256": "8248186d8242b3efe18d80ab31ef17399919ab78641d8577300ce556b3f7c921",
+    "runtime_snapshot_implementation_sha256": "9ca2f515714ffc41e07e95b4b0140e2ce1ecaad2dcaca7bb259449fdb2cd39d1",
+    "scene_safety_implementation_sha256": "10bc4ad4f632c14d69b0cb55dc70d00c2c932a2990540f5694ed789dfd5060c9",
+    "schema_version": "FormalIsaacAttachmentMonitorConfigurationV1",
+    "terminal_contact_broker_bound": true
+  },
+  "binding_addendum_path": "docs/decisions/ADR-0022-BINDING-ADDENDUM.md",
+  "contact_monitor_configuration": {
+    "collector_methods": [
+      "cursor",
+      "events_after",
+      "poll_current_report"
+    ],
+    "configuration_sha256": "0144c2539cc341e57fb0e255c2962b79a399e2ed62bbdb9f707d094bcec814cb",
+    "contact_view_methods": [
+      "get_contact_force_matrix",
+      "get_contact_force_data"
+    ],
+    "finger_roles": [
+      "left",
+      "right"
+    ],
+    "frozen_probe_sha256": "6623b1ce1dc5b289e1166ce7a59ea742fa6de2c3595d4818ab65ef03f0553f87",
+    "persistent_scene_implementation_sha256": "b9728412c940eec5d3848997476cad8d90abcacec41a5eaf727fe6963e9e4ec4",
+    "query_only_preflight": true,
+    "runtime_readiness_implementation_sha256": "8248186d8242b3efe18d80ab31ef17399919ab78641d8577300ce556b3f7c921",
+    "schema_version": "FormalIsaacContactMonitorConfigurationV1",
+    "sensor_methods": [
+      "get_data",
+      "get_sensor_reading"
+    ],
+    "terminal_bilateral_contact_required": true
+  },
+  "preflight_configuration": {
+    "all_phases_before_first_command": true,
+    "attachment": {
+      "algorithm_id": "A3_PLANNED_ATTACHMENT_TRANSITION_V1",
+      "algorithm_sha256": "2a1c1c2719f5afd5a9355c718f27dfee13d3ec31479a70eedea72529e3ef258b",
+      "attachment_monitor_configuration_sha256": "ade54c963b787118819b05d21ff3c52ec4b6aa0f72588ac31e1c2b87e3f70231",
+      "configuration_sha256": "5d7f8d569b34cff18d7595558e4d8d51a554efe8dbc7952cf986d4157906e14e",
+      "contact_monitor_configuration_sha256": "0144c2539cc341e57fb0e255c2962b79a399e2ed62bbdb9f707d094bcec814cb",
+      "query_only_required": true,
+      "require_terminal_bilateral_contact_selector": true,
+      "require_unique_bilateral_contact_pair": true,
+      "schema_version": "AttachmentPreflightConfigurationV1",
+      "timeout_ns_per_phase": 5000000000
+    },
+    "callback_implementation_sha256": "50046e308faab53928fc689eff867b92b5c56f49e4e643795d50d8e372a99ca7",
+    "configuration_sha256": "7c87ab20226cd99be5d4ca413c05b6a3792df2ba34d1e73a2b4f7999972162a6",
+    "controller": {
+      "cartesian_command_dimensions": 7,
+      "configuration_sha256": "5063371ad549ad9006805b9c6a27cb5b9be29036723e61636d7fc7ef3831808b",
+      "controller_configuration_sha256": "a3ff559a7a073f52c28458fe47814a5dc34711fe559f80ad2c012a7c9b9acb31",
+      "controller_id": "official_franka_dls",
+      "gripper_command_dimensions": 1,
+      "non_motion_command_dimensions": 0,
+      "readiness_timeout_ns": 5000000000,
+      "required_rate_hz": 60.0,
+      "schema_version": "ControllerPreflightConfigurationV1",
+      "target_writes_before_authorization": 0
+    },
+    "gripper_limits": {
+      "configuration_sha256": "ba3c93733d55cc0ae0bf583d05caab6fda2d649ac47e36de6786347519eef1bb",
+      "maximum_position_m": 0.04,
+      "maximum_velocity_m_per_s": 0.2,
+      "minimum_position_m": 0.0,
+      "sample_rate_hz": 60.0,
+      "schema_version": "GripperLimitConfigurationV1",
+      "source_sha256": "6678ff409d60f074283805879f53edaa939ead34f97a5a961ee67f6229b44ba8",
+      "target_tolerance_m": 0.001,
+      "timeout_ns_per_phase": 5000000000
+    },
+    "ik": {
+      "algorithm_id": "LULA_QUERY_ONLY_PHASE_PATH_V1",
+      "algorithm_sha256": "6c997ed26283a3dfac85eda2c3bd8d6e94efe3ed8befb26f2d594ba5cca47d1c",
+      "base_frame": "panda_link0",
+      "configuration_sha256": "530d12488383e6e50d9545eae97fe20bf0159714eb1d529879173c62dcebf335",
+      "deterministic_seed": 0,
+      "end_effector_frame": "panda_hand",
+      "maximum_iterations_per_sample": 64,
+      "maximum_orientation_residual_rad": 0.01,
+      "maximum_position_residual_m": 0.002,
+      "query_only_required": true,
+      "robot_description_sha256": "e9024642e7952cbcaec0ae14425bf1cd19d674d3c98eeef3793913f63a8101b6",
+      "schema_version": "IKPreflightConfigurationV1",
+      "timeout_ns_per_phase": 5000000000
+    },
+    "incomplete_or_timeout_is_invalid": true,
+    "joint_limits": {
+      "configuration_sha256": "7be883459a6c1dadc6526b4bac6d2252eaf49d79cd321a0dd5e2ac373a505d55",
+      "effort_estimator_sha256": "a9f4bf9f0c9773b8979f49ead2409e1c80510516b20915a1e37137014db00e07",
+      "effort_tolerance": 0.0,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "lower_position": [
+        -2.8973,
+        -1.7628,
+        -2.8973,
+        -3.0718,
+        -2.8973,
+        -0.0175,
+        -2.8973
+      ],
+      "maximum_abs_effort": [
+        87.0,
+        87.0,
+        87.0,
+        87.0,
+        12.0,
+        12.0,
+        12.0
+      ],
+      "maximum_velocity_per_s": [
+        2.3925,
+        2.3925,
+        2.3925,
+        2.3925,
+        2.871,
+        2.871,
+        2.8973
+      ],
+      "position_tolerance": 0.0,
+      "sample_rate_hz": 60.0,
+      "schema_version": "JointLimitConfigurationV1",
+      "source_sha256": "6678ff409d60f074283805879f53edaa939ead34f97a5a961ee67f6229b44ba8",
+      "upper_position": [
+        2.8973,
+        1.7628,
+        2.8973,
+        0.0175,
+        2.8973,
+        3.7525,
+        2.8973
+      ],
+      "velocity_tolerance": 0.0
+    },
+    "safety": {
+      "attachment_monitor_configuration_sha256": "ade54c963b787118819b05d21ff3c52ec4b6aa0f72588ac31e1c2b87e3f70231",
+      "configuration_sha256": "78585e329e0ad5411ed82d6912b188675ba4c7c8bcee75ed5970bdd6967ddfa7",
+      "contact_monitor_configuration_sha256": "0144c2539cc341e57fb0e255c2962b79a399e2ed62bbdb9f707d094bcec814cb",
+      "fail_on_emergency_stop": true,
+      "maximum_state_age_ns": 100000000,
+      "privileged_truth_policy_input_allowed": false,
+      "require_attachment_monitor_ready": true,
+      "require_collision_world_ready": true,
+      "require_contact_monitor_ready": true,
+      "safety_configuration_sha256": "33f3d60e17a669dd73f9cfe21631a92035bbb22a2dd63090ee7c3a3eaa661ce7",
+      "schema_version": "SafetyPreflightConfigurationV1",
+      "teacher_allowed": false,
+      "workspace_max_world_m": [
+        2.0,
+        2.0,
+        2.0
+      ],
+      "workspace_min_world_m": [
+        -2.0,
+        -2.0,
+        0.0
+      ]
+    },
+    "schema_version": "ExactPlanPreflightConfigurationV1",
+    "swept_collision": {
+      "algorithm_id": "A3_BULLET_COMPLETE_SCENE_CHILD_PAIR_CCD_V2",
+      "algorithm_sha256": "c54766491b75ecf37457e143dae5e3ebf57de5e594aa1d0b161090079831d894",
+      "collision_geometry_sha256": "3441e311684754ae26b5e41a9aebe586dbfe55c46dbfda77764e4bd5e95781d7",
+      "configuration_sha256": "8aed0e53fd141ec4b2e8b126ae15c9e256774f29373603f47c073caa4af2690e",
+      "continuous_between_samples": true,
+      "fail_on_unknown_pair": true,
+      "robot_root_path": "/World/Robot",
+      "schema_version": "SweptCollisionConfigurationV1",
+      "subsamples_per_segment": 1,
+      "timeout_ns_per_phase": 5000000000
+    },
+    "total_timeout_ns": 120000000000
+  },
+  "privileged_truth_policy_input": false,
+  "scene_geometry": {
+    "collision_geometry_binding_sha256": "3441e311684754ae26b5e41a9aebe586dbfe55c46dbfda77764e4bd5e95781d7",
+    "complete_scene_algorithm_sha256": "c54766491b75ecf37457e143dae5e3ebf57de5e594aa1d0b161090079831d894",
+    "external_collision_child_count": 8,
+    "robot_collision_child_count": 14,
+    "robot_geometry_receipt_sha256": "d4efa5a485af51d195356807f9312dd0502e9e32584cf8d5c2438d2bffad735d",
+    "scene_geometry_receipt_sha256": "d54cd83834b33d95c0a52a5533c25c7225ecc2c282b7f1dfe0f0be5636a7af03",
+    "scene_pose_source_configuration_sha256": "ad9f27c903db6e49f2a25d463827a7af94e9d104920b6d01187e65f6489441d1",
+    "scene_seed": 25514,
+    "sdf_sha256": "2bd5a27d6d3a2ff42152024e4fbd9a68749840c153f3fe68e5b27085e58b1615",
+    "stage_sha256": "b78f6b15b96a6cbe257ec35bb6b2f1a87c74d2cf2f8697a90a0000d8dd6a78ca",
+    "supervision_sha256": "731e3a478a92d444bde62ea94c612cb84be7912f0593776d0ecd7f480c372927"
+  },
+  "schema_version": "M2CExactPlanPreflightProductionConfigurationV1",
+  "status": "ACCEPTED_PHASE2_BINDING_ADDENDUM",
+  "teacher_used": false
+}

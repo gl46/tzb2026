@@ -1,0 +1,26 @@
+{
+  "generation": 901,
+  "writers": [
+    "tzb-fe",
+    "m2c-exec"
+  ],
+  "grandfathered": [
+    "chain.head",
+    "host.formal_canonical",
+    "ruling.r132_39_option_a",
+    "design.terminalization_fix",
+    "lane.m2c_exec",
+    "lane.tzb_fe",
+    "lane.qwen_brain",
+    "stopline.impl_phase",
+    "stopline.human_gates",
+    "discipline.hash_and_citation",
+    "stopline.compaction_ladder",
+    "todo.tzb_fe",
+    "todo.user"
+  ],
+  "legacy": {
+    "path": "/Users/gl/tzb/M2C_STATE.md",
+    "sha256": "9dc690524ad77e6d51964237f11ee107e23e3ae92398d19e3424eb0676648fc6"
+  }
+}

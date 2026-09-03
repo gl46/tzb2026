@@ -1,0 +1,82 @@
+{
+  "scene_id": "IndustrialCylinderBenchmarkV1",
+  "seed": 1071,
+  "split": "train",
+  "part_count": 6,
+  "randomization": {
+    "material": "matte_metal",
+    "camera_offset_m": 0.0,
+    "light_intensity": 1.2736089003911886
+  },
+  "simulator_supervision": {
+    "training_and_evaluation_only": true,
+    "objects": [
+      {
+        "actual_sim_entity_id": "cylinder_01",
+        "category": "industrial_cylinder",
+        "orientation_state": "normal",
+        "position_3d_world": [
+          -0.2575885136299202,
+          -0.03443824317122371,
+          0.5
+        ],
+        "yaw": 0.17037775766824526
+      },
+      {
+        "actual_sim_entity_id": "cylinder_02",
+        "category": "industrial_cylinder",
+        "orientation_state": "inverted",
+        "position_3d_world": [
+          -0.21861415475919918,
+          0.1680162455889621,
+          0.5
+        ],
+        "yaw": -0.3663190069407274
+      },
+      {
+        "actual_sim_entity_id": "cylinder_03",
+        "category": "industrial_cylinder",
+        "orientation_state": "tilted",
+        "position_3d_world": [
+          -0.34908136736917655,
+          0.18997006278564638,
+          0.48
+        ],
+        "yaw": 1.073128647278887
+      },
+      {
+        "actual_sim_entity_id": "cylinder_04",
+        "category": "industrial_cylinder",
+        "orientation_state": "normal",
+        "position_3d_world": [
+          -0.16404504919884494,
+          0.14051328054475015,
+          0.5
+        ],
+        "yaw": -1.5371774402360543
+      },
+      {
+        "actual_sim_entity_id": "cylinder_05",
+        "category": "industrial_cylinder",
+        "orientation_state": "inverted",
+        "position_3d_world": [
+          -0.22418089970367458,
+          0.1391120083428744,
+          0.5
+        ],
+        "yaw": -3.0463513367003574
+      },
+      {
+        "actual_sim_entity_id": "cylinder_06",
+        "category": "industrial_cylinder",
+        "orientation_state": "tilted",
+        "position_3d_world": [
+          -0.10268397785884326,
+          -0.07556060123336664,
+          0.48
+        ],
+        "yaw": -2.7648977832086934
+      }
+    ]
+  }
+}

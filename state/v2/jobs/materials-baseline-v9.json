@@ -1,0 +1,76 @@
+{
+  "schema_version": "M2CMaterialsBaselineV1",
+  "baseline": "v9",
+  "date_local": "2026-09-01",
+  "materials": [
+    {
+      "file": "CLAIMS-SHEET-20260831.md",
+      "size_bytes": 43706,
+      "sha256": "c3361c875b110b0e21a3dd3f582989492f83b056183e8d170afde8b064344d1c"
+    },
+    {
+      "file": "external-consult-brief-7-20260831.md",
+      "size_bytes": 14727,
+      "sha256": "bee610ddf33812231cabfd23d32f6c0c5c8631eeaad75e1006ce185f61b0e4a9"
+    },
+    {
+      "file": "external-consult-brief-8-20260831.md",
+      "size_bytes": 15551,
+      "sha256": "46678230ee752311d046462c3dd6de47e58be5ff0a10d8df85f1906096b161fe"
+    },
+    {
+      "file": "deck-p7-p8-content-blocks.md",
+      "size_bytes": 7724,
+      "sha256": "92f17248887f8279e4219f5abf46dd215f105c4006aca08e790028ce64930492"
+    },
+    {
+      "file": "deck-p1-p3-p4-p6-content-blocks.md",
+      "size_bytes": 8206,
+      "sha256": "db96caa633fd9fe6fb39817ca20f08b7d566e32e43dca192d4c26b4ce31adda9"
+    },
+    {
+      "file": "deck-p2-p5-content-blocks.md",
+      "size_bytes": 6568,
+      "sha256": "7e83cec8b31005c87026d25aeb13a8d567e67836a8e118989b62ca28d722eae0"
+    },
+    {
+      "file": "deck-p2-semantic-gate-demo.html",
+      "size_bytes": 18833,
+      "sha256": "a8632788d1d50629c05b1bd046c6e3dfc80207705844c6bd6ece417169bb507b"
+    },
+    {
+      "file": "deck-video-script-20260831.md",
+      "size_bytes": 7948,
+      "sha256": "1c52b2de3eeadd95915e4e2802ad7c672e0ae0333eb7990b49b4cc49da5de800"
+    },
+    {
+      "file": "deck-m2c-campaign-block-20260831.md",
+      "size_bytes": 2196,
+      "sha256": "5d2294645b271adbd9aa5ec1d8e1ddfc5ce1f7c4867564e6443adb1b20cbd2c4"
+    },
+    {
+      "file": "appendix-p2-rule-coverage.md",
+      "size_bytes": 6461,
+      "sha256": "0ad423f857ac2b734c39973a06d92536fd9e9846c8f623cd74d8062452e2edad"
+    },
+    {
+      "file": "appendix-qwen-lane-defense-qa.md",
+      "size_bytes": 14783,
+      "sha256": "ab462ba5880fc1e235ce14fb2d1051815c53f99660a462493b72db9257bd385b"
+    },
+    {
+      "file": "VNEXT-BRAIN-ROADMAP-20260831.md",
+      "size_bytes": 5853,
+      "sha256": "59626c55279819b302cbf2e90efe70ddb5c03bde683d67137ba79846d8f72cda"
+    }
+  ],
+  "unresolved_path_scan": {
+    "packaged_materials_scanned": 12,
+    "files_with_absolute_paths": [
+      "CLAIMS-SHEET-20260831.md",
+      "appendix-p2-rule-coverage.md"
+    ],
+    "both_forms": "package-relative path stated first, worktree path explicitly labelled as provenance only",
+    "note": "External references must use the package path. A worktree path does not resolve inside the delivery archive — this was external-review blocker 6, and it had also been present unnoticed in CLAIMS-SHEET:162 from v2 through v8."
+  }
+}

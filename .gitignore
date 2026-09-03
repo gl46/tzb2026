@@ -32,3 +32,8 @@ checkpoints/
 hf-cache/
 logs/*.log
 logs/*.json
+
+# scratch / machine-local / bulk generated (2026-09-03)
+.claude/worktrees/
+.tmp-*
+artifacts/teacher-compare/

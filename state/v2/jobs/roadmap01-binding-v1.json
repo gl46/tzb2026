@@ -1,0 +1,35 @@
+{
+ "schema_version": "M2CJobRegistrationV1",
+ "job_identity": "roadmap01-binding-v1",
+ "registered_by": "tzb-fe (tzb-57)",
+ "registered_date_local": "2026-09-03 00:2x",
+ "verdict": "REGISTERED — 用户裁:两条线一人一题,做路线图 01(二维框→三维坐标的绑定)的两个子题。vNext 工程证据,不进 9/5 交付物,deck 不动。",
+ "problem_A": {
+  "owner": "LocateAnything lane sid 72ad7a26(现名 tzb-f5)",
+  "title": "查清 Isaac 里 12 发末端偏约 95 mm 的原因",
+  "what": "在 Isaac 复现 frozen run 的抓取尝试,每步记录目标物体/hand/指尖中点三者的世界位姿,把残差拆成感知项(目标点 vs 物体真值)与运动链项(末端 vs 目标点)。优先验证'旋转约定错'假设:单位旋转目标 vs 旋转目标,误差消不消。Task32 线索:hand→指尖中点 +Z 112.2 mm;四候选残差彼此差 213 mm,随姿态变。",
+  "pointers": [
+   "state §1 task32.closeout / campaign.* 各条",
+   "/private/tmp/m2c-r13239-task32-frame-chain-v1/task32-final-disposition-v3.json",
+   "memory m1b-isaac-migration-status(包络 10/15/10,审查 bug 清单)"
+  ],
+  "write_root": "/Users/gl/tzb-lanes/roadmap01-residual-v1/(create-only);Isaac 主机上只建新目录,不碰冻结 campaign 目录"
+ },
+ "problem_B": {
+  "owner": "build-auditable-agent-demo sid ef4db636",
+  "title": "把演示链的合成绑定换成真绑定(Isaac RGB-D)",
+  "what": "在 Isaac 渲染 RGB-D + 已知相机内参位姿的场景上,LocateAnything(text 模式,chxy 入口)出框 → 框内深度 → 反投影 → 世界系质心 → 真 TaskSpec,替换 agent_loop_v2 的 S3 合成夹具;至少一个案例摘掉 DEMO_SYNTHETIC_NOT_TRUSTED。顺手修 isaac_m1b_episode.py 两个已知感知 bug(躺倒圆柱 Z 偏移 ~24 mm;半径修正 XY 偏 3–5 mm),用 GT 位姿量修前修后 p90。",
+  "pointers": [
+   "state/v2/jobs/agent-demo-v2-locany-s2.json",
+   "perception/public_track_associator_v2.py",
+   "memory m1b-isaac-migration-status 审查 bug 清单 3/4 条"
+  ],
+  "write_root": "/Users/gl/tzb-lanes/roadmap01-binding-v1/(create-only)"
+ },
+ "permanent_lines": [
+  "不改任何冻结源与冻结 campaign 工件",
+  "不产生对外主张;deck/brief 不动(用户未放行)",
+  "不 commit/push、不开子代理"
+ ],
+ "hosts": "Isaac 所在主机与 GPU 由用户本条指令授权使用;发现第三方进程只报不动。"
+}

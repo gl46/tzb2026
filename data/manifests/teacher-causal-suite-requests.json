@@ -1,0 +1,4536 @@
+{
+  "suite_id": "teacher-causal-v0",
+  "scene": {
+    "scene_id": "industrial-table-cylinder-bin-v0",
+    "description_zh": "工业桌面俯视/斜视固定相机。桌上有一根竖直立着的金属圆柱零件，右侧有分格料箱（可见第2排第3格），背景墙面与桌面纹理保持固定。画面中有一只 Franka Panda 机械臂与平行夹爪，初始夹爪张开，位于零件上方附近。",
+    "camera": "fixed third-person industrial RGB, no camera motion",
+    "objects": {
+      "cylinder": "upright metal cylinder on table, graspable",
+      "bin": "partitioned bin with visible row2-col3 cell",
+      "table": "static workbench",
+      "arm": "Franka Panda with two-finger gripper, initially open"
+    },
+    "initial_rgb_uri": "pending://shared/industrial-table-cylinder-bin-v0/rgb.png",
+    "depth_uri": "pending://shared/industrial-table-cylinder-bin-v0/depth.png",
+    "notes": "All paired variants under one case MUST share this exact initial frame."
+  },
+  "requests": [
+    {
+      "schema_version": "TeacherRequestV0",
+      "request_id": "C1_static_hold__hold_open",
+      "candidate_model": "COMPARE_BWM_AND_COSMOS3_NANO",
+      "checkpoint_revision": "local-compare",
+      "prompt": "Predict the future video if the robot holds still with gripper open.",
+      "seed": 20260717,
+      "action_domain": "ee_delta_world_m_gripper",
+      "action_mapping_revision": "EVAL_EE_DELTA_WORLD_M_GRIPPER_V0",
+      "generation_parameters": {
+        "num_frames_hint": 24,
+        "fps_hint": 10.0,
+        "human_review_only": true,
+        "shared_initial_frame": true
+      },
+      "conditioning_scene": {
+        "scene_id": "industrial-table-cylinder-bin-v0",
+        "description_zh": "工业桌面俯视/斜视固定相机。桌上有一根竖直立着的金属圆柱零件，右侧有分格料箱（可见第2排第3格），背景墙面与桌面纹理保持固定。画面中有一只 Franka Panda 机械臂与平行夹爪，初始夹爪张开，位于零件上方附近。",
+        "camera": "fixed third-person industrial RGB, no camera motion",
+        "objects": {
+          "cylinder": "upright metal cylinder on table, graspable",
+          "bin": "partitioned bin with visible row2-col3 cell",
+          "table": "static workbench",
+          "arm": "Franka Panda with two-finger gripper, initially open"
+        },
+        "initial_rgb_uri": "pending://shared/industrial-table-cylinder-bin-v0/rgb.png",
+        "depth_uri": "pending://shared/industrial-table-cylinder-bin-v0/depth.png",
+        "notes": "All paired variants under one case MUST share this exact initial frame."
+      },
+      "action_trajectory": {
+        "schema_version": "ActionTrajectoryV0",
+        "embodiment": "franka_panda_eval",
+        "representation": "ee_delta",
+        "coordinate_frame": "world",
+        "units": "m_rad_gripper01",
+        "fps": 10.0,
+        "values": [
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "dimension_names": [
+          "dx",
+          "dy",
+          "dz",
+          "droll",
+          "dpitch",
+          "dyaw",
+          "gripper"
+        ],
+        "normalization_method": "identity",
+        "normalization_revision": "eval-v0",
+        "source_skill": "OBSERVE",
+        "source_policy": "causal_suite_v0",
+        "action_summary": "hold_pose_open_gripper",
+        "duration_s": 2.4,
+        "num_frames": 24
+      },
+      "human_pass_criteria": [
+        "arm_does_not_self_move",
+        "cylinder_does_not_teleport",
+        "bin_and_background_stable"
+      ],
+      "human_fail_modes": [
+        "spontaneous_pick_or_place_story",
+        "object_drift_without_contact"
+      ],
+      "review_checklist_zh": [
+        "臂几乎不动",
+        "零件不漂移/瞬移",
+        "料箱与背景稳定",
+        "不要自动演抓取剧情"
+      ]
+    },
+    {
+      "schema_version": "TeacherRequestV0",
+      "request_id": "C2_left_right_opposite__move_left_10cm",
+      "candidate_model": "COMPARE_BWM_AND_COSMOS3_NANO",
+      "checkpoint_revision": "local-compare",
+      "prompt": "Predict the future video if the end-effector moves 10 cm left; gripper stays open; no grasp.",
+      "seed": 20260717,
+      "action_domain": "ee_delta_world_m_gripper",
+      "action_mapping_revision": "EVAL_EE_DELTA_WORLD_M_GRIPPER_V0",
+      "generation_parameters": {
+        "num_frames_hint": 24,
+        "fps_hint": 10.0,
+        "human_review_only": true,
+        "shared_initial_frame": true
+      },
+      "conditioning_scene": {
+        "scene_id": "industrial-table-cylinder-bin-v0",
+        "description_zh": "工业桌面俯视/斜视固定相机。桌上有一根竖直立着的金属圆柱零件，右侧有分格料箱（可见第2排第3格），背景墙面与桌面纹理保持固定。画面中有一只 Franka Panda 机械臂与平行夹爪，初始夹爪张开，位于零件上方附近。",
+        "camera": "fixed third-person industrial RGB, no camera motion",
+        "objects": {
+          "cylinder": "upright metal cylinder on table, graspable",
+          "bin": "partitioned bin with visible row2-col3 cell",
+          "table": "static workbench",
+          "arm": "Franka Panda with two-finger gripper, initially open"
+        },
+        "initial_rgb_uri": "pending://shared/industrial-table-cylinder-bin-v0/rgb.png",
+        "depth_uri": "pending://shared/industrial-table-cylinder-bin-v0/depth.png",
+        "notes": "All paired variants under one case MUST share this exact initial frame."
+      },
+      "action_trajectory": {
+        "schema_version": "ActionTrajectoryV0",
+        "embodiment": "franka_panda_eval",
+        "representation": "ee_delta",
+        "coordinate_frame": "world",
+        "units": "m_rad_gripper01",
+        "fps": 10.0,
+        "values": [
+          [
+            0.0,
+            -0.004166666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            -0.004166666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            -0.004166666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            -0.004166666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            -0.004166666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            -0.004166666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            -0.004166666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            -0.004166666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            -0.004166666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            -0.004166666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            -0.004166666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            -0.004166666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            -0.004166666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            -0.004166666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            -0.004166666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            -0.004166666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            -0.004166666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            -0.004166666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            -0.004166666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            -0.004166666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            -0.004166666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            -0.004166666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            -0.004166666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            -0.004166666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "dimension_names": [
+          "dx",
+          "dy",
+          "dz",
+          "droll",
+          "dpitch",
+          "dyaw",
+          "gripper"
+        ],
+        "normalization_method": "identity",
+        "normalization_revision": "eval-v0",
+        "source_skill": "MOVE",
+        "source_policy": "causal_suite_v0",
+        "action_summary": "ee_delta_y_-0.10_open",
+        "duration_s": 2.4,
+        "num_frames": 24
+      },
+      "human_pass_criteria": [
+        "left_and_right_arm_motion_clearly_opposite",
+        "non_target_objects_stable",
+        "neither_variant_collapses_to_generic_grasp"
+      ],
+      "human_fail_modes": [
+        "both_variants_same_direction",
+        "grasp_prior_overrides_lateral_command"
+      ],
+      "review_checklist_zh": [
+        "左/右臂运动方向明显相反",
+        "其他物体基本不动",
+        "两边都不要退化成同款抓取动画"
+      ]
+    },
+    {
+      "schema_version": "TeacherRequestV0",
+      "request_id": "C2_left_right_opposite__move_right_10cm",
+      "candidate_model": "COMPARE_BWM_AND_COSMOS3_NANO",
+      "checkpoint_revision": "local-compare",
+      "prompt": "Predict the future video if the end-effector moves 10 cm right; gripper stays open; no grasp.",
+      "seed": 20260717,
+      "action_domain": "ee_delta_world_m_gripper",
+      "action_mapping_revision": "EVAL_EE_DELTA_WORLD_M_GRIPPER_V0",
+      "generation_parameters": {
+        "num_frames_hint": 24,
+        "fps_hint": 10.0,
+        "human_review_only": true,
+        "shared_initial_frame": true
+      },
+      "conditioning_scene": {
+        "scene_id": "industrial-table-cylinder-bin-v0",
+        "description_zh": "工业桌面俯视/斜视固定相机。桌上有一根竖直立着的金属圆柱零件，右侧有分格料箱（可见第2排第3格），背景墙面与桌面纹理保持固定。画面中有一只 Franka Panda 机械臂与平行夹爪，初始夹爪张开，位于零件上方附近。",
+        "camera": "fixed third-person industrial RGB, no camera motion",
+        "objects": {
+          "cylinder": "upright metal cylinder on table, graspable",
+          "bin": "partitioned bin with visible row2-col3 cell",
+          "table": "static workbench",
+          "arm": "Franka Panda with two-finger gripper, initially open"
+        },
+        "initial_rgb_uri": "pending://shared/industrial-table-cylinder-bin-v0/rgb.png",
+        "depth_uri": "pending://shared/industrial-table-cylinder-bin-v0/depth.png",
+        "notes": "All paired variants under one case MUST share this exact initial frame."
+      },
+      "action_trajectory": {
+        "schema_version": "ActionTrajectoryV0",
+        "embodiment": "franka_panda_eval",
+        "representation": "ee_delta",
+        "coordinate_frame": "world",
+        "units": "m_rad_gripper01",
+        "fps": 10.0,
+        "values": [
+          [
+            0.0,
+            0.004166666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.004166666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.004166666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.004166666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.004166666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.004166666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.004166666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.004166666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.004166666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.004166666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.004166666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.004166666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.004166666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.004166666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.004166666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.004166666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.004166666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.004166666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.004166666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.004166666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.004166666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.004166666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.004166666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.004166666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "dimension_names": [
+          "dx",
+          "dy",
+          "dz",
+          "droll",
+          "dpitch",
+          "dyaw",
+          "gripper"
+        ],
+        "normalization_method": "identity",
+        "normalization_revision": "eval-v0",
+        "source_skill": "MOVE",
+        "source_policy": "causal_suite_v0",
+        "action_summary": "ee_delta_y_+0.10_open",
+        "duration_s": 2.4,
+        "num_frames": 24
+      },
+      "human_pass_criteria": [
+        "left_and_right_arm_motion_clearly_opposite",
+        "non_target_objects_stable",
+        "neither_variant_collapses_to_generic_grasp"
+      ],
+      "human_fail_modes": [
+        "both_variants_same_direction",
+        "grasp_prior_overrides_lateral_command"
+      ],
+      "review_checklist_zh": [
+        "左/右臂运动方向明显相反",
+        "其他物体基本不动",
+        "两边都不要退化成同款抓取动画"
+      ]
+    },
+    {
+      "schema_version": "TeacherRequestV0",
+      "request_id": "C3_grasp_vs_no_grasp__approach_close_lift",
+      "candidate_model": "COMPARE_BWM_AND_COSMOS3_NANO",
+      "checkpoint_revision": "local-compare",
+      "prompt": "Predict the future video: approach cylinder, close gripper, lift. Object should rise only if grasped.",
+      "seed": 20260717,
+      "action_domain": "ee_delta_world_m_gripper",
+      "action_mapping_revision": "EVAL_EE_DELTA_WORLD_M_GRIPPER_V0",
+      "generation_parameters": {
+        "num_frames_hint": 40,
+        "fps_hint": 10.0,
+        "human_review_only": true,
+        "shared_initial_frame": true
+      },
+      "conditioning_scene": {
+        "scene_id": "industrial-table-cylinder-bin-v0",
+        "description_zh": "工业桌面俯视/斜视固定相机。桌上有一根竖直立着的金属圆柱零件，右侧有分格料箱（可见第2排第3格），背景墙面与桌面纹理保持固定。画面中有一只 Franka Panda 机械臂与平行夹爪，初始夹爪张开，位于零件上方附近。",
+        "camera": "fixed third-person industrial RGB, no camera motion",
+        "objects": {
+          "cylinder": "upright metal cylinder on table, graspable",
+          "bin": "partitioned bin with visible row2-col3 cell",
+          "table": "static workbench",
+          "arm": "Franka Panda with two-finger gripper, initially open"
+        },
+        "initial_rgb_uri": "pending://shared/industrial-table-cylinder-bin-v0/rgb.png",
+        "depth_uri": "pending://shared/industrial-table-cylinder-bin-v0/depth.png",
+        "notes": "All paired variants under one case MUST share this exact initial frame."
+      },
+      "action_trajectory": {
+        "schema_version": "ActionTrajectoryV0",
+        "embodiment": "franka_panda_eval",
+        "representation": "ee_delta",
+        "coordinate_frame": "world",
+        "units": "m_rad_gripper01",
+        "fps": 10.0,
+        "values": [
+          [
+            0.0,
+            0.0,
+            -0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            -0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            -0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            -0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            -0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            -0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            -0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            -0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            -0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            -0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            -0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            -0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            -0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            -0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            -0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            -0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0075,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0075,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0075,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0075,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0075,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0075,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0075,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0075,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0075,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0075,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0075,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0075,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0075,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0075,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0075,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0075,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "dimension_names": [
+          "dx",
+          "dy",
+          "dz",
+          "droll",
+          "dpitch",
+          "dyaw",
+          "gripper"
+        ],
+        "normalization_method": "identity",
+        "normalization_revision": "eval-v0",
+        "source_skill": "GRASP",
+        "source_policy": "causal_suite_v0",
+        "action_summary": "approach_close_lift",
+        "duration_s": 4.0,
+        "num_frames": 40
+      },
+      "human_pass_criteria": [
+        "closed_lift_carries_cylinder",
+        "open_lift_leaves_cylinder_on_table",
+        "only_gripper_differs_in_action"
+      ],
+      "human_fail_modes": [
+        "both_lift_object",
+        "neither_lifts_object_when_closed",
+        "object_sticks_without_closure"
+      ],
+      "review_checklist_zh": [
+        "闭合抬升：圆柱应被带起",
+        "张开抬升：圆柱应留在桌面",
+        "不能两种都把圆柱带走"
+      ]
+    },
+    {
+      "schema_version": "TeacherRequestV0",
+      "request_id": "C3_grasp_vs_no_grasp__approach_open_lift",
+      "candidate_model": "COMPARE_BWM_AND_COSMOS3_NANO",
+      "checkpoint_revision": "local-compare",
+      "prompt": "Predict the future video: same approach and lift path, but gripper remains open (no grasp).",
+      "seed": 20260717,
+      "action_domain": "ee_delta_world_m_gripper",
+      "action_mapping_revision": "EVAL_EE_DELTA_WORLD_M_GRIPPER_V0",
+      "generation_parameters": {
+        "num_frames_hint": 40,
+        "fps_hint": 10.0,
+        "human_review_only": true,
+        "shared_initial_frame": true
+      },
+      "conditioning_scene": {
+        "scene_id": "industrial-table-cylinder-bin-v0",
+        "description_zh": "工业桌面俯视/斜视固定相机。桌上有一根竖直立着的金属圆柱零件，右侧有分格料箱（可见第2排第3格），背景墙面与桌面纹理保持固定。画面中有一只 Franka Panda 机械臂与平行夹爪，初始夹爪张开，位于零件上方附近。",
+        "camera": "fixed third-person industrial RGB, no camera motion",
+        "objects": {
+          "cylinder": "upright metal cylinder on table, graspable",
+          "bin": "partitioned bin with visible row2-col3 cell",
+          "table": "static workbench",
+          "arm": "Franka Panda with two-finger gripper, initially open"
+        },
+        "initial_rgb_uri": "pending://shared/industrial-table-cylinder-bin-v0/rgb.png",
+        "depth_uri": "pending://shared/industrial-table-cylinder-bin-v0/depth.png",
+        "notes": "All paired variants under one case MUST share this exact initial frame."
+      },
+      "action_trajectory": {
+        "schema_version": "ActionTrajectoryV0",
+        "embodiment": "franka_panda_eval",
+        "representation": "ee_delta",
+        "coordinate_frame": "world",
+        "units": "m_rad_gripper01",
+        "fps": 10.0,
+        "values": [
+          [
+            0.0,
+            0.0,
+            -0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            -0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            -0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            -0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            -0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            -0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            -0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            -0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            -0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            -0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            -0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            -0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            -0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            -0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            -0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            -0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0075,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0075,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0075,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0075,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0075,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0075,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0075,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0075,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0075,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0075,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0075,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0075,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0075,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0075,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0075,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0075,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "dimension_names": [
+          "dx",
+          "dy",
+          "dz",
+          "droll",
+          "dpitch",
+          "dyaw",
+          "gripper"
+        ],
+        "normalization_method": "identity",
+        "normalization_revision": "eval-v0",
+        "source_skill": "MOVE",
+        "source_policy": "causal_suite_v0",
+        "action_summary": "approach_open_lift",
+        "duration_s": 4.0,
+        "num_frames": 40
+      },
+      "human_pass_criteria": [
+        "closed_lift_carries_cylinder",
+        "open_lift_leaves_cylinder_on_table",
+        "only_gripper_differs_in_action"
+      ],
+      "human_fail_modes": [
+        "both_lift_object",
+        "neither_lifts_object_when_closed",
+        "object_sticks_without_closure"
+      ],
+      "review_checklist_zh": [
+        "闭合抬升：圆柱应被带起",
+        "张开抬升：圆柱应留在桌面",
+        "不能两种都把圆柱带走"
+      ]
+    },
+    {
+      "schema_version": "TeacherRequestV0",
+      "request_id": "C4_empty_grasp_offset__offset_close_lift",
+      "candidate_model": "COMPARE_BWM_AND_COSMOS3_NANO",
+      "checkpoint_revision": "local-compare",
+      "prompt": "Predict the future video: approach 4 cm beside the cylinder, close gripper, lift (empty grasp).",
+      "seed": 20260717,
+      "action_domain": "ee_delta_world_m_gripper",
+      "action_mapping_revision": "EVAL_EE_DELTA_WORLD_M_GRIPPER_V0",
+      "generation_parameters": {
+        "num_frames_hint": 40,
+        "fps_hint": 10.0,
+        "human_review_only": true,
+        "shared_initial_frame": true
+      },
+      "conditioning_scene": {
+        "scene_id": "industrial-table-cylinder-bin-v0",
+        "description_zh": "工业桌面俯视/斜视固定相机。桌上有一根竖直立着的金属圆柱零件，右侧有分格料箱（可见第2排第3格），背景墙面与桌面纹理保持固定。画面中有一只 Franka Panda 机械臂与平行夹爪，初始夹爪张开，位于零件上方附近。",
+        "camera": "fixed third-person industrial RGB, no camera motion",
+        "objects": {
+          "cylinder": "upright metal cylinder on table, graspable",
+          "bin": "partitioned bin with visible row2-col3 cell",
+          "table": "static workbench",
+          "arm": "Franka Panda with two-finger gripper, initially open"
+        },
+        "initial_rgb_uri": "pending://shared/industrial-table-cylinder-bin-v0/rgb.png",
+        "depth_uri": "pending://shared/industrial-table-cylinder-bin-v0/depth.png",
+        "notes": "All paired variants under one case MUST share this exact initial frame."
+      },
+      "action_trajectory": {
+        "schema_version": "ActionTrajectoryV0",
+        "embodiment": "franka_panda_eval",
+        "representation": "ee_delta",
+        "coordinate_frame": "world",
+        "units": "m_rad_gripper01",
+        "fps": 10.0,
+        "values": [
+          [
+            0.0,
+            0.0025,
+            -0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0025,
+            -0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0025,
+            -0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0025,
+            -0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0025,
+            -0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0025,
+            -0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0025,
+            -0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0025,
+            -0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0025,
+            -0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0025,
+            -0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0025,
+            -0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0025,
+            -0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0025,
+            -0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0025,
+            -0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0025,
+            -0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0025,
+            -0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0075,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0075,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0075,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0075,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0075,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0075,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0075,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0075,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0075,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0075,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0075,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0075,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0075,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0075,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0075,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0075,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "dimension_names": [
+          "dx",
+          "dy",
+          "dz",
+          "droll",
+          "dpitch",
+          "dyaw",
+          "gripper"
+        ],
+        "normalization_method": "identity",
+        "normalization_revision": "eval-v0",
+        "source_skill": "GRASP",
+        "source_policy": "causal_suite_v0",
+        "action_summary": "approach_offset_0.04_close_lift",
+        "duration_s": 4.0,
+        "num_frames": 40
+      },
+      "human_pass_criteria": [
+        "cylinder_stays_on_table",
+        "gripper_lifts_empty",
+        "no_auto_success_correction"
+      ],
+      "human_fail_modes": [
+        "model_steers_into_successful_grasp",
+        "object_teleports_into_gripper"
+      ],
+      "review_checklist_zh": [
+        "零件留在桌上",
+        "夹爪空载抬起",
+        "不要自动修正成成功抓取"
+      ]
+    },
+    {
+      "schema_version": "TeacherRequestV0",
+      "request_id": "C5_place_pose_variants__place_bin_r2c3_upright",
+      "candidate_model": "COMPARE_BWM_AND_COSMOS3_NANO",
+      "checkpoint_revision": "local-compare",
+      "prompt": "Predict the future video: place grasped upright cylinder into bin row2 col3, then release.",
+      "seed": 20260717,
+      "action_domain": "ee_delta_world_m_gripper",
+      "action_mapping_revision": "EVAL_EE_DELTA_WORLD_M_GRIPPER_V0",
+      "generation_parameters": {
+        "num_frames_hint": 40,
+        "fps_hint": 10.0,
+        "human_review_only": true,
+        "shared_initial_frame": true
+      },
+      "conditioning_scene": {
+        "scene_id": "industrial-table-cylinder-bin-v0",
+        "description_zh": "工业桌面俯视/斜视固定相机。桌上有一根竖直立着的金属圆柱零件，右侧有分格料箱（可见第2排第3格），背景墙面与桌面纹理保持固定。画面中有一只 Franka Panda 机械臂与平行夹爪，初始夹爪张开，位于零件上方附近。",
+        "camera": "fixed third-person industrial RGB, no camera motion",
+        "objects": {
+          "cylinder": "upright metal cylinder on table, graspable",
+          "bin": "partitioned bin with visible row2-col3 cell",
+          "table": "static workbench",
+          "arm": "Franka Panda with two-finger gripper, initially open"
+        },
+        "initial_rgb_uri": "pending://shared/industrial-table-cylinder-bin-v0/rgb.png",
+        "depth_uri": "pending://shared/industrial-table-cylinder-bin-v0/depth.png",
+        "notes": "All paired variants under one case MUST share this exact initial frame."
+      },
+      "action_trajectory": {
+        "schema_version": "ActionTrajectoryV0",
+        "embodiment": "franka_panda_eval",
+        "representation": "ee_delta",
+        "coordinate_frame": "world",
+        "units": "m_rad_gripper01",
+        "fps": 10.0,
+        "values": [
+          [
+            0.006,
+            -0.0025,
+            0.001,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.006,
+            -0.0025,
+            0.001,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.006,
+            -0.0025,
+            0.001,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.006,
+            -0.0025,
+            0.001,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.006,
+            -0.0025,
+            0.001,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.006,
+            -0.0025,
+            0.001,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.006,
+            -0.0025,
+            0.001,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.006,
+            -0.0025,
+            0.001,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.006,
+            -0.0025,
+            0.001,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.006,
+            -0.0025,
+            0.001,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.006,
+            -0.0025,
+            0.001,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.006,
+            -0.0025,
+            0.001,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.006,
+            -0.0025,
+            0.001,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.006,
+            -0.0025,
+            0.001,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.006,
+            -0.0025,
+            0.001,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.006,
+            -0.0025,
+            0.001,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.006,
+            -0.0025,
+            0.001,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.006,
+            -0.0025,
+            0.001,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.006,
+            -0.0025,
+            0.001,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.006,
+            -0.0025,
+            0.001,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "dimension_names": [
+          "dx",
+          "dy",
+          "dz",
+          "droll",
+          "dpitch",
+          "dyaw",
+          "gripper"
+        ],
+        "normalization_method": "identity",
+        "normalization_revision": "eval-v0",
+        "source_skill": "PLACE",
+        "source_policy": "causal_suite_v0",
+        "action_summary": "place_bin_r2c3_upright_release",
+        "duration_s": 4.0,
+        "num_frames": 40
+      },
+      "human_pass_criteria": [
+        "r2c3_enters_target_cell_upright",
+        "outside_release_lands_outside_bin",
+        "sideways_release_is_unstable_or_collides_not_perfect_upright"
+      ],
+      "human_fail_modes": [
+        "all_variants_perfect_vertical_bin_insert",
+        "destination_ignored"
+      ],
+      "review_checklist_zh": [
+        "A 进入第2排第3格且较竖直",
+        "B 落在料箱外",
+        "C 横放/碰撞/不稳，而不是完美竖直入格"
+      ]
+    },
+    {
+      "schema_version": "TeacherRequestV0",
+      "request_id": "C5_place_pose_variants__place_outside_bin_release",
+      "candidate_model": "COMPARE_BWM_AND_COSMOS3_NANO",
+      "checkpoint_revision": "local-compare",
+      "prompt": "Predict the future video: move grasped cylinder outside the bin and release.",
+      "seed": 20260717,
+      "action_domain": "ee_delta_world_m_gripper",
+      "action_mapping_revision": "EVAL_EE_DELTA_WORLD_M_GRIPPER_V0",
+      "generation_parameters": {
+        "num_frames_hint": 40,
+        "fps_hint": 10.0,
+        "human_review_only": true,
+        "shared_initial_frame": true
+      },
+      "conditioning_scene": {
+        "scene_id": "industrial-table-cylinder-bin-v0",
+        "description_zh": "工业桌面俯视/斜视固定相机。桌上有一根竖直立着的金属圆柱零件，右侧有分格料箱（可见第2排第3格），背景墙面与桌面纹理保持固定。画面中有一只 Franka Panda 机械臂与平行夹爪，初始夹爪张开，位于零件上方附近。",
+        "camera": "fixed third-person industrial RGB, no camera motion",
+        "objects": {
+          "cylinder": "upright metal cylinder on table, graspable",
+          "bin": "partitioned bin with visible row2-col3 cell",
+          "table": "static workbench",
+          "arm": "Franka Panda with two-finger gripper, initially open"
+        },
+        "initial_rgb_uri": "pending://shared/industrial-table-cylinder-bin-v0/rgb.png",
+        "depth_uri": "pending://shared/industrial-table-cylinder-bin-v0/depth.png",
+        "notes": "All paired variants under one case MUST share this exact initial frame."
+      },
+      "action_trajectory": {
+        "schema_version": "ActionTrajectoryV0",
+        "embodiment": "franka_panda_eval",
+        "representation": "ee_delta",
+        "coordinate_frame": "world",
+        "units": "m_rad_gripper01",
+        "fps": 10.0,
+        "values": [
+          [
+            0.009,
+            0.006,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.009,
+            0.006,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.009,
+            0.006,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.009,
+            0.006,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.009,
+            0.006,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.009,
+            0.006,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.009,
+            0.006,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.009,
+            0.006,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.009,
+            0.006,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.009,
+            0.006,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.009,
+            0.006,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.009,
+            0.006,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.009,
+            0.006,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.009,
+            0.006,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.009,
+            0.006,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.009,
+            0.006,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.009,
+            0.006,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.009,
+            0.006,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.009,
+            0.006,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.009,
+            0.006,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "dimension_names": [
+          "dx",
+          "dy",
+          "dz",
+          "droll",
+          "dpitch",
+          "dyaw",
+          "gripper"
+        ],
+        "normalization_method": "identity",
+        "normalization_revision": "eval-v0",
+        "source_skill": "PLACE",
+        "source_policy": "causal_suite_v0",
+        "action_summary": "place_outside_release",
+        "duration_s": 4.0,
+        "num_frames": 40
+      },
+      "human_pass_criteria": [
+        "r2c3_enters_target_cell_upright",
+        "outside_release_lands_outside_bin",
+        "sideways_release_is_unstable_or_collides_not_perfect_upright"
+      ],
+      "human_fail_modes": [
+        "all_variants_perfect_vertical_bin_insert",
+        "destination_ignored"
+      ],
+      "review_checklist_zh": [
+        "A 进入第2排第3格且较竖直",
+        "B 落在料箱外",
+        "C 横放/碰撞/不稳，而不是完美竖直入格"
+      ]
+    },
+    {
+      "schema_version": "TeacherRequestV0",
+      "request_id": "C5_place_pose_variants__place_above_bin_sideways_release",
+      "candidate_model": "COMPARE_BWM_AND_COSMOS3_NANO",
+      "checkpoint_revision": "local-compare",
+      "prompt": "Predict the future video: hold cylinder sideways above bin, then release.",
+      "seed": 20260717,
+      "action_domain": "ee_delta_world_m_gripper",
+      "action_mapping_revision": "EVAL_EE_DELTA_WORLD_M_GRIPPER_V0",
+      "generation_parameters": {
+        "num_frames_hint": 40,
+        "fps_hint": 10.0,
+        "human_review_only": true,
+        "shared_initial_frame": true
+      },
+      "conditioning_scene": {
+        "scene_id": "industrial-table-cylinder-bin-v0",
+        "description_zh": "工业桌面俯视/斜视固定相机。桌上有一根竖直立着的金属圆柱零件，右侧有分格料箱（可见第2排第3格），背景墙面与桌面纹理保持固定。画面中有一只 Franka Panda 机械臂与平行夹爪，初始夹爪张开，位于零件上方附近。",
+        "camera": "fixed third-person industrial RGB, no camera motion",
+        "objects": {
+          "cylinder": "upright metal cylinder on table, graspable",
+          "bin": "partitioned bin with visible row2-col3 cell",
+          "table": "static workbench",
+          "arm": "Franka Panda with two-finger gripper, initially open"
+        },
+        "initial_rgb_uri": "pending://shared/industrial-table-cylinder-bin-v0/rgb.png",
+        "depth_uri": "pending://shared/industrial-table-cylinder-bin-v0/depth.png",
+        "notes": "All paired variants under one case MUST share this exact initial frame."
+      },
+      "action_trajectory": {
+        "schema_version": "ActionTrajectoryV0",
+        "embodiment": "franka_panda_eval",
+        "representation": "ee_delta",
+        "coordinate_frame": "world",
+        "units": "m_rad_gripper01",
+        "fps": 10.0,
+        "values": [
+          [
+            0.006,
+            -0.0025,
+            0.002,
+            0.0,
+            0.0,
+            0.0785,
+            1.0
+          ],
+          [
+            0.006,
+            -0.0025,
+            0.002,
+            0.0,
+            0.0,
+            0.0785,
+            1.0
+          ],
+          [
+            0.006,
+            -0.0025,
+            0.002,
+            0.0,
+            0.0,
+            0.0785,
+            1.0
+          ],
+          [
+            0.006,
+            -0.0025,
+            0.002,
+            0.0,
+            0.0,
+            0.0785,
+            1.0
+          ],
+          [
+            0.006,
+            -0.0025,
+            0.002,
+            0.0,
+            0.0,
+            0.0785,
+            1.0
+          ],
+          [
+            0.006,
+            -0.0025,
+            0.002,
+            0.0,
+            0.0,
+            0.0785,
+            1.0
+          ],
+          [
+            0.006,
+            -0.0025,
+            0.002,
+            0.0,
+            0.0,
+            0.0785,
+            1.0
+          ],
+          [
+            0.006,
+            -0.0025,
+            0.002,
+            0.0,
+            0.0,
+            0.0785,
+            1.0
+          ],
+          [
+            0.006,
+            -0.0025,
+            0.002,
+            0.0,
+            0.0,
+            0.0785,
+            1.0
+          ],
+          [
+            0.006,
+            -0.0025,
+            0.002,
+            0.0,
+            0.0,
+            0.0785,
+            1.0
+          ],
+          [
+            0.006,
+            -0.0025,
+            0.002,
+            0.0,
+            0.0,
+            0.0785,
+            1.0
+          ],
+          [
+            0.006,
+            -0.0025,
+            0.002,
+            0.0,
+            0.0,
+            0.0785,
+            1.0
+          ],
+          [
+            0.006,
+            -0.0025,
+            0.002,
+            0.0,
+            0.0,
+            0.0785,
+            1.0
+          ],
+          [
+            0.006,
+            -0.0025,
+            0.002,
+            0.0,
+            0.0,
+            0.0785,
+            1.0
+          ],
+          [
+            0.006,
+            -0.0025,
+            0.002,
+            0.0,
+            0.0,
+            0.0785,
+            1.0
+          ],
+          [
+            0.006,
+            -0.0025,
+            0.002,
+            0.0,
+            0.0,
+            0.0785,
+            1.0
+          ],
+          [
+            0.006,
+            -0.0025,
+            0.002,
+            0.0,
+            0.0,
+            0.0785,
+            1.0
+          ],
+          [
+            0.006,
+            -0.0025,
+            0.002,
+            0.0,
+            0.0,
+            0.0785,
+            1.0
+          ],
+          [
+            0.006,
+            -0.0025,
+            0.002,
+            0.0,
+            0.0,
+            0.0785,
+            1.0
+          ],
+          [
+            0.006,
+            -0.0025,
+            0.002,
+            0.0,
+            0.0,
+            0.0785,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "dimension_names": [
+          "dx",
+          "dy",
+          "dz",
+          "droll",
+          "dpitch",
+          "dyaw",
+          "gripper"
+        ],
+        "normalization_method": "identity",
+        "normalization_revision": "eval-v0",
+        "source_skill": "PLACE",
+        "source_policy": "causal_suite_v0",
+        "action_summary": "place_above_sideways_release",
+        "duration_s": 4.0,
+        "num_frames": 40
+      },
+      "human_pass_criteria": [
+        "r2c3_enters_target_cell_upright",
+        "outside_release_lands_outside_bin",
+        "sideways_release_is_unstable_or_collides_not_perfect_upright"
+      ],
+      "human_fail_modes": [
+        "all_variants_perfect_vertical_bin_insert",
+        "destination_ignored"
+      ],
+      "review_checklist_zh": [
+        "A 进入第2排第3格且较竖直",
+        "B 落在料箱外",
+        "C 横放/碰撞/不稳，而不是完美竖直入格"
+      ]
+    },
+    {
+      "schema_version": "TeacherRequestV0",
+      "request_id": "C6_recovery_after_failure__press_down_again",
+      "candidate_model": "COMPARE_BWM_AND_COSMOS3_NANO",
+      "checkpoint_revision": "local-compare",
+      "prompt": "From a failed placement state, predict future if the robot only presses down again.",
+      "seed": 20260717,
+      "action_domain": "ee_delta_world_m_gripper",
+      "action_mapping_revision": "EVAL_EE_DELTA_WORLD_M_GRIPPER_V0",
+      "generation_parameters": {
+        "num_frames_hint": 24,
+        "fps_hint": 10.0,
+        "human_review_only": true,
+        "shared_initial_frame": true
+      },
+      "conditioning_scene": {
+        "scene_id": "industrial-table-cylinder-bin-v0",
+        "description_zh": "工业桌面俯视/斜视固定相机。桌上有一根竖直立着的金属圆柱零件，右侧有分格料箱（可见第2排第3格），背景墙面与桌面纹理保持固定。画面中有一只 Franka Panda 机械臂与平行夹爪，初始夹爪张开，位于零件上方附近。",
+        "camera": "fixed third-person industrial RGB, no camera motion",
+        "objects": {
+          "cylinder": "upright metal cylinder on table, graspable",
+          "bin": "partitioned bin with visible row2-col3 cell",
+          "table": "static workbench",
+          "arm": "Franka Panda with two-finger gripper, initially open"
+        },
+        "initial_rgb_uri": "pending://shared/industrial-table-cylinder-bin-v0/rgb.png",
+        "depth_uri": "pending://shared/industrial-table-cylinder-bin-v0/depth.png",
+        "notes": "All paired variants under one case MUST share this exact initial frame."
+      },
+      "action_trajectory": {
+        "schema_version": "ActionTrajectoryV0",
+        "embodiment": "franka_panda_eval",
+        "representation": "ee_delta",
+        "coordinate_frame": "world",
+        "units": "m_rad_gripper01",
+        "fps": 10.0,
+        "values": [
+          [
+            0.0,
+            0.0,
+            -0.00375,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            -0.00375,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            -0.00375,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            -0.00375,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            -0.00375,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            -0.00375,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            -0.00375,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            -0.00375,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            -0.00375,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            -0.00375,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            -0.00375,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            -0.00375,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            -0.00375,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            -0.00375,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            -0.00375,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            -0.00375,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "dimension_names": [
+          "dx",
+          "dy",
+          "dz",
+          "droll",
+          "dpitch",
+          "dyaw",
+          "gripper"
+        ],
+        "normalization_method": "identity",
+        "normalization_revision": "eval-v0",
+        "source_skill": "PLACE",
+        "source_policy": "causal_suite_v0",
+        "action_summary": "recovery_press_down",
+        "duration_s": 2.4,
+        "num_frames": 24
+      },
+      "human_pass_criteria": [
+        "press_down_does_not_magically_succeed_from_all_failures",
+        "structured_recovery_differs_from_blind_press",
+        "regrasp_path_shows_backoff_then_retry_structure"
+      ],
+      "human_fail_modes": [
+        "both_actions_instantly_succeed",
+        "recovery_ignored_and_story_resets"
+      ],
+      "review_checklist_zh": [
+        "失败状态不要被瞬间洗白",
+        "A 盲压与 B 回退重抓路径明显不同",
+        "B 应出现后退-调整-再抓-放置结构"
+      ]
+    },
+    {
+      "schema_version": "TeacherRequestV0",
+      "request_id": "C6_recovery_after_failure__backoff_regrasp_place",
+      "candidate_model": "COMPARE_BWM_AND_COSMOS3_NANO",
+      "checkpoint_revision": "local-compare",
+      "prompt": "From the same failed state, predict future if robot backs off, regrasps, then places normally.",
+      "seed": 20260717,
+      "action_domain": "ee_delta_world_m_gripper",
+      "action_mapping_revision": "EVAL_EE_DELTA_WORLD_M_GRIPPER_V0",
+      "generation_parameters": {
+        "num_frames_hint": 80,
+        "fps_hint": 10.0,
+        "human_review_only": true,
+        "shared_initial_frame": true
+      },
+      "conditioning_scene": {
+        "scene_id": "industrial-table-cylinder-bin-v0",
+        "description_zh": "工业桌面俯视/斜视固定相机。桌上有一根竖直立着的金属圆柱零件，右侧有分格料箱（可见第2排第3格），背景墙面与桌面纹理保持固定。画面中有一只 Franka Panda 机械臂与平行夹爪，初始夹爪张开，位于零件上方附近。",
+        "camera": "fixed third-person industrial RGB, no camera motion",
+        "objects": {
+          "cylinder": "upright metal cylinder on table, graspable",
+          "bin": "partitioned bin with visible row2-col3 cell",
+          "table": "static workbench",
+          "arm": "Franka Panda with two-finger gripper, initially open"
+        },
+        "initial_rgb_uri": "pending://shared/industrial-table-cylinder-bin-v0/rgb.png",
+        "depth_uri": "pending://shared/industrial-table-cylinder-bin-v0/depth.png",
+        "notes": "All paired variants under one case MUST share this exact initial frame."
+      },
+      "action_trajectory": {
+        "schema_version": "ActionTrajectoryV0",
+        "embodiment": "franka_panda_eval",
+        "representation": "ee_delta",
+        "coordinate_frame": "world",
+        "units": "m_rad_gripper01",
+        "fps": 10.0,
+        "values": [
+          [
+            0.0,
+            0.0,
+            0.006666666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.006666666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.006666666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.006666666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.006666666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.006666666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.006666666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.006666666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.006666666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.006666666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.006666666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.006666666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            -0.0025,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            -0.0025,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            -0.0025,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            -0.0025,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            -0.0025,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            -0.0025,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            -0.0025,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            -0.0025,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            -0.0025,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            -0.0025,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            -0.0025,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            -0.0025,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            -0.006666666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            -0.006666666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            -0.006666666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            -0.006666666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            -0.006666666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            -0.006666666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            -0.006666666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            -0.006666666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            -0.006666666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            -0.006666666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            -0.006666666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            -0.006666666666666667,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.008333333333333333,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.008333333333333333,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.008333333333333333,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.008333333333333333,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.008333333333333333,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.008333333333333333,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.008333333333333333,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.008333333333333333,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.008333333333333333,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.008333333333333333,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.008333333333333333,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.008333333333333333,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.00625,
+            -0.0025,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.00625,
+            -0.0025,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.00625,
+            -0.0025,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.00625,
+            -0.0025,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.00625,
+            -0.0025,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.00625,
+            -0.0025,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.00625,
+            -0.0025,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.00625,
+            -0.0025,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.00625,
+            -0.0025,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.00625,
+            -0.0025,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.00625,
+            -0.0025,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.00625,
+            -0.0025,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.00625,
+            -0.0025,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.00625,
+            -0.0025,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.00625,
+            -0.0025,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.00625,
+            -0.0025,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "dimension_names": [
+          "dx",
+          "dy",
+          "dz",
+          "droll",
+          "dpitch",
+          "dyaw",
+          "gripper"
+        ],
+        "normalization_method": "identity",
+        "normalization_revision": "eval-v0",
+        "source_skill": "REGRASP",
+        "source_policy": "causal_suite_v0",
+        "action_summary": "recovery_backoff_regrasp_place",
+        "duration_s": 8.0,
+        "num_frames": 80
+      },
+      "human_pass_criteria": [
+        "press_down_does_not_magically_succeed_from_all_failures",
+        "structured_recovery_differs_from_blind_press",
+        "regrasp_path_shows_backoff_then_retry_structure"
+      ],
+      "human_fail_modes": [
+        "both_actions_instantly_succeed",
+        "recovery_ignored_and_story_resets"
+      ],
+      "review_checklist_zh": [
+        "失败状态不要被瞬间洗白",
+        "A 盲压与 B 回退重抓路径明显不同",
+        "B 应出现后退-调整-再抓-放置结构"
+      ]
+    }
+  ]
+}
