@@ -1,5 +1,5 @@
 <!-- GENERATED — 禁止直接 Edit/Write。唯一写入口: tools/statectl.py -->
-<!-- statectl protocol=2 stream=M2C generation=1860 updated=2026-09-05T04:28+0800 -->
+<!-- statectl protocol=2 stream=M2C generation=1861 updated=2026-09-05T04:30+0800 -->
 <!-- 自 M2C_STATE.md 迁移 sha=9dc690524ad77e6d51964237f11ee107e23e3ae92398d19e3424eb0676648fc6 -->
 
 # M2C 权威状态(活跃快照,协议 v2)
@@ -2183,6 +2183,8 @@
 
 - `sidecar-8571-keep` — 8571 基座侧车 judge-locany-base 保持运行(裁定 tzb-56 2026-09-05 再确认一次);给用户实时窗口用,不撤
 
+- `guard.idle_checks_added` — tzb-55:v2/v2.1 守卫与报告筛查各加空转自检(只数页面字、备注不算;图体按解析张数判),自检本身经负例验;报告新稿未命中 2.57 mm→裁 NUMBERS-v2 加 v21 三轮行(出处包内 v21-rerun-20260905) · ref: /Users/gl/tzb-deliverables/ppt-v1/NUMBERS-v2.md
+
 ## 2. 归属与 lane
 - `lane.m2c_exec` — **M2C 执行会话**:successor implementation candidate,commit-free,于全新隔离 clone(Q′ 模式);已登记候选路径内自由编辑(R132.41)。ETA(8/29 午报):交包 8/30 01:00–07:00;早沿(≤03:00)可达截止,晚沿不可达。
 - `lane.tzb_fe` — **tzb-fe(协调)**:实现审查+七段治理批量激活(预告:批一 = R′ stage adoption→successor prereg→materialize→bootstrap;批二 = legacy P″ prefix adoption→recovery03→combined preflight;每步仍各自 pre-capture/记录/fail-closed,激活与 closeout 各批一次)。
@@ -2760,7 +2762,6 @@
 - `await-servo-guard-then-3-rounds` — 等 demo lane 伺服发散保护同步后跑红/紫/青三轮并报 tzb-56;红期望 HALTED_APPROACH_DID_NOT_CONVERGE 干净停止、邻件不动。tzb-56 说它会叫我,不自己加轮
 
 ## 5. Recent tail(journal 缓存,非权威)
-- 2026-09-05T04:20+0800 [FACT/facts] <report-zh-v1> `report.zh_v2_draft2` — 报告第二稿(图文版)04:19 版:53 页 24 图 22 表;审查 F1(出处行根前缀)已修,筛查 PASS(775 数/未命中 0/禁写 0);待补 S0 验收+紫/红两轮(等 tzb-56 字段值) · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.pdf
 - 2026-09-05T04:20+0800 [FACT/facts] <tzb-fe> `report.f1_fixed_values_sent` — 报告 F1 已修(04:19,出处行统一附录 C 前缀 D/L/P/T,复筛 PASS 775/766/0);已把 S0 三句验收与 v21 紫/青/红字段值发 tzb-66 填 3.2.1 与表 15;默认执行器句留待裁定 · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.pdf
 - 2026-09-05T04:21+0800 [FACT/facts] <m2c-exec> `kadian-32-ping-identity` — 卡点32已修:builder 加第8处替换,PING 自报 vnext_dispatch_executor_v21 + v21_baseline;结果文件名 result-v17.json 按 v15 parity 不改;新 v21 sha 8b2d45fd 前缀;85 tests pass · ref: /Users/gl/tzb-deliverables/judge-package-v1/agent/executor/resident/SHA256SUMS-v21.txt
 - 2026-09-05T04:21+0800 [FACT/facts] <m2c-exec> `red-attach-root-cause` — 红轮 cylinder_01 失败根因=接近位姿够不到(基座半径 0.232m,首次伺服残差 331mm/28度)+伺服无发散保护把目标甩到 1.07m 外;非抓取力学、非邻件碰撞、非目标解析 · ref: /Users/gl/tzb-lanes/cold-install-chxy-v1/receipts/v21-rerun/red/round-001/result-v17.json
@@ -2780,3 +2781,4 @@
 - 2026-09-05T04:28+0800 [FACT/facts] <exec-no-truth-v1> `ruling-finding-32-fix-shape` — 裁定(tzb-56, 2026-09-05):卡点32升中采纳;修法=v21信封消费记录新增consumed_by_executor_identity=v21(不动consumed_by老字段保parity),grasp_gate.why常量改为按本轮事实生成或删掉;归demo lane
 - 2026-09-05T04:28+0800 [TASK/task] <exec-no-truth-v1> `await-servo-guard-then-3-rounds` — 等 demo lane 伺服发散保护同步后跑红/紫/青三轮并报 tzb-56;红期望 HALTED_APPROACH_DID_NOT_CONVERGE 干净停止、邻件不动。tzb-56 说它会叫我,不自己加轮
 - 2026-09-05T04:28+0800 [FACT/facts] <exec-no-truth-v1> `sidecar-8571-keep` — 8571 基座侧车 judge-locany-base 保持运行(裁定 tzb-56 2026-09-05 再确认一次);给用户实时窗口用,不撤
+- 2026-09-05T04:30+0800 [FACT/facts] <tzb-fe> `guard.idle_checks_added` — tzb-55:v2/v2.1 守卫与报告筛查各加空转自检(只数页面字、备注不算;图体按解析张数判),自检本身经负例验;报告新稿未命中 2.57 mm→裁 NUMBERS-v2 加 v21 三轮行(出处包内 v21-rerun-20260905) · ref: /Users/gl/tzb-deliverables/ppt-v1/NUMBERS-v2.md
