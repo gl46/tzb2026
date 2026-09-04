@@ -1,5 +1,5 @@
 <!-- GENERATED — 禁止直接 Edit/Write。唯一写入口: tools/statectl.py -->
-<!-- statectl protocol=2 stream=M2C generation=1948 updated=2026-09-05T05:55+0800 -->
+<!-- statectl protocol=2 stream=M2C generation=1949 updated=2026-09-05T05:57+0800 -->
 <!-- 自 M2C_STATE.md 迁移 sha=9dc690524ad77e6d51964237f11ee107e23e3ae92398d19e3424eb0676648fc6 -->
 
 # M2C 权威状态(活跃快照,协议 v2)
@@ -271,6 +271,8 @@
 
 - `review.tarball_054100` — 终包 054100 开箱 PASS 无阻断:sha 三方一致 892 文件;11 份 SHA256SUMS 摘要不符 0;地址/密钥/运行态/模式位全清;U1-U6 全修;5 条非阻断(判委错字7处、拒绝轮无五面板未进判委文档、目标柱15/17nm两口径、launcher旧摘要无说明、README 9 处包外引用旧有) · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-tarball-054100.md
 
+- `review.tarball_055444` — 终包 055444 差量核 PASS:sha 三方一致 892 文件,逐文件比对确认只差 README+使用说明两个文件且摘要相符;N1-N5 五处全落实;新引入 2 处小错(v20 回执位置写成 evidence/、§Claim boundary 空指)非阻断 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-tarball-055444-delta.md
+
 ## 2. 归属与 lane
 - `lane.m2c_exec` — **M2C 执行会话**:successor implementation candidate,commit-free,于全新隔离 clone(Q′ 模式);已登记候选路径内自由编辑(R132.41)。ETA(8/29 午报):交包 8/30 01:00–07:00;早沿(≤03:00)可达截止,晚沿不可达。
 - `lane.tzb_fe` — **tzb-fe(协调)**:实现审查+七段治理批量激活(预告:批一 = R′ stage adoption→successor prereg→materialize→bootstrap;批二 = legacy P″ prefix adoption→recovery03→combined preflight;每步仍各自 pre-capture/记录/fail-closed,激活与 closeout 各批一次)。
@@ -366,7 +368,6 @@
 - `live-loop-open-items-ptr` — 直播窗口 lane 三项未结(不追):①我方驱动 exit0 端到端待下一轮真实运行②卡点30 未对失败样本证伪③发散保护行为未触发。紫柱倾倒已裁今日不修→OQ25(demo lane 写)
 
 ## 5. Recent tail(journal 缓存,非权威)
-- 2026-09-05T05:30+0800 [TASK/task] <exec-no-truth-v1> `rerun-refusal-after-c34-fix` — 等 demo lane 修完卡点34同步后,原样再跑一次拒绝轮(同句、不设EXECUTOR),落 receipts/s0-refusal-exit0-r2/,验 NOT DISPATCHED 只剩一行、exit 0、nonce不耗,sha 报 tzb-56
 - 2026-09-05T05:30+0800 [FACT/facts] <tzb-fe> `delivery.deck_v3_rebuilt_20260905` — 05:3x deck v3 重建 pptx 164d1b38/pdf 7cee4b64(P07 三处改'相对声明格底平面 +x mm',守卫 PASS),已交 tzb-95 核;NUMBERS-v2 461–467 改口(466 柱 Ø≈29.7×79.7、467 感知直径低估≈1.5%) · ref: /Users/gl/tzb-deliverables/ppt-v3/CHANGES-v3.md
 - 2026-09-05T05:31+0800 [FACT/facts] <tzb-fe> `pkg.readme_cell_floor_wording` — README §Verification 三处'x mm above the cell floor'改为 height_above_cell_floor_m 偏移口径(非净空),README bcdd7c8c→cad2b5cf;待拒绝轮 r2 行加入后再让 demo lane 同步 chxy · ref: /Users/gl/tzb-deliverables/judge-package-v1/README.md
 - 2026-09-05T05:31+0800 [FACT/facts] <m2c-exec> `kadian-34-single-not-dispatched` — 卡点34已修:S0 拒绝时跳过 executor 那条 NOT DISPATCHED、detail 空不打悬空 --;两处共用同一 refused_at_s0 判据;run_demo 73af14fe;95 tests;新测试对旧码复现两行 · ref: /Users/gl/tzb-deliverables/judge-package-v1/agent/run_demo.py
@@ -386,3 +387,4 @@
 - 2026-09-05T05:42+0800 [FACT/facts] <tzb-fe> `delivery.morning_status_20260905` — 05:4x 交付态:终包 054100;报告 4c38f395/46873d50;deck v3 1bb70b2d/b0c0c73c;训练包 a5ba5091;GPT 终审包 0245;直播现场保持;待用户:LoRA 默认/模型名/push/GPT 结论/录视频/权重许可 · ref: /Users/gl/tzb-lanes/coordinator-notes/morning-report-20260905.md
 - 2026-09-05T05:52+0800 [FACT/facts] <review-zh-v1> `review.tarball_054100` — 终包 054100 开箱 PASS 无阻断:sha 三方一致 892 文件;11 份 SHA256SUMS 摘要不符 0;地址/密钥/运行态/模式位全清;U1-U6 全修;5 条非阻断(判委错字7处、拒绝轮无五面板未进判委文档、目标柱15/17nm两口径、launcher旧摘要无说明、README 9 处包外引用旧有) · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-tarball-054100.md
 - 2026-09-05T05:55+0800 [FACT/facts] <tzb-fe> `milestone.final_tarball_20260905` — 终包 judge-package-v1-20260905-055444.tar.gz(892 文件/241MB/双门 CLEAN,sha 575f6e4c…):054100 审稿 PASS 后再修 N1–N5(判委→评委、README 0ee396b6);054100 与 235958 入 superseded/ · ref: /Users/gl/tzb-deliverables/judge-package-v1-20260905-055444.tar.gz.sha256
+- 2026-09-05T05:57+0800 [FACT/facts] <review-zh-v1> `review.tarball_055444` — 终包 055444 差量核 PASS:sha 三方一致 892 文件,逐文件比对确认只差 README+使用说明两个文件且摘要相符;N1-N5 五处全落实;新引入 2 处小错(v20 回执位置写成 evidence/、§Claim boundary 空指)非阻断 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-tarball-055444-delta.md
