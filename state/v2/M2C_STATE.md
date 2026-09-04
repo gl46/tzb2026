@@ -1,5 +1,5 @@
 <!-- GENERATED — 禁止直接 Edit/Write。唯一写入口: tools/statectl.py -->
-<!-- statectl protocol=2 stream=M2C generation=1743 updated=2026-09-05T02:21+0800 -->
+<!-- statectl protocol=2 stream=M2C generation=1751 updated=2026-09-05T02:27+0800 -->
 <!-- 自 M2C_STATE.md 迁移 sha=9dc690524ad77e6d51964237f11ee107e23e3ae92398d19e3424eb0676648fc6 -->
 
 # M2C 权威状态(活跃快照,协议 v2)
@@ -1991,7 +1991,7 @@
 
 - `report-screen-ruling-applied` — 报告线禁写裁定已进 screen_report.py 覆盖层(规划/推理/智能体放行,闭环与位姿估计给否定豁免,校验统一);deck 表未动,正负例各复验 · ref: /Users/gl/tzb-deliverables/report-v1/tools/禁写清单-给报告作者.md
 
-- `deliverable.training_bundle_v1` — Q9②训练包已出(tzb-76 02:1x):training-v1/training-bundle-v1.tar 572MB,591文件SHA全OK;代码/数据集206+326帧/adapter两版/日志/结果+勘误/中文README;无私网IP与key;勘误件已进评委包 env/s2-lora-v1/ · ref: /Users/gl/tzb-deliverables/training-v1/training-bundle-v1.tar.sha256
+- `deliverable.training_bundle_v1` — 训练包重打(02:2x):599 文件 SHA 全 OK,tar 572MB,sha e669981e…(0273a99a 作废);5 阻断+2 来源不明全改(补两脚本、勘误索引+SUPERSEDED.json、显存/内存四行带出处、runs-ab3 步、推理峰值出处);待审查复核 · ref: /Users/gl/tzb-deliverables/training-v1/training-bundle-v1.tar.sha256
 
 - `report.zh_v1_started` — 技术报告 owner tzb-66 02:1x 开工:事实源读齐;PDF 路线 Markdown→HTML→Chrome headless(CJK 已验);tzb-55 旧稿改名为素材件仅查数;细节见 ref · ref: /Users/gl/tzb-lanes/report-zh-v1/LANE-NOTES.md
 
@@ -2010,6 +2010,20 @@
 - `review.training-bundle` — 训练包①脱敏②摘要往返④adapter0400 均PASS;③5条阻断:提取器与冻结入口不在任何包内、RESULT-v2仍挂已撤回的0.133对比、两RESULT指向错回执(62a81648内部矛盾且无作废标记)、宿主内存23.9/49.3实为GPU显存、runs-ab3无来源 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-training-bundle-v1.md
 
 - `review.training_bundle_v1` — 审查训练包:脱敏/SHA/0400 过;5 阻断已裁(T1 补发提取器与冻结入口;T2/T3 原件不改、加勘误索引与 SUPERSEDED.json;T4 显存/内存标签改准;T5 补 runs-ab3 生成步或删)+两处来源不明数;tzb-76 08:00 前重打 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-training-bundle-v1.md
+
+- `s0-llm-exists-but-not-on-judge-path` — S0 两条路:live_entry_v4/v5 有真 LLM S0(stage=S0,usage 35/152/187,S0_DECOMPOSITION_FAILED_FAIL_CLOSED);评委路 run_demo 的 S0 是注册表确定性匹配、expression 由调用方传 · ref: /Users/gl/tzb-lanes/agent-demo-v3-isaac-rgbd/src/live_entry_v5.py
+
+- `ruling.s0_llm_extraction` — 用户裁(02:2x)颜色词表太固化→S0 改为 27B 抽取指称表达(JSON:zh/en 短语、注册颜色词或null、目的地、操作、否定;畸形即拒),S2 用开放词汇短语,颜色词 null 则规则跳过并披露;词表仅离线兜底;验收紫/红/最左边三句评委路径;README/deck 'S0=LLM' 暂不改 · ref: /Users/gl/tzb-deliverables/judge-package-v1/config/chain.yaml
+
+- `s0.existing_llm_decomposition` — 树内已有真 LLM S0(live_entry_v4/v5,失败码 S0_DECOMPOSITION_FAILED_FAIL_CLOSED,回执 v4-switch-v1 turn.json,S0 2.12 s 出自此路);评委路未接它。裁:复用并扩槽接入评委路;S0 耗时须带路径身份;deck P2 槽位进 v2.1 · ref: /Users/gl/tzb-deliverables/ppt-v1/NUMBERS-v2.md
+
+- `report.s0_wording_pending` — 报告 S0 按 tzb-fe 02:4x 第二条改写为大模型结构化抽取(JSON 畸形即拒),留位【待补:S0 改版验收结果】;12:00 未过则改回确定性解析。紫色/红色两轮新证据留位于 4.1 · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.md
+
+- `deck-v2.1-pending-list` — deck v2.1 待改清单已落 ppt-v1/PENDING-v2.1.md:P2 的 S0 槽位三改五(或按未过分支改确定性)、S0 耗时须带路径身份、LOCATOR_NAME、12项0FAIL落点 · ref: /Users/gl/tzb-deliverables/ppt-v1/PENDING-v2.1.md
+
+- `discipline.varied_instructions` — 纪律(02:2x,用户指出后):评委路径'已验证'须至少三条不同指令(换物体/换目的地/应拒绝);管线图每步'谁在做'对代码核;README §Verification 已加说明;记忆已存 · ref: /Users/gl/.claude/projects/-Users-gl-tzb/memory/verify-with-varied-instructions.md
+
+- `training-bundle-review-fixes` — 审查5条阻断改完,tar重打sha e669981e(旧0273a99a作废),599文件。T4显存标签错最重:设备级23.9/49.3GB而非8.45/9,硬件门槛差一量级,已改并加门槛句。 · ref: /Users/gl/tzb-deliverables/training-v1/training-bundle-v1/README-训练.md
 
 ## 2. 归属与 lane
 - `lane.m2c_exec` — **M2C 执行会话**:successor implementation candidate,commit-free,于全新隔离 clone(Q′ 模式);已登记候选路径内自由编辑(R132.41)。ETA(8/29 午报):交包 8/30 01:00–07:00;早沿(≤03:00)可达截止,晚沿不可达。
@@ -2577,14 +2591,6 @@
 - `task.q9_deliverables_20260905` — Q9 分工:②训练包 tzb-76 10:00;⑤技术报告 tzb-55 初稿12:00/定稿18:00;①⑥使用说明 demo lane 08:00;④视频用户录;审查逐件点名;终包 20:00 重出 · ref: /Users/gl/tzb-lanes/coordinator-notes/delivery-checklist-20260904.md
 
 ## 5. Recent tail(journal 缓存,非权威)
-- 2026-09-05T02:07+0800 [FACT/facts] <deck-v2> `report-v1-handover-to-tzb66` — 技术报告改由 tzb-66 写(tzb-56 改令 0205);deck-v2 转为供数+筛查:tools/screen_report.py 与禁写清单-给报告作者.md 已就绪;草稿已移出交付路径 · ref: /Users/gl/tzb-deliverables/report-v1/tools/禁写清单-给报告作者.md
-- 2026-09-05T02:08+0800 [FACT/facts] <tzb-fe> `ruling.report_banned_words` — 裁定(02:1x,报告线专用禁写表):放行 规划/推理/智能体(主办方原话与领域常用词);闭环只在变更10逐字句与否定句;位姿估计仅否定式;安全陈述带范围;统一用校验。deck 表不动;tzb-55 改筛查脚本与清单给 tzb-66 · ref: /Users/gl/tzb-deliverables/report-v1/tools/禁写清单-给报告作者.md
-- 2026-09-05T02:08+0800 [FACT/facts] <tzb-fe> `live_window.pose_user_final` — 用户裁定(02:0x):直播机位以 step 3 为准(eye 1.478,-1.226,1.698 / look_at 0.02,-0.08,0.60,sha 4dda3c2b,实测主体占比 30.7%);键盘那次作废;'缩略图'系渲染滞后旧画面;重起保持此 pose · ref: /Users/gl/tzb-lanes/live-loop-v1/evidence/live-round-20260905-bprime/step3-actual-after-render-caughtup.png
-- 2026-09-05T02:09+0800 [FACT/facts] <finetuned-live-v1> `training-bundle-v1-delivered` — 训练交付包已出:tzb-deliverables/training-v1/training-bundle-v1(584MB/591文件)+ .tar 572MB sha 0273a99a。含两版数据集/adapter/日志/结果。脱敏过:无10.13./root@/key。 · ref: /Users/gl/tzb-deliverables/training-v1/training-bundle-v1/README-训练.md
-- 2026-09-05T02:09+0800 [FACT/facts] <finetuned-live-v1> `v2-training-numbers-erratum` — 勘误0e6c90fd:RESULT-v2的train_loss 0.133是瞬时值比v1均值,错;同口径v1均值.1591 v2均值.1727(v2更高)。回执62a81648有4字段是v1硬编码常量,更正件b2e27ce7。 · ref: /Users/gl/tzb-lanes/finetuned-live-path-v1/RESULT-v2-training-numbers-erratum-v1.md
-- 2026-09-05T02:09+0800 [EVENT] <tzb-fe> — labserver 账目:01:52 轮 round-002-composite-20260904T175254 为半成品——链完成、信封已铸、nonce d416390d 已花、执行器停在 observation_before,无 result;加性保留;loop lane 写回执;v17 重起不受阻 · ref: /var/tmp/vnext-demo-v3-20260903/dispatch-v1/rounds/round-002-composite-20260904T175254
-- 2026-09-05T02:10+0800 [EVENT] <m2c-exec> — 半成品记录: round-002-...T175254 nonce d416390d 已花但无 result(v17 丢 GPU 停在 observation_before), v17 于 02:09 重起故永久不完整 · ref: live-loop-v1/receipts/live-window-incomplete-round-20260904T175254.json
-- 2026-09-05T02:10+0800 [EVENT] <m2c-exec> — v17 重起(GPU1,v3 变体 sha 72d91479):PING 8.0s→0.02s,rounds 归零,pose 保持 step 3 (4dda3c2b);前一容器日志已存盘。
 - 2026-09-05T02:10+0800 [FACT/facts] <m2c-exec> `labonly-viewport-liveness-probe` — PING 8s 是病不是结构:重起后同代码 0.02s。8s=空转周期被拖慢;GIL 交接只解释倍数。1.616s 写入→应用亦为病中数。 · ref: /Users/gl/tzb-lanes/agent-demo-v3-isaac-rgbd/labonly-viewport-v1/PING-LATENCY-IS-NOT-A-HANG.md
 - 2026-09-05T02:11+0800 [FACT/facts] <deck-v2> `report-screen-ruling-applied` — 报告线禁写裁定已进 screen_report.py 覆盖层(规划/推理/智能体放行,闭环与位姿估计给否定豁免,校验统一);deck 表未动,正负例各复验 · ref: /Users/gl/tzb-deliverables/report-v1/tools/禁写清单-给报告作者.md
 - 2026-09-05T02:11+0800 [FACT/facts] <tzb-fe> `deliverable.training_bundle_v1` — Q9②训练包已出(tzb-76 02:1x):training-v1/training-bundle-v1.tar 572MB,591文件SHA全OK;代码/数据集206+326帧/adapter两版/日志/结果+勘误/中文README;无私网IP与key;勘误件已进评委包 env/s2-lora-v1/ · ref: /Users/gl/tzb-deliverables/training-v1/training-bundle-v1.tar.sha256
@@ -2597,3 +2603,11 @@
 - 2026-09-05T02:19+0800 [FACT/facts] <tzb-fe> `defect.referring_expression_fixed_cyan` — 阻断缺陷(02:2x):start.sh 与直播驱动固定 expression=cyan cylinder,S0 只规则解目的地不派生指称词(无LLM),颜色规则只认英文→敲紫色抓青色。裁:S0 加颜色词表派生+新拒绝码,去固定值,紫/红评委路径复验;'S0=LLM'主张待更正 · ref: /Users/gl/tzb-deliverables/judge-package-v1/config/chain.yaml
 - 2026-09-05T02:20+0800 [FACT/facts] <review-zh-v1> `review.training-bundle` — 训练包①脱敏②摘要往返④adapter0400 均PASS;③5条阻断:提取器与冻结入口不在任何包内、RESULT-v2仍挂已撤回的0.133对比、两RESULT指向错回执(62a81648内部矛盾且无作废标记)、宿主内存23.9/49.3实为GPU显存、runs-ab3无来源 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-training-bundle-v1.md
 - 2026-09-05T02:21+0800 [FACT/facts] <tzb-fe> `review.training_bundle_v1` — 审查训练包:脱敏/SHA/0400 过;5 阻断已裁(T1 补发提取器与冻结入口;T2/T3 原件不改、加勘误索引与 SUPERSEDED.json;T4 显存/内存标签改准;T5 补 runs-ab3 生成步或删)+两处来源不明数;tzb-76 08:00 前重打 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-training-bundle-v1.md
+- 2026-09-05T02:23+0800 [FACT/facts] <deck-v2> `s0-llm-exists-but-not-on-judge-path` — S0 两条路:live_entry_v4/v5 有真 LLM S0(stage=S0,usage 35/152/187,S0_DECOMPOSITION_FAILED_FAIL_CLOSED);评委路 run_demo 的 S0 是注册表确定性匹配、expression 由调用方传 · ref: /Users/gl/tzb-lanes/agent-demo-v3-isaac-rgbd/src/live_entry_v5.py
+- 2026-09-05T02:23+0800 [FACT/facts] <tzb-fe> `ruling.s0_llm_extraction` — 用户裁(02:2x)颜色词表太固化→S0 改为 27B 抽取指称表达(JSON:zh/en 短语、注册颜色词或null、目的地、操作、否定;畸形即拒),S2 用开放词汇短语,颜色词 null 则规则跳过并披露;词表仅离线兜底;验收紫/红/最左边三句评委路径;README/deck 'S0=LLM' 暂不改 · ref: /Users/gl/tzb-deliverables/judge-package-v1/config/chain.yaml
+- 2026-09-05T02:24+0800 [FACT/facts] <tzb-fe> `s0.existing_llm_decomposition` — 树内已有真 LLM S0(live_entry_v4/v5,失败码 S0_DECOMPOSITION_FAILED_FAIL_CLOSED,回执 v4-switch-v1 turn.json,S0 2.12 s 出自此路);评委路未接它。裁:复用并扩槽接入评委路;S0 耗时须带路径身份;deck P2 槽位进 v2.1 · ref: /Users/gl/tzb-deliverables/ppt-v1/NUMBERS-v2.md
+- 2026-09-05T02:24+0800 [FACT/facts] <report-zh-v1> `report.s0_wording_pending` — 报告 S0 按 tzb-fe 02:4x 第二条改写为大模型结构化抽取(JSON 畸形即拒),留位【待补:S0 改版验收结果】;12:00 未过则改回确定性解析。紫色/红色两轮新证据留位于 4.1 · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.md
+- 2026-09-05T02:25+0800 [FACT/facts] <deck-v2> `deck-v2.1-pending-list` — deck v2.1 待改清单已落 ppt-v1/PENDING-v2.1.md:P2 的 S0 槽位三改五(或按未过分支改确定性)、S0 耗时须带路径身份、LOCATOR_NAME、12项0FAIL落点 · ref: /Users/gl/tzb-deliverables/ppt-v1/PENDING-v2.1.md
+- 2026-09-05T02:26+0800 [FACT/facts] <tzb-fe> `discipline.varied_instructions` — 纪律(02:2x,用户指出后):评委路径'已验证'须至少三条不同指令(换物体/换目的地/应拒绝);管线图每步'谁在做'对代码核;README §Verification 已加说明;记忆已存 · ref: /Users/gl/.claude/projects/-Users-gl-tzb/memory/verify-with-varied-instructions.md
+- 2026-09-05T02:26+0800 [FACT/facts] <finetuned-live-v1> `training-bundle-review-fixes` — 审查5条阻断改完,tar重打sha e669981e(旧0273a99a作废),599文件。T4显存标签错最重:设备级23.9/49.3GB而非8.45/9,硬件门槛差一量级,已改并加门槛句。 · ref: /Users/gl/tzb-deliverables/training-v1/training-bundle-v1/README-训练.md
+- 2026-09-05T02:27+0800 [FACT/facts] <tzb-fe> `deliverable.training_bundle_v1` — 训练包重打(02:2x):599 文件 SHA 全 OK,tar 572MB,sha e669981e…(0273a99a 作废);5 阻断+2 来源不明全改(补两脚本、勘误索引+SUPERSEDED.json、显存/内存四行带出处、runs-ab3 步、推理峰值出处);待审查复核 · ref: /Users/gl/tzb-deliverables/training-v1/training-bundle-v1.tar.sha256
