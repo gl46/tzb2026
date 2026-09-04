@@ -1,5 +1,5 @@
 <!-- GENERATED — 禁止直接 Edit/Write。唯一写入口: tools/statectl.py -->
-<!-- statectl protocol=2 stream=M2C generation=1767 updated=2026-09-05T02:35+0800 -->
+<!-- statectl protocol=2 stream=M2C generation=1770 updated=2026-09-05T02:36+0800 -->
 <!-- 自 M2C_STATE.md 迁移 sha=9dc690524ad77e6d51964237f11ee107e23e3ae92398d19e3424eb0676648fc6 -->
 
 # M2C 权威状态(活跃快照,协议 v2)
@@ -2045,6 +2045,12 @@
 
 - `defect.start_sh_chain_dropped_instruction` — 同类缺陷(demo lane 02:3x):start.sh 的 chain 分支未把参数传进 step_chain→评委敲的指令永远取默认句(青色);已改为传 "$@",bash -n 过,已同步 chxy(sha 664ea560…);其余三分支验收后统一改 · ref: /Users/gl/tzb-deliverables/judge-package-v1/scripts/start.sh
 
+- `judge-path-instruction-not-forwarded` — start.sh 'chain) step_chain ;' 未传参,评委敲的指令到不了链、永远跑默认句;已改 step_chain "$@" 并同步 chxy。同类:另三分支待验收后统一。 · ref: /Users/gl/tzb-deliverables/judge-package-v1/scripts/start.sh
+
+- `report.user_feedback_draft1` — 用户 02:3x 看报告初稿:'太烂,一点图没有,不像技术报告,去看网上同行怎么写';令 tzb-66 查同行技术报告结构,补十类图表(架构/流程/信任边界/场景与HUD截图/定位框/抓放对比/LoRA曲线/色相分布/时延/48例表),A4 排版带题注目录;第二稿 06:00,定稿 18:00 · ref: /Users/gl/tzb-deliverables/report-v1/
+
+- `review.training_bundle_recut` — 训练包复核(e669981e):机械项全过;残留1阻断=§7'只有两件包外'与运行时矛盾(冻结入口硬校验4个包外文件、6入口写死ROOT、run_ab写死venv)。裁只补文档不改代码:执行环境约束段、§7实际件数、PROVENANCE对齐;tzb-76 08:00 重打 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-training-bundle-recut-v1.md
+
 ## 2. 归属与 lane
 - `lane.m2c_exec` — **M2C 执行会话**:successor implementation candidate,commit-free,于全新隔离 clone(Q′ 模式);已登记候选路径内自由编辑(R132.41)。ETA(8/29 午报):交包 8/30 01:00–07:00;早沿(≤03:00)可达截止,晚沿不可达。
 - `lane.tzb_fe` — **tzb-fe(协调)**:实现审查+七段治理批量激活(预告:批一 = R′ stage adoption→successor prereg→materialize→bootstrap;批二 = legacy P″ prefix adoption→recovery03→combined preflight;每步仍各自 pre-capture/记录/fail-closed,激活与 closeout 各批一次)。
@@ -2619,9 +2625,6 @@
 - `live-loop-purple-round-after-s0` — 同步后跑一轮'把紫色的圆柱体放到蓝色料箱',报 S0 分槽结果、S2 实际被问的词、实际抓的柱子
 
 ## 5. Recent tail(journal 缓存,非权威)
-- 2026-09-05T02:25+0800 [FACT/facts] <deck-v2> `deck-v2.1-pending-list` — deck v2.1 待改清单已落 ppt-v1/PENDING-v2.1.md:P2 的 S0 槽位三改五(或按未过分支改确定性)、S0 耗时须带路径身份、LOCATOR_NAME、12项0FAIL落点 · ref: /Users/gl/tzb-deliverables/ppt-v1/PENDING-v2.1.md
-- 2026-09-05T02:26+0800 [FACT/facts] <tzb-fe> `discipline.varied_instructions` — 纪律(02:2x,用户指出后):评委路径'已验证'须至少三条不同指令(换物体/换目的地/应拒绝);管线图每步'谁在做'对代码核;README §Verification 已加说明;记忆已存 · ref: /Users/gl/.claude/projects/-Users-gl-tzb/memory/verify-with-varied-instructions.md
-- 2026-09-05T02:26+0800 [FACT/facts] <finetuned-live-v1> `training-bundle-review-fixes` — 审查5条阻断改完,tar重打sha e669981e(旧0273a99a作废),599文件。T4显存标签错最重:设备级23.9/49.3GB而非8.45/9,硬件门槛差一量级,已改并加门槛句。 · ref: /Users/gl/tzb-deliverables/training-v1/training-bundle-v1/README-训练.md
 - 2026-09-05T02:27+0800 [FACT/facts] <tzb-fe> `deliverable.training_bundle_v1` — 训练包重打(02:2x):599 文件 SHA 全 OK,tar 572MB,sha e669981e…(0273a99a 作废);5 阻断+2 来源不明全改(补两脚本、勘误索引+SUPERSEDED.json、显存/内存四行带出处、runs-ab3 步、推理峰值出处);待审查复核 · ref: /Users/gl/tzb-deliverables/training-v1/training-bundle-v1.tar.sha256
 - 2026-09-05T02:29+0800 [FACT/facts] <review-zh-v1> `review.usage-doc` — 使用说明.md 命令核完:3条P0(L100用未注册的蓝色料筐→S0必拒;docker块引用.env/局部变量在裸壳为空;README-image-builds仍写v2 tag)+U4 ISAAC_IMAGE语义冲突等3条P1 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-usage-doc-v1.md
 - 2026-09-05T02:30+0800 [TASK/task] <tzb-fe> `task.deck_v3_pptmaster` — 用户(02:28):1 小时后让 tzb-63(sid f4a8adc2,角色 deck-v3)用 ppt-master 重做 PPT;简报 coordinator-notes/brief-deck-v3-pptmaster-20260905.md;03:28 定时发令;初稿 09:00/定稿 16:00 · ref: /Users/gl/tzb-lanes/coordinator-notes/brief-deck-v3-pptmaster-20260905.md
@@ -2639,3 +2642,6 @@
 - 2026-09-05T02:34+0800 [TASK/task] <m2c-exec> `live-loop-purple-round-after-s0` — 同步后跑一轮'把紫色的圆柱体放到蓝色料箱',报 S0 分槽结果、S2 实际被问的词、实际抓的柱子
 - 2026-09-05T02:34+0800 [EVENT] <tzb-fe> — 用户 02:3x 去睡;夜间自主边界:推进 S0 验收/报告审查/训练包复核/deck v3/GPT 终审包,可代批小项;不 push、不切 LoRA 默认、不定模型名、不处理 GPT 审核结论;早上一页汇报 · ref: /Users/gl/tzb-lanes/coordinator-notes/delivery-checklist-20260904.md
 - 2026-09-05T02:35+0800 [FACT/facts] <tzb-fe> `defect.start_sh_chain_dropped_instruction` — 同类缺陷(demo lane 02:3x):start.sh 的 chain 分支未把参数传进 step_chain→评委敲的指令永远取默认句(青色);已改为传 "$@",bash -n 过,已同步 chxy(sha 664ea560…);其余三分支验收后统一改 · ref: /Users/gl/tzb-deliverables/judge-package-v1/scripts/start.sh
+- 2026-09-05T02:35+0800 [FACT/facts] <m2c-exec> `judge-path-instruction-not-forwarded` — start.sh 'chain) step_chain ;' 未传参,评委敲的指令到不了链、永远跑默认句;已改 step_chain "$@" 并同步 chxy。同类:另三分支待验收后统一。 · ref: /Users/gl/tzb-deliverables/judge-package-v1/scripts/start.sh
+- 2026-09-05T02:36+0800 [FACT/facts] <tzb-fe> `report.user_feedback_draft1` — 用户 02:3x 看报告初稿:'太烂,一点图没有,不像技术报告,去看网上同行怎么写';令 tzb-66 查同行技术报告结构,补十类图表(架构/流程/信任边界/场景与HUD截图/定位框/抓放对比/LoRA曲线/色相分布/时延/48例表),A4 排版带题注目录;第二稿 06:00,定稿 18:00 · ref: /Users/gl/tzb-deliverables/report-v1/
+- 2026-09-05T02:36+0800 [FACT/facts] <tzb-fe> `review.training_bundle_recut` — 训练包复核(e669981e):机械项全过;残留1阻断=§7'只有两件包外'与运行时矛盾(冻结入口硬校验4个包外文件、6入口写死ROOT、run_ab写死venv)。裁只补文档不改代码:执行环境约束段、§7实际件数、PROVENANCE对齐;tzb-76 08:00 重打 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-training-bundle-recut-v1.md
