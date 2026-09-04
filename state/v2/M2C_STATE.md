@@ -1,5 +1,5 @@
 <!-- GENERATED — 禁止直接 Edit/Write。唯一写入口: tools/statectl.py -->
-<!-- statectl protocol=2 stream=M2C generation=1780 updated=2026-09-05T02:43+0800 -->
+<!-- statectl protocol=2 stream=M2C generation=1784 updated=2026-09-05T02:45+0800 -->
 <!-- 自 M2C_STATE.md 迁移 sha=9dc690524ad77e6d51964237f11ee107e23e3ae92398d19e3424eb0676648fc6 -->
 
 # M2C 权威状态(活跃快照,协议 v2)
@@ -2067,6 +2067,8 @@
 
 - `deck.v3_guard_ready` — check_deck_v3.py 就位(tzb-55 02:44,ppt-v3/tools/):v2 表只读+覆盖层,正负例验过,v2 deck 过 v3 守卫;REQUIRED/CONDITIONAL 按 v2 页码故 v3 默认不启用(tzb-63 需重写);简报补充已写;报告筛查加两源后 513/507,禁写 0 · ref: /Users/gl/tzb-deliverables/ppt-v3/tools/check_deck_v3.py
 
+- `defect.executor_target_prim_hardcoded` — 阻断(02:4x,两线证实):S0 修后链前半对紫色全对(→cylinder_05),但 v17 写死目标 cylinder_06,检查在 envelope_consumed 后→REJECTED 先烧 nonce。裁 v21 变体(目标取自请求+注册校验、检查前移),04:30 交 · ref: /Users/gl/tzb-deliverables/judge-package-v1/agent/executor/resident/vnext_dispatch_executor_v17.py
+
 ## 2. 归属与 lane
 - `lane.m2c_exec` — **M2C 执行会话**:successor implementation candidate,commit-free,于全新隔离 clone(Q′ 模式);已登记候选路径内自由编辑(R132.41)。ETA(8/29 午报):交包 8/30 01:00–07:00;早沿(≤03:00)可达截止,晚沿不可达。
 - `lane.tzb_fe` — **tzb-fe(协调)**:实现审查+七段治理批量激活(预告:批一 = R′ stage adoption→successor prereg→materialize→bootstrap;批二 = legacy P″ prefix adoption→recovery03→combined preflight;每步仍各自 pre-capture/记录/fail-closed,激活与 closeout 各批一次)。
@@ -2636,15 +2638,12 @@
 
 - `task.gpt_final_review_bundle` — 用户(02:3x):派空闲会话打'不脱敏'的项目+状态审核包给 GPT Web Pro 终审(保留内网地址与路径;仍排除 .env/密钥/权重/图像/npy/output);交 tzb-76;用户去睡,夜间按 overnight 边界自主推进 · ref: /Users/gl/tzb-deliverables/review-v3/
 
-- `live-loop-sync-pkgnext-after-s0` — 等 demo lane 通知后:Mac 权威树整树同步进 labserver pkg-next(不带 --delete,排除 output/.env/liveview-out*)
 
 - `live-loop-purple-round-after-s0` — 同步后跑一轮'把紫色的圆柱体放到蓝色料箱',报 S0 分槽结果、S2 实际被问的词、实际抓的柱子
 
+- `live-loop-executor-target-prim-pin` — vnext_dispatch_executor_v17.py:75 TARGET_PRIM_PATH 硬钉 cylinder_06,非青指令一律 EXECUTOR_ERROR 且已花 nonce;归 demo lane/协调裁
+
 ## 5. Recent tail(journal 缓存,非权威)
-- 2026-09-05T02:34+0800 [FACT/facts] <review-zh-v1> `review.training-recut` — 重打包e669981e复核:摘要599/599+往返+脱敏+adapter0400全PASS;T2-T5与两处来源不明均闭环;残留1条阻断:六个code入口与VENV_PYTHON写死/home/fx且四个digest门在包外,第5-7步评委机跑不起来 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-training-bundle-recut-v1.md
-- 2026-09-05T02:34+0800 [FACT/facts] <report-zh-v1> `ruling.report_title_20260905` — CLAIMS 变更 14 已落报告:主标题改「面向工业机械臂的指令交互型智能体原型——开放词汇感知、确定性任务规划与可审计执行」,内部名括注一次;4.11 冻结原话块加引言句;数字来源含 0903/README/negative-results · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.md
-- 2026-09-05T02:34+0800 [FACT/facts] <tzb-fe> `defect.truth_prim_english_lookup` — 直播线发现(loop lane):build_request 的 truth prim 按英文子串查注册表,纯中文指称→BRIDGE_REFUSED_BEFORE_MINT;S0 修复(英文物体短语)绕过;裁不做 B/C/D,A(truth prim 取自绑定)记 OQ21;loop lane 同步新包后重跑紫色 · ref: /Users/gl/tzb-deliverables/judge-package-v1/docs/open-questions.md
-- 2026-09-05T02:34+0800 [TASK/task] <m2c-exec> `live-loop-sync-pkgnext-after-s0` — 等 demo lane 通知后:Mac 权威树整树同步进 labserver pkg-next(不带 --delete,排除 output/.env/liveview-out*)
 - 2026-09-05T02:34+0800 [TASK/task] <m2c-exec> `live-loop-purple-round-after-s0` — 同步后跑一轮'把紫色的圆柱体放到蓝色料箱',报 S0 分槽结果、S2 实际被问的词、实际抓的柱子
 - 2026-09-05T02:34+0800 [EVENT] <tzb-fe> — 用户 02:3x 去睡;夜间自主边界:推进 S0 验收/报告审查/训练包复核/deck v3/GPT 终审包,可代批小项;不 push、不切 LoRA 默认、不定模型名、不处理 GPT 审核结论;早上一页汇报 · ref: /Users/gl/tzb-lanes/coordinator-notes/delivery-checklist-20260904.md
 - 2026-09-05T02:35+0800 [FACT/facts] <tzb-fe> `defect.start_sh_chain_dropped_instruction` — 同类缺陷(demo lane 02:3x):start.sh 的 chain 分支未把参数传进 step_chain→评委敲的指令永远取默认句(青色);已改为传 "$@",bash -n 过,已同步 chxy(sha 664ea560…);其余三分支验收后统一改 · ref: /Users/gl/tzb-deliverables/judge-package-v1/scripts/start.sh
@@ -2661,3 +2660,7 @@
 - 2026-09-05T02:42+0800 [FACT/facts] <tzb-fe> `review.report_draft1` — 审查报告初稿:2 阻断(R1 §2.6 vLLM 两套配方混写→按 serve-27b.md A 套;R2 2.97 rad/0.53 mm→引 physics-redrive 回执原值 2.966)+2 缺口(加训练包指针;自家超参补齐);禁写/术语/留位通过;已转 tzb-66 并入第二稿 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-report-draft1-v1.md
 - 2026-09-05T02:43+0800 [FACT/facts] <tzb-fe> `deliverable.training_bundle_v1` — 训练包第三版(tzb-76 02:4x):sha a5ba5091…(e669981e 作废);零代码改动;§1.2.1 执行环境约束(4 包外 digest 门、6 写死 ROOT、VENV_PYTHON)、§7 四件、PROVENANCE 对齐;偏离接受:仅第 5/6 步受限,第 7 步纯后处理;599/599 · ref: /Users/gl/tzb-deliverables/training-v1/training-bundle-v1.tar.sha256
 - 2026-09-05T02:43+0800 [FACT/facts] <tzb-fe> `deck.v3_guard_ready` — check_deck_v3.py 就位(tzb-55 02:44,ppt-v3/tools/):v2 表只读+覆盖层,正负例验过,v2 deck 过 v3 守卫;REQUIRED/CONDITIONAL 按 v2 页码故 v3 默认不启用(tzb-63 需重写);简报补充已写;报告筛查加两源后 513/507,禁写 0 · ref: /Users/gl/tzb-deliverables/ppt-v3/tools/check_deck_v3.py
+- 2026-09-05T02:44+0800 [EVENT] <m2c-exec> — S0 修复已同步 labserver(7 文件双侧 digest 一致);紫色轮 S2 被问 'purple cylinder'、绑 cylinder_05、三态 PRESENT/PASS/EXECUTE;executor 硬钉 cylinder_06 拒了,花 1 nonce · ref: receipts/live-window-s0-fix-purple-round-v1.json 3a182e63
+- 2026-09-05T02:44+0800 [DONE/task] <m2c-exec> `live-loop-sync-pkgnext-after-s0` — 完成 live-loop-sync-pkgnext-after-s0
+- 2026-09-05T02:44+0800 [TASK/task] <m2c-exec> `live-loop-executor-target-prim-pin` — vnext_dispatch_executor_v17.py:75 TARGET_PRIM_PATH 硬钉 cylinder_06,非青指令一律 EXECUTOR_ERROR 且已花 nonce;归 demo lane/协调裁
+- 2026-09-05T02:45+0800 [FACT/facts] <tzb-fe> `defect.executor_target_prim_hardcoded` — 阻断(02:4x,两线证实):S0 修后链前半对紫色全对(→cylinder_05),但 v17 写死目标 cylinder_06,检查在 envelope_consumed 后→REJECTED 先烧 nonce。裁 v21 变体(目标取自请求+注册校验、检查前移),04:30 交 · ref: /Users/gl/tzb-deliverables/judge-package-v1/agent/executor/resident/vnext_dispatch_executor_v17.py
