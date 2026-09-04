@@ -1,5 +1,5 @@
 <!-- GENERATED — 禁止直接 Edit/Write。唯一写入口: tools/statectl.py -->
-<!-- statectl protocol=2 stream=M2C generation=1818 updated=2026-09-05T04:02+0800 -->
+<!-- statectl protocol=2 stream=M2C generation=1819 updated=2026-09-05T04:03+0800 -->
 <!-- 自 M2C_STATE.md 迁移 sha=9dc690524ad77e6d51964237f11ee107e23e3ae92398d19e3424eb0676648fc6 -->
 
 # M2C 权威状态(活跃快照,协议 v2)
@@ -2119,6 +2119,8 @@
 
 - `live_window.v21_viewport_variant_ready` — v21 视口叠层变体就位(04:0x):vnext_dispatch_executor_v21_viewport_labonly.py(b1e2a856…,v21 上纯增 171 行)+ v6 启动器(EXECUTOR 可覆盖);双侧 sha 一致,不进包;loop lane 可切并跑紫色直播轮 · ref: /var/tmp/labonly-viewport-v1/
 
+- `deck.v2_1_relabel` — deck v2.1 出(03:58):只改 P9 那句→'除 S4 外各段 3.04 s(确定性 S3+S5 0.045 s)';守卫 0 项、pdf 晚于 pptx、无字体回退;NUMBERS-v2:236 已改;禁写表加'确定性各段';PENDING-v2.1.md 待办未随此版(归 v3) · ref: /Users/gl/tzb-deliverables/ppt-v1/xh-202607-deck-v2.1.pdf
+
 ## 2. 归属与 lane
 - `lane.m2c_exec` — **M2C 执行会话**:successor implementation candidate,commit-free,于全新隔离 clone(Q′ 模式);已登记候选路径内自由编辑(R132.41)。ETA(8/29 午报):交包 8/30 01:00–07:00;早沿(≤03:00)可达截止,晚沿不可达。
 - `lane.tzb_fe` — **tzb-fe(协调)**:实现审查+七段治理批量激活(预告:批一 = R′ stage adoption→successor prereg→materialize→bootstrap;批二 = legacy P″ prefix adoption→recovery03→combined preflight;每步仍各自 pre-capture/记录/fail-closed,激活与 closeout 各批一次)。
@@ -2694,7 +2696,6 @@
 - `live-loop-executor-target-prim-pin` — vnext_dispatch_executor_v17.py:75 TARGET_PRIM_PATH 硬钉 cylinder_06,非青指令一律 EXECUTOR_ERROR 且已花 nonce;归 demo lane/协调裁
 
 ## 5. Recent tail(journal 缓存,非权威)
-- 2026-09-05T03:45+0800 [EVENT] <tzb-fe> — 03:4x 回音齐(除 tzb-b9):tzb-95/76/55/loop lane 未被卡,tzb-66 与 demo lane 曾卡已恢复;loop lane 监视 up、非青 nonce 0 花费,等 v21 定稿再同步 labserver 跑紫色;tzb-b9 待 04:13 三探 · ref: /Users/gl/tzb/state/journal/M2C/2026-09-05.md
 - 2026-09-05T03:45+0800 [FACT/facts] <review-zh-v1> `review.training-v3` — 训练包第三版a5ba5091:无阻断。599/599+往返+脱敏+adapter0400全过;只动README与provenance两文件;§1.2.1执行环境约束闭环且比我报的更全,其新写的四条事实(--adapter门控、launch ROOT、打分纯后处理、两评测digest)逐条核实成立 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-training-bundle-v3-a5ba5091.md
 - 2026-09-05T03:46+0800 [EVENT] <m2c-exec> — 直播面监视已起(仅变化时报,基线全 up);v21 静态预审四条裁定要求全满足;v21 未推(labserver 无、未宣定稿);非青 nonce 花费 0
 - 2026-09-05T03:46+0800 [FACT/facts] <tzb-fe> `acceptance.three_instructions_front_half` — 三指令验收(02:56):①紫②红前半全过(S0 DECOMPOSED、purple/red cylinder、S2 一框、cylinder_05/01 对),执行器拒(卡点29);③S0 拒未登记目的地不花账目;新卡点30 取帧宿主偶崩→loop lane,31 S0拒绝exit=1→demo lane · ref: /Users/gl/tzb-lanes/cold-install-chxy-v1/cold-install-report-v1.md
@@ -2714,3 +2715,4 @@
 - 2026-09-05T04:02+0800 [FACT/facts] <deck-v2> `forbidden-v2-变更14` — FORBIDDEN_V2 加 确定性各段;deck v3 守卫与报告筛查都 import 这张表,一处加三处生效;反向验证旧v2 FAIL、v2.1 PASS、确定性生成 未误伤 · ref: /Users/gl/tzb-deliverables/ppt-v1/check_deck_v2.py
 - 2026-09-05T04:02+0800 [FACT/facts] <deck-v2> `报告图筛查缺口` — 报告 :399/:517 与 figs/fig-latency.png 图内标题仍含旧句(归 tzb-66);8张SVG无来源行;make_figs.py 只在 tzb-lanes 不在交付目录 · ref: /Users/gl/tzb-deliverables/report-v1/figs/FIGURE-DATA-SOURCES.md
 - 2026-09-05T04:02+0800 [FACT/facts] <tzb-fe> `live_window.v21_viewport_variant_ready` — v21 视口叠层变体就位(04:0x):vnext_dispatch_executor_v21_viewport_labonly.py(b1e2a856…,v21 上纯增 171 行)+ v6 启动器(EXECUTOR 可覆盖);双侧 sha 一致,不进包;loop lane 可切并跑紫色直播轮 · ref: /var/tmp/labonly-viewport-v1/
+- 2026-09-05T04:03+0800 [FACT/facts] <tzb-fe> `deck.v2_1_relabel` — deck v2.1 出(03:58):只改 P9 那句→'除 S4 外各段 3.04 s(确定性 S3+S5 0.045 s)';守卫 0 项、pdf 晚于 pptx、无字体回退;NUMBERS-v2:236 已改;禁写表加'确定性各段';PENDING-v2.1.md 待办未随此版(归 v3) · ref: /Users/gl/tzb-deliverables/ppt-v1/xh-202607-deck-v2.1.pdf
