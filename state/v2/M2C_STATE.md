@@ -1,5 +1,5 @@
 <!-- GENERATED — 禁止直接 Edit/Write。唯一写入口: tools/statectl.py -->
-<!-- statectl protocol=2 stream=M2C generation=1773 updated=2026-09-05T02:38+0800 -->
+<!-- statectl protocol=2 stream=M2C generation=1774 updated=2026-09-05T02:38+0800 -->
 <!-- 自 M2C_STATE.md 迁移 sha=9dc690524ad77e6d51964237f11ee107e23e3ae92398d19e3424eb0676648fc6 -->
 
 # M2C 权威状态(活跃快照,协议 v2)
@@ -2055,6 +2055,8 @@
 
 - `tests.judge_path_instruction_guard` — demo lane 加 5 条回归(start.sh 传参静态断言、假 docker 跑真 start.sh 断言指令回显、M2C_EXPRESSION 覆盖可见、不再写死 cyan、trace.instruction 逐字),回退即 2 failed;全套 65 过;已放行同步 chxy · ref: /Users/gl/tzb-deliverables/judge-package-v1/tests/test_judge_path_instruction_reaches_the_chain_v1.py
 
+- `report.screen_results_draft1` — 报告初稿筛查(tzb-55):禁写 0 项;数字 513/507 命中,5 待裁→裁:加 serve-27b.md 与 live-demo.md 为源,2.97 改 2.966 引回执;豁免锚定受控源原句;deck v3 用 check_deck_v3(覆盖层)不用 v2 守卫 · ref: /Users/gl/tzb-deliverables/report-v1/tools/
+
 ## 2. 归属与 lane
 - `lane.m2c_exec` — **M2C 执行会话**:successor implementation candidate,commit-free,于全新隔离 clone(Q′ 模式);已登记候选路径内自由编辑(R132.41)。ETA(8/29 午报):交包 8/30 01:00–07:00;早沿(≤03:00)可达截止,晚沿不可达。
 - `lane.tzb_fe` — **tzb-fe(协调)**:实现审查+七段治理批量激活(预告:批一 = R′ stage adoption→successor prereg→materialize→bootstrap;批二 = legacy P″ prefix adoption→recovery03→combined preflight;每步仍各自 pre-capture/记录/fail-closed,激活与 closeout 各批一次)。
@@ -2629,7 +2631,6 @@
 - `live-loop-purple-round-after-s0` — 同步后跑一轮'把紫色的圆柱体放到蓝色料箱',报 S0 分槽结果、S2 实际被问的词、实际抓的柱子
 
 ## 5. Recent tail(journal 缓存,非权威)
-- 2026-09-05T02:31+0800 [FACT/facts] <report-zh-v1> `report.zh_v1_draft1` — 技术报告初稿 v1 已写:report-v1/技术报告-XH-202607.md(约 45K 字)+ PDF 32 页;screen_report 仅余 2 项=冻结原话代码块(裁定豁免);留位 3 处(S0 验收、紫/红两轮);README 来源数字见 lane notes · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.md
 - 2026-09-05T02:31+0800 [FACT/facts] <tzb-fe> `review.usage_doc_v1` — 审查使用说明 3P0+3P1(料筐、.env/CAPTURE 载入、镜像 tag v2 成环、ISAAC/CHAIN_IMAGE 语义、标定路径、SMOKE_EXPECT_MOTION);U1/2/5/6 交 demo lane,U3/U4 我已改 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-usage-doc-v1.md
 - 2026-09-05T02:31+0800 [TASK/task] <tzb-fe> `task.gpt_final_review_bundle` — 用户(02:3x):派空闲会话打'不脱敏'的项目+状态审核包给 GPT Web Pro 终审(保留内网地址与路径;仍排除 .env/密钥/权重/图像/npy/output);交 tzb-76;用户去睡,夜间按 overnight 边界自主推进 · ref: /Users/gl/tzb-deliverables/review-v3/
 - 2026-09-05T02:32+0800 [FACT/facts] <m2c-exec> `judge-path-s0-referring-expression-fix` — 评委路 S0 指称表达修复:复用冻结 live_entry_v5.decompose;start.sh/smoke06 去固定 cyan cylinder;新增 21 测试(共 60 过);已同步 chxy pkg 并在镜像内验通。 · ref: /Users/gl/tzb-deliverables/judge-package-v1/agent/run_demo.py
@@ -2649,3 +2650,4 @@
 - 2026-09-05T02:37+0800 [EVENT] <tzb-fe> — 用户 02:37:新会话走中转站、额度约 03:17 重置、任务可能中途终止;已设 03:19 探测(五条线发'继续任务+一行状态')与 03:43 复探(沉默者再发/改派);03:28 定时下达 deck v3 · ref: /Users/gl/tzb-lanes/coordinator-notes/delivery-checklist-20260904.md
 - 2026-09-05T02:37+0800 [FACT/facts] <deck-v2> `report-v1-screen-round1` — 报告初稿筛查:禁写 0 项(4.11 逐字句豁免锚在 CLAIMS-0903:145);数字 513 个 507 命中,5 项待裁(8192、2.97/0.53、两个引用年份);23 个数仅外源 · ref: /Users/gl/tzb-deliverables/report-v1/tools/screen_report.py
 - 2026-09-05T02:38+0800 [FACT/facts] <tzb-fe> `tests.judge_path_instruction_guard` — demo lane 加 5 条回归(start.sh 传参静态断言、假 docker 跑真 start.sh 断言指令回显、M2C_EXPRESSION 覆盖可见、不再写死 cyan、trace.instruction 逐字),回退即 2 failed;全套 65 过;已放行同步 chxy · ref: /Users/gl/tzb-deliverables/judge-package-v1/tests/test_judge_path_instruction_reaches_the_chain_v1.py
+- 2026-09-05T02:38+0800 [FACT/facts] <tzb-fe> `report.screen_results_draft1` — 报告初稿筛查(tzb-55):禁写 0 项;数字 513/507 命中,5 待裁→裁:加 serve-27b.md 与 live-demo.md 为源,2.97 改 2.966 引回执;豁免锚定受控源原句;deck v3 用 check_deck_v3(覆盖层)不用 v2 守卫 · ref: /Users/gl/tzb-deliverables/report-v1/tools/
