@@ -1,5 +1,5 @@
 <!-- GENERATED — 禁止直接 Edit/Write。唯一写入口: tools/statectl.py -->
-<!-- statectl protocol=2 stream=M2C generation=1636 updated=2026-09-04T22:52+0800 -->
+<!-- statectl protocol=2 stream=M2C generation=1643 updated=2026-09-04T22:55+0800 -->
 <!-- 自 M2C_STATE.md 迁移 sha=9dc690524ad77e6d51964237f11ee107e23e3ae92398d19e3424eb0676648fc6 -->
 
 # M2C 权威状态(活跃快照,协议 v2)
@@ -1879,6 +1879,18 @@
 
 - `milestone.execute1_start_sh_chain` — 里程碑(22:45 chxy,tzb-b9):EXECUTE=1 scripts/start.sh chain 真执行——DISPATCHED/6指令/336s/帧龄4.44s/规则选框;无世界再确认;前提手工M2C_DATASET_ROOT+M2C_FRAME(open-questions 18,不今晚改);工件入包 · ref: /Users/gl/tzb-deliverables/judge-package-v1/evidence/verification-20260904/chxy-cold-install/rounds/execute1-start-sh-chain-20260904T144504/
 
+- `chxy-execute1-start-sh-chain` — EXECUTE=1 start.sh chain(RTSP=0)三态=执行:exit=0/336s,DISPATCHED,nonce 290798ad,world=UNOBSERVABLE(非通过),帧龄4.44/30 · ref: cold-install-chxy-v1/receipts/start-sh-chain-execute/
+
+- `chxy-cold-install-findings` — 冷装卡点 21(默认帧 frame_000000 与 000014 不同构,源码级)与 22(A6 年龄从帧进链起算)两条新增未决,报告终局表 22 条 · ref: cold-install-chxy-v1/cold-install-report-v1.md
+
+- `deck.v2_final_2250` — deck v2 定稿(22:50 PDF晚于pptx,20页,checker 0项):LoRA第2次甲口径可选profile、P7两轮(r4非规则/dl-r7规则+帧龄4.35)、P4三框=预录件、P11 #14两轮父目录;12项0 FAIL不上页留NUMBERS-v2;此后不改 · ref: /Users/gl/tzb-deliverables/ppt-v1/xh-202607-deck-v2.pdf
+
+- `deck-v2-frozen-accepted-gen1636` — gen1636(tzb-a1,2026-09-04):22:50:29 PDF 接受为定稿并收线,deck v2 冻结不再改;LOCATOR_NAME 仍空待用户;12项0FAIL 留 NUMBERS-v2 不上页 · ref: /Users/gl/tzb-deliverables/ppt-v1/CHANGES-v2.md
+
+- `review.round20_execute1` — EXECUTE=1那行逐项核过:336s/6指令/4.4357of30/UNOBSERVABLE/93.2763在notes/nonce290798ad/8555unbound/侧车45s/frame_000000不匹配000014/账目六枚+改名披露 全对上;只差一处:该轮boxes_considered=1未写限定 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-round20-final.md
+
+- `milestone.final_tarball_20260904` — 最终交付包 judge-package-v1-20260904-225455.tar.gz(727文件/224MB/CLEAN,sha256 同名 .sha256)已出于 tzb-deliverables/;deck v2 PDF 22:50;此后包内不改。待用户:模型名、push;待我:状态压缩 · ref: /Users/gl/tzb-deliverables/judge-package-v1-20260904-225455.tar.gz.sha256
+
 ## 2. 归属与 lane
 - `lane.m2c_exec` — **M2C 执行会话**:successor implementation candidate,commit-free,于全新隔离 clone(Q′ 模式);已登记候选路径内自由编辑(R132.41)。ETA(8/29 午报):交包 8/30 01:00–07:00;早沿(≤03:00)可达截止,晚沿不可达。
 - `lane.tzb_fe` — **tzb-fe(协调)**:实现审查+七段治理批量激活(预告:批一 = R′ stage adoption→successor prereg→materialize→bootstrap;批二 = legacy P″ prefix adoption→recovery03→combined preflight;每步仍各自 pre-capture/记录/fail-closed,激活与 closeout 各批一次)。
@@ -2441,13 +2453,6 @@
 - `task.end_to_end_composed_round` — 缺口(18:5x):尚无一轮'REPL指令→链路→盘上请求+信封→v17执行'合成实跑。桥=包内run_demo --execute→resident客户端→mint_envelope→8557(smoke 7)。v20两跑毕(~19:00)后loop lane重起取帧宿主跑一轮,回执end-to-end-v1 · ref: /Users/gl/tzb-lanes/live-loop-v1/receipts/end-to-end-composition-v1.json
 
 ## 5. Recent tail(journal 缓存,非权威)
-- 2026-09-04T22:34+0800 [FACT/facts] <live-loop-v1> `route-a-request-handoff-gap` — 路线A下次重试前要先解决:链在Mac、执行器在labserver时,铸好的请求没有任何步骤送到执行器自己的盘上(RESIDENT_OUTPUT 须与容器 /m2c/output 同一宿主目录)。属代码阅读非实测 · ref: /Users/gl/tzb-lanes/live-loop-v1/receipts/end-to-end-v1.json
-- 2026-09-04T22:35+0800 [FACT/facts] <tzb-fe> `ruling.lora_v2_optional_profile_shipped` — LoRA第2次真值重判三条全过(ADOPT)→随包可选profile env/s2-lora-v1/(255MB,sha 8/8 OK),默认仍基座;采用门(LoRA侧车合成一轮)未跑不切默认;README边界/管线/Layout/manifest/negative-results/CLAIMS变更13已写;名字待用户 · ref: /Users/gl/tzb-deliverables/judge-package-v1/env/s2-lora-v1/README.md
-- 2026-09-04T22:35+0800 [FACT/facts] <tzb-fe> `ruling.lora_v2_optional_profile_shipped` — LoRA第2次真值重判三条全过→随包可选profile env/s2-lora-v1/(255MB,sha 8/8 OK),默认仍基座;采用门未跑不切默认;README/manifest/negative-results/CLAIMS变更13已写;名字待用户 · ref: /Users/gl/tzb-deliverables/judge-package-v1/env/s2-lora-v1/README.md
-- 2026-09-04T22:35+0800 [FACT/facts] <tzb-fe> `pkg.chxy_12items_final_and_ledger` — chxy 12项终态19:06:8 PASS/4 SKIP/0 FAIL;三轮真执行三枚nonce账目;round目录+帧png+attributed日志+三份smoke回执入包(LAN地址已脱敏);README §Verification +6行;23:30出tarball · ref: /Users/gl/tzb-deliverables/judge-package-v1/README.md
-- 2026-09-04T22:35+0800 [EVENT] <tzb-fe> — 路线A收线确认(loop lane 22:33 READY_BUT_NOT_RUN,labserver GPU0取帧宿主已停);其代码阅读发现:链与执行器跨机时请求未搬到执行器盘→记 open-questions 设计项,不实测 · ref: /Users/gl/tzb-lanes/live-loop-v1/receipts/end-to-end-v1.json
-- 2026-09-04T22:36+0800 [FACT/facts] <live-loop-v1> `lane-closed` — live-loop-v1 今晚收线,无待办。跨机请求搬盘那条由 tzb-a1 记进包内 docs/open-questions.md,按代码阅读的设计项、非实测结论。仅在被点名时核查,否则不动包内文件 · ref: /Users/gl/tzb-lanes/live-loop-v1/receipts/end-to-end-v1.json
-- 2026-09-04T22:36+0800 [FACT/facts] <review-zh-v1> `review.round19` — R18两项闭环:audit命令原样跑无输出、README颜色规则带启用时刻。deck 19:04四筛全过。新2低:pdf导出早于pptx写入(文本逐页字符集20/20相同)、NUMBERS-v2头部仍写18页 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-round19.md
 - 2026-09-04T22:38+0800 [FACT/facts] <tzb-fe> `pkg.chxy_12items_final_and_ledger` — 更正(R19):12项无任何一轮0 FAIL——18:32全12项(7 FAIL)+19:06定向重跑7-12;按各项最新结果8 PASS/4 SKIP/无FAIL。r4规则串=FIRST_RETURNED_BOX_NO_RESPONSE_SELECTION,不兼作颜色规则演示;README/CLAIMS/deck已改 · ref: /Users/gl/tzb-deliverables/judge-package-v1/README.md
 - 2026-09-04T22:40+0800 [FACT/facts] <m2c-exec> `package-handoff-2026-09-04` — 包已交快照:tests 36 过、resident SHA256SUMS 14/14、v20 start-notruth 保持 lane 同源(no-healthcheck 例外已写明);Mac 为权威、chxy pkg 已同步
 - 2026-09-04T22:41+0800 [FACT/facts] <tzb-fe> `milestone.composed_round_dl_r7_and_full12` — 里程碑:dl-r7 DISPATCHED(规则身份+bridge-receipt帧龄4.35/30+outcome.json入工件);chxy 22:31全12项 11 PASS/1 SKIP/0 FAIL(8/9/10自足化);5枚nonce账目;镜像重建含字体 9de43b377bcb;全部入包README · ref: /Users/gl/tzb-deliverables/judge-package-v1/evidence/verification-20260904/chxy-cold-install/smoke-all-20260904T223111/smoke-all.json
@@ -2461,3 +2466,10 @@
 - 2026-09-04T22:50+0800 [FACT/facts] <review-zh-v1> `review.round20_recheck` — 复核:F1关闭(bullet与对照件一致、fonts mtime 17:49对上、README:284已改)、F3关闭、F4关闭。新2项:dl-r7的163s包内无出处(可推159.62/155.19s)、4.3774其实在outcome.json的executor.notes里 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-round20-final.md
 - 2026-09-04T22:51+0800 [FACT/facts] <deck-v2> `deck-v2-final-pdf-2250` — v2 PDF 定稿 22:50:29(晚于 pptx 22:50:12),20页 PASS 零字体回退;dl-r7 帧龄4.35s上页、r4选框非规则已注明;223111 单轮 0 FAIL 存 NUMBERS · ref: /Users/gl/tzb-deliverables/ppt-v1/CHANGES-v2.md
 - 2026-09-04T22:52+0800 [FACT/facts] <tzb-fe> `milestone.execute1_start_sh_chain` — 里程碑(22:45 chxy,tzb-b9):EXECUTE=1 scripts/start.sh chain 真执行——DISPATCHED/6指令/336s/帧龄4.44s/规则选框;无世界再确认;前提手工M2C_DATASET_ROOT+M2C_FRAME(open-questions 18,不今晚改);工件入包 · ref: /Users/gl/tzb-deliverables/judge-package-v1/evidence/verification-20260904/chxy-cold-install/rounds/execute1-start-sh-chain-20260904T144504/
+- 2026-09-04T22:53+0800 [EVENT] <exec-no-truth-v1> — chxy GPU0 占用结束:judge-resident/locany/capture-host 三容器已移除,8555-8570 全释放,GPU0 剩 17MiB 无 compute app · ref: cold-install-chxy-v1/logs/seg2/29-driver.log
+- 2026-09-04T22:53+0800 [FACT/facts] <exec-no-truth-v1> `chxy-execute1-start-sh-chain` — EXECUTE=1 start.sh chain(RTSP=0)三态=执行:exit=0/336s,DISPATCHED,nonce 290798ad,world=UNOBSERVABLE(非通过),帧龄4.44/30 · ref: cold-install-chxy-v1/receipts/start-sh-chain-execute/
+- 2026-09-04T22:53+0800 [FACT/facts] <exec-no-truth-v1> `chxy-cold-install-findings` — 冷装卡点 21(默认帧 frame_000000 与 000014 不同构,源码级)与 22(A6 年龄从帧进链起算)两条新增未决,报告终局表 22 条 · ref: cold-install-chxy-v1/cold-install-report-v1.md
+- 2026-09-04T22:53+0800 [FACT/facts] <tzb-fe> `deck.v2_final_2250` — deck v2 定稿(22:50 PDF晚于pptx,20页,checker 0项):LoRA第2次甲口径可选profile、P7两轮(r4非规则/dl-r7规则+帧龄4.35)、P4三框=预录件、P11 #14两轮父目录;12项0 FAIL不上页留NUMBERS-v2;此后不改 · ref: /Users/gl/tzb-deliverables/ppt-v1/xh-202607-deck-v2.pdf
+- 2026-09-04T22:53+0800 [FACT/facts] <deck-v2> `deck-v2-frozen-accepted-gen1636` — gen1636(tzb-a1,2026-09-04):22:50:29 PDF 接受为定稿并收线,deck v2 冻结不再改;LOCATOR_NAME 仍空待用户;12项0FAIL 留 NUMBERS-v2 不上页 · ref: /Users/gl/tzb-deliverables/ppt-v1/CHANGES-v2.md
+- 2026-09-04T22:54+0800 [FACT/facts] <review-zh-v1> `review.round20_execute1` — EXECUTE=1那行逐项核过:336s/6指令/4.4357of30/UNOBSERVABLE/93.2763在notes/nonce290798ad/8555unbound/侧车45s/frame_000000不匹配000014/账目六枚+改名披露 全对上;只差一处:该轮boxes_considered=1未写限定 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-round20-final.md
+- 2026-09-04T22:55+0800 [FACT/facts] <tzb-fe> `milestone.final_tarball_20260904` — 最终交付包 judge-package-v1-20260904-225455.tar.gz(727文件/224MB/CLEAN,sha256 同名 .sha256)已出于 tzb-deliverables/;deck v2 PDF 22:50;此后包内不改。待用户:模型名、push;待我:状态压缩 · ref: /Users/gl/tzb-deliverables/judge-package-v1-20260904-225455.tar.gz.sha256
