@@ -29,7 +29,52 @@
       "bound_at": "2026-08-30T20:40+0800",
       "bound_by": "QWEN_BRAIN_STATE.md:3 既有条款(裁定 A2 要求初始钉此值)",
       "note": "sessionId 由程序从 QWEN_BRAIN_STATE.md 派生,未手打"
+    },
+    "live-loop-v1": {
+      "streams": [
+        "M2C"
+      ],
+      "current_session_id": "72ad7a26-9a33-4894-ba52-21a593ed7175",
+      "bound_at": "2026-09-04T11:59+08",
+      "bound_by": "tzb-fe(裁定 gen1282;sessionId 由 ~/.claude/sessions/*.json 程序派生,未手打)",
+      "note": "残差线 two-shot-canonical-gate 接交互循环+RTSP(gen1276);仅 M2C 流"
+    },
+    "exec-no-truth-v1": {
+      "streams": [
+        "M2C"
+      ],
+      "current_session_id": "75052d0f-897c-4bdf-836c-0029e2b843d0",
+      "bound_at": "2026-09-04T14:57+0800",
+      "bound_by": "tzb-fe(用户 09-04 15:0x 开新会话;sessionId 由 ~/.claude/sessions/*.json 程序派生,未手打)",
+      "note": "A2 代码侧去真值执行器 v20;写根 tzb-lanes/executor-no-truth-v1/;GPU0"
+    },
+    "deck-v2": {
+      "streams": [
+        "M2C"
+      ],
+      "current_session_id": "6e9f552e-dcf9-4040-b8aa-41071850c649",
+      "bound_at": "2026-09-04T14:57+0800",
+      "bound_by": "tzb-fe(用户 09-04 15:0x 开新会话并批 deck 重构;sessionId 程序派生,未手打)",
+      "note": "deck 重构 B1-B9;写根 tzb-lanes/deck-v2/ 与 tzb-deliverables/ppt-v1/ 内 *-v2* 新文件,v1 不覆盖"
+    },
+    "finetuned-live-v1": {
+      "streams": [
+        "M2C"
+      ],
+      "current_session_id": "d4768bf5-1baa-4505-8e1e-4ed442d6a0af",
+      "bound_at": "2026-09-04T15:10+0800",
+      "bound_by": "tzb-fe(用户 09-04 15:5x 开新会话;sessionId 程序派生,未手打)",
+      "note": "LocateAnything text+ours-LoRA A/B(任务1),4B profile(任务2,视时间);写根 tzb-lanes/finetuned-live-path-v1/ 与包内 config/llm.yaml 新 profile 段;chxy A100"
+    },
+    "review-zh-v1": {
+      "streams": [
+        "M2C"
+      ],
+      "current_session_id": "2f0a84eb-799b-4913-9934-8135fc63b017",
+      "bound_at": "2026-09-04T15:11+0800",
+      "bound_by": "tzb-fe(用户 09-04 16:0x 开审查会话;sessionId 程序派生,未手打)",
+      "note": "只读审查:问题/矛盾/超说+中文术语人话;写根仅 tzb-lanes/review-zh-v1/;不写交付物"
     }
   },
-  "_amended_by": "tzb-fe 2026-08-30:绑定 tzb-fe / m2c-exec 两角色"
+  "_amended_by": "tzb-fe 2026-08-30:绑定 tzb-fe / m2c-exec 两角色 | tzb-fe 2026-09-04:加 live-loop-v1(gen1282) | tzb-fe 2026-09-04 15:0x:加 exec-no-truth-v1、deck-v2 | tzb-fe 2026-09-04 15:5x:加 finetuned-live-v1 | tzb-fe 2026-09-04 16:0x:加 review-zh-v1"
 }

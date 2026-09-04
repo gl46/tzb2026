@@ -1,0 +1,28 @@
+{
+  "job": "judge-package-env-v1",
+  "created": "2026-09-03T17:2x+0800 by tzb-fe (sid 5ae1238c); user offered a new session to speed up",
+  "what": "judge-package-v1 的环境侧做成真能跑:(1) env/Dockerfile 与 env/Dockerfile.locany-sidecar 真构建并记镜像 digest;(2) 权重包按 env/weights-fetch-plan.md 从 chxy 拷进包外的 weights/ 目录并 sha256sum -c(LocateAnything-3B 基座 24 文件 7.2 GiB + adapters 255 MiB);(3) scene/family24/ 拷入 m1b_physics_scene.usdc 等六文件并 sha256sum -c,scripts/preflight_offline_stage.py 在 --network none 下真跑通出一帧;(4) env/serve-27b.md + scripts/serve_27b.sh(两版:冻结 vLLM 0.28.0 /home/gl/venvs/qwen38-vllm --generation-config vllm --max-model-len 8192 --max-num-seqs 2;今日 0.25.1 0.92/32768;都要 VLLM_USE_FLASHINFER_SAMPLER=0)+ scripts/check_endpoint.sh(发一份冻结 S4 body 自然序断言 OpenAI 形状回复);(5) scripts/start.sh 的 env/preflight/endpoint 三步成真;(6) 打包脚本 make_tarball.sh:排除 .env/*.env/*.key,打完 grep sk-。",
+  "who": "新会话(用户 17:2x 起),接手即在 state 落 ack 并把 sid 写进本文件 owner_sid。",
+  "not_yours": "agent/**、config/chain.yaml、docs/**、README.md 正文、UI —— 归 demo lane(build-auditable-agent-demo, sid ef4db636);你只改 env/、scene/、scripts/{preflight_offline_stage.py,serve_27b.sh,check_endpoint.sh,start.sh,make_tarball.sh}、weights/(包外)。README 里环境节的改动写成 patch 放你写根,由 demo lane 并。",
+  "inputs": [
+    "/Users/gl/tzb-deliverables/judge-package-v1/docs/open-questions.md(q1-q12 含裁定)",
+    "/Users/gl/tzb-lanes/judge-package-inputs-v1/*.md(pins、场景路径与 digest 文件、q4/q11 实证、serve 配方、vllm-parity 结论、双指规则)",
+    "/Users/gl/tzb-lanes/agent-demo-v3-isaac-rgbd/endpoints/serve-27b-recipe-evidence-v1.json",
+    "/Users/gl/tzb-lanes/vllm-parity-v1/REPORT.md"
+  ],
+  "when": "9/4 24:00 前;每完成一项在 state 落一条 fact;卡住立刻报 tzb-fe。",
+  "write_roots": [
+    "/Users/gl/tzb-deliverables/judge-package-v1/{env,scene,scripts}/",
+    "/Users/gl/tzb-deliverables/judge-package-v1/vendor/ (自 gen1099 归 env 会话:填 xh-202607-qwen-brain 冻结 commit 副本 + 应用补丁;patches/ 原件不改)",
+    "/Users/gl/tzb-lanes/judge-package-env-v1/",
+    "labserver:/var/tmp/judge-pkg-env-20260904/ (<=20 GB, 磁盘 90% 满先 du)"
+  ],
+  "hard_lines": [
+    "密钥不入任何文件;~/.config/tzb/*.env 只读",
+    "冻结根只读;hash 不手打,一律 sha256sum 原文件拷贝",
+    "GPU 随便用但起停通告 state,不杀他人进程",
+    "0 ordinal;不改 agent/ 与 docs/;不 push"
+  ],
+  "owner_sid": "0c2f98ce",
+  "owner_peer": "uds:/tmp/cc-socks/64112.sock (2026-09-03 17:3x, user-started)"
+}

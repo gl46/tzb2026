@@ -1,0 +1,9 @@
+{
+  "job": "live-view-v1",
+  "created": "2026-09-03T17:0x+0800 by tzb-fe (sid 5ae1238c); user ask 16:5x: 评委现场'打一句话当场看臂动',不是做好的视频",
+  "what": "在 labserver headless 容器里把'执行时实时可视'试通,供 9/4 打包接入:(1) Isaac Sim 6.0.1 内建 WebRTC 直播(--/app/livestream/enabled=true 等),从本机或 chxy 用 Streaming Client 连上,跑一遍 v11 真抓真放,确认视口里臂实时在动,记端到端延迟与帧率;(3) 兜底:用 v28 渲染路径在执行循环里每 N 步渲一帧写到环形目录 + 本机 OpenCV/浏览器滚动显示,记 fps。(2) GUI 窗口模式只记可行性不做。",
+  "who": "残差线 two-shot-canonical-gate(sid 72ad7a26),GPU1;执行器复用 demo lane 已发布的 build_dispatch_executor_v11.py(只读拷贝到自己写根,不改其 lane)。",
+  "when": "今晚;不受 24:00 冻结约束(打包能力,不是新结果);明早 demo lane 接交互循环前给出'哪条路能用、怎么起'一页。",
+  "write_roots": ["/Users/gl/tzb-lanes/live-view-v1/", "labserver:/var/tmp/vnext-liveview-20260903/ (<=10 GB)"],
+  "hard_lines": ["0 ordinal;冻结根只读;不改 demo lane 文件;每次尝试前臂+物体验证复位;验产出不验返回码(帧间差、延迟实测)", "标 vNext 打包能力验证;不作任何抓取成功计数(跑 v11 只是为了有运动可看)", "端口/直播若需外露只在 labserver 内网,不开公网"]
+}

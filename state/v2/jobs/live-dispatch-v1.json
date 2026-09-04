@@ -1,0 +1,12 @@
+{
+  "job": "live-dispatch-v1",
+  "created": "2026-09-03T09:2x+0800 by tzb-fe (tzb-7c, sid 5ae1238c); user go 09:2x",
+  "what": "把现场入口 S5 PASS 的已验证计划接到 Isaac 里真执行:计划的 6 个原语(approach CARTESIAN_POSE → GRIPPER CLOSE → ATTACH → place CARTESIAN_POSE → REMOVE_ATTACHMENT → GRIPPER OPEN)经 ExecutorPort 派给确定性执行器,臂真抓真放。评委看到的链:指令→S0→S1→S2→S3 真绑定→S4→S5 PASS→执行→结果观测。",
+  "who": "demo lane build-auditable-agent-demo(sid ef4db636),27B 重跑收尾后接;GPU0。残差线可被问抓取姿态(v18 az135_el70_roll15 相对物体、standoff 伺服、复位规则),不派它。",
+  "when": "24:00 冻结前跑通一次才算原创结果;18:00 报一次进度;接不通就演示到 S5 PASS 为止,不硬凑。",
+  "pose_source": "approach/grasp 姿态从 S3 真绑定的物体中心 + v18 获胜姿态(相对物体)推出,写进 pose registry;place 位从注册目的地(蓝色料箱)推出;不读真值。",
+  "success": "同 v18 判据:指尖-物体入包络 10/15/10 mm、夹爪合到物体上、提起并保持、物体落入目的地格位;邻居位移记录。执行前后各出一帧观测。",
+  "write_roots": ["/Users/gl/tzb-lanes/agent-demo-v3-isaac-rgbd/dispatch-v1/", "labserver:/var/tmp/vnext-demo-v3-20260903/ (<=10 GB)"],
+  "hard_lines": ["0 ordinal;冻结 gate/validator/契约不动;dispatch 挂在冻结 gate 之后", "标 vNext 工程演示;一次跑通不报成功率", "每次尝试前臂+物体验证复位(gen817),物体位移>5mm 标扰动", "验产出不验返回码:末端位姿、物体位姿读回再报"],
+  "then": "9/4 打包 judge-package-v1 的 owner 也是 demo lane:把 live_entry_v3 + dispatch 填进 agent/ stub、start.sh 成真、断网预检跑通、权重/场景拷入、README 改 27B 默认。"
+}

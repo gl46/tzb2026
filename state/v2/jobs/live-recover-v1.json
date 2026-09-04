@@ -1,0 +1,9 @@
+{
+  "job": "live-recover-v1",
+  "created": "2026-09-04T00:3x+0800 by tzb-fe (sid 5ae1238c); user go 00:3x, freeze = user's morning announcement",
+  "what": "现场链加 RECOVER 路径与世界状态账本:S5 PASS 后、执行前(或接近段中)目标被挪走→执行器前置/观测检查发现物体不在绑定位置→按冻结契约 RECOVER(PUBLIC_RGBD_CAPTURE→重绑定→新 TaskSpec→S4 新计划→S5→再执行)→物体入箱。账本 WorldStateLedgerV1 append-only JSONL:每步 observation_ref、binding、task_spec_sha、plan_sha、validation、executor_receipt、expected_postconditions、observed_predicates、t;HUD 加'期望 vs 观测→RECOVER'一栏。",
+  "who": "demo lane build-auditable-agent-demo(sid ef4db636)主做;残差线提供挪物体/位移记录/复位钩子(见 tilt-estimator-probe-v1 与其写根),demo lane 只读调用。",
+  "when": "今夜;用户明早宣布冻结前落地即计原创结果;每完成一段落 fact。",
+  "write_roots": ["/Users/gl/tzb-lanes/agent-demo-v3-isaac-rgbd/recover-v1/", "labserver:/var/tmp/vnext-demo-v3-20260903/ (<=10 GB)"],
+  "hard_lines": ["0 ordinal;冻结 gate/validator/契约/RECOVER 契约字面不改;离线链不动", "observed_predicates 只能由感知/执行回执生成,不得由模型填", "每次尝试前臂+物体验证复位;挪物体动作本身记入账本与 trace(标 SCRIPTED_PERTURBATION)", "标 vNext 工程演示;一次跑通不报成功率;验产出不验返回码", "GPU0;起停通告"]
+}

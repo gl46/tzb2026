@@ -1,8 +1,13 @@
 {
-  "generation": 901,
+  "generation": 1534,
   "writers": [
     "tzb-fe",
-    "m2c-exec"
+    "m2c-exec",
+    "live-loop-v1",
+    "exec-no-truth-v1",
+    "deck-v2",
+    "finetuned-live-v1",
+    "review-zh-v1"
   ],
   "grandfathered": [
     "chain.head",
@@ -21,6 +26,9 @@
   ],
   "legacy": {
     "path": "/Users/gl/tzb/M2C_STATE.md",
-    "sha256": "9dc690524ad77e6d51964237f11ee107e23e3ae92398d19e3424eb0676648fc6"
+    "sha256": "6f3f138b27a0a3a0a08ec47d7e11d85b60bbd5975fc0788d04dc68e76d90b00b",
+    "sha256_at_import": "9dc690524ad77e6d51964237f11ee107e23e3ae92398d19e3424eb0676648fc6",
+    "reconciled_at": "2026-09-04T17:1x+0800",
+    "reconcile_note": "legacy file last modified 2026-08-30 21:08 (git-clean, committed 3e2351b); no writer since; sha acknowledged by tzb-fe"
   }
 }
