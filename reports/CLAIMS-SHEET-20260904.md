@@ -55,7 +55,7 @@ deck P7 / README 所引"一次工程演示走完从中文指令到六原语抓�
 ## 变更 13(交付前最后一批:LoRA 第 2 次、推流默认、12 项终态、执行账目;22:3x)
 - **Isaac 域适配 text-LoRA 第 2 次(加静态帧,同晚)**:唯一允许的写法——"held-out 真值锚定重判三条全过:检出 .845→.995、cyan V11 中心误差中位 3.243→3.194 mm(n=40/臂)、14 格现场集零框 5→0、held-out 紫色真缺席假阳 .991→0(同场景后段帧,非跨场景泛化);随包为**可选 profile**(`env/s2-lora-v1/`,派生入口+adapter+契约 v4 提案+SHA256SUMS),**默认仍是基座 text 模式**;默认切换的采用门(评委路径用 LoRA 侧车跑通合成一轮)交付前未跑,§Verification 无任何数字出自 adapter。"证据 `tzb-lanes/finetuned-live-path-v1/RESULT-v2-judgement-v1.md`(前缀 5b607a4b),重判未重跑推理、全取自既有回执。禁止:"已用于现场/直播";禁止把重判通过写成"已采用为默认";名字待用户给,格式仍为"名字(LocateAnything-3B + Isaac 域适配 LoRA)"。变更 11 的第 1 次负结果照旧列,不与第 2 次混写。
 - **推流默认**:`scripts/start.sh chain` 的 RTSP 默认由 1 改 0(卡点 18:无 NVENC 的卡上 RTSP 注册失败→执行器起不来→EXECUTE=1 静默退成 dry-run)。写法:"推流是演示选项,不是执行前提;`RTSP=1` 显式打开"。
-- **12 项终态(chxy 冷装,19:06)**:"8 PASS(1–7、11)/ 4 SKIP(8/9/10 包外套件、12 无 NVENC)/ 0 FAIL";17:01 与 18:32 两次带 FAIL 的回执一并随包,不得只引终态而删前两次。
+- **12 项终态(chxy 冷装)**:唯一写法——"18:32 全 12 项:1–6、11 PASS,7 FAIL(钩子回归),8/9/10/12 SKIP;19:06 定向重跑 7–12:7、11 PASS,其余 SKIP;按各项最新结果 8 PASS / 4 SKIP / 无 FAIL"。18:32/19:06 两轮都不是单轮无 FAIL(审查 R19 指出,22:4x 更正);**22:31 全 12 项(8/9/10 自足化后):11 PASS / 1 SKIP(12 无流)/ 0 FAIL**,可写"0 FAIL"仅指这一轮并引 `smoke-all-20260904T223111`。四份回执一并随包。
 - **真执行账目(chxy)**:三轮、三枚 nonce(81a9932e…/8e098071…/2ba10c75…,取自 nonces 目录文件名),一枚一轮、账本只读、重启后不可重放;写法必须带"谁跑的"。
-- **合成一轮 r4**:写法同 deck P7 三行边界;A6 帧龄 4.30 s 只在轮次日志、不在回执,交付件里不作为回执数字引用。r7(颜色规则默认启用后)若落地,记规则身份;未落地则 README 写"待补",不写数字。
+- **合成一轮 r4**:写法同 deck P7 三行边界;r4 的 A6 帧龄 4.30 s 只在轮次日志、不在回执,不作为回执数字引用;r4 的选框规则串是 FIRST_RETURNED_BOX_NO_RESPONSE_SELECTION,不兼作颜色规则演示。**dl-r7(22:25–22:28,规则默认启用后)DISPATCHED**:回执记 REGISTERED_COLOUR_MEDIAN_BOX_SELECTION_V1 + 规则文件 sha;bridge-receipt 记帧龄 4.35 s / 预算 30 s(可作工件数字引用,但须并写"其自述不是对世界状态的通过")、plan_read_from=compiled_plan;首动 4.38 s 只在端口输出、不在回执。
 - **路线 A(链在 Mac、执行器在 labserver)主轮未跑**:回执只写"已就绪、未跑、原因为让位评委路径",标签 LAB_ROUND_CHAIN_ON_MAC_NOT_THE_JUDGE_PATH。

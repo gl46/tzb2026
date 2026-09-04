@@ -1,5 +1,5 @@
 <!-- GENERATED — 禁止直接 Edit/Write。唯一写入口: tools/statectl.py -->
-<!-- statectl protocol=2 stream=M2C generation=1623 updated=2026-09-04T22:36+0800 -->
+<!-- statectl protocol=2 stream=M2C generation=1628 updated=2026-09-04T22:44+0800 -->
 <!-- 自 M2C_STATE.md 迁移 sha=9dc690524ad77e6d51964237f11ee107e23e3ae92398d19e3424eb0676648fc6 -->
 
 # M2C 权威状态(活跃快照,协议 v2)
@@ -1853,11 +1853,17 @@
 
 - `ruling.lora_v2_optional_profile_shipped` — LoRA第2次真值重判三条全过→随包可选profile env/s2-lora-v1/(255MB,sha 8/8 OK),默认仍基座;采用门未跑不切默认;README/manifest/negative-results/CLAIMS变更13已写;名字待用户 · ref: /Users/gl/tzb-deliverables/judge-package-v1/env/s2-lora-v1/README.md
 
-- `pkg.chxy_12items_final_and_ledger` — chxy 12项终态19:06:8 PASS/4 SKIP/0 FAIL;三轮真执行三枚nonce账目;round目录+帧png+attributed日志+三份smoke回执入包(LAN地址已脱敏);README §Verification +6行;23:30出tarball · ref: /Users/gl/tzb-deliverables/judge-package-v1/README.md
+- `pkg.chxy_12items_final_and_ledger` — 更正(R19):12项无任何一轮0 FAIL——18:32全12项(7 FAIL)+19:06定向重跑7-12;按各项最新结果8 PASS/4 SKIP/无FAIL。r4规则串=FIRST_RETURNED_BOX_NO_RESPONSE_SELECTION,不兼作颜色规则演示;README/CLAIMS/deck已改 · ref: /Users/gl/tzb-deliverables/judge-package-v1/README.md
 
 - `lane-closed` — live-loop-v1 今晚收线,无待办。跨机请求搬盘那条由 tzb-a1 记进包内 docs/open-questions.md,按代码阅读的设计项、非实测结论。仅在被点名时核查,否则不动包内文件 · ref: /Users/gl/tzb-lanes/live-loop-v1/receipts/end-to-end-v1.json
 
 - `review.round19` — R18两项闭环:audit命令原样跑无输出、README颜色规则带启用时刻。deck 19:04四筛全过。新2低:pdf导出早于pptx写入(文本逐页字符集20/20相同)、NUMBERS-v2头部仍写18页 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-round19.md
+
+- `package-handoff-2026-09-04` — 包已交快照:tests 36 过、resident SHA256SUMS 14/14、v20 start-notruth 保持 lane 同源(no-healthcheck 例外已写明);Mac 为权威、chxy pkg 已同步
+
+- `milestone.composed_round_dl_r7_and_full12` — 更正:v3 同tag两机各建一次→ID不同(labserver dcbb16101162/chxy 9de43b377bcb),与字体无关(字体走bind mount);22:31全12项11 PASS/1 SKIP执行者待tzb-b9确认;dl-r7 DISPATCHED工件入包;5枚nonce账目 · ref: /Users/gl/tzb-deliverables/judge-package-v1/evidence/verification-20260904/IMAGE-IDENTITY.md
+
+- `image-identity-two-hosts` — 判分包 v3 同 tag 两机各建一次:labserver dcbb16101162 / chxy 9de43b377bcb(同小时);与字体无关,字体经 bind mount 进容器,镜像内无 assets/无 CJK
 
 ## 2. 归属与 lane
 - `lane.m2c_exec` — **M2C 执行会话**:successor implementation candidate,commit-free,于全新隔离 clone(Q′ 模式);已登记候选路径内自由编辑(R132.41)。ETA(8/29 午报):交包 8/30 01:00–07:00;早沿(≤03:00)可达截止,晚沿不可达。
@@ -2421,11 +2427,6 @@
 - `task.end_to_end_composed_round` — 缺口(18:5x):尚无一轮'REPL指令→链路→盘上请求+信封→v17执行'合成实跑。桥=包内run_demo --execute→resident客户端→mint_envelope→8557(smoke 7)。v20两跑毕(~19:00)后loop lane重起取帧宿主跑一轮,回执end-to-end-v1 · ref: /Users/gl/tzb-lanes/live-loop-v1/receipts/end-to-end-composition-v1.json
 
 ## 5. Recent tail(journal 缓存,非权威)
-- 2026-09-04T19:07+0800 [FACT/facts] <tzb-fe> `deck.v2_composed_row_done` — deck v2(19:04):P7三行边界(首例flash+v3/默认配置合成一轮只写有留存工件的数);帧龄4.30s只在终端无回执不上页(裁:对,待执行器写进回执);P11第14条引冷装报告,round目录到货再并;守卫加placeholder_fails;P4两句已加 · ref: /Users/gl/tzb-deliverables/ppt-v1/xh-202607-deck-v2.pdf
-- 2026-09-04T19:08+0800 [FACT/facts] <review-zh-v1> `review.round18` — 18轮:R17已改并机械化(REDACTION-NOTE明示保留3个RFC1918;make_tarball 新增 ADDR_CHECK 命中即删包 exit5,已确认被调用)。CLAIMS变更12重写完整。提醒:包内7处记了颜色规则名,但含预录bundle继承的字面,非'真选过框'的证据。 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-round18.md
-- 2026-09-04T19:08+0800 [FACT/facts] <deck-v2> `deck-v2-gen1604-ruling` — gen1604(tzb-a1,2026-09-04):4.30s 待回执落盘后再上页;P7三行/P11冷装报告/placeholder_fails/P4两句均接受;P4 0.588度句保留不在禁写内 · ref: /Users/gl/tzb-deliverables/ppt-v1/CHANGES-v2.md
-- 2026-09-04T19:09+0800 [FACT/facts] <tzb-fe> `review.round18_small` — 审查R18:R17机械化确认(ADDR_CHECK真调用);两小项已改(audit命令补自排除;README写规则启用时间);提醒:包内7处规则名含预录派发包继承字面,'启用后一轮真选框'的证据须来自r6 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-round18.md
-- 2026-09-04T22:24+0800 [EVENT] <exec-no-truth-v1> — 重跑 7-12:item7 PASS(用先前未消费的 nonce),item11 PASS(3枚只读不可重放),8/9/10/12 SKIP,0 FAIL。12项终态:8 PASS / 4 SKIP / 0 FAIL。三轮 round 目录+帧已同步本机。 · ref: /Users/gl/tzb-lanes/cold-install-chxy-v1/receipts/smoke-all-20260904T190638
 - 2026-09-04T22:25+0800 [FACT/facts] <finetuned-live-v1> `ab14-truth-rejudge-adopt` — 裁定b重判三条全过=ADOPT:cyan真值3.243->3.194mm更好,green柱在画面内基座漏检LoRA命中4px,零框0/70假阳0。RESULT-v2-judgement-v1前缀5b607a4b。采用门r6/r7未跑,仍默认基座。 · ref: /Users/gl/tzb-lanes/finetuned-live-path-v1/RESULT-v2-judgement-v1.md
 - 2026-09-04T22:25+0800 [FACT/facts] <finetuned-live-v1> `s2-lora-mountable-package` — 打包目录 tzb-lanes/finetuned-live-path-v1/mountable/s2-lora-v1 255MB 8文件校验全OK:派生入口fd833a52+adapter 9459f7b1+contract v4+SHA256SUMS+NVIDIA LICENSE+侧车逐字命令。OFL无对应物。 · ref: /Users/gl/tzb-lanes/finetuned-live-path-v1/mountable/s2-lora-v1/README.md
 - 2026-09-04T22:25+0800 [EVENT] <m2c-exec> — ISAAC 占用开始 chxy GPU0:dl-r7 合成一轮(颜色规则默认启用 + 请求 provenance 段 + bridge-receipt + outcome.json 首验)
@@ -2441,3 +2442,8 @@
 - 2026-09-04T22:35+0800 [EVENT] <tzb-fe> — 路线A收线确认(loop lane 22:33 READY_BUT_NOT_RUN,labserver GPU0取帧宿主已停);其代码阅读发现:链与执行器跨机时请求未搬到执行器盘→记 open-questions 设计项,不实测 · ref: /Users/gl/tzb-lanes/live-loop-v1/receipts/end-to-end-v1.json
 - 2026-09-04T22:36+0800 [FACT/facts] <live-loop-v1> `lane-closed` — live-loop-v1 今晚收线,无待办。跨机请求搬盘那条由 tzb-a1 记进包内 docs/open-questions.md,按代码阅读的设计项、非实测结论。仅在被点名时核查,否则不动包内文件 · ref: /Users/gl/tzb-lanes/live-loop-v1/receipts/end-to-end-v1.json
 - 2026-09-04T22:36+0800 [FACT/facts] <review-zh-v1> `review.round19` — R18两项闭环:audit命令原样跑无输出、README颜色规则带启用时刻。deck 19:04四筛全过。新2低:pdf导出早于pptx写入(文本逐页字符集20/20相同)、NUMBERS-v2头部仍写18页 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-round19.md
+- 2026-09-04T22:38+0800 [FACT/facts] <tzb-fe> `pkg.chxy_12items_final_and_ledger` — 更正(R19):12项无任何一轮0 FAIL——18:32全12项(7 FAIL)+19:06定向重跑7-12;按各项最新结果8 PASS/4 SKIP/无FAIL。r4规则串=FIRST_RETURNED_BOX_NO_RESPONSE_SELECTION,不兼作颜色规则演示;README/CLAIMS/deck已改 · ref: /Users/gl/tzb-deliverables/judge-package-v1/README.md
+- 2026-09-04T22:40+0800 [FACT/facts] <m2c-exec> `package-handoff-2026-09-04` — 包已交快照:tests 36 过、resident SHA256SUMS 14/14、v20 start-notruth 保持 lane 同源(no-healthcheck 例外已写明);Mac 为权威、chxy pkg 已同步
+- 2026-09-04T22:41+0800 [FACT/facts] <tzb-fe> `milestone.composed_round_dl_r7_and_full12` — 里程碑:dl-r7 DISPATCHED(规则身份+bridge-receipt帧龄4.35/30+outcome.json入工件);chxy 22:31全12项 11 PASS/1 SKIP/0 FAIL(8/9/10自足化);5枚nonce账目;镜像重建含字体 9de43b377bcb;全部入包README · ref: /Users/gl/tzb-deliverables/judge-package-v1/evidence/verification-20260904/chxy-cold-install/smoke-all-20260904T223111/smoke-all.json
+- 2026-09-04T22:44+0800 [FACT/facts] <tzb-fe> `milestone.composed_round_dl_r7_and_full12` — 更正:v3 同tag两机各建一次→ID不同(labserver dcbb16101162/chxy 9de43b377bcb),与字体无关(字体走bind mount);22:31全12项11 PASS/1 SKIP执行者待tzb-b9确认;dl-r7 DISPATCHED工件入包;5枚nonce账目 · ref: /Users/gl/tzb-deliverables/judge-package-v1/evidence/verification-20260904/IMAGE-IDENTITY.md
+- 2026-09-04T22:44+0800 [FACT/facts] <m2c-exec> `image-identity-two-hosts` — 判分包 v3 同 tag 两机各建一次:labserver dcbb16101162 / chxy 9de43b377bcb(同小时);与字体无关,字体经 bind mount 进容器,镜像内无 assets/无 CJK
