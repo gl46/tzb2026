@@ -1,5 +1,5 @@
 <!-- GENERATED — 禁止直接 Edit/Write。唯一写入口: tools/statectl.py -->
-<!-- statectl protocol=2 stream=M2C generation=1807 updated=2026-09-05T03:49+0800 -->
+<!-- statectl protocol=2 stream=M2C generation=1808 updated=2026-09-05T03:52+0800 -->
 <!-- 自 M2C_STATE.md 迁移 sha=9dc690524ad77e6d51964237f11ee107e23e3ae92398d19e3424eb0676648fc6 -->
 
 # M2C 权威状态(活跃快照,协议 v2)
@@ -2099,6 +2099,8 @@
 
 - `executor.v21_delivered` — v21 交付(03:47):六文件双侧 digest 核;tests 80 过;build_request 邻居本就动态;RUN03_* 无读取处;consumer 串保留 v15(launcher 明文),v21 回执以 v21_target_resolution 键区分;tzb-b9 紫/红复跑中 · ref: /Users/gl/tzb-deliverables/judge-package-v1/agent/executor/resident/PROVENANCE-v21.md
 
+- `executor.v21_sums_and_blocker31` — SHA256SUMS.txt 14/14 与 -v21 5/5 重算并同步 chxy;卡点 31 已修(S0 合法拒绝 exit 0 + NOT DISPATCHED 一行,3 测试,本地 83 过),run_demo.py 压着等 tzb-b9 紫/红跑完再推(同字节纪律);LC_ALL=C 数清单的教训再记一次 · ref: /Users/gl/tzb-deliverables/judge-package-v1/agent/executor/resident/SHA256SUMS.txt
+
 ## 2. 归属与 lane
 - `lane.m2c_exec` — **M2C 执行会话**:successor implementation candidate,commit-free,于全新隔离 clone(Q′ 模式);已登记候选路径内自由编辑(R132.41)。ETA(8/29 午报):交包 8/30 01:00–07:00;早沿(≤03:00)可达截止,晚沿不可达。
 - `lane.tzb_fe` — **tzb-fe(协调)**:实现审查+七段治理批量激活(预告:批一 = R′ stage adoption→successor prereg→materialize→bootstrap;批二 = legacy P″ prefix adoption→recovery03→combined preflight;每步仍各自 pre-capture/记录/fail-closed,激活与 closeout 各批一次)。
@@ -2674,7 +2676,6 @@
 - `live-loop-executor-target-prim-pin` — vnext_dispatch_executor_v17.py:75 TARGET_PRIM_PATH 硬钉 cylinder_06,非青指令一律 EXECUTOR_ERROR 且已花 nonce;归 demo lane/协调裁
 
 ## 5. Recent tail(journal 缓存,非权威)
-- 2026-09-05T03:28+0800 [EVENT] <tzb-fe> — 03:28 定时:deck v3 任务已下达 tzb-63(sid f4a8adc2 核名无变),按简报用 ppt-master 重做,初稿 09:00 / 定稿 16:00,守卫 check_deck_v3,统一标题 · ref: /Users/gl/tzb-lanes/coordinator-notes/brief-deck-v3-pptmaster-20260905.md
 - 2026-09-05T03:30+0800 [FACT/facts] <deck-v3> `deck_v3.takeover` — deck-v3 owner(tzb-63,sid f4a8adc2)03:28 接手:已读简报+补充、CLAIMS-0904、v2 全 20 页文本、check_deck_v3、术语表;ppt-master 完整性门 rc=0;路线=Generate PPTX Default;初稿 09:00 定稿 16:00 · ref: /Users/gl/tzb-lanes/coordinator-notes/brief-deck-v3-pptmaster-20260905.md
 - 2026-09-05T03:43+0800 [EVENT] <tzb-fe> — 03:43 复探:03:19 后七条线全部沉默(journal 仅 deck-v3 03:30 接手),session json 均在;已再发'继续+一行状态';设 04:13 第三轮探测,届时仍沉默则截止顺延 2h 并改派 v21 · ref: /Users/gl/tzb/state/journal/M2C/2026-09-05.md
 - 2026-09-05T03:43+0800 [FACT/facts] <finetuned-live-v1> `review-v3-final-bundle-delivered` — 不脱敏GPT终审包已出:review-v3/final-review-bundle-20260905T0245(499文件/29MB,tar.gz 6.6MB sha 12f85317)。保留内网地址与绝对路径;排除密钥/权重/图像/视频;凭据扫描0命中,往返499/499。含REVIEW-BRIEF-FINAL.md · ref: /Users/gl/tzb-deliverables/review-v3/final-review-bundle-20260905T0245/REVIEW-BRIEF-FINAL.md
@@ -2694,3 +2695,4 @@
 - 2026-09-05T03:47+0800 [FACT/facts] <m2c-exec> `judge-executor-v21-target-from-request` — v21 交付:目标取自请求+注册六 prim 校验+检查前移(拒绝不花 nonce)+邻居六减目标;v17 侧仅 8 行变化,gate 段未动;15 测试,全套 80 过;已同步 chxy。 · ref: /Users/gl/tzb-deliverables/judge-package-v1/agent/executor/resident/PROVENANCE-v21.md
 - 2026-09-05T03:47+0800 [FACT/facts] <tzb-fe> `deliverable.cold_install_report_1449` — 冷装报告 1449 行(tzb-b9 03:5x):新增三句验收一节 + 卡点 29/30/31 + 驱动脚本自曝三处;已复制入包(脱敏);acceptance-3 三套 run 目录与回执入包 rounds/acceptance-3-20260905/ · ref: /Users/gl/tzb-deliverables/judge-package-v1/evidence/verification-20260904/chxy-cold-install/cold-install-report-v1.md
 - 2026-09-05T03:49+0800 [FACT/facts] <tzb-fe> `executor.v21_delivered` — v21 交付(03:47):六文件双侧 digest 核;tests 80 过;build_request 邻居本就动态;RUN03_* 无读取处;consumer 串保留 v15(launcher 明文),v21 回执以 v21_target_resolution 键区分;tzb-b9 紫/红复跑中 · ref: /Users/gl/tzb-deliverables/judge-package-v1/agent/executor/resident/PROVENANCE-v21.md
+- 2026-09-05T03:52+0800 [FACT/facts] <tzb-fe> `executor.v21_sums_and_blocker31` — SHA256SUMS.txt 14/14 与 -v21 5/5 重算并同步 chxy;卡点 31 已修(S0 合法拒绝 exit 0 + NOT DISPATCHED 一行,3 测试,本地 83 过),run_demo.py 压着等 tzb-b9 紫/红跑完再推(同字节纪律);LC_ALL=C 数清单的教训再记一次 · ref: /Users/gl/tzb-deliverables/judge-package-v1/agent/executor/resident/SHA256SUMS.txt
