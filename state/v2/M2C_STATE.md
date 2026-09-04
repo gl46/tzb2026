@@ -1,5 +1,5 @@
 <!-- GENERATED — 禁止直接 Edit/Write。唯一写入口: tools/statectl.py -->
-<!-- statectl protocol=2 stream=M2C generation=1778 updated=2026-09-05T02:42+0800 -->
+<!-- statectl protocol=2 stream=M2C generation=1780 updated=2026-09-05T02:43+0800 -->
 <!-- 自 M2C_STATE.md 迁移 sha=9dc690524ad77e6d51964237f11ee107e23e3ae92398d19e3424eb0676648fc6 -->
 
 # M2C 权威状态(活跃快照,协议 v2)
@@ -1991,7 +1991,7 @@
 
 - `report-screen-ruling-applied` — 报告线禁写裁定已进 screen_report.py 覆盖层(规划/推理/智能体放行,闭环与位姿估计给否定豁免,校验统一);deck 表未动,正负例各复验 · ref: /Users/gl/tzb-deliverables/report-v1/tools/禁写清单-给报告作者.md
 
-- `deliverable.training_bundle_v1` — 训练包重打(02:2x):599 文件 SHA 全 OK,tar 572MB,sha e669981e…(0273a99a 作废);5 阻断+2 来源不明全改(补两脚本、勘误索引+SUPERSEDED.json、显存/内存四行带出处、runs-ab3 步、推理峰值出处);待审查复核 · ref: /Users/gl/tzb-deliverables/training-v1/training-bundle-v1.tar.sha256
+- `deliverable.training_bundle_v1` — 训练包第三版(tzb-76 02:4x):sha a5ba5091…(e669981e 作废);零代码改动;§1.2.1 执行环境约束(4 包外 digest 门、6 写死 ROOT、VENV_PYTHON)、§7 四件、PROVENANCE 对齐;偏离接受:仅第 5/6 步受限,第 7 步纯后处理;599/599 · ref: /Users/gl/tzb-deliverables/training-v1/training-bundle-v1.tar.sha256
 
 - `report.zh_v1_started` — 技术报告 owner tzb-66 02:1x 开工:事实源读齐;PDF 路线 Markdown→HTML→Chrome headless(CJK 已验);tzb-55 旧稿改名为素材件仅查数;细节见 ref · ref: /Users/gl/tzb-lanes/report-zh-v1/LANE-NOTES.md
 
@@ -2064,6 +2064,8 @@
 - `deck-v3-guard-ready` — ppt-v3/tools/check_deck_v3.py 与简报补充已就位(03:28 前);覆盖层放行规划推理智能体、禁通用自主智能体、闭环位姿估计逐处判;v2 表未动;REQUIRED 未继承已注明 · ref: /Users/gl/tzb-deliverables/ppt-v3/tools/简报补充-给-tzb-63.md
 
 - `review.report_draft1` — 审查报告初稿:2 阻断(R1 §2.6 vLLM 两套配方混写→按 serve-27b.md A 套;R2 2.97 rad/0.53 mm→引 physics-redrive 回执原值 2.966)+2 缺口(加训练包指针;自家超参补齐);禁写/术语/留位通过;已转 tzb-66 并入第二稿 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-report-draft1-v1.md
+
+- `deck.v3_guard_ready` — check_deck_v3.py 就位(tzb-55 02:44,ppt-v3/tools/):v2 表只读+覆盖层,正负例验过,v2 deck 过 v3 守卫;REQUIRED/CONDITIONAL 按 v2 页码故 v3 默认不启用(tzb-63 需重写);简报补充已写;报告筛查加两源后 513/507,禁写 0 · ref: /Users/gl/tzb-deliverables/ppt-v3/tools/check_deck_v3.py
 
 ## 2. 归属与 lane
 - `lane.m2c_exec` — **M2C 执行会话**:successor implementation candidate,commit-free,于全新隔离 clone(Q′ 模式);已登记候选路径内自由编辑(R132.41)。ETA(8/29 午报):交包 8/30 01:00–07:00;早沿(≤03:00)可达截止,晚沿不可达。
@@ -2639,8 +2641,6 @@
 - `live-loop-purple-round-after-s0` — 同步后跑一轮'把紫色的圆柱体放到蓝色料箱',报 S0 分槽结果、S2 实际被问的词、实际抓的柱子
 
 ## 5. Recent tail(journal 缓存,非权威)
-- 2026-09-05T02:33+0800 [FACT/facts] <tzb-fe> `s0.llm_extraction_landed` — S0 修复已交(02:3x):复用冻结 live_entry_v5.decompose(模型出英文指称短语/目的地/操作;颜色词规则子串;否定走登记表);start.sh/smoke06 去固定值;tests 60 过;已同步 chxy;待 tzb-b9 三指令验收 · ref: /Users/gl/tzb-deliverables/judge-package-v1/tests/test_s0_referring_expression_v1.py
-- 2026-09-05T02:34+0800 [EVENT] <m2c-exec> — 中文指令派发被 BRIDGE_REFUSED_BEFORE_MINT 拦在铸造前:truth prim 查表只认英文注册词;--expression 解钉已修好绑定层但臂仍不动;未花 nonce · ref: receipts/live-window-chinese-instruction-dispatch-blocker-v1.json c11e693d
 - 2026-09-05T02:34+0800 [FACT/facts] <review-zh-v1> `review.training-recut` — 重打包e669981e复核:摘要599/599+往返+脱敏+adapter0400全PASS;T2-T5与两处来源不明均闭环;残留1条阻断:六个code入口与VENV_PYTHON写死/home/fx且四个digest门在包外,第5-7步评委机跑不起来 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-training-bundle-recut-v1.md
 - 2026-09-05T02:34+0800 [FACT/facts] <report-zh-v1> `ruling.report_title_20260905` — CLAIMS 变更 14 已落报告:主标题改「面向工业机械臂的指令交互型智能体原型——开放词汇感知、确定性任务规划与可审计执行」,内部名括注一次;4.11 冻结原话块加引言句;数字来源含 0903/README/negative-results · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.md
 - 2026-09-05T02:34+0800 [FACT/facts] <tzb-fe> `defect.truth_prim_english_lookup` — 直播线发现(loop lane):build_request 的 truth prim 按英文子串查注册表,纯中文指称→BRIDGE_REFUSED_BEFORE_MINT;S0 修复(英文物体短语)绕过;裁不做 B/C/D,A(truth prim 取自绑定)记 OQ21;loop lane 同步新包后重跑紫色 · ref: /Users/gl/tzb-deliverables/judge-package-v1/docs/open-questions.md
@@ -2659,3 +2659,5 @@
 - 2026-09-05T02:42+0800 [FACT/facts] <review-zh-v1> `review.report-draft1` — 报告初稿:2条阻断(§2.6 vLLM 0.25.1配上A配方参数是包内不存在的组合;§4.10 2.97rad/0.53mm无来源)。禁写/留位/术语三项通过;四段到位但缺训练包指针且自家超参比复现上游还薄 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-report-draft1-v1.md
 - 2026-09-05T02:42+0800 [FACT/facts] <deck-v2> `deck-v3-guard-ready` — ppt-v3/tools/check_deck_v3.py 与简报补充已就位(03:28 前);覆盖层放行规划推理智能体、禁通用自主智能体、闭环位姿估计逐处判;v2 表未动;REQUIRED 未继承已注明 · ref: /Users/gl/tzb-deliverables/ppt-v3/tools/简报补充-给-tzb-63.md
 - 2026-09-05T02:42+0800 [FACT/facts] <tzb-fe> `review.report_draft1` — 审查报告初稿:2 阻断(R1 §2.6 vLLM 两套配方混写→按 serve-27b.md A 套;R2 2.97 rad/0.53 mm→引 physics-redrive 回执原值 2.966)+2 缺口(加训练包指针;自家超参补齐);禁写/术语/留位通过;已转 tzb-66 并入第二稿 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-report-draft1-v1.md
+- 2026-09-05T02:43+0800 [FACT/facts] <tzb-fe> `deliverable.training_bundle_v1` — 训练包第三版(tzb-76 02:4x):sha a5ba5091…(e669981e 作废);零代码改动;§1.2.1 执行环境约束(4 包外 digest 门、6 写死 ROOT、VENV_PYTHON)、§7 四件、PROVENANCE 对齐;偏离接受:仅第 5/6 步受限,第 7 步纯后处理;599/599 · ref: /Users/gl/tzb-deliverables/training-v1/training-bundle-v1.tar.sha256
+- 2026-09-05T02:43+0800 [FACT/facts] <tzb-fe> `deck.v3_guard_ready` — check_deck_v3.py 就位(tzb-55 02:44,ppt-v3/tools/):v2 表只读+覆盖层,正负例验过,v2 deck 过 v3 守卫;REQUIRED/CONDITIONAL 按 v2 页码故 v3 默认不启用(tzb-63 需重写);简报补充已写;报告筛查加两源后 513/507,禁写 0 · ref: /Users/gl/tzb-deliverables/ppt-v3/tools/check_deck_v3.py
