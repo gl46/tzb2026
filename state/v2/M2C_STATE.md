@@ -1,5 +1,5 @@
 <!-- GENERATED — 禁止直接 Edit/Write。唯一写入口: tools/statectl.py -->
-<!-- statectl protocol=2 stream=M2C generation=1679 updated=2026-09-04T23:55+0800 -->
+<!-- statectl protocol=2 stream=M2C generation=1680 updated=2026-09-05T00:00+0800 -->
 <!-- 自 M2C_STATE.md 迁移 sha=9dc690524ad77e6d51964237f11ee107e23e3ae92398d19e3424eb0676648fc6 -->
 
 # M2C 权威状态(活跃快照,协议 v2)
@@ -1889,7 +1889,7 @@
 
 - `review.round20_execute1` — EXECUTE=1那行逐项核过:336s/6指令/4.4357of30/UNOBSERVABLE/93.2763在notes/nonce290798ad/8555unbound/侧车45s/frame_000000不匹配000014/账目六枚+改名披露 全对上;只差一处:该轮boxes_considered=1未写限定 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-round20-final.md
 
-- `milestone.final_tarball_20260904` — 最终交付包改为 judge-package-v1-20260904-230159.tar.gz(727文件/225MB/CLEAN,sha256 631895ec…);225455版移入superseded/;差异=审查T1/T2两处文字(v20源线清单说明、REDACTION-NOTE补vendor两处root@) · ref: /Users/gl/tzb-deliverables/judge-package-v1-20260904-230159.tar.gz.sha256
+- `milestone.final_tarball_20260904` — 最终交付包 judge-package-v1-20260904-235958.tar.gz(764文件/225MB/CLEAN,ADDR+MODE双检,sha256 d16e5494…);前版入superseded/;含卡点23补丁、S2_PROFILE开关+首验、lora-r8b、直播两轮、OQ19/20 · ref: /Users/gl/tzb-deliverables/judge-package-v1-20260904-235958.tar.gz.sha256
 
 - `review.tarball_225455` — 开箱核tar 882095e0:sha一致/727文件/五份摘要全OK/ADDR_CHECK真接线且清洁/无密钥/239路径全解析/exec位全在。两项文档-命令不符:v20 from-source-lane清单4文件缺、REDACTION漏报两处vendor root@labserver · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-round21-tarball.md
 
@@ -2503,7 +2503,6 @@
 - `task.viewport_camera_pose_future` — 裁定(tzb-60, 9/4):视口不动、不分叉v17、不试Kit setting;现场 ffplay crop 裁剪(非变焦)。以后真要拉近:OBS_CAMERA_POSITION(-0.8,-0.8,1.4)+LOOK_AT(-0.05,0,0.55) 照抄给 Kit 透视相机,需重起+分叉裁定 · ref: /Users/gl/tzb-deliverables/judge-package-v1/agent/executor/resident/vnext_dispatch_executor_v17.py
 
 ## 5. Recent tail(journal 缓存,非权威)
-- 2026-09-04T23:32+0800 [FACT/facts] <tzb-fe> `pkg.reissue_pending_after_rounds` — 重出待办:卡点23补丁(run_demo.py 23:30,tests 39/39)、open-questions 19(首匹配循环两处 :259/:488)、冷装报告1168行;等 lora-r8 重试+直播轮结果后切新版;此前数字按包外修改版写 · ref: /Users/gl/tzb-deliverables/judge-package-v1/agent/run_demo.py
 - 2026-09-04T23:33+0800 [EVENT] <m2c-exec> — ISAAC 占用结束 chxy GPU0:dl-lora-r8b DISPATCHED(LoRA 侧车服务 S2,age 5.09/30,首动 10.75s);已撤 locany-lora/v17/取帧宿主,8571 基座侧车非我所起未动
 - 2026-09-04T23:33+0800 [FACT/facts] <m2c-exec> `lora-sidecar-round-evidence` — lora-r8b:LoRA 派生入口(fd833a52)+adapter(receipt 9459f7b1)服务 S2 并 DISPATCHED;ready_line 无两 safetensors 摘要(在 receipt 内);合并契约 4cca534b 生效(s2_source_label=XH-Locator)
 - 2026-09-04T23:35+0800 [FACT/facts] <tzb-fe> `milestone.lora_r8b_dispatched` — 里程碑(23:26 chxy,demo lane):LoRA侧车合成轮 lora-r8b DISPATCHED/6指令/帧龄5.09;S2归属三跳链成立(attached=true+入口fd833a52+receipt 9459f7b1);合并契约生效;采用门已过,默认仍基座待用户裁;工件入包 · ref: /Users/gl/tzb-deliverables/judge-package-v1/evidence/verification-20260904/chxy-cold-install/rounds/lora-r8b-composite-20260904T152644/
@@ -2523,3 +2522,4 @@
 - 2026-09-04T23:55+0800 [FACT/facts] <exec-no-truth-v1> `s2profile-lora-first-verification` — S2_PROFILE=lora EXECUTE=1 经 start.sh 首验通过:exit=0/324s,DISPATCHED,nonce 2a17e097,round-001-composite-20260904T154726 · ref: cold-install-chxy-v1/receipts/s2profile-lora/
 - 2026-09-04T23:55+0800 [FACT/facts] <exec-no-truth-v1> `cold-install-findings-2` — 新卡点 27(诊断落注释块印 [FAIL]+复用尸体)已修并复验;28=包内 adapter 三件 644≠回执 0400,已修 · ref: cold-install-chxy-v1/cold-install-report-v1.md
 - 2026-09-04T23:55+0800 [FACT/facts] <tzb-fe> `pkg.blocker27_start_sh_hint_and_reuse` — 卡点27两半 tzb-b9 验过(静态+行为,干跑不欠账):日志开头无[FAIL];Exited尸体被替换而非复用。补一句'replacing a non-running container'提示;首败日志丢失 NOTE 入包;三容器已撤,8571留用户窗口 · ref: /Users/gl/tzb-deliverables/judge-package-v1/scripts/start.sh
+- 2026-09-05T00:00+0800 [FACT/facts] <tzb-fe> `milestone.final_tarball_20260904` — 最终交付包 judge-package-v1-20260904-235958.tar.gz(764文件/225MB/CLEAN,ADDR+MODE双检,sha256 d16e5494…);前版入superseded/;含卡点23补丁、S2_PROFILE开关+首验、lora-r8b、直播两轮、OQ19/20 · ref: /Users/gl/tzb-deliverables/judge-package-v1-20260904-235958.tar.gz.sha256
