@@ -1,5 +1,5 @@
 <!-- GENERATED — 禁止直接 Edit/Write。唯一写入口: tools/statectl.py -->
-<!-- statectl protocol=2 stream=M2C generation=1864 updated=2026-09-05T04:31+0800 -->
+<!-- statectl protocol=2 stream=M2C generation=1868 updated=2026-09-05T04:34+0800 -->
 <!-- 自 M2C_STATE.md 迁移 sha=9dc690524ad77e6d51964237f11ee107e23e3ae92398d19e3424eb0676648fc6 -->
 
 # M2C 权威状态(活跃快照,协议 v2)
@@ -2121,7 +2121,7 @@
 
 - `deck.v2_1_relabel` — deck v2.1 出(03:58):只改 P9 那句→'除 S4 外各段 3.04 s(确定性 S3+S5 0.045 s)';守卫 0 项、pdf 晚于 pptx、无字体回退;NUMBERS-v2:236 已改;禁写表加'确定性各段';PENDING-v2.1.md 待办未随此版(归 v3) · ref: /Users/gl/tzb-deliverables/ppt-v1/xh-202607-deck-v2.1.pdf
 
-- `report.zh_v2_draft2` — 报告第二稿 04:31 版:S0 验收三例+v21 轮次已填,2.57 mm 带包内回执路径;筛查 PASS(807 数未命中 0,禁写 0);仅剩默认执行器 v17/v21【待裁】一句(5.1、附录B)与红色轮细节 · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.pdf
+- `report.zh_v2_draft2` — 报告第二稿 04:32 版:红色轮细节(v21,ATTACH 断言失败、近基座不可达)已填;筛查 832 数未命中 7(待 tzb-56 指源);仅剩默认执行器 v17/v21【待裁】一句 · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.pdf
 
 - `report.draft2_delivered` — 报告第二稿图文版(tzb-66 04:09):53 页 A4,24 图 22 表带题注与出处行,含 R1/R2/训练包指针/自家超参/3.04 s 改标签;待补三处(S0 验收、紫红两轮、附录 B 末行);审查 06:30 核图表出处;数字源加训练包 README · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.pdf
 
@@ -2188,6 +2188,12 @@
 - `三工具空转自检` — v2守卫(只数页面字,备注不算)+报告筛查(空稿/空源/有图标记却零图体)各加空转自检,均负例验过;第一版两条自检自己是空转的,已修 · ref: /Users/gl/tzb-deliverables/report-v1/tools/screen_report.py
 
 - `report.v2_screen_pass_0431` — 报告 04:31 重建:2.57 mm 带包内路径与字段,复筛 807 数命中 798/归一 9/未命中 0,禁写 0 PASS;红色轮细节已发作者;仅剩默认执行器一句待裁(等发散保护三轮复跑) · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.pdf
+
+- `servo-divergence-guard` — 伺服发散保护已落 v21(builder 第9-14处):首次迭代跟踪误差>50mm 或迭代间增大即停 HALTED_APPROACH_DID_NOT_CONVERGE,不施修正/不下发/不闭合;新 v21 sha 03ef4cea;94 tests · ref: /Users/gl/tzb-deliverables/judge-package-v1/agent/executor/resident/SHA256SUMS-v21.txt
+
+- `v21-receipt-identity-and-gate-wording` — v21 新增 envelope_consumption.consumed_by_executor_identity(consume 是 spliced 段不可改,故加在调用点;磁盘 nonce 文件仍只有 v15);grasp_gate.why 改为本轮实测
+
+- `v21三轮入NUMBERS-Z2` — NUMBERS-v2 加 Z2 节(v21 紫/青/红三轮,报告用未上deck,label自述不计入冻结campaign);口述三处出入按回执改:3.5867→3.5868、98.28是伺服首拍非对齐项、红色attach断言失败且撞邻件27.22mm非干净停止 · ref: /Users/gl/tzb-deliverables/ppt-v1/NUMBERS-v2.md
 
 ## 2. 归属与 lane
 - `lane.m2c_exec` — **M2C 执行会话**:successor implementation candidate,commit-free,于全新隔离 clone(Q′ 模式);已登记候选路径内自由编辑(R132.41)。ETA(8/29 午报):交包 8/30 01:00–07:00;早沿(≤03:00)可达截止,晚沿不可达。
@@ -2766,10 +2772,6 @@
 - `await-servo-guard-then-3-rounds` — 等 demo lane 伺服发散保护同步后跑红/紫/青三轮并报 tzb-56;红期望 HALTED_APPROACH_DID_NOT_CONVERGE 干净停止、邻件不动。tzb-56 说它会叫我,不自己加轮
 
 ## 5. Recent tail(journal 缓存,非权威)
-- 2026-09-05T04:22+0800 [FACT/facts] <report-zh-v1> `report.zh_v2_draft2` — 报告第二稿 04:22 版:S0 验收三例与 v21 紫/青轮次已填(表15后段、3.2.1、6.2、附录B、摘要);留【待裁】默认执行器 v17/v21 一句+红色轮细节;筛查 803 数未命中 1(2.57 待加源)禁写 0 · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.pdf
-- 2026-09-05T04:22+0800 [FACT/facts] <tzb-fe> `report.acceptance_filled` — 报告 04:22:3.2.1 三例与表 15 后 v21 段已填(引 L 直播回执),6.2 加第 7/8 条,附录 B 移位,摘要加句;筛查 803/793/未命中 1(2.57 mm 待 tzb-b9 v21 复跑回执入源);默认执行器句【待裁】 · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.pdf
-- 2026-09-05T04:23+0800 [FACT/facts] <deck-v3> `deck_v3.notes_enabled` — deck v3 讲者备注已启用并导出(20/20 页);守卫递归生效禁写 0 项;几何断言 32 项均为页脚/条组误报待 tzb-55 改;产物 pptx 8f69e890 pdf ba3770ff;待 12:00 定稿口径改 P02/P04/P07 · ref: /Users/gl/tzb-deliverables/ppt-v3/CHANGES-v3.md
-- 2026-09-05T04:23+0800 [FACT/facts] <tzb-fe> `defect.red_unreachable_servo_divergence` — 红色失败根因:cylinder_01 r_xy 0.232 m 近基座不可达,伺服无发散保护→失控挥动、撞动邻件 27 mm、attach 断言;紫/青 r≥0.35 成。裁:伺服发散保护现在做(v21 builder),可达带作启发不写常量,推荐词改青/品红/蓝,红/绿/橙标近基座区 · ref: /Users/gl/tzb-lanes/cold-install-chxy-v1/receipts/v21-rerun/
 - 2026-09-05T04:23+0800 [FACT/facts] <tzb-fe> `deck.v3_rebuilt_0425` — deck v3 重建(04:25):讲者备注 20/20、Mac 字体 PDF 主件、加宽框保留;守卫组递归生效禁写 0,几何断言 32 项误报待 tzb-55 修;P02/P04/P07 等定稿口径 · ref: /Users/gl/tzb-deliverables/ppt-v3/CHANGES-v3.md
 - 2026-09-05T04:24+0800 [FACT/facts] <deck-v2> `v3守卫空转已修` — check_deck_v3 曾对全组化导出件 0页0字仍报PASS;加组递归(484框/12920字)+紧缩空间匹配(88框含\x0b)+备注扫描(20页)+几何按几何内容认条+空转自检;v2 未动 · ref: /Users/gl/tzb-deliverables/ppt-v3/tools/check_deck_v3.py
 - 2026-09-05T04:25+0800 [FACT/facts] <tzb-fe> `guard.v3_recursion_and_idle_check` — v3 守卫修好(tzb-55 04:2x):组递归后扫 484 框/12920 字 PASS 0 项;原守卫对导出件空转(0 框仍 PASS)→加'0 文本框即 FAIL'空转自检;备注纳入禁写;三条负例验;批报告筛查与 v2.1 守卫同补空转自检 · ref: /Users/gl/tzb-deliverables/ppt-v3/tools/check_deck_v3.py
@@ -2786,3 +2788,7 @@
 - 2026-09-05T04:30+0800 [FACT/facts] <deck-v2> `三工具空转自检` — v2守卫(只数页面字,备注不算)+报告筛查(空稿/空源/有图标记却零图体)各加空转自检,均负例验过;第一版两条自检自己是空转的,已修 · ref: /Users/gl/tzb-deliverables/report-v1/tools/screen_report.py
 - 2026-09-05T04:31+0800 [FACT/facts] <report-zh-v1> `report.zh_v2_draft2` — 报告第二稿 04:31 版:S0 验收三例+v21 轮次已填,2.57 mm 带包内回执路径;筛查 PASS(807 数未命中 0,禁写 0);仅剩默认执行器 v17/v21【待裁】一句(5.1、附录B)与红色轮细节 · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.pdf
 - 2026-09-05T04:31+0800 [FACT/facts] <tzb-fe> `report.v2_screen_pass_0431` — 报告 04:31 重建:2.57 mm 带包内路径与字段,复筛 807 数命中 798/归一 9/未命中 0,禁写 0 PASS;红色轮细节已发作者;仅剩默认执行器一句待裁(等发散保护三轮复跑) · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.pdf
+- 2026-09-05T04:33+0800 [FACT/facts] <m2c-exec> `servo-divergence-guard` — 伺服发散保护已落 v21(builder 第9-14处):首次迭代跟踪误差>50mm 或迭代间增大即停 HALTED_APPROACH_DID_NOT_CONVERGE,不施修正/不下发/不闭合;新 v21 sha 03ef4cea;94 tests · ref: /Users/gl/tzb-deliverables/judge-package-v1/agent/executor/resident/SHA256SUMS-v21.txt
+- 2026-09-05T04:33+0800 [FACT/facts] <m2c-exec> `v21-receipt-identity-and-gate-wording` — v21 新增 envelope_consumption.consumed_by_executor_identity(consume 是 spliced 段不可改,故加在调用点;磁盘 nonce 文件仍只有 v15);grasp_gate.why 改为本轮实测
+- 2026-09-05T04:33+0800 [FACT/facts] <report-zh-v1> `report.zh_v2_draft2` — 报告第二稿 04:32 版:红色轮细节(v21,ATTACH 断言失败、近基座不可达)已填;筛查 832 数未命中 7(待 tzb-56 指源);仅剩默认执行器 v17/v21【待裁】一句 · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.pdf
+- 2026-09-05T04:34+0800 [FACT/facts] <deck-v2> `v21三轮入NUMBERS-Z2` — NUMBERS-v2 加 Z2 节(v21 紫/青/红三轮,报告用未上deck,label自述不计入冻结campaign);口述三处出入按回执改:3.5867→3.5868、98.28是伺服首拍非对齐项、红色attach断言失败且撞邻件27.22mm非干净停止 · ref: /Users/gl/tzb-deliverables/ppt-v1/NUMBERS-v2.md
