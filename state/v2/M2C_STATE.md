@@ -1,5 +1,5 @@
 <!-- GENERATED — 禁止直接 Edit/Write。唯一写入口: tools/statectl.py -->
-<!-- statectl protocol=2 stream=M2C generation=1908 updated=2026-09-05T05:19+0800 -->
+<!-- statectl protocol=2 stream=M2C generation=1944 updated=2026-09-05T05:38+0800 -->
 <!-- 自 M2C_STATE.md 迁移 sha=9dc690524ad77e6d51964237f11ee107e23e3ae92398d19e3424eb0676648fc6 -->
 
 # M2C 权威状态(活跃快照,协议 v2)
@@ -205,11 +205,65 @@
 - `live_window.guard_overlay_restarted` — 05:11 loop lane 计划内重起:guard 叠层 3bd3f6e3 运行,step3 pose 未变,青轮完成 0.659 m 与切前逐位同;labserver pkg-next v21 同步到 03ef4cea;live_round.sh exit=2 为信息性管道 pipefail,已裁修 · ref: /Users/gl/tzb-lanes/coordinator-notes/delivery-checklist-20260904.md
 - `report.final_candidate_review` — 05:1x 审稿人核 05:04 版:阻断 G1(21 nm 单件值当全体,L502×2/L701)、G2(青回归轮 4.109 µm 写成 <4.1);建议 G3/G4/G5;五条全转 tzb-66,改完自查定稿不再过审 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-report-final-candidate.md
 - `readme-claim-boundary-v21-merged` — README §Claim boundary 已合入 v21 A 版口径(新 sha 405eec74);同时修 ground-truth 那条的 default v17→v21、重写 §Verification 那句过期 Net;negative-results 加紫柱躺倒一行;pkg 与 pkg-next 双份同步 · ref: /Users/gl/tzb-deliverables/judge-package-v1/README.md
-- `report.zh_v1_final` — 技术报告定稿 2026-09-05 05:18:report-v1/技术报告-XH-202607.md(061d4e45)+.pdf(6457d2c7,54页);终审 G1–G5 与紫色躺倒/OQ24 已改;筛查 PASS(883 数未命中 0 禁写 0);占位 0;tzb-56 裁不再过审 · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.pdf
-- `review.index` — 审查线 R1–R14 及报告/包开箱核对全文在 /Users/gl/tzb-lanes/review-zh-v1/(findings-*.md);历史 review.* 条目已归档 state/v2/archive/M2C_STATE-retired-20260905T0519-gen1906.md
+- `report.zh_v1_final` — 技术报告定稿 05:31:md 4c38f395 / pdf 46873d50,54 页,三处30.2mm措辞已与deck同口径,筛查 PASS;此后不再动 · ref: /Users/gl/tzb-lanes/report-zh-v1/LANE-NOTES.md
+- `review.index` — 审查线全部记录索引:/Users/gl/tzb-lanes/review-zh-v1/INDEX.md(63 行,含活项 U1–U6 与终包开箱清单 next-cut-checklist.md);历史 review.* 条目在 state/v2/archive/ 退役文件 · ref: /Users/gl/tzb-lanes/review-zh-v1/INDEX.md
 - `state.compaction_20260905` — 05:3x 语义压缩:gen1906 全量快照归档 state/v2/archive/M2C_STATE-archive-20260905T0519-gen1906.md(sha bda9221bfb10f6a0…),退役条目按小节存 state/v2/archive/M2C_STATE-retired-20260905T0519-gen1906.md;退役≠完成,journal 未动
 
 - `state.compaction_result_20260905` — 压缩后活跃文件约 84 KB(前 426 KB,4.9×);§1 198 条/§2 4/§3 40/§4 7;退役 1161 条在 archive/ retired 文件;演练与脚本在 coordinator-notes/state-compaction-dryrun-20260905.md · ref: /Users/gl/tzb-lanes/coordinator-notes/state-compaction-dryrun-20260905.md
+
+- `Z3-v21最终字节三轮` — NUMBERS-v2:444-475 加 Z3(v21 03ef4cea 三轮)与 Z4(v17 五轮 3.5867);紫柱落位躺倒 89.999 已自算复现两轮;25mm离格底=姿态非深度(两轮独立指向 Ø10.40x60.40);425 行加轮次身份注记 · ref: /Users/gl/tzb-deliverables/ppt-v1/NUMBERS-v2.md
+
+- `default-executor-now-v21-confirmed` — 默认已切v21并确认(不设EXECUTOR跑评委原样命令):五处证据齐,含v17不写的v21_target_resolution块;身份sha 03ef4cea · ref: cold-install-chxy-v1/receipts/v21-default-confirm/
+
+- `deck_v3.z3_applied` — deck v3 P07/P04 已按 NUMBERS-v2 Z3 行更新(Z3 三轮 + Z2 修复前对照),守卫 PASS 0;pptx 53485e68 pdf 41fa4dd5;细节见 CHANGES-v3.md · ref: /Users/gl/tzb-deliverables/ppt-v3/CHANGES-v3.md
+
+- `deck_v3.review_tzb55_pass` — tzb-55 独立复核 deck v3 pptx 53485e68:守卫 PASS 0(507 框),Z3/Z2 写法与位移零命中逐条核过,无待改;记录见 CHANGES-v3.md 外部复核节 · ref: /Users/gl/tzb-deliverables/ppt-v3/CHANGES-v3.md
+
+- `delivery.report_and_deck_final_20260905` — 05:22 报告二次定稿 md 8b47e64e/pdf 713c028b(54 页,筛查 PASS);05:3x deck v3 pptx 53485e68/pdf 41fa4dd5 按 NUMBERS-v2 Z3 行改 P07/P04,审稿人核中;NUMBERS-v2 Z3 行 460–467/475 · ref: /Users/gl/tzb-deliverables/ppt-v1/NUMBERS-v2.md
+
+- `oq25-and-landing-height-wording` — OQ25 紫柱躺倒已记(三轮两台机,故意不修);negative-results 与 README 的"离池底"改为"声明平面偏移"(该平面比真实支承面高 9.65mm);使用说明 U4 补 ISAAC_IMAGE 注释 · ref: /Users/gl/tzb-deliverables/judge-package-v1/docs/open-questions.md
+
+- `pkg.v21_default_confirm_in_package` — tzb-b9 默认路径确认轮(exit 0/321 s,identity 03ef4cea,v21_target_resolution 块)脱敏入包 rounds/v21-default-confirm-20260905(13 文件)+ README 342 行 + 报告副本;等拒绝轮后重出终包 · ref: /Users/gl/tzb-deliverables/judge-package-v1/evidence/verification-20260904/chxy-cold-install/rounds/v21-default-confirm-20260905
+
+- `correction.cell_floor_offset_not_radius` — 更正(05:4x):5.198/30.2 mm 是相对声明格底平面的偏移非净空(真实支承面低 9.65 mm),柱 Ø≈29.7×79.7;'感知半径高估 2.8 倍'撤;README 6efb1d39→bcdd7c8c;报告/deck/NUMBERS 466 改中 · ref: /Users/gl/tzb-deliverables/judge-package-v1/docs/open-questions.md
+
+- `report.zh_v1_final_20260905` — 05:27 报告三次定稿 md 4e34de23/pdf 120a36ca(54 页):2.8 倍句删、离格底改为相对声明平面偏移口径,grep 半径|半高|5.198|14.645 0 命中;筛查 PASS 0 项;此后只等用户 · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.md
+
+- `466行更正撤高估` — NUMBERS-v2:467 撤回'感知半径高估2.8倍'(我把 height_above_cell_floor 当成从真实支承面量起);柱实为 Ø29.7x79.7,感知低估直径0.41/0.47mm;5.198/30.2 是相对声明平面0.47的偏移、真实支承面低9.65mm · ref: /Users/gl/tzb-deliverables/ppt-v1/NUMBERS-v2.md
+
+- `cardpoint31-refusal-round-verified` — 卡点31复验通过:S0拒绝 exit 0、stderr有NOT DISPATCHED、[ok]非[FAIL]、nonce 17→17未耗;outcome 无 refused_at 键,S0事实由 disposition 与 s3 承载 · ref: cold-install-chxy-v1/receipts/s0-refusal-exit0/
+
+- `finding-34-double-not-dispatched` — 卡点34[低]:一次S0拒绝在stderr打两行NOT DISPATCHED,两码不一致(run_demo.py:1285带S0_前缀/:1293不带),首行悬空--;归demo lane · ref: cold-install-chxy-v1/receipts/s0-refusal-exit0/57-s0-refusal.err
+
+- `review.deck-v3` — deck v3(53485e68/41fa4dd5)核:1条阻断D1(P02三句验收括注把拒绝原因写成'最左边不是注册颜色词',回执是REFUSE_UNREGISTERED_DESTINATION);P07四行表12个数对上Z3、禁写0项、备注齐;重建后按新sha再核 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-deck-v3.md
+
+- `deck_v3.candidate_164d1b38` — deck v3 定稿候选重建:P07 三处改'相对声明格底平面 +N mm'(tzb-56 裁,账本 466 行同步),守卫 PASS 0;pptx 164d1b38 pdf 7cee4b64;sha 已发 tzb-56/tzb-95(审稿) · ref: /Users/gl/tzb-deliverables/ppt-v3/CHANGES-v3.md
+
+- `delivery.deck_v3_rebuilt_20260905` — 05:3x deck v3 重建 pptx 164d1b38/pdf 7cee4b64(P07 三处改'相对声明格底平面 +x mm',守卫 PASS),已交 tzb-95 核;NUMBERS-v2 461–467 改口(466 柱 Ø≈29.7×79.7、467 感知直径低估≈1.5%) · ref: /Users/gl/tzb-deliverables/ppt-v3/CHANGES-v3.md
+
+- `pkg.readme_cell_floor_wording` — README §Verification 三处'x mm above the cell floor'改为 height_above_cell_floor_m 偏移口径(非净空),README bcdd7c8c→cad2b5cf;待拒绝轮 r2 行加入后再让 demo lane 同步 chxy · ref: /Users/gl/tzb-deliverables/judge-package-v1/README.md
+
+- `kadian-34-single-not-dispatched` — 卡点34已修:S0 拒绝时跳过 executor 那条 NOT DISPATCHED、detail 空不打悬空 --;两处共用同一 refused_at_s0 判据;run_demo 73af14fe;95 tests;新测试对旧码复现两行 · ref: /Users/gl/tzb-deliverables/judge-package-v1/agent/run_demo.py
+
+- `deck_v3.review_d1_fixed` — tzb-95 审稿 D1(P02 拒绝原因括注)+2 非阻断已改,deck v3 重建 pptx fd607d1d pdf 487ba5d5,守卫 PASS 0,待 tzb-95 按新 sha 复核;记录见 CHANGES-v3.md 审稿复核节 · ref: /Users/gl/tzb-deliverables/ppt-v3/CHANGES-v3.md
+
+- `pkg.kadian34_fixed` — 卡点 34(S0 拒绝 stderr 两行 NOT DISPATCHED 码不同)已修:run_demo.py 73af14fe 两处按 refused_at_s0 互斥,新测试 test_s0_refusal_exit_code_v1(95 passed),三处同步;tzb-b9 重跑拒绝轮 r2 中 · ref: /Users/gl/tzb-deliverables/judge-package-v1/tests/test_s0_refusal_exit_code_v1.py
+
+- `deck_v3.candidate_1bb70b2d` — deck v3 候选重建(审稿追加 17 nm 整轮口径):pptx 1bb70b2d pdf b0c0c73c,守卫 PASS 0;待 tzb-95 按新 sha 复核;记录见 CHANGES-v3.md · ref: /Users/gl/tzb-deliverables/ppt-v3/CHANGES-v3.md
+
+- `review.deck-v3-pass` — deck v3 重建版 pptx 1bb70b2d/pdf b0c0c73c 复核 PASS:D1括注、P07边界句、离格底三处改口、整轮口径全部落实;22个Z3数字仍在;禁写+旧措辞页面与备注0命中;µm渲染渲图核过 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-deck-v3.md
+
+- `deck_v3.review_pass` — tzb-95 复核 deck v3 PASS 无阻断:pptx 1bb70b2d pdf b0c0c73c;整改三条落实,禁写 0 命中,Z3 22 数在;候选定稿,deck-v3 无待办;记录 CHANGES-v3.md + review-zh-v1/findings-deck-v3.md · ref: /Users/gl/tzb-deliverables/ppt-v3/CHANGES-v3.md
+
+- `delivery.deck_v3_final_20260905` — 05:5x deck v3 定稿 pptx 1bb70b2d/pdf b0c0c73c:审稿人 PASS(D1 P02 拒绝原因、离格底三处偏移口径、17 nm 整轮、禁写 0 命中);报告终稿 md 4c38f395/pdf 46873d50 审稿人做双向措辞搜索中 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-deck-v3.md
+
+- `cardpoint34-r2-verified` — 卡点34复跑通过:stderr NOT DISPATCHED 恰一行、无悬空--、S0_前缀码不再上终端、exit0、nonce17→17;回执字段未动(executor.reason_code仍S0_前缀) · ref: cold-install-chxy-v1/receipts/s0-refusal-exit0-r2/
+
+- `refused-at-lives-in-trace` — 更正:refused_at="S0" 在 trace.json 里(不在 outcome.json);refusal trace 14键含 localizer_called=false、model_calls=0。终包写按 refused_at 可查成立,须指向 trace · ref: cold-install-chxy-v1/receipts/s0-refusal-exit0-r2/run-20260904T213643/trace.json
+
+- `refusal-trace-not-run-identifying` — 两轮拒绝的 trace.json 逐字节相同(22414c8e):不含时间戳或run id,单看一份无法判断出自哪轮,需靠 outcome.trace_path 或所在 run 目录定位
+
+- `review.report-final-4c38f395` — 报告终稿 md 4c38f395/pdf 46873d50 双向核查 PASS:旧措辞8项 md/pdf 各0命中,新措辞相对声明格底平面5处、净空2处 md/pdf 计数一致,抽样数字未动;仅1条非阻断建议(未给声明平面 0.47 m 与 9.65 mm 差值) · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-report-final-4c38f395.md
 
 ## 2. 归属与 lane
 - `lane.m2c_exec` — **M2C 执行会话**:successor implementation candidate,commit-free,于全新隔离 clone(Q′ 模式);已登记候选路径内自由编辑(R132.41)。ETA(8/29 午报):交包 8/30 01:00–07:00;早沿(≤03:00)可达截止,晚沿不可达。
@@ -301,27 +355,28 @@
 - `task.q9_deliverables_20260905` — Q9 分工:②训练包 tzb-76 10:00;⑤技术报告 tzb-55 初稿12:00/定稿18:00;①⑥使用说明 demo lane 08:00;④视频用户录;审查逐件点名;终包 20:00 重出 · ref: /Users/gl/tzb-lanes/coordinator-notes/delivery-checklist-20260904.md
 - `task.deck_v3_pptmaster` — 用户(02:28):1 小时后让 tzb-63(sid f4a8adc2,角色 deck-v3)用 ppt-master 重做 PPT;简报 coordinator-notes/brief-deck-v3-pptmaster-20260905.md;03:28 定时发令;初稿 09:00/定稿 16:00 · ref: /Users/gl/tzb-lanes/coordinator-notes/brief-deck-v3-pptmaster-20260905.md
 - `task.gpt_final_review_bundle` — 用户(02:3x):派空闲会话打'不脱敏'的项目+状态审核包给 GPT Web Pro 终审(保留内网地址与路径;仍排除 .env/密钥/权重/图像/npy/output);交 tzb-76;用户去睡,夜间按 overnight 边界自主推进 · ref: /Users/gl/tzb-deliverables/review-v3/
-- `await-default-switch-then-confirm-round` — 等 demo lane 同步切默认 diff 后跑一轮确认(不设 EXECUTOR),核身份文件与回执证明默认已是v21,报回执路径给tzb-56;并在报告记"默认已切换"
 - `todo.archived_pre_delivery` — 8/29–9/4 的 42 条待办(建包/治理/S5/agent-demo v1–v3/HUD/v4 切换/RECOVER 等)已被 9/4–9/5 交付取代,未逐条核实完成,原文在 state/v2/archive/M2C_STATE-retired-20260905T0519-gen1906.md §4
 
+- `live-loop-open-items-ptr` — 直播窗口 lane 三项未结(不追):①我方驱动 exit0 端到端待下一轮真实运行②卡点30 未对失败样本证伪③发散保护行为未触发。紫柱倾倒已裁今日不修→OQ25(demo lane 写)
+
 ## 5. Recent tail(journal 缓存,非权威)
-- 2026-09-05T05:05+0800 [FACT/facts] <report-zh-v1> `report.zh_v2_draft2` — 报告 05:04 版为定稿候选(tzb-56 05:0x):占位 0、筛查 PASS、term-check 干净;18:00 前不再改除非新证据;17:05 起改版本行为定稿并写 report.zh_v1_final · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.pdf
-- 2026-09-05T05:07+0800 [FACT/facts] <m2c-exec> `v21-default-switched` — 默认已切 v21(diff 已应用,日期 2026-09-05);两份 manifest 重算并双侧验(主表15/15、v21表5/5);run_demo 卡点31 已同步 chxy;卡点33 记 open-questions 24 不改字节 · ref: /Users/gl/tzb-deliverables/judge-package-v1/agent/executor/resident/SHA256SUMS-v21.txt
-- 2026-09-05T05:09+0800 [FACT/facts] <deck-v3> `deck_v3.final_wording_applied` — deck v3 按 tzb-56 04:5x 口径改 P02/P04/P07+备注并重建,守卫 PASS 0。三处口述与 NUMBERS-v2 Z2 出入按账本写(红色 attach 失败非干净停止;邻件 27.22 mm;0.749/0.659 m 无出处未上页),已报 tzb-56 · ref: /Users/gl/tzb-deliverables/ppt-v3/CHANGES-v3.md
-- 2026-09-05T05:12+0800 [FACT/facts] <review-zh-v1> `review.report-final` — 报告定稿候选:2条阻断(v21-guard红轮邻件21nm是单件值、该轮最大1.06um;青轮'邻件<4.1um'实为4.109um不等号错)+3条一句话建议。S0三例与v21六轮逐字段核过、附录E.1与Z2逐位一致 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-report-final-candidate.md
-- 2026-09-05T05:13+0800 [EVENT] <m2c-exec> — 已切发散保护 v21(3bd3f6e3,基底03ef4cea自核);青色确认轮六基元完成、机位保持;紫柱系躺倒落地(89.999°)解释25mm;exit=2 定位为我驱动尾部信息管道+pipefail,未改待裁 · ref: receipts/live-window-v21-guard-switch-and-cyan-round-v1.json e6b187ce
-- 2026-09-05T05:13+0800 [FACT/facts] <deck-v3> `deck_v3.ruling_z3_pending` — tzb-56 裁:deck v3 三处按账本写法保留;Z2 红轮作修复前对照;待 tzb-55 录 NUMBERS-v2 Z3 行(v21-guard 最终字节 03ef4cea 三轮)后改 P07(必要时 P04)再重建守卫回 sha;0.749/0.659 m 不上页 · ref: /Users/gl/tzb-lanes/deck-v3/LANE_NOTES.md
-- 2026-09-05T05:15+0800 [FACT/facts] <exec-no-truth-v1> `cyan-residual-round-variation` — 青轮1.6mm残差差已定位为取帧感知差、非发散保护:两轮感知中心相差1.663mm、残差相差1.625mm几乎相等;原保留意见撤销,不需多跑轮 · ref: cold-install-chxy-v1/receipts/v21-guard/cyan/
-- 2026-09-05T05:15+0800 [FACT/facts] <exec-no-truth-v1> `purple-lands-lying-down` — 紫色是躺着落进格子的(落地后倾角89.99°),青色直立(0.002°),四轮复现;离格底5.2vs30.2mm是姿态差非深度差。放进格子≠直立地放进格子 · ref: cold-install-chxy-v1/cold-install-report-v1.md
-- 2026-09-05T05:15+0800 [FACT/facts] <exec-no-truth-v1> `finding-33-disposition` — 卡点33记入 docs/open-questions.md 第24条、故意不改字节:改它要重建v21,而三件事刚在03ef4cea上验完,为可读性换未验收字节不划算
-- 2026-09-05T05:15+0800 [FACT/facts] <exec-no-truth-v1> `red-worst-neighbour-shift` — 红轮邻件最差位移是cylinder_03的1.063µm(文档用最差值);cylinder_02 27.2mm→21nm是单根对照非全场最差
-- 2026-09-05T05:15+0800 [FACT/facts] <tzb-fe> `vnext.v21_default_applied` — 05:1x demo lane 默认执行器已切 v21(launch_resident 3b9a9649,双表重算,chxy 同步 15/15+5/5 OK);卡点33→OQ24 不改字节;guard 视口叠层 3bd3f6e3 落 labserver 未覆盖运行份 · ref: /Users/gl/tzb-lanes/coordinator-notes/README-claim-boundary-v21-draft-20260905.md
-- 2026-09-05T05:15+0800 [FACT/facts] <tzb-fe> `vnext.v21_guard_red_neighbour_correction` — 更正:v21-guard 红轮邻件位移最差 1.06 µm(cylinder_03),21 nm 仅 cylinder_02;README/CLAIMS15/checklist 已改;报告 L502/L701 与 deck 待改;紫柱落格但躺倒 89.999° 如实写 · ref: /Users/gl/tzb-deliverables/judge-package-v1/evidence/verification-20260904/chxy-cold-install/rounds/v21-guard-20260905/red/round-001/result-v17.json
-- 2026-09-05T05:15+0800 [FACT/facts] <tzb-fe> `live_window.guard_overlay_restarted` — 05:11 loop lane 计划内重起:guard 叠层 3bd3f6e3 运行,step3 pose 未变,青轮完成 0.659 m 与切前逐位同;labserver pkg-next v21 同步到 03ef4cea;live_round.sh exit=2 为信息性管道 pipefail,已裁修 · ref: /Users/gl/tzb-lanes/coordinator-notes/delivery-checklist-20260904.md
-- 2026-09-05T05:15+0800 [FACT/facts] <tzb-fe> `report.final_candidate_review` — 05:1x 审稿人核 05:04 版:阻断 G1(21 nm 单件值当全体,L502×2/L701)、G2(青回归轮 4.109 µm 写成 <4.1);建议 G3/G4/G5;五条全转 tzb-66,改完自查定稿不再过审 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-report-final-candidate.md
-- 2026-09-05T05:15+0800 [FACT/facts] <m2c-exec> `readme-claim-boundary-v21-merged` — README §Claim boundary 已合入 v21 A 版口径(新 sha 405eec74);同时修 ground-truth 那条的 default v17→v21、重写 §Verification 那句过期 Net;negative-results 加紫柱躺倒一行;pkg 与 pkg-next 双份同步 · ref: /Users/gl/tzb-deliverables/judge-package-v1/README.md
-- 2026-09-05T05:16+0800 [EVENT] <m2c-exec> — exit 码已修(live_round.sh eb58a809,|| true + return 0 + 头部说明);隔离验旧2新0,端到端未验;同步119条0删除;现场保持不动等用户
-- 2026-09-05T05:18+0800 [FACT/facts] <tzb-fe> `ruling.default_executor_v21` — 裁定(04:4x,05:2x 更正数字):默认执行器切 v21(03ef4cea 发散保护版)——三轮:红干净停止、邻件最差 1.06 µm(cylinder_03);紫/青六原语落格(紫躺倒);v17 随包可选;正式条目见 ruling.default_executor_v21_20260905 · ref: /Users/gl/tzb-lanes/coordinator-notes/v21-executor-change-list-20260905.md
-- 2026-09-05T05:18+0800 [FACT/facts] <report-zh-v1> `report.zh_v1_final` — 技术报告定稿 2026-09-05 05:18:report-v1/技术报告-XH-202607.md(061d4e45)+.pdf(6457d2c7,54页);终审 G1–G5 与紫色躺倒/OQ24 已改;筛查 PASS(883 数未命中 0 禁写 0);占位 0;tzb-56 裁不再过审 · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.pdf
-- 2026-09-05T05:19+0800 [EVENT/facts] <tzb-fe> `state.compaction_20260905` — 语义压缩执行:gen1906 快照归档 sha bda9221bfb10f6a0…;退役条目 1161 条另存;journal 未动 · ref: state/v2/archive/M2C_STATE-archive-20260905T0519-gen1906.md
-- 2026-09-05T05:19+0800 [FACT/facts] <tzb-fe> `state.compaction_result_20260905` — 压缩后活跃文件约 84 KB(前 426 KB,4.9×);§1 198 条/§2 4/§3 40/§4 7;退役 1161 条在 archive/ retired 文件;演练与脚本在 coordinator-notes/state-compaction-dryrun-20260905.md · ref: /Users/gl/tzb-lanes/coordinator-notes/state-compaction-dryrun-20260905.md
+- 2026-09-05T05:29+0800 [FACT/facts] <exec-no-truth-v1> `cardpoint31-refusal-round-verified` — 卡点31复验通过:S0拒绝 exit 0、stderr有NOT DISPATCHED、[ok]非[FAIL]、nonce 17→17未耗;outcome 无 refused_at 键,S0事实由 disposition 与 s3 承载 · ref: cold-install-chxy-v1/receipts/s0-refusal-exit0/
+- 2026-09-05T05:29+0800 [FACT/facts] <exec-no-truth-v1> `finding-34-double-not-dispatched` — 卡点34[低]:一次S0拒绝在stderr打两行NOT DISPATCHED,两码不一致(run_demo.py:1285带S0_前缀/:1293不带),首行悬空--;归demo lane · ref: cold-install-chxy-v1/receipts/s0-refusal-exit0/57-s0-refusal.err
+- 2026-09-05T05:29+0800 [FACT/facts] <review-zh-v1> `review.deck-v3` — deck v3(53485e68/41fa4dd5)核:1条阻断D1(P02三句验收括注把拒绝原因写成'最左边不是注册颜色词',回执是REFUSE_UNREGISTERED_DESTINATION);P07四行表12个数对上Z3、禁写0项、备注齐;重建后按新sha再核 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-deck-v3.md
+- 2026-09-05T05:29+0800 [FACT/facts] <deck-v3> `deck_v3.candidate_164d1b38` — deck v3 定稿候选重建:P07 三处改'相对声明格底平面 +N mm'(tzb-56 裁,账本 466 行同步),守卫 PASS 0;pptx 164d1b38 pdf 7cee4b64;sha 已发 tzb-56/tzb-95(审稿) · ref: /Users/gl/tzb-deliverables/ppt-v3/CHANGES-v3.md
+- 2026-09-05T05:30+0800 [TASK/task] <exec-no-truth-v1> `rerun-refusal-after-c34-fix` — 等 demo lane 修完卡点34同步后,原样再跑一次拒绝轮(同句、不设EXECUTOR),落 receipts/s0-refusal-exit0-r2/,验 NOT DISPATCHED 只剩一行、exit 0、nonce不耗,sha 报 tzb-56
+- 2026-09-05T05:30+0800 [FACT/facts] <tzb-fe> `delivery.deck_v3_rebuilt_20260905` — 05:3x deck v3 重建 pptx 164d1b38/pdf 7cee4b64(P07 三处改'相对声明格底平面 +x mm',守卫 PASS),已交 tzb-95 核;NUMBERS-v2 461–467 改口(466 柱 Ø≈29.7×79.7、467 感知直径低估≈1.5%) · ref: /Users/gl/tzb-deliverables/ppt-v3/CHANGES-v3.md
+- 2026-09-05T05:31+0800 [FACT/facts] <tzb-fe> `pkg.readme_cell_floor_wording` — README §Verification 三处'x mm above the cell floor'改为 height_above_cell_floor_m 偏移口径(非净空),README bcdd7c8c→cad2b5cf;待拒绝轮 r2 行加入后再让 demo lane 同步 chxy · ref: /Users/gl/tzb-deliverables/judge-package-v1/README.md
+- 2026-09-05T05:31+0800 [FACT/facts] <m2c-exec> `kadian-34-single-not-dispatched` — 卡点34已修:S0 拒绝时跳过 executor 那条 NOT DISPATCHED、detail 空不打悬空 --;两处共用同一 refused_at_s0 判据;run_demo 73af14fe;95 tests;新测试对旧码复现两行 · ref: /Users/gl/tzb-deliverables/judge-package-v1/agent/run_demo.py
+- 2026-09-05T05:32+0800 [FACT/facts] <deck-v3> `deck_v3.review_d1_fixed` — tzb-95 审稿 D1(P02 拒绝原因括注)+2 非阻断已改,deck v3 重建 pptx fd607d1d pdf 487ba5d5,守卫 PASS 0,待 tzb-95 按新 sha 复核;记录见 CHANGES-v3.md 审稿复核节 · ref: /Users/gl/tzb-deliverables/ppt-v3/CHANGES-v3.md
+- 2026-09-05T05:32+0800 [FACT/facts] <tzb-fe> `pkg.kadian34_fixed` — 卡点 34(S0 拒绝 stderr 两行 NOT DISPATCHED 码不同)已修:run_demo.py 73af14fe 两处按 refused_at_s0 互斥,新测试 test_s0_refusal_exit_code_v1(95 passed),三处同步;tzb-b9 重跑拒绝轮 r2 中 · ref: /Users/gl/tzb-deliverables/judge-package-v1/tests/test_s0_refusal_exit_code_v1.py
+- 2026-09-05T05:33+0800 [FACT/facts] <deck-v3> `deck_v3.candidate_1bb70b2d` — deck v3 候选重建(审稿追加 17 nm 整轮口径):pptx 1bb70b2d pdf b0c0c73c,守卫 PASS 0;待 tzb-95 按新 sha 复核;记录见 CHANGES-v3.md · ref: /Users/gl/tzb-deliverables/ppt-v3/CHANGES-v3.md
+- 2026-09-05T05:34+0800 [FACT/facts] <review-zh-v1> `review.deck-v3-pass` — deck v3 重建版 pptx 1bb70b2d/pdf b0c0c73c 复核 PASS:D1括注、P07边界句、离格底三处改口、整轮口径全部落实;22个Z3数字仍在;禁写+旧措辞页面与备注0命中;µm渲染渲图核过 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-deck-v3.md
+- 2026-09-05T05:34+0800 [FACT/facts] <report-zh-v1> `report.zh_v1_final` — 技术报告定稿 05:31:md 4c38f395 / pdf 46873d50,54 页,三处30.2mm措辞已与deck同口径,筛查 PASS;此后不再动 · ref: /Users/gl/tzb-lanes/report-zh-v1/LANE-NOTES.md
+- 2026-09-05T05:35+0800 [FACT/facts] <deck-v3> `deck_v3.review_pass` — tzb-95 复核 deck v3 PASS 无阻断:pptx 1bb70b2d pdf b0c0c73c;整改三条落实,禁写 0 命中,Z3 22 数在;候选定稿,deck-v3 无待办;记录 CHANGES-v3.md + review-zh-v1/findings-deck-v3.md · ref: /Users/gl/tzb-deliverables/ppt-v3/CHANGES-v3.md
+- 2026-09-05T05:35+0800 [FACT/facts] <tzb-fe> `delivery.deck_v3_final_20260905` — 05:5x deck v3 定稿 pptx 1bb70b2d/pdf b0c0c73c:审稿人 PASS(D1 P02 拒绝原因、离格底三处偏移口径、17 nm 整轮、禁写 0 命中);报告终稿 md 4c38f395/pdf 46873d50 审稿人做双向措辞搜索中 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-deck-v3.md
+- 2026-09-05T05:38+0800 [FACT/facts] <exec-no-truth-v1> `cardpoint34-r2-verified` — 卡点34复跑通过:stderr NOT DISPATCHED 恰一行、无悬空--、S0_前缀码不再上终端、exit0、nonce17→17;回执字段未动(executor.reason_code仍S0_前缀) · ref: cold-install-chxy-v1/receipts/s0-refusal-exit0-r2/
+- 2026-09-05T05:38+0800 [FACT/facts] <exec-no-truth-v1> `refused-at-lives-in-trace` — 更正:refused_at="S0" 在 trace.json 里(不在 outcome.json);refusal trace 14键含 localizer_called=false、model_calls=0。终包写按 refused_at 可查成立,须指向 trace · ref: cold-install-chxy-v1/receipts/s0-refusal-exit0-r2/run-20260904T213643/trace.json
+- 2026-09-05T05:38+0800 [FACT/facts] <exec-no-truth-v1> `refusal-trace-not-run-identifying` — 两轮拒绝的 trace.json 逐字节相同(22414c8e):不含时间戳或run id,单看一份无法判断出自哪轮,需靠 outcome.trace_path 或所在 run 目录定位
+- 2026-09-05T05:38+0800 [DONE/task] <exec-no-truth-v1> `rerun-refusal-after-c34-fix` — 完成 rerun-refusal-after-c34-fix
+- 2026-09-05T05:38+0800 [FACT/facts] <review-zh-v1> `review.report-final-4c38f395` — 报告终稿 md 4c38f395/pdf 46873d50 双向核查 PASS:旧措辞8项 md/pdf 各0命中,新措辞相对声明格底平面5处、净空2处 md/pdf 计数一致,抽样数字未动;仅1条非阻断建议(未给声明平面 0.47 m 与 9.65 mm 差值) · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-report-final-4c38f395.md
