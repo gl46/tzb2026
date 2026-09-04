@@ -1,5 +1,5 @@
 <!-- GENERATED — 禁止直接 Edit/Write。唯一写入口: tools/statectl.py -->
-<!-- statectl protocol=2 stream=M2C generation=1751 updated=2026-09-05T02:27+0800 -->
+<!-- statectl protocol=2 stream=M2C generation=1757 updated=2026-09-05T02:32+0800 -->
 <!-- 自 M2C_STATE.md 迁移 sha=9dc690524ad77e6d51964237f11ee107e23e3ae92398d19e3424eb0676648fc6 -->
 
 # M2C 权威状态(活跃快照,协议 v2)
@@ -2025,6 +2025,14 @@
 
 - `training-bundle-review-fixes` — 审查5条阻断改完,tar重打sha e669981e(旧0273a99a作废),599文件。T4显存标签错最重:设备级23.9/49.3GB而非8.45/9,硬件门槛差一量级,已改并加门槛句。 · ref: /Users/gl/tzb-deliverables/training-v1/training-bundle-v1/README-训练.md
 
+- `review.usage-doc` — 使用说明.md 命令核完:3条P0(L100用未注册的蓝色料筐→S0必拒;docker块引用.env/局部变量在裸壳为空;README-image-builds仍写v2 tag)+U4 ISAAC_IMAGE语义冲突等3条P1 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-usage-doc-v1.md
+
+- `report.zh_v1_draft1` — 技术报告初稿 v1 已写:report-v1/技术报告-XH-202607.md(约 45K 字)+ PDF 32 页;screen_report 仅余 2 项=冻结原话代码块(裁定豁免);留位 3 处(S0 验收、紫/红两轮);README 来源数字见 lane notes · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.md
+
+- `review.usage_doc_v1` — 审查使用说明 3P0+3P1(料筐、.env/CAPTURE 载入、镜像 tag v2 成环、ISAAC/CHAIN_IMAGE 语义、标定路径、SMOKE_EXPECT_MOTION);U1/2/5/6 交 demo lane,U3/U4 我已改 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-usage-doc-v1.md
+
+- `judge-path-s0-referring-expression-fix` — 评委路 S0 指称表达修复:复用冻结 live_entry_v5.decompose;start.sh/smoke06 去固定 cyan cylinder;新增 21 测试(共 60 过);已同步 chxy pkg 并在镜像内验通。 · ref: /Users/gl/tzb-deliverables/judge-package-v1/agent/run_demo.py
+
 ## 2. 归属与 lane
 - `lane.m2c_exec` — **M2C 执行会话**:successor implementation candidate,commit-free,于全新隔离 clone(Q′ 模式);已登记候选路径内自由编辑(R132.41)。ETA(8/29 午报):交包 8/30 01:00–07:00;早沿(≤03:00)可达截止,晚沿不可达。
 - `lane.tzb_fe` — **tzb-fe(协调)**:实现审查+七段治理批量激活(预告:批一 = R′ stage adoption→successor prereg→materialize→bootstrap;批二 = legacy P″ prefix adoption→recovery03→combined preflight;每步仍各自 pre-capture/记录/fail-closed,激活与 closeout 各批一次)。
@@ -2590,13 +2598,11 @@
 
 - `task.q9_deliverables_20260905` — Q9 分工:②训练包 tzb-76 10:00;⑤技术报告 tzb-55 初稿12:00/定稿18:00;①⑥使用说明 demo lane 08:00;④视频用户录;审查逐件点名;终包 20:00 重出 · ref: /Users/gl/tzb-lanes/coordinator-notes/delivery-checklist-20260904.md
 
+- `task.deck_v3_pptmaster` — 用户(02:28):1 小时后让 tzb-63(sid f4a8adc2,角色 deck-v3)用 ppt-master 重做 PPT;简报 coordinator-notes/brief-deck-v3-pptmaster-20260905.md;03:28 定时发令;初稿 09:00/定稿 16:00 · ref: /Users/gl/tzb-lanes/coordinator-notes/brief-deck-v3-pptmaster-20260905.md
+
+- `task.gpt_final_review_bundle` — 用户(02:3x):派空闲会话打'不脱敏'的项目+状态审核包给 GPT Web Pro 终审(保留内网地址与路径;仍排除 .env/密钥/权重/图像/npy/output);交 tzb-76;用户去睡,夜间按 overnight 边界自主推进 · ref: /Users/gl/tzb-deliverables/review-v3/
+
 ## 5. Recent tail(journal 缓存,非权威)
-- 2026-09-05T02:10+0800 [FACT/facts] <m2c-exec> `labonly-viewport-liveness-probe` — PING 8s 是病不是结构:重起后同代码 0.02s。8s=空转周期被拖慢;GIL 交接只解释倍数。1.616s 写入→应用亦为病中数。 · ref: /Users/gl/tzb-lanes/agent-demo-v3-isaac-rgbd/labonly-viewport-v1/PING-LATENCY-IS-NOT-A-HANG.md
-- 2026-09-05T02:11+0800 [FACT/facts] <deck-v2> `report-screen-ruling-applied` — 报告线禁写裁定已进 screen_report.py 覆盖层(规划/推理/智能体放行,闭环与位姿估计给否定豁免,校验统一);deck 表未动,正负例各复验 · ref: /Users/gl/tzb-deliverables/report-v1/tools/禁写清单-给报告作者.md
-- 2026-09-05T02:11+0800 [FACT/facts] <tzb-fe> `deliverable.training_bundle_v1` — Q9②训练包已出(tzb-76 02:1x):training-v1/training-bundle-v1.tar 572MB,591文件SHA全OK;代码/数据集206+326帧/adapter两版/日志/结果+勘误/中文README;无私网IP与key;勘误件已进评委包 env/s2-lora-v1/ · ref: /Users/gl/tzb-deliverables/training-v1/training-bundle-v1.tar.sha256
-- 2026-09-05T02:11+0800 [FACT/facts] <report-zh-v1> `report.zh_v1_started` — 技术报告 owner tzb-66 02:1x 开工:事实源读齐;PDF 路线 Markdown→HTML→Chrome headless(CJK 已验);tzb-55 旧稿改名为素材件仅查数;细节见 ref · ref: /Users/gl/tzb-lanes/report-zh-v1/LANE-NOTES.md
-- 2026-09-05T02:11+0800 [FACT/facts] <report-zh-v1> `ruling.report_terms_20260905` — tzb-fe 2026-09-05 02:1x 报告术语放行:任务规划/推理效率/智能体可用;闭环仅逐字句与否定;位姿估计仅否定式;安全陈述带范围;统一校验 · ref: /Users/gl/tzb-lanes/report-zh-v1/LANE-NOTES.md
-- 2026-09-05T02:12+0800 [FACT/facts] <tzb-fe> `report.screen_tool_ready` — 报告筛查工具就绪(tzb-55 02:1x):screen_report.py 以覆盖层落实六条裁定(放行规划/推理/智能体;闭环与位姿估计逐处判+否定豁免;禁通用/自主智能体、符号契约验证);正负例各验;禁写清单 93 行给 tzb-66;deck 不动 · ref: /Users/gl/tzb-deliverables/report-v1/tools/禁写清单-给报告作者.md
 - 2026-09-05T02:12+0800 [FACT/facts] <tzb-fe> `live_window.v17_restart_0209` — v17 02:09 重起后 PING 0.01–0.02 s(重起前 7–8 s),GPU1 空转 10%;'8 s 结构性延迟'结论撤回(秒级即病);pose 保持 step 3;空闲循环本就渲染,先前是 0.125 fps 幻灯片;等轮内 GPU 利用率 · ref: /var/tmp/labonly-viewport-v1/slowgpu-vnext-v17-20260904T180841Z.log
 - 2026-09-05T02:14+0800 [FACT/facts] <tzb-fe> `live_window.gpu_recovered` — v17 重起后闭环(02:13):轮内 GPU1 34–70%(重起前 4–5%),一轮 55 s(前 11 min 停滞),reset_verified +8.4 s,ALL_SIX;机位重贴 +8 ms = step 3;直播恢复实时;用户可录 · ref: /var/tmp/labonly-viewport-v1/
 - 2026-09-05T02:15+0800 [FACT/facts] <m2c-exec> `judge-package-usage-doc-zh` — docs/使用说明.md 写完(459 行/12 模块):bash 18 块 -n 全过、python -c 4 条 compile 全过,manifest 已加行;附录 B 列 7 条缺独立入口待裁。 · ref: /Users/gl/tzb-deliverables/judge-package-v1/docs/使用说明.md
@@ -2611,3 +2617,9 @@
 - 2026-09-05T02:26+0800 [FACT/facts] <tzb-fe> `discipline.varied_instructions` — 纪律(02:2x,用户指出后):评委路径'已验证'须至少三条不同指令(换物体/换目的地/应拒绝);管线图每步'谁在做'对代码核;README §Verification 已加说明;记忆已存 · ref: /Users/gl/.claude/projects/-Users-gl-tzb/memory/verify-with-varied-instructions.md
 - 2026-09-05T02:26+0800 [FACT/facts] <finetuned-live-v1> `training-bundle-review-fixes` — 审查5条阻断改完,tar重打sha e669981e(旧0273a99a作废),599文件。T4显存标签错最重:设备级23.9/49.3GB而非8.45/9,硬件门槛差一量级,已改并加门槛句。 · ref: /Users/gl/tzb-deliverables/training-v1/training-bundle-v1/README-训练.md
 - 2026-09-05T02:27+0800 [FACT/facts] <tzb-fe> `deliverable.training_bundle_v1` — 训练包重打(02:2x):599 文件 SHA 全 OK,tar 572MB,sha e669981e…(0273a99a 作废);5 阻断+2 来源不明全改(补两脚本、勘误索引+SUPERSEDED.json、显存/内存四行带出处、runs-ab3 步、推理峰值出处);待审查复核 · ref: /Users/gl/tzb-deliverables/training-v1/training-bundle-v1.tar.sha256
+- 2026-09-05T02:29+0800 [FACT/facts] <review-zh-v1> `review.usage-doc` — 使用说明.md 命令核完:3条P0(L100用未注册的蓝色料筐→S0必拒;docker块引用.env/局部变量在裸壳为空;README-image-builds仍写v2 tag)+U4 ISAAC_IMAGE语义冲突等3条P1 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-usage-doc-v1.md
+- 2026-09-05T02:30+0800 [TASK/task] <tzb-fe> `task.deck_v3_pptmaster` — 用户(02:28):1 小时后让 tzb-63(sid f4a8adc2,角色 deck-v3)用 ppt-master 重做 PPT;简报 coordinator-notes/brief-deck-v3-pptmaster-20260905.md;03:28 定时发令;初稿 09:00/定稿 16:00 · ref: /Users/gl/tzb-lanes/coordinator-notes/brief-deck-v3-pptmaster-20260905.md
+- 2026-09-05T02:31+0800 [FACT/facts] <report-zh-v1> `report.zh_v1_draft1` — 技术报告初稿 v1 已写:report-v1/技术报告-XH-202607.md(约 45K 字)+ PDF 32 页;screen_report 仅余 2 项=冻结原话代码块(裁定豁免);留位 3 处(S0 验收、紫/红两轮);README 来源数字见 lane notes · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.md
+- 2026-09-05T02:31+0800 [FACT/facts] <tzb-fe> `review.usage_doc_v1` — 审查使用说明 3P0+3P1(料筐、.env/CAPTURE 载入、镜像 tag v2 成环、ISAAC/CHAIN_IMAGE 语义、标定路径、SMOKE_EXPECT_MOTION);U1/2/5/6 交 demo lane,U3/U4 我已改 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-usage-doc-v1.md
+- 2026-09-05T02:31+0800 [TASK/task] <tzb-fe> `task.gpt_final_review_bundle` — 用户(02:3x):派空闲会话打'不脱敏'的项目+状态审核包给 GPT Web Pro 终审(保留内网地址与路径;仍排除 .env/密钥/权重/图像/npy/output);交 tzb-76;用户去睡,夜间按 overnight 边界自主推进 · ref: /Users/gl/tzb-deliverables/review-v3/
+- 2026-09-05T02:32+0800 [FACT/facts] <m2c-exec> `judge-path-s0-referring-expression-fix` — 评委路 S0 指称表达修复:复用冻结 live_entry_v5.decompose;start.sh/smoke06 去固定 cyan cylinder;新增 21 测试(共 60 过);已同步 chxy pkg 并在镜像内验通。 · ref: /Users/gl/tzb-deliverables/judge-package-v1/agent/run_demo.py

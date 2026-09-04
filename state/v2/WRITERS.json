@@ -82,7 +82,15 @@
       "current_session_id": "4035aaa0-8dee-4a6a-a143-a0fc28e20e18",
       "bound_by": "tzb-fe 2026-09-05 02:0x(用户开的会话,sid 由 sessions/90032.json 读出)",
       "note": "技术报告(Q9 第5项)撰写:写根 /Users/gl/tzb-deliverables/report-v1/ 与 tzb-lanes/report-zh-v1/;不写包、不写 CLAIMS;术语用领域常见中文词"
+    },
+    "deck-v3": {
+      "streams": [
+        "M2C"
+      ],
+      "current_session_id": "f4a8adc2-ded9-4f10-818e-01c41c053913",
+      "bound_by": "tzb-fe 2026-09-05 02:3x(用户开的会话,sid 由 sessions/95285.json 读出)",
+      "note": "deck v3(ppt-master 重做):写根 tzb-deliverables/ppt-v3/ 与 tzb-lanes/deck-v3/;不改 ppt-v1、评委包、CLAIMS;简报 coordinator-notes/brief-deck-v3-pptmaster-20260905.md"
     }
   },
-  "_amended_by": "tzb-fe 2026-08-30:绑定 tzb-fe / m2c-exec 两角色 | tzb-fe 2026-09-04:加 live-loop-v1(gen1282) | tzb-fe 2026-09-04 15:0x:加 exec-no-truth-v1、deck-v2 | tzb-fe 2026-09-04 15:5x:加 finetuned-live-v1 | tzb-fe 2026-09-04 16:0x:加 review-zh-v1 | tzb-fe 2026-09-05 02:0x:加 report-zh-v1"
+  "_amended_by": "tzb-fe 2026-08-30:绑定 tzb-fe / m2c-exec 两角色 | tzb-fe 2026-09-04:加 live-loop-v1(gen1282) | tzb-fe 2026-09-04 15:0x:加 exec-no-truth-v1、deck-v2 | tzb-fe 2026-09-04 15:5x:加 finetuned-live-v1 | tzb-fe 2026-09-04 16:0x:加 review-zh-v1 | tzb-fe 2026-09-05 02:0x:加 report-zh-v1 | tzb-fe 2026-09-05 02:3x:加 deck-v3"
 }
