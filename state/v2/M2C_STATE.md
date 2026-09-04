@@ -1,5 +1,5 @@
 <!-- GENERATED — 禁止直接 Edit/Write。唯一写入口: tools/statectl.py -->
-<!-- statectl protocol=2 stream=M2C generation=1827 updated=2026-09-05T04:13+0800 -->
+<!-- statectl protocol=2 stream=M2C generation=1828 updated=2026-09-05T04:14+0800 -->
 <!-- 自 M2C_STATE.md 迁移 sha=9dc690524ad77e6d51964237f11ee107e23e3ae92398d19e3424eb0676648fc6 -->
 
 # M2C 权威状态(活跃快照,协议 v2)
@@ -2131,6 +2131,8 @@
 
 - `report.draft2_screen` — 第二稿复筛(tzb-55):772 数命中 762/归一 9/未命中 1(2.966→裁 NUMBERS-v2 加一行);禁写 0;24 图题注与出处行全认,8 SVG 图内文字机筛 0 未命中,16 像素图只证有出处行;logs/ 不进源(会假命中) · ref: /Users/gl/tzb-deliverables/report-v1/tools/
 
+- `milestone.v21_purple_end_to_end` — 里程碑(04:1x):纯中文非青指令首次走到臂——v21 紫色 chxy 六原语落格(感知误差 2.57mm)与 labserver 直播轮 0.749 m 入箱(grasp_gate 过,邻件<6µm);红色 attach 断言失败;卡点 32 PING 自报 v17;切默认待青色 v21 轮 · ref: /Users/gl/tzb-lanes/live-loop-v1/receipts/live-window-v21-purple-round-dispatched-v1.json
+
 ## 2. 归属与 lane
 - `lane.m2c_exec` — **M2C 执行会话**:successor implementation candidate,commit-free,于全新隔离 clone(Q′ 模式);已登记候选路径内自由编辑(R132.41)。ETA(8/29 午报):交包 8/30 01:00–07:00;早沿(≤03:00)可达截止,晚沿不可达。
 - `lane.tzb_fe` — **tzb-fe(协调)**:实现审查+七段治理批量激活(预告:批一 = R′ stage adoption→successor prereg→materialize→bootstrap;批二 = legacy P″ prefix adoption→recovery03→combined preflight;每步仍各自 pre-capture/记录/fail-closed,激活与 closeout 各批一次)。
@@ -2706,7 +2708,6 @@
 - `live-loop-executor-target-prim-pin` — vnext_dispatch_executor_v17.py:75 TARGET_PRIM_PATH 硬钉 cylinder_06,非青指令一律 EXECUTOR_ERROR 且已花 nonce;归 demo lane/协调裁
 
 ## 5. Recent tail(journal 缓存,非权威)
-- 2026-09-05T03:52+0800 [FACT/facts] <tzb-fe> `executor.v21_sums_and_blocker31` — SHA256SUMS.txt 14/14 与 -v21 5/5 重算并同步 chxy;卡点 31 已修(S0 合法拒绝 exit 0 + NOT DISPATCHED 一行,3 测试,本地 83 过),run_demo.py 压着等 tzb-b9 紫/红跑完再推(同字节纪律);LC_ALL=C 数清单的教训再记一次 · ref: /Users/gl/tzb-deliverables/judge-package-v1/agent/executor/resident/SHA256SUMS.txt
 - 2026-09-05T03:54+0800 [FACT/facts] <tzb-fe> `ruling.relabel_3_04s` — 裁定(03:5x):'确定性各段合计 3.04 s'是错标签(含 S1/S2 模型时间,确定性 S3+S5 仅 0.045 s)→改标签不改数,四处同改(NUMBERS-v2、deck v2.1、报告、fig-latency);题注口径:需访问端点的只有 S0/S1/可选 S4,S2 本地视觉模型 · ref: /Users/gl/tzb/reports/CLAIMS-SHEET-20260904.md
 - 2026-09-05T03:54+0800 [FACT/facts] <m2c-exec> `v21-followups-prepared` — 备好未应用:launch_resident 切默认 v21 的 diff 与 README §Claim boundary 两版草稿(A 两轮过/B 任一轮未动),均在 coordinator-notes/,等 tzb-b9 结果与放行。 · ref: /Users/gl/tzb-lanes/coordinator-notes/README-claim-boundary-v21-draft-20260905.md
 - 2026-09-05T03:54+0800 [FACT/facts] <tzb-fe> `executor.v21_default_diff_and_readme_draft` — demo lane 备好未应用:launch_resident 切默认 v21 的 diff(含注释同改)与 README §Claim boundary 草稿 A/B 两版(不写 any object;拒绝不花 nonce 单说;身份看 v21_target_resolution),等 tzb-b9 紫/红结果后我裁 · ref: /Users/gl/tzb-lanes/coordinator-notes/README-claim-boundary-v21-draft-20260905.md
@@ -2726,3 +2727,4 @@
 - 2026-09-05T04:13+0800 [FACT/facts] <tzb-fe> `report.draft2_screen` — 第二稿复筛(tzb-55):772 数命中 762/归一 9/未命中 1(2.966→裁 NUMBERS-v2 加一行);禁写 0;24 图题注与出处行全认,8 SVG 图内文字机筛 0 未命中,16 像素图只证有出处行;logs/ 不进源(会假命中) · ref: /Users/gl/tzb-deliverables/report-v1/tools/
 - 2026-09-05T04:13+0800 [EVENT] <m2c-exec> — 首次:纯中文非青指令走通到臂。紫色轮 DISPATCH_COMPLETED_ALL_SIX_PRIMITIVES,cylinder_05 移动 0.749m 入料箱,grasp_gate 过,邻件位移<6um,ordinal 0 · ref: receipts/live-window-v21-purple-round-dispatched-v1.json
 - 2026-09-05T04:13+0800 [EVENT] <tzb-fe> — 04:13 第三轮探测:03:40 后各角色均有 journal 活动(report/finetuned/m2c-exec/exec-no-truth/review/deck-v2/deck-v3;live-loop 经消息在线),额度已恢复,无需顺延或改派;截止不变 · ref: /Users/gl/tzb/state/journal/M2C/2026-09-05.md
+- 2026-09-05T04:14+0800 [FACT/facts] <tzb-fe> `milestone.v21_purple_end_to_end` — 里程碑(04:1x):纯中文非青指令首次走到臂——v21 紫色 chxy 六原语落格(感知误差 2.57mm)与 labserver 直播轮 0.749 m 入箱(grasp_gate 过,邻件<6µm);红色 attach 断言失败;卡点 32 PING 自报 v17;切默认待青色 v21 轮 · ref: /Users/gl/tzb-lanes/live-loop-v1/receipts/live-window-v21-purple-round-dispatched-v1.json
