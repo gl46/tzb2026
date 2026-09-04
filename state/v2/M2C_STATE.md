@@ -1,5 +1,5 @@
 <!-- GENERATED — 禁止直接 Edit/Write。唯一写入口: tools/statectl.py -->
-<!-- statectl protocol=2 stream=M2C generation=1861 updated=2026-09-05T04:30+0800 -->
+<!-- statectl protocol=2 stream=M2C generation=1864 updated=2026-09-05T04:31+0800 -->
 <!-- 自 M2C_STATE.md 迁移 sha=9dc690524ad77e6d51964237f11ee107e23e3ae92398d19e3424eb0676648fc6 -->
 
 # M2C 权威状态(活跃快照,协议 v2)
@@ -2121,7 +2121,7 @@
 
 - `deck.v2_1_relabel` — deck v2.1 出(03:58):只改 P9 那句→'除 S4 外各段 3.04 s(确定性 S3+S5 0.045 s)';守卫 0 项、pdf 晚于 pptx、无字体回退;NUMBERS-v2:236 已改;禁写表加'确定性各段';PENDING-v2.1.md 待办未随此版(归 v3) · ref: /Users/gl/tzb-deliverables/ppt-v1/xh-202607-deck-v2.1.pdf
 
-- `report.zh_v2_draft2` — 报告第二稿 04:22 版:S0 验收三例与 v21 紫/青轮次已填(表15后段、3.2.1、6.2、附录B、摘要);留【待裁】默认执行器 v17/v21 一句+红色轮细节;筛查 803 数未命中 1(2.57 待加源)禁写 0 · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.pdf
+- `report.zh_v2_draft2` — 报告第二稿 04:31 版:S0 验收三例+v21 轮次已填,2.57 mm 带包内回执路径;筛查 PASS(807 数未命中 0,禁写 0);仅剩默认执行器 v17/v21【待裁】一句(5.1、附录B)与红色轮细节 · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.pdf
 
 - `report.draft2_delivered` — 报告第二稿图文版(tzb-66 04:09):53 页 A4,24 图 22 表带题注与出处行,含 R1/R2/训练包指针/自家超参/3.04 s 改标签;待补三处(S0 验收、紫红两轮、附录 B 末行);审查 06:30 核图表出处;数字源加训练包 README · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.pdf
 
@@ -2184,6 +2184,10 @@
 - `sidecar-8571-keep` — 8571 基座侧车 judge-locany-base 保持运行(裁定 tzb-56 2026-09-05 再确认一次);给用户实时窗口用,不撤
 
 - `guard.idle_checks_added` — tzb-55:v2/v2.1 守卫与报告筛查各加空转自检(只数页面字、备注不算;图体按解析张数判),自检本身经负例验;报告新稿未命中 2.57 mm→裁 NUMBERS-v2 加 v21 三轮行(出处包内 v21-rerun-20260905) · ref: /Users/gl/tzb-deliverables/ppt-v1/NUMBERS-v2.md
+
+- `三工具空转自检` — v2守卫(只数页面字,备注不算)+报告筛查(空稿/空源/有图标记却零图体)各加空转自检,均负例验过;第一版两条自检自己是空转的,已修 · ref: /Users/gl/tzb-deliverables/report-v1/tools/screen_report.py
+
+- `report.v2_screen_pass_0431` — 报告 04:31 重建:2.57 mm 带包内路径与字段,复筛 807 数命中 798/归一 9/未命中 0,禁写 0 PASS;红色轮细节已发作者;仅剩默认执行器一句待裁(等发散保护三轮复跑) · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.pdf
 
 ## 2. 归属与 lane
 - `lane.m2c_exec` — **M2C 执行会话**:successor implementation candidate,commit-free,于全新隔离 clone(Q′ 模式);已登记候选路径内自由编辑(R132.41)。ETA(8/29 午报):交包 8/30 01:00–07:00;早沿(≤03:00)可达截止,晚沿不可达。
@@ -2762,9 +2766,6 @@
 - `await-servo-guard-then-3-rounds` — 等 demo lane 伺服发散保护同步后跑红/紫/青三轮并报 tzb-56;红期望 HALTED_APPROACH_DID_NOT_CONVERGE 干净停止、邻件不动。tzb-56 说它会叫我,不自己加轮
 
 ## 5. Recent tail(journal 缓存,非权威)
-- 2026-09-05T04:20+0800 [FACT/facts] <tzb-fe> `report.f1_fixed_values_sent` — 报告 F1 已修(04:19,出处行统一附录 C 前缀 D/L/P/T,复筛 PASS 775/766/0);已把 S0 三句验收与 v21 紫/青/红字段值发 tzb-66 填 3.2.1 与表 15;默认执行器句留待裁定 · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.pdf
-- 2026-09-05T04:21+0800 [FACT/facts] <m2c-exec> `kadian-32-ping-identity` — 卡点32已修:builder 加第8处替换,PING 自报 vnext_dispatch_executor_v21 + v21_baseline;结果文件名 result-v17.json 按 v15 parity 不改;新 v21 sha 8b2d45fd 前缀;85 tests pass · ref: /Users/gl/tzb-deliverables/judge-package-v1/agent/executor/resident/SHA256SUMS-v21.txt
-- 2026-09-05T04:21+0800 [FACT/facts] <m2c-exec> `red-attach-root-cause` — 红轮 cylinder_01 失败根因=接近位姿够不到(基座半径 0.232m,首次伺服残差 331mm/28度)+伺服无发散保护把目标甩到 1.07m 外;非抓取力学、非邻件碰撞、非目标解析 · ref: /Users/gl/tzb-lanes/cold-install-chxy-v1/receipts/v21-rerun/red/round-001/result-v17.json
 - 2026-09-05T04:22+0800 [FACT/facts] <report-zh-v1> `report.zh_v2_draft2` — 报告第二稿 04:22 版:S0 验收三例与 v21 紫/青轮次已填(表15后段、3.2.1、6.2、附录B、摘要);留【待裁】默认执行器 v17/v21 一句+红色轮细节;筛查 803 数未命中 1(2.57 待加源)禁写 0 · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.pdf
 - 2026-09-05T04:22+0800 [FACT/facts] <tzb-fe> `report.acceptance_filled` — 报告 04:22:3.2.1 三例与表 15 后 v21 段已填(引 L 直播回执),6.2 加第 7/8 条,附录 B 移位,摘要加句;筛查 803/793/未命中 1(2.57 mm 待 tzb-b9 v21 复跑回执入源);默认执行器句【待裁】 · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.pdf
 - 2026-09-05T04:23+0800 [FACT/facts] <deck-v3> `deck_v3.notes_enabled` — deck v3 讲者备注已启用并导出(20/20 页);守卫递归生效禁写 0 项;几何断言 32 项均为页脚/条组误报待 tzb-55 改;产物 pptx 8f69e890 pdf ba3770ff;待 12:00 定稿口径改 P02/P04/P07 · ref: /Users/gl/tzb-deliverables/ppt-v3/CHANGES-v3.md
@@ -2782,3 +2783,6 @@
 - 2026-09-05T04:28+0800 [TASK/task] <exec-no-truth-v1> `await-servo-guard-then-3-rounds` — 等 demo lane 伺服发散保护同步后跑红/紫/青三轮并报 tzb-56;红期望 HALTED_APPROACH_DID_NOT_CONVERGE 干净停止、邻件不动。tzb-56 说它会叫我,不自己加轮
 - 2026-09-05T04:28+0800 [FACT/facts] <exec-no-truth-v1> `sidecar-8571-keep` — 8571 基座侧车 judge-locany-base 保持运行(裁定 tzb-56 2026-09-05 再确认一次);给用户实时窗口用,不撤
 - 2026-09-05T04:30+0800 [FACT/facts] <tzb-fe> `guard.idle_checks_added` — tzb-55:v2/v2.1 守卫与报告筛查各加空转自检(只数页面字、备注不算;图体按解析张数判),自检本身经负例验;报告新稿未命中 2.57 mm→裁 NUMBERS-v2 加 v21 三轮行(出处包内 v21-rerun-20260905) · ref: /Users/gl/tzb-deliverables/ppt-v1/NUMBERS-v2.md
+- 2026-09-05T04:30+0800 [FACT/facts] <deck-v2> `三工具空转自检` — v2守卫(只数页面字,备注不算)+报告筛查(空稿/空源/有图标记却零图体)各加空转自检,均负例验过;第一版两条自检自己是空转的,已修 · ref: /Users/gl/tzb-deliverables/report-v1/tools/screen_report.py
+- 2026-09-05T04:31+0800 [FACT/facts] <report-zh-v1> `report.zh_v2_draft2` — 报告第二稿 04:31 版:S0 验收三例+v21 轮次已填,2.57 mm 带包内回执路径;筛查 PASS(807 数未命中 0,禁写 0);仅剩默认执行器 v17/v21【待裁】一句(5.1、附录B)与红色轮细节 · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.pdf
+- 2026-09-05T04:31+0800 [FACT/facts] <tzb-fe> `report.v2_screen_pass_0431` — 报告 04:31 重建:2.57 mm 带包内路径与字段,复筛 807 数命中 798/归一 9/未命中 0,禁写 0 PASS;红色轮细节已发作者;仅剩默认执行器一句待裁(等发散保护三轮复跑) · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.pdf
