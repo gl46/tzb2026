@@ -1,5 +1,5 @@
 <!-- GENERATED — 禁止直接 Edit/Write。唯一写入口: tools/statectl.py -->
-<!-- statectl protocol=2 stream=M2C generation=1842 updated=2026-09-05T04:20+0800 -->
+<!-- statectl protocol=2 stream=M2C generation=1849 updated=2026-09-05T04:23+0800 -->
 <!-- 自 M2C_STATE.md 迁移 sha=9dc690524ad77e6d51964237f11ee107e23e3ae92398d19e3424eb0676648fc6 -->
 
 # M2C 权威状态(活跃快照,协议 v2)
@@ -2121,7 +2121,7 @@
 
 - `deck.v2_1_relabel` — deck v2.1 出(03:58):只改 P9 那句→'除 S4 外各段 3.04 s(确定性 S3+S5 0.045 s)';守卫 0 项、pdf 晚于 pptx、无字体回退;NUMBERS-v2:236 已改;禁写表加'确定性各段';PENDING-v2.1.md 待办未随此版(归 v3) · ref: /Users/gl/tzb-deliverables/ppt-v1/xh-202607-deck-v2.1.pdf
 
-- `report.zh_v2_draft2` — 报告第二稿(图文版)04:19 版:53 页 24 图 22 表;审查 F1(出处行根前缀)已修,筛查 PASS(775 数/未命中 0/禁写 0);待补 S0 验收+紫/红两轮(等 tzb-56 字段值) · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.pdf
+- `report.zh_v2_draft2` — 报告第二稿 04:22 版:S0 验收三例与 v21 紫/青轮次已填(表15后段、3.2.1、6.2、附录B、摘要);留【待裁】默认执行器 v17/v21 一句+红色轮细节;筛查 803 数未命中 1(2.57 待加源)禁写 0 · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.pdf
 
 - `report.draft2_delivered` — 报告第二稿图文版(tzb-66 04:09):53 页 A4,24 图 22 表带题注与出处行,含 R1/R2/训练包指针/自家超参/3.04 s 改标签;待补三处(S0 验收、紫红两轮、附录 B 末行);审查 06:30 核图表出处;数字源加训练包 README · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.pdf
 
@@ -2152,6 +2152,18 @@
 - `v21-red-failure-detail` — 红轮=干净带码停止非traceback:停在step3 attach断言后(step556),手指停39mm未合到33mm柱体;邻件cylinder_02位移27.2mm;花1枚nonce,ordinal_consumed=0 · ref: cold-install-chxy-v1/receipts/v21-rerun/red/round-001/result-v17.json
 
 - `report.f1_fixed_values_sent` — 报告 F1 已修(04:19,出处行统一附录 C 前缀 D/L/P/T,复筛 PASS 775/766/0);已把 S0 三句验收与 v21 紫/青/红字段值发 tzb-66 填 3.2.1 与表 15;默认执行器句留待裁定 · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.pdf
+
+- `kadian-32-ping-identity` — 卡点32已修:builder 加第8处替换,PING 自报 vnext_dispatch_executor_v21 + v21_baseline;结果文件名 result-v17.json 按 v15 parity 不改;新 v21 sha 8b2d45fd 前缀;85 tests pass · ref: /Users/gl/tzb-deliverables/judge-package-v1/agent/executor/resident/SHA256SUMS-v21.txt
+
+- `red-attach-root-cause` — 红轮 cylinder_01 失败根因=接近位姿够不到(基座半径 0.232m,首次伺服残差 331mm/28度)+伺服无发散保护把目标甩到 1.07m 外;非抓取力学、非邻件碰撞、非目标解析 · ref: /Users/gl/tzb-lanes/cold-install-chxy-v1/receipts/v21-rerun/red/round-001/result-v17.json
+
+- `report.acceptance_filled` — 报告 04:22:3.2.1 三例与表 15 后 v21 段已填(引 L 直播回执),6.2 加第 7/8 条,附录 B 移位,摘要加句;筛查 803/793/未命中 1(2.57 mm 待 tzb-b9 v21 复跑回执入源);默认执行器句【待裁】 · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.pdf
+
+- `deck_v3.notes_enabled` — deck v3 讲者备注已启用并导出(20/20 页);守卫递归生效禁写 0 项;几何断言 32 项均为页脚/条组误报待 tzb-55 改;产物 pptx 8f69e890 pdf ba3770ff;待 12:00 定稿口径改 P02/P04/P07 · ref: /Users/gl/tzb-deliverables/ppt-v3/CHANGES-v3.md
+
+- `defect.red_unreachable_servo_divergence` — 红色失败根因:cylinder_01 r_xy 0.232 m 近基座不可达,伺服无发散保护→失控挥动、撞动邻件 27 mm、attach 断言;紫/青 r≥0.35 成。裁:伺服发散保护现在做(v21 builder),可达带作启发不写常量,推荐词改青/品红/蓝,红/绿/橙标近基座区 · ref: /Users/gl/tzb-lanes/cold-install-chxy-v1/receipts/v21-rerun/
+
+- `deck.v3_rebuilt_0425` — deck v3 重建(04:25):讲者备注 20/20、Mac 字体 PDF 主件、加宽框保留;守卫组递归生效禁写 0,几何断言 32 项误报待 tzb-55 修;P02/P04/P07 等定稿口径 · ref: /Users/gl/tzb-deliverables/ppt-v3/CHANGES-v3.md
 
 ## 2. 归属与 lane
 - `lane.m2c_exec` — **M2C 执行会话**:successor implementation candidate,commit-free,于全新隔离 clone(Q′ 模式);已登记候选路径内自由编辑(R132.41)。ETA(8/29 午报):交包 8/30 01:00–07:00;早沿(≤03:00)可达截止,晚沿不可达。
@@ -2728,13 +2740,6 @@
 - `live-loop-executor-target-prim-pin` — vnext_dispatch_executor_v17.py:75 TARGET_PRIM_PATH 硬钉 cylinder_06,非青指令一律 EXECUTOR_ERROR 且已花 nonce;归 demo lane/协调裁
 
 ## 5. Recent tail(journal 缓存,非权威)
-- 2026-09-05T04:11+0800 [FACT/facts] <exec-no-truth-v1> `finding-32-ping-reports-intent` — 卡点32:v21:2216 PING 硬编码 executor=v17,stream/port 回显请求值(8555 实际未监听);身份文件正确,属控制口误报 · ref: cold-install-chxy-v1/receipts/v21-rerun/executor-identity-v1.json
-- 2026-09-05T04:12+0800 [FACT/facts] <exec-no-truth-v1> `finding-32-ping-reports-intent` — 卡点32改窄[低]:v21 下 PING 硬编码 executor=v17(:2216)、结果文件仍名 result-v17.json(:26/:2185);stream/port 取自环境是对的,前一版摘要写宽已作废 · ref: cold-install-chxy-v1/receipts/v21-rerun/executor-identity-v1.json
-- 2026-09-05T04:13+0800 [FACT/facts] <tzb-fe> `report.draft2_screen` — 第二稿复筛(tzb-55):772 数命中 762/归一 9/未命中 1(2.966→裁 NUMBERS-v2 加一行);禁写 0;24 图题注与出处行全认,8 SVG 图内文字机筛 0 未命中,16 像素图只证有出处行;logs/ 不进源(会假命中) · ref: /Users/gl/tzb-deliverables/report-v1/tools/
-- 2026-09-05T04:13+0800 [EVENT] <m2c-exec> — 首次:纯中文非青指令走通到臂。紫色轮 DISPATCH_COMPLETED_ALL_SIX_PRIMITIVES,cylinder_05 移动 0.749m 入料箱,grasp_gate 过,邻件位移<6um,ordinal 0 · ref: receipts/live-window-v21-purple-round-dispatched-v1.json
-- 2026-09-05T04:13+0800 [EVENT] <tzb-fe> — 04:13 第三轮探测:03:40 后各角色均有 journal 活动(report/finetuned/m2c-exec/exec-no-truth/review/deck-v2/deck-v3;live-loop 经消息在线),额度已恢复,无需顺延或改派;截止不变 · ref: /Users/gl/tzb/state/journal/M2C/2026-09-05.md
-- 2026-09-05T04:14+0800 [FACT/facts] <tzb-fe> `milestone.v21_purple_end_to_end` — 里程碑(04:1x):纯中文非青指令首次走到臂——v21 紫色 chxy 六原语落格(感知误差 2.57mm)与 labserver 直播轮 0.749 m 入箱(grasp_gate 过,邻件<6µm);红色 attach 断言失败;卡点 32 PING 自报 v17;切默认待青色 v21 轮 · ref: /Users/gl/tzb-lanes/live-loop-v1/receipts/live-window-v21-purple-round-dispatched-v1.json
-- 2026-09-05T04:15+0800 [FACT/facts] <deck-v2> `报告二稿复筛PASS` — 第二稿 772数 命中763/归一9/未命中0,禁写0,图表节0;加 training-README 为源;拒收 logs(grad_norm 2.9667 撞 2.966 rad);NUMBERS-v2 加出处 Z · ref: /Users/gl/tzb-deliverables/report-v1/tools/screen_report.py
 - 2026-09-05T04:15+0800 [FACT/facts] <deck-v3> `deck_v3.draft_exported` — deck v3 初稿已导出:ppt-master Default 路径,20 页原生 PPTX+PDF 落 ppt-v3/xh-202607-deck-v3.pptx/.pdf;final gate 0 错;守卫顶层 PASS 但导出器把根组打成 GROUP,守卫不递归,已用同表递归扫 PASS · ref: /Users/gl/tzb-deliverables/ppt-v3/xh-202607-deck-v3.pptx
 - 2026-09-05T04:15+0800 [FACT/facts] <tzb-fe> `report.draft2_screen` — 第二稿复筛 PASS(0 项):772 数命中 763/归一 9/未命中 0;NUMBERS-v2 A6 加 2.966 rad/0.53 mm/0.655 m 行(出处 Z);Y 补登记;v3 简报补充 §6 转 PENDING-v2.1 五项 · ref: /Users/gl/tzb-deliverables/ppt-v1/NUMBERS-v2.md
 - 2026-09-05T04:16+0800 [EVENT] <m2c-exec> — v21 青色回归轮无退步:六基元全完成,target cylinder_06,grasp_gate 过,位移 0.659m 入料箱,邻件<4.2um,ordinal 0;容器与机位保持不动待用户 · ref: receipts/live-window-v21-cyan-regression-round-v1.json
@@ -2748,3 +2753,10 @@
 - 2026-09-05T04:19+0800 [FACT/facts] <exec-no-truth-v1> `v21-red-failure-detail` — 红轮=干净带码停止非traceback:停在step3 attach断言后(step556),手指停39mm未合到33mm柱体;邻件cylinder_02位移27.2mm;花1枚nonce,ordinal_consumed=0 · ref: cold-install-chxy-v1/receipts/v21-rerun/red/round-001/result-v17.json
 - 2026-09-05T04:20+0800 [FACT/facts] <report-zh-v1> `report.zh_v2_draft2` — 报告第二稿(图文版)04:19 版:53 页 24 图 22 表;审查 F1(出处行根前缀)已修,筛查 PASS(775 数/未命中 0/禁写 0);待补 S0 验收+紫/红两轮(等 tzb-56 字段值) · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.pdf
 - 2026-09-05T04:20+0800 [FACT/facts] <tzb-fe> `report.f1_fixed_values_sent` — 报告 F1 已修(04:19,出处行统一附录 C 前缀 D/L/P/T,复筛 PASS 775/766/0);已把 S0 三句验收与 v21 紫/青/红字段值发 tzb-66 填 3.2.1 与表 15;默认执行器句留待裁定 · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.pdf
+- 2026-09-05T04:21+0800 [FACT/facts] <m2c-exec> `kadian-32-ping-identity` — 卡点32已修:builder 加第8处替换,PING 自报 vnext_dispatch_executor_v21 + v21_baseline;结果文件名 result-v17.json 按 v15 parity 不改;新 v21 sha 8b2d45fd 前缀;85 tests pass · ref: /Users/gl/tzb-deliverables/judge-package-v1/agent/executor/resident/SHA256SUMS-v21.txt
+- 2026-09-05T04:21+0800 [FACT/facts] <m2c-exec> `red-attach-root-cause` — 红轮 cylinder_01 失败根因=接近位姿够不到(基座半径 0.232m,首次伺服残差 331mm/28度)+伺服无发散保护把目标甩到 1.07m 外;非抓取力学、非邻件碰撞、非目标解析 · ref: /Users/gl/tzb-lanes/cold-install-chxy-v1/receipts/v21-rerun/red/round-001/result-v17.json
+- 2026-09-05T04:22+0800 [FACT/facts] <report-zh-v1> `report.zh_v2_draft2` — 报告第二稿 04:22 版:S0 验收三例与 v21 紫/青轮次已填(表15后段、3.2.1、6.2、附录B、摘要);留【待裁】默认执行器 v17/v21 一句+红色轮细节;筛查 803 数未命中 1(2.57 待加源)禁写 0 · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.pdf
+- 2026-09-05T04:22+0800 [FACT/facts] <tzb-fe> `report.acceptance_filled` — 报告 04:22:3.2.1 三例与表 15 后 v21 段已填(引 L 直播回执),6.2 加第 7/8 条,附录 B 移位,摘要加句;筛查 803/793/未命中 1(2.57 mm 待 tzb-b9 v21 复跑回执入源);默认执行器句【待裁】 · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.pdf
+- 2026-09-05T04:23+0800 [FACT/facts] <deck-v3> `deck_v3.notes_enabled` — deck v3 讲者备注已启用并导出(20/20 页);守卫递归生效禁写 0 项;几何断言 32 项均为页脚/条组误报待 tzb-55 改;产物 pptx 8f69e890 pdf ba3770ff;待 12:00 定稿口径改 P02/P04/P07 · ref: /Users/gl/tzb-deliverables/ppt-v3/CHANGES-v3.md
+- 2026-09-05T04:23+0800 [FACT/facts] <tzb-fe> `defect.red_unreachable_servo_divergence` — 红色失败根因:cylinder_01 r_xy 0.232 m 近基座不可达,伺服无发散保护→失控挥动、撞动邻件 27 mm、attach 断言;紫/青 r≥0.35 成。裁:伺服发散保护现在做(v21 builder),可达带作启发不写常量,推荐词改青/品红/蓝,红/绿/橙标近基座区 · ref: /Users/gl/tzb-lanes/cold-install-chxy-v1/receipts/v21-rerun/
+- 2026-09-05T04:23+0800 [FACT/facts] <tzb-fe> `deck.v3_rebuilt_0425` — deck v3 重建(04:25):讲者备注 20/20、Mac 字体 PDF 主件、加宽框保留;守卫组递归生效禁写 0,几何断言 32 项误报待 tzb-55 修;P02/P04/P07 等定稿口径 · ref: /Users/gl/tzb-deliverables/ppt-v3/CHANGES-v3.md
