@@ -1,5 +1,5 @@
 <!-- GENERATED — 禁止直接 Edit/Write。唯一写入口: tools/statectl.py -->
-<!-- statectl protocol=2 stream=M2C generation=1838 updated=2026-09-05T04:18+0800 -->
+<!-- statectl protocol=2 stream=M2C generation=1842 updated=2026-09-05T04:20+0800 -->
 <!-- 自 M2C_STATE.md 迁移 sha=9dc690524ad77e6d51964237f11ee107e23e3ae92398d19e3424eb0676648fc6 -->
 
 # M2C 权威状态(活跃快照,协议 v2)
@@ -2121,13 +2121,13 @@
 
 - `deck.v2_1_relabel` — deck v2.1 出(03:58):只改 P9 那句→'除 S4 外各段 3.04 s(确定性 S3+S5 0.045 s)';守卫 0 项、pdf 晚于 pptx、无字体回退;NUMBERS-v2:236 已改;禁写表加'确定性各段';PENDING-v2.1.md 待办未随此版(归 v3) · ref: /Users/gl/tzb-deliverables/ppt-v1/xh-202607-deck-v2.1.pdf
 
-- `report.zh_v2_draft2` — 技术报告第二稿(图文版)04:06 交:report-v1/技术报告-XH-202607.{md,pdf} 53 页,24 图/22 表带题注与出处;含 R1/R2、2.966 引回执、训练包指针、超参表;S0 验收与紫/红轮次仍【待补】 · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.pdf
+- `report.zh_v2_draft2` — 报告第二稿(图文版)04:19 版:53 页 24 图 22 表;审查 F1(出处行根前缀)已修,筛查 PASS(775 数/未命中 0/禁写 0);待补 S0 验收+紫/红两轮(等 tzb-56 字段值) · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.pdf
 
 - `report.draft2_delivered` — 报告第二稿图文版(tzb-66 04:09):53 页 A4,24 图 22 表带题注与出处行,含 R1/R2/训练包指针/自家超参/3.04 s 改标签;待补三处(S0 验收、紫红两轮、附录 B 末行);审查 06:30 核图表出处;数字源加训练包 README · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.pdf
 
 - `v21-rerun-purple-red` — v21 复跑:紫 cyl_05 六原语全成、落在登记格内、感知误差2.57mm;红 cyl_01 目标解析成功但 attach 断言失败(抓取几何未验证) · ref: cold-install-chxy-v1/receipts/v21-rerun/
 
-- `finding-32-ping-reports-intent` — 卡点32改窄[低]:v21 下 PING 硬编码 executor=v17(:2216)、结果文件仍名 result-v17.json(:26/:2185);stream/port 取自环境是对的,前一版摘要写宽已作废 · ref: cold-install-chxy-v1/receipts/v21-rerun/executor-identity-v1.json
+- `finding-32-ping-reports-intent` — 卡点32改判[中]:v21 运行时自述身份落后——nonce消费记录写v15(:1224)、PING写v17(:2216)、产物名result-v17、grasp_gate.why是常量(:1806);行为无误,溯源字符串错 · ref: cold-install-chxy-v1/receipts/v21-rerun/
 
 - `report.draft2_screen` — 第二稿复筛 PASS(0 项):772 数命中 763/归一 9/未命中 0;NUMBERS-v2 A6 加 2.966 rad/0.53 mm/0.655 m 行(出处 Z);Y 补登记;v3 简报补充 §6 转 PENDING-v2.1 五项 · ref: /Users/gl/tzb-deliverables/ppt-v1/NUMBERS-v2.md
 
@@ -2148,6 +2148,10 @@
 - `review.report_draft2` — 审查报告二稿:1 阻断 F1(出处行约半数路径未带附录 C 根前缀,evidence 同名 v20 回执易混)→tzb-66 逐条加前缀;四图数据/R1/R2/缺口/术语/留位全过 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-report-draft2-figures.md
 
 - `live_window.v21_cyan_regression` — labserver 青色回归轮 v21 通过(04:16):cylinder_06 六原语,位移 0.659 m 入格(离底 30.2 mm),grasp_gate 过,邻件<4.1µm;与紫色轮并列两点非成功率;现场保持不动 · ref: /Users/gl/tzb-lanes/live-loop-v1/receipts/live-window-v21-cyan-regression-round-v1.json
+
+- `v21-red-failure-detail` — 红轮=干净带码停止非traceback:停在step3 attach断言后(step556),手指停39mm未合到33mm柱体;邻件cylinder_02位移27.2mm;花1枚nonce,ordinal_consumed=0 · ref: cold-install-chxy-v1/receipts/v21-rerun/red/round-001/result-v17.json
+
+- `report.f1_fixed_values_sent` — 报告 F1 已修(04:19,出处行统一附录 C 前缀 D/L/P/T,复筛 PASS 775/766/0);已把 S0 三句验收与 v21 紫/青/红字段值发 tzb-66 填 3.2.1 与表 15;默认执行器句留待裁定 · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.pdf
 
 ## 2. 归属与 lane
 - `lane.m2c_exec` — **M2C 执行会话**:successor implementation candidate,commit-free,于全新隔离 clone(Q′ 模式);已登记候选路径内自由编辑(R132.41)。ETA(8/29 午报):交包 8/30 01:00–07:00;早沿(≤03:00)可达截止,晚沿不可达。
@@ -2724,10 +2728,6 @@
 - `live-loop-executor-target-prim-pin` — vnext_dispatch_executor_v17.py:75 TARGET_PRIM_PATH 硬钉 cylinder_06,非青指令一律 EXECUTOR_ERROR 且已花 nonce;归 demo lane/协调裁
 
 ## 5. Recent tail(journal 缓存,非权威)
-- 2026-09-05T04:03+0800 [FACT/facts] <tzb-fe> `deck.v2_1_relabel` — deck v2.1 出(03:58):只改 P9 那句→'除 S4 外各段 3.04 s(确定性 S3+S5 0.045 s)';守卫 0 项、pdf 晚于 pptx、无字体回退;NUMBERS-v2:236 已改;禁写表加'确定性各段';PENDING-v2.1.md 待办未随此版(归 v3) · ref: /Users/gl/tzb-deliverables/ppt-v1/xh-202607-deck-v2.1.pdf
-- 2026-09-05T04:06+0800 [FACT/facts] <report-zh-v1> `report.zh_v2_draft2` — 技术报告第二稿(图文版)04:06 交:report-v1/技术报告-XH-202607.{md,pdf} 53 页,24 图/22 表带题注与出处;含 R1/R2、2.966 引回执、训练包指针、超参表;S0 验收与紫/红轮次仍【待补】 · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.pdf
-- 2026-09-05T04:10+0800 [FACT/facts] <tzb-fe> `report.draft2_delivered` — 报告第二稿图文版(tzb-66 04:09):53 页 A4,24 图 22 表带题注与出处行,含 R1/R2/训练包指针/自家超参/3.04 s 改标签;待补三处(S0 验收、紫红两轮、附录 B 末行);审查 06:30 核图表出处;数字源加训练包 README · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.pdf
-- 2026-09-05T04:11+0800 [FACT/facts] <exec-no-truth-v1> `v21-rerun-purple-red` — v21 复跑:紫 cyl_05 六原语全成、落在登记格内、感知误差2.57mm;红 cyl_01 目标解析成功但 attach 断言失败(抓取几何未验证) · ref: cold-install-chxy-v1/receipts/v21-rerun/
 - 2026-09-05T04:11+0800 [FACT/facts] <exec-no-truth-v1> `finding-32-ping-reports-intent` — 卡点32:v21:2216 PING 硬编码 executor=v17,stream/port 回显请求值(8555 实际未监听);身份文件正确,属控制口误报 · ref: cold-install-chxy-v1/receipts/v21-rerun/executor-identity-v1.json
 - 2026-09-05T04:12+0800 [FACT/facts] <exec-no-truth-v1> `finding-32-ping-reports-intent` — 卡点32改窄[低]:v21 下 PING 硬编码 executor=v17(:2216)、结果文件仍名 result-v17.json(:26/:2185);stream/port 取自环境是对的,前一版摘要写宽已作废 · ref: cold-install-chxy-v1/receipts/v21-rerun/executor-identity-v1.json
 - 2026-09-05T04:13+0800 [FACT/facts] <tzb-fe> `report.draft2_screen` — 第二稿复筛(tzb-55):772 数命中 762/归一 9/未命中 1(2.966→裁 NUMBERS-v2 加一行);禁写 0;24 图题注与出处行全认,8 SVG 图内文字机筛 0 未命中,16 像素图只证有出处行;logs/ 不进源(会假命中) · ref: /Users/gl/tzb-deliverables/report-v1/tools/
@@ -2744,3 +2744,7 @@
 - 2026-09-05T04:18+0800 [FACT/facts] <tzb-fe> `deck.v3_draft1` — deck v3 初稿(tzb-63 04:15,ppt-master):20 页 PPTX+PDF,标题按变更 14,P09 已改标签;守卫因 GROUP 空转→tzb-55 加组递归,递归扫 484 框 0 项;裁:Mac 字体、PDF 主件、备注开、加宽框接受 · ref: /Users/gl/tzb-deliverables/ppt-v3/CHANGES-v3.md
 - 2026-09-05T04:18+0800 [FACT/facts] <tzb-fe> `review.report_draft2` — 审查报告二稿:1 阻断 F1(出处行约半数路径未带附录 C 根前缀,evidence 同名 v20 回执易混)→tzb-66 逐条加前缀;四图数据/R1/R2/缺口/术语/留位全过 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-report-draft2-figures.md
 - 2026-09-05T04:18+0800 [FACT/facts] <tzb-fe> `live_window.v21_cyan_regression` — labserver 青色回归轮 v21 通过(04:16):cylinder_06 六原语,位移 0.659 m 入格(离底 30.2 mm),grasp_gate 过,邻件<4.1µm;与紫色轮并列两点非成功率;现场保持不动 · ref: /Users/gl/tzb-lanes/live-loop-v1/receipts/live-window-v21-cyan-regression-round-v1.json
+- 2026-09-05T04:19+0800 [FACT/facts] <exec-no-truth-v1> `finding-32-ping-reports-intent` — 卡点32改判[中]:v21 运行时自述身份落后——nonce消费记录写v15(:1224)、PING写v17(:2216)、产物名result-v17、grasp_gate.why是常量(:1806);行为无误,溯源字符串错 · ref: cold-install-chxy-v1/receipts/v21-rerun/
+- 2026-09-05T04:19+0800 [FACT/facts] <exec-no-truth-v1> `v21-red-failure-detail` — 红轮=干净带码停止非traceback:停在step3 attach断言后(step556),手指停39mm未合到33mm柱体;邻件cylinder_02位移27.2mm;花1枚nonce,ordinal_consumed=0 · ref: cold-install-chxy-v1/receipts/v21-rerun/red/round-001/result-v17.json
+- 2026-09-05T04:20+0800 [FACT/facts] <report-zh-v1> `report.zh_v2_draft2` — 报告第二稿(图文版)04:19 版:53 页 24 图 22 表;审查 F1(出处行根前缀)已修,筛查 PASS(775 数/未命中 0/禁写 0);待补 S0 验收+紫/红两轮(等 tzb-56 字段值) · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.pdf
+- 2026-09-05T04:20+0800 [FACT/facts] <tzb-fe> `report.f1_fixed_values_sent` — 报告 F1 已修(04:19,出处行统一附录 C 前缀 D/L/P/T,复筛 PASS 775/766/0);已把 S0 三句验收与 v21 紫/青/红字段值发 tzb-66 填 3.2.1 与表 15;默认执行器句留待裁定 · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.pdf
