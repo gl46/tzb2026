@@ -1,5 +1,5 @@
 <!-- GENERATED — 禁止直接 Edit/Write。唯一写入口: tools/statectl.py -->
-<!-- statectl protocol=2 stream=M2C generation=1628 updated=2026-09-04T22:44+0800 -->
+<!-- statectl protocol=2 stream=M2C generation=1636 updated=2026-09-04T22:52+0800 -->
 <!-- 自 M2C_STATE.md 迁移 sha=9dc690524ad77e6d51964237f11ee107e23e3ae92398d19e3424eb0676648fc6 -->
 
 # M2C 权威状态(活跃快照,协议 v2)
@@ -1865,6 +1865,20 @@
 
 - `image-identity-two-hosts` — 判分包 v3 同 tag 两机各建一次:labserver dcbb16101162 / chxy 9de43b377bcb(同小时);与字体无关,字体经 bind mount 进容器,镜像内无 assets/无 CJK
 
+- `review.round20` — 最终审查6项:镜像重建归因与同目录对照件互斥+README写dcbb在两机(chxy回执自17:01皆9de43b);19:06行句子截断;dl-r7仅1候选框非消歧演示;账目缺谁跑的+5枚nonce仅3随包;LoRA缺n=40;launcher仍默认RTSP=1 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-round20-final.md
+
+- `ruling-rtsp-default-launcher` — 裁定(tzb-a1 2026-09-04):launch_resident.sh:31 RTSP 默认保持 1;start.sh chain 默认 0;README env 表两者都披露 · ref: cold-install-chxy-v1/cold-install-report-v1.md
+
+- `chxy-cold-install-smoke12` — chxy 冷装全 12 项(冷装 lane 执行):11 PASS/1 SKIP(12-stream:RTSP=0 无 8555)/0 FAIL;凭据 nonce ca1098d8…+round-008 · ref: cold-install-chxy-v1/receipts/smoke-all-20260904T223111/
+
+- `review.round20_closed` — 审查R20六项:F1镜像身份(未重建,save/load ID不同,字体走bind mount)F2断句F3 dl-r7仅1候选框(三框演示=预录trace)F4账目带执行者+五nonce齐F5 n=40/臂按不更差读 已改;F6 launcher默认1保持+披露(同源清单不动);live view行改未跑 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-round20-final.md
+
+- `review.round20_recheck` — 复核:F1关闭(bullet与对照件一致、fonts mtime 17:49对上、README:284已改)、F3关闭、F4关闭。新2项:dl-r7的163s包内无出处(可推159.62/155.19s)、4.3774其实在outcome.json的executor.notes里 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-round20-final.md
+
+- `deck-v2-final-pdf-2250` — v2 PDF 定稿 22:50:29(晚于 pptx 22:50:12),20页 PASS 零字体回退;dl-r7 帧龄4.35s上页、r4选框非规则已注明;223111 单轮 0 FAIL 存 NUMBERS · ref: /Users/gl/tzb-deliverables/ppt-v1/CHANGES-v2.md
+
+- `milestone.execute1_start_sh_chain` — 里程碑(22:45 chxy,tzb-b9):EXECUTE=1 scripts/start.sh chain 真执行——DISPATCHED/6指令/336s/帧龄4.44s/规则选框;无世界再确认;前提手工M2C_DATASET_ROOT+M2C_FRAME(open-questions 18,不今晚改);工件入包 · ref: /Users/gl/tzb-deliverables/judge-package-v1/evidence/verification-20260904/chxy-cold-install/rounds/execute1-start-sh-chain-20260904T144504/
+
 ## 2. 归属与 lane
 - `lane.m2c_exec` — **M2C 执行会话**:successor implementation candidate,commit-free,于全新隔离 clone(Q′ 模式);已登记候选路径内自由编辑(R132.41)。ETA(8/29 午报):交包 8/30 01:00–07:00;早沿(≤03:00)可达截止,晚沿不可达。
 - `lane.tzb_fe` — **tzb-fe(协调)**:实现审查+七段治理批量激活(预告:批一 = R′ stage adoption→successor prereg→materialize→bootstrap;批二 = legacy P″ prefix adoption→recovery03→combined preflight;每步仍各自 pre-capture/记录/fail-closed,激活与 closeout 各批一次)。
@@ -2427,14 +2441,6 @@
 - `task.end_to_end_composed_round` — 缺口(18:5x):尚无一轮'REPL指令→链路→盘上请求+信封→v17执行'合成实跑。桥=包内run_demo --execute→resident客户端→mint_envelope→8557(smoke 7)。v20两跑毕(~19:00)后loop lane重起取帧宿主跑一轮,回执end-to-end-v1 · ref: /Users/gl/tzb-lanes/live-loop-v1/receipts/end-to-end-composition-v1.json
 
 ## 5. Recent tail(journal 缓存,非权威)
-- 2026-09-04T22:25+0800 [FACT/facts] <finetuned-live-v1> `ab14-truth-rejudge-adopt` — 裁定b重判三条全过=ADOPT:cyan真值3.243->3.194mm更好,green柱在画面内基座漏检LoRA命中4px,零框0/70假阳0。RESULT-v2-judgement-v1前缀5b607a4b。采用门r6/r7未跑,仍默认基座。 · ref: /Users/gl/tzb-lanes/finetuned-live-path-v1/RESULT-v2-judgement-v1.md
-- 2026-09-04T22:25+0800 [FACT/facts] <finetuned-live-v1> `s2-lora-mountable-package` — 打包目录 tzb-lanes/finetuned-live-path-v1/mountable/s2-lora-v1 255MB 8文件校验全OK:派生入口fd833a52+adapter 9459f7b1+contract v4+SHA256SUMS+NVIDIA LICENSE+侧车逐字命令。OFL无对应物。 · ref: /Users/gl/tzb-lanes/finetuned-live-path-v1/mountable/s2-lora-v1/README.md
-- 2026-09-04T22:25+0800 [EVENT] <m2c-exec> — ISAAC 占用开始 chxy GPU0:dl-r7 合成一轮(颜色规则默认启用 + 请求 provenance 段 + bridge-receipt + outcome.json 首验)
-- 2026-09-04T22:30+0800 [EVENT] <m2c-exec> — ISAAC 占用结束 chxy GPU0:dl-r7 DISPATCHED(颜色规则身份已记、请求 provenance 被执行器接受、bridge-receipt+outcome.json 落盘);8/9/10 自足化后首次全 PASS
-- 2026-09-04T22:30+0800 [FACT/facts] <m2c-exec> `smoke-8-9-10-self-sufficient` — 8/9/10 改为包内自足(mint_envelope+_dispatch_probe),chxy 实测全 PASS:ENVELOPE_ALTERED/REQUEST_DIGEST_MISMATCH/NONCE_ALREADY_CONSUMED,0 指令、执行器仍活
-- 2026-09-04T22:31+0800 [FACT/facts] <finetuned-live-v1> `s2-lora-accepted-into-package` — tzb-a1 9/4验收:重判+打包接受,进包env/s2-lora-v1(8/8校验OK)为可选profile默认基座,采用门r6/r7未跑。延误不追。/var/tmp问题由包内副本解决。压缩归tzb-a1。本线收线。 · ref: /Users/gl/tzb-lanes/finetuned-live-path-v1/LANE_STATE.md
-- 2026-09-04T22:34+0800 [EVENT] <live-loop-v1> — 路线A收线:主轮取消(GPU0 让给评委路径 EXECUTE=1)。取帧宿主 22:33 已停,GPU0 占用结束回到143MiB、RAM回到41GB,v17 在GPU1未动。0 轮、0 nonce、0 ordinal;dispatch-v1 全程 ABSENT · ref: /Users/gl/tzb-lanes/live-loop-v1/receipts/end-to-end-v1.json
-- 2026-09-04T22:34+0800 [FACT/facts] <live-loop-v1> `route-a-outcome` — 路线A结果 READY_BUT_NOT_RUN:preflight 0 blocker、宿主起过并就绪,但主轮未跑。合成一轮仍未被本 lane 证明。回执 end-to-end-v1 (712a5b21ffba11cf) · ref: /Users/gl/tzb-lanes/live-loop-v1/receipts/end-to-end-v1.json
 - 2026-09-04T22:34+0800 [FACT/facts] <live-loop-v1> `route-a-request-handoff-gap` — 路线A下次重试前要先解决:链在Mac、执行器在labserver时,铸好的请求没有任何步骤送到执行器自己的盘上(RESIDENT_OUTPUT 须与容器 /m2c/output 同一宿主目录)。属代码阅读非实测 · ref: /Users/gl/tzb-lanes/live-loop-v1/receipts/end-to-end-v1.json
 - 2026-09-04T22:35+0800 [FACT/facts] <tzb-fe> `ruling.lora_v2_optional_profile_shipped` — LoRA第2次真值重判三条全过(ADOPT)→随包可选profile env/s2-lora-v1/(255MB,sha 8/8 OK),默认仍基座;采用门(LoRA侧车合成一轮)未跑不切默认;README边界/管线/Layout/manifest/negative-results/CLAIMS变更13已写;名字待用户 · ref: /Users/gl/tzb-deliverables/judge-package-v1/env/s2-lora-v1/README.md
 - 2026-09-04T22:35+0800 [FACT/facts] <tzb-fe> `ruling.lora_v2_optional_profile_shipped` — LoRA第2次真值重判三条全过→随包可选profile env/s2-lora-v1/(255MB,sha 8/8 OK),默认仍基座;采用门未跑不切默认;README/manifest/negative-results/CLAIMS变更13已写;名字待用户 · ref: /Users/gl/tzb-deliverables/judge-package-v1/env/s2-lora-v1/README.md
@@ -2447,3 +2453,11 @@
 - 2026-09-04T22:41+0800 [FACT/facts] <tzb-fe> `milestone.composed_round_dl_r7_and_full12` — 里程碑:dl-r7 DISPATCHED(规则身份+bridge-receipt帧龄4.35/30+outcome.json入工件);chxy 22:31全12项 11 PASS/1 SKIP/0 FAIL(8/9/10自足化);5枚nonce账目;镜像重建含字体 9de43b377bcb;全部入包README · ref: /Users/gl/tzb-deliverables/judge-package-v1/evidence/verification-20260904/chxy-cold-install/smoke-all-20260904T223111/smoke-all.json
 - 2026-09-04T22:44+0800 [FACT/facts] <tzb-fe> `milestone.composed_round_dl_r7_and_full12` — 更正:v3 同tag两机各建一次→ID不同(labserver dcbb16101162/chxy 9de43b377bcb),与字体无关(字体走bind mount);22:31全12项11 PASS/1 SKIP执行者待tzb-b9确认;dl-r7 DISPATCHED工件入包;5枚nonce账目 · ref: /Users/gl/tzb-deliverables/judge-package-v1/evidence/verification-20260904/IMAGE-IDENTITY.md
 - 2026-09-04T22:44+0800 [FACT/facts] <m2c-exec> `image-identity-two-hosts` — 判分包 v3 同 tag 两机各建一次:labserver dcbb16101162 / chxy 9de43b377bcb(同小时);与字体无关,字体经 bind mount 进容器,镜像内无 assets/无 CJK
+- 2026-09-04T22:45+0800 [FACT/facts] <review-zh-v1> `review.round20` — 最终审查6项:镜像重建归因与同目录对照件互斥+README写dcbb在两机(chxy回执自17:01皆9de43b);19:06行句子截断;dl-r7仅1候选框非消歧演示;账目缺谁跑的+5枚nonce仅3随包;LoRA缺n=40;launcher仍默认RTSP=1 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-round20-final.md
+- 2026-09-04T22:46+0800 [FACT/facts] <exec-no-truth-v1> `ruling-rtsp-default-launcher` — 裁定(tzb-a1 2026-09-04):launch_resident.sh:31 RTSP 默认保持 1;start.sh chain 默认 0;README env 表两者都披露 · ref: cold-install-chxy-v1/cold-install-report-v1.md
+- 2026-09-04T22:46+0800 [FACT/facts] <exec-no-truth-v1> `chxy-cold-install-smoke12` — chxy 冷装全 12 项(冷装 lane 执行):11 PASS/1 SKIP(12-stream:RTSP=0 无 8555)/0 FAIL;凭据 nonce ca1098d8…+round-008 · ref: cold-install-chxy-v1/receipts/smoke-all-20260904T223111/
+- 2026-09-04T22:46+0800 [EVENT] <exec-no-truth-v1> — EXECUTE=1 scripts/start.sh chain 单次:脚本自起 sidecar(8570/45s)、自 rm -f 重起 v17(host GPU0/8557/stream none) · ref: cold-install-chxy-v1/logs/seg2/29-execute-chain.log
+- 2026-09-04T22:48+0800 [FACT/facts] <tzb-fe> `review.round20_closed` — 审查R20六项:F1镜像身份(未重建,save/load ID不同,字体走bind mount)F2断句F3 dl-r7仅1候选框(三框演示=预录trace)F4账目带执行者+五nonce齐F5 n=40/臂按不更差读 已改;F6 launcher默认1保持+披露(同源清单不动);live view行改未跑 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-round20-final.md
+- 2026-09-04T22:50+0800 [FACT/facts] <review-zh-v1> `review.round20_recheck` — 复核:F1关闭(bullet与对照件一致、fonts mtime 17:49对上、README:284已改)、F3关闭、F4关闭。新2项:dl-r7的163s包内无出处(可推159.62/155.19s)、4.3774其实在outcome.json的executor.notes里 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-round20-final.md
+- 2026-09-04T22:51+0800 [FACT/facts] <deck-v2> `deck-v2-final-pdf-2250` — v2 PDF 定稿 22:50:29(晚于 pptx 22:50:12),20页 PASS 零字体回退;dl-r7 帧龄4.35s上页、r4选框非规则已注明;223111 单轮 0 FAIL 存 NUMBERS · ref: /Users/gl/tzb-deliverables/ppt-v1/CHANGES-v2.md
+- 2026-09-04T22:52+0800 [FACT/facts] <tzb-fe> `milestone.execute1_start_sh_chain` — 里程碑(22:45 chxy,tzb-b9):EXECUTE=1 scripts/start.sh chain 真执行——DISPATCHED/6指令/336s/帧龄4.44s/规则选框;无世界再确认;前提手工M2C_DATASET_ROOT+M2C_FRAME(open-questions 18,不今晚改);工件入包 · ref: /Users/gl/tzb-deliverables/judge-package-v1/evidence/verification-20260904/chxy-cold-install/rounds/execute1-start-sh-chain-20260904T144504/
