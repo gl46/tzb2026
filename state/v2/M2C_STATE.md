@@ -1,5 +1,5 @@
 <!-- GENERATED — 禁止直接 Edit/Write。唯一写入口: tools/statectl.py -->
-<!-- statectl protocol=2 stream=M2C generation=1788 updated=2026-09-05T03:28+0800 -->
+<!-- statectl protocol=2 stream=M2C generation=1791 updated=2026-09-05T03:43+0800 -->
 <!-- 自 M2C_STATE.md 迁移 sha=9dc690524ad77e6d51964237f11ee107e23e3ae92398d19e3424eb0676648fc6 -->
 
 # M2C 权威状态(活跃快照,协议 v2)
@@ -2071,6 +2071,10 @@
 
 - `s0.purple_round_slots_confirmed` — 紫色轮 preregistration.json 证实 S0 分槽:purple cylinder / blue bin / RELOCATE,colour_term 由英文短语规则取,目的地色词不入物体短语;注:规则注册色 15 vs 场景可达 9,黑/棕/灰/粉/白在铸造前拒 · ref: /Users/gl/tzb-lanes/live-loop-v1/receipts/live-window-s0-fix-purple-round-v1-addendum-v1.json
 
+- `deck_v3.takeover` — deck-v3 owner(tzb-63,sid f4a8adc2)03:28 接手:已读简报+补充、CLAIMS-0904、v2 全 20 页文本、check_deck_v3、术语表;ppt-master 完整性门 rc=0;路线=Generate PPTX Default;初稿 09:00 定稿 16:00 · ref: /Users/gl/tzb-lanes/coordinator-notes/brief-deck-v3-pptmaster-20260905.md
+
+- `review-v3-final-bundle-delivered` — 不脱敏GPT终审包已出:review-v3/final-review-bundle-20260905T0245(499文件/29MB,tar.gz 6.6MB sha 12f85317)。保留内网地址与绝对路径;排除密钥/权重/图像/视频;凭据扫描0命中,往返499/499。含REVIEW-BRIEF-FINAL.md · ref: /Users/gl/tzb-deliverables/review-v3/final-review-bundle-20260905T0245/REVIEW-BRIEF-FINAL.md
+
 ## 2. 归属与 lane
 - `lane.m2c_exec` — **M2C 执行会话**:successor implementation candidate,commit-free,于全新隔离 clone(Q′ 模式);已登记候选路径内自由编辑(R132.41)。ETA(8/29 午报):交包 8/30 01:00–07:00;早沿(≤03:00)可达截止,晚沿不可达。
 - `lane.tzb_fe` — **tzb-fe(协调)**:实现审查+七段治理批量激活(预告:批一 = R′ stage adoption→successor prereg→materialize→bootstrap;批二 = legacy P″ prefix adoption→recovery03→combined preflight;每步仍各自 pre-capture/记录/fail-closed,激活与 closeout 各批一次)。
@@ -2646,9 +2650,6 @@
 - `live-loop-executor-target-prim-pin` — vnext_dispatch_executor_v17.py:75 TARGET_PRIM_PATH 硬钉 cylinder_06,非青指令一律 EXECUTOR_ERROR 且已花 nonce;归 demo lane/协调裁
 
 ## 5. Recent tail(journal 缓存,非权威)
-- 2026-09-05T02:36+0800 [FACT/facts] <tzb-fe> `report.user_feedback_draft1` — 用户 02:3x 看报告初稿:'太烂,一点图没有,不像技术报告,去看网上同行怎么写';令 tzb-66 查同行技术报告结构,补十类图表(架构/流程/信任边界/场景与HUD截图/定位框/抓放对比/LoRA曲线/色相分布/时延/48例表),A4 排版带题注目录;第二稿 06:00,定稿 18:00 · ref: /Users/gl/tzb-deliverables/report-v1/
-- 2026-09-05T02:36+0800 [FACT/facts] <tzb-fe> `review.training_bundle_recut` — 训练包复核(e669981e):机械项全过;残留1阻断=§7'只有两件包外'与运行时矛盾(冻结入口硬校验4个包外文件、6入口写死ROOT、run_ab写死venv)。裁只补文档不改代码:执行环境约束段、§7实际件数、PROVENANCE对齐;tzb-76 08:00 重打 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-training-bundle-recut-v1.md
-- 2026-09-05T02:37+0800 [EVENT] <tzb-fe> — 用户 02:37:新会话走中转站、额度约 03:17 重置、任务可能中途终止;已设 03:19 探测(五条线发'继续任务+一行状态')与 03:43 复探(沉默者再发/改派);03:28 定时下达 deck v3 · ref: /Users/gl/tzb-lanes/coordinator-notes/delivery-checklist-20260904.md
 - 2026-09-05T02:37+0800 [FACT/facts] <deck-v2> `report-v1-screen-round1` — 报告初稿筛查:禁写 0 项(4.11 逐字句豁免锚在 CLAIMS-0903:145);数字 513 个 507 命中,5 项待裁(8192、2.97/0.53、两个引用年份);23 个数仅外源 · ref: /Users/gl/tzb-deliverables/report-v1/tools/screen_report.py
 - 2026-09-05T02:38+0800 [FACT/facts] <tzb-fe> `tests.judge_path_instruction_guard` — demo lane 加 5 条回归(start.sh 传参静态断言、假 docker 跑真 start.sh 断言指令回显、M2C_EXPRESSION 覆盖可见、不再写死 cyan、trace.instruction 逐字),回退即 2 failed;全套 65 过;已放行同步 chxy · ref: /Users/gl/tzb-deliverables/judge-package-v1/tests/test_judge_path_instruction_reaches_the_chain_v1.py
 - 2026-09-05T02:38+0800 [FACT/facts] <tzb-fe> `report.screen_results_draft1` — 报告初稿筛查(tzb-55):禁写 0 项;数字 513/507 命中,5 待裁→裁:加 serve-27b.md 与 live-demo.md 为源,2.97 改 2.966 引回执;豁免锚定受控源原句;deck v3 用 check_deck_v3(覆盖层)不用 v2 守卫 · ref: /Users/gl/tzb-deliverables/report-v1/tools/
@@ -2666,3 +2667,6 @@
 - 2026-09-05T02:48+0800 [EVENT] <m2c-exec> — 更正:S0 三键在链 trace 里是'不存在'非'null'(get() 不分缺键与 null);S0 记录在 preregistration.json;非青轮次停至 v21 · ref: receipts/live-window-s0-fix-purple-round-v1-addendum-v2-CORRECTION.json
 - 2026-09-05T03:19+0800 [EVENT] <tzb-fe> — 03:19 额度重置探测:七条线(tzb-66/tzb-76/demo lane/tzb-b9/loop lane/tzb-55/tzb-95)ListAgents 均在线,名字未变(按 sid 核);journal 02:48 后无新活动(疑额度耗尽);已各发'继续任务+一行状态';03:43 复探 · ref: /Users/gl/tzb/state/journal/M2C/2026-09-05.md
 - 2026-09-05T03:28+0800 [EVENT] <tzb-fe> — 03:28 定时:deck v3 任务已下达 tzb-63(sid f4a8adc2 核名无变),按简报用 ppt-master 重做,初稿 09:00 / 定稿 16:00,守卫 check_deck_v3,统一标题 · ref: /Users/gl/tzb-lanes/coordinator-notes/brief-deck-v3-pptmaster-20260905.md
+- 2026-09-05T03:30+0800 [FACT/facts] <deck-v3> `deck_v3.takeover` — deck-v3 owner(tzb-63,sid f4a8adc2)03:28 接手:已读简报+补充、CLAIMS-0904、v2 全 20 页文本、check_deck_v3、术语表;ppt-master 完整性门 rc=0;路线=Generate PPTX Default;初稿 09:00 定稿 16:00 · ref: /Users/gl/tzb-lanes/coordinator-notes/brief-deck-v3-pptmaster-20260905.md
+- 2026-09-05T03:43+0800 [EVENT] <tzb-fe> — 03:43 复探:03:19 后七条线全部沉默(journal 仅 deck-v3 03:30 接手),session json 均在;已再发'继续+一行状态';设 04:13 第三轮探测,届时仍沉默则截止顺延 2h 并改派 v21 · ref: /Users/gl/tzb/state/journal/M2C/2026-09-05.md
+- 2026-09-05T03:43+0800 [FACT/facts] <finetuned-live-v1> `review-v3-final-bundle-delivered` — 不脱敏GPT终审包已出:review-v3/final-review-bundle-20260905T0245(499文件/29MB,tar.gz 6.6MB sha 12f85317)。保留内网地址与绝对路径;排除密钥/权重/图像/视频;凭据扫描0命中,往返499/499。含REVIEW-BRIEF-FINAL.md · ref: /Users/gl/tzb-deliverables/review-v3/final-review-bundle-20260905T0245/REVIEW-BRIEF-FINAL.md
