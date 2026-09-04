@@ -67,3 +67,8 @@ deck P7 / README 所引"一次工程演示走完从中文指令到六原语抓�
 - **卡点 23(合法拒绝在 --execute 下 traceback)**:写法"已修:REFUSE TaskSpec 下 --execute 正常收尾写 outcome.json、reason_code=TASKSPEC_IS_REFUSE_NOT_EXECUTE、不铸请求不铸封、exit 0 并在 stderr 打 NOT DISPATCHED 一行;三条回归测试用真 trace;修复随 23:01 之后的新包交付"。退出码 0 是裁定(校验器认可的拒绝=演示正常工作),不得写成"拒绝会返回非零"。
 - **第一次尝试(23:21)**:写法"派生入口作宿主进程起、契约 upload 路径是容器路径→每次请求 type=error→链正确拒绝(TARGET_NOT_LOCALIZED)";这是部署形态错,不是入口协议差(invoke/output 一字未改即跑通)。
 - **`S2_PROFILE=lora EXECUTE=1 scripts/start.sh chain`(23:47 chxy,tzb-b9,从包内副本起)**:允许的写法——"LoRA 开关经评委启动脚本端到端跑通一次:执行、6 条控制指令、COMPILED_PRIMARY、S5 PASS、帧龄 4.59 s / 30、S2 由 adapter 服务(三跳链同 lora-r8b)";**必须并写**:首次尝试(23:40)起不来——23:01 包把 adapter 三件存成 0644 而回执要求 0400,冻结校验器比模式;已改树 + make_tarball MODE_CHECK;该路径不做世界再确认;默认仍是基座(基座 6 次评委路径执行 / adapter 2 次);首动 86.98 s 只作日志数字。入口脚本 mode 只记录不校验,身份看 sha256。
+
+## 变更 14(9/5 02:3x:对外标题与术语;报告/deck v3/README 下一版统一)
+- 对外主标题统一为「面向工业机械臂的指令交互型智能体原型 —— 开放词汇感知、确定性任务规划与可审计执行」;"符号契约校验"只作一次括注(内部名)。变更 1 的标题保留为评委包 230159 版之前的历史写法。
+- 术语按用户 9/5 02:00 要求:用领域常见中文词(任务规划/规划器/校验器/执行授权凭证/一次性令牌/失效安全/边车容器/运行记录…),内部词只在首次括注;放行"规划/推理/智能体"(见 ruling.report_banned_words)。
+- 报告数字来源:CLAIMS-0904/0903、NUMBERS-v2、README §Prerequisites/§Verification、negative-results;S0 "2.12 s" 只能带 live_entry 路径身份引用。

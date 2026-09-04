@@ -1,5 +1,5 @@
 <!-- GENERATED — 禁止直接 Edit/Write。唯一写入口: tools/statectl.py -->
-<!-- statectl protocol=2 stream=M2C generation=1757 updated=2026-09-05T02:32+0800 -->
+<!-- statectl protocol=2 stream=M2C generation=1759 updated=2026-09-05T02:33+0800 -->
 <!-- 自 M2C_STATE.md 迁移 sha=9dc690524ad77e6d51964237f11ee107e23e3ae92398d19e3424eb0676648fc6 -->
 
 # M2C 权威状态(活跃快照,协议 v2)
@@ -2033,6 +2033,10 @@
 
 - `judge-path-s0-referring-expression-fix` — 评委路 S0 指称表达修复:复用冻结 live_entry_v5.decompose;start.sh/smoke06 去固定 cyan cylinder;新增 21 测试(共 60 过);已同步 chxy pkg 并在镜像内验通。 · ref: /Users/gl/tzb-deliverables/judge-package-v1/agent/run_demo.py
 
+- `report.draft1_rulings` — 报告初稿 v1(02:3x,32页)裁:冻结原话块豁免;允许 0903/README/negative-results 作数字源;删 135 与 S0 2.12s;统一对外标题(CLAIMS 变更 14);审查即刻核 · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.md
+
+- `s0.llm_extraction_landed` — S0 修复已交(02:3x):复用冻结 live_entry_v5.decompose(模型出英文指称短语/目的地/操作;颜色词规则子串;否定走登记表);start.sh/smoke06 去固定值;tests 60 过;已同步 chxy;待 tzb-b9 三指令验收 · ref: /Users/gl/tzb-deliverables/judge-package-v1/tests/test_s0_referring_expression_v1.py
+
 ## 2. 归属与 lane
 - `lane.m2c_exec` — **M2C 执行会话**:successor implementation candidate,commit-free,于全新隔离 clone(Q′ 模式);已登记候选路径内自由编辑(R132.41)。ETA(8/29 午报):交包 8/30 01:00–07:00;早沿(≤03:00)可达截止,晚沿不可达。
 - `lane.tzb_fe` — **tzb-fe(协调)**:实现审查+七段治理批量激活(预告:批一 = R′ stage adoption→successor prereg→materialize→bootstrap;批二 = legacy P″ prefix adoption→recovery03→combined preflight;每步仍各自 pre-capture/记录/fail-closed,激活与 closeout 各批一次)。
@@ -2603,8 +2607,6 @@
 - `task.gpt_final_review_bundle` — 用户(02:3x):派空闲会话打'不脱敏'的项目+状态审核包给 GPT Web Pro 终审(保留内网地址与路径;仍排除 .env/密钥/权重/图像/npy/output);交 tzb-76;用户去睡,夜间按 overnight 边界自主推进 · ref: /Users/gl/tzb-deliverables/review-v3/
 
 ## 5. Recent tail(journal 缓存,非权威)
-- 2026-09-05T02:12+0800 [FACT/facts] <tzb-fe> `live_window.v17_restart_0209` — v17 02:09 重起后 PING 0.01–0.02 s(重起前 7–8 s),GPU1 空转 10%;'8 s 结构性延迟'结论撤回(秒级即病);pose 保持 step 3;空闲循环本就渲染,先前是 0.125 fps 幻灯片;等轮内 GPU 利用率 · ref: /var/tmp/labonly-viewport-v1/slowgpu-vnext-v17-20260904T180841Z.log
-- 2026-09-05T02:14+0800 [FACT/facts] <tzb-fe> `live_window.gpu_recovered` — v17 重起后闭环(02:13):轮内 GPU1 34–70%(重起前 4–5%),一轮 55 s(前 11 min 停滞),reset_verified +8.4 s,ALL_SIX;机位重贴 +8 ms = step 3;直播恢复实时;用户可录 · ref: /var/tmp/labonly-viewport-v1/
 - 2026-09-05T02:15+0800 [FACT/facts] <m2c-exec> `judge-package-usage-doc-zh` — docs/使用说明.md 写完(459 行/12 模块):bash 18 块 -n 全过、python -c 4 条 compile 全过,manifest 已加行;附录 B 列 7 条缺独立入口待裁。 · ref: /Users/gl/tzb-deliverables/judge-package-v1/docs/使用说明.md
 - 2026-09-05T02:19+0800 [FACT/facts] <tzb-fe> `defect.referring_expression_fixed_cyan` — 阻断缺陷(02:2x):start.sh 与直播驱动固定 expression=cyan cylinder,S0 只规则解目的地不派生指称词(无LLM),颜色规则只认英文→敲紫色抓青色。裁:S0 加颜色词表派生+新拒绝码,去固定值,紫/红评委路径复验;'S0=LLM'主张待更正 · ref: /Users/gl/tzb-deliverables/judge-package-v1/config/chain.yaml
 - 2026-09-05T02:20+0800 [FACT/facts] <review-zh-v1> `review.training-bundle` — 训练包①脱敏②摘要往返④adapter0400 均PASS;③5条阻断:提取器与冻结入口不在任何包内、RESULT-v2仍挂已撤回的0.133对比、两RESULT指向错回执(62a81648内部矛盾且无作废标记)、宿主内存23.9/49.3实为GPU显存、runs-ab3无来源 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-training-bundle-v1.md
@@ -2623,3 +2625,5 @@
 - 2026-09-05T02:31+0800 [FACT/facts] <tzb-fe> `review.usage_doc_v1` — 审查使用说明 3P0+3P1(料筐、.env/CAPTURE 载入、镜像 tag v2 成环、ISAAC/CHAIN_IMAGE 语义、标定路径、SMOKE_EXPECT_MOTION);U1/2/5/6 交 demo lane,U3/U4 我已改 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-usage-doc-v1.md
 - 2026-09-05T02:31+0800 [TASK/task] <tzb-fe> `task.gpt_final_review_bundle` — 用户(02:3x):派空闲会话打'不脱敏'的项目+状态审核包给 GPT Web Pro 终审(保留内网地址与路径;仍排除 .env/密钥/权重/图像/npy/output);交 tzb-76;用户去睡,夜间按 overnight 边界自主推进 · ref: /Users/gl/tzb-deliverables/review-v3/
 - 2026-09-05T02:32+0800 [FACT/facts] <m2c-exec> `judge-path-s0-referring-expression-fix` — 评委路 S0 指称表达修复:复用冻结 live_entry_v5.decompose;start.sh/smoke06 去固定 cyan cylinder;新增 21 测试(共 60 过);已同步 chxy pkg 并在镜像内验通。 · ref: /Users/gl/tzb-deliverables/judge-package-v1/agent/run_demo.py
+- 2026-09-05T02:33+0800 [FACT/facts] <tzb-fe> `report.draft1_rulings` — 报告初稿 v1(02:3x,32页)裁:冻结原话块豁免;允许 0903/README/negative-results 作数字源;删 135 与 S0 2.12s;统一对外标题(CLAIMS 变更 14);审查即刻核 · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.md
+- 2026-09-05T02:33+0800 [FACT/facts] <tzb-fe> `s0.llm_extraction_landed` — S0 修复已交(02:3x):复用冻结 live_entry_v5.decompose(模型出英文指称短语/目的地/操作;颜色词规则子串;否定走登记表);start.sh/smoke06 去固定值;tests 60 过;已同步 chxy;待 tzb-b9 三指令验收 · ref: /Users/gl/tzb-deliverables/judge-package-v1/tests/test_s0_referring_expression_v1.py
