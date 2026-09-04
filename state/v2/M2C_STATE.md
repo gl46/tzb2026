@@ -1,5 +1,5 @@
 <!-- GENERATED — 禁止直接 Edit/Write。唯一写入口: tools/statectl.py -->
-<!-- statectl protocol=2 stream=M2C generation=1825 updated=2026-09-05T04:13+0800 -->
+<!-- statectl protocol=2 stream=M2C generation=1827 updated=2026-09-05T04:13+0800 -->
 <!-- 自 M2C_STATE.md 迁移 sha=9dc690524ad77e6d51964237f11ee107e23e3ae92398d19e3424eb0676648fc6 -->
 
 # M2C 权威状态(活跃快照,协议 v2)
@@ -2706,8 +2706,6 @@
 - `live-loop-executor-target-prim-pin` — vnext_dispatch_executor_v17.py:75 TARGET_PRIM_PATH 硬钉 cylinder_06,非青指令一律 EXECUTOR_ERROR 且已花 nonce;归 demo lane/协调裁
 
 ## 5. Recent tail(journal 缓存,非权威)
-- 2026-09-05T03:47+0800 [FACT/facts] <tzb-fe> `deliverable.cold_install_report_1449` — 冷装报告 1449 行(tzb-b9 03:5x):新增三句验收一节 + 卡点 29/30/31 + 驱动脚本自曝三处;已复制入包(脱敏);acceptance-3 三套 run 目录与回执入包 rounds/acceptance-3-20260905/ · ref: /Users/gl/tzb-deliverables/judge-package-v1/evidence/verification-20260904/chxy-cold-install/cold-install-report-v1.md
-- 2026-09-05T03:49+0800 [FACT/facts] <tzb-fe> `executor.v21_delivered` — v21 交付(03:47):六文件双侧 digest 核;tests 80 过;build_request 邻居本就动态;RUN03_* 无读取处;consumer 串保留 v15(launcher 明文),v21 回执以 v21_target_resolution 键区分;tzb-b9 紫/红复跑中 · ref: /Users/gl/tzb-deliverables/judge-package-v1/agent/executor/resident/PROVENANCE-v21.md
 - 2026-09-05T03:52+0800 [FACT/facts] <tzb-fe> `executor.v21_sums_and_blocker31` — SHA256SUMS.txt 14/14 与 -v21 5/5 重算并同步 chxy;卡点 31 已修(S0 合法拒绝 exit 0 + NOT DISPATCHED 一行,3 测试,本地 83 过),run_demo.py 压着等 tzb-b9 紫/红跑完再推(同字节纪律);LC_ALL=C 数清单的教训再记一次 · ref: /Users/gl/tzb-deliverables/judge-package-v1/agent/executor/resident/SHA256SUMS.txt
 - 2026-09-05T03:54+0800 [FACT/facts] <tzb-fe> `ruling.relabel_3_04s` — 裁定(03:5x):'确定性各段合计 3.04 s'是错标签(含 S1/S2 模型时间,确定性 S3+S5 仅 0.045 s)→改标签不改数,四处同改(NUMBERS-v2、deck v2.1、报告、fig-latency);题注口径:需访问端点的只有 S0/S1/可选 S4,S2 本地视觉模型 · ref: /Users/gl/tzb/reports/CLAIMS-SHEET-20260904.md
 - 2026-09-05T03:54+0800 [FACT/facts] <m2c-exec> `v21-followups-prepared` — 备好未应用:launch_resident 切默认 v21 的 diff 与 README §Claim boundary 两版草稿(A 两轮过/B 任一轮未动),均在 coordinator-notes/,等 tzb-b9 结果与放行。 · ref: /Users/gl/tzb-lanes/coordinator-notes/README-claim-boundary-v21-draft-20260905.md
@@ -2726,3 +2724,5 @@
 - 2026-09-05T04:11+0800 [FACT/facts] <exec-no-truth-v1> `finding-32-ping-reports-intent` — 卡点32:v21:2216 PING 硬编码 executor=v17,stream/port 回显请求值(8555 实际未监听);身份文件正确,属控制口误报 · ref: cold-install-chxy-v1/receipts/v21-rerun/executor-identity-v1.json
 - 2026-09-05T04:12+0800 [FACT/facts] <exec-no-truth-v1> `finding-32-ping-reports-intent` — 卡点32改窄[低]:v21 下 PING 硬编码 executor=v17(:2216)、结果文件仍名 result-v17.json(:26/:2185);stream/port 取自环境是对的,前一版摘要写宽已作废 · ref: cold-install-chxy-v1/receipts/v21-rerun/executor-identity-v1.json
 - 2026-09-05T04:13+0800 [FACT/facts] <tzb-fe> `report.draft2_screen` — 第二稿复筛(tzb-55):772 数命中 762/归一 9/未命中 1(2.966→裁 NUMBERS-v2 加一行);禁写 0;24 图题注与出处行全认,8 SVG 图内文字机筛 0 未命中,16 像素图只证有出处行;logs/ 不进源(会假命中) · ref: /Users/gl/tzb-deliverables/report-v1/tools/
+- 2026-09-05T04:13+0800 [EVENT] <m2c-exec> — 首次:纯中文非青指令走通到臂。紫色轮 DISPATCH_COMPLETED_ALL_SIX_PRIMITIVES,cylinder_05 移动 0.749m 入料箱,grasp_gate 过,邻件位移<6um,ordinal 0 · ref: receipts/live-window-v21-purple-round-dispatched-v1.json
+- 2026-09-05T04:13+0800 [EVENT] <tzb-fe> — 04:13 第三轮探测:03:40 后各角色均有 journal 活动(report/finetuned/m2c-exec/exec-no-truth/review/deck-v2/deck-v3;live-loop 经消息在线),额度已恢复,无需顺延或改派;截止不变 · ref: /Users/gl/tzb/state/journal/M2C/2026-09-05.md
