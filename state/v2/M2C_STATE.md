@@ -1,5 +1,5 @@
 <!-- GENERATED — 禁止直接 Edit/Write。唯一写入口: tools/statectl.py -->
-<!-- statectl protocol=2 stream=M2C generation=1828 updated=2026-09-05T04:14+0800 -->
+<!-- statectl protocol=2 stream=M2C generation=1831 updated=2026-09-05T04:15+0800 -->
 <!-- 自 M2C_STATE.md 迁移 sha=9dc690524ad77e6d51964237f11ee107e23e3ae92398d19e3424eb0676648fc6 -->
 
 # M2C 权威状态(活跃快照,协议 v2)
@@ -2129,9 +2129,13 @@
 
 - `finding-32-ping-reports-intent` — 卡点32改窄[低]:v21 下 PING 硬编码 executor=v17(:2216)、结果文件仍名 result-v17.json(:26/:2185);stream/port 取自环境是对的,前一版摘要写宽已作废 · ref: cold-install-chxy-v1/receipts/v21-rerun/executor-identity-v1.json
 
-- `report.draft2_screen` — 第二稿复筛(tzb-55):772 数命中 762/归一 9/未命中 1(2.966→裁 NUMBERS-v2 加一行);禁写 0;24 图题注与出处行全认,8 SVG 图内文字机筛 0 未命中,16 像素图只证有出处行;logs/ 不进源(会假命中) · ref: /Users/gl/tzb-deliverables/report-v1/tools/
+- `report.draft2_screen` — 第二稿复筛 PASS(0 项):772 数命中 763/归一 9/未命中 0;NUMBERS-v2 A6 加 2.966 rad/0.53 mm/0.655 m 行(出处 Z);Y 补登记;v3 简报补充 §6 转 PENDING-v2.1 五项 · ref: /Users/gl/tzb-deliverables/ppt-v1/NUMBERS-v2.md
 
 - `milestone.v21_purple_end_to_end` — 里程碑(04:1x):纯中文非青指令首次走到臂——v21 紫色 chxy 六原语落格(感知误差 2.57mm)与 labserver 直播轮 0.749 m 入箱(grasp_gate 过,邻件<6µm);红色 attach 断言失败;卡点 32 PING 自报 v17;切默认待青色 v21 轮 · ref: /Users/gl/tzb-lanes/live-loop-v1/receipts/live-window-v21-purple-round-dispatched-v1.json
+
+- `报告二稿复筛PASS` — 第二稿 772数 命中763/归一9/未命中0,禁写0,图表节0;加 training-README 为源;拒收 logs(grad_norm 2.9667 撞 2.966 rad);NUMBERS-v2 加出处 Z · ref: /Users/gl/tzb-deliverables/report-v1/tools/screen_report.py
+
+- `deck_v3.draft_exported` — deck v3 初稿已导出:ppt-master Default 路径,20 页原生 PPTX+PDF 落 ppt-v3/xh-202607-deck-v3.pptx/.pdf;final gate 0 错;守卫顶层 PASS 但导出器把根组打成 GROUP,守卫不递归,已用同表递归扫 PASS · ref: /Users/gl/tzb-deliverables/ppt-v3/xh-202607-deck-v3.pptx
 
 ## 2. 归属与 lane
 - `lane.m2c_exec` — **M2C 执行会话**:successor implementation candidate,commit-free,于全新隔离 clone(Q′ 模式);已登记候选路径内自由编辑(R132.41)。ETA(8/29 午报):交包 8/30 01:00–07:00;早沿(≤03:00)可达截止,晚沿不可达。
@@ -2708,9 +2712,6 @@
 - `live-loop-executor-target-prim-pin` — vnext_dispatch_executor_v17.py:75 TARGET_PRIM_PATH 硬钉 cylinder_06,非青指令一律 EXECUTOR_ERROR 且已花 nonce;归 demo lane/协调裁
 
 ## 5. Recent tail(journal 缓存,非权威)
-- 2026-09-05T03:54+0800 [FACT/facts] <tzb-fe> `ruling.relabel_3_04s` — 裁定(03:5x):'确定性各段合计 3.04 s'是错标签(含 S1/S2 模型时间,确定性 S3+S5 仅 0.045 s)→改标签不改数,四处同改(NUMBERS-v2、deck v2.1、报告、fig-latency);题注口径:需访问端点的只有 S0/S1/可选 S4,S2 本地视觉模型 · ref: /Users/gl/tzb/reports/CLAIMS-SHEET-20260904.md
-- 2026-09-05T03:54+0800 [FACT/facts] <m2c-exec> `v21-followups-prepared` — 备好未应用:launch_resident 切默认 v21 的 diff 与 README §Claim boundary 两版草稿(A 两轮过/B 任一轮未动),均在 coordinator-notes/,等 tzb-b9 结果与放行。 · ref: /Users/gl/tzb-lanes/coordinator-notes/README-claim-boundary-v21-draft-20260905.md
-- 2026-09-05T03:54+0800 [FACT/facts] <tzb-fe> `executor.v21_default_diff_and_readme_draft` — demo lane 备好未应用:launch_resident 切默认 v21 的 diff(含注释同改)与 README §Claim boundary 草稿 A/B 两版(不写 any object;拒绝不花 nonce 单说;身份看 v21_target_resolution),等 tzb-b9 紫/红结果后我裁 · ref: /Users/gl/tzb-lanes/coordinator-notes/README-claim-boundary-v21-draft-20260905.md
 - 2026-09-05T03:56+0800 [EVENT] <m2c-exec> — 卡点30 已修(等 physics tensor 有效,预算600/60s)两份双侧 digest 一致;新宿主 HOST_READY,新 dataset root;v21 已同步6文件对digest;紫色轮待切 EXECUTOR=v21 · ref: receipts/live-window-kadian30-physics-tensor-wait-v1.json 7e209619
 - 2026-09-05T03:56+0800 [FACT/facts] <tzb-fe> `live_window.v21_switch_plan` — 卡点30 已修(谓词等待;本次 extra_updates=0 不证治好);v21 已同步 labserver;裁:loop lane 切执行器,先等 15 min v21+视口叠层变体,否则纯 v21 跑一轮后切回视口 v3;chxy 侧由 tzb-b9 跑 · ref: /Users/gl/tzb-lanes/live-loop-v1/receipts/live-window-kadian30-physics-tensor-wait-v1.json
 - 2026-09-05T04:02+0800 [FACT/facts] <m2c-exec> `labonly-viewport-v21` — v21 lab-only 视口变体已建并双侧落盘(lane + labserver /var/tmp/labonly-viewport-v1),v21->变体纯增 171 行 0 删 0 改,插入行与 v17 变体逐行相同;不进包 · ref: /Users/gl/tzb-lanes/agent-demo-v3-isaac-rgbd/labonly-viewport-v1/vnext_dispatch_executor_v21_viewport_labonly.py
@@ -2728,3 +2729,6 @@
 - 2026-09-05T04:13+0800 [EVENT] <m2c-exec> — 首次:纯中文非青指令走通到臂。紫色轮 DISPATCH_COMPLETED_ALL_SIX_PRIMITIVES,cylinder_05 移动 0.749m 入料箱,grasp_gate 过,邻件位移<6um,ordinal 0 · ref: receipts/live-window-v21-purple-round-dispatched-v1.json
 - 2026-09-05T04:13+0800 [EVENT] <tzb-fe> — 04:13 第三轮探测:03:40 后各角色均有 journal 活动(report/finetuned/m2c-exec/exec-no-truth/review/deck-v2/deck-v3;live-loop 经消息在线),额度已恢复,无需顺延或改派;截止不变 · ref: /Users/gl/tzb/state/journal/M2C/2026-09-05.md
 - 2026-09-05T04:14+0800 [FACT/facts] <tzb-fe> `milestone.v21_purple_end_to_end` — 里程碑(04:1x):纯中文非青指令首次走到臂——v21 紫色 chxy 六原语落格(感知误差 2.57mm)与 labserver 直播轮 0.749 m 入箱(grasp_gate 过,邻件<6µm);红色 attach 断言失败;卡点 32 PING 自报 v17;切默认待青色 v21 轮 · ref: /Users/gl/tzb-lanes/live-loop-v1/receipts/live-window-v21-purple-round-dispatched-v1.json
+- 2026-09-05T04:15+0800 [FACT/facts] <deck-v2> `报告二稿复筛PASS` — 第二稿 772数 命中763/归一9/未命中0,禁写0,图表节0;加 training-README 为源;拒收 logs(grad_norm 2.9667 撞 2.966 rad);NUMBERS-v2 加出处 Z · ref: /Users/gl/tzb-deliverables/report-v1/tools/screen_report.py
+- 2026-09-05T04:15+0800 [FACT/facts] <deck-v3> `deck_v3.draft_exported` — deck v3 初稿已导出:ppt-master Default 路径,20 页原生 PPTX+PDF 落 ppt-v3/xh-202607-deck-v3.pptx/.pdf;final gate 0 错;守卫顶层 PASS 但导出器把根组打成 GROUP,守卫不递归,已用同表递归扫 PASS · ref: /Users/gl/tzb-deliverables/ppt-v3/xh-202607-deck-v3.pptx
+- 2026-09-05T04:15+0800 [FACT/facts] <tzb-fe> `report.draft2_screen` — 第二稿复筛 PASS(0 项):772 数命中 763/归一 9/未命中 0;NUMBERS-v2 A6 加 2.966 rad/0.53 mm/0.655 m 行(出处 Z);Y 补登记;v3 简报补充 §6 转 PENDING-v2.1 五项 · ref: /Users/gl/tzb-deliverables/ppt-v1/NUMBERS-v2.md
