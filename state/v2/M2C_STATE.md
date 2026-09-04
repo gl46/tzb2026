@@ -1,5 +1,5 @@
 <!-- GENERATED — 禁止直接 Edit/Write。唯一写入口: tools/statectl.py -->
-<!-- statectl protocol=2 stream=M2C generation=1799 updated=2026-09-05T03:45+0800 -->
+<!-- statectl protocol=2 stream=M2C generation=1803 updated=2026-09-05T03:46+0800 -->
 <!-- 自 M2C_STATE.md 迁移 sha=9dc690524ad77e6d51964237f11ee107e23e3ae92398d19e3424eb0676648fc6 -->
 
 # M2C 权威状态(活跃快照,协议 v2)
@@ -2085,6 +2085,12 @@
 
 - `finding-29-executor-target-pinned` — 卡点29:v17:75 TARGET_PRIM_PATH 写死 cylinder_06 无 env 覆盖,检查在 1152 晚于 1149 envelope_consumed=先烧账目后拒;①②各烧一枚无运动 · ref: cold-install-chxy-v1/receipts/acceptance-3/r1/
 
+- `review.training-v3` — 训练包第三版a5ba5091:无阻断。599/599+往返+脱敏+adapter0400全过;只动README与provenance两文件;§1.2.1执行环境约束闭环且比我报的更全,其新写的四条事实(--adapter门控、launch ROOT、打分纯后处理、两评测digest)逐条核实成立 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-training-bundle-v3-a5ba5091.md
+
+- `acceptance.three_instructions_front_half` — 三指令验收(02:56):①紫②红前半全过(S0 DECOMPOSED、purple/red cylinder、S2 一框、cylinder_05/01 对),执行器拒(卡点29);③S0 拒未登记目的地不花账目;新卡点30 取帧宿主偶崩→loop lane,31 S0拒绝exit=1→demo lane · ref: /Users/gl/tzb-lanes/cold-install-chxy-v1/cold-install-report-v1.md
+
+- `review.training_bundle_v3_clean` — 训练包第三版 a5ba5091 审查无阻断(gen1800):机械项全过,§1.2.1/§7/PROVENANCE 四条新事实逐条成立;提醒:解包后 adapter 目录 0500/文件 0400,rm 前需 chmod -R u+w(写进 PACKAGE-NOTE) · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-training-bundle-v3-a5ba5091.md
+
 ## 2. 归属与 lane
 - `lane.m2c_exec` — **M2C 执行会话**:successor implementation candidate,commit-free,于全新隔离 clone(Q′ 模式);已登记候选路径内自由编辑(R132.41)。ETA(8/29 午报):交包 8/30 01:00–07:00;早沿(≤03:00)可达截止,晚沿不可达。
 - `lane.tzb_fe` — **tzb-fe(协调)**:实现审查+七段治理批量激活(预告:批一 = R′ stage adoption→successor prereg→materialize→bootstrap;批二 = legacy P″ prefix adoption→recovery03→combined preflight;每步仍各自 pre-capture/记录/fail-closed,激活与 closeout 各批一次)。
@@ -2660,10 +2666,6 @@
 - `live-loop-executor-target-prim-pin` — vnext_dispatch_executor_v17.py:75 TARGET_PRIM_PATH 硬钉 cylinder_06,非青指令一律 EXECUTOR_ERROR 且已花 nonce;归 demo lane/协调裁
 
 ## 5. Recent tail(journal 缓存,非权威)
-- 2026-09-05T02:43+0800 [FACT/facts] <tzb-fe> `deck.v3_guard_ready` — check_deck_v3.py 就位(tzb-55 02:44,ppt-v3/tools/):v2 表只读+覆盖层,正负例验过,v2 deck 过 v3 守卫;REQUIRED/CONDITIONAL 按 v2 页码故 v3 默认不启用(tzb-63 需重写);简报补充已写;报告筛查加两源后 513/507,禁写 0 · ref: /Users/gl/tzb-deliverables/ppt-v3/tools/check_deck_v3.py
-- 2026-09-05T02:44+0800 [EVENT] <m2c-exec> — S0 修复已同步 labserver(7 文件双侧 digest 一致);紫色轮 S2 被问 'purple cylinder'、绑 cylinder_05、三态 PRESENT/PASS/EXECUTE;executor 硬钉 cylinder_06 拒了,花 1 nonce · ref: receipts/live-window-s0-fix-purple-round-v1.json 3a182e63
-- 2026-09-05T02:44+0800 [DONE/task] <m2c-exec> `live-loop-sync-pkgnext-after-s0` — 完成 live-loop-sync-pkgnext-after-s0
-- 2026-09-05T02:44+0800 [TASK/task] <m2c-exec> `live-loop-executor-target-prim-pin` — vnext_dispatch_executor_v17.py:75 TARGET_PRIM_PATH 硬钉 cylinder_06,非青指令一律 EXECUTOR_ERROR 且已花 nonce;归 demo lane/协调裁
 - 2026-09-05T02:45+0800 [FACT/facts] <tzb-fe> `defect.executor_target_prim_hardcoded` — 阻断(02:4x,两线证实):S0 修后链前半对紫色全对(→cylinder_05),但 v17 写死目标 cylinder_06,检查在 envelope_consumed 后→REJECTED 先烧 nonce。裁 v21 变体(目标取自请求+注册校验、检查前移),04:30 交 · ref: /Users/gl/tzb-deliverables/judge-package-v1/agent/executor/resident/vnext_dispatch_executor_v17.py
 - 2026-09-05T02:47+0800 [FACT/facts] <tzb-fe> `s0.purple_round_slots_confirmed` — 紫色轮 preregistration.json 证实 S0 分槽:purple cylinder / blue bin / RELOCATE,colour_term 由英文短语规则取,目的地色词不入物体短语;注:规则注册色 15 vs 场景可达 9,黑/棕/灰/粉/白在铸造前拒 · ref: /Users/gl/tzb-lanes/live-loop-v1/receipts/live-window-s0-fix-purple-round-v1-addendum-v1.json
 - 2026-09-05T02:48+0800 [EVENT] <m2c-exec> — 更正:S0 三键在链 trace 里是'不存在'非'null'(get() 不分缺键与 null);S0 记录在 preregistration.json;非青轮次停至 v21 · ref: receipts/live-window-s0-fix-purple-round-v1-addendum-v2-CORRECTION.json
@@ -2680,3 +2682,7 @@
 - 2026-09-05T03:44+0800 [FACT/facts] <exec-no-truth-v1> `finding-29-executor-target-pinned` — 卡点29:v17:75 TARGET_PRIM_PATH 写死 cylinder_06 无 env 覆盖,检查在 1152 晚于 1149 envelope_consumed=先烧账目后拒;①②各烧一枚无运动 · ref: cold-install-chxy-v1/receipts/acceptance-3/r1/
 - 2026-09-05T03:44+0800 [EVENT] <exec-no-truth-v1> — 卡点30 取帧宿主 live_host_v1.py:129-134 固定 60 次 update 后无条件读 DOF,物理张量未就绪即 assert;两次起有一次挂 · ref: cold-install-chxy-v1/receipts/acceptance-3/capture-host-crash-r2-first-attempt.log
 - 2026-09-05T03:45+0800 [EVENT] <tzb-fe> — 03:4x 回音齐(除 tzb-b9):tzb-95/76/55/loop lane 未被卡,tzb-66 与 demo lane 曾卡已恢复;loop lane 监视 up、非青 nonce 0 花费,等 v21 定稿再同步 labserver 跑紫色;tzb-b9 待 04:13 三探 · ref: /Users/gl/tzb/state/journal/M2C/2026-09-05.md
+- 2026-09-05T03:45+0800 [FACT/facts] <review-zh-v1> `review.training-v3` — 训练包第三版a5ba5091:无阻断。599/599+往返+脱敏+adapter0400全过;只动README与provenance两文件;§1.2.1执行环境约束闭环且比我报的更全,其新写的四条事实(--adapter门控、launch ROOT、打分纯后处理、两评测digest)逐条核实成立 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-training-bundle-v3-a5ba5091.md
+- 2026-09-05T03:46+0800 [EVENT] <m2c-exec> — 直播面监视已起(仅变化时报,基线全 up);v21 静态预审四条裁定要求全满足;v21 未推(labserver 无、未宣定稿);非青 nonce 花费 0
+- 2026-09-05T03:46+0800 [FACT/facts] <tzb-fe> `acceptance.three_instructions_front_half` — 三指令验收(02:56):①紫②红前半全过(S0 DECOMPOSED、purple/red cylinder、S2 一框、cylinder_05/01 对),执行器拒(卡点29);③S0 拒未登记目的地不花账目;新卡点30 取帧宿主偶崩→loop lane,31 S0拒绝exit=1→demo lane · ref: /Users/gl/tzb-lanes/cold-install-chxy-v1/cold-install-report-v1.md
+- 2026-09-05T03:46+0800 [FACT/facts] <tzb-fe> `review.training_bundle_v3_clean` — 训练包第三版 a5ba5091 审查无阻断(gen1800):机械项全过,§1.2.1/§7/PROVENANCE 四条新事实逐条成立;提醒:解包后 adapter 目录 0500/文件 0400,rm 前需 chmod -R u+w(写进 PACKAGE-NOTE) · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-training-bundle-v3-a5ba5091.md
