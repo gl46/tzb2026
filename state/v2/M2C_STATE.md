@@ -1,5 +1,5 @@
 <!-- GENERATED — 禁止直接 Edit/Write。唯一写入口: tools/statectl.py -->
-<!-- statectl protocol=2 stream=M2C generation=1811 updated=2026-09-05T03:54+0800 -->
+<!-- statectl protocol=2 stream=M2C generation=1813 updated=2026-09-05T03:56+0800 -->
 <!-- 自 M2C_STATE.md 迁移 sha=9dc690524ad77e6d51964237f11ee107e23e3ae92398d19e3424eb0676648fc6 -->
 
 # M2C 权威状态(活跃快照,协议 v2)
@@ -2107,6 +2107,8 @@
 
 - `executor.v21_default_diff_and_readme_draft` — demo lane 备好未应用:launch_resident 切默认 v21 的 diff(含注释同改)与 README §Claim boundary 草稿 A/B 两版(不写 any object;拒绝不花 nonce 单说;身份看 v21_target_resolution),等 tzb-b9 紫/红结果后我裁 · ref: /Users/gl/tzb-lanes/coordinator-notes/README-claim-boundary-v21-draft-20260905.md
 
+- `live_window.v21_switch_plan` — 卡点30 已修(谓词等待;本次 extra_updates=0 不证治好);v21 已同步 labserver;裁:loop lane 切执行器,先等 15 min v21+视口叠层变体,否则纯 v21 跑一轮后切回视口 v3;chxy 侧由 tzb-b9 跑 · ref: /Users/gl/tzb-lanes/live-loop-v1/receipts/live-window-kadian30-physics-tensor-wait-v1.json
+
 ## 2. 归属与 lane
 - `lane.m2c_exec` — **M2C 执行会话**:successor implementation candidate,commit-free,于全新隔离 clone(Q′ 模式);已登记候选路径内自由编辑(R132.41)。ETA(8/29 午报):交包 8/30 01:00–07:00;早沿(≤03:00)可达截止,晚沿不可达。
 - `lane.tzb_fe` — **tzb-fe(协调)**:实现审查+七段治理批量激活(预告:批一 = R′ stage adoption→successor prereg→materialize→bootstrap;批二 = legacy P″ prefix adoption→recovery03→combined preflight;每步仍各自 pre-capture/记录/fail-closed,激活与 closeout 各批一次)。
@@ -2682,8 +2684,6 @@
 - `live-loop-executor-target-prim-pin` — vnext_dispatch_executor_v17.py:75 TARGET_PRIM_PATH 硬钉 cylinder_06,非青指令一律 EXECUTOR_ERROR 且已花 nonce;归 demo lane/协调裁
 
 ## 5. Recent tail(journal 缓存,非权威)
-- 2026-09-05T03:43+0800 [FACT/facts] <report-zh-v1> `report.zh_v2_in_progress` — 报告第二稿(图文版)进行中:图件脚本 build/make_figs.py+SVG 示意图,结构改为摘要/引言/总体设计/模块/实验/讨论/结论/参考文献/附录;含 R1/R2、2.966 引回执、训练包指针、超参表;目标 06:00 · ref: /Users/gl/tzb-lanes/report-zh-v1/LANE-NOTES.md
-- 2026-09-05T03:44+0800 [EVENT] <tzb-fe> — 03:4x 回音:tzb-95 在线(未被卡,开始复核训练包 v3);tzb-66 02:46–03:43 被额度卡住已恢复,报告二稿 05:45;其余五线仍待回;我写了 v21 改动清单(只读预备)coordinator-notes/v21-executor-change-list-20260905.md · ref: /Users/gl/tzb-lanes/coordinator-notes/v21-executor-change-list-20260905.md
 - 2026-09-05T03:44+0800 [FACT/facts] <tzb-fe> `deliverable.gpt_final_review_bundle` — GPT 终审包已交(tzb-76 03:4x):review-v3/final-review-bundle-20260905T0245(499 文件/29MB,tar 6.6MB,sha 12f85317…),不脱敏、无密钥/权重/图像;十项齐+REVIEW-BRIEF-FINAL.md;brief 明写视频尚无交付件 · ref: /Users/gl/tzb-deliverables/review-v3/final-review-bundle-20260905T0245.tar.gz.sha256
 - 2026-09-05T03:44+0800 [FACT/facts] <tzb-fe> `executor.v21_in_progress` — v21 过半(demo lane,04:15 交):builder 精确替换 v17 八处;目标取自请求+烘入六注册 prim 校验;邻居=六减目标;检查在 envelope_consumed 前拒不花 nonce;新拒绝本地异常同形回包;两自主决定接受 · ref: /Users/gl/tzb-lanes/coordinator-notes/v21-executor-change-list-20260905.md
 - 2026-09-05T03:44+0800 [FACT/facts] <exec-no-truth-v1> `acceptance-3-instructions` — 三句验收前半全过:①purple→cylinder_05 ②red→cylinder_01 S0/S2/选框/世界坐标均正确;③"料箱"未注册,S0 拒、S2 未调用 · ref: cold-install-chxy-v1/receipts/acceptance-3/
@@ -2702,3 +2702,5 @@
 - 2026-09-05T03:54+0800 [FACT/facts] <tzb-fe> `ruling.relabel_3_04s` — 裁定(03:5x):'确定性各段合计 3.04 s'是错标签(含 S1/S2 模型时间,确定性 S3+S5 仅 0.045 s)→改标签不改数,四处同改(NUMBERS-v2、deck v2.1、报告、fig-latency);题注口径:需访问端点的只有 S0/S1/可选 S4,S2 本地视觉模型 · ref: /Users/gl/tzb/reports/CLAIMS-SHEET-20260904.md
 - 2026-09-05T03:54+0800 [FACT/facts] <m2c-exec> `v21-followups-prepared` — 备好未应用:launch_resident 切默认 v21 的 diff 与 README §Claim boundary 两版草稿(A 两轮过/B 任一轮未动),均在 coordinator-notes/,等 tzb-b9 结果与放行。 · ref: /Users/gl/tzb-lanes/coordinator-notes/README-claim-boundary-v21-draft-20260905.md
 - 2026-09-05T03:54+0800 [FACT/facts] <tzb-fe> `executor.v21_default_diff_and_readme_draft` — demo lane 备好未应用:launch_resident 切默认 v21 的 diff(含注释同改)与 README §Claim boundary 草稿 A/B 两版(不写 any object;拒绝不花 nonce 单说;身份看 v21_target_resolution),等 tzb-b9 紫/红结果后我裁 · ref: /Users/gl/tzb-lanes/coordinator-notes/README-claim-boundary-v21-draft-20260905.md
+- 2026-09-05T03:56+0800 [EVENT] <m2c-exec> — 卡点30 已修(等 physics tensor 有效,预算600/60s)两份双侧 digest 一致;新宿主 HOST_READY,新 dataset root;v21 已同步6文件对digest;紫色轮待切 EXECUTOR=v21 · ref: receipts/live-window-kadian30-physics-tensor-wait-v1.json 7e209619
+- 2026-09-05T03:56+0800 [FACT/facts] <tzb-fe> `live_window.v21_switch_plan` — 卡点30 已修(谓词等待;本次 extra_updates=0 不证治好);v21 已同步 labserver;裁:loop lane 切执行器,先等 15 min v21+视口叠层变体,否则纯 v21 跑一轮后切回视口 v3;chxy 侧由 tzb-b9 跑 · ref: /Users/gl/tzb-lanes/live-loop-v1/receipts/live-window-kadian30-physics-tensor-wait-v1.json
