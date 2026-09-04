@@ -1,5 +1,5 @@
 <!-- GENERATED — 禁止直接 Edit/Write。唯一写入口: tools/statectl.py -->
-<!-- statectl protocol=2 stream=M2C generation=1643 updated=2026-09-04T22:55+0800 -->
+<!-- statectl protocol=2 stream=M2C generation=1644 updated=2026-09-04T23:00+0800 -->
 <!-- 自 M2C_STATE.md 迁移 sha=9dc690524ad77e6d51964237f11ee107e23e3ae92398d19e3424eb0676648fc6 -->
 
 # M2C 权威状态(活跃快照,协议 v2)
@@ -1891,6 +1891,8 @@
 
 - `milestone.final_tarball_20260904` — 最终交付包 judge-package-v1-20260904-225455.tar.gz(727文件/224MB/CLEAN,sha256 同名 .sha256)已出于 tzb-deliverables/;deck v2 PDF 22:50;此后包内不改。待用户:模型名、push;待我:状态压缩 · ref: /Users/gl/tzb-deliverables/judge-package-v1-20260904-225455.tar.gz.sha256
 
+- `review.tarball_225455` — 开箱核tar 882095e0:sha一致/727文件/五份摘要全OK/ADDR_CHECK真接线且清洁/无密钥/239路径全解析/exec位全在。两项文档-命令不符:v20 from-source-lane清单4文件缺、REDACTION漏报两处vendor root@labserver · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-round21-tarball.md
+
 ## 2. 归属与 lane
 - `lane.m2c_exec` — **M2C 执行会话**:successor implementation candidate,commit-free,于全新隔离 clone(Q′ 模式);已登记候选路径内自由编辑(R132.41)。ETA(8/29 午报):交包 8/30 01:00–07:00;早沿(≤03:00)可达截止,晚沿不可达。
 - `lane.tzb_fe` — **tzb-fe(协调)**:实现审查+七段治理批量激活(预告:批一 = R′ stage adoption→successor prereg→materialize→bootstrap;批二 = legacy P″ prefix adoption→recovery03→combined preflight;每步仍各自 pre-capture/记录/fail-closed,激活与 closeout 各批一次)。
@@ -2453,7 +2455,6 @@
 - `task.end_to_end_composed_round` — 缺口(18:5x):尚无一轮'REPL指令→链路→盘上请求+信封→v17执行'合成实跑。桥=包内run_demo --execute→resident客户端→mint_envelope→8557(smoke 7)。v20两跑毕(~19:00)后loop lane重起取帧宿主跑一轮,回执end-to-end-v1 · ref: /Users/gl/tzb-lanes/live-loop-v1/receipts/end-to-end-composition-v1.json
 
 ## 5. Recent tail(journal 缓存,非权威)
-- 2026-09-04T22:38+0800 [FACT/facts] <tzb-fe> `pkg.chxy_12items_final_and_ledger` — 更正(R19):12项无任何一轮0 FAIL——18:32全12项(7 FAIL)+19:06定向重跑7-12;按各项最新结果8 PASS/4 SKIP/无FAIL。r4规则串=FIRST_RETURNED_BOX_NO_RESPONSE_SELECTION,不兼作颜色规则演示;README/CLAIMS/deck已改 · ref: /Users/gl/tzb-deliverables/judge-package-v1/README.md
 - 2026-09-04T22:40+0800 [FACT/facts] <m2c-exec> `package-handoff-2026-09-04` — 包已交快照:tests 36 过、resident SHA256SUMS 14/14、v20 start-notruth 保持 lane 同源(no-healthcheck 例外已写明);Mac 为权威、chxy pkg 已同步
 - 2026-09-04T22:41+0800 [FACT/facts] <tzb-fe> `milestone.composed_round_dl_r7_and_full12` — 里程碑:dl-r7 DISPATCHED(规则身份+bridge-receipt帧龄4.35/30+outcome.json入工件);chxy 22:31全12项 11 PASS/1 SKIP/0 FAIL(8/9/10自足化);5枚nonce账目;镜像重建含字体 9de43b377bcb;全部入包README · ref: /Users/gl/tzb-deliverables/judge-package-v1/evidence/verification-20260904/chxy-cold-install/smoke-all-20260904T223111/smoke-all.json
 - 2026-09-04T22:44+0800 [FACT/facts] <tzb-fe> `milestone.composed_round_dl_r7_and_full12` — 更正:v3 同tag两机各建一次→ID不同(labserver dcbb16101162/chxy 9de43b377bcb),与字体无关(字体走bind mount);22:31全12项11 PASS/1 SKIP执行者待tzb-b9确认;dl-r7 DISPATCHED工件入包;5枚nonce账目 · ref: /Users/gl/tzb-deliverables/judge-package-v1/evidence/verification-20260904/IMAGE-IDENTITY.md
@@ -2473,3 +2474,4 @@
 - 2026-09-04T22:53+0800 [FACT/facts] <deck-v2> `deck-v2-frozen-accepted-gen1636` — gen1636(tzb-a1,2026-09-04):22:50:29 PDF 接受为定稿并收线,deck v2 冻结不再改;LOCATOR_NAME 仍空待用户;12项0FAIL 留 NUMBERS-v2 不上页 · ref: /Users/gl/tzb-deliverables/ppt-v1/CHANGES-v2.md
 - 2026-09-04T22:54+0800 [FACT/facts] <review-zh-v1> `review.round20_execute1` — EXECUTE=1那行逐项核过:336s/6指令/4.4357of30/UNOBSERVABLE/93.2763在notes/nonce290798ad/8555unbound/侧车45s/frame_000000不匹配000014/账目六枚+改名披露 全对上;只差一处:该轮boxes_considered=1未写限定 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-round20-final.md
 - 2026-09-04T22:55+0800 [FACT/facts] <tzb-fe> `milestone.final_tarball_20260904` — 最终交付包 judge-package-v1-20260904-225455.tar.gz(727文件/224MB/CLEAN,sha256 同名 .sha256)已出于 tzb-deliverables/;deck v2 PDF 22:50;此后包内不改。待用户:模型名、push;待我:状态压缩 · ref: /Users/gl/tzb-deliverables/judge-package-v1-20260904-225455.tar.gz.sha256
+- 2026-09-04T23:00+0800 [FACT/facts] <review-zh-v1> `review.tarball_225455` — 开箱核tar 882095e0:sha一致/727文件/五份摘要全OK/ADDR_CHECK真接线且清洁/无密钥/239路径全解析/exec位全在。两项文档-命令不符:v20 from-source-lane清单4文件缺、REDACTION漏报两处vendor root@labserver · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-round21-tarball.md
