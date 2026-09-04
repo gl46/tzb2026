@@ -1,5 +1,5 @@
 <!-- GENERATED — 禁止直接 Edit/Write。唯一写入口: tools/statectl.py -->
-<!-- statectl protocol=2 stream=M2C generation=1946 updated=2026-09-05T05:42+0800 -->
+<!-- statectl protocol=2 stream=M2C generation=1948 updated=2026-09-05T05:55+0800 -->
 <!-- 自 M2C_STATE.md 迁移 sha=9dc690524ad77e6d51964237f11ee107e23e3ae92398d19e3424eb0676648fc6 -->
 
 # M2C 权威状态(活跃快照,协议 v2)
@@ -265,9 +265,11 @@
 
 - `review.report-final-4c38f395` — 报告终稿 md 4c38f395/pdf 46873d50 双向核查 PASS:旧措辞8项 md/pdf 各0命中,新措辞相对声明格底平面5处、净空2处 md/pdf 计数一致,抽样数字未动;仅1条非阻断建议(未给声明平面 0.47 m 与 9.65 mm 差值) · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-report-final-4c38f395.md
 
-- `milestone.final_tarball_20260905` — 终包 judge-package-v1-20260905-054100.tar.gz(892 文件/241MB/双门 CLEAN,sha c7c34f45…):v21 默认+确认轮、S0 拒绝轮 r1/r2、卡点 34、README 0595ace5、OQ24/25;旧包入 superseded/ · ref: /Users/gl/tzb-deliverables/judge-package-v1-20260905-054100.tar.gz.sha256
+- `milestone.final_tarball_20260905` — 终包 judge-package-v1-20260905-055444.tar.gz(892 文件/241MB/双门 CLEAN,sha 575f6e4c…):054100 审稿 PASS 后再修 N1–N5(判委→评委、README 0ee396b6);054100 与 235958 入 superseded/ · ref: /Users/gl/tzb-deliverables/judge-package-v1-20260905-055444.tar.gz.sha256
 
 - `delivery.morning_status_20260905` — 05:4x 交付态:终包 054100;报告 4c38f395/46873d50;deck v3 1bb70b2d/b0c0c73c;训练包 a5ba5091;GPT 终审包 0245;直播现场保持;待用户:LoRA 默认/模型名/push/GPT 结论/录视频/权重许可 · ref: /Users/gl/tzb-lanes/coordinator-notes/morning-report-20260905.md
+
+- `review.tarball_054100` — 终包 054100 开箱 PASS 无阻断:sha 三方一致 892 文件;11 份 SHA256SUMS 摘要不符 0;地址/密钥/运行态/模式位全清;U1-U6 全修;5 条非阻断(判委错字7处、拒绝轮无五面板未进判委文档、目标柱15/17nm两口径、launcher旧摘要无说明、README 9 处包外引用旧有) · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-tarball-054100.md
 
 ## 2. 归属与 lane
 - `lane.m2c_exec` — **M2C 执行会话**:successor implementation candidate,commit-free,于全新隔离 clone(Q′ 模式);已登记候选路径内自由编辑(R132.41)。ETA(8/29 午报):交包 8/30 01:00–07:00;早沿(≤03:00)可达截止,晚沿不可达。
@@ -364,8 +366,6 @@
 - `live-loop-open-items-ptr` — 直播窗口 lane 三项未结(不追):①我方驱动 exit0 端到端待下一轮真实运行②卡点30 未对失败样本证伪③发散保护行为未触发。紫柱倾倒已裁今日不修→OQ25(demo lane 写)
 
 ## 5. Recent tail(journal 缓存,非权威)
-- 2026-09-05T05:29+0800 [FACT/facts] <review-zh-v1> `review.deck-v3` — deck v3(53485e68/41fa4dd5)核:1条阻断D1(P02三句验收括注把拒绝原因写成'最左边不是注册颜色词',回执是REFUSE_UNREGISTERED_DESTINATION);P07四行表12个数对上Z3、禁写0项、备注齐;重建后按新sha再核 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-deck-v3.md
-- 2026-09-05T05:29+0800 [FACT/facts] <deck-v3> `deck_v3.candidate_164d1b38` — deck v3 定稿候选重建:P07 三处改'相对声明格底平面 +N mm'(tzb-56 裁,账本 466 行同步),守卫 PASS 0;pptx 164d1b38 pdf 7cee4b64;sha 已发 tzb-56/tzb-95(审稿) · ref: /Users/gl/tzb-deliverables/ppt-v3/CHANGES-v3.md
 - 2026-09-05T05:30+0800 [TASK/task] <exec-no-truth-v1> `rerun-refusal-after-c34-fix` — 等 demo lane 修完卡点34同步后,原样再跑一次拒绝轮(同句、不设EXECUTOR),落 receipts/s0-refusal-exit0-r2/,验 NOT DISPATCHED 只剩一行、exit 0、nonce不耗,sha 报 tzb-56
 - 2026-09-05T05:30+0800 [FACT/facts] <tzb-fe> `delivery.deck_v3_rebuilt_20260905` — 05:3x deck v3 重建 pptx 164d1b38/pdf 7cee4b64(P07 三处改'相对声明格底平面 +x mm',守卫 PASS),已交 tzb-95 核;NUMBERS-v2 461–467 改口(466 柱 Ø≈29.7×79.7、467 感知直径低估≈1.5%) · ref: /Users/gl/tzb-deliverables/ppt-v3/CHANGES-v3.md
 - 2026-09-05T05:31+0800 [FACT/facts] <tzb-fe> `pkg.readme_cell_floor_wording` — README §Verification 三处'x mm above the cell floor'改为 height_above_cell_floor_m 偏移口径(非净空),README bcdd7c8c→cad2b5cf;待拒绝轮 r2 行加入后再让 demo lane 同步 chxy · ref: /Users/gl/tzb-deliverables/judge-package-v1/README.md
@@ -384,3 +384,5 @@
 - 2026-09-05T05:38+0800 [FACT/facts] <review-zh-v1> `review.report-final-4c38f395` — 报告终稿 md 4c38f395/pdf 46873d50 双向核查 PASS:旧措辞8项 md/pdf 各0命中,新措辞相对声明格底平面5处、净空2处 md/pdf 计数一致,抽样数字未动;仅1条非阻断建议(未给声明平面 0.47 m 与 9.65 mm 差值) · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-report-final-4c38f395.md
 - 2026-09-05T05:42+0800 [FACT/facts] <tzb-fe> `milestone.final_tarball_20260905` — 终包 judge-package-v1-20260905-054100.tar.gz(892 文件/241MB/双门 CLEAN,sha c7c34f45…):v21 默认+确认轮、S0 拒绝轮 r1/r2、卡点 34、README 0595ace5、OQ24/25;旧包入 superseded/ · ref: /Users/gl/tzb-deliverables/judge-package-v1-20260905-054100.tar.gz.sha256
 - 2026-09-05T05:42+0800 [FACT/facts] <tzb-fe> `delivery.morning_status_20260905` — 05:4x 交付态:终包 054100;报告 4c38f395/46873d50;deck v3 1bb70b2d/b0c0c73c;训练包 a5ba5091;GPT 终审包 0245;直播现场保持;待用户:LoRA 默认/模型名/push/GPT 结论/录视频/权重许可 · ref: /Users/gl/tzb-lanes/coordinator-notes/morning-report-20260905.md
+- 2026-09-05T05:52+0800 [FACT/facts] <review-zh-v1> `review.tarball_054100` — 终包 054100 开箱 PASS 无阻断:sha 三方一致 892 文件;11 份 SHA256SUMS 摘要不符 0;地址/密钥/运行态/模式位全清;U1-U6 全修;5 条非阻断(判委错字7处、拒绝轮无五面板未进判委文档、目标柱15/17nm两口径、launcher旧摘要无说明、README 9 处包外引用旧有) · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-tarball-054100.md
+- 2026-09-05T05:55+0800 [FACT/facts] <tzb-fe> `milestone.final_tarball_20260905` — 终包 judge-package-v1-20260905-055444.tar.gz(892 文件/241MB/双门 CLEAN,sha 575f6e4c…):054100 审稿 PASS 后再修 N1–N5(判委→评委、README 0ee396b6);054100 与 235958 入 superseded/ · ref: /Users/gl/tzb-deliverables/judge-package-v1-20260905-055444.tar.gz.sha256
