@@ -1,5 +1,5 @@
 <!-- GENERATED — 禁止直接 Edit/Write。唯一写入口: tools/statectl.py -->
-<!-- statectl protocol=2 stream=M2C generation=1798 updated=2026-09-05T03:44+0800 -->
+<!-- statectl protocol=2 stream=M2C generation=1799 updated=2026-09-05T03:45+0800 -->
 <!-- 自 M2C_STATE.md 迁移 sha=9dc690524ad77e6d51964237f11ee107e23e3ae92398d19e3424eb0676648fc6 -->
 
 # M2C 权威状态(活跃快照,协议 v2)
@@ -2660,7 +2660,6 @@
 - `live-loop-executor-target-prim-pin` — vnext_dispatch_executor_v17.py:75 TARGET_PRIM_PATH 硬钉 cylinder_06,非青指令一律 EXECUTOR_ERROR 且已花 nonce;归 demo lane/协调裁
 
 ## 5. Recent tail(journal 缓存,非权威)
-- 2026-09-05T02:43+0800 [FACT/facts] <tzb-fe> `deliverable.training_bundle_v1` — 训练包第三版(tzb-76 02:4x):sha a5ba5091…(e669981e 作废);零代码改动;§1.2.1 执行环境约束(4 包外 digest 门、6 写死 ROOT、VENV_PYTHON)、§7 四件、PROVENANCE 对齐;偏离接受:仅第 5/6 步受限,第 7 步纯后处理;599/599 · ref: /Users/gl/tzb-deliverables/training-v1/training-bundle-v1.tar.sha256
 - 2026-09-05T02:43+0800 [FACT/facts] <tzb-fe> `deck.v3_guard_ready` — check_deck_v3.py 就位(tzb-55 02:44,ppt-v3/tools/):v2 表只读+覆盖层,正负例验过,v2 deck 过 v3 守卫;REQUIRED/CONDITIONAL 按 v2 页码故 v3 默认不启用(tzb-63 需重写);简报补充已写;报告筛查加两源后 513/507,禁写 0 · ref: /Users/gl/tzb-deliverables/ppt-v3/tools/check_deck_v3.py
 - 2026-09-05T02:44+0800 [EVENT] <m2c-exec> — S0 修复已同步 labserver(7 文件双侧 digest 一致);紫色轮 S2 被问 'purple cylinder'、绑 cylinder_05、三态 PRESENT/PASS/EXECUTE;executor 硬钉 cylinder_06 拒了,花 1 nonce · ref: receipts/live-window-s0-fix-purple-round-v1.json 3a182e63
 - 2026-09-05T02:44+0800 [DONE/task] <m2c-exec> `live-loop-sync-pkgnext-after-s0` — 完成 live-loop-sync-pkgnext-after-s0
@@ -2680,3 +2679,4 @@
 - 2026-09-05T03:44+0800 [FACT/facts] <exec-no-truth-v1> `acceptance-3-instructions` — 三句验收前半全过:①purple→cylinder_05 ②red→cylinder_01 S0/S2/选框/世界坐标均正确;③"料箱"未注册,S0 拒、S2 未调用 · ref: cold-install-chxy-v1/receipts/acceptance-3/
 - 2026-09-05T03:44+0800 [FACT/facts] <exec-no-truth-v1> `finding-29-executor-target-pinned` — 卡点29:v17:75 TARGET_PRIM_PATH 写死 cylinder_06 无 env 覆盖,检查在 1152 晚于 1149 envelope_consumed=先烧账目后拒;①②各烧一枚无运动 · ref: cold-install-chxy-v1/receipts/acceptance-3/r1/
 - 2026-09-05T03:44+0800 [EVENT] <exec-no-truth-v1> — 卡点30 取帧宿主 live_host_v1.py:129-134 固定 60 次 update 后无条件读 DOF,物理张量未就绪即 assert;两次起有一次挂 · ref: cold-install-chxy-v1/receipts/acceptance-3/capture-host-crash-r2-first-attempt.log
+- 2026-09-05T03:45+0800 [EVENT] <tzb-fe> — 03:4x 回音齐(除 tzb-b9):tzb-95/76/55/loop lane 未被卡,tzb-66 与 demo lane 曾卡已恢复;loop lane 监视 up、非青 nonce 0 花费,等 v21 定稿再同步 labserver 跑紫色;tzb-b9 待 04:13 三探 · ref: /Users/gl/tzb/state/journal/M2C/2026-09-05.md
