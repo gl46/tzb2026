@@ -1,5 +1,5 @@
 <!-- GENERATED — 禁止直接 Edit/Write。唯一写入口: tools/statectl.py -->
-<!-- statectl protocol=2 stream=M2C generation=1785 updated=2026-09-05T02:47+0800 -->
+<!-- statectl protocol=2 stream=M2C generation=1788 updated=2026-09-05T03:28+0800 -->
 <!-- 自 M2C_STATE.md 迁移 sha=9dc690524ad77e6d51964237f11ee107e23e3ae92398d19e3424eb0676648fc6 -->
 
 # M2C 权威状态(活跃快照,协议 v2)
@@ -2646,9 +2646,6 @@
 - `live-loop-executor-target-prim-pin` — vnext_dispatch_executor_v17.py:75 TARGET_PRIM_PATH 硬钉 cylinder_06,非青指令一律 EXECUTOR_ERROR 且已花 nonce;归 demo lane/协调裁
 
 ## 5. Recent tail(journal 缓存,非权威)
-- 2026-09-05T02:34+0800 [EVENT] <tzb-fe> — 用户 02:3x 去睡;夜间自主边界:推进 S0 验收/报告审查/训练包复核/deck v3/GPT 终审包,可代批小项;不 push、不切 LoRA 默认、不定模型名、不处理 GPT 审核结论;早上一页汇报 · ref: /Users/gl/tzb-lanes/coordinator-notes/delivery-checklist-20260904.md
-- 2026-09-05T02:35+0800 [FACT/facts] <tzb-fe> `defect.start_sh_chain_dropped_instruction` — 同类缺陷(demo lane 02:3x):start.sh 的 chain 分支未把参数传进 step_chain→评委敲的指令永远取默认句(青色);已改为传 "$@",bash -n 过,已同步 chxy(sha 664ea560…);其余三分支验收后统一改 · ref: /Users/gl/tzb-deliverables/judge-package-v1/scripts/start.sh
-- 2026-09-05T02:35+0800 [FACT/facts] <m2c-exec> `judge-path-instruction-not-forwarded` — start.sh 'chain) step_chain ;' 未传参,评委敲的指令到不了链、永远跑默认句;已改 step_chain "$@" 并同步 chxy。同类:另三分支待验收后统一。 · ref: /Users/gl/tzb-deliverables/judge-package-v1/scripts/start.sh
 - 2026-09-05T02:36+0800 [FACT/facts] <tzb-fe> `report.user_feedback_draft1` — 用户 02:3x 看报告初稿:'太烂,一点图没有,不像技术报告,去看网上同行怎么写';令 tzb-66 查同行技术报告结构,补十类图表(架构/流程/信任边界/场景与HUD截图/定位框/抓放对比/LoRA曲线/色相分布/时延/48例表),A4 排版带题注目录;第二稿 06:00,定稿 18:00 · ref: /Users/gl/tzb-deliverables/report-v1/
 - 2026-09-05T02:36+0800 [FACT/facts] <tzb-fe> `review.training_bundle_recut` — 训练包复核(e669981e):机械项全过;残留1阻断=§7'只有两件包外'与运行时矛盾(冻结入口硬校验4个包外文件、6入口写死ROOT、run_ab写死venv)。裁只补文档不改代码:执行环境约束段、§7实际件数、PROVENANCE对齐;tzb-76 08:00 重打 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-training-bundle-recut-v1.md
 - 2026-09-05T02:37+0800 [EVENT] <tzb-fe> — 用户 02:37:新会话走中转站、额度约 03:17 重置、任务可能中途终止;已设 03:19 探测(五条线发'继续任务+一行状态')与 03:43 复探(沉默者再发/改派);03:28 定时下达 deck v3 · ref: /Users/gl/tzb-lanes/coordinator-notes/delivery-checklist-20260904.md
@@ -2666,3 +2663,6 @@
 - 2026-09-05T02:44+0800 [TASK/task] <m2c-exec> `live-loop-executor-target-prim-pin` — vnext_dispatch_executor_v17.py:75 TARGET_PRIM_PATH 硬钉 cylinder_06,非青指令一律 EXECUTOR_ERROR 且已花 nonce;归 demo lane/协调裁
 - 2026-09-05T02:45+0800 [FACT/facts] <tzb-fe> `defect.executor_target_prim_hardcoded` — 阻断(02:4x,两线证实):S0 修后链前半对紫色全对(→cylinder_05),但 v17 写死目标 cylinder_06,检查在 envelope_consumed 后→REJECTED 先烧 nonce。裁 v21 变体(目标取自请求+注册校验、检查前移),04:30 交 · ref: /Users/gl/tzb-deliverables/judge-package-v1/agent/executor/resident/vnext_dispatch_executor_v17.py
 - 2026-09-05T02:47+0800 [FACT/facts] <tzb-fe> `s0.purple_round_slots_confirmed` — 紫色轮 preregistration.json 证实 S0 分槽:purple cylinder / blue bin / RELOCATE,colour_term 由英文短语规则取,目的地色词不入物体短语;注:规则注册色 15 vs 场景可达 9,黑/棕/灰/粉/白在铸造前拒 · ref: /Users/gl/tzb-lanes/live-loop-v1/receipts/live-window-s0-fix-purple-round-v1-addendum-v1.json
+- 2026-09-05T02:48+0800 [EVENT] <m2c-exec> — 更正:S0 三键在链 trace 里是'不存在'非'null'(get() 不分缺键与 null);S0 记录在 preregistration.json;非青轮次停至 v21 · ref: receipts/live-window-s0-fix-purple-round-v1-addendum-v2-CORRECTION.json
+- 2026-09-05T03:19+0800 [EVENT] <tzb-fe> — 03:19 额度重置探测:七条线(tzb-66/tzb-76/demo lane/tzb-b9/loop lane/tzb-55/tzb-95)ListAgents 均在线,名字未变(按 sid 核);journal 02:48 后无新活动(疑额度耗尽);已各发'继续任务+一行状态';03:43 复探 · ref: /Users/gl/tzb/state/journal/M2C/2026-09-05.md
+- 2026-09-05T03:28+0800 [EVENT] <tzb-fe> — 03:28 定时:deck v3 任务已下达 tzb-63(sid f4a8adc2 核名无变),按简报用 ppt-master 重做,初稿 09:00 / 定稿 16:00,守卫 check_deck_v3,统一标题 · ref: /Users/gl/tzb-lanes/coordinator-notes/brief-deck-v3-pptmaster-20260905.md
