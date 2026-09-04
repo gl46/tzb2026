@@ -1,5 +1,5 @@
 <!-- GENERATED — 禁止直接 Edit/Write。唯一写入口: tools/statectl.py -->
-<!-- statectl protocol=2 stream=M2C generation=1831 updated=2026-09-05T04:15+0800 -->
+<!-- statectl protocol=2 stream=M2C generation=1838 updated=2026-09-05T04:18+0800 -->
 <!-- 自 M2C_STATE.md 迁移 sha=9dc690524ad77e6d51964237f11ee107e23e3ae92398d19e3424eb0676648fc6 -->
 
 # M2C 权威状态(活跃快照,协议 v2)
@@ -2137,6 +2137,18 @@
 
 - `deck_v3.draft_exported` — deck v3 初稿已导出:ppt-master Default 路径,20 页原生 PPTX+PDF 落 ppt-v3/xh-202607-deck-v3.pptx/.pdf;final gate 0 错;守卫顶层 PASS 但导出器把根组打成 GROUP,守卫不递归,已用同表递归扫 PASS · ref: /Users/gl/tzb-deliverables/ppt-v3/xh-202607-deck-v3.pptx
 
+- `review.report-draft2` — 报告二稿图表核:1条阻断(出处行约半数路径无L/D前缀且不在评委包内,acceptance-receipt-v1.json包内同名却是v20那份)。四张抽查图逐项对上数据源(fig-smoke 42格全对);R1R2与两缺口闭环并核到工件 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-report-draft2-figures.md
+
+- `deck_v3.draft_reported` — deck v3 初稿路径 04:2x 报 tzb-56(sid 5ae1238c):ppt-v3/xh-202607-deck-v3.pptx/.pdf + CHANGES-v3.md;待裁:演示机 Win/Mac、守卫组递归(tzb-55)、S0/三指令/v21 更新 12:00 前 · ref: /Users/gl/tzb-deliverables/ppt-v3/CHANGES-v3.md
+
+- `deck_v3.rulings_0420` — tzb-56 三裁(04:2x):演示机 Mac、PDF 为主交付;讲者备注开,16:00 前填,内容只出 CLAIMS/NUMBERS/报告;加宽文本框接受。S0 三槽/紫青入箱/红 attach 失败 12:00 前给定稿口径再改 P02/P04/P07 · ref: /Users/gl/tzb-lanes/deck-v3/LANE_NOTES.md
+
+- `deck.v3_draft1` — deck v3 初稿(tzb-63 04:15,ppt-master):20 页 PPTX+PDF,标题按变更 14,P09 已改标签;守卫因 GROUP 空转→tzb-55 加组递归,递归扫 484 框 0 项;裁:Mac 字体、PDF 主件、备注开、加宽框接受 · ref: /Users/gl/tzb-deliverables/ppt-v3/CHANGES-v3.md
+
+- `review.report_draft2` — 审查报告二稿:1 阻断 F1(出处行约半数路径未带附录 C 根前缀,evidence 同名 v20 回执易混)→tzb-66 逐条加前缀;四图数据/R1/R2/缺口/术语/留位全过 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-report-draft2-figures.md
+
+- `live_window.v21_cyan_regression` — labserver 青色回归轮 v21 通过(04:16):cylinder_06 六原语,位移 0.659 m 入格(离底 30.2 mm),grasp_gate 过,邻件<4.1µm;与紫色轮并列两点非成功率;现场保持不动 · ref: /Users/gl/tzb-lanes/live-loop-v1/receipts/live-window-v21-cyan-regression-round-v1.json
+
 ## 2. 归属与 lane
 - `lane.m2c_exec` — **M2C 执行会话**:successor implementation candidate,commit-free,于全新隔离 clone(Q′ 模式);已登记候选路径内自由编辑(R132.41)。ETA(8/29 午报):交包 8/30 01:00–07:00;早沿(≤03:00)可达截止,晚沿不可达。
 - `lane.tzb_fe` — **tzb-fe(协调)**:实现审查+七段治理批量激活(预告:批一 = R′ stage adoption→successor prereg→materialize→bootstrap;批二 = legacy P″ prefix adoption→recovery03→combined preflight;每步仍各自 pre-capture/记录/fail-closed,激活与 closeout 各批一次)。
@@ -2712,13 +2724,6 @@
 - `live-loop-executor-target-prim-pin` — vnext_dispatch_executor_v17.py:75 TARGET_PRIM_PATH 硬钉 cylinder_06,非青指令一律 EXECUTOR_ERROR 且已花 nonce;归 demo lane/协调裁
 
 ## 5. Recent tail(journal 缓存,非权威)
-- 2026-09-05T03:56+0800 [EVENT] <m2c-exec> — 卡点30 已修(等 physics tensor 有效,预算600/60s)两份双侧 digest 一致;新宿主 HOST_READY,新 dataset root;v21 已同步6文件对digest;紫色轮待切 EXECUTOR=v21 · ref: receipts/live-window-kadian30-physics-tensor-wait-v1.json 7e209619
-- 2026-09-05T03:56+0800 [FACT/facts] <tzb-fe> `live_window.v21_switch_plan` — 卡点30 已修(谓词等待;本次 extra_updates=0 不证治好);v21 已同步 labserver;裁:loop lane 切执行器,先等 15 min v21+视口叠层变体,否则纯 v21 跑一轮后切回视口 v3;chxy 侧由 tzb-b9 跑 · ref: /Users/gl/tzb-lanes/live-loop-v1/receipts/live-window-kadian30-physics-tensor-wait-v1.json
-- 2026-09-05T04:02+0800 [FACT/facts] <m2c-exec> `labonly-viewport-v21` — v21 lab-only 视口变体已建并双侧落盘(lane + labserver /var/tmp/labonly-viewport-v1),v21->变体纯增 171 行 0 删 0 改,插入行与 v17 变体逐行相同;不进包 · ref: /Users/gl/tzb-lanes/agent-demo-v3-isaac-rgbd/labonly-viewport-v1/vnext_dispatch_executor_v21_viewport_labonly.py
-- 2026-09-05T04:02+0800 [FACT/facts] <deck-v2> `deck-v2.1-label-fix` — deck v2.1 出:P9 确定性各段 3.04s 改除S4外各段(确定性S3+S5=0.045s);v2 未动;守卫 PASS;pdf 晚 33s;字体纯 HiraginoSansGB · ref: /Users/gl/tzb-deliverables/ppt-v1/CHANGES-v2.md
-- 2026-09-05T04:02+0800 [FACT/facts] <deck-v2> `forbidden-v2-变更14` — FORBIDDEN_V2 加 确定性各段;deck v3 守卫与报告筛查都 import 这张表,一处加三处生效;反向验证旧v2 FAIL、v2.1 PASS、确定性生成 未误伤 · ref: /Users/gl/tzb-deliverables/ppt-v1/check_deck_v2.py
-- 2026-09-05T04:02+0800 [FACT/facts] <deck-v2> `报告图筛查缺口` — 报告 :399/:517 与 figs/fig-latency.png 图内标题仍含旧句(归 tzb-66);8张SVG无来源行;make_figs.py 只在 tzb-lanes 不在交付目录 · ref: /Users/gl/tzb-deliverables/report-v1/figs/FIGURE-DATA-SOURCES.md
-- 2026-09-05T04:02+0800 [FACT/facts] <tzb-fe> `live_window.v21_viewport_variant_ready` — v21 视口叠层变体就位(04:0x):vnext_dispatch_executor_v21_viewport_labonly.py(b1e2a856…,v21 上纯增 171 行)+ v6 启动器(EXECUTOR 可覆盖);双侧 sha 一致,不进包;loop lane 可切并跑紫色直播轮 · ref: /var/tmp/labonly-viewport-v1/
 - 2026-09-05T04:03+0800 [FACT/facts] <tzb-fe> `deck.v2_1_relabel` — deck v2.1 出(03:58):只改 P9 那句→'除 S4 外各段 3.04 s(确定性 S3+S5 0.045 s)';守卫 0 项、pdf 晚于 pptx、无字体回退;NUMBERS-v2:236 已改;禁写表加'确定性各段';PENDING-v2.1.md 待办未随此版(归 v3) · ref: /Users/gl/tzb-deliverables/ppt-v1/xh-202607-deck-v2.1.pdf
 - 2026-09-05T04:06+0800 [FACT/facts] <report-zh-v1> `report.zh_v2_draft2` — 技术报告第二稿(图文版)04:06 交:report-v1/技术报告-XH-202607.{md,pdf} 53 页,24 图/22 表带题注与出处;含 R1/R2、2.966 引回执、训练包指针、超参表;S0 验收与紫/红轮次仍【待补】 · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.pdf
 - 2026-09-05T04:10+0800 [FACT/facts] <tzb-fe> `report.draft2_delivered` — 报告第二稿图文版(tzb-66 04:09):53 页 A4,24 图 22 表带题注与出处行,含 R1/R2/训练包指针/自家超参/3.04 s 改标签;待补三处(S0 验收、紫红两轮、附录 B 末行);审查 06:30 核图表出处;数字源加训练包 README · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.pdf
@@ -2732,3 +2737,10 @@
 - 2026-09-05T04:15+0800 [FACT/facts] <deck-v2> `报告二稿复筛PASS` — 第二稿 772数 命中763/归一9/未命中0,禁写0,图表节0;加 training-README 为源;拒收 logs(grad_norm 2.9667 撞 2.966 rad);NUMBERS-v2 加出处 Z · ref: /Users/gl/tzb-deliverables/report-v1/tools/screen_report.py
 - 2026-09-05T04:15+0800 [FACT/facts] <deck-v3> `deck_v3.draft_exported` — deck v3 初稿已导出:ppt-master Default 路径,20 页原生 PPTX+PDF 落 ppt-v3/xh-202607-deck-v3.pptx/.pdf;final gate 0 错;守卫顶层 PASS 但导出器把根组打成 GROUP,守卫不递归,已用同表递归扫 PASS · ref: /Users/gl/tzb-deliverables/ppt-v3/xh-202607-deck-v3.pptx
 - 2026-09-05T04:15+0800 [FACT/facts] <tzb-fe> `report.draft2_screen` — 第二稿复筛 PASS(0 项):772 数命中 763/归一 9/未命中 0;NUMBERS-v2 A6 加 2.966 rad/0.53 mm/0.655 m 行(出处 Z);Y 补登记;v3 简报补充 §6 转 PENDING-v2.1 五项 · ref: /Users/gl/tzb-deliverables/ppt-v1/NUMBERS-v2.md
+- 2026-09-05T04:16+0800 [EVENT] <m2c-exec> — v21 青色回归轮无退步:六基元全完成,target cylinder_06,grasp_gate 过,位移 0.659m 入料箱,邻件<4.2um,ordinal 0;容器与机位保持不动待用户 · ref: receipts/live-window-v21-cyan-regression-round-v1.json
+- 2026-09-05T04:16+0800 [FACT/facts] <review-zh-v1> `review.report-draft2` — 报告二稿图表核:1条阻断(出处行约半数路径无L/D前缀且不在评委包内,acceptance-receipt-v1.json包内同名却是v20那份)。四张抽查图逐项对上数据源(fig-smoke 42格全对);R1R2与两缺口闭环并核到工件 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-report-draft2-figures.md
+- 2026-09-05T04:16+0800 [FACT/facts] <deck-v3> `deck_v3.draft_reported` — deck v3 初稿路径 04:2x 报 tzb-56(sid 5ae1238c):ppt-v3/xh-202607-deck-v3.pptx/.pdf + CHANGES-v3.md;待裁:演示机 Win/Mac、守卫组递归(tzb-55)、S0/三指令/v21 更新 12:00 前 · ref: /Users/gl/tzb-deliverables/ppt-v3/CHANGES-v3.md
+- 2026-09-05T04:18+0800 [FACT/facts] <deck-v3> `deck_v3.rulings_0420` — tzb-56 三裁(04:2x):演示机 Mac、PDF 为主交付;讲者备注开,16:00 前填,内容只出 CLAIMS/NUMBERS/报告;加宽文本框接受。S0 三槽/紫青入箱/红 attach 失败 12:00 前给定稿口径再改 P02/P04/P07 · ref: /Users/gl/tzb-lanes/deck-v3/LANE_NOTES.md
+- 2026-09-05T04:18+0800 [FACT/facts] <tzb-fe> `deck.v3_draft1` — deck v3 初稿(tzb-63 04:15,ppt-master):20 页 PPTX+PDF,标题按变更 14,P09 已改标签;守卫因 GROUP 空转→tzb-55 加组递归,递归扫 484 框 0 项;裁:Mac 字体、PDF 主件、备注开、加宽框接受 · ref: /Users/gl/tzb-deliverables/ppt-v3/CHANGES-v3.md
+- 2026-09-05T04:18+0800 [FACT/facts] <tzb-fe> `review.report_draft2` — 审查报告二稿:1 阻断 F1(出处行约半数路径未带附录 C 根前缀,evidence 同名 v20 回执易混)→tzb-66 逐条加前缀;四图数据/R1/R2/缺口/术语/留位全过 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-report-draft2-figures.md
+- 2026-09-05T04:18+0800 [FACT/facts] <tzb-fe> `live_window.v21_cyan_regression` — labserver 青色回归轮 v21 通过(04:16):cylinder_06 六原语,位移 0.659 m 入格(离底 30.2 mm),grasp_gate 过,邻件<4.1µm;与紫色轮并列两点非成功率;现场保持不动 · ref: /Users/gl/tzb-lanes/live-loop-v1/receipts/live-window-v21-cyan-regression-round-v1.json
