@@ -1,5 +1,5 @@
 <!-- GENERATED — 禁止直接 Edit/Write。唯一写入口: tools/statectl.py -->
-<!-- statectl protocol=2 stream=M2C generation=1851 updated=2026-09-05T04:25+0800 -->
+<!-- statectl protocol=2 stream=M2C generation=1856 updated=2026-09-05T04:28+0800 -->
 <!-- 自 M2C_STATE.md 迁移 sha=9dc690524ad77e6d51964237f11ee107e23e3ae92398d19e3424eb0676648fc6 -->
 
 # M2C 权威状态(活跃快照,协议 v2)
@@ -2169,6 +2169,14 @@
 
 - `guard.v3_recursion_and_idle_check` — v3 守卫修好(tzb-55 04:2x):组递归后扫 484 框/12920 字 PASS 0 项;原守卫对导出件空转(0 框仍 PASS)→加'0 文本框即 FAIL'空转自检;备注纳入禁写;三条负例验;批报告筛查与 v2.1 守卫同补空转自检 · ref: /Users/gl/tzb-deliverables/ppt-v3/tools/check_deck_v3.py
 
+- `deck_v3.guard_pass` — check_deck_v3(tzb-55 修正版:组递归+几何+备注)对 deck v3 pptx 8f69e890 复核 PASS 0 项:484 框/12920 字,几何 20 页全认出,备注 20 页 8088 字 0 项;CHANGES-v3 已更新;待 12:00 口径改 P02/P04/P07 · ref: /Users/gl/tzb-deliverables/ppt-v3/CHANGES-v3.md
+
+- `v21-cyan-no-regression` — v21 青色轮与 v17 基线逐项对齐:六原语全成、落格内,各项差1e-7~1e-5(释放点偏移毫米级);判据成立=v21在青色上不退步(一轮对一轮) · ref: cold-install-chxy-v1/receipts/v21-rerun/cyan/
+
+- `v21-red-rootcause-corrected` — 红轮根因更正(demo lane 提出,我逐项复核对上):手停在离柱290mm、伺服把残差当标定偏置固定3次不判收敛(0.331→0.515→0.325);判别量=离基座水平半径,红0.232失败/紫0.354青0.416成功 · ref: cold-install-chxy-v1/receipts/v21-rerun/red/round-001/result-v17.json
+
+- `acceptance.v21_three_rounds_chxy` — chxy v21 三轮:青色与 v17 逐项对齐(差≤1e-5)不退步;紫色六原语落格;红色干净带码停止(exit 0)但撞邻件 27 mm(近基座不可达+伺服不判收敛);ordinal 全 0;报告 1654 行入包;卡点 32 升中 · ref: /Users/gl/tzb-deliverables/judge-package-v1/evidence/verification-20260904/chxy-cold-install/rounds/v21-rerun-20260905/
+
 ## 2. 归属与 lane
 - `lane.m2c_exec` — **M2C 执行会话**:successor implementation candidate,commit-free,于全新隔离 clone(Q′ 模式);已登记候选路径内自由编辑(R132.41)。ETA(8/29 午报):交包 8/30 01:00–07:00;早沿(≤03:00)可达截止,晚沿不可达。
 - `lane.tzb_fe` — **tzb-fe(协调)**:实现审查+七段治理批量激活(预告:批一 = R′ stage adoption→successor prereg→materialize→bootstrap;批二 = legacy P″ prefix adoption→recovery03→combined preflight;每步仍各自 pre-capture/记录/fail-closed,激活与 closeout 各批一次)。
@@ -2744,11 +2752,6 @@
 - `live-loop-executor-target-prim-pin` — vnext_dispatch_executor_v17.py:75 TARGET_PRIM_PATH 硬钉 cylinder_06,非青指令一律 EXECUTOR_ERROR 且已花 nonce;归 demo lane/协调裁
 
 ## 5. Recent tail(journal 缓存,非权威)
-- 2026-09-05T04:16+0800 [EVENT] <m2c-exec> — v21 青色回归轮无退步:六基元全完成,target cylinder_06,grasp_gate 过,位移 0.659m 入料箱,邻件<4.2um,ordinal 0;容器与机位保持不动待用户 · ref: receipts/live-window-v21-cyan-regression-round-v1.json
-- 2026-09-05T04:16+0800 [FACT/facts] <review-zh-v1> `review.report-draft2` — 报告二稿图表核:1条阻断(出处行约半数路径无L/D前缀且不在评委包内,acceptance-receipt-v1.json包内同名却是v20那份)。四张抽查图逐项对上数据源(fig-smoke 42格全对);R1R2与两缺口闭环并核到工件 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-report-draft2-figures.md
-- 2026-09-05T04:16+0800 [FACT/facts] <deck-v3> `deck_v3.draft_reported` — deck v3 初稿路径 04:2x 报 tzb-56(sid 5ae1238c):ppt-v3/xh-202607-deck-v3.pptx/.pdf + CHANGES-v3.md;待裁:演示机 Win/Mac、守卫组递归(tzb-55)、S0/三指令/v21 更新 12:00 前 · ref: /Users/gl/tzb-deliverables/ppt-v3/CHANGES-v3.md
-- 2026-09-05T04:18+0800 [FACT/facts] <deck-v3> `deck_v3.rulings_0420` — tzb-56 三裁(04:2x):演示机 Mac、PDF 为主交付;讲者备注开,16:00 前填,内容只出 CLAIMS/NUMBERS/报告;加宽文本框接受。S0 三槽/紫青入箱/红 attach 失败 12:00 前给定稿口径再改 P02/P04/P07 · ref: /Users/gl/tzb-lanes/deck-v3/LANE_NOTES.md
-- 2026-09-05T04:18+0800 [FACT/facts] <tzb-fe> `deck.v3_draft1` — deck v3 初稿(tzb-63 04:15,ppt-master):20 页 PPTX+PDF,标题按变更 14,P09 已改标签;守卫因 GROUP 空转→tzb-55 加组递归,递归扫 484 框 0 项;裁:Mac 字体、PDF 主件、备注开、加宽框接受 · ref: /Users/gl/tzb-deliverables/ppt-v3/CHANGES-v3.md
 - 2026-09-05T04:18+0800 [FACT/facts] <tzb-fe> `review.report_draft2` — 审查报告二稿:1 阻断 F1(出处行约半数路径未带附录 C 根前缀,evidence 同名 v20 回执易混)→tzb-66 逐条加前缀;四图数据/R1/R2/缺口/术语/留位全过 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-report-draft2-figures.md
 - 2026-09-05T04:18+0800 [FACT/facts] <tzb-fe> `live_window.v21_cyan_regression` — labserver 青色回归轮 v21 通过(04:16):cylinder_06 六原语,位移 0.659 m 入格(离底 30.2 mm),grasp_gate 过,邻件<4.1µm;与紫色轮并列两点非成功率;现场保持不动 · ref: /Users/gl/tzb-lanes/live-loop-v1/receipts/live-window-v21-cyan-regression-round-v1.json
 - 2026-09-05T04:19+0800 [FACT/facts] <exec-no-truth-v1> `finding-32-ping-reports-intent` — 卡点32改判[中]:v21 运行时自述身份落后——nonce消费记录写v15(:1224)、PING写v17(:2216)、产物名result-v17、grasp_gate.why是常量(:1806);行为无误,溯源字符串错 · ref: cold-install-chxy-v1/receipts/v21-rerun/
@@ -2764,3 +2767,8 @@
 - 2026-09-05T04:23+0800 [FACT/facts] <tzb-fe> `deck.v3_rebuilt_0425` — deck v3 重建(04:25):讲者备注 20/20、Mac 字体 PDF 主件、加宽框保留;守卫组递归生效禁写 0,几何断言 32 项误报待 tzb-55 修;P02/P04/P07 等定稿口径 · ref: /Users/gl/tzb-deliverables/ppt-v3/CHANGES-v3.md
 - 2026-09-05T04:24+0800 [FACT/facts] <deck-v2> `v3守卫空转已修` — check_deck_v3 曾对全组化导出件 0页0字仍报PASS;加组递归(484框/12920字)+紧缩空间匹配(88框含\x0b)+备注扫描(20页)+几何按几何内容认条+空转自检;v2 未动 · ref: /Users/gl/tzb-deliverables/ppt-v3/tools/check_deck_v3.py
 - 2026-09-05T04:25+0800 [FACT/facts] <tzb-fe> `guard.v3_recursion_and_idle_check` — v3 守卫修好(tzb-55 04:2x):组递归后扫 484 框/12920 字 PASS 0 项;原守卫对导出件空转(0 框仍 PASS)→加'0 文本框即 FAIL'空转自检;备注纳入禁写;三条负例验;批报告筛查与 v2.1 守卫同补空转自检 · ref: /Users/gl/tzb-deliverables/ppt-v3/tools/check_deck_v3.py
+- 2026-09-05T04:26+0800 [FACT/facts] <deck-v3> `deck_v3.guard_pass` — check_deck_v3(tzb-55 修正版:组递归+几何+备注)对 deck v3 pptx 8f69e890 复核 PASS 0 项:484 框/12920 字,几何 20 页全认出,备注 20 页 8088 字 0 项;CHANGES-v3 已更新;待 12:00 口径改 P02/P04/P07 · ref: /Users/gl/tzb-deliverables/ppt-v3/CHANGES-v3.md
+- 2026-09-05T04:26+0800 [FACT/facts] <exec-no-truth-v1> `v21-cyan-no-regression` — v21 青色轮与 v17 基线逐项对齐:六原语全成、落格内,各项差1e-7~1e-5(释放点偏移毫米级);判据成立=v21在青色上不退步(一轮对一轮) · ref: cold-install-chxy-v1/receipts/v21-rerun/cyan/
+- 2026-09-05T04:26+0800 [FACT/facts] <exec-no-truth-v1> `v21-red-rootcause-corrected` — 红轮根因更正(demo lane 提出,我逐项复核对上):手停在离柱290mm、伺服把残差当标定偏置固定3次不判收敛(0.331→0.515→0.325);判别量=离基座水平半径,红0.232失败/紫0.354青0.416成功 · ref: cold-install-chxy-v1/receipts/v21-rerun/red/round-001/result-v17.json
+- 2026-09-05T04:26+0800 [EVENT] <exec-no-truth-v1> — v21 三色各一轮跑完:青(与v17逐项对齐)、紫(落格内)、红(近基座顶抓不可达);nonce 9→13,ordinal_consumed 全 0
+- 2026-09-05T04:28+0800 [FACT/facts] <tzb-fe> `acceptance.v21_three_rounds_chxy` — chxy v21 三轮:青色与 v17 逐项对齐(差≤1e-5)不退步;紫色六原语落格;红色干净带码停止(exit 0)但撞邻件 27 mm(近基座不可达+伺服不判收敛);ordinal 全 0;报告 1654 行入包;卡点 32 升中 · ref: /Users/gl/tzb-deliverables/judge-package-v1/evidence/verification-20260904/chxy-cold-install/rounds/v21-rerun-20260905/
