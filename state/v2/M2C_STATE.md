@@ -1,5 +1,5 @@
 <!-- GENERATED — 禁止直接 Edit/Write。唯一写入口: tools/statectl.py -->
-<!-- statectl protocol=2 stream=M2C generation=1791 updated=2026-09-05T03:43+0800 -->
+<!-- statectl protocol=2 stream=M2C generation=1798 updated=2026-09-05T03:44+0800 -->
 <!-- 自 M2C_STATE.md 迁移 sha=9dc690524ad77e6d51964237f11ee107e23e3ae92398d19e3424eb0676648fc6 -->
 
 # M2C 权威状态(活跃快照,协议 v2)
@@ -2075,6 +2075,16 @@
 
 - `review-v3-final-bundle-delivered` — 不脱敏GPT终审包已出:review-v3/final-review-bundle-20260905T0245(499文件/29MB,tar.gz 6.6MB sha 12f85317)。保留内网地址与绝对路径;排除密钥/权重/图像/视频;凭据扫描0命中,往返499/499。含REVIEW-BRIEF-FINAL.md · ref: /Users/gl/tzb-deliverables/review-v3/final-review-bundle-20260905T0245/REVIEW-BRIEF-FINAL.md
 
+- `report.zh_v2_in_progress` — 报告第二稿(图文版)进行中:图件脚本 build/make_figs.py+SVG 示意图,结构改为摘要/引言/总体设计/模块/实验/讨论/结论/参考文献/附录;含 R1/R2、2.966 引回执、训练包指针、超参表;目标 06:00 · ref: /Users/gl/tzb-lanes/report-zh-v1/LANE-NOTES.md
+
+- `deliverable.gpt_final_review_bundle` — GPT 终审包已交(tzb-76 03:4x):review-v3/final-review-bundle-20260905T0245(499 文件/29MB,tar 6.6MB,sha 12f85317…),不脱敏、无密钥/权重/图像;十项齐+REVIEW-BRIEF-FINAL.md;brief 明写视频尚无交付件 · ref: /Users/gl/tzb-deliverables/review-v3/final-review-bundle-20260905T0245.tar.gz.sha256
+
+- `executor.v21_in_progress` — v21 过半(demo lane,04:15 交):builder 精确替换 v17 八处;目标取自请求+烘入六注册 prim 校验;邻居=六减目标;检查在 envelope_consumed 前拒不花 nonce;新拒绝本地异常同形回包;两自主决定接受 · ref: /Users/gl/tzb-lanes/coordinator-notes/v21-executor-change-list-20260905.md
+
+- `acceptance-3-instructions` — 三句验收前半全过:①purple→cylinder_05 ②red→cylinder_01 S0/S2/选框/世界坐标均正确;③"料箱"未注册,S0 拒、S2 未调用 · ref: cold-install-chxy-v1/receipts/acceptance-3/
+
+- `finding-29-executor-target-pinned` — 卡点29:v17:75 TARGET_PRIM_PATH 写死 cylinder_06 无 env 覆盖,检查在 1152 晚于 1149 envelope_consumed=先烧账目后拒;①②各烧一枚无运动 · ref: cold-install-chxy-v1/receipts/acceptance-3/r1/
+
 ## 2. 归属与 lane
 - `lane.m2c_exec` — **M2C 执行会话**:successor implementation candidate,commit-free,于全新隔离 clone(Q′ 模式);已登记候选路径内自由编辑(R132.41)。ETA(8/29 午报):交包 8/30 01:00–07:00;早沿(≤03:00)可达截止,晚沿不可达。
 - `lane.tzb_fe` — **tzb-fe(协调)**:实现审查+七段治理批量激活(预告:批一 = R′ stage adoption→successor prereg→materialize→bootstrap;批二 = legacy P″ prefix adoption→recovery03→combined preflight;每步仍各自 pre-capture/记录/fail-closed,激活与 closeout 各批一次)。
@@ -2650,13 +2660,6 @@
 - `live-loop-executor-target-prim-pin` — vnext_dispatch_executor_v17.py:75 TARGET_PRIM_PATH 硬钉 cylinder_06,非青指令一律 EXECUTOR_ERROR 且已花 nonce;归 demo lane/协调裁
 
 ## 5. Recent tail(journal 缓存,非权威)
-- 2026-09-05T02:37+0800 [FACT/facts] <deck-v2> `report-v1-screen-round1` — 报告初稿筛查:禁写 0 项(4.11 逐字句豁免锚在 CLAIMS-0903:145);数字 513 个 507 命中,5 项待裁(8192、2.97/0.53、两个引用年份);23 个数仅外源 · ref: /Users/gl/tzb-deliverables/report-v1/tools/screen_report.py
-- 2026-09-05T02:38+0800 [FACT/facts] <tzb-fe> `tests.judge_path_instruction_guard` — demo lane 加 5 条回归(start.sh 传参静态断言、假 docker 跑真 start.sh 断言指令回显、M2C_EXPRESSION 覆盖可见、不再写死 cyan、trace.instruction 逐字),回退即 2 failed;全套 65 过;已放行同步 chxy · ref: /Users/gl/tzb-deliverables/judge-package-v1/tests/test_judge_path_instruction_reaches_the_chain_v1.py
-- 2026-09-05T02:38+0800 [FACT/facts] <tzb-fe> `report.screen_results_draft1` — 报告初稿筛查(tzb-55):禁写 0 项;数字 513/507 命中,5 待裁→裁:加 serve-27b.md 与 live-demo.md 为源,2.97 改 2.966 引回执;豁免锚定受控源原句;deck v3 用 check_deck_v3(覆盖层)不用 v2 守卫 · ref: /Users/gl/tzb-deliverables/report-v1/tools/
-- 2026-09-05T02:39+0800 [FACT/facts] <m2c-exec> `judge-package-test-count` — judge-package tests=65(原 39+S0 21+评委路参数 5);跑在宿主解释器,镜像内无 pytest。回归守卫已对旧代码验证会 FAIL。 · ref: /Users/gl/tzb-deliverables/judge-package-v1/tests
-- 2026-09-05T02:42+0800 [FACT/facts] <review-zh-v1> `review.report-draft1` — 报告初稿:2条阻断(§2.6 vLLM 0.25.1配上A配方参数是包内不存在的组合;§4.10 2.97rad/0.53mm无来源)。禁写/留位/术语三项通过;四段到位但缺训练包指针且自家超参比复现上游还薄 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-report-draft1-v1.md
-- 2026-09-05T02:42+0800 [FACT/facts] <deck-v2> `deck-v3-guard-ready` — ppt-v3/tools/check_deck_v3.py 与简报补充已就位(03:28 前);覆盖层放行规划推理智能体、禁通用自主智能体、闭环位姿估计逐处判;v2 表未动;REQUIRED 未继承已注明 · ref: /Users/gl/tzb-deliverables/ppt-v3/tools/简报补充-给-tzb-63.md
-- 2026-09-05T02:42+0800 [FACT/facts] <tzb-fe> `review.report_draft1` — 审查报告初稿:2 阻断(R1 §2.6 vLLM 两套配方混写→按 serve-27b.md A 套;R2 2.97 rad/0.53 mm→引 physics-redrive 回执原值 2.966)+2 缺口(加训练包指针;自家超参补齐);禁写/术语/留位通过;已转 tzb-66 并入第二稿 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-report-draft1-v1.md
 - 2026-09-05T02:43+0800 [FACT/facts] <tzb-fe> `deliverable.training_bundle_v1` — 训练包第三版(tzb-76 02:4x):sha a5ba5091…(e669981e 作废);零代码改动;§1.2.1 执行环境约束(4 包外 digest 门、6 写死 ROOT、VENV_PYTHON)、§7 四件、PROVENANCE 对齐;偏离接受:仅第 5/6 步受限,第 7 步纯后处理;599/599 · ref: /Users/gl/tzb-deliverables/training-v1/training-bundle-v1.tar.sha256
 - 2026-09-05T02:43+0800 [FACT/facts] <tzb-fe> `deck.v3_guard_ready` — check_deck_v3.py 就位(tzb-55 02:44,ppt-v3/tools/):v2 表只读+覆盖层,正负例验过,v2 deck 过 v3 守卫;REQUIRED/CONDITIONAL 按 v2 页码故 v3 默认不启用(tzb-63 需重写);简报补充已写;报告筛查加两源后 513/507,禁写 0 · ref: /Users/gl/tzb-deliverables/ppt-v3/tools/check_deck_v3.py
 - 2026-09-05T02:44+0800 [EVENT] <m2c-exec> — S0 修复已同步 labserver(7 文件双侧 digest 一致);紫色轮 S2 被问 'purple cylinder'、绑 cylinder_05、三态 PRESENT/PASS/EXECUTE;executor 硬钉 cylinder_06 拒了,花 1 nonce · ref: receipts/live-window-s0-fix-purple-round-v1.json 3a182e63
@@ -2670,3 +2673,10 @@
 - 2026-09-05T03:30+0800 [FACT/facts] <deck-v3> `deck_v3.takeover` — deck-v3 owner(tzb-63,sid f4a8adc2)03:28 接手:已读简报+补充、CLAIMS-0904、v2 全 20 页文本、check_deck_v3、术语表;ppt-master 完整性门 rc=0;路线=Generate PPTX Default;初稿 09:00 定稿 16:00 · ref: /Users/gl/tzb-lanes/coordinator-notes/brief-deck-v3-pptmaster-20260905.md
 - 2026-09-05T03:43+0800 [EVENT] <tzb-fe> — 03:43 复探:03:19 后七条线全部沉默(journal 仅 deck-v3 03:30 接手),session json 均在;已再发'继续+一行状态';设 04:13 第三轮探测,届时仍沉默则截止顺延 2h 并改派 v21 · ref: /Users/gl/tzb/state/journal/M2C/2026-09-05.md
 - 2026-09-05T03:43+0800 [FACT/facts] <finetuned-live-v1> `review-v3-final-bundle-delivered` — 不脱敏GPT终审包已出:review-v3/final-review-bundle-20260905T0245(499文件/29MB,tar.gz 6.6MB sha 12f85317)。保留内网地址与绝对路径;排除密钥/权重/图像/视频;凭据扫描0命中,往返499/499。含REVIEW-BRIEF-FINAL.md · ref: /Users/gl/tzb-deliverables/review-v3/final-review-bundle-20260905T0245/REVIEW-BRIEF-FINAL.md
+- 2026-09-05T03:43+0800 [FACT/facts] <report-zh-v1> `report.zh_v2_in_progress` — 报告第二稿(图文版)进行中:图件脚本 build/make_figs.py+SVG 示意图,结构改为摘要/引言/总体设计/模块/实验/讨论/结论/参考文献/附录;含 R1/R2、2.966 引回执、训练包指针、超参表;目标 06:00 · ref: /Users/gl/tzb-lanes/report-zh-v1/LANE-NOTES.md
+- 2026-09-05T03:44+0800 [EVENT] <tzb-fe> — 03:4x 回音:tzb-95 在线(未被卡,开始复核训练包 v3);tzb-66 02:46–03:43 被额度卡住已恢复,报告二稿 05:45;其余五线仍待回;我写了 v21 改动清单(只读预备)coordinator-notes/v21-executor-change-list-20260905.md · ref: /Users/gl/tzb-lanes/coordinator-notes/v21-executor-change-list-20260905.md
+- 2026-09-05T03:44+0800 [FACT/facts] <tzb-fe> `deliverable.gpt_final_review_bundle` — GPT 终审包已交(tzb-76 03:4x):review-v3/final-review-bundle-20260905T0245(499 文件/29MB,tar 6.6MB,sha 12f85317…),不脱敏、无密钥/权重/图像;十项齐+REVIEW-BRIEF-FINAL.md;brief 明写视频尚无交付件 · ref: /Users/gl/tzb-deliverables/review-v3/final-review-bundle-20260905T0245.tar.gz.sha256
+- 2026-09-05T03:44+0800 [FACT/facts] <tzb-fe> `executor.v21_in_progress` — v21 过半(demo lane,04:15 交):builder 精确替换 v17 八处;目标取自请求+烘入六注册 prim 校验;邻居=六减目标;检查在 envelope_consumed 前拒不花 nonce;新拒绝本地异常同形回包;两自主决定接受 · ref: /Users/gl/tzb-lanes/coordinator-notes/v21-executor-change-list-20260905.md
+- 2026-09-05T03:44+0800 [FACT/facts] <exec-no-truth-v1> `acceptance-3-instructions` — 三句验收前半全过:①purple→cylinder_05 ②red→cylinder_01 S0/S2/选框/世界坐标均正确;③"料箱"未注册,S0 拒、S2 未调用 · ref: cold-install-chxy-v1/receipts/acceptance-3/
+- 2026-09-05T03:44+0800 [FACT/facts] <exec-no-truth-v1> `finding-29-executor-target-pinned` — 卡点29:v17:75 TARGET_PRIM_PATH 写死 cylinder_06 无 env 覆盖,检查在 1152 晚于 1149 envelope_consumed=先烧账目后拒;①②各烧一枚无运动 · ref: cold-install-chxy-v1/receipts/acceptance-3/r1/
+- 2026-09-05T03:44+0800 [EVENT] <exec-no-truth-v1> — 卡点30 取帧宿主 live_host_v1.py:129-134 固定 60 次 update 后无条件读 DOF,物理张量未就绪即 assert;两次起有一次挂 · ref: cold-install-chxy-v1/receipts/acceptance-3/capture-host-crash-r2-first-attempt.log
