@@ -1,5 +1,5 @@
 <!-- GENERATED — 禁止直接 Edit/Write。唯一写入口: tools/statectl.py -->
-<!-- statectl protocol=2 stream=M2C generation=1849 updated=2026-09-05T04:23+0800 -->
+<!-- statectl protocol=2 stream=M2C generation=1851 updated=2026-09-05T04:25+0800 -->
 <!-- 自 M2C_STATE.md 迁移 sha=9dc690524ad77e6d51964237f11ee107e23e3ae92398d19e3424eb0676648fc6 -->
 
 # M2C 权威状态(活跃快照,协议 v2)
@@ -2165,6 +2165,10 @@
 
 - `deck.v3_rebuilt_0425` — deck v3 重建(04:25):讲者备注 20/20、Mac 字体 PDF 主件、加宽框保留;守卫组递归生效禁写 0,几何断言 32 项误报待 tzb-55 修;P02/P04/P07 等定稿口径 · ref: /Users/gl/tzb-deliverables/ppt-v3/CHANGES-v3.md
 
+- `v3守卫空转已修` — check_deck_v3 曾对全组化导出件 0页0字仍报PASS;加组递归(484框/12920字)+紧缩空间匹配(88框含\x0b)+备注扫描(20页)+几何按几何内容认条+空转自检;v2 未动 · ref: /Users/gl/tzb-deliverables/ppt-v3/tools/check_deck_v3.py
+
+- `guard.v3_recursion_and_idle_check` — v3 守卫修好(tzb-55 04:2x):组递归后扫 484 框/12920 字 PASS 0 项;原守卫对导出件空转(0 框仍 PASS)→加'0 文本框即 FAIL'空转自检;备注纳入禁写;三条负例验;批报告筛查与 v2.1 守卫同补空转自检 · ref: /Users/gl/tzb-deliverables/ppt-v3/tools/check_deck_v3.py
+
 ## 2. 归属与 lane
 - `lane.m2c_exec` — **M2C 执行会话**:successor implementation candidate,commit-free,于全新隔离 clone(Q′ 模式);已登记候选路径内自由编辑(R132.41)。ETA(8/29 午报):交包 8/30 01:00–07:00;早沿(≤03:00)可达截止,晚沿不可达。
 - `lane.tzb_fe` — **tzb-fe(协调)**:实现审查+七段治理批量激活(预告:批一 = R′ stage adoption→successor prereg→materialize→bootstrap;批二 = legacy P″ prefix adoption→recovery03→combined preflight;每步仍各自 pre-capture/记录/fail-closed,激活与 closeout 各批一次)。
@@ -2740,8 +2744,6 @@
 - `live-loop-executor-target-prim-pin` — vnext_dispatch_executor_v17.py:75 TARGET_PRIM_PATH 硬钉 cylinder_06,非青指令一律 EXECUTOR_ERROR 且已花 nonce;归 demo lane/协调裁
 
 ## 5. Recent tail(journal 缓存,非权威)
-- 2026-09-05T04:15+0800 [FACT/facts] <deck-v3> `deck_v3.draft_exported` — deck v3 初稿已导出:ppt-master Default 路径,20 页原生 PPTX+PDF 落 ppt-v3/xh-202607-deck-v3.pptx/.pdf;final gate 0 错;守卫顶层 PASS 但导出器把根组打成 GROUP,守卫不递归,已用同表递归扫 PASS · ref: /Users/gl/tzb-deliverables/ppt-v3/xh-202607-deck-v3.pptx
-- 2026-09-05T04:15+0800 [FACT/facts] <tzb-fe> `report.draft2_screen` — 第二稿复筛 PASS(0 项):772 数命中 763/归一 9/未命中 0;NUMBERS-v2 A6 加 2.966 rad/0.53 mm/0.655 m 行(出处 Z);Y 补登记;v3 简报补充 §6 转 PENDING-v2.1 五项 · ref: /Users/gl/tzb-deliverables/ppt-v1/NUMBERS-v2.md
 - 2026-09-05T04:16+0800 [EVENT] <m2c-exec> — v21 青色回归轮无退步:六基元全完成,target cylinder_06,grasp_gate 过,位移 0.659m 入料箱,邻件<4.2um,ordinal 0;容器与机位保持不动待用户 · ref: receipts/live-window-v21-cyan-regression-round-v1.json
 - 2026-09-05T04:16+0800 [FACT/facts] <review-zh-v1> `review.report-draft2` — 报告二稿图表核:1条阻断(出处行约半数路径无L/D前缀且不在评委包内,acceptance-receipt-v1.json包内同名却是v20那份)。四张抽查图逐项对上数据源(fig-smoke 42格全对);R1R2与两缺口闭环并核到工件 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-report-draft2-figures.md
 - 2026-09-05T04:16+0800 [FACT/facts] <deck-v3> `deck_v3.draft_reported` — deck v3 初稿路径 04:2x 报 tzb-56(sid 5ae1238c):ppt-v3/xh-202607-deck-v3.pptx/.pdf + CHANGES-v3.md;待裁:演示机 Win/Mac、守卫组递归(tzb-55)、S0/三指令/v21 更新 12:00 前 · ref: /Users/gl/tzb-deliverables/ppt-v3/CHANGES-v3.md
@@ -2760,3 +2762,5 @@
 - 2026-09-05T04:23+0800 [FACT/facts] <deck-v3> `deck_v3.notes_enabled` — deck v3 讲者备注已启用并导出(20/20 页);守卫递归生效禁写 0 项;几何断言 32 项均为页脚/条组误报待 tzb-55 改;产物 pptx 8f69e890 pdf ba3770ff;待 12:00 定稿口径改 P02/P04/P07 · ref: /Users/gl/tzb-deliverables/ppt-v3/CHANGES-v3.md
 - 2026-09-05T04:23+0800 [FACT/facts] <tzb-fe> `defect.red_unreachable_servo_divergence` — 红色失败根因:cylinder_01 r_xy 0.232 m 近基座不可达,伺服无发散保护→失控挥动、撞动邻件 27 mm、attach 断言;紫/青 r≥0.35 成。裁:伺服发散保护现在做(v21 builder),可达带作启发不写常量,推荐词改青/品红/蓝,红/绿/橙标近基座区 · ref: /Users/gl/tzb-lanes/cold-install-chxy-v1/receipts/v21-rerun/
 - 2026-09-05T04:23+0800 [FACT/facts] <tzb-fe> `deck.v3_rebuilt_0425` — deck v3 重建(04:25):讲者备注 20/20、Mac 字体 PDF 主件、加宽框保留;守卫组递归生效禁写 0,几何断言 32 项误报待 tzb-55 修;P02/P04/P07 等定稿口径 · ref: /Users/gl/tzb-deliverables/ppt-v3/CHANGES-v3.md
+- 2026-09-05T04:24+0800 [FACT/facts] <deck-v2> `v3守卫空转已修` — check_deck_v3 曾对全组化导出件 0页0字仍报PASS;加组递归(484框/12920字)+紧缩空间匹配(88框含\x0b)+备注扫描(20页)+几何按几何内容认条+空转自检;v2 未动 · ref: /Users/gl/tzb-deliverables/ppt-v3/tools/check_deck_v3.py
+- 2026-09-05T04:25+0800 [FACT/facts] <tzb-fe> `guard.v3_recursion_and_idle_check` — v3 守卫修好(tzb-55 04:2x):组递归后扫 484 框/12920 字 PASS 0 项;原守卫对导出件空转(0 框仍 PASS)→加'0 文本框即 FAIL'空转自检;备注纳入禁写;三条负例验;批报告筛查与 v2.1 守卫同补空转自检 · ref: /Users/gl/tzb-deliverables/ppt-v3/tools/check_deck_v3.py
