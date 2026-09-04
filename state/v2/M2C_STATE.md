@@ -1,5 +1,5 @@
 <!-- GENERATED — 禁止直接 Edit/Write。唯一写入口: tools/statectl.py -->
-<!-- statectl protocol=2 stream=M2C generation=1759 updated=2026-09-05T02:33+0800 -->
+<!-- statectl protocol=2 stream=M2C generation=1767 updated=2026-09-05T02:35+0800 -->
 <!-- 自 M2C_STATE.md 迁移 sha=9dc690524ad77e6d51964237f11ee107e23e3ae92398d19e3424eb0676648fc6 -->
 
 # M2C 权威状态(活跃快照,协议 v2)
@@ -2037,6 +2037,14 @@
 
 - `s0.llm_extraction_landed` — S0 修复已交(02:3x):复用冻结 live_entry_v5.decompose(模型出英文指称短语/目的地/操作;颜色词规则子串;否定走登记表);start.sh/smoke06 去固定值;tests 60 过;已同步 chxy;待 tzb-b9 三指令验收 · ref: /Users/gl/tzb-deliverables/judge-package-v1/tests/test_s0_referring_expression_v1.py
 
+- `review.training-recut` — 重打包e669981e复核:摘要599/599+往返+脱敏+adapter0400全PASS;T2-T5与两处来源不明均闭环;残留1条阻断:六个code入口与VENV_PYTHON写死/home/fx且四个digest门在包外,第5-7步评委机跑不起来 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-training-bundle-recut-v1.md
+
+- `ruling.report_title_20260905` — CLAIMS 变更 14 已落报告:主标题改「面向工业机械臂的指令交互型智能体原型——开放词汇感知、确定性任务规划与可审计执行」,内部名括注一次;4.11 冻结原话块加引言句;数字来源含 0903/README/negative-results · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.md
+
+- `defect.truth_prim_english_lookup` — 直播线发现(loop lane):build_request 的 truth prim 按英文子串查注册表,纯中文指称→BRIDGE_REFUSED_BEFORE_MINT;S0 修复(英文物体短语)绕过;裁不做 B/C/D,A(truth prim 取自绑定)记 OQ21;loop lane 同步新包后重跑紫色 · ref: /Users/gl/tzb-deliverables/judge-package-v1/docs/open-questions.md
+
+- `defect.start_sh_chain_dropped_instruction` — 同类缺陷(demo lane 02:3x):start.sh 的 chain 分支未把参数传进 step_chain→评委敲的指令永远取默认句(青色);已改为传 "$@",bash -n 过,已同步 chxy(sha 664ea560…);其余三分支验收后统一改 · ref: /Users/gl/tzb-deliverables/judge-package-v1/scripts/start.sh
+
 ## 2. 归属与 lane
 - `lane.m2c_exec` — **M2C 执行会话**:successor implementation candidate,commit-free,于全新隔离 clone(Q′ 模式);已登记候选路径内自由编辑(R132.41)。ETA(8/29 午报):交包 8/30 01:00–07:00;早沿(≤03:00)可达截止,晚沿不可达。
 - `lane.tzb_fe` — **tzb-fe(协调)**:实现审查+七段治理批量激活(预告:批一 = R′ stage adoption→successor prereg→materialize→bootstrap;批二 = legacy P″ prefix adoption→recovery03→combined preflight;每步仍各自 pre-capture/记录/fail-closed,激活与 closeout 各批一次)。
@@ -2606,15 +2614,11 @@
 
 - `task.gpt_final_review_bundle` — 用户(02:3x):派空闲会话打'不脱敏'的项目+状态审核包给 GPT Web Pro 终审(保留内网地址与路径;仍排除 .env/密钥/权重/图像/npy/output);交 tzb-76;用户去睡,夜间按 overnight 边界自主推进 · ref: /Users/gl/tzb-deliverables/review-v3/
 
+- `live-loop-sync-pkgnext-after-s0` — 等 demo lane 通知后:Mac 权威树整树同步进 labserver pkg-next(不带 --delete,排除 output/.env/liveview-out*)
+
+- `live-loop-purple-round-after-s0` — 同步后跑一轮'把紫色的圆柱体放到蓝色料箱',报 S0 分槽结果、S2 实际被问的词、实际抓的柱子
+
 ## 5. Recent tail(journal 缓存,非权威)
-- 2026-09-05T02:15+0800 [FACT/facts] <m2c-exec> `judge-package-usage-doc-zh` — docs/使用说明.md 写完(459 行/12 模块):bash 18 块 -n 全过、python -c 4 条 compile 全过,manifest 已加行;附录 B 列 7 条缺独立入口待裁。 · ref: /Users/gl/tzb-deliverables/judge-package-v1/docs/使用说明.md
-- 2026-09-05T02:19+0800 [FACT/facts] <tzb-fe> `defect.referring_expression_fixed_cyan` — 阻断缺陷(02:2x):start.sh 与直播驱动固定 expression=cyan cylinder,S0 只规则解目的地不派生指称词(无LLM),颜色规则只认英文→敲紫色抓青色。裁:S0 加颜色词表派生+新拒绝码,去固定值,紫/红评委路径复验;'S0=LLM'主张待更正 · ref: /Users/gl/tzb-deliverables/judge-package-v1/config/chain.yaml
-- 2026-09-05T02:20+0800 [FACT/facts] <review-zh-v1> `review.training-bundle` — 训练包①脱敏②摘要往返④adapter0400 均PASS;③5条阻断:提取器与冻结入口不在任何包内、RESULT-v2仍挂已撤回的0.133对比、两RESULT指向错回执(62a81648内部矛盾且无作废标记)、宿主内存23.9/49.3实为GPU显存、runs-ab3无来源 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-training-bundle-v1.md
-- 2026-09-05T02:21+0800 [FACT/facts] <tzb-fe> `review.training_bundle_v1` — 审查训练包:脱敏/SHA/0400 过;5 阻断已裁(T1 补发提取器与冻结入口;T2/T3 原件不改、加勘误索引与 SUPERSEDED.json;T4 显存/内存标签改准;T5 补 runs-ab3 生成步或删)+两处来源不明数;tzb-76 08:00 前重打 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-training-bundle-v1.md
-- 2026-09-05T02:23+0800 [FACT/facts] <deck-v2> `s0-llm-exists-but-not-on-judge-path` — S0 两条路:live_entry_v4/v5 有真 LLM S0(stage=S0,usage 35/152/187,S0_DECOMPOSITION_FAILED_FAIL_CLOSED);评委路 run_demo 的 S0 是注册表确定性匹配、expression 由调用方传 · ref: /Users/gl/tzb-lanes/agent-demo-v3-isaac-rgbd/src/live_entry_v5.py
-- 2026-09-05T02:23+0800 [FACT/facts] <tzb-fe> `ruling.s0_llm_extraction` — 用户裁(02:2x)颜色词表太固化→S0 改为 27B 抽取指称表达(JSON:zh/en 短语、注册颜色词或null、目的地、操作、否定;畸形即拒),S2 用开放词汇短语,颜色词 null 则规则跳过并披露;词表仅离线兜底;验收紫/红/最左边三句评委路径;README/deck 'S0=LLM' 暂不改 · ref: /Users/gl/tzb-deliverables/judge-package-v1/config/chain.yaml
-- 2026-09-05T02:24+0800 [FACT/facts] <tzb-fe> `s0.existing_llm_decomposition` — 树内已有真 LLM S0(live_entry_v4/v5,失败码 S0_DECOMPOSITION_FAILED_FAIL_CLOSED,回执 v4-switch-v1 turn.json,S0 2.12 s 出自此路);评委路未接它。裁:复用并扩槽接入评委路;S0 耗时须带路径身份;deck P2 槽位进 v2.1 · ref: /Users/gl/tzb-deliverables/ppt-v1/NUMBERS-v2.md
-- 2026-09-05T02:24+0800 [FACT/facts] <report-zh-v1> `report.s0_wording_pending` — 报告 S0 按 tzb-fe 02:4x 第二条改写为大模型结构化抽取(JSON 畸形即拒),留位【待补:S0 改版验收结果】;12:00 未过则改回确定性解析。紫色/红色两轮新证据留位于 4.1 · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.md
 - 2026-09-05T02:25+0800 [FACT/facts] <deck-v2> `deck-v2.1-pending-list` — deck v2.1 待改清单已落 ppt-v1/PENDING-v2.1.md:P2 的 S0 槽位三改五(或按未过分支改确定性)、S0 耗时须带路径身份、LOCATOR_NAME、12项0FAIL落点 · ref: /Users/gl/tzb-deliverables/ppt-v1/PENDING-v2.1.md
 - 2026-09-05T02:26+0800 [FACT/facts] <tzb-fe> `discipline.varied_instructions` — 纪律(02:2x,用户指出后):评委路径'已验证'须至少三条不同指令(换物体/换目的地/应拒绝);管线图每步'谁在做'对代码核;README §Verification 已加说明;记忆已存 · ref: /Users/gl/.claude/projects/-Users-gl-tzb/memory/verify-with-varied-instructions.md
 - 2026-09-05T02:26+0800 [FACT/facts] <finetuned-live-v1> `training-bundle-review-fixes` — 审查5条阻断改完,tar重打sha e669981e(旧0273a99a作废),599文件。T4显存标签错最重:设备级23.9/49.3GB而非8.45/9,硬件门槛差一量级,已改并加门槛句。 · ref: /Users/gl/tzb-deliverables/training-v1/training-bundle-v1/README-训练.md
@@ -2627,3 +2631,11 @@
 - 2026-09-05T02:32+0800 [FACT/facts] <m2c-exec> `judge-path-s0-referring-expression-fix` — 评委路 S0 指称表达修复:复用冻结 live_entry_v5.decompose;start.sh/smoke06 去固定 cyan cylinder;新增 21 测试(共 60 过);已同步 chxy pkg 并在镜像内验通。 · ref: /Users/gl/tzb-deliverables/judge-package-v1/agent/run_demo.py
 - 2026-09-05T02:33+0800 [FACT/facts] <tzb-fe> `report.draft1_rulings` — 报告初稿 v1(02:3x,32页)裁:冻结原话块豁免;允许 0903/README/negative-results 作数字源;删 135 与 S0 2.12s;统一对外标题(CLAIMS 变更 14);审查即刻核 · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.md
 - 2026-09-05T02:33+0800 [FACT/facts] <tzb-fe> `s0.llm_extraction_landed` — S0 修复已交(02:3x):复用冻结 live_entry_v5.decompose(模型出英文指称短语/目的地/操作;颜色词规则子串;否定走登记表);start.sh/smoke06 去固定值;tests 60 过;已同步 chxy;待 tzb-b9 三指令验收 · ref: /Users/gl/tzb-deliverables/judge-package-v1/tests/test_s0_referring_expression_v1.py
+- 2026-09-05T02:34+0800 [EVENT] <m2c-exec> — 中文指令派发被 BRIDGE_REFUSED_BEFORE_MINT 拦在铸造前:truth prim 查表只认英文注册词;--expression 解钉已修好绑定层但臂仍不动;未花 nonce · ref: receipts/live-window-chinese-instruction-dispatch-blocker-v1.json c11e693d
+- 2026-09-05T02:34+0800 [FACT/facts] <review-zh-v1> `review.training-recut` — 重打包e669981e复核:摘要599/599+往返+脱敏+adapter0400全PASS;T2-T5与两处来源不明均闭环;残留1条阻断:六个code入口与VENV_PYTHON写死/home/fx且四个digest门在包外,第5-7步评委机跑不起来 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-training-bundle-recut-v1.md
+- 2026-09-05T02:34+0800 [FACT/facts] <report-zh-v1> `ruling.report_title_20260905` — CLAIMS 变更 14 已落报告:主标题改「面向工业机械臂的指令交互型智能体原型——开放词汇感知、确定性任务规划与可审计执行」,内部名括注一次;4.11 冻结原话块加引言句;数字来源含 0903/README/negative-results · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.md
+- 2026-09-05T02:34+0800 [FACT/facts] <tzb-fe> `defect.truth_prim_english_lookup` — 直播线发现(loop lane):build_request 的 truth prim 按英文子串查注册表,纯中文指称→BRIDGE_REFUSED_BEFORE_MINT;S0 修复(英文物体短语)绕过;裁不做 B/C/D,A(truth prim 取自绑定)记 OQ21;loop lane 同步新包后重跑紫色 · ref: /Users/gl/tzb-deliverables/judge-package-v1/docs/open-questions.md
+- 2026-09-05T02:34+0800 [TASK/task] <m2c-exec> `live-loop-sync-pkgnext-after-s0` — 等 demo lane 通知后:Mac 权威树整树同步进 labserver pkg-next(不带 --delete,排除 output/.env/liveview-out*)
+- 2026-09-05T02:34+0800 [TASK/task] <m2c-exec> `live-loop-purple-round-after-s0` — 同步后跑一轮'把紫色的圆柱体放到蓝色料箱',报 S0 分槽结果、S2 实际被问的词、实际抓的柱子
+- 2026-09-05T02:34+0800 [EVENT] <tzb-fe> — 用户 02:3x 去睡;夜间自主边界:推进 S0 验收/报告审查/训练包复核/deck v3/GPT 终审包,可代批小项;不 push、不切 LoRA 默认、不定模型名、不处理 GPT 审核结论;早上一页汇报 · ref: /Users/gl/tzb-lanes/coordinator-notes/delivery-checklist-20260904.md
+- 2026-09-05T02:35+0800 [FACT/facts] <tzb-fe> `defect.start_sh_chain_dropped_instruction` — 同类缺陷(demo lane 02:3x):start.sh 的 chain 分支未把参数传进 step_chain→评委敲的指令永远取默认句(青色);已改为传 "$@",bash -n 过,已同步 chxy(sha 664ea560…);其余三分支验收后统一改 · ref: /Users/gl/tzb-deliverables/judge-package-v1/scripts/start.sh
