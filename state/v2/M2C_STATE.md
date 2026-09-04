@@ -1,5 +1,5 @@
 <!-- GENERATED — 禁止直接 Edit/Write。唯一写入口: tools/statectl.py -->
-<!-- statectl protocol=2 stream=M2C generation=1680 updated=2026-09-05T00:00+0800 -->
+<!-- statectl protocol=2 stream=M2C generation=1743 updated=2026-09-05T02:21+0800 -->
 <!-- 自 M2C_STATE.md 迁移 sha=9dc690524ad77e6d51964237f11ee107e23e3ae92398d19e3424eb0676648fc6 -->
 
 # M2C 权威状态(活跃快照,协议 v2)
@@ -1939,6 +1939,78 @@
 
 - `cold-install-findings-2` — 新卡点 27(诊断落注释块印 [FAIL]+复用尸体)已修并复验;28=包内 adapter 三件 644≠回执 0400,已修 · ref: cold-install-chxy-v1/cold-install-report-v1.md
 
+- `review.tarball_235958` — 开箱核 d16e5494(764文件):无阻断。六份摘要全OK、归档模式三件0400(上次翻车项闭环)、ADDR clean、无密钥无运行态目录、exec位全在、364引用路径14条未解析全为正当非包内引用;与235809仅NOTE一文件之差 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-round22-tarball-235958.md
+
+- `review.tarball_235958_clean` — 审查开箱核 235958 无阻断(16项全过;与235809仅NOTE两句不同;三件adapter归档位0400;地址/密钥/摘要全过;364条路径解析,14条未解析均为正当包外引用)。终版定:judge-package-v1-20260904-235958.tar.gz · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-round22-tarball-235958.md
+
+- `ruling.v17_viewport_labonly_variant` — 裁定(00:1x):v17 实验室直播变体=视口相机摆到OBS机位,不进包;本次重起只换相机、保持1080p(4K为第二步:Kit跟随/码率/帧率三未知);沿用 /var/tmp/launch_v17_gpu1.sh,R与端口不动;重起后轮次编号与rounds_completed归零,不作累计值 · ref: /Users/gl/tzb-deliverables/judge-package-v1/agent/executor/resident/PROVENANCE.md
+
+- `labonly-viewport-variant` — lab-only 视口 v3 在跑(16:59:33Z 起):72d91479(v17 纯增171行/删0行),每0.25s 查 pose 文件 mtime 实时改机位(轮内也可),启动脚本 v5 带关网格/轴五 flag(生效待验);包未动 · ref: /Users/gl/tzb-lanes/agent-demo-v3-isaac-rgbd/labonly-viewport-v1/
+
+- `labonly-viewport-verified` — 视口变体已验(16:23-16:24Z 一轮青色):applied_by=set_camera_view 无回退;视口 1285x688(crop=1285:688:52:38),主体占满 1272x688(原~230x140);全帧 mean|Δ| 1.63(原 0.003);臂顶被裁 · ref: /Users/gl/tzb-lanes/agent-demo-v3-isaac-rgbd/labonly-viewport-v1/frames/
+
+- `live_window.newview_round` — 新机位首轮(00:23):round-001-composite-20260904T162314 ALL_SIX;全帧臂动峰值1.3–2.1 vs 空闲0.079,两路采集同结论,不再需裁;限制:视口竖向窄,臂举高时上半截出画;同静态摆放三轮数字逐位相同不算样本;ssh -L 探8555空结论 · ref: /Users/gl/tzb-lanes/live-loop-v1/receipts/live-window-newview-round-v1.json
+
+- `viewport-second-pose-candidates` — 第二机位候选(待用户选,未重起):A' eye(0.05,0.95,1.95) 俯角55° 抓取零遮挡;B' eye(1.00,-0.85,1.85) 俯角47° 与OBS相对、轨迹横穿画面;共同 look_at(0.02,-0.08,0.50);曝光未验 · ref: /Users/gl/tzb-lanes/agent-demo-v3-isaac-rgbd/labonly-viewport-v1/viewport-pose-candidates-v1.txt
+
+- `ruling.viewport_pose_file_and_candidates` — 裁定(00:3x):直播变体改为每轮读 /m2c/labonly/viewport-pose.json(缺省OBS机位),切机位不重起;候选A'(+y侧俯角55°,遮挡最少)/B'(对面145°俯角47°,动作横穿、明显非模型视角),默认B';首轮抓帧查曝光>230则换;不动包与观测相机 · ref: /Users/gl/tzb-lanes/agent-demo-v3-isaac-rgbd/labonly-viewport-v1/
+
+- `viewport-pose-in-effect` — 展示机位改由 tzb-60 按用户口令直接写 pose 文件(step1 = be0b1f9c, eye 1.327,-1.107,1.578 / look_at 0.02,-0.08,0.55);用户键盘版存 viewport-pose-user-0106.json;我方不写不覆盖, 待 tzb-60 喊定稿再固化 · ref: /Users/gl/tzb-lanes/agent-demo-v3-isaac-rgbd/labonly-viewport-v1/viewport-pose.json
+
+- `live_window.viewport_b4_final` — 直播机位定 B4(eye 1.147,-0.965,1.903/look_at 0.02,-0.08,0.85,sha 975c7b54):臂完整进画(像素判据)、主体居中、曝光≥250占比0;机位文件每轮读、切换不重起;五份存档在 labserver /var/tmp/labonly-viewport-v1/ · ref: /Users/gl/tzb-lanes/agent-demo-v3-isaac-rgbd/labonly-viewport-v1/frames/b4-mid.png
+
+- `live_window.keyboard_camera_control` — 直播机位键盘实时调(01:0x):变体v3每0.25s轮询pose文件mtime→重摆相机(纯增171行,不进包);Mac脚本 viewport_keys.py(方向键转/WASD平移/JK升降/-=远近/[]瞄点/P/0/Q);第四次重起00:59含关网格flag;通路实测0.25s;当前pose z=0.65 · ref: /Users/gl/tzb-lanes/agent-demo-v3-isaac-rgbd/labonly-viewport-v1/viewport_keys.py
+
+- `viewport-rect-measured` — 视口真 3D 视图 = 全帧 x69..1317 y63..725(1248x663);行0..24 工具条、crop 列17/1266 边框。桌面外是背景渐变(243->225)+桌沿,稳态无网格线;判此类结构须用去行斜坡后的残差,不能用 std 或灰带计数 · ref: /Users/gl/tzb-lanes/agent-demo-v3-isaac-rgbd/labonly-viewport-v1/frames/analysis/ramp-removed-bdouble-vs-gridoff.png
+
+- `viewport-grid-axis-off` — 坐标三角已验去掉(714->560)。网格只在开 stage 的加载几秒内闪现, 稳态无线(±4/±12 残差图两侧都验过)。flag 是否消掉那几秒【仍未验】:双方帧相对 M2C_VIEWPORT 日志时刻(唯一共同时钟)落在加载完成的两侧 · ref: /Users/gl/tzb-lanes/agent-demo-v3-isaac-rgbd/labonly-viewport-v1/frames/analysis/
+
+- `picture-measurement-method` — 画面测量方法笔记已落盘 MEASURING-THE-PICTURE.md 137af47a:相位零点取 docker logs -t 的 M2C_VIEWPORT(EXECUTE->相机 6.6s)、两样本须同前置状态、判结构须去渐变+固定窗口看图、聚合量只筛帧 · ref: /Users/gl/tzb-lanes/agent-demo-v3-isaac-rgbd/labonly-viewport-v1/MEASURING-THE-PICTURE.md
+
+- `labonly-viewport-liveness-probe` — PING 8s 是病不是结构:重起后同代码 0.02s。8s=空转周期被拖慢;GIL 交接只解释倍数。1.616s 写入→应用亦为病中数。 · ref: /Users/gl/tzb-lanes/agent-demo-v3-isaac-rgbd/labonly-viewport-v1/PING-LATENCY-IS-NOT-A-HANG.md
+
+- `ruling.capture_host_fresh_root` — 裁定(01:5x):取帧宿主每次重起一律用全新 dataset root(OQ19 已实发生:01:50 探测覆盖了 000000.png);v17 不重起,先跑一轮 cyan 判别画面冻结是渲染/编码侧还是空闲不重绘(loop lane 抓帧逐帧 Δ 精确 0.0000) · ref: /Users/gl/tzb-deliverables/judge-package-v1/docs/open-questions.md
+
+- `submission.q9_six_items` — 用户 01:5x 给出主办方 Q9 六项交付要求:①推理代码+模型(模块可独立运行)②训练代码+预训练权重+数据集③仿真环境打包④仿真验证视频⑤技术报告(重点开放域感知/任务决策/微调策略/智能体设计)⑥使用说明。缺口:②训练代码与数据未进包、⑤技术报告未写 · ref: /Users/gl/.claude/projects/-Users-gl-tzb/memory/xh202607-submission-requirements-q9.md
+
+- `review.queue_0905` — 9/5待审三件(08:00使用说明/10:00训练交付包/12:00技术报告)。派工方 socket68941=sid 5ae1238c=协调会话(今叫tzb-56);我现名tzb-95 sid 2f0a84eb。带入项与禁写清单见ref · ref: /Users/gl/tzb-lanes/review-zh-v1/queue-20260905.md
+
+- `task.tech_report_owner` — 技术报告 owner=tzb-66(用户 02:00 新开,sid 4035aaa0,角色 report-zh-v1 已注册);用户要求术语用领域常见中文词、不用内部造词、先查同行论文;事实来源=CLAIMS/NUMBERS/README;初稿12:00/定稿18:00;tzb-55 改为供数与守卫筛 · ref: /Users/gl/tzb/state/v2/WRITERS.json
+
+- `review.termcheck_ready` — term-check.py已备(基线=包内glossary,80原词,STRONG/cond分级,live-demo标定40命中)。顺带发现:glossary定下发,deck遵守11:0,live-demo派发12:下发6且L214同句混用;报告须统一 · ref: /Users/gl/tzb-lanes/review-zh-v1/queue-20260905.md
+
+- `report-v1-handover-to-tzb66` — 技术报告改由 tzb-66 写(tzb-56 改令 0205);deck-v2 转为供数+筛查:tools/screen_report.py 与禁写清单-给报告作者.md 已就绪;草稿已移出交付路径 · ref: /Users/gl/tzb-deliverables/report-v1/tools/禁写清单-给报告作者.md
+
+- `ruling.report_banned_words` — 裁定(02:1x,报告线专用禁写表):放行 规划/推理/智能体(主办方原话与领域常用词);闭环只在变更10逐字句与否定句;位姿估计仅否定式;安全陈述带范围;统一用校验。deck 表不动;tzb-55 改筛查脚本与清单给 tzb-66 · ref: /Users/gl/tzb-deliverables/report-v1/tools/禁写清单-给报告作者.md
+
+- `live_window.pose_user_final` — 用户裁定(02:0x):直播机位以 step 3 为准(eye 1.478,-1.226,1.698 / look_at 0.02,-0.08,0.60,sha 4dda3c2b,实测主体占比 30.7%);键盘那次作废;'缩略图'系渲染滞后旧画面;重起保持此 pose · ref: /Users/gl/tzb-lanes/live-loop-v1/evidence/live-round-20260905-bprime/step3-actual-after-render-caughtup.png
+
+- `training-bundle-v1-delivered` — 训练交付包已出:tzb-deliverables/training-v1/training-bundle-v1(584MB/591文件)+ .tar 572MB sha 0273a99a。含两版数据集/adapter/日志/结果。脱敏过:无10.13./root@/key。 · ref: /Users/gl/tzb-deliverables/training-v1/training-bundle-v1/README-训练.md
+
+- `v2-training-numbers-erratum` — 勘误0e6c90fd:RESULT-v2的train_loss 0.133是瞬时值比v1均值,错;同口径v1均值.1591 v2均值.1727(v2更高)。回执62a81648有4字段是v1硬编码常量,更正件b2e27ce7。 · ref: /Users/gl/tzb-lanes/finetuned-live-path-v1/RESULT-v2-training-numbers-erratum-v1.md
+
+- `report-screen-ruling-applied` — 报告线禁写裁定已进 screen_report.py 覆盖层(规划/推理/智能体放行,闭环与位姿估计给否定豁免,校验统一);deck 表未动,正负例各复验 · ref: /Users/gl/tzb-deliverables/report-v1/tools/禁写清单-给报告作者.md
+
+- `deliverable.training_bundle_v1` — Q9②训练包已出(tzb-76 02:1x):training-v1/training-bundle-v1.tar 572MB,591文件SHA全OK;代码/数据集206+326帧/adapter两版/日志/结果+勘误/中文README;无私网IP与key;勘误件已进评委包 env/s2-lora-v1/ · ref: /Users/gl/tzb-deliverables/training-v1/training-bundle-v1.tar.sha256
+
+- `report.zh_v1_started` — 技术报告 owner tzb-66 02:1x 开工:事实源读齐;PDF 路线 Markdown→HTML→Chrome headless(CJK 已验);tzb-55 旧稿改名为素材件仅查数;细节见 ref · ref: /Users/gl/tzb-lanes/report-zh-v1/LANE-NOTES.md
+
+- `ruling.report_terms_20260905` — tzb-fe 2026-09-05 02:1x 报告术语放行:任务规划/推理效率/智能体可用;闭环仅逐字句与否定;位姿估计仅否定式;安全陈述带范围;统一校验 · ref: /Users/gl/tzb-lanes/report-zh-v1/LANE-NOTES.md
+
+- `report.screen_tool_ready` — 报告筛查工具就绪(tzb-55 02:1x):screen_report.py 以覆盖层落实六条裁定(放行规划/推理/智能体;闭环与位姿估计逐处判+否定豁免;禁通用/自主智能体、符号契约验证);正负例各验;禁写清单 93 行给 tzb-66;deck 不动 · ref: /Users/gl/tzb-deliverables/report-v1/tools/禁写清单-给报告作者.md
+
+- `live_window.v17_restart_0209` — v17 02:09 重起后 PING 0.01–0.02 s(重起前 7–8 s),GPU1 空转 10%;'8 s 结构性延迟'结论撤回(秒级即病);pose 保持 step 3;空闲循环本就渲染,先前是 0.125 fps 幻灯片;等轮内 GPU 利用率 · ref: /var/tmp/labonly-viewport-v1/slowgpu-vnext-v17-20260904T180841Z.log
+
+- `live_window.gpu_recovered` — v17 重起后闭环(02:13):轮内 GPU1 34–70%(重起前 4–5%),一轮 55 s(前 11 min 停滞),reset_verified +8.4 s,ALL_SIX;机位重贴 +8 ms = step 3;直播恢复实时;用户可录 · ref: /var/tmp/labonly-viewport-v1/
+
+- `judge-package-usage-doc-zh` — docs/使用说明.md 写完(459 行/12 模块):bash 18 块 -n 全过、python -c 4 条 compile 全过,manifest 已加行;附录 B 列 7 条缺独立入口待裁。 · ref: /Users/gl/tzb-deliverables/judge-package-v1/docs/使用说明.md
+
+- `defect.referring_expression_fixed_cyan` — 阻断缺陷(02:2x):start.sh 与直播驱动固定 expression=cyan cylinder,S0 只规则解目的地不派生指称词(无LLM),颜色规则只认英文→敲紫色抓青色。裁:S0 加颜色词表派生+新拒绝码,去固定值,紫/红评委路径复验;'S0=LLM'主张待更正 · ref: /Users/gl/tzb-deliverables/judge-package-v1/config/chain.yaml
+
+- `review.training-bundle` — 训练包①脱敏②摘要往返④adapter0400 均PASS;③5条阻断:提取器与冻结入口不在任何包内、RESULT-v2仍挂已撤回的0.133对比、两RESULT指向错回执(62a81648内部矛盾且无作废标记)、宿主内存23.9/49.3实为GPU显存、runs-ab3无来源 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-training-bundle-v1.md
+
+- `review.training_bundle_v1` — 审查训练包:脱敏/SHA/0400 过;5 阻断已裁(T1 补发提取器与冻结入口;T2/T3 原件不改、加勘误索引与 SUPERSEDED.json;T4 显存/内存标签改准;T5 补 runs-ab3 生成步或删)+两处来源不明数;tzb-76 08:00 前重打 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-training-bundle-v1.md
+
 ## 2. 归属与 lane
 - `lane.m2c_exec` — **M2C 执行会话**:successor implementation candidate,commit-free,于全新隔离 clone(Q′ 模式);已登记候选路径内自由编辑(R132.41)。ETA(8/29 午报):交包 8/30 01:00–07:00;早沿(≤03:00)可达截止,晚沿不可达。
 - `lane.tzb_fe` — **tzb-fe(协调)**:实现审查+七段治理批量激活(预告:批一 = R′ stage adoption→successor prereg→materialize→bootstrap;批二 = legacy P″ prefix adoption→recovery03→combined preflight;每步仍各自 pre-capture/记录/fail-closed,激活与 closeout 各批一次)。
@@ -2502,24 +2574,26 @@
 
 - `task.viewport_camera_pose_future` — 裁定(tzb-60, 9/4):视口不动、不分叉v17、不试Kit setting;现场 ffplay crop 裁剪(非变焦)。以后真要拉近:OBS_CAMERA_POSITION(-0.8,-0.8,1.4)+LOOK_AT(-0.05,0,0.55) 照抄给 Kit 透视相机,需重起+分叉裁定 · ref: /Users/gl/tzb-deliverables/judge-package-v1/agent/executor/resident/vnext_dispatch_executor_v17.py
 
+- `task.q9_deliverables_20260905` — Q9 分工:②训练包 tzb-76 10:00;⑤技术报告 tzb-55 初稿12:00/定稿18:00;①⑥使用说明 demo lane 08:00;④视频用户录;审查逐件点名;终包 20:00 重出 · ref: /Users/gl/tzb-lanes/coordinator-notes/delivery-checklist-20260904.md
+
 ## 5. Recent tail(journal 缓存,非权威)
-- 2026-09-04T23:33+0800 [EVENT] <m2c-exec> — ISAAC 占用结束 chxy GPU0:dl-lora-r8b DISPATCHED(LoRA 侧车服务 S2,age 5.09/30,首动 10.75s);已撤 locany-lora/v17/取帧宿主,8571 基座侧车非我所起未动
-- 2026-09-04T23:33+0800 [FACT/facts] <m2c-exec> `lora-sidecar-round-evidence` — lora-r8b:LoRA 派生入口(fd833a52)+adapter(receipt 9459f7b1)服务 S2 并 DISPATCHED;ready_line 无两 safetensors 摘要(在 receipt 内);合并契约 4cca534b 生效(s2_source_label=XH-Locator)
-- 2026-09-04T23:35+0800 [FACT/facts] <tzb-fe> `milestone.lora_r8b_dispatched` — 里程碑(23:26 chxy,demo lane):LoRA侧车合成轮 lora-r8b DISPATCHED/6指令/帧龄5.09;S2归属三跳链成立(attached=true+入口fd833a52+receipt 9459f7b1);合并契约生效;采用门已过,默认仍基座待用户裁;工件入包 · ref: /Users/gl/tzb-deliverables/judge-package-v1/evidence/verification-20260904/chxy-cold-install/rounds/lora-r8b-composite-20260904T152644/
-- 2026-09-04T23:37+0800 [FACT/facts] <m2c-exec> `s2-profile-switch` — start.sh 加 S2_PROFILE(默认 base 逐字不变);lora 分支把包内副本 re-root 到 receipt 原路径+合并契约,侧车容器名带 profile 防串档;经 start.sh 尚未端到端验证
-- 2026-09-04T23:39+0800 [EVENT] <m2c-exec> — GPU占用结束: 实时窗口打通, cyan 两轮 DISPATCH_COMPLETED_ALL_SIX_PRIMITIVES (round-006/007), 流上实测臂动; 采帧主机可停 · ref: live-loop-v1/receipts/live-window-first-round-v1.json
-- 2026-09-04T23:39+0800 [EVENT] <m2c-exec> — 更正 gen1665: GPU0 占用未结束。liveloop-host 必须继续开着,两条 Mac 命令才可用;用户用完再停,届时补记占用结束 · ref: live-loop-v1/MAC-LIVE-WINDOW.md
-- 2026-09-04T23:40+0800 [FACT/facts] <review-zh-v1> `review.next_cut_checklist` — 下一版包开箱核清单已落盘:9项工作树改动(卡点23补丁/openq19/冷装报告/S2_PROFILE/s2-lora新件/lora-r8b/audit/CLAIMS变更13/过期gate字段)+7项固定核查。交付基准仍631895ec · ref: /Users/gl/tzb-lanes/review-zh-v1/next-cut-checklist.md
-- 2026-09-04T23:44+0800 [FACT/facts] <tzb-fe> `s2_profile_lora.first_run_mode_mismatch` — S2_PROFILE=lora EXECUTE=1 首跑(tzb-b9 23:40)起不来:包内adapter三件644≠回执0400,冻结校验器比mode→拒,未欠账。修:chmod 0400+start.sh诊断+PACKAGE-NOTE第3条,rsync -a同步两树(已核400);tzb-b9重跑 · ref: /Users/gl/tzb-deliverables/judge-package-v1/env/s2-lora-v1/PACKAGE-NOTE.md
-- 2026-09-04T23:44+0800 [FACT/facts] <tzb-fe> `milestone.user_live_window_ready` — 用户直播窗口就绪(loop lane 23:4x):labserver v17 GPU1 推流+GPU0取帧宿主+chxy 8571基座侧车;两轮真跑(round-006/007,ALL_SIX,同一静态摆放数字逐位相同);两条Mac命令(幂等版)已转用户;视口偏远待v17 owner答;GPU0/隧道保持到用户说完 · ref: /Users/gl/tzb-lanes/live-loop-v1/MAC-LIVE-WINDOW.md
-- 2026-09-04T23:48+0800 [FACT/facts] <m2c-exec> `viewport-vs-observation-camera` — v17: RTSP 推流走 Kit 默认透视相机, 与 build_observation_camera 的 /World/vnext_dispatch_rgbd 是两个相机; 拉近推流不改控制路径, 但无 env/控制口旋钮, 需分叉字节冻结的 v17 才能做 -> 未做, 建议消费端裁剪
-- 2026-09-04T23:49+0800 [FACT/facts] <tzb-fe> `pkg.mode_check_added` — make_tarball.sh 加 MODE_CHECK(解包后三件 adapter 必须 0400,否则拒出包 exit 7;摘要看不见权限位);PACKAGE-NOTE 第3条归因改'23:01 包存的是 0644';README 直播行带'定位器=基座' · ref: /Users/gl/tzb-deliverables/judge-package-v1/scripts/make_tarball.sh
-- 2026-09-04T23:49+0800 [FACT/facts] <tzb-fe> `ruling.stream_viewport_crop_not_refit` — 裁定(23:4x):推流视口相机拉近无现成旋钮(执行器无相机env/动词;改v17=分叉同源文件),今晚不动容器;用户端裁剪 ffplay -vf crop=290:180:560:240;以后要挪机位照抄 OBS_CAMERA_POSITION/LOOK_AT · ref: /Users/gl/tzb-deliverables/judge-package-v1/agent/executor/resident/PROVENANCE.md
-- 2026-09-04T23:49+0800 [TASK/task] <m2c-exec> `task.viewport_camera_pose_future` — 裁定(tzb-60, 9/4):视口不动、不分叉v17、不试Kit setting;现场 ffplay crop 裁剪(非变焦)。以后真要拉近:OBS_CAMERA_POSITION(-0.8,-0.8,1.4)+LOOK_AT(-0.05,0,0.55) 照抄给 Kit 透视相机,需重起+分叉裁定 · ref: /Users/gl/tzb-deliverables/judge-package-v1/agent/executor/resident/vnext_dispatch_executor_v17.py
-- 2026-09-04T23:50+0800 [FACT/facts] <tzb-fe> `pkg.blocker27_start_sh_hint_and_reuse` — 卡点27(tzb-b9):我23:44把mode提示插进注释块→每次chain无条件打[FAIL];已搬进侧车exited)分支。同时修复用判据:只复用State.Running=true的侧车,否则先docker rm -f(避免复用已退出容器)。bash -n过;pkg-next已同步,pkg待tzb-b9跑完再推 · ref: /Users/gl/tzb-deliverables/judge-package-v1/scripts/start.sh
-- 2026-09-04T23:53+0800 [FACT/facts] <tzb-fe> `milestone.s2_profile_lora_execute1` — 里程碑(23:47 chxy,tzb-b9,包内副本):S2_PROFILE=lora EXECUTE=1 start.sh chain 执行——DISPATCHED/6指令/324s/帧龄4.59;S2由adapter服务;LoRA开关与EXECUTE=1经start.sh首验;账目8枚;默认仍基座待用户裁 · ref: /Users/gl/tzb-deliverables/judge-package-v1/evidence/verification-20260904/chxy-cold-install/rounds/s2profile-lora-execute1-start-sh-chain-20260904T154726/
-- 2026-09-04T23:55+0800 [EVENT] <exec-no-truth-v1> — chxy 占用结束(第二轮):locany/resident/capture-host 三容器撤除,撤前 docker logs 已落盘;仅剩 8571 基座侧车,GPU0 11476MiB · ref: cold-install-chxy-v1/logs/seg2/35-teardown-judge-resident.log
-- 2026-09-04T23:55+0800 [FACT/facts] <exec-no-truth-v1> `s2profile-lora-first-verification` — S2_PROFILE=lora EXECUTE=1 经 start.sh 首验通过:exit=0/324s,DISPATCHED,nonce 2a17e097,round-001-composite-20260904T154726 · ref: cold-install-chxy-v1/receipts/s2profile-lora/
-- 2026-09-04T23:55+0800 [FACT/facts] <exec-no-truth-v1> `cold-install-findings-2` — 新卡点 27(诊断落注释块印 [FAIL]+复用尸体)已修并复验;28=包内 adapter 三件 644≠回执 0400,已修 · ref: cold-install-chxy-v1/cold-install-report-v1.md
-- 2026-09-04T23:55+0800 [FACT/facts] <tzb-fe> `pkg.blocker27_start_sh_hint_and_reuse` — 卡点27两半 tzb-b9 验过(静态+行为,干跑不欠账):日志开头无[FAIL];Exited尸体被替换而非复用。补一句'replacing a non-running container'提示;首败日志丢失 NOTE 入包;三容器已撤,8571留用户窗口 · ref: /Users/gl/tzb-deliverables/judge-package-v1/scripts/start.sh
-- 2026-09-05T00:00+0800 [FACT/facts] <tzb-fe> `milestone.final_tarball_20260904` — 最终交付包 judge-package-v1-20260904-235958.tar.gz(764文件/225MB/CLEAN,ADDR+MODE双检,sha256 d16e5494…);前版入superseded/;含卡点23补丁、S2_PROFILE开关+首验、lora-r8b、直播两轮、OQ19/20 · ref: /Users/gl/tzb-deliverables/judge-package-v1-20260904-235958.tar.gz.sha256
+- 2026-09-05T02:07+0800 [FACT/facts] <deck-v2> `report-v1-handover-to-tzb66` — 技术报告改由 tzb-66 写(tzb-56 改令 0205);deck-v2 转为供数+筛查:tools/screen_report.py 与禁写清单-给报告作者.md 已就绪;草稿已移出交付路径 · ref: /Users/gl/tzb-deliverables/report-v1/tools/禁写清单-给报告作者.md
+- 2026-09-05T02:08+0800 [FACT/facts] <tzb-fe> `ruling.report_banned_words` — 裁定(02:1x,报告线专用禁写表):放行 规划/推理/智能体(主办方原话与领域常用词);闭环只在变更10逐字句与否定句;位姿估计仅否定式;安全陈述带范围;统一用校验。deck 表不动;tzb-55 改筛查脚本与清单给 tzb-66 · ref: /Users/gl/tzb-deliverables/report-v1/tools/禁写清单-给报告作者.md
+- 2026-09-05T02:08+0800 [FACT/facts] <tzb-fe> `live_window.pose_user_final` — 用户裁定(02:0x):直播机位以 step 3 为准(eye 1.478,-1.226,1.698 / look_at 0.02,-0.08,0.60,sha 4dda3c2b,实测主体占比 30.7%);键盘那次作废;'缩略图'系渲染滞后旧画面;重起保持此 pose · ref: /Users/gl/tzb-lanes/live-loop-v1/evidence/live-round-20260905-bprime/step3-actual-after-render-caughtup.png
+- 2026-09-05T02:09+0800 [FACT/facts] <finetuned-live-v1> `training-bundle-v1-delivered` — 训练交付包已出:tzb-deliverables/training-v1/training-bundle-v1(584MB/591文件)+ .tar 572MB sha 0273a99a。含两版数据集/adapter/日志/结果。脱敏过:无10.13./root@/key。 · ref: /Users/gl/tzb-deliverables/training-v1/training-bundle-v1/README-训练.md
+- 2026-09-05T02:09+0800 [FACT/facts] <finetuned-live-v1> `v2-training-numbers-erratum` — 勘误0e6c90fd:RESULT-v2的train_loss 0.133是瞬时值比v1均值,错;同口径v1均值.1591 v2均值.1727(v2更高)。回执62a81648有4字段是v1硬编码常量,更正件b2e27ce7。 · ref: /Users/gl/tzb-lanes/finetuned-live-path-v1/RESULT-v2-training-numbers-erratum-v1.md
+- 2026-09-05T02:09+0800 [EVENT] <tzb-fe> — labserver 账目:01:52 轮 round-002-composite-20260904T175254 为半成品——链完成、信封已铸、nonce d416390d 已花、执行器停在 observation_before,无 result;加性保留;loop lane 写回执;v17 重起不受阻 · ref: /var/tmp/vnext-demo-v3-20260903/dispatch-v1/rounds/round-002-composite-20260904T175254
+- 2026-09-05T02:10+0800 [EVENT] <m2c-exec> — 半成品记录: round-002-...T175254 nonce d416390d 已花但无 result(v17 丢 GPU 停在 observation_before), v17 于 02:09 重起故永久不完整 · ref: live-loop-v1/receipts/live-window-incomplete-round-20260904T175254.json
+- 2026-09-05T02:10+0800 [EVENT] <m2c-exec> — v17 重起(GPU1,v3 变体 sha 72d91479):PING 8.0s→0.02s,rounds 归零,pose 保持 step 3 (4dda3c2b);前一容器日志已存盘。
+- 2026-09-05T02:10+0800 [FACT/facts] <m2c-exec> `labonly-viewport-liveness-probe` — PING 8s 是病不是结构:重起后同代码 0.02s。8s=空转周期被拖慢;GIL 交接只解释倍数。1.616s 写入→应用亦为病中数。 · ref: /Users/gl/tzb-lanes/agent-demo-v3-isaac-rgbd/labonly-viewport-v1/PING-LATENCY-IS-NOT-A-HANG.md
+- 2026-09-05T02:11+0800 [FACT/facts] <deck-v2> `report-screen-ruling-applied` — 报告线禁写裁定已进 screen_report.py 覆盖层(规划/推理/智能体放行,闭环与位姿估计给否定豁免,校验统一);deck 表未动,正负例各复验 · ref: /Users/gl/tzb-deliverables/report-v1/tools/禁写清单-给报告作者.md
+- 2026-09-05T02:11+0800 [FACT/facts] <tzb-fe> `deliverable.training_bundle_v1` — Q9②训练包已出(tzb-76 02:1x):training-v1/training-bundle-v1.tar 572MB,591文件SHA全OK;代码/数据集206+326帧/adapter两版/日志/结果+勘误/中文README;无私网IP与key;勘误件已进评委包 env/s2-lora-v1/ · ref: /Users/gl/tzb-deliverables/training-v1/training-bundle-v1.tar.sha256
+- 2026-09-05T02:11+0800 [FACT/facts] <report-zh-v1> `report.zh_v1_started` — 技术报告 owner tzb-66 02:1x 开工:事实源读齐;PDF 路线 Markdown→HTML→Chrome headless(CJK 已验);tzb-55 旧稿改名为素材件仅查数;细节见 ref · ref: /Users/gl/tzb-lanes/report-zh-v1/LANE-NOTES.md
+- 2026-09-05T02:11+0800 [FACT/facts] <report-zh-v1> `ruling.report_terms_20260905` — tzb-fe 2026-09-05 02:1x 报告术语放行:任务规划/推理效率/智能体可用;闭环仅逐字句与否定;位姿估计仅否定式;安全陈述带范围;统一校验 · ref: /Users/gl/tzb-lanes/report-zh-v1/LANE-NOTES.md
+- 2026-09-05T02:12+0800 [FACT/facts] <tzb-fe> `report.screen_tool_ready` — 报告筛查工具就绪(tzb-55 02:1x):screen_report.py 以覆盖层落实六条裁定(放行规划/推理/智能体;闭环与位姿估计逐处判+否定豁免;禁通用/自主智能体、符号契约验证);正负例各验;禁写清单 93 行给 tzb-66;deck 不动 · ref: /Users/gl/tzb-deliverables/report-v1/tools/禁写清单-给报告作者.md
+- 2026-09-05T02:12+0800 [FACT/facts] <tzb-fe> `live_window.v17_restart_0209` — v17 02:09 重起后 PING 0.01–0.02 s(重起前 7–8 s),GPU1 空转 10%;'8 s 结构性延迟'结论撤回(秒级即病);pose 保持 step 3;空闲循环本就渲染,先前是 0.125 fps 幻灯片;等轮内 GPU 利用率 · ref: /var/tmp/labonly-viewport-v1/slowgpu-vnext-v17-20260904T180841Z.log
+- 2026-09-05T02:14+0800 [FACT/facts] <tzb-fe> `live_window.gpu_recovered` — v17 重起后闭环(02:13):轮内 GPU1 34–70%(重起前 4–5%),一轮 55 s(前 11 min 停滞),reset_verified +8.4 s,ALL_SIX;机位重贴 +8 ms = step 3;直播恢复实时;用户可录 · ref: /var/tmp/labonly-viewport-v1/
+- 2026-09-05T02:15+0800 [FACT/facts] <m2c-exec> `judge-package-usage-doc-zh` — docs/使用说明.md 写完(459 行/12 模块):bash 18 块 -n 全过、python -c 4 条 compile 全过,manifest 已加行;附录 B 列 7 条缺独立入口待裁。 · ref: /Users/gl/tzb-deliverables/judge-package-v1/docs/使用说明.md
+- 2026-09-05T02:19+0800 [FACT/facts] <tzb-fe> `defect.referring_expression_fixed_cyan` — 阻断缺陷(02:2x):start.sh 与直播驱动固定 expression=cyan cylinder,S0 只规则解目的地不派生指称词(无LLM),颜色规则只认英文→敲紫色抓青色。裁:S0 加颜色词表派生+新拒绝码,去固定值,紫/红评委路径复验;'S0=LLM'主张待更正 · ref: /Users/gl/tzb-deliverables/judge-package-v1/config/chain.yaml
+- 2026-09-05T02:20+0800 [FACT/facts] <review-zh-v1> `review.training-bundle` — 训练包①脱敏②摘要往返④adapter0400 均PASS;③5条阻断:提取器与冻结入口不在任何包内、RESULT-v2仍挂已撤回的0.133对比、两RESULT指向错回执(62a81648内部矛盾且无作废标记)、宿主内存23.9/49.3实为GPU显存、runs-ab3无来源 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-training-bundle-v1.md
+- 2026-09-05T02:21+0800 [FACT/facts] <tzb-fe> `review.training_bundle_v1` — 审查训练包:脱敏/SHA/0400 过;5 阻断已裁(T1 补发提取器与冻结入口;T2/T3 原件不改、加勘误索引与 SUPERSEDED.json;T4 显存/内存标签改准;T5 补 runs-ab3 生成步或删)+两处来源不明数;tzb-76 08:00 前重打 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-training-bundle-v1.md
