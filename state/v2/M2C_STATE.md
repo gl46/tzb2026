@@ -1,5 +1,5 @@
 <!-- GENERATED — 禁止直接 Edit/Write。唯一写入口: tools/statectl.py -->
-<!-- statectl protocol=2 stream=M2C generation=1534 updated=2026-09-04T17:39+0800 -->
+<!-- statectl protocol=2 stream=M2C generation=1623 updated=2026-09-04T22:36+0800 -->
 <!-- 自 M2C_STATE.md 迁移 sha=9dc690524ad77e6d51964237f11ee107e23e3ae92398d19e3424eb0676648fc6 -->
 
 # M2C 权威状态(活跃快照,协议 v2)
@@ -1723,6 +1723,142 @@
 
 - `review.round10_guard_closed` — 审查R10:'逐位复现'守卫改逐处判后三例负例全FAIL(原错误形态已堵),导入表按各自许可上下文逐处判;残留R10-S1(窗口法可被无关否定词放行)→裁改为紧邻匹配(不是|不可|非|并非|未)逐位复现;REQUIRED五条回归仍FAIL · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-round10.md
 
+- `pkg.healthcheck_and_cold_probe` — 卡点14:镜像HEALTHCHECK恒判unhealthy→start.sh预检加--no-healthcheck,README说明,launch_resident/liveview转owner。批tzb-b9现在单独跑真冷启预检以判空读模式(缺时间vs render product未活),据此定README措辞与预算 · ref: /Users/gl/tzb-deliverables/judge-package-v1/scripts/start.sh
+
+- `liveview-no-healthcheck` — 卡点14:start_liveview.sh 取帧宿主 docker run 加 --no-healthcheck(labserver docker 29.6.1 支持已核),live-demo.md 第3/5步补 unhealthy 可忽略。常驻执行器 launcher 不在我写入根,未改 · ref: /Users/gl/tzb-deliverables/judge-package-v1/scripts/liveview/start_liveview.sh
+
+- `deck-v2-guards-per-occurrence-and-font-fix` — 守卫改逐处判(逐位复现紧邻匹配/导入表含入式),勘误引用换到 c5b7e0e7;FONT 换中文族名,PDF 回退字 1539→0 · ref: /Users/gl/tzb-deliverables/ppt-v1/CHANGES-v2.md
+
+- `deck.v2_font_fix_and_guard` — deck v2(17:42 PDF,20页):守卫改紧邻匹配+导入表按各自许可上下文逐处判(两表三种负例全FAIL);勘误引用换到erratum文件;字体缺陷修:英文族名被解析成日文Hiragino Sans致11%字回退,改中文族名'冬青黑体简体中文'后13707字零回退(tzb-fe保留此修) · ref: /Users/gl/tzb-deliverables/ppt-v1/xh-202607-deck-v2.pdf
+
+- `deck-v2-gen1538-font-and-guard-ruling` — gen1538(tzb-a1,2026-09-04)裁定:字体中文族名修保留;导入表含入式/邻近式逐处判接受;紧邻匹配收到。待命三件 · ref: /Users/gl/tzb-deliverables/ppt-v1/CHANGES-v2.md
+
+- `deck-v2-locator-name-derisked` — LOCATOR_NAME 到手确为改一行:玄象/玄象定位器/XH-Locator/14字长名四种都过几何断言与 checker,交付件未动 · ref: /Users/gl/tzb-deliverables/ppt-v1/build_deck_v2.py
+
+- `bridge-three-field-mismatches` — 桥三处字段错已修:stage_output→output、按 plan_source 取 compiled_plan、给冻结 builder 补 proposed_plan;真 trace 离线跑通派发 6 命令
+
+- `render-nonfatal-and-fonts` — render 改为先打判据后渲染且失败只记 render_error;renderer 走 vendored main;镜像内 latin 字体已重定向,CJK 字体镜像里没有(0/158)
+
+- `plan-schema-rung-and-healthcheck` — compile_plan_v1 schema 走 M2C_PLAN_SCHEMA 指到包内(兄弟 vendor 布局);所有 docker run 加 --no-healthcheck(gen1535)
+
+- `review.round11` — 11轮:R10-S1已修(包含式判定,四例全FAIL,基线无假失败);8a三必改三建议全改。新:chxy(A100)与labserver(3080)4量+落点逐位一致且真跑非复制,但与known_limits'GPU物理不可逐位'冲突;chxy第7项用的是预录绑定。 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-round11.md
+
+- `pkg.preflight_cold_verified` — 冷启预检复验(tzb-b9,chxy真冷缓存,A100共享):PASS 175s,readback_attempts 8,wait 132s,open_and_render 132.5s——预算重试使冷首跑能过,'A模式等不好'假设被推翻;README措辞成立,240s预算保留(用掉55%);工件进包evidence · ref: /Users/gl/tzb-deliverables/judge-package-v1/evidence/verification-20260904/chxy-cold-install/preflight-cold-budget-verify-artefact.json
+
+- `r11m1-item7-qualifier` — R11-M1:live-demo.md 把'预录派发包·不含当场感知'的限定挪到 chxy 第7项主张的同一句,③改为回指不复述;未断言两机文件逐字节相同(labserver 日志无摘要) · ref: /Users/gl/tzb-deliverables/judge-package-v1/docs/live-demo.md
+
+- `ruling.render_font_noto` — 裁定(17:5x):容器内--render因冻结渲染器写死macOS字体且镜像无CJK必败→包内加Noto Sans CJK(OFL,chxy自带)与许可证并重定向,NOTICE/manifest登记;R11-M1 live-demo已改;hook07加打印请求sha256 · ref: /Users/gl/tzb-deliverables/judge-package-v1/NOTICE.md
+
+- `pkg.blocker2_fixed_staged` — 阻断2已修并快照两机:run_demo读compiled_plan.plan、拒绝码拆两种、render失败只记render_error,tests 16;适配层填proposed_plan不转vendor patch,以tzb-b9三项实测为验收;执行器身份由启动脚本外测写identity文件 · ref: /Users/gl/tzb-deliverables/judge-package-v1/agent/run_demo.py
+
+- `review.round12` — 12轮:预检行重写、四份工件全列且值互异,逐项核对全对(1.15/1.24无probe/1.11/66.42/132.5/132.0/8)。必改:'175 s wall'包内无源(仅README自身;另一命中是8/26无关时间戳),工件只记132.5。另断句丢失一处。 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-round12.md
+
+- `review.round12_preflight_row` — 审查R12:预检行四份工件点名全对;必改'175 s wall'包内无源→改为只引工件数(132.5/132.0/8次),整段墙钟注明操作员观察未落盘不引;补句号;工件路径补进receipt栏。F1标'观察未主张待查PhysX' · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-round12.md
+
+- `review.round13` — 13轮闭环复核,无新发现:R12三条与R11-M1全部属实。175 s已去、改为只引工件数并注明整段墙钟为操作员观察未落盘;live-demo还多写了'合成一轮的缺口未被这份回执填上';binding短前缀17b16926核对一致。 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-round13.md
+
+- `review.state_oversize_map` — OVERSIZE map + 待退役key列表已备(裁定gen1557:交付后再压缩,由tzb-a1执行)。更正:review.*是32条不是31,且非本lane独占——可退役仅19条6.5KB;两条未闭主张约束务必保留。 · ref: /Users/gl/tzb-lanes/review-zh-v1/state-oversize-map.md
+
+- `state.oversize_map_ruling` — state体量图(review lane,只读awk):§1 876条占77.6%,长平尾非个别臃肿→压缩只能靠退役已取代条目;review.*31条可收成2条。裁定:交付tarball之后再压缩(按state-compaction-plan),届时采纳该map与review收编;现在不动 · ref: /Users/gl/tzb-lanes/review-zh-v1/state-oversize-map.md
+
+- `task.composed_round_blocker3` — 合成一轮第三阻断(tzb-b9,18:06):换包后链侧三处修确认(s5=PASS),--execute仍拒——outcome无capture_stamp致A6收到空stamp,KeyError盖住拒绝码;已报demo lane,优先于字体批次。冷启预检第二次复验PASS 155s/9次/110.9s · ref: /Users/gl/tzb-lanes/cold-install-chxy-v1/logs/seg2/
+
+- `pkg.item7_executor_launch_record` — chxy第7项执行器身份按启动记录(docker inspect):包镜像v3、exec vnext_dispatch_executor_v17.py、08:51Z、STREAM=none、经launch_resident.sh;identity文件在EXECUTE=1步随新launcher产出;冷启预检两次PASS · ref: /Users/gl/tzb-lanes/cold-install-chxy-v1/cold-install-report-v1.md
+
+- `chxy-executor-identity` — chxy第7项执行器身份实据是 cold-install lane 的 logs/seg2/05-resident-v17.log:PING 自报 vnext_dispatch_executor_v17。报告卡点15 无 inspect 记录;该日志未随包,交付需拷入 evidence · ref: /Users/gl/tzb-lanes/cold-install-chxy-v1/logs/seg2/05-resident-v17.log
+
+- `ruling.reconfirm_round_wording` — 裁定(18:2x):再确认第二轮今晚按(a):链运行期间并发采一帧,回执只写'严格晚于绑定帧、与规划并发',不写'晚于计划';拒绝那半用绑定帧自复查验;run_demo在S5后自采(b)记设计项。chxy seg2日志进包evidence · ref: /Users/gl/tzb-deliverables/judge-package-v1/evidence/verification-20260904/chxy-cold-install/logs-seg2/
+
+- `review.round14` — 14轮:live-demo第8步重写,<待填>全消、R7-S2警告已移到步内、变更12写在使用点。必改:'余量只有6.6°'与同句146.7/150并排,评委减出3.3差2倍——回执原文是'6.6 deg lead',掉了lead一词。 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-round14.md
+
+- `doc-cited-receipts-not-in-package` — live-demo.md 引的 5 个 receipts/*.json 全在 lane、包内无 receipts/ 目录,评委副本上指不到;与刚补的 logs-seg2 同一类缺口。evidence/ 不在我写入根,已上报待授权 · ref: /Users/gl/tzb-deliverables/judge-package-v1/docs/live-demo.md
+
+- `chxy-logs-in-package` — cold-install logs-seg2 30个日志已入包,05-resident-v17.log 与 lane 副本逐字节一致;live-demo.md 已改引包内路径,两条 evidence 路径均可解析 · ref: /Users/gl/tzb-deliverables/judge-package-v1/docs/live-demo.md
+
+- `bridge-stamp-seam` — 桥第四处已修:stamp 改从 trace 读(outcome 从无此键、A6 年龄判据一次没执行过)、turn 传真值、早退分支全带码;tests 16→30 过;resident SHA256SUMS 14/14
+
+- `reconfirm-later-than-plan-gap` — --reconfirm-target 拿不到'晚于计划'的帧:链→复查→铸封同进程无钩子;tzb-b9 降级口径'晚于绑定、与规划并发';是否加自采端点待 tzb-a1 裁
+
+- `ruling.demo_lane_direct_iteration_chxy` — 调度(18:1x):为压缩修→跑循环(每圈约40min已三圈),阻断3起demo lane可直接rsync共享树到chxy pkg/(不带--delete)并在tzb-b9的容器上跑合成一轮,tzb-b9只记录核三项;gen1472暂存纪律对此段豁免。R14 6.6°/3.3°并写→loop lane改 · ref: /Users/gl/tzb-lanes/cold-install-chxy-v1/
+
+- `r14-green-margin-units` — R14:live-demo.md 绿色余量改为单一量纲'距分界3.2°(色相)',删掉 lead 6.6°(两者差2倍:lead=2×距分界);dual100 改区间146.0-146.6°(离分界3.4°) · ref: /Users/gl/tzb-deliverables/judge-package-v1/docs/live-demo.md
+
+- `pkg.liveloop_receipts_shipped` — loop lane五份回执拷进包evidence/verification-20260904/live-loop/(脱敏),README live view行改引包内路径;颜色数按R14统一:均值146.8°距分界3.2°、原位146.0–146.6°距3.4°,评委文档只写色相距离 · ref: /Users/gl/tzb-deliverables/judge-package-v1/evidence/verification-20260904/live-loop/
+
+- `pkg.reconfirm_halves_verified` — 再确认两半离线验毕(真chain目录,不派发不铸封):同帧复查被拒(NOT_A_LOOK);晚25min复查帧→TARGET_STILL_WHERE_IT_WAS_BOUND,2.07mm/容差30mm,感知管线不读真值。卡点16:复查回执camera=null→demo lane · ref: /Users/gl/tzb-lanes/cold-install-chxy-v1/cold-install-report-v1.md
+
+- `review.round15` — 15轮:R14两条已改且更完整;新数字全有回执(146.8/n120/sd2.57、10/120、spread)。必改:CLAIMS变更12声明色相距离3.3–3.4°,live-demo现为3.2°(源自回执146.8),落在声明区间外,建议CLAIMS改3.2–3.4°并点明端点来源。 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-round15.md
+
+- `doc-paths-all-resolve` — live-demo.md 五个回执改引 evidence/verification-20260904/live-loop/;三处原写成 live-loop-v1/receipts/(lane 相对路径)也一并改。包内 5 份与 lane 逐字节一致且 semantic_sha256 自校验通过 · ref: /Users/gl/tzb-deliverables/judge-package-v1/docs/live-demo.md
+
+- `review.round15_colour_consistency` — 审查R15:颜色数三处对齐——CLAIMS变更12改3.2–3.4°并注来源(静态均值146.8/dual100上沿146.6),README写原位区间+静态均值+'120帧中10判cyan/109判绿/1其他',live-demo已改;采纳'派工固定改哪几个文件' · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-round15.md
+
+- `review.round15b` — 15b复核当前版本:R15三条全落(README的'10判cyan/109判绿/1其他'比我建议更准)。必改:CLAIMS的lead区间6.4-6.6°与同句公式lead=2×色相距离对不上,3.4°应得6.8°,6.6是旧值146.7的残留,正确为6.4-6.8°。 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-round15.md
+
+- `pkg.redaction_note` — 脱敏核查(loop lane提醒):evidence/里被替换内网IP的只有5个纯文本日志,带sha256/semantic_sha256的JSON回执零改动、自校验仍过;加REDACTION-NOTE.md列出文件与替换字节。live-demo引用路径已全部改为包内路径并校验可解析 · ref: /Users/gl/tzb-deliverables/judge-package-v1/evidence/verification-20260904/REDACTION-NOTE.md
+
+- `r15b-green-frame-counts` — R15b-S1:改为 109 判green/10 判cyan/1 帧(000001)hue 恰 150.000° 与两色等距。第120帧不是'其他色',是分界上的平局,取决于规则平局处理——已提醒 tzb-a1 别在 README 写成'其他' · ref: /Users/gl/tzb-deliverables/judge-package-v1/docs/live-demo.md
+
+- `correction.green_tie_frame` — 颜色数更正(loop lane):第120帧000001色相恰150.000°与green/cyan等距,是平局非'其他';README/CLAIMS/live-demo三处改为'109判绿、10判cyan、1帧平局取决于规则平局处理';addendum-v2记该帧;CLAIMS lead区间改6.4–6.8 · ref: /Users/gl/tzb/reports/CLAIMS-SHEET-20260904.md
+
+- `static-frames-addendum-v2` — addendum-v2 已写(0444,d45a096a176f5fca):120帧完整分布 green109/cyan10/分界平局1(000001 色相恰150.000°,到两原型各30°);v1未动,三份互指且自校验通过 · ref: /Users/gl/tzb-lanes/live-loop-v1/receipts/static-frames-v1-addendum-v2.json
+
+- `milestone.composed_round_r4_dispatched` — 里程碑(18:24 chxy):合成一轮r4 DISPATCHED——评委路径指令→链PASS→盘上请求+封条→常驻执行器,6条控制指令,首动11.06s,A6 age 4.30/30(时效判据首次真跑),268s;demo lane在chxy跑,tzb-b9落账。接:再确认轮、EXECUTE=1、12项、路线A · ref: /Users/gl/tzb-lanes/cold-install-chxy-v1/
+
+- `review.round16` — 16轮:三处清单复核通过(addendum-v2合计120)。新问题:注册规则第4步只有饱和度门、无最大色相距离阈值,问green时绿柱分≤40.7恒胜青柱的60,'说绿可能返青柱'推不出;真正推得出的是青柱缺席时问cyan会拿回绿柱(且cyan是推荐词)。implementation=null,我读的是规格非代码。 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-round16.md
+
+- `review.round16_colour_rule_logic` — 审查R16(读规格):选框规则无最大色相距离阈值、无拒答→'问绿拿回青'按规则推不出(绿柱136.9–160.7°对green分16.9–40.7恒小于青柱60);真风险是任何注册色词都会选中某框,青柱漏检时问cyan会选绿柱。已令demo lane对实现核实,S1门是否唯一挡板;三处措辞待改 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-round16.md
+
+- `reconfirm-timing-measured` — 实测:chxy 取一帧 ~38s(10:29:19 请求→10:29:57 帧),整链 7s,故'复查帧晚于绑定帧且铸封前可用'在本机不可达;r5 只能诚实拒绝
+
+- `ruling.colour_rule_enable_and_disclose` — 裁定(18:4x):注册颜色规则未随包启用(r4记FIRST_RETURNED_BOX)→进包默认启用以与账目配置一致,启用后跑一轮记规则身份;披露无阈值无拒答、目标色框缺失时选别色框且按色词命名、S1唯一挡板;'绿→青'仅绿框缺失时成立;README/CLAIMS已改 · ref: /Users/gl/tzb/reports/CLAIMS-SHEET-20260904.md
+
+- `ruling.reconfirm_live_positive_half` — 裁定(19:0x):再确认'测量半'现场不可达(取帧38s>链7s)不再硬凑;交付口径=拒绝半现场两次实证+测量半离线真深度实证(晚25min帧2.07mm);S5后自采记设计项。12项:1-6/11过,7=钩子,8/9/10/12 SKIP→demo lane修 · ref: /Users/gl/tzb-lanes/cold-install-chxy-v1/logs/seg2/round-r5.log
+
+- `review.round17` — 交付前:absolute-paths-audit.md:33 印出的 grep(root@/10.13./chxy→0)复跑全不成立(3/4/45 文件);REDACTION-NOTE 漏了 085100 的 04-endpoint.log(仍含 10.13.28.243);包内5个私网IP全部出货。 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-round17.md
+
+- `isaac-text-lora-v2-result` — RESULT-v2落地前缀0e18c715。held-out真值锚定LoRA全面更好:det.845->.995,中文.804->.994,cyan.897->.983,两切分都涨。14格按gen1405判据未过->不采用,不出contract v4。 · ref: /Users/gl/tzb-lanes/finetuned-live-path-v1/RESULT-isaac-text-lora-v2.md
+
+- `ab14-criterion-conflict` — 待裁:gen1405的cyan不更差用IoU-vs-基座输出(一致性),真值口径说平手且两臂每格都指向cylinder_06、一格好5.8mm。当前判据结构上不让边界不同的候选过。本线不自改。 · ref: /Users/gl/tzb-lanes/finetuned-live-path-v1/receipts/isaac-text-lora-v2-ab14-v1.json
+
+- `r16-colour-rule-facts` — R16:选框规则无色相阈值、从不拒答、目标色缺席时返回别色物体而 target_ref 仍用指令色词、下游不复核;绿→青仅在绿框缺失时成立。live-demo.md 重写,addendum-v3 更正 v1 过强表述 · ref: /Users/gl/tzb-lanes/live-loop-v1/receipts/static-frames-v1-addendum-v3.json
+
+- `pkg.redaction_completed_r17` — 审查R17:audit印的grep复跑不成立(085100日志漏脱等4文件)。已补脱敏(tests 33过),REDACTION-NOTE重写并明示保留的3个RFC1918地址(env镜像、vendor示例),audit改印实际检查,make_tarball加地址检查命中即拒出包 · ref: /Users/gl/tzb-deliverables/judge-package-v1/evidence/verification-20260904/REDACTION-NOTE.md
+
+- `pkg.chxy_12items_1832` — chxy全12项(18:32):1-6/11 PASS(6首过),7 FAIL=hook (nonce未消费),8/9/10 SKIP=hook依赖包外拒绝套件与预置容器(评委机永远SKIP→须改自足),12无流SKIP;r4溯源过(注入仅内存);轮次label撞名→带执行者前缀 · ref: /Users/gl/tzb-lanes/cold-install-chxy-v1/cold-install-report-v1.md
+
+- `ruling.lora_v2_rejudge_on_truth` — LoRA第2次(19:01):held-out真值口径全面更好(det .845→.995,cyan .897→.983,IoU .861→.954,紫色真缺席假阳.991→0);14格按一致性未过但按真值cyan平手无丢框。裁(b)按真值重判,green先答帧内有无绿柱;LoRA侧车跑通合成一轮才切默认 · ref: /Users/gl/tzb-lanes/finetuned-live-path-v1/RESULT-isaac-text-lora-v2.md
+
+- `deck-v2-default-config-round-and-colour-rule` — P7 三行边界(默认配置合成一轮 11.06/268/DISPATCHED),P11 第14条引冷装报告非占位;P4 加规则无阈值不拒答;4.30s 因只在 stdout 未上页 · ref: /Users/gl/tzb-deliverables/ppt-v1/NUMBERS-v2.md
+
+- `deck.v2_composed_row_done` — deck v2(19:04):P7三行边界(首例flash+v3/默认配置合成一轮只写有留存工件的数);帧龄4.30s只在终端无回执不上页(裁:对,待执行器写进回执);P11第14条引冷装报告,round目录到货再并;守卫加placeholder_fails;P4两句已加 · ref: /Users/gl/tzb-deliverables/ppt-v1/xh-202607-deck-v2.pdf
+
+- `review.round18` — 18轮:R17已改并机械化(REDACTION-NOTE明示保留3个RFC1918;make_tarball 新增 ADDR_CHECK 命中即删包 exit5,已确认被调用)。CLAIMS变更12重写完整。提醒:包内7处记了颜色规则名,但含预录bundle继承的字面,非'真选过框'的证据。 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-round18.md
+
+- `deck-v2-gen1604-ruling` — gen1604(tzb-a1,2026-09-04):4.30s 待回执落盘后再上页;P7三行/P11冷装报告/placeholder_fails/P4两句均接受;P4 0.588度句保留不在禁写内 · ref: /Users/gl/tzb-deliverables/ppt-v1/CHANGES-v2.md
+
+- `review.round18_small` — 审查R18:R17机械化确认(ADDR_CHECK真调用);两小项已改(audit命令补自排除;README写规则启用时间);提醒:包内7处规则名含预录派发包继承字面,'启用后一轮真选框'的证据须来自r6 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-round18.md
+
+- `ab14-truth-rejudge-adopt` — 裁定b重判三条全过=ADOPT:cyan真值3.243->3.194mm更好,green柱在画面内基座漏检LoRA命中4px,零框0/70假阳0。RESULT-v2-judgement-v1前缀5b607a4b。采用门r6/r7未跑,仍默认基座。 · ref: /Users/gl/tzb-lanes/finetuned-live-path-v1/RESULT-v2-judgement-v1.md
+
+- `s2-lora-mountable-package` — 打包目录 tzb-lanes/finetuned-live-path-v1/mountable/s2-lora-v1 255MB 8文件校验全OK:派生入口fd833a52+adapter 9459f7b1+contract v4+SHA256SUMS+NVIDIA LICENSE+侧车逐字命令。OFL无对应物。 · ref: /Users/gl/tzb-lanes/finetuned-live-path-v1/mountable/s2-lora-v1/README.md
+
+- `smoke-8-9-10-self-sufficient` — 8/9/10 改为包内自足(mint_envelope+_dispatch_probe),chxy 实测全 PASS:ENVELOPE_ALTERED/REQUEST_DIGEST_MISMATCH/NONCE_ALREADY_CONSUMED,0 指令、执行器仍活
+
+- `s2-lora-accepted-into-package` — tzb-a1 9/4验收:重判+打包接受,进包env/s2-lora-v1(8/8校验OK)为可选profile默认基座,采用门r6/r7未跑。延误不追。/var/tmp问题由包内副本解决。压缩归tzb-a1。本线收线。 · ref: /Users/gl/tzb-lanes/finetuned-live-path-v1/LANE_STATE.md
+
+- `route-a-outcome` — 路线A结果 READY_BUT_NOT_RUN:preflight 0 blocker、宿主起过并就绪,但主轮未跑。合成一轮仍未被本 lane 证明。回执 end-to-end-v1 (712a5b21ffba11cf) · ref: /Users/gl/tzb-lanes/live-loop-v1/receipts/end-to-end-v1.json
+
+- `route-a-request-handoff-gap` — 路线A下次重试前要先解决:链在Mac、执行器在labserver时,铸好的请求没有任何步骤送到执行器自己的盘上(RESIDENT_OUTPUT 须与容器 /m2c/output 同一宿主目录)。属代码阅读非实测 · ref: /Users/gl/tzb-lanes/live-loop-v1/receipts/end-to-end-v1.json
+
+- `ruling.lora_v2_optional_profile_shipped` — LoRA第2次真值重判三条全过→随包可选profile env/s2-lora-v1/(255MB,sha 8/8 OK),默认仍基座;采用门未跑不切默认;README/manifest/negative-results/CLAIMS变更13已写;名字待用户 · ref: /Users/gl/tzb-deliverables/judge-package-v1/env/s2-lora-v1/README.md
+
+- `pkg.chxy_12items_final_and_ledger` — chxy 12项终态19:06:8 PASS/4 SKIP/0 FAIL;三轮真执行三枚nonce账目;round目录+帧png+attributed日志+三份smoke回执入包(LAN地址已脱敏);README §Verification +6行;23:30出tarball · ref: /Users/gl/tzb-deliverables/judge-package-v1/README.md
+
+- `lane-closed` — live-loop-v1 今晚收线,无待办。跨机请求搬盘那条由 tzb-a1 记进包内 docs/open-questions.md,按代码阅读的设计项、非实测结论。仅在被点名时核查,否则不动包内文件 · ref: /Users/gl/tzb-lanes/live-loop-v1/receipts/end-to-end-v1.json
+
+- `review.round19` — R18两项闭环:audit命令原样跑无输出、README颜色规则带启用时刻。deck 19:04四筛全过。新2低:pdf导出早于pptx写入(文本逐页字符集20/20相同)、NUMBERS-v2头部仍写18页 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-round19.md
+
 ## 2. 归属与 lane
 - `lane.m2c_exec` — **M2C 执行会话**:successor implementation candidate,commit-free,于全新隔离 clone(Q′ 模式);已登记候选路径内自由编辑(R132.41)。ETA(8/29 午报):交包 8/30 01:00–07:00;早沿(≤03:00)可达截止,晚沿不可达。
 - `lane.tzb_fe` — **tzb-fe(协调)**:实现审查+七段治理批量激活(预告:批一 = R′ stage adoption→successor prereg→materialize→bootstrap;批二 = legacy P″ prefix adoption→recovery03→combined preflight;每步仍各自 pre-capture/记录/fail-closed,激活与 closeout 各批一次)。
@@ -2284,26 +2420,24 @@
 
 - `task.end_to_end_composed_round` — 缺口(18:5x):尚无一轮'REPL指令→链路→盘上请求+信封→v17执行'合成实跑。桥=包内run_demo --execute→resident客户端→mint_envelope→8557(smoke 7)。v20两跑毕(~19:00)后loop lane重起取帧宿主跑一轮,回执end-to-end-v1 · ref: /Users/gl/tzb-lanes/live-loop-v1/receipts/end-to-end-composition-v1.json
 
-- `cold-preflight-budget-verify` — 修复到货换包后:移开 pkg/.isaac-cache,冷启只跑一遍 preflight,看能否在 240s 预算内 PASS(readback_attempts>1、readback_wait_s)。跑完删/还原备份。 · ref: /Users/gl/tzb-lanes/cold-install-chxy-v1/cold-install-report-v1.md
-
 ## 5. Recent tail(journal 缓存,非权威)
-- 2026-09-04T17:22+0800 [FACT/facts] <tzb-fe> `correction.colour_rule_wording` — 更正(审查):颜色规则句'余量6.6°'与'146.7对150'是两个量(lead余量vs色相距离3.3°),且静态批已观测越界(136.9–160.7°)非'风险'。README与CLAIMS变更12已按条件分写并说明为何排除绿/棕/橙;live-demo交loop lane同改 · ref: /Users/gl/tzb/reports/CLAIMS-SHEET-20260904.md
-- 2026-09-04T17:23+0800 [FACT/facts] <tzb-fe> `correction.tested_colour_words` — 更正:'已测试四色'宽于证据——只有cyan跑过整轮;README/CLAIMS变更12改为loop lane措辞(四色可用,只有青色整轮,另三色不在薄余量上,不写度数)。chxy冷装回执已拷进evidence/verification-20260904/chxy-cold-install/(12文件,IP已脱敏) · ref: /Users/gl/tzb-deliverables/judge-package-v1/evidence/verification-20260904/chxy-cold-install/
-- 2026-09-04T17:26+0800 [FACT/facts] <live-loop-v1> `chxy-item7-receipt` — chxy第7项回执已进包并引用,但回执自报 v15 非 v17、且真值仅事后度量(simulator_truth_used false),故未写'v17真值模式';同轮第6项FAIL、8-12未跑、下发的是预录bundle · ref: /Users/gl/tzb-deliverables/judge-package-v1/evidence/verification-20260904/chxy-cold-install/item7-result-v17.json
-- 2026-09-04T17:27+0800 [FACT/facts] <deck-v2> `deck.v2_r7_erratum_guards` — R7+7b+gen1509 落地:P11 两个 LoRA 条目点名分开、A8 撤下无物假阳一对并改标题为'有物格两项'、A7 补 5.315/7.005 与逐位一致口径;checker 加 8 条必现断言+按页条件断言+逐位复现只许否定 · ref: ppt-v1/NUMBERS-v2.md
-- 2026-09-04T17:28+0800 [FACT/facts] <tzb-fe> `ruling.receipt_executor_identity` — 裁定(17:5x):v17/v20回执内执行器串仍是继承的'v15',不能自证谁跑的→demo lane加附加字段executor_identity{file,sha256,version,image},继承串不改;envelope两sha不同待答并区分字段名;已跑回执缺字段文档注明 · ref: /Users/gl/tzb-deliverables/judge-package-v1/agent/executor/resident/PROVENANCE.md
-- 2026-09-04T17:29+0800 [FACT/facts] <live-loop-v1> `v17-truth-usage-scope` — 更正:v17 真值用在倾斜门/举起/释放/落地四处判定与放置在手偏移(CLAIMS变更10);不读真值仅限S0-S5与接近伺服。回执v15串是parity继承字符串,身份见容器启动记录 · ref: /Users/gl/tzb-deliverables/judge-package-v1/docs/live-demo.md
-- 2026-09-04T17:29+0800 [FACT/facts] <tzb-fe> `deck.v2_round7_done` — deck v2(17:28,20页):R7/7b/checker/勘误全落地,check PASS;勘误句不带0.982/0.048(禁引优先);勘误件未落盘暂引LANE_STATE与RESULT-v2-DRAFT;A8标题改'有物格上两项更好';checker三类断言 · ref: /Users/gl/tzb-deliverables/ppt-v1/xh-202607-deck-v2.pdf
-- 2026-09-04T17:30+0800 [FACT/facts] <review-zh-v1> `review.round8b` — 8b:R7-M1已改(P11三工件+点名vp2000步+A8页内回执);7b两必改已改且更好;勘误0.982/0.048撤净并留痕。必改:'逐位复现'守卫按页判,同页有一处否定就放行整页——原错误形态抓不到,负例已证PASS。 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-round8b.md
-- 2026-09-04T17:30+0800 [FACT/facts] <deck-v2> `deck.v2_pending_erratum_ref_swap` — 待办:tzb-76 落 RESULT-isaac-text-lora-v1-erratum-v1.md 后,把 A8 口径带与 NUMBERS 勘误段的引用从 LANE_STATE/RESULT-v2-DRAFT 换成该勘误件,再重导 PDF · ref: ppt-v1/NUMBERS-v2.md
-- 2026-09-04T17:30+0800 [FACT/facts] <tzb-fe> `review.round8b_dispositions` — 审查8b:R7-M1/7b/勘误撤引全部落地;必改'逐位复现'守卫按页放行同页裸肯定→改按出现位置判(前8字内须有否定词),负例须FAIL;勘误件c5b7e0e7已落盘,deck换引。均转tzb-55 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-round8.md
-- 2026-09-04T17:32+0800 [FACT/facts] <review-zh-v1> `review.round9` — 9轮:守卫洞未堵(重导但checker未动,负例第三例仍PASS);chxy第6项仍抛KeyError非编码拒绝、且这份崩溃记录已进包evidence;主镜像跨机29层摘要逐行相同(独立验)、但sidecar是两地各建、同一性记录未覆盖。 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-round9.md
-- 2026-09-04T17:33+0800 [EVENT] <exec-no-truth-v1> — 合成一轮:链到 s5=PASS(8s),--execute 拒于 NO_PLAN_OR_TASKSPEC_IN_TRACE。_dispatch 两处不匹配 + --render 崩并吞掉判据,已报 owner。 · ref: /var/tmp/judge-cold-test/logs/seg2/round-r2.log
-- 2026-09-04T17:34+0800 [FACT/facts] <tzb-fe> `review.round9_dispositions` — 审查R9:守卫洞待改;chxy 17:01轮item6崩溃记录留evidence,README chxy栏写修复前/后两行;侧车跨机同一性已有对照文件(层一致ID异),主镜像另有对照;三个open_and_render值点名来源 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-round9.md
-- 2026-09-04T17:34+0800 [FACT/facts] <tzb-fe> `task.composed_round_blocker2` — 合成一轮第二阻断(tzb-b9,17:33):链到s5=PASS(8s)但--execute拒于NO_PLAN_OR_TASKSPEC_IN_TRACE(_dispatch两处字段不匹配)且--render崩并吞掉判据;已报demo lane,第一优先修;修后重快照、chxy重跑 · ref: /Users/gl/tzb-lanes/cold-install-chxy-v1/
-- 2026-09-04T17:34+0800 [FACT/facts] <review-zh-v1> `review.round9.correction` — 更正 gen1525 的 R9-S1:sidecar 并非两地各建。env/locany-sidecar-image-identity-v1.txt 有对照,我独立重算:8 层摘要逐行相同,chxy 构建→labserver save/load。两机两镜像均一致成立。我错在未查 env/ 就把窄结论放宽。 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-round9.md
-- 2026-09-04T17:35+0800 [FACT/facts] <tzb-fe> `pkg.image_identity_crossref` — 审查R9更正采纳:两机两镜像层摘要均一致(主镜像29层、侧车8层,独立复核);包内加evidence/verification-20260904/IMAGE-IDENTITY.md互指两份对照文件,侧车文件加指向行;已同步pkg-next · ref: /Users/gl/tzb-deliverables/judge-package-v1/evidence/verification-20260904/IMAGE-IDENTITY.md
-- 2026-09-04T17:38+0800 [FACT/facts] <tzb-fe> `pkg.preflight_cold_budget` — 预检再修(复验:冷缓存首跑6次0.3s内全空→FAIL;第二跑4次才有帧,137s):改墙钟预算重试(默认240s,每次30个app.update),FAIL工件带readback字段;README预检时长改2–4分钟并写明冷启可能FAIL即重跑;pkg-next散件已清 · ref: /Users/gl/tzb-deliverables/judge-package-v1/scripts/preflight_offline_stage.py
-- 2026-09-04T17:39+0800 [FACT/facts] <review-zh-v1> `review.round10` — 10轮:R8b-M1已修并按第三例复验通过(逐处判+8字窗口),回归干净,导入表也一并改成逐处判且避开了假失败陷阱。低优先残留:窗口内无关否定词仍放行裸用,建议改为要求否定词紧邻。 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-round10.md
-- 2026-09-04T17:39+0800 [TASK/task] <exec-no-truth-v1> `cold-preflight-budget-verify` — 修复到货换包后:移开 pkg/.isaac-cache,冷启只跑一遍 preflight,看能否在 240s 预算内 PASS(readback_attempts>1、readback_wait_s)。跑完删/还原备份。 · ref: /Users/gl/tzb-lanes/cold-install-chxy-v1/cold-install-report-v1.md
-- 2026-09-04T17:39+0800 [FACT/facts] <tzb-fe> `review.round10_guard_closed` — 审查R10:'逐位复现'守卫改逐处判后三例负例全FAIL(原错误形态已堵),导入表按各自许可上下文逐处判;残留R10-S1(窗口法可被无关否定词放行)→裁改为紧邻匹配(不是|不可|非|并非|未)逐位复现;REQUIRED五条回归仍FAIL · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-round10.md
+- 2026-09-04T19:07+0800 [FACT/facts] <tzb-fe> `deck.v2_composed_row_done` — deck v2(19:04):P7三行边界(首例flash+v3/默认配置合成一轮只写有留存工件的数);帧龄4.30s只在终端无回执不上页(裁:对,待执行器写进回执);P11第14条引冷装报告,round目录到货再并;守卫加placeholder_fails;P4两句已加 · ref: /Users/gl/tzb-deliverables/ppt-v1/xh-202607-deck-v2.pdf
+- 2026-09-04T19:08+0800 [FACT/facts] <review-zh-v1> `review.round18` — 18轮:R17已改并机械化(REDACTION-NOTE明示保留3个RFC1918;make_tarball 新增 ADDR_CHECK 命中即删包 exit5,已确认被调用)。CLAIMS变更12重写完整。提醒:包内7处记了颜色规则名,但含预录bundle继承的字面,非'真选过框'的证据。 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-round18.md
+- 2026-09-04T19:08+0800 [FACT/facts] <deck-v2> `deck-v2-gen1604-ruling` — gen1604(tzb-a1,2026-09-04):4.30s 待回执落盘后再上页;P7三行/P11冷装报告/placeholder_fails/P4两句均接受;P4 0.588度句保留不在禁写内 · ref: /Users/gl/tzb-deliverables/ppt-v1/CHANGES-v2.md
+- 2026-09-04T19:09+0800 [FACT/facts] <tzb-fe> `review.round18_small` — 审查R18:R17机械化确认(ADDR_CHECK真调用);两小项已改(audit命令补自排除;README写规则启用时间);提醒:包内7处规则名含预录派发包继承字面,'启用后一轮真选框'的证据须来自r6 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-round18.md
+- 2026-09-04T22:24+0800 [EVENT] <exec-no-truth-v1> — 重跑 7-12:item7 PASS(用先前未消费的 nonce),item11 PASS(3枚只读不可重放),8/9/10/12 SKIP,0 FAIL。12项终态:8 PASS / 4 SKIP / 0 FAIL。三轮 round 目录+帧已同步本机。 · ref: /Users/gl/tzb-lanes/cold-install-chxy-v1/receipts/smoke-all-20260904T190638
+- 2026-09-04T22:25+0800 [FACT/facts] <finetuned-live-v1> `ab14-truth-rejudge-adopt` — 裁定b重判三条全过=ADOPT:cyan真值3.243->3.194mm更好,green柱在画面内基座漏检LoRA命中4px,零框0/70假阳0。RESULT-v2-judgement-v1前缀5b607a4b。采用门r6/r7未跑,仍默认基座。 · ref: /Users/gl/tzb-lanes/finetuned-live-path-v1/RESULT-v2-judgement-v1.md
+- 2026-09-04T22:25+0800 [FACT/facts] <finetuned-live-v1> `s2-lora-mountable-package` — 打包目录 tzb-lanes/finetuned-live-path-v1/mountable/s2-lora-v1 255MB 8文件校验全OK:派生入口fd833a52+adapter 9459f7b1+contract v4+SHA256SUMS+NVIDIA LICENSE+侧车逐字命令。OFL无对应物。 · ref: /Users/gl/tzb-lanes/finetuned-live-path-v1/mountable/s2-lora-v1/README.md
+- 2026-09-04T22:25+0800 [EVENT] <m2c-exec> — ISAAC 占用开始 chxy GPU0:dl-r7 合成一轮(颜色规则默认启用 + 请求 provenance 段 + bridge-receipt + outcome.json 首验)
+- 2026-09-04T22:30+0800 [EVENT] <m2c-exec> — ISAAC 占用结束 chxy GPU0:dl-r7 DISPATCHED(颜色规则身份已记、请求 provenance 被执行器接受、bridge-receipt+outcome.json 落盘);8/9/10 自足化后首次全 PASS
+- 2026-09-04T22:30+0800 [FACT/facts] <m2c-exec> `smoke-8-9-10-self-sufficient` — 8/9/10 改为包内自足(mint_envelope+_dispatch_probe),chxy 实测全 PASS:ENVELOPE_ALTERED/REQUEST_DIGEST_MISMATCH/NONCE_ALREADY_CONSUMED,0 指令、执行器仍活
+- 2026-09-04T22:31+0800 [FACT/facts] <finetuned-live-v1> `s2-lora-accepted-into-package` — tzb-a1 9/4验收:重判+打包接受,进包env/s2-lora-v1(8/8校验OK)为可选profile默认基座,采用门r6/r7未跑。延误不追。/var/tmp问题由包内副本解决。压缩归tzb-a1。本线收线。 · ref: /Users/gl/tzb-lanes/finetuned-live-path-v1/LANE_STATE.md
+- 2026-09-04T22:34+0800 [EVENT] <live-loop-v1> — 路线A收线:主轮取消(GPU0 让给评委路径 EXECUTE=1)。取帧宿主 22:33 已停,GPU0 占用结束回到143MiB、RAM回到41GB,v17 在GPU1未动。0 轮、0 nonce、0 ordinal;dispatch-v1 全程 ABSENT · ref: /Users/gl/tzb-lanes/live-loop-v1/receipts/end-to-end-v1.json
+- 2026-09-04T22:34+0800 [FACT/facts] <live-loop-v1> `route-a-outcome` — 路线A结果 READY_BUT_NOT_RUN:preflight 0 blocker、宿主起过并就绪,但主轮未跑。合成一轮仍未被本 lane 证明。回执 end-to-end-v1 (712a5b21ffba11cf) · ref: /Users/gl/tzb-lanes/live-loop-v1/receipts/end-to-end-v1.json
+- 2026-09-04T22:34+0800 [FACT/facts] <live-loop-v1> `route-a-request-handoff-gap` — 路线A下次重试前要先解决:链在Mac、执行器在labserver时,铸好的请求没有任何步骤送到执行器自己的盘上(RESIDENT_OUTPUT 须与容器 /m2c/output 同一宿主目录)。属代码阅读非实测 · ref: /Users/gl/tzb-lanes/live-loop-v1/receipts/end-to-end-v1.json
+- 2026-09-04T22:35+0800 [FACT/facts] <tzb-fe> `ruling.lora_v2_optional_profile_shipped` — LoRA第2次真值重判三条全过(ADOPT)→随包可选profile env/s2-lora-v1/(255MB,sha 8/8 OK),默认仍基座;采用门(LoRA侧车合成一轮)未跑不切默认;README边界/管线/Layout/manifest/negative-results/CLAIMS变更13已写;名字待用户 · ref: /Users/gl/tzb-deliverables/judge-package-v1/env/s2-lora-v1/README.md
+- 2026-09-04T22:35+0800 [FACT/facts] <tzb-fe> `ruling.lora_v2_optional_profile_shipped` — LoRA第2次真值重判三条全过→随包可选profile env/s2-lora-v1/(255MB,sha 8/8 OK),默认仍基座;采用门未跑不切默认;README/manifest/negative-results/CLAIMS变更13已写;名字待用户 · ref: /Users/gl/tzb-deliverables/judge-package-v1/env/s2-lora-v1/README.md
+- 2026-09-04T22:35+0800 [FACT/facts] <tzb-fe> `pkg.chxy_12items_final_and_ledger` — chxy 12项终态19:06:8 PASS/4 SKIP/0 FAIL;三轮真执行三枚nonce账目;round目录+帧png+attributed日志+三份smoke回执入包(LAN地址已脱敏);README §Verification +6行;23:30出tarball · ref: /Users/gl/tzb-deliverables/judge-package-v1/README.md
+- 2026-09-04T22:35+0800 [EVENT] <tzb-fe> — 路线A收线确认(loop lane 22:33 READY_BUT_NOT_RUN,labserver GPU0取帧宿主已停);其代码阅读发现:链与执行器跨机时请求未搬到执行器盘→记 open-questions 设计项,不实测 · ref: /Users/gl/tzb-lanes/live-loop-v1/receipts/end-to-end-v1.json
+- 2026-09-04T22:36+0800 [FACT/facts] <live-loop-v1> `lane-closed` — live-loop-v1 今晚收线,无待办。跨机请求搬盘那条由 tzb-a1 记进包内 docs/open-questions.md,按代码阅读的设计项、非实测结论。仅在被点名时核查,否则不动包内文件 · ref: /Users/gl/tzb-lanes/live-loop-v1/receipts/end-to-end-v1.json
+- 2026-09-04T22:36+0800 [FACT/facts] <review-zh-v1> `review.round19` — R18两项闭环:audit命令原样跑无输出、README颜色规则带启用时刻。deck 19:04四筛全过。新2低:pdf导出早于pptx写入(文本逐页字符集20/20相同)、NUMBERS-v2头部仍写18页 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-round19.md
