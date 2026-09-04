@@ -1,5 +1,5 @@
 <!-- GENERATED — 禁止直接 Edit/Write。唯一写入口: tools/statectl.py -->
-<!-- statectl protocol=2 stream=M2C generation=1856 updated=2026-09-05T04:28+0800 -->
+<!-- statectl protocol=2 stream=M2C generation=1860 updated=2026-09-05T04:28+0800 -->
 <!-- 自 M2C_STATE.md 迁移 sha=9dc690524ad77e6d51964237f11ee107e23e3ae92398d19e3424eb0676648fc6 -->
 
 # M2C 权威状态(活跃快照,协议 v2)
@@ -2177,6 +2177,12 @@
 
 - `acceptance.v21_three_rounds_chxy` — chxy v21 三轮:青色与 v17 逐项对齐(差≤1e-5)不退步;紫色六原语落格;红色干净带码停止(exit 0)但撞邻件 27 mm(近基座不可达+伺服不判收敛);ordinal 全 0;报告 1654 行入包;卡点 32 升中 · ref: /Users/gl/tzb-deliverables/judge-package-v1/evidence/verification-20260904/chxy-cold-install/rounds/v21-rerun-20260905/
 
+- `ruling-v21-default-switch` — 裁定(tzb-56, 2026-09-05):默认执行器切v21的条件=demo lane伺服发散保护落地后,我再跑红/紫/青三轮全符合预期(红期望HALTED_APPROACH_DID_NOT_CONVERGE干净停、邻件不动),跑完报它切
+
+- `ruling-finding-32-fix-shape` — 裁定(tzb-56, 2026-09-05):卡点32升中采纳;修法=v21信封消费记录新增consumed_by_executor_identity=v21(不动consumed_by老字段保parity),grasp_gate.why常量改为按本轮事实生成或删掉;归demo lane
+
+- `sidecar-8571-keep` — 8571 基座侧车 judge-locany-base 保持运行(裁定 tzb-56 2026-09-05 再确认一次);给用户实时窗口用,不撤
+
 ## 2. 归属与 lane
 - `lane.m2c_exec` — **M2C 执行会话**:successor implementation candidate,commit-free,于全新隔离 clone(Q′ 模式);已登记候选路径内自由编辑(R132.41)。ETA(8/29 午报):交包 8/30 01:00–07:00;早沿(≤03:00)可达截止,晚沿不可达。
 - `lane.tzb_fe` — **tzb-fe(协调)**:实现审查+七段治理批量激活(预告:批一 = R′ stage adoption→successor prereg→materialize→bootstrap;批二 = legacy P″ prefix adoption→recovery03→combined preflight;每步仍各自 pre-capture/记录/fail-closed,激活与 closeout 各批一次)。
@@ -2751,11 +2757,9 @@
 
 - `live-loop-executor-target-prim-pin` — vnext_dispatch_executor_v17.py:75 TARGET_PRIM_PATH 硬钉 cylinder_06,非青指令一律 EXECUTOR_ERROR 且已花 nonce;归 demo lane/协调裁
 
+- `await-servo-guard-then-3-rounds` — 等 demo lane 伺服发散保护同步后跑红/紫/青三轮并报 tzb-56;红期望 HALTED_APPROACH_DID_NOT_CONVERGE 干净停止、邻件不动。tzb-56 说它会叫我,不自己加轮
+
 ## 5. Recent tail(journal 缓存,非权威)
-- 2026-09-05T04:18+0800 [FACT/facts] <tzb-fe> `review.report_draft2` — 审查报告二稿:1 阻断 F1(出处行约半数路径未带附录 C 根前缀,evidence 同名 v20 回执易混)→tzb-66 逐条加前缀;四图数据/R1/R2/缺口/术语/留位全过 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-report-draft2-figures.md
-- 2026-09-05T04:18+0800 [FACT/facts] <tzb-fe> `live_window.v21_cyan_regression` — labserver 青色回归轮 v21 通过(04:16):cylinder_06 六原语,位移 0.659 m 入格(离底 30.2 mm),grasp_gate 过,邻件<4.1µm;与紫色轮并列两点非成功率;现场保持不动 · ref: /Users/gl/tzb-lanes/live-loop-v1/receipts/live-window-v21-cyan-regression-round-v1.json
-- 2026-09-05T04:19+0800 [FACT/facts] <exec-no-truth-v1> `finding-32-ping-reports-intent` — 卡点32改判[中]:v21 运行时自述身份落后——nonce消费记录写v15(:1224)、PING写v17(:2216)、产物名result-v17、grasp_gate.why是常量(:1806);行为无误,溯源字符串错 · ref: cold-install-chxy-v1/receipts/v21-rerun/
-- 2026-09-05T04:19+0800 [FACT/facts] <exec-no-truth-v1> `v21-red-failure-detail` — 红轮=干净带码停止非traceback:停在step3 attach断言后(step556),手指停39mm未合到33mm柱体;邻件cylinder_02位移27.2mm;花1枚nonce,ordinal_consumed=0 · ref: cold-install-chxy-v1/receipts/v21-rerun/red/round-001/result-v17.json
 - 2026-09-05T04:20+0800 [FACT/facts] <report-zh-v1> `report.zh_v2_draft2` — 报告第二稿(图文版)04:19 版:53 页 24 图 22 表;审查 F1(出处行根前缀)已修,筛查 PASS(775 数/未命中 0/禁写 0);待补 S0 验收+紫/红两轮(等 tzb-56 字段值) · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.pdf
 - 2026-09-05T04:20+0800 [FACT/facts] <tzb-fe> `report.f1_fixed_values_sent` — 报告 F1 已修(04:19,出处行统一附录 C 前缀 D/L/P/T,复筛 PASS 775/766/0);已把 S0 三句验收与 v21 紫/青/红字段值发 tzb-66 填 3.2.1 与表 15;默认执行器句留待裁定 · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.pdf
 - 2026-09-05T04:21+0800 [FACT/facts] <m2c-exec> `kadian-32-ping-identity` — 卡点32已修:builder 加第8处替换,PING 自报 vnext_dispatch_executor_v21 + v21_baseline;结果文件名 result-v17.json 按 v15 parity 不改;新 v21 sha 8b2d45fd 前缀;85 tests pass · ref: /Users/gl/tzb-deliverables/judge-package-v1/agent/executor/resident/SHA256SUMS-v21.txt
@@ -2772,3 +2776,7 @@
 - 2026-09-05T04:26+0800 [FACT/facts] <exec-no-truth-v1> `v21-red-rootcause-corrected` — 红轮根因更正(demo lane 提出,我逐项复核对上):手停在离柱290mm、伺服把残差当标定偏置固定3次不判收敛(0.331→0.515→0.325);判别量=离基座水平半径,红0.232失败/紫0.354青0.416成功 · ref: cold-install-chxy-v1/receipts/v21-rerun/red/round-001/result-v17.json
 - 2026-09-05T04:26+0800 [EVENT] <exec-no-truth-v1> — v21 三色各一轮跑完:青(与v17逐项对齐)、紫(落格内)、红(近基座顶抓不可达);nonce 9→13,ordinal_consumed 全 0
 - 2026-09-05T04:28+0800 [FACT/facts] <tzb-fe> `acceptance.v21_three_rounds_chxy` — chxy v21 三轮:青色与 v17 逐项对齐(差≤1e-5)不退步;紫色六原语落格;红色干净带码停止(exit 0)但撞邻件 27 mm(近基座不可达+伺服不判收敛);ordinal 全 0;报告 1654 行入包;卡点 32 升中 · ref: /Users/gl/tzb-deliverables/judge-package-v1/evidence/verification-20260904/chxy-cold-install/rounds/v21-rerun-20260905/
+- 2026-09-05T04:28+0800 [FACT/facts] <exec-no-truth-v1> `ruling-v21-default-switch` — 裁定(tzb-56, 2026-09-05):默认执行器切v21的条件=demo lane伺服发散保护落地后,我再跑红/紫/青三轮全符合预期(红期望HALTED_APPROACH_DID_NOT_CONVERGE干净停、邻件不动),跑完报它切
+- 2026-09-05T04:28+0800 [FACT/facts] <exec-no-truth-v1> `ruling-finding-32-fix-shape` — 裁定(tzb-56, 2026-09-05):卡点32升中采纳;修法=v21信封消费记录新增consumed_by_executor_identity=v21(不动consumed_by老字段保parity),grasp_gate.why常量改为按本轮事实生成或删掉;归demo lane
+- 2026-09-05T04:28+0800 [TASK/task] <exec-no-truth-v1> `await-servo-guard-then-3-rounds` — 等 demo lane 伺服发散保护同步后跑红/紫/青三轮并报 tzb-56;红期望 HALTED_APPROACH_DID_NOT_CONVERGE 干净停止、邻件不动。tzb-56 说它会叫我,不自己加轮
+- 2026-09-05T04:28+0800 [FACT/facts] <exec-no-truth-v1> `sidecar-8571-keep` — 8571 基座侧车 judge-locany-base 保持运行(裁定 tzb-56 2026-09-05 再确认一次);给用户实时窗口用,不撤
