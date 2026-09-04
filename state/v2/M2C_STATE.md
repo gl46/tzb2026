@@ -1,5 +1,5 @@
 <!-- GENERATED — 禁止直接 Edit/Write。唯一写入口: tools/statectl.py -->
-<!-- statectl protocol=2 stream=M2C generation=1884 updated=2026-09-05T05:04+0800 -->
+<!-- statectl protocol=2 stream=M2C generation=1888 updated=2026-09-05T05:05+0800 -->
 <!-- 自 M2C_STATE.md 迁移 sha=9dc690524ad77e6d51964237f11ee107e23e3ae92398d19e3424eb0676648fc6 -->
 
 # M2C 权威状态(活跃快照,协议 v2)
@@ -2121,7 +2121,7 @@
 
 - `deck.v2_1_relabel` — deck v2.1 出(03:58):只改 P9 那句→'除 S4 外各段 3.04 s(确定性 S3+S5 0.045 s)';守卫 0 项、pdf 晚于 pptx、无字体回退;NUMBERS-v2:236 已改;禁写表加'确定性各段';PENDING-v2.1.md 待办未随此版(归 v3) · ref: /Users/gl/tzb-deliverables/ppt-v1/xh-202607-deck-v2.1.pdf
 
-- `report.zh_v2_draft2` — 报告第二稿 04:36 版:红色轮两层写法+附录E.1 基座距离推导记录已加;筛查未命中 18 均为推导数(tzb-55 加源中);3 处【待裁】=默认执行器 v17/v21(等 tzb-56),定稿前必清 · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.pdf
+- `report.zh_v2_draft2` — 报告第二稿 05:04 版:v21 默认裁定已落,占位 0,筛查 PASS(869 数未命中 0,禁写 0);待 tzb-56/tzb-55 终审后 18:00 前出定稿(版本行改'定稿 2026-09-05') · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.pdf
 
 - `report.draft2_delivered` — 报告第二稿图文版(tzb-66 04:09):53 页 A4,24 图 22 表带题注与出处行,含 R1/R2/训练包指针/自家超参/3.04 s 改标签;待补三处(S0 验收、紫红两轮、附录 B 末行);审查 06:30 核图表出处;数字源加训练包 README · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.pdf
 
@@ -2218,6 +2218,10 @@
 - `ruling-default-switched-to-v21` — 裁定(tzb-56, 2026-09-05):默认切 v21;demo lane 同步切默认 diff 后我跑一轮确认(不设 EXECUTOR、评委原样命令),核身份与 v21_target_resolution;卡点33交demo lane
 
 - `pkg.v21_default_applied_mac` — Mac 权威拷贝(05:04):launch_resident 默认已是 v21(:62),tests 94 过,resident SUMS 15/15、v21 SUMS 5/5;干跑 tarball 867 文件/240MB/CLEAN(ADDR+MODE 双检);等 tzb-b9 默认路径确认轮后切终包 · ref: /Users/gl/tzb-deliverables/judge-package-v1/agent/executor/resident/launch_resident.sh
+
+- `ruling.default_executor_v21_20260905` — 裁定(tzb-fe/tzb-56,2026-09-05 05:0x):评审复现包默认执行器 v21(目标取自请求+消费凭证前检查+接近段发散保护),v17 随包 EXECUTOR=v17;依据 v21-guard 三轮;报告 5.1/6.2/3.5.2/附录B 已按原句落 · ref: /Users/gl/tzb-deliverables/judge-package-v1/evidence/verification-20260904/chxy-cold-install/rounds/v21-guard-20260905/
+
+- `report.v21_default_filled` — 报告 05:04:默认执行器 v21 句已填,待裁/待补=0,筛查 869/860/未命中 0 PASS;偏离接受(附录 B 左列 v21 默认已实现,右列近基座柱抓取未解决);直播横幅与 live-demo.md 推荐词同步改 · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.pdf
 
 ## 2. 归属与 lane
 - `lane.m2c_exec` — **M2C 执行会话**:successor implementation candidate,commit-free,于全新隔离 clone(Q′ 模式);已登记候选路径内自由编辑(R132.41)。ETA(8/29 午报):交包 8/30 01:00–07:00;早沿(≤03:00)可达截止,晚沿不可达。
@@ -2798,10 +2802,6 @@
 - `await-default-switch-then-confirm-round` — 等 demo lane 同步切默认 diff 后跑一轮确认(不设 EXECUTOR),核身份文件与回执证明默认已是v21,报回执路径给tzb-56;并在报告记"默认已切换"
 
 ## 5. Recent tail(journal 缓存,非权威)
-- 2026-09-05T04:33+0800 [FACT/facts] <m2c-exec> `servo-divergence-guard` — 伺服发散保护已落 v21(builder 第9-14处):首次迭代跟踪误差>50mm 或迭代间增大即停 HALTED_APPROACH_DID_NOT_CONVERGE,不施修正/不下发/不闭合;新 v21 sha 03ef4cea;94 tests · ref: /Users/gl/tzb-deliverables/judge-package-v1/agent/executor/resident/SHA256SUMS-v21.txt
-- 2026-09-05T04:33+0800 [FACT/facts] <m2c-exec> `v21-receipt-identity-and-gate-wording` — v21 新增 envelope_consumption.consumed_by_executor_identity(consume 是 spliced 段不可改,故加在调用点;磁盘 nonce 文件仍只有 v15);grasp_gate.why 改为本轮实测
-- 2026-09-05T04:33+0800 [FACT/facts] <report-zh-v1> `report.zh_v2_draft2` — 报告第二稿 04:32 版:红色轮细节(v21,ATTACH 断言失败、近基座不可达)已填;筛查 832 数未命中 7(待 tzb-56 指源);仅剩默认执行器 v17/v21【待裁】一句 · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.pdf
-- 2026-09-05T04:34+0800 [FACT/facts] <deck-v2> `v21三轮入NUMBERS-Z2` — NUMBERS-v2 加 Z2 节(v21 紫/青/红三轮,报告用未上deck,label自述不计入冻结campaign);口述三处出入按回执改:3.5867→3.5868、98.28是伺服首拍非对齐项、红色attach断言失败且撞邻件27.22mm非干净停止 · ref: /Users/gl/tzb-deliverables/ppt-v1/NUMBERS-v2.md
 - 2026-09-05T04:34+0800 [FACT/facts] <tzb-fe> `executor.v21_guard_landed` — v21 发散保护版落地(04:3x,sha 03ef4cea,tests 94):跟踪误差判据(首迭代>50mm 或增大即停,不施修正不闭合);回执加 consumed_by_executor_identity;grasp_gate.why 按本轮生成;SUMS 补 v21 行;三轮开跑 · ref: /Users/gl/tzb-deliverables/judge-package-v1/agent/executor/resident/PROVENANCE-v21.md
 - 2026-09-05T04:35+0800 [FACT/facts] <m2c-exec> `v21-default-switch-prep` — 默认切 v21 的两件已备好未应用:launch_resident diff(重生成,dry-run 通过;旧版注释写红轮完成验收=错,已改)与 README Claim boundary A 版;等 tzb-56 一句"切" · ref: /Users/gl/tzb-lanes/coordinator-notes/README-claim-boundary-v21-draft-20260905.md
 - 2026-09-05T04:36+0800 [FACT/facts] <report-zh-v1> `report.zh_v2_draft2` — 报告第二稿 04:36 版:红色轮两层写法+附录E.1 基座距离推导记录已加;筛查未命中 18 均为推导数(tzb-55 加源中);3 处【待裁】=默认执行器 v17/v21(等 tzb-56),定稿前必清 · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.pdf
@@ -2818,3 +2818,7 @@
 - 2026-09-05T05:03+0800 [FACT/facts] <exec-no-truth-v1> `launch-resident-in-two-manifests` — launch_resident.sh 的 digest 117d27f1 同时列在 SHA256SUMS.txt:22 与 SHA256SUMS-v21.txt:5;改默认执行器必须同时重算两份,否则 5/5 与 15/15 校验与 smoke 07 会失效
 - 2026-09-05T05:03+0800 [FACT/facts] <exec-no-truth-v1> `ruling-default-switched-to-v21` — 裁定(tzb-56, 2026-09-05):默认切 v21;demo lane 同步切默认 diff 后我跑一轮确认(不设 EXECUTOR、评委原样命令),核身份与 v21_target_resolution;卡点33交demo lane
 - 2026-09-05T05:04+0800 [FACT/facts] <tzb-fe> `pkg.v21_default_applied_mac` — Mac 权威拷贝(05:04):launch_resident 默认已是 v21(:62),tests 94 过,resident SUMS 15/15、v21 SUMS 5/5;干跑 tarball 867 文件/240MB/CLEAN(ADDR+MODE 双检);等 tzb-b9 默认路径确认轮后切终包 · ref: /Users/gl/tzb-deliverables/judge-package-v1/agent/executor/resident/launch_resident.sh
+- 2026-09-05T05:04+0800 [FACT/facts] <report-zh-v1> `ruling.default_executor_v21_20260905` — 裁定(tzb-fe/tzb-56,2026-09-05 05:0x):评审复现包默认执行器 v21(目标取自请求+消费凭证前检查+接近段发散保护),v17 随包 EXECUTOR=v17;依据 v21-guard 三轮;报告 5.1/6.2/3.5.2/附录B 已按原句落 · ref: /Users/gl/tzb-deliverables/judge-package-v1/evidence/verification-20260904/chxy-cold-install/rounds/v21-guard-20260905/
+- 2026-09-05T05:04+0800 [FACT/facts] <report-zh-v1> `report.zh_v2_draft2` — 报告第二稿 05:04 版:v21 默认裁定已落,占位 0,筛查 PASS(869 数未命中 0,禁写 0);待 tzb-56/tzb-55 终审后 18:00 前出定稿(版本行改'定稿 2026-09-05') · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.pdf
+- 2026-09-05T05:05+0800 [EVENT] <m2c-exec> — 等最终 v21(03ef4cea)叠层,监视已挂;五步预验待做;已上报 live_round.sh:109 横幅仍推荐红色,与用词约束冲突,未自行改
+- 2026-09-05T05:05+0800 [FACT/facts] <tzb-fe> `report.v21_default_filled` — 报告 05:04:默认执行器 v21 句已填,待裁/待补=0,筛查 869/860/未命中 0 PASS;偏离接受(附录 B 左列 v21 默认已实现,右列近基座柱抓取未解决);直播横幅与 live-demo.md 推荐词同步改 · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.pdf
