@@ -1,5 +1,5 @@
 <!-- GENERATED — 禁止直接 Edit/Write。唯一写入口: tools/statectl.py -->
-<!-- statectl protocol=2 stream=M2C generation=1868 updated=2026-09-05T04:34+0800 -->
+<!-- statectl protocol=2 stream=M2C generation=1869 updated=2026-09-05T04:34+0800 -->
 <!-- 自 M2C_STATE.md 迁移 sha=9dc690524ad77e6d51964237f11ee107e23e3ae92398d19e3424eb0676648fc6 -->
 
 # M2C 权威状态(活跃快照,协议 v2)
@@ -2195,6 +2195,8 @@
 
 - `v21三轮入NUMBERS-Z2` — NUMBERS-v2 加 Z2 节(v21 紫/青/红三轮,报告用未上deck,label自述不计入冻结campaign);口述三处出入按回执改:3.5867→3.5868、98.28是伺服首拍非对齐项、红色attach断言失败且撞邻件27.22mm非干净停止 · ref: /Users/gl/tzb-deliverables/ppt-v1/NUMBERS-v2.md
 
+- `executor.v21_guard_landed` — v21 发散保护版落地(04:3x,sha 03ef4cea,tests 94):跟踪误差判据(首迭代>50mm 或增大即停,不施修正不闭合);回执加 consumed_by_executor_identity;grasp_gate.why 按本轮生成;SUMS 补 v21 行;三轮开跑 · ref: /Users/gl/tzb-deliverables/judge-package-v1/agent/executor/resident/PROVENANCE-v21.md
+
 ## 2. 归属与 lane
 - `lane.m2c_exec` — **M2C 执行会话**:successor implementation candidate,commit-free,于全新隔离 clone(Q′ 模式);已登记候选路径内自由编辑(R132.41)。ETA(8/29 午报):交包 8/30 01:00–07:00;早沿(≤03:00)可达截止,晚沿不可达。
 - `lane.tzb_fe` — **tzb-fe(协调)**:实现审查+七段治理批量激活(预告:批一 = R′ stage adoption→successor prereg→materialize→bootstrap;批二 = legacy P″ prefix adoption→recovery03→combined preflight;每步仍各自 pre-capture/记录/fail-closed,激活与 closeout 各批一次)。
@@ -2772,7 +2774,6 @@
 - `await-servo-guard-then-3-rounds` — 等 demo lane 伺服发散保护同步后跑红/紫/青三轮并报 tzb-56;红期望 HALTED_APPROACH_DID_NOT_CONVERGE 干净停止、邻件不动。tzb-56 说它会叫我,不自己加轮
 
 ## 5. Recent tail(journal 缓存,非权威)
-- 2026-09-05T04:23+0800 [FACT/facts] <tzb-fe> `deck.v3_rebuilt_0425` — deck v3 重建(04:25):讲者备注 20/20、Mac 字体 PDF 主件、加宽框保留;守卫组递归生效禁写 0,几何断言 32 项误报待 tzb-55 修;P02/P04/P07 等定稿口径 · ref: /Users/gl/tzb-deliverables/ppt-v3/CHANGES-v3.md
 - 2026-09-05T04:24+0800 [FACT/facts] <deck-v2> `v3守卫空转已修` — check_deck_v3 曾对全组化导出件 0页0字仍报PASS;加组递归(484框/12920字)+紧缩空间匹配(88框含\x0b)+备注扫描(20页)+几何按几何内容认条+空转自检;v2 未动 · ref: /Users/gl/tzb-deliverables/ppt-v3/tools/check_deck_v3.py
 - 2026-09-05T04:25+0800 [FACT/facts] <tzb-fe> `guard.v3_recursion_and_idle_check` — v3 守卫修好(tzb-55 04:2x):组递归后扫 484 框/12920 字 PASS 0 项;原守卫对导出件空转(0 框仍 PASS)→加'0 文本框即 FAIL'空转自检;备注纳入禁写;三条负例验;批报告筛查与 v2.1 守卫同补空转自检 · ref: /Users/gl/tzb-deliverables/ppt-v3/tools/check_deck_v3.py
 - 2026-09-05T04:26+0800 [FACT/facts] <deck-v3> `deck_v3.guard_pass` — check_deck_v3(tzb-55 修正版:组递归+几何+备注)对 deck v3 pptx 8f69e890 复核 PASS 0 项:484 框/12920 字,几何 20 页全认出,备注 20 页 8088 字 0 项;CHANGES-v3 已更新;待 12:00 口径改 P02/P04/P07 · ref: /Users/gl/tzb-deliverables/ppt-v3/CHANGES-v3.md
@@ -2792,3 +2793,4 @@
 - 2026-09-05T04:33+0800 [FACT/facts] <m2c-exec> `v21-receipt-identity-and-gate-wording` — v21 新增 envelope_consumption.consumed_by_executor_identity(consume 是 spliced 段不可改,故加在调用点;磁盘 nonce 文件仍只有 v15);grasp_gate.why 改为本轮实测
 - 2026-09-05T04:33+0800 [FACT/facts] <report-zh-v1> `report.zh_v2_draft2` — 报告第二稿 04:32 版:红色轮细节(v21,ATTACH 断言失败、近基座不可达)已填;筛查 832 数未命中 7(待 tzb-56 指源);仅剩默认执行器 v17/v21【待裁】一句 · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.pdf
 - 2026-09-05T04:34+0800 [FACT/facts] <deck-v2> `v21三轮入NUMBERS-Z2` — NUMBERS-v2 加 Z2 节(v21 紫/青/红三轮,报告用未上deck,label自述不计入冻结campaign);口述三处出入按回执改:3.5867→3.5868、98.28是伺服首拍非对齐项、红色attach断言失败且撞邻件27.22mm非干净停止 · ref: /Users/gl/tzb-deliverables/ppt-v1/NUMBERS-v2.md
+- 2026-09-05T04:34+0800 [FACT/facts] <tzb-fe> `executor.v21_guard_landed` — v21 发散保护版落地(04:3x,sha 03ef4cea,tests 94):跟踪误差判据(首迭代>50mm 或增大即停,不施修正不闭合);回执加 consumed_by_executor_identity;grasp_gate.why 按本轮生成;SUMS 补 v21 行;三轮开跑 · ref: /Users/gl/tzb-deliverables/judge-package-v1/agent/executor/resident/PROVENANCE-v21.md
