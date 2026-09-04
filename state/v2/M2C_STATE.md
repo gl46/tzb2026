@@ -1,5 +1,5 @@
 <!-- GENERATED — 禁止直接 Edit/Write。唯一写入口: tools/statectl.py -->
-<!-- statectl protocol=2 stream=M2C generation=1883 updated=2026-09-05T05:03+0800 -->
+<!-- statectl protocol=2 stream=M2C generation=1884 updated=2026-09-05T05:04+0800 -->
 <!-- 自 M2C_STATE.md 迁移 sha=9dc690524ad77e6d51964237f11ee107e23e3ae92398d19e3424eb0676648fc6 -->
 
 # M2C 权威状态(活跃快照,协议 v2)
@@ -2217,6 +2217,8 @@
 
 - `ruling-default-switched-to-v21` — 裁定(tzb-56, 2026-09-05):默认切 v21;demo lane 同步切默认 diff 后我跑一轮确认(不设 EXECUTOR、评委原样命令),核身份与 v21_target_resolution;卡点33交demo lane
 
+- `pkg.v21_default_applied_mac` — Mac 权威拷贝(05:04):launch_resident 默认已是 v21(:62),tests 94 过,resident SUMS 15/15、v21 SUMS 5/5;干跑 tarball 867 文件/240MB/CLEAN(ADDR+MODE 双检);等 tzb-b9 默认路径确认轮后切终包 · ref: /Users/gl/tzb-deliverables/judge-package-v1/agent/executor/resident/launch_resident.sh
+
 ## 2. 归属与 lane
 - `lane.m2c_exec` — **M2C 执行会话**:successor implementation candidate,commit-free,于全新隔离 clone(Q′ 模式);已登记候选路径内自由编辑(R132.41)。ETA(8/29 午报):交包 8/30 01:00–07:00;早沿(≤03:00)可达截止,晚沿不可达。
 - `lane.tzb_fe` — **tzb-fe(协调)**:实现审查+七段治理批量激活(预告:批一 = R′ stage adoption→successor prereg→materialize→bootstrap;批二 = legacy P″ prefix adoption→recovery03→combined preflight;每步仍各自 pre-capture/记录/fail-closed,激活与 closeout 各批一次)。
@@ -2796,7 +2798,6 @@
 - `await-default-switch-then-confirm-round` — 等 demo lane 同步切默认 diff 后跑一轮确认(不设 EXECUTOR),核身份文件与回执证明默认已是v21,报回执路径给tzb-56;并在报告记"默认已切换"
 
 ## 5. Recent tail(journal 缓存,非权威)
-- 2026-09-05T04:31+0800 [FACT/facts] <tzb-fe> `report.v2_screen_pass_0431` — 报告 04:31 重建:2.57 mm 带包内路径与字段,复筛 807 数命中 798/归一 9/未命中 0,禁写 0 PASS;红色轮细节已发作者;仅剩默认执行器一句待裁(等发散保护三轮复跑) · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.pdf
 - 2026-09-05T04:33+0800 [FACT/facts] <m2c-exec> `servo-divergence-guard` — 伺服发散保护已落 v21(builder 第9-14处):首次迭代跟踪误差>50mm 或迭代间增大即停 HALTED_APPROACH_DID_NOT_CONVERGE,不施修正/不下发/不闭合;新 v21 sha 03ef4cea;94 tests · ref: /Users/gl/tzb-deliverables/judge-package-v1/agent/executor/resident/SHA256SUMS-v21.txt
 - 2026-09-05T04:33+0800 [FACT/facts] <m2c-exec> `v21-receipt-identity-and-gate-wording` — v21 新增 envelope_consumption.consumed_by_executor_identity(consume 是 spliced 段不可改,故加在调用点;磁盘 nonce 文件仍只有 v15);grasp_gate.why 改为本轮实测
 - 2026-09-05T04:33+0800 [FACT/facts] <report-zh-v1> `report.zh_v2_draft2` — 报告第二稿 04:32 版:红色轮细节(v21,ATTACH 断言失败、近基座不可达)已填;筛查 832 数未命中 7(待 tzb-56 指源);仅剩默认执行器 v17/v21【待裁】一句 · ref: /Users/gl/tzb-deliverables/report-v1/技术报告-XH-202607.pdf
@@ -2816,3 +2817,4 @@
 - 2026-09-05T05:03+0800 [TASK/task] <exec-no-truth-v1> `await-default-switch-then-confirm-round` — 等 demo lane 同步切默认 diff 后跑一轮确认(不设 EXECUTOR),核身份文件与回执证明默认已是v21,报回执路径给tzb-56;并在报告记"默认已切换"
 - 2026-09-05T05:03+0800 [FACT/facts] <exec-no-truth-v1> `launch-resident-in-two-manifests` — launch_resident.sh 的 digest 117d27f1 同时列在 SHA256SUMS.txt:22 与 SHA256SUMS-v21.txt:5;改默认执行器必须同时重算两份,否则 5/5 与 15/15 校验与 smoke 07 会失效
 - 2026-09-05T05:03+0800 [FACT/facts] <exec-no-truth-v1> `ruling-default-switched-to-v21` — 裁定(tzb-56, 2026-09-05):默认切 v21;demo lane 同步切默认 diff 后我跑一轮确认(不设 EXECUTOR、评委原样命令),核身份与 v21_target_resolution;卡点33交demo lane
+- 2026-09-05T05:04+0800 [FACT/facts] <tzb-fe> `pkg.v21_default_applied_mac` — Mac 权威拷贝(05:04):launch_resident 默认已是 v21(:62),tests 94 过,resident SUMS 15/15、v21 SUMS 5/5;干跑 tarball 867 文件/240MB/CLEAN(ADDR+MODE 双检);等 tzb-b9 默认路径确认轮后切终包 · ref: /Users/gl/tzb-deliverables/judge-package-v1/agent/executor/resident/launch_resident.sh
