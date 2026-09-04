@@ -1,5 +1,5 @@
 <!-- GENERATED — 禁止直接 Edit/Write。唯一写入口: tools/statectl.py -->
-<!-- statectl protocol=2 stream=M2C generation=1663 updated=2026-09-04T23:35+0800 -->
+<!-- statectl protocol=2 stream=M2C generation=1679 updated=2026-09-04T23:55+0800 -->
 <!-- 自 M2C_STATE.md 迁移 sha=9dc690524ad77e6d51964237f11ee107e23e3ae92398d19e3424eb0676648fc6 -->
 
 # M2C 权威状态(活跃快照,协议 v2)
@@ -1917,6 +1917,28 @@
 
 - `milestone.lora_r8b_dispatched` — 里程碑(23:26 chxy,demo lane):LoRA侧车合成轮 lora-r8b DISPATCHED/6指令/帧龄5.09;S2归属三跳链成立(attached=true+入口fd833a52+receipt 9459f7b1);合并契约生效;采用门已过,默认仍基座待用户裁;工件入包 · ref: /Users/gl/tzb-deliverables/judge-package-v1/evidence/verification-20260904/chxy-cold-install/rounds/lora-r8b-composite-20260904T152644/
 
+- `s2-profile-switch` — start.sh 加 S2_PROFILE(默认 base 逐字不变);lora 分支把包内副本 re-root 到 receipt 原路径+合并契约,侧车容器名带 profile 防串档;经 start.sh 尚未端到端验证
+
+- `review.next_cut_checklist` — 下一版包开箱核清单已落盘:9项工作树改动(卡点23补丁/openq19/冷装报告/S2_PROFILE/s2-lora新件/lora-r8b/audit/CLAIMS变更13/过期gate字段)+7项固定核查。交付基准仍631895ec · ref: /Users/gl/tzb-lanes/review-zh-v1/next-cut-checklist.md
+
+- `s2_profile_lora.first_run_mode_mismatch` — S2_PROFILE=lora EXECUTE=1 首跑(tzb-b9 23:40)起不来:包内adapter三件644≠回执0400,冻结校验器比mode→拒,未欠账。修:chmod 0400+start.sh诊断+PACKAGE-NOTE第3条,rsync -a同步两树(已核400);tzb-b9重跑 · ref: /Users/gl/tzb-deliverables/judge-package-v1/env/s2-lora-v1/PACKAGE-NOTE.md
+
+- `milestone.user_live_window_ready` — 用户直播窗口就绪(loop lane 23:4x):labserver v17 GPU1 推流+GPU0取帧宿主+chxy 8571基座侧车;两轮真跑(round-006/007,ALL_SIX,同一静态摆放数字逐位相同);两条Mac命令(幂等版)已转用户;视口偏远待v17 owner答;GPU0/隧道保持到用户说完 · ref: /Users/gl/tzb-lanes/live-loop-v1/MAC-LIVE-WINDOW.md
+
+- `viewport-vs-observation-camera` — v17: RTSP 推流走 Kit 默认透视相机, 与 build_observation_camera 的 /World/vnext_dispatch_rgbd 是两个相机; 拉近推流不改控制路径, 但无 env/控制口旋钮, 需分叉字节冻结的 v17 才能做 -> 未做, 建议消费端裁剪
+
+- `pkg.mode_check_added` — make_tarball.sh 加 MODE_CHECK(解包后三件 adapter 必须 0400,否则拒出包 exit 7;摘要看不见权限位);PACKAGE-NOTE 第3条归因改'23:01 包存的是 0644';README 直播行带'定位器=基座' · ref: /Users/gl/tzb-deliverables/judge-package-v1/scripts/make_tarball.sh
+
+- `ruling.stream_viewport_crop_not_refit` — 裁定(23:4x):推流视口相机拉近无现成旋钮(执行器无相机env/动词;改v17=分叉同源文件),今晚不动容器;用户端裁剪 ffplay -vf crop=290:180:560:240;以后要挪机位照抄 OBS_CAMERA_POSITION/LOOK_AT · ref: /Users/gl/tzb-deliverables/judge-package-v1/agent/executor/resident/PROVENANCE.md
+
+- `pkg.blocker27_start_sh_hint_and_reuse` — 卡点27两半 tzb-b9 验过(静态+行为,干跑不欠账):日志开头无[FAIL];Exited尸体被替换而非复用。补一句'replacing a non-running container'提示;首败日志丢失 NOTE 入包;三容器已撤,8571留用户窗口 · ref: /Users/gl/tzb-deliverables/judge-package-v1/scripts/start.sh
+
+- `milestone.s2_profile_lora_execute1` — 里程碑(23:47 chxy,tzb-b9,包内副本):S2_PROFILE=lora EXECUTE=1 start.sh chain 执行——DISPATCHED/6指令/324s/帧龄4.59;S2由adapter服务;LoRA开关与EXECUTE=1经start.sh首验;账目8枚;默认仍基座待用户裁 · ref: /Users/gl/tzb-deliverables/judge-package-v1/evidence/verification-20260904/chxy-cold-install/rounds/s2profile-lora-execute1-start-sh-chain-20260904T154726/
+
+- `s2profile-lora-first-verification` — S2_PROFILE=lora EXECUTE=1 经 start.sh 首验通过:exit=0/324s,DISPATCHED,nonce 2a17e097,round-001-composite-20260904T154726 · ref: cold-install-chxy-v1/receipts/s2profile-lora/
+
+- `cold-install-findings-2` — 新卡点 27(诊断落注释块印 [FAIL]+复用尸体)已修并复验;28=包内 adapter 三件 644≠回执 0400,已修 · ref: cold-install-chxy-v1/cold-install-report-v1.md
+
 ## 2. 归属与 lane
 - `lane.m2c_exec` — **M2C 执行会话**:successor implementation candidate,commit-free,于全新隔离 clone(Q′ 模式);已登记候选路径内自由编辑(R132.41)。ETA(8/29 午报):交包 8/30 01:00–07:00;早沿(≤03:00)可达截止,晚沿不可达。
 - `lane.tzb_fe` — **tzb-fe(协调)**:实现审查+七段治理批量激活(预告:批一 = R′ stage adoption→successor prereg→materialize→bootstrap;批二 = legacy P″ prefix adoption→recovery03→combined preflight;每步仍各自 pre-capture/记录/fail-closed,激活与 closeout 各批一次)。
@@ -2478,24 +2500,26 @@
 
 - `task.end_to_end_composed_round` — 缺口(18:5x):尚无一轮'REPL指令→链路→盘上请求+信封→v17执行'合成实跑。桥=包内run_demo --execute→resident客户端→mint_envelope→8557(smoke 7)。v20两跑毕(~19:00)后loop lane重起取帧宿主跑一轮,回执end-to-end-v1 · ref: /Users/gl/tzb-lanes/live-loop-v1/receipts/end-to-end-composition-v1.json
 
+- `task.viewport_camera_pose_future` — 裁定(tzb-60, 9/4):视口不动、不分叉v17、不试Kit setting;现场 ffplay crop 裁剪(非变焦)。以后真要拉近:OBS_CAMERA_POSITION(-0.8,-0.8,1.4)+LOOK_AT(-0.05,0,0.55) 照抄给 Kit 透视相机,需重起+分叉裁定 · ref: /Users/gl/tzb-deliverables/judge-package-v1/agent/executor/resident/vnext_dispatch_executor_v17.py
+
 ## 5. Recent tail(journal 缓存,非权威)
-- 2026-09-04T23:00+0800 [FACT/facts] <review-zh-v1> `review.tarball_225455` — 开箱核tar 882095e0:sha一致/727文件/五份摘要全OK/ADDR_CHECK真接线且清洁/无密钥/239路径全解析/exec位全在。两项文档-命令不符:v20 from-source-lane清单4文件缺、REDACTION漏报两处vendor root@labserver · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-round21-tarball.md
-- 2026-09-04T23:03+0800 [FACT/facts] <review-zh-v1> `review.tarball_230159` — 交付版 631895ec(727文件,225455已superseded):T1/T2关闭。T1改在file-manifest:62(源线清单被SHA256SUMS.txt:5收录故不能加头部);新包v20 17/17、resident 14/14、ADDR_CHECK clean、无密钥 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-round21-tarball.md
-- 2026-09-04T23:04+0800 [FACT/facts] <tzb-fe> `milestone.final_tarball_20260904` — 最终交付包改为 judge-package-v1-20260904-230159.tar.gz(727文件/225MB/CLEAN,sha256 631895ec…);225455版移入superseded/;差异=审查T1/T2两处文字(v20源线清单说明、REDACTION-NOTE补vendor两处root@) · ref: /Users/gl/tzb-deliverables/judge-package-v1-20260904-230159.tar.gz.sha256
-- 2026-09-04T23:05+0800 [FACT/facts] <review-zh-v1> `review.deck_2250_recheck` — deck两项低关闭:pdf 22:50:29晚于pptx 22:50:12、NUMBERS-v2头部改20页。换字体后重跑四筛全过;pdffonts只内嵌HiraginoSansGB-W3/W6五子集,无第二字族,与零回退说法一致 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-round19.md
-- 2026-09-04T23:08+0800 [FACT/facts] <tzb-fe> `ruling.lora_sidecar_evidence_round` — 用户批(23:0x):chxy 跑 LoRA 侧车合成轮 lora-r8,只作可选profile证据行、不切默认不改包默认启动;demo lane 主跑(派生入口+adapter,RTSP=0,GPU0),tzb-b9 归属核验;23:40 前工件→重出包,否则进冷装报告 9/5 早重出 · ref: /Users/gl/tzb-deliverables/judge-package-v1/env/s2-lora-v1/README.md
-- 2026-09-04T23:14+0800 [FACT/facts] <tzb-fe> `task.user_live_window_tonight` — 用户要求(23:1x):今晚给他自己敲指令、实时看机械臂的窗口(先验证后录视频;提交9/5 24:00)。形态:链+v17(GPU1 RTSP=1)+取帧都在labserver,S2基座侧车在chxy经隧道;Mac经chxy跳。loop lane主办,00:00前交两条命令 · ref: /Users/gl/tzb-deliverables/judge-package-v1/docs/live-demo.md
-- 2026-09-04T23:14+0800 [FACT/facts] <tzb-fe> `ruling.lora_r8_attribution_criterion` — lora-r8 归属判据(tzb-b9核):s2-session-receipt ready_line 三条同时成立——adapter.attached=true、adapter段含两safetensors摘要、entrypoint=派生入口fd833a52…;s2_source_label包内不存在不作判据 · ref: /Users/gl/tzb-deliverables/judge-package-v1/env/s2-lora-v1/SHA256SUMS
-- 2026-09-04T23:16+0800 [FACT/facts] <tzb-fe> `ruling.lora_r8_merged_contract` — 裁定(23:2x):LoRA契约v4继承v3 ssh传输且镜像无ssh→lora-r8 用合并契约(vendor冻结v4为底,只改entrypoint/adapter/label/derivation,invoke不动),M2C_S2_CONTRACT指它,不进包;过后进env/重出;时限00:30 · ref: /Users/gl/tzb-deliverables/judge-package-v1/agent/s2_locateanything/session.py
-- 2026-09-04T23:20+0800 [EVENT] <m2c-exec> — ISAAC 占用开始 chxy GPU0:lora-r8(LoRA 侧车 8570 + v17 + 取帧宿主),按 gen1648/1651 用合并契约 M2C_S2_CONTRACT
-- 2026-09-04T23:21+0800 [EVENT] <tzb-fe> — 当夜例外(23:2x):chxy GPU0 同时跑 LoRA 侧车(8570,lora-r8)与基座侧车(8571,用户直播窗口),放宽 §7 一卡一定位器;起前查显存≥15GB。loop lane 反向隧道 -R 8570:127.0.0.1:8571 到 labserver · ref: /Users/gl/tzb-deliverables/judge-package-v1/env/locany-sidecar-layout.md
-- 2026-09-04T23:22+0800 [EVENT] <live-loop-v1> — 占用开始:重开线做实时交互窗口(tzb-60 派,owner=我)。labserver GPU0 取帧宿主 23:20 起在新 dataset 根 vnext-liveloop-night-20260904;v17 在 GPU1 未动(已是 RTSP=1 形态);跳板隧道+ffplay 实测通 · ref: /Users/gl/tzb-lanes/live-loop-v1/receipts/end-to-end-v1.json
-- 2026-09-04T23:28+0800 [FACT/facts] <tzb-fe> `pkg.reissue_pending_after_rounds` — open-questions 19(取帧计数器归零撞号,机制在 build_real_taskspec_v4.py:253-261 核实)23:24 落于工作树、不在 230159 版内;lora-r8 与用户直播轮结束后重出一版一并带入;此前不得声称已随包披露 · ref: /Users/gl/tzb-deliverables/judge-package-v1/docs/open-questions.md
-- 2026-09-04T23:29+0800 [FACT/facts] <tzb-fe> `lora_r8.attempt1_and_blocker23` — lora-r8 第1次:S2归属四项过(LoRA入口fd833a52/adapter三件一致/attached=true);定位器回error→链正确拒绝,但--execute随后traceback无outcome(卡点23)。裁:demo lane今晚修+回归测试,30min不成记OQ20;重试查拒因 · ref: /Users/gl/tzb-lanes/cold-install-chxy-v1/cold-install-report-v1.md
-- 2026-09-04T23:31+0800 [FACT/facts] <exec-no-truth-v1> `chxy-base-sidecar-8571` — chxy GPU0 起基座入口侧车 judge-locany-base:8571,入口实测 b5159bf8…,adapter.attached=false;给用户实时窗口,待协调通知再撤 · ref: cold-install-chxy-v1/cold-install-report-v1.md
-- 2026-09-04T23:31+0800 [FACT/facts] <exec-no-truth-v1> `lora-r8-verification` — dl-lora-r8:S2 确由 LoRA 派生入口服务(adapter/entrypoint 摘要三级闭链);轮次合法拒 TARGET_NOT_LOCALIZED,故无第七枚 nonce · ref: cold-install-chxy-v1/receipts/lora-r8/
-- 2026-09-04T23:31+0800 [EVENT] <exec-no-truth-v1> — 冷装报告 1168 行:新增卡点 23(拒绝下 --execute 崩)、24(=open-questions 19 帧号重置)、25(同名两份契约) · ref: cold-install-chxy-v1/cold-install-report-v1.md
 - 2026-09-04T23:32+0800 [FACT/facts] <tzb-fe> `pkg.reissue_pending_after_rounds` — 重出待办:卡点23补丁(run_demo.py 23:30,tests 39/39)、open-questions 19(首匹配循环两处 :259/:488)、冷装报告1168行;等 lora-r8 重试+直播轮结果后切新版;此前数字按包外修改版写 · ref: /Users/gl/tzb-deliverables/judge-package-v1/agent/run_demo.py
 - 2026-09-04T23:33+0800 [EVENT] <m2c-exec> — ISAAC 占用结束 chxy GPU0:dl-lora-r8b DISPATCHED(LoRA 侧车服务 S2,age 5.09/30,首动 10.75s);已撤 locany-lora/v17/取帧宿主,8571 基座侧车非我所起未动
 - 2026-09-04T23:33+0800 [FACT/facts] <m2c-exec> `lora-sidecar-round-evidence` — lora-r8b:LoRA 派生入口(fd833a52)+adapter(receipt 9459f7b1)服务 S2 并 DISPATCHED;ready_line 无两 safetensors 摘要(在 receipt 内);合并契约 4cca534b 生效(s2_source_label=XH-Locator)
 - 2026-09-04T23:35+0800 [FACT/facts] <tzb-fe> `milestone.lora_r8b_dispatched` — 里程碑(23:26 chxy,demo lane):LoRA侧车合成轮 lora-r8b DISPATCHED/6指令/帧龄5.09;S2归属三跳链成立(attached=true+入口fd833a52+receipt 9459f7b1);合并契约生效;采用门已过,默认仍基座待用户裁;工件入包 · ref: /Users/gl/tzb-deliverables/judge-package-v1/evidence/verification-20260904/chxy-cold-install/rounds/lora-r8b-composite-20260904T152644/
+- 2026-09-04T23:37+0800 [FACT/facts] <m2c-exec> `s2-profile-switch` — start.sh 加 S2_PROFILE(默认 base 逐字不变);lora 分支把包内副本 re-root 到 receipt 原路径+合并契约,侧车容器名带 profile 防串档;经 start.sh 尚未端到端验证
+- 2026-09-04T23:39+0800 [EVENT] <m2c-exec> — GPU占用结束: 实时窗口打通, cyan 两轮 DISPATCH_COMPLETED_ALL_SIX_PRIMITIVES (round-006/007), 流上实测臂动; 采帧主机可停 · ref: live-loop-v1/receipts/live-window-first-round-v1.json
+- 2026-09-04T23:39+0800 [EVENT] <m2c-exec> — 更正 gen1665: GPU0 占用未结束。liveloop-host 必须继续开着,两条 Mac 命令才可用;用户用完再停,届时补记占用结束 · ref: live-loop-v1/MAC-LIVE-WINDOW.md
+- 2026-09-04T23:40+0800 [FACT/facts] <review-zh-v1> `review.next_cut_checklist` — 下一版包开箱核清单已落盘:9项工作树改动(卡点23补丁/openq19/冷装报告/S2_PROFILE/s2-lora新件/lora-r8b/audit/CLAIMS变更13/过期gate字段)+7项固定核查。交付基准仍631895ec · ref: /Users/gl/tzb-lanes/review-zh-v1/next-cut-checklist.md
+- 2026-09-04T23:44+0800 [FACT/facts] <tzb-fe> `s2_profile_lora.first_run_mode_mismatch` — S2_PROFILE=lora EXECUTE=1 首跑(tzb-b9 23:40)起不来:包内adapter三件644≠回执0400,冻结校验器比mode→拒,未欠账。修:chmod 0400+start.sh诊断+PACKAGE-NOTE第3条,rsync -a同步两树(已核400);tzb-b9重跑 · ref: /Users/gl/tzb-deliverables/judge-package-v1/env/s2-lora-v1/PACKAGE-NOTE.md
+- 2026-09-04T23:44+0800 [FACT/facts] <tzb-fe> `milestone.user_live_window_ready` — 用户直播窗口就绪(loop lane 23:4x):labserver v17 GPU1 推流+GPU0取帧宿主+chxy 8571基座侧车;两轮真跑(round-006/007,ALL_SIX,同一静态摆放数字逐位相同);两条Mac命令(幂等版)已转用户;视口偏远待v17 owner答;GPU0/隧道保持到用户说完 · ref: /Users/gl/tzb-lanes/live-loop-v1/MAC-LIVE-WINDOW.md
+- 2026-09-04T23:48+0800 [FACT/facts] <m2c-exec> `viewport-vs-observation-camera` — v17: RTSP 推流走 Kit 默认透视相机, 与 build_observation_camera 的 /World/vnext_dispatch_rgbd 是两个相机; 拉近推流不改控制路径, 但无 env/控制口旋钮, 需分叉字节冻结的 v17 才能做 -> 未做, 建议消费端裁剪
+- 2026-09-04T23:49+0800 [FACT/facts] <tzb-fe> `pkg.mode_check_added` — make_tarball.sh 加 MODE_CHECK(解包后三件 adapter 必须 0400,否则拒出包 exit 7;摘要看不见权限位);PACKAGE-NOTE 第3条归因改'23:01 包存的是 0644';README 直播行带'定位器=基座' · ref: /Users/gl/tzb-deliverables/judge-package-v1/scripts/make_tarball.sh
+- 2026-09-04T23:49+0800 [FACT/facts] <tzb-fe> `ruling.stream_viewport_crop_not_refit` — 裁定(23:4x):推流视口相机拉近无现成旋钮(执行器无相机env/动词;改v17=分叉同源文件),今晚不动容器;用户端裁剪 ffplay -vf crop=290:180:560:240;以后要挪机位照抄 OBS_CAMERA_POSITION/LOOK_AT · ref: /Users/gl/tzb-deliverables/judge-package-v1/agent/executor/resident/PROVENANCE.md
+- 2026-09-04T23:49+0800 [TASK/task] <m2c-exec> `task.viewport_camera_pose_future` — 裁定(tzb-60, 9/4):视口不动、不分叉v17、不试Kit setting;现场 ffplay crop 裁剪(非变焦)。以后真要拉近:OBS_CAMERA_POSITION(-0.8,-0.8,1.4)+LOOK_AT(-0.05,0,0.55) 照抄给 Kit 透视相机,需重起+分叉裁定 · ref: /Users/gl/tzb-deliverables/judge-package-v1/agent/executor/resident/vnext_dispatch_executor_v17.py
+- 2026-09-04T23:50+0800 [FACT/facts] <tzb-fe> `pkg.blocker27_start_sh_hint_and_reuse` — 卡点27(tzb-b9):我23:44把mode提示插进注释块→每次chain无条件打[FAIL];已搬进侧车exited)分支。同时修复用判据:只复用State.Running=true的侧车,否则先docker rm -f(避免复用已退出容器)。bash -n过;pkg-next已同步,pkg待tzb-b9跑完再推 · ref: /Users/gl/tzb-deliverables/judge-package-v1/scripts/start.sh
+- 2026-09-04T23:53+0800 [FACT/facts] <tzb-fe> `milestone.s2_profile_lora_execute1` — 里程碑(23:47 chxy,tzb-b9,包内副本):S2_PROFILE=lora EXECUTE=1 start.sh chain 执行——DISPATCHED/6指令/324s/帧龄4.59;S2由adapter服务;LoRA开关与EXECUTE=1经start.sh首验;账目8枚;默认仍基座待用户裁 · ref: /Users/gl/tzb-deliverables/judge-package-v1/evidence/verification-20260904/chxy-cold-install/rounds/s2profile-lora-execute1-start-sh-chain-20260904T154726/
+- 2026-09-04T23:55+0800 [EVENT] <exec-no-truth-v1> — chxy 占用结束(第二轮):locany/resident/capture-host 三容器撤除,撤前 docker logs 已落盘;仅剩 8571 基座侧车,GPU0 11476MiB · ref: cold-install-chxy-v1/logs/seg2/35-teardown-judge-resident.log
+- 2026-09-04T23:55+0800 [FACT/facts] <exec-no-truth-v1> `s2profile-lora-first-verification` — S2_PROFILE=lora EXECUTE=1 经 start.sh 首验通过:exit=0/324s,DISPATCHED,nonce 2a17e097,round-001-composite-20260904T154726 · ref: cold-install-chxy-v1/receipts/s2profile-lora/
+- 2026-09-04T23:55+0800 [FACT/facts] <exec-no-truth-v1> `cold-install-findings-2` — 新卡点 27(诊断落注释块印 [FAIL]+复用尸体)已修并复验;28=包内 adapter 三件 644≠回执 0400,已修 · ref: cold-install-chxy-v1/cold-install-report-v1.md
+- 2026-09-04T23:55+0800 [FACT/facts] <tzb-fe> `pkg.blocker27_start_sh_hint_and_reuse` — 卡点27两半 tzb-b9 验过(静态+行为,干跑不欠账):日志开头无[FAIL];Exited尸体被替换而非复用。补一句'replacing a non-running container'提示;首败日志丢失 NOTE 入包;三容器已撤,8571留用户窗口 · ref: /Users/gl/tzb-deliverables/judge-package-v1/scripts/start.sh
