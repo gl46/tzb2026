@@ -1,5 +1,5 @@
 <!-- GENERATED — 禁止直接 Edit/Write。唯一写入口: tools/statectl.py -->
-<!-- statectl protocol=2 stream=M2C generation=1950 updated=2026-09-05T05:58+0800 -->
+<!-- statectl protocol=2 stream=M2C generation=1952 updated=2026-09-05T06:00+0800 -->
 <!-- 自 M2C_STATE.md 迁移 sha=9dc690524ad77e6d51964237f11ee107e23e3ae92398d19e3424eb0676648fc6 -->
 
 # M2C 权威状态(活跃快照,协议 v2)
@@ -273,6 +273,10 @@
 
 - `review.tarball_055444` — 终包 055444 差量核 PASS:sha 三方一致 892 文件,逐文件比对确认只差 README+使用说明两个文件且摘要相符;N1-N5 五处全落实;新引入 2 处小错(v20 回执位置写成 evidence/、§Claim boundary 空指)非阻断 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-tarball-055444-delta.md
 
+- `review.tarball_055803` — 终包 055803 PASS:sha 三方一致 892 文件,对 055444 仅 README 变(ad32241d)且只有两个变更块;D1 路径改对、D2 改为直引 launch_resident.sh:62 原文(与包内脚本逐字相符、分支正确)、句点已补;回归全 0 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-tarball-055444-delta.md
+
+- `delivery.final_baseline_20260905` — 06:0x 交付基准定稿:终包 055803(e4108fbb…)审稿 PASS;报告 4c38f395/46873d50;deck v3 1bb70b2d/b0c0c73c;训练包 a5ba5091;GPT 终审包 0245;各线待命,直播现场保持;此后只按用户指令改 · ref: /Users/gl/tzb-lanes/coordinator-notes/morning-report-20260905.md
+
 ## 2. 归属与 lane
 - `lane.m2c_exec` — **M2C 执行会话**:successor implementation candidate,commit-free,于全新隔离 clone(Q′ 模式);已登记候选路径内自由编辑(R132.41)。ETA(8/29 午报):交包 8/30 01:00–07:00;早沿(≤03:00)可达截止,晚沿不可达。
 - `lane.tzb_fe` — **tzb-fe(协调)**:实现审查+七段治理批量激活(预告:批一 = R′ stage adoption→successor prereg→materialize→bootstrap;批二 = legacy P″ prefix adoption→recovery03→combined preflight;每步仍各自 pre-capture/记录/fail-closed,激活与 closeout 各批一次)。
@@ -368,8 +372,6 @@
 - `live-loop-open-items-ptr` — 直播窗口 lane 三项未结(不追):①我方驱动 exit0 端到端待下一轮真实运行②卡点30 未对失败样本证伪③发散保护行为未触发。紫柱倾倒已裁今日不修→OQ25(demo lane 写)
 
 ## 5. Recent tail(journal 缓存,非权威)
-- 2026-09-05T05:31+0800 [FACT/facts] <tzb-fe> `pkg.readme_cell_floor_wording` — README §Verification 三处'x mm above the cell floor'改为 height_above_cell_floor_m 偏移口径(非净空),README bcdd7c8c→cad2b5cf;待拒绝轮 r2 行加入后再让 demo lane 同步 chxy · ref: /Users/gl/tzb-deliverables/judge-package-v1/README.md
-- 2026-09-05T05:31+0800 [FACT/facts] <m2c-exec> `kadian-34-single-not-dispatched` — 卡点34已修:S0 拒绝时跳过 executor 那条 NOT DISPATCHED、detail 空不打悬空 --;两处共用同一 refused_at_s0 判据;run_demo 73af14fe;95 tests;新测试对旧码复现两行 · ref: /Users/gl/tzb-deliverables/judge-package-v1/agent/run_demo.py
 - 2026-09-05T05:32+0800 [FACT/facts] <deck-v3> `deck_v3.review_d1_fixed` — tzb-95 审稿 D1(P02 拒绝原因括注)+2 非阻断已改,deck v3 重建 pptx fd607d1d pdf 487ba5d5,守卫 PASS 0,待 tzb-95 按新 sha 复核;记录见 CHANGES-v3.md 审稿复核节 · ref: /Users/gl/tzb-deliverables/ppt-v3/CHANGES-v3.md
 - 2026-09-05T05:32+0800 [FACT/facts] <tzb-fe> `pkg.kadian34_fixed` — 卡点 34(S0 拒绝 stderr 两行 NOT DISPATCHED 码不同)已修:run_demo.py 73af14fe 两处按 refused_at_s0 互斥,新测试 test_s0_refusal_exit_code_v1(95 passed),三处同步;tzb-b9 重跑拒绝轮 r2 中 · ref: /Users/gl/tzb-deliverables/judge-package-v1/tests/test_s0_refusal_exit_code_v1.py
 - 2026-09-05T05:33+0800 [FACT/facts] <deck-v3> `deck_v3.candidate_1bb70b2d` — deck v3 候选重建(审稿追加 17 nm 整轮口径):pptx 1bb70b2d pdf b0c0c73c,守卫 PASS 0;待 tzb-95 按新 sha 复核;记录见 CHANGES-v3.md · ref: /Users/gl/tzb-deliverables/ppt-v3/CHANGES-v3.md
@@ -388,3 +390,5 @@
 - 2026-09-05T05:55+0800 [FACT/facts] <tzb-fe> `milestone.final_tarball_20260905` — 终包 judge-package-v1-20260905-055444.tar.gz(892 文件/241MB/双门 CLEAN,sha 575f6e4c…):054100 审稿 PASS 后再修 N1–N5(判委→评委、README 0ee396b6);054100 与 235958 入 superseded/ · ref: /Users/gl/tzb-deliverables/judge-package-v1-20260905-055444.tar.gz.sha256
 - 2026-09-05T05:57+0800 [FACT/facts] <review-zh-v1> `review.tarball_055444` — 终包 055444 差量核 PASS:sha 三方一致 892 文件,逐文件比对确认只差 README+使用说明两个文件且摘要相符;N1-N5 五处全落实;新引入 2 处小错(v20 回执位置写成 evidence/、§Claim boundary 空指)非阻断 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-tarball-055444-delta.md
 - 2026-09-05T05:58+0800 [FACT/facts] <tzb-fe> `milestone.final_tarball_20260905` — 终包 judge-package-v1-20260905-055803.tar.gz(892 文件/241MB/双门 CLEAN,sha e4108fbb…):055444 差量 PASS 后修 README 两处笔误(ad32241d);旧包入 superseded/ · ref: /Users/gl/tzb-deliverables/judge-package-v1-20260905-055803.tar.gz.sha256
+- 2026-09-05T05:59+0800 [FACT/facts] <review-zh-v1> `review.tarball_055803` — 终包 055803 PASS:sha 三方一致 892 文件,对 055444 仅 README 变(ad32241d)且只有两个变更块;D1 路径改对、D2 改为直引 launch_resident.sh:62 原文(与包内脚本逐字相符、分支正确)、句点已补;回归全 0 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-tarball-055444-delta.md
+- 2026-09-05T06:00+0800 [FACT/facts] <tzb-fe> `delivery.final_baseline_20260905` — 06:0x 交付基准定稿:终包 055803(e4108fbb…)审稿 PASS;报告 4c38f395/46873d50;deck v3 1bb70b2d/b0c0c73c;训练包 a5ba5091;GPT 终审包 0245;各线待命,直播现场保持;此后只按用户指令改 · ref: /Users/gl/tzb-lanes/coordinator-notes/morning-report-20260905.md
