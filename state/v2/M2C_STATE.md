@@ -1,5 +1,5 @@
 <!-- GENERATED — 禁止直接 Edit/Write。唯一写入口: tools/statectl.py -->
-<!-- statectl protocol=2 stream=M2C generation=1952 updated=2026-09-05T06:00+0800 -->
+<!-- statectl protocol=2 stream=M2C generation=2001 updated=2026-09-05T20:19+0800 -->
 <!-- 自 M2C_STATE.md 迁移 sha=9dc690524ad77e6d51964237f11ee107e23e3ae92398d19e3424eb0676648fc6 -->
 
 # M2C 权威状态(活跃快照,协议 v2)
@@ -277,6 +277,76 @@
 
 - `delivery.final_baseline_20260905` — 06:0x 交付基准定稿:终包 055803(e4108fbb…)审稿 PASS;报告 4c38f395/46873d50;deck v3 1bb70b2d/b0c0c73c;训练包 a5ba5091;GPT 终审包 0245;各线待命,直播现场保持;此后只按用户指令改 · ref: /Users/gl/tzb-lanes/coordinator-notes/morning-report-20260905.md
 
+- `audit.triage_20260905` — 13:4x(非 06:1x)两份审查分级:今日可修 A(HALT→DISPATCHED 误报/UNKNOWN)B(S0 结构+operation 门)C(目的地未注册放行)D(无颜色词目标晚断)E(文档口径);F1/exit1 已过时;架构级写 OQ;用户裁定全修 · ref: /Users/gl/tzb-lanes/coordinator-notes/audit-triage-20260905.md
+
+- `delivery.gpt_fix_round_20260905` — 13:5x 用户:本地 GPT 代理按工作单就地修 judge-package-v1(先 cp -a 备份,只改点名文件,写 GPT-FIX-REPORT.md,不建包不同步);demo lane 停写 A–D 转审/同步/测试;tzb-b9 四轮已备;报告/PPT 口径由 tzb-66/63 后改 · ref: /Users/gl/tzb-deliverables/review-v3/fix-round-20260905/FIX-LIST-20260905.md
+
+- `audit-fix-A-out-of-package` — A(HALT/UNKNOWN 回执真实化)已在包外副本做完并 99 passed,补丁与测试留 /Users/gl/tzb-lanes/audit-fixes-20260905/;B-D 按裁定停手交 GPT 就地改;包对 SOURCE-SHA256SUMS 270/270 OK · ref: /Users/gl/tzb-lanes/audit-fixes-20260905/A-patch-isaac-receipt-truth.diff
+
+- `delivery.gpt_changes_landed_20260905` — 18:2x 本地 GPT 四轮改包完成:A–E 修复、新 v22/v23/v24 执行器+launcher v2–4、capture v2/v3、run_chain_v6、颜色 v2/v3、许可门 v2、冷启动入口(start.sh 默认 v24);我实跑 975 passed/1 skipped;审与复验中 · ref: /Users/gl/tzb-deliverables/review-v3/fix-round-20260905/COLDSTART-FIX-REPORT.md
+
+- `deck_v3.evening_prepared` — deck v3 晚间版改动已备未建(tzb-56 指示等复验过):P08 S0 四码行/P07 帧龄句/P02 回执句已入脚本;待裁执行器版本与三句逐句原码;清单 tzb-lanes/deck-v3/PREPARED-20260905-evening.md · ref: /Users/gl/tzb-lanes/deck-v3/PREPARED-20260905-evening.md
+
+- `Z5预留-v24六轮` — Z5 预留给 v24 六轮评委路径(今晚 tzb-b9 跑,tzb-56 脱敏复制到 judge-package-v1/evidence/verification-20260905/chxy-judge-path-v24/);Z4 已是 v17 五轮基线勿重用;记录要点见 ref · ref: /Users/gl/tzb-deliverables/ppt-v1/NUMBERS-v2.md
+
+- `review.gptfix-round-20260905` — GPT 四轮就地修复复核:三条只读命令实测退出码 0/0/0(许可门反例4个全被拦、正对照仍到边界);冻结面零改动、README Verification 字节未变、isaac_primitives 只改回执口径未碰运动;紫色靠 magenta 兼容词、冷启青轮两次超期、grant 仍 V1 无签名均属实 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-gptfix-round-20260905.md
+
+- `review.gptfix_round_verdict` — 18:4x 审稿人核 GPT 四轮:三条只读复核退出 0/0/0;冻结面零改动(892→948 文件,新增 56/改 11/删 0);工程门可信;存疑=v24 仅青一轮、证据在包外、紫靠 magenta 兼容族、许可 V1 无签名;活包多 output/smoke-all 目录待清 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-gptfix-round-20260905.md
+
+- `gpt-fix-round-audit` — GPT 四轮改动审完:冻结面0改动、manifest 15/15+5/5、§Verification未动、A实现更严可接受;必修4条(v24自称v23、身份文件改名致smoke07失效、v22-24未登记、3.9下收集失败);默认已是无验收的v24 · ref: /Users/gl/tzb-deliverables/review-v3/fix-round-20260905/GPT-FIX-REPORT.md
+
+- `ruling.default_executor_v24_pending` — 裁定(18:5x):默认暂留 v24,以修后字节六轮(青冷/紫/红/三句)为准,任一不过退回 v21;demo lane 先修 4 处(v24 自报 v23、identity-v1 文件、SHA256SUMS-v24+PROVENANCE-v24、3.9 收集错)再同步 chxy pkg-v24 · ref: /Users/gl/tzb-lanes/coordinator-notes/delivery-checklist-20260904.md
+
+- `review.v24-bytes-never-run` — 包内 v24 字节 c83c0770 未被任何 GPU 轮跑过:冷启动最终轮跑的是 1f20b122(COLDSTART 表 19 行仅此行不符),两份只差 12 行=回执身份串 v23→v24;故该轮回执写 consumed_by_executor_identity=v23。解法:tzb-b9 六轮从当前活包部署 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-gptfix-round-20260905.md
+
+- `stopline.v24_bytes_freeze` — 硬线(19:1x):tzb-b9 六轮必须跑随包字节的 v24(demo lane 修身份串后的版本),六轮到切包之间 v24 一字节不改;README 只引这六轮,GPT 的 v24 青冷轮注明跑的是订正前字节 1f20b122(回执自报 v23) · ref: /Users/gl/tzb-lanes/coordinator-notes/README-v24-drafts-20260905.md
+
+- `pkg.docs_new_entry_20260905` — 18:5x tzb-76 三份文档改到新默认入口:使用说明 61c1cbb2、live-demo 3b6fcae8(颜色规则正文改 v3:14.9°/NO_MATCHING_BOX/purple-magenta 族内歧义拒)、file-manifest 6c5c27aa(54+2 新文件);tzb-76 待命 · ref: /Users/gl/tzb-deliverables/judge-package-v1/docs/live-demo.md
+
+- `incident.v24_coldstart_identity_refusal` — 19:5x 第二次拒因=demo lane 改超时时把三行并进 except 致探针 NameError(自造回归;核错了工件:本机已被 GPT 19:34 修好 06551e98);批只推该文件重跑青冷;18:40 原问题仍未解;决策顺延至 20:15 · ref: /Users/gl/tzb-deliverables/review-v3/fix-round-20260905/DEMO-LANE-IDENTITY-FIX-20260905.md
+
+- `v24-prelim-cyan-refused` — v24预跑青冷启动 exit=1/345s:RESIDENT_IDENTITY_MISMATCH→COLDSTART_REFUSED,nonce未耗,30s期限未被考验;驻留本身READY(140.66s)四检查全过 · ref: cold-install-chxy-v1/receipts/v24-judge-path/prelim-round/
+
+- `v24-identity-mismatch-swallows-cause` — 线索:该拒因由 resident_identity_v4.py:324 的宽except(7类异常)打印且故意不回显异常(防凭据泄露),真正失败的子项从stderr不可知;建议加异常类型或阶段标记
+
+- `v24-freshness-v2-two-ages` — v24 CaptureFreshnessV2 同记 age_at_chain_entry(7.15s)与检查时 age_s(12.24s)+绝对期限+剩余预算+时钟回拨容差;审查E项"帧龄=链内耗时"在v24已不成立
+
+- `v24-identity-writes-v23` — 我独立确认:v24 result 的 consumed_by_executor_identity 写成 v23;result 文件仍名 result-v17.json,schema AgentDemoV3DispatchResultV15(卡点32族在v24仍在)
+
+- `v24-output-moved-aside` — pkg-v24/output 已移到 pkg-v24-output-prelim-20260905T184646(root属主目录fx删不掉、sudo被排除),留档45文件在 receipts/v24-judge-path/prelim-round/leftover;pkg/output 完好516文件17 nonce
+
+- `delivery.submission_dir_20260905` — 19:0x 建提交目录 tzb-deliverables/submission-XH-202607-20260905/(Q9 六项:①055803 候选 ②训练包 ③环境指引 ④视频待录 ⑤报告 ⑥使用说明)+ 提交说明.md;①/⑥ 版本随 20:00 决定同步 · ref: /Users/gl/tzb-deliverables/submission-XH-202607-20260905/提交说明.md
+
+- `v24-four-fixes-synced` — 四项裁定修正落盘并同步 chxy:pkg-v24:v24 身份串、身份文件双名+smoke07、根级 SHA256SUMS-v24(18/18)+PROVENANCE-v24、三测试 3.10 版本门;3.9 collect 931/0 error,3.12 全量 976 passed · ref: tzb-deliverables/review-v3/fix-round-20260905/DEMO-LANE-IDENTITY-FIX-20260905.md
+
+- `identity-mismatch-diagnostic` — resident_identity_v4 现自报 stage/error/reason(白名单回显探针原文);超时 30/5s 放宽到 180/20s;字节被换与容器重启已排除;根因未定,候选见交接文件;已停止对活包写入 · ref: tzb-deliverables/review-v3/fix-round-20260905/DEMO-LANE-IDENTITY-FIX-20260905.md
+
+- `identity-probe-regression-mine` — 我同步的 resident_identity_v4(8970d5f9)三行缩进进 except 致 ping 未赋值 NameError,tzb-b9 青轮639s失败源此;本机 06551e98 已由GPT修好仅此三行;chxy 待推;SHA256SUMS-v24 过期 · ref: tzb-deliverables/review-v3/fix-round-20260905/DEMO-LANE-IDENTITY-FIX-20260905.md
+
+- `v24-cyan-cold-pass` — v24修复探针NameError后青轮冷启动通过:exit=0/469s、六原语全成、落格内、ordinal=0、nonce0→1;consumed_by_executor_identity已正确写v24 · ref: cold-install-chxy-v1/receipts/v24-judge-path/cyan-pass/
+
+- `v24-probe-nameerror-rootcause` — 19:24轮639s超时根因:RUNTIME_PROBE 三行被缩进进except且在raise之后,ping永不赋值→第61行NameError→通用identity mismatch;18:40:32那次是打补丁前的原始文件,仍未解释 · ref: cold-install-chxy-v1/receipts/v24-judge-path/cyan-attempt2/
+
+- `ruling.default_executor_v24` — 裁定(20:0x):v24 定为默认——评委原样青冷启动在随包字节通过(exit 0/469 s/6/6,identity v24,nonce 0→1,outcome 622de2bd);余五轮暖态接跑;v24/identity_v4/coldstart/launcher v4 字节冻结;18:40 拒绝→OQ36 · ref: /Users/gl/tzb-lanes/cold-install-chxy-v1/receipts/v24-judge-path/cyan-pass
+
+- `v24-default-cyan-round1-pass` — v24 定为默认:青冷启 exit0/469s/6原语/nonce 0->1/ordinal 0/落格内/离格底与v17逐位相同/identity v24;manifest 远近端各18/18;18:40那次未解释拒绝入 open-questions 36 · ref: tzb-deliverables/judge-package-v1/PROVENANCE-v24.md
+
+- `review.v24-round1-precheck` — v24 round1 预核:运行字节=随包字节 c83c0770,SHA256SUMS-v24 18/18 OK,身份写 v24、6 原语、age 11.92/30。976vs975 差在 COLOUR_V3_REPLAY_EVIDENCE 门控的单条测试;3vs4 是表只列出结果目录 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-gptfix-round-20260905.md
+
+- `pkg.v24_provenance_manifest` — 20:1x demo lane 收尾:SHA256SUMS-v24 18/18(459bf9e4)、PROVENANCE-v24 加六轮节(第 1 轮已填)、OQ36 写 18:40 未解释拒绝,均同步 chxy;probe-stderr 不进包 · ref: /Users/gl/tzb-deliverables/judge-package-v1/agent/executor/resident/PROVENANCE-v24.md
+
+- `review.v24_round1_precheck` — 20:1x 审稿人:975/1 vs 976/0 差在 COLOUR_V3_REPLAY_EVIDENCE 门控的单条测试;coldstart 第 4 目录=未起服务的准备目录;round1 预核硬线成立(轮内 v24 c83c0770=包内自算);scene_instance_id=null 勿写同实例 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-gptfix-round-20260905.md
+
+- `evidence.v24_judge_path_rounds` — 20:3x v24 七轮齐:R1 青冷 6/6、R2 紫暖 6/6、R3 红 S0 拒(蓝箱子未登记)、R4–R6 三句拒绝、R7 红 HALTED/2 上层如实(A 验过);全部入包 verification-20260905/;README v24 段+验证行 eff5f49b · ref: /Users/gl/tzb-deliverables/judge-package-v1/evidence/verification-20260905/chxy-judge-path-v24
+
+- `v24-judge-path-seven-rounds` — 七轮入 PROVENANCE(cab91620):R1青冷启过/R2紫过/R3-R6四种S0拒因各一行NOT DISPATCHED/R7补跑红柱HALTED 2of6验回执真值;活包写入到此为止 · ref: tzb-deliverables/judge-package-v1/PROVENANCE-v24.md
+
+- `v24-judge-path-rounds` — v24 评委路径七轮验收完成:1冷启+2暖态派发成功,3-6 各按码 S0 拒绝,7 红轮 HALTED/2条。nonce 0→3,ordinal 全 0,冻结字节未变。 · ref: receipts/v24-judge-path/
+
+- `audit-fixes-abcd` — 修法 A/B/C/D 全验过:A 需补跑第7轮(第3轮被 C 的 S0 拒绝挡住、未进执行器);D 实际在 S0 就拒,比裁定表更早,收紧偏离。 · ref: cold-install-report-v1.md v24 七轮节
+
+- `height-above-floor-not-clearance` — height_above_cell_floor_m 相对声明面 bin_floor_top_z_m=0.47,该面高于真实停放面 9.652mm,不是净空;报告五处措辞已改。 · ref: demo lane 更正 2026-09-05
+
 ## 2. 归属与 lane
 - `lane.m2c_exec` — **M2C 执行会话**:successor implementation candidate,commit-free,于全新隔离 clone(Q′ 模式);已登记候选路径内自由编辑(R132.41)。ETA(8/29 午报):交包 8/30 01:00–07:00;早沿(≤03:00)可达截止,晚沿不可达。
 - `lane.tzb_fe` — **tzb-fe(协调)**:实现审查+七段治理批量激活(预告:批一 = R′ stage adoption→successor prereg→materialize→bootstrap;批二 = legacy P″ prefix adoption→recovery03→combined preflight;每步仍各自 pre-capture/记录/fail-closed,激活与 closeout 各批一次)。
@@ -371,24 +441,26 @@
 
 - `live-loop-open-items-ptr` — 直播窗口 lane 三项未结(不追):①我方驱动 exit0 端到端待下一轮真实运行②卡点30 未对失败样本证伪③发散保护行为未触发。紫柱倾倒已裁今日不修→OQ25(demo lane 写)
 
+- `audit-4-rounds-prepared-not-run` — 审查四轮已备未跑(判据+判别项经 tzb-56 认可);用户已裁定全修,demo lane 做 A-D、GPT 也出补丁,合并同步 chxy 后 tzb-56 叫我跑,预计下午晚些 · ref: cold-install-chxy-v1/audit-4-criteria.md
+
 ## 5. Recent tail(journal 缓存,非权威)
-- 2026-09-05T05:32+0800 [FACT/facts] <deck-v3> `deck_v3.review_d1_fixed` — tzb-95 审稿 D1(P02 拒绝原因括注)+2 非阻断已改,deck v3 重建 pptx fd607d1d pdf 487ba5d5,守卫 PASS 0,待 tzb-95 按新 sha 复核;记录见 CHANGES-v3.md 审稿复核节 · ref: /Users/gl/tzb-deliverables/ppt-v3/CHANGES-v3.md
-- 2026-09-05T05:32+0800 [FACT/facts] <tzb-fe> `pkg.kadian34_fixed` — 卡点 34(S0 拒绝 stderr 两行 NOT DISPATCHED 码不同)已修:run_demo.py 73af14fe 两处按 refused_at_s0 互斥,新测试 test_s0_refusal_exit_code_v1(95 passed),三处同步;tzb-b9 重跑拒绝轮 r2 中 · ref: /Users/gl/tzb-deliverables/judge-package-v1/tests/test_s0_refusal_exit_code_v1.py
-- 2026-09-05T05:33+0800 [FACT/facts] <deck-v3> `deck_v3.candidate_1bb70b2d` — deck v3 候选重建(审稿追加 17 nm 整轮口径):pptx 1bb70b2d pdf b0c0c73c,守卫 PASS 0;待 tzb-95 按新 sha 复核;记录见 CHANGES-v3.md · ref: /Users/gl/tzb-deliverables/ppt-v3/CHANGES-v3.md
-- 2026-09-05T05:34+0800 [FACT/facts] <review-zh-v1> `review.deck-v3-pass` — deck v3 重建版 pptx 1bb70b2d/pdf b0c0c73c 复核 PASS:D1括注、P07边界句、离格底三处改口、整轮口径全部落实;22个Z3数字仍在;禁写+旧措辞页面与备注0命中;µm渲染渲图核过 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-deck-v3.md
-- 2026-09-05T05:34+0800 [FACT/facts] <report-zh-v1> `report.zh_v1_final` — 技术报告定稿 05:31:md 4c38f395 / pdf 46873d50,54 页,三处30.2mm措辞已与deck同口径,筛查 PASS;此后不再动 · ref: /Users/gl/tzb-lanes/report-zh-v1/LANE-NOTES.md
-- 2026-09-05T05:35+0800 [FACT/facts] <deck-v3> `deck_v3.review_pass` — tzb-95 复核 deck v3 PASS 无阻断:pptx 1bb70b2d pdf b0c0c73c;整改三条落实,禁写 0 命中,Z3 22 数在;候选定稿,deck-v3 无待办;记录 CHANGES-v3.md + review-zh-v1/findings-deck-v3.md · ref: /Users/gl/tzb-deliverables/ppt-v3/CHANGES-v3.md
-- 2026-09-05T05:35+0800 [FACT/facts] <tzb-fe> `delivery.deck_v3_final_20260905` — 05:5x deck v3 定稿 pptx 1bb70b2d/pdf b0c0c73c:审稿人 PASS(D1 P02 拒绝原因、离格底三处偏移口径、17 nm 整轮、禁写 0 命中);报告终稿 md 4c38f395/pdf 46873d50 审稿人做双向措辞搜索中 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-deck-v3.md
-- 2026-09-05T05:38+0800 [FACT/facts] <exec-no-truth-v1> `cardpoint34-r2-verified` — 卡点34复跑通过:stderr NOT DISPATCHED 恰一行、无悬空--、S0_前缀码不再上终端、exit0、nonce17→17;回执字段未动(executor.reason_code仍S0_前缀) · ref: cold-install-chxy-v1/receipts/s0-refusal-exit0-r2/
-- 2026-09-05T05:38+0800 [FACT/facts] <exec-no-truth-v1> `refused-at-lives-in-trace` — 更正:refused_at="S0" 在 trace.json 里(不在 outcome.json);refusal trace 14键含 localizer_called=false、model_calls=0。终包写按 refused_at 可查成立,须指向 trace · ref: cold-install-chxy-v1/receipts/s0-refusal-exit0-r2/run-20260904T213643/trace.json
-- 2026-09-05T05:38+0800 [FACT/facts] <exec-no-truth-v1> `refusal-trace-not-run-identifying` — 两轮拒绝的 trace.json 逐字节相同(22414c8e):不含时间戳或run id,单看一份无法判断出自哪轮,需靠 outcome.trace_path 或所在 run 目录定位
-- 2026-09-05T05:38+0800 [DONE/task] <exec-no-truth-v1> `rerun-refusal-after-c34-fix` — 完成 rerun-refusal-after-c34-fix
-- 2026-09-05T05:38+0800 [FACT/facts] <review-zh-v1> `review.report-final-4c38f395` — 报告终稿 md 4c38f395/pdf 46873d50 双向核查 PASS:旧措辞8项 md/pdf 各0命中,新措辞相对声明格底平面5处、净空2处 md/pdf 计数一致,抽样数字未动;仅1条非阻断建议(未给声明平面 0.47 m 与 9.65 mm 差值) · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-report-final-4c38f395.md
-- 2026-09-05T05:42+0800 [FACT/facts] <tzb-fe> `milestone.final_tarball_20260905` — 终包 judge-package-v1-20260905-054100.tar.gz(892 文件/241MB/双门 CLEAN,sha c7c34f45…):v21 默认+确认轮、S0 拒绝轮 r1/r2、卡点 34、README 0595ace5、OQ24/25;旧包入 superseded/ · ref: /Users/gl/tzb-deliverables/judge-package-v1-20260905-054100.tar.gz.sha256
-- 2026-09-05T05:42+0800 [FACT/facts] <tzb-fe> `delivery.morning_status_20260905` — 05:4x 交付态:终包 054100;报告 4c38f395/46873d50;deck v3 1bb70b2d/b0c0c73c;训练包 a5ba5091;GPT 终审包 0245;直播现场保持;待用户:LoRA 默认/模型名/push/GPT 结论/录视频/权重许可 · ref: /Users/gl/tzb-lanes/coordinator-notes/morning-report-20260905.md
-- 2026-09-05T05:52+0800 [FACT/facts] <review-zh-v1> `review.tarball_054100` — 终包 054100 开箱 PASS 无阻断:sha 三方一致 892 文件;11 份 SHA256SUMS 摘要不符 0;地址/密钥/运行态/模式位全清;U1-U6 全修;5 条非阻断(判委错字7处、拒绝轮无五面板未进判委文档、目标柱15/17nm两口径、launcher旧摘要无说明、README 9 处包外引用旧有) · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-tarball-054100.md
-- 2026-09-05T05:55+0800 [FACT/facts] <tzb-fe> `milestone.final_tarball_20260905` — 终包 judge-package-v1-20260905-055444.tar.gz(892 文件/241MB/双门 CLEAN,sha 575f6e4c…):054100 审稿 PASS 后再修 N1–N5(判委→评委、README 0ee396b6);054100 与 235958 入 superseded/ · ref: /Users/gl/tzb-deliverables/judge-package-v1-20260905-055444.tar.gz.sha256
-- 2026-09-05T05:57+0800 [FACT/facts] <review-zh-v1> `review.tarball_055444` — 终包 055444 差量核 PASS:sha 三方一致 892 文件,逐文件比对确认只差 README+使用说明两个文件且摘要相符;N1-N5 五处全落实;新引入 2 处小错(v20 回执位置写成 evidence/、§Claim boundary 空指)非阻断 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-tarball-055444-delta.md
-- 2026-09-05T05:58+0800 [FACT/facts] <tzb-fe> `milestone.final_tarball_20260905` — 终包 judge-package-v1-20260905-055803.tar.gz(892 文件/241MB/双门 CLEAN,sha e4108fbb…):055444 差量 PASS 后修 README 两处笔误(ad32241d);旧包入 superseded/ · ref: /Users/gl/tzb-deliverables/judge-package-v1-20260905-055803.tar.gz.sha256
-- 2026-09-05T05:59+0800 [FACT/facts] <review-zh-v1> `review.tarball_055803` — 终包 055803 PASS:sha 三方一致 892 文件,对 055444 仅 README 变(ad32241d)且只有两个变更块;D1 路径改对、D2 改为直引 launch_resident.sh:62 原文(与包内脚本逐字相符、分支正确)、句点已补;回归全 0 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-tarball-055444-delta.md
-- 2026-09-05T06:00+0800 [FACT/facts] <tzb-fe> `delivery.final_baseline_20260905` — 06:0x 交付基准定稿:终包 055803(e4108fbb…)审稿 PASS;报告 4c38f395/46873d50;deck v3 1bb70b2d/b0c0c73c;训练包 a5ba5091;GPT 终审包 0245;各线待命,直播现场保持;此后只按用户指令改 · ref: /Users/gl/tzb-lanes/coordinator-notes/morning-report-20260905.md
+- 2026-09-05T19:04+0800 [FACT/facts] <tzb-fe> `incident.v24_coldstart_identity_refusal` — 19:0x GPT 只读诊断与 demo lane 一致:初次核验过,失败在 capture READY 后 coldstart_chain_v1:429 再 PING(候选 5 s 超时/fd 瞬失/exec 30 s);用户令 GPT 修→冲突风险,已令 demo lane 立即同步并写改动清单后停写 · ref: /Users/gl/tzb-deliverables/review-v3/fix-round-20260905
+- 2026-09-05T19:29+0800 [FACT/facts] <m2c-exec> `v24-four-fixes-synced` — 四项裁定修正落盘并同步 chxy:pkg-v24:v24 身份串、身份文件双名+smoke07、根级 SHA256SUMS-v24(18/18)+PROVENANCE-v24、三测试 3.10 版本门;3.9 collect 931/0 error,3.12 全量 976 passed · ref: tzb-deliverables/review-v3/fix-round-20260905/DEMO-LANE-IDENTITY-FIX-20260905.md
+- 2026-09-05T19:29+0800 [FACT/facts] <m2c-exec> `identity-mismatch-diagnostic` — resident_identity_v4 现自报 stage/error/reason(白名单回显探针原文);超时 30/5s 放宽到 180/20s;字节被换与容器重启已排除;根因未定,候选见交接文件;已停止对活包写入 · ref: tzb-deliverables/review-v3/fix-round-20260905/DEMO-LANE-IDENTITY-FIX-20260905.md
+- 2026-09-05T19:30+0800 [FACT/facts] <tzb-fe> `incident.v24_coldstart_identity_refusal` — 19:2x demo lane 修后已同步 pkg-v24(v24 c83c0770、identity_v4 8970d5f9、SHA256SUMS-v24),976 passed/1 skipped,交接文件 DEMO-LANE-IDENTITY-FIX 已写并停写;tzb-b9 19:24 评委原样青冷启动开跑 · ref: /Users/gl/tzb-deliverables/review-v3/fix-round-20260905/DEMO-LANE-IDENTITY-FIX-20260905.md
+- 2026-09-05T19:43+0800 [FACT/facts] <tzb-fe> `incident.v24_coldstart_identity_refusal` — 19:3x 修后 pkg-v24 评委原样青冷启动再次被身份核验拒(通用文案=探针以白名单外原因非零退出,非超时非 owners);demo lane 用只读脚本抓 docker exec stderr 中;20:00 无解回退 055803 · ref: /Users/gl/tzb-deliverables/review-v3/fix-round-20260905/DEMO-LANE-IDENTITY-FIX-20260905.md
+- 2026-09-05T19:48+0800 [FACT/facts] <m2c-exec> `identity-probe-regression-mine` — 我同步的 resident_identity_v4(8970d5f9)三行缩进进 except 致 ping 未赋值 NameError,tzb-b9 青轮639s失败源此;本机 06551e98 已由GPT修好仅此三行;chxy 待推;SHA256SUMS-v24 过期 · ref: tzb-deliverables/review-v3/fix-round-20260905/DEMO-LANE-IDENTITY-FIX-20260905.md
+- 2026-09-05T19:48+0800 [FACT/facts] <tzb-fe> `incident.v24_coldstart_identity_refusal` — 19:5x 第二次拒因=demo lane 改超时时把三行并进 except 致探针 NameError(自造回归;核错了工件:本机已被 GPT 19:34 修好 06551e98);批只推该文件重跑青冷;18:40 原问题仍未解;决策顺延至 20:15 · ref: /Users/gl/tzb-deliverables/review-v3/fix-round-20260905/DEMO-LANE-IDENTITY-FIX-20260905.md
+- 2026-09-05T20:00+0800 [FACT/facts] <exec-no-truth-v1> `v24-cyan-cold-pass` — v24修复探针NameError后青轮冷启动通过:exit=0/469s、六原语全成、落格内、ordinal=0、nonce0→1;consumed_by_executor_identity已正确写v24 · ref: cold-install-chxy-v1/receipts/v24-judge-path/cyan-pass/
+- 2026-09-05T20:00+0800 [FACT/facts] <exec-no-truth-v1> `v24-probe-nameerror-rootcause` — 19:24轮639s超时根因:RUNTIME_PROBE 三行被缩进进except且在raise之后,ping永不赋值→第61行NameError→通用identity mismatch;18:40:32那次是打补丁前的原始文件,仍未解释 · ref: cold-install-chxy-v1/receipts/v24-judge-path/cyan-attempt2/
+- 2026-09-05T20:02+0800 [FACT/facts] <tzb-fe> `ruling.default_executor_v24` — 裁定(20:0x):v24 定为默认——评委原样青冷启动在随包字节通过(exit 0/469 s/6/6,identity v24,nonce 0→1,outcome 622de2bd);余五轮暖态接跑;v24/identity_v4/coldstart/launcher v4 字节冻结;18:40 拒绝→OQ36 · ref: /Users/gl/tzb-lanes/cold-install-chxy-v1/receipts/v24-judge-path/cyan-pass
+- 2026-09-05T20:04+0800 [FACT/facts] <m2c-exec> `v24-default-cyan-round1-pass` — v24 定为默认:青冷启 exit0/469s/6原语/nonce 0->1/ordinal 0/落格内/离格底与v17逐位相同/identity v24;manifest 远近端各18/18;18:40那次未解释拒绝入 open-questions 36 · ref: tzb-deliverables/judge-package-v1/PROVENANCE-v24.md
+- 2026-09-05T20:05+0800 [FACT/facts] <review-zh-v1> `review.v24-round1-precheck` — v24 round1 预核:运行字节=随包字节 c83c0770,SHA256SUMS-v24 18/18 OK,身份写 v24、6 原语、age 11.92/30。976vs975 差在 COLOUR_V3_REPLAY_EVIDENCE 门控的单条测试;3vs4 是表只列出结果目录 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-gptfix-round-20260905.md
+- 2026-09-05T20:06+0800 [FACT/facts] <tzb-fe> `pkg.v24_provenance_manifest` — 20:1x demo lane 收尾:SHA256SUMS-v24 18/18(459bf9e4)、PROVENANCE-v24 加六轮节(第 1 轮已填)、OQ36 写 18:40 未解释拒绝,均同步 chxy;probe-stderr 不进包 · ref: /Users/gl/tzb-deliverables/judge-package-v1/agent/executor/resident/PROVENANCE-v24.md
+- 2026-09-05T20:06+0800 [FACT/facts] <tzb-fe> `review.v24_round1_precheck` — 20:1x 审稿人:975/1 vs 976/0 差在 COLOUR_V3_REPLAY_EVIDENCE 门控的单条测试;coldstart 第 4 目录=未起服务的准备目录;round1 预核硬线成立(轮内 v24 c83c0770=包内自算);scene_instance_id=null 勿写同实例 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-gptfix-round-20260905.md
+- 2026-09-05T20:12+0800 [FACT/facts] <tzb-fe> `evidence.v24_judge_path_rounds` — 20:2x v24 六轮:R1 青冷 6/6;R2 紫暖 6/6;R3 红被 S0 拒(蓝箱子未登记)→A 未验;R4 INSPECT 拒;R5 绿箱拒无蓝箱绑定;R6 最左 S0 即拒;批 R7 红+蓝色料箱验 A · ref: /Users/gl/tzb-lanes/cold-install-chxy-v1/receipts/v24-judge-path
+- 2026-09-05T20:16+0800 [FACT/facts] <tzb-fe> `evidence.v24_judge_path_rounds` — 20:3x v24 七轮齐:R1 青冷 6/6、R2 紫暖 6/6、R3 红 S0 拒(蓝箱子未登记)、R4–R6 三句拒绝、R7 红 HALTED/2 上层如实(A 验过);全部入包 verification-20260905/;README v24 段+验证行 eff5f49b · ref: /Users/gl/tzb-deliverables/judge-package-v1/evidence/verification-20260905/chxy-judge-path-v24
+- 2026-09-05T20:19+0800 [FACT/facts] <m2c-exec> `v24-judge-path-seven-rounds` — 七轮入 PROVENANCE(cab91620):R1青冷启过/R2紫过/R3-R6四种S0拒因各一行NOT DISPATCHED/R7补跑红柱HALTED 2of6验回执真值;活包写入到此为止 · ref: tzb-deliverables/judge-package-v1/PROVENANCE-v24.md
+- 2026-09-05T20:19+0800 [FACT/facts] <exec-no-truth-v1> `v24-judge-path-rounds` — v24 评委路径七轮验收完成:1冷启+2暖态派发成功,3-6 各按码 S0 拒绝,7 红轮 HALTED/2条。nonce 0→3,ordinal 全 0,冻结字节未变。 · ref: receipts/v24-judge-path/
+- 2026-09-05T20:19+0800 [FACT/facts] <exec-no-truth-v1> `audit-fixes-abcd` — 修法 A/B/C/D 全验过:A 需补跑第7轮(第3轮被 C 的 S0 拒绝挡住、未进执行器);D 实际在 S0 就拒,比裁定表更早,收紧偏离。 · ref: cold-install-report-v1.md v24 七轮节
+- 2026-09-05T20:19+0800 [FACT/facts] <exec-no-truth-v1> `height-above-floor-not-clearance` — height_above_cell_floor_m 相对声明面 bin_floor_top_z_m=0.47,该面高于真实停放面 9.652mm,不是净空;报告五处措辞已改。 · ref: demo lane 更正 2026-09-05
