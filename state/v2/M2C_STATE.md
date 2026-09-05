@@ -1,5 +1,5 @@
 <!-- GENERATED — 禁止直接 Edit/Write。唯一写入口: tools/statectl.py -->
-<!-- statectl protocol=2 stream=M2C generation=2001 updated=2026-09-05T20:19+0800 -->
+<!-- statectl protocol=2 stream=M2C generation=2010 updated=2026-09-05T20:28+0800 -->
 <!-- 自 M2C_STATE.md 迁移 sha=9dc690524ad77e6d51964237f11ee107e23e3ae92398d19e3424eb0676648fc6 -->
 
 # M2C 权威状态(活跃快照,协议 v2)
@@ -265,7 +265,7 @@
 
 - `review.report-final-4c38f395` — 报告终稿 md 4c38f395/pdf 46873d50 双向核查 PASS:旧措辞8项 md/pdf 各0命中,新措辞相对声明格底平面5处、净空2处 md/pdf 计数一致,抽样数字未动;仅1条非阻断建议(未给声明平面 0.47 m 与 9.65 mm 差值) · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-report-final-4c38f395.md
 
-- `milestone.final_tarball_20260905` — 终包 judge-package-v1-20260905-055803.tar.gz(892 文件/241MB/双门 CLEAN,sha e4108fbb…):055444 差量 PASS 后修 README 两处笔误(ad32241d);旧包入 superseded/ · ref: /Users/gl/tzb-deliverables/judge-package-v1-20260905-055803.tar.gz.sha256
+- `milestone.final_tarball_20260905` — 终包 judge-package-v1-20260905-202015.tar.gz(1018 文件/240MB/三门 CLEAN,sha 67752d9a…):默认 v24+七轮回执、A–E 修复、新入口文档、SHA256SUMS-v24、OQ26–36;055803 入 superseded/;提交目录①⑥已换 · ref: /Users/gl/tzb-deliverables/judge-package-v1-20260905-202015.tar.gz.sha256
 
 - `delivery.morning_status_20260905` — 05:4x 交付态:终包 054100;报告 4c38f395/46873d50;deck v3 1bb70b2d/b0c0c73c;训练包 a5ba5091;GPT 终审包 0245;直播现场保持;待用户:LoRA 默认/模型名/push/GPT 结论/录视频/权重许可 · ref: /Users/gl/tzb-lanes/coordinator-notes/morning-report-20260905.md
 
@@ -346,6 +346,22 @@
 - `audit-fixes-abcd` — 修法 A/B/C/D 全验过:A 需补跑第7轮(第3轮被 C 的 S0 拒绝挡住、未进执行器);D 实际在 S0 就拒,比裁定表更早,收紧偏离。 · ref: cold-install-report-v1.md v24 七轮节
 
 - `height-above-floor-not-clearance` — height_above_cell_floor_m 相对声明面 bin_floor_top_z_m=0.47,该面高于真实停放面 9.652mm,不是净空;报告五处措辞已改。 · ref: demo lane 更正 2026-09-05
+
+- `z5-v24-seven-rounds-entered` — Z5 已入 NUMBERS-v2:v24 评委路径七轮(R1青/R2紫/R7红HALTED + R3-R6 四条S0拒绝)。文件 sha 8273ec20 · ref: ppt-v1/NUMBERS-v2.md:480-557(节)、48(图例)、470-476(陷阱表扩到五条)
+
+- `v24-prereg-box-rule-mislabel` — 七轮 preregistration.box_selection_rule 仍写冻结首框规则、active_chain_sources 漏 v3 模块;trace/outcome/result 三处才是 V3。R2 紫轮尤其要紧 · ref: run_demo.py:40,214,223 / run_chain_v6.py:41;v3 模块 88c380cd 全树 0 命中
+
+- `z5r1-bitwise-reproduces-z4` — Z5 R1 与 Z4 五轮全精度逐位相同(误差量/感知/真值/落位/倾角/位移):是可复现性,禁止与 Z4 一起平均当六个独立样本 · ref: NUMBERS-v2.md:550;采集帧 02fb2792 在 v17 那批 0 命中
+
+- `evidence.z5_ledger_20260905` — 20:3x Z5 入 NUMBERS-v2 480–557:引包内副本 sha;R1=Z4 逐位同(跨版本复现非样本);紫靠 magenta 族;R7 抓取布尔/−17 mm 不可引;预注册选框规则字面量陈旧+v3 sha 未入回执→OQ37(demo lane 写,随最后重切) · ref: /Users/gl/tzb-deliverables/ppt-v1/NUMBERS-v2.md
+
+- `z5-rulings-20260905` — tzb-56 裁 2026-09-05:账本引包内脱敏副本 sha;06551e98=identity 脚本;R7 两时长并列注口径;暖态按令牌+consumed_at 连续不写同 boot · ref: NUMBERS-v2.md:480-560(Z5),文件 sha 自算 f8b41478
+
+- `oq37-prereg-box-rule-deferred` — 预注册 box_selection_rule 字面量陈旧 + v3 模块 sha 未入回执:tzb-56 裁今晚不改字节,demo lane 记 OQ37 随最后一次文档重切入包 · ref: run_demo.py:40,214,223;引选框规则只引 trace/outcome/result
+
+- `review.tarball_202015` — 终包 202015(v24 默认)PASS 无阻断:sha 三方一致 1018 文件、删除 0、冻结面仅 REDACTION 追加;13 份清单摘要不符 0;v24 c83c0770 三方一致;七轮逐字段与 README 442 行相符;3 条非阻断=两脚本无执行位+两处行号指路失效 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-tarball-202015.md
+
+- `oq37-written-pending-sync` — open-questions 第37条(选框规则名/预注册漏钉v3、halt布尔与-17.14mm非感知误差、拒绝文案中英不一且英文在冻结vendor、自检负例那行)已写 1e391d09,未同步;OQ24 close_report→command_report 已改正保留;等审稿人结论后由 tzb-56 叫同步并重切 · ref: tzb-deliverables/judge-package-v1/docs/open-questions.md
 
 ## 2. 归属与 lane
 - `lane.m2c_exec` — **M2C 执行会话**:successor implementation candidate,commit-free,于全新隔离 clone(Q′ 模式);已登记候选路径内自由编辑(R132.41)。ETA(8/29 午报):交包 8/30 01:00–07:00;早沿(≤03:00)可达截止,晚沿不可达。
@@ -444,15 +460,6 @@
 - `audit-4-rounds-prepared-not-run` — 审查四轮已备未跑(判据+判别项经 tzb-56 认可);用户已裁定全修,demo lane 做 A-D、GPT 也出补丁,合并同步 chxy 后 tzb-56 叫我跑,预计下午晚些 · ref: cold-install-chxy-v1/audit-4-criteria.md
 
 ## 5. Recent tail(journal 缓存,非权威)
-- 2026-09-05T19:04+0800 [FACT/facts] <tzb-fe> `incident.v24_coldstart_identity_refusal` — 19:0x GPT 只读诊断与 demo lane 一致:初次核验过,失败在 capture READY 后 coldstart_chain_v1:429 再 PING(候选 5 s 超时/fd 瞬失/exec 30 s);用户令 GPT 修→冲突风险,已令 demo lane 立即同步并写改动清单后停写 · ref: /Users/gl/tzb-deliverables/review-v3/fix-round-20260905
-- 2026-09-05T19:29+0800 [FACT/facts] <m2c-exec> `v24-four-fixes-synced` — 四项裁定修正落盘并同步 chxy:pkg-v24:v24 身份串、身份文件双名+smoke07、根级 SHA256SUMS-v24(18/18)+PROVENANCE-v24、三测试 3.10 版本门;3.9 collect 931/0 error,3.12 全量 976 passed · ref: tzb-deliverables/review-v3/fix-round-20260905/DEMO-LANE-IDENTITY-FIX-20260905.md
-- 2026-09-05T19:29+0800 [FACT/facts] <m2c-exec> `identity-mismatch-diagnostic` — resident_identity_v4 现自报 stage/error/reason(白名单回显探针原文);超时 30/5s 放宽到 180/20s;字节被换与容器重启已排除;根因未定,候选见交接文件;已停止对活包写入 · ref: tzb-deliverables/review-v3/fix-round-20260905/DEMO-LANE-IDENTITY-FIX-20260905.md
-- 2026-09-05T19:30+0800 [FACT/facts] <tzb-fe> `incident.v24_coldstart_identity_refusal` — 19:2x demo lane 修后已同步 pkg-v24(v24 c83c0770、identity_v4 8970d5f9、SHA256SUMS-v24),976 passed/1 skipped,交接文件 DEMO-LANE-IDENTITY-FIX 已写并停写;tzb-b9 19:24 评委原样青冷启动开跑 · ref: /Users/gl/tzb-deliverables/review-v3/fix-round-20260905/DEMO-LANE-IDENTITY-FIX-20260905.md
-- 2026-09-05T19:43+0800 [FACT/facts] <tzb-fe> `incident.v24_coldstart_identity_refusal` — 19:3x 修后 pkg-v24 评委原样青冷启动再次被身份核验拒(通用文案=探针以白名单外原因非零退出,非超时非 owners);demo lane 用只读脚本抓 docker exec stderr 中;20:00 无解回退 055803 · ref: /Users/gl/tzb-deliverables/review-v3/fix-round-20260905/DEMO-LANE-IDENTITY-FIX-20260905.md
-- 2026-09-05T19:48+0800 [FACT/facts] <m2c-exec> `identity-probe-regression-mine` — 我同步的 resident_identity_v4(8970d5f9)三行缩进进 except 致 ping 未赋值 NameError,tzb-b9 青轮639s失败源此;本机 06551e98 已由GPT修好仅此三行;chxy 待推;SHA256SUMS-v24 过期 · ref: tzb-deliverables/review-v3/fix-round-20260905/DEMO-LANE-IDENTITY-FIX-20260905.md
-- 2026-09-05T19:48+0800 [FACT/facts] <tzb-fe> `incident.v24_coldstart_identity_refusal` — 19:5x 第二次拒因=demo lane 改超时时把三行并进 except 致探针 NameError(自造回归;核错了工件:本机已被 GPT 19:34 修好 06551e98);批只推该文件重跑青冷;18:40 原问题仍未解;决策顺延至 20:15 · ref: /Users/gl/tzb-deliverables/review-v3/fix-round-20260905/DEMO-LANE-IDENTITY-FIX-20260905.md
-- 2026-09-05T20:00+0800 [FACT/facts] <exec-no-truth-v1> `v24-cyan-cold-pass` — v24修复探针NameError后青轮冷启动通过:exit=0/469s、六原语全成、落格内、ordinal=0、nonce0→1;consumed_by_executor_identity已正确写v24 · ref: cold-install-chxy-v1/receipts/v24-judge-path/cyan-pass/
-- 2026-09-05T20:00+0800 [FACT/facts] <exec-no-truth-v1> `v24-probe-nameerror-rootcause` — 19:24轮639s超时根因:RUNTIME_PROBE 三行被缩进进except且在raise之后,ping永不赋值→第61行NameError→通用identity mismatch;18:40:32那次是打补丁前的原始文件,仍未解释 · ref: cold-install-chxy-v1/receipts/v24-judge-path/cyan-attempt2/
 - 2026-09-05T20:02+0800 [FACT/facts] <tzb-fe> `ruling.default_executor_v24` — 裁定(20:0x):v24 定为默认——评委原样青冷启动在随包字节通过(exit 0/469 s/6/6,identity v24,nonce 0→1,outcome 622de2bd);余五轮暖态接跑;v24/identity_v4/coldstart/launcher v4 字节冻结;18:40 拒绝→OQ36 · ref: /Users/gl/tzb-lanes/cold-install-chxy-v1/receipts/v24-judge-path/cyan-pass
 - 2026-09-05T20:04+0800 [FACT/facts] <m2c-exec> `v24-default-cyan-round1-pass` — v24 定为默认:青冷启 exit0/469s/6原语/nonce 0->1/ordinal 0/落格内/离格底与v17逐位相同/identity v24;manifest 远近端各18/18;18:40那次未解释拒绝入 open-questions 36 · ref: tzb-deliverables/judge-package-v1/PROVENANCE-v24.md
 - 2026-09-05T20:05+0800 [FACT/facts] <review-zh-v1> `review.v24-round1-precheck` — v24 round1 预核:运行字节=随包字节 c83c0770,SHA256SUMS-v24 18/18 OK,身份写 v24、6 原语、age 11.92/30。976vs975 差在 COLOUR_V3_REPLAY_EVIDENCE 门控的单条测试;3vs4 是表只列出结果目录 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-gptfix-round-20260905.md
@@ -464,3 +471,12 @@
 - 2026-09-05T20:19+0800 [FACT/facts] <exec-no-truth-v1> `v24-judge-path-rounds` — v24 评委路径七轮验收完成:1冷启+2暖态派发成功,3-6 各按码 S0 拒绝,7 红轮 HALTED/2条。nonce 0→3,ordinal 全 0,冻结字节未变。 · ref: receipts/v24-judge-path/
 - 2026-09-05T20:19+0800 [FACT/facts] <exec-no-truth-v1> `audit-fixes-abcd` — 修法 A/B/C/D 全验过:A 需补跑第7轮(第3轮被 C 的 S0 拒绝挡住、未进执行器);D 实际在 S0 就拒,比裁定表更早,收紧偏离。 · ref: cold-install-report-v1.md v24 七轮节
 - 2026-09-05T20:19+0800 [FACT/facts] <exec-no-truth-v1> `height-above-floor-not-clearance` — height_above_cell_floor_m 相对声明面 bin_floor_top_z_m=0.47,该面高于真实停放面 9.652mm,不是净空;报告五处措辞已改。 · ref: demo lane 更正 2026-09-05
+- 2026-09-05T20:21+0800 [FACT/facts] <tzb-fe> `milestone.final_tarball_20260905` — 终包 judge-package-v1-20260905-202015.tar.gz(1018 文件/240MB/三门 CLEAN,sha 67752d9a…):默认 v24+七轮回执、A–E 修复、新入口文档、SHA256SUMS-v24、OQ26–36;055803 入 superseded/;提交目录①⑥已换 · ref: /Users/gl/tzb-deliverables/judge-package-v1-20260905-202015.tar.gz.sha256
+- 2026-09-05T20:22+0800 [FACT/facts] <deck-v2> `z5-v24-seven-rounds-entered` — Z5 已入 NUMBERS-v2:v24 评委路径七轮(R1青/R2紫/R7红HALTED + R3-R6 四条S0拒绝)。文件 sha 8273ec20 · ref: ppt-v1/NUMBERS-v2.md:480-557(节)、48(图例)、470-476(陷阱表扩到五条)
+- 2026-09-05T20:22+0800 [FACT/facts] <deck-v2> `v24-prereg-box-rule-mislabel` — 七轮 preregistration.box_selection_rule 仍写冻结首框规则、active_chain_sources 漏 v3 模块;trace/outcome/result 三处才是 V3。R2 紫轮尤其要紧 · ref: run_demo.py:40,214,223 / run_chain_v6.py:41;v3 模块 88c380cd 全树 0 命中
+- 2026-09-05T20:22+0800 [FACT/facts] <deck-v2> `z5r1-bitwise-reproduces-z4` — Z5 R1 与 Z4 五轮全精度逐位相同(误差量/感知/真值/落位/倾角/位移):是可复现性,禁止与 Z4 一起平均当六个独立样本 · ref: NUMBERS-v2.md:550;采集帧 02fb2792 在 v17 那批 0 命中
+- 2026-09-05T20:25+0800 [FACT/facts] <tzb-fe> `evidence.z5_ledger_20260905` — 20:3x Z5 入 NUMBERS-v2 480–557:引包内副本 sha;R1=Z4 逐位同(跨版本复现非样本);紫靠 magenta 族;R7 抓取布尔/−17 mm 不可引;预注册选框规则字面量陈旧+v3 sha 未入回执→OQ37(demo lane 写,随最后重切) · ref: /Users/gl/tzb-deliverables/ppt-v1/NUMBERS-v2.md
+- 2026-09-05T20:25+0800 [FACT/facts] <deck-v2> `z5-rulings-20260905` — tzb-56 裁 2026-09-05:账本引包内脱敏副本 sha;06551e98=identity 脚本;R7 两时长并列注口径;暖态按令牌+consumed_at 连续不写同 boot · ref: NUMBERS-v2.md:480-560(Z5),文件 sha 自算 f8b41478
+- 2026-09-05T20:25+0800 [FACT/facts] <deck-v2> `oq37-prereg-box-rule-deferred` — 预注册 box_selection_rule 字面量陈旧 + v3 模块 sha 未入回执:tzb-56 裁今晚不改字节,demo lane 记 OQ37 随最后一次文档重切入包 · ref: run_demo.py:40,214,223;引选框规则只引 trace/outcome/result
+- 2026-09-05T20:28+0800 [FACT/facts] <review-zh-v1> `review.tarball_202015` — 终包 202015(v24 默认)PASS 无阻断:sha 三方一致 1018 文件、删除 0、冻结面仅 REDACTION 追加;13 份清单摘要不符 0;v24 c83c0770 三方一致;七轮逐字段与 README 442 行相符;3 条非阻断=两脚本无执行位+两处行号指路失效 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-tarball-202015.md
+- 2026-09-05T20:28+0800 [FACT/facts] <m2c-exec> `oq37-written-pending-sync` — open-questions 第37条(选框规则名/预注册漏钉v3、halt布尔与-17.14mm非感知误差、拒绝文案中英不一且英文在冻结vendor、自检负例那行)已写 1e391d09,未同步;OQ24 close_report→command_report 已改正保留;等审稿人结论后由 tzb-56 叫同步并重切 · ref: tzb-deliverables/judge-package-v1/docs/open-questions.md
