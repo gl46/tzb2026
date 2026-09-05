@@ -1,5 +1,5 @@
 <!-- GENERATED — 禁止直接 Edit/Write。唯一写入口: tools/statectl.py -->
-<!-- statectl protocol=2 stream=M2C generation=2010 updated=2026-09-05T20:28+0800 -->
+<!-- statectl protocol=2 stream=M2C generation=2011 updated=2026-09-05T20:33+0800 -->
 <!-- 自 M2C_STATE.md 迁移 sha=9dc690524ad77e6d51964237f11ee107e23e3ae92398d19e3424eb0676648fc6 -->
 
 # M2C 权威状态(活跃快照,协议 v2)
@@ -363,6 +363,8 @@
 
 - `oq37-written-pending-sync` — open-questions 第37条(选框规则名/预注册漏钉v3、halt布尔与-17.14mm非感知误差、拒绝文案中英不一且英文在冻结vendor、自检负例那行)已写 1e391d09,未同步;OQ24 close_report→command_report 已改正保留;等审稿人结论后由 tzb-56 叫同步并重切 · ref: tzb-deliverables/judge-package-v1/docs/open-questions.md
 
+- `review.tarball_202942` — 终包 202942 差量核 PASS:仅 4 文档变内容+2 权限位(字节未变,v24 清单仍 18/18)+3 个新增 recovery 文件(无人引用、file-manifest 未收录);两条非阻断=审计文档句子改断、OQ24 的 close_report 只改一处 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-tarball-202015.md
+
 ## 2. 归属与 lane
 - `lane.m2c_exec` — **M2C 执行会话**:successor implementation candidate,commit-free,于全新隔离 clone(Q′ 模式);已登记候选路径内自由编辑(R132.41)。ETA(8/29 午报):交包 8/30 01:00–07:00;早沿(≤03:00)可达截止,晚沿不可达。
 - `lane.tzb_fe` — **tzb-fe(协调)**:实现审查+七段治理批量激活(预告:批一 = R′ stage adoption→successor prereg→materialize→bootstrap;批二 = legacy P″ prefix adoption→recovery03→combined preflight;每步仍各自 pre-capture/记录/fail-closed,激活与 closeout 各批一次)。
@@ -460,7 +462,6 @@
 - `audit-4-rounds-prepared-not-run` — 审查四轮已备未跑(判据+判别项经 tzb-56 认可);用户已裁定全修,demo lane 做 A-D、GPT 也出补丁,合并同步 chxy 后 tzb-56 叫我跑,预计下午晚些 · ref: cold-install-chxy-v1/audit-4-criteria.md
 
 ## 5. Recent tail(journal 缓存,非权威)
-- 2026-09-05T20:02+0800 [FACT/facts] <tzb-fe> `ruling.default_executor_v24` — 裁定(20:0x):v24 定为默认——评委原样青冷启动在随包字节通过(exit 0/469 s/6/6,identity v24,nonce 0→1,outcome 622de2bd);余五轮暖态接跑;v24/identity_v4/coldstart/launcher v4 字节冻结;18:40 拒绝→OQ36 · ref: /Users/gl/tzb-lanes/cold-install-chxy-v1/receipts/v24-judge-path/cyan-pass
 - 2026-09-05T20:04+0800 [FACT/facts] <m2c-exec> `v24-default-cyan-round1-pass` — v24 定为默认:青冷启 exit0/469s/6原语/nonce 0->1/ordinal 0/落格内/离格底与v17逐位相同/identity v24;manifest 远近端各18/18;18:40那次未解释拒绝入 open-questions 36 · ref: tzb-deliverables/judge-package-v1/PROVENANCE-v24.md
 - 2026-09-05T20:05+0800 [FACT/facts] <review-zh-v1> `review.v24-round1-precheck` — v24 round1 预核:运行字节=随包字节 c83c0770,SHA256SUMS-v24 18/18 OK,身份写 v24、6 原语、age 11.92/30。976vs975 差在 COLOUR_V3_REPLAY_EVIDENCE 门控的单条测试;3vs4 是表只列出结果目录 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-gptfix-round-20260905.md
 - 2026-09-05T20:06+0800 [FACT/facts] <tzb-fe> `pkg.v24_provenance_manifest` — 20:1x demo lane 收尾:SHA256SUMS-v24 18/18(459bf9e4)、PROVENANCE-v24 加六轮节(第 1 轮已填)、OQ36 写 18:40 未解释拒绝,均同步 chxy;probe-stderr 不进包 · ref: /Users/gl/tzb-deliverables/judge-package-v1/agent/executor/resident/PROVENANCE-v24.md
@@ -480,3 +481,4 @@
 - 2026-09-05T20:25+0800 [FACT/facts] <deck-v2> `oq37-prereg-box-rule-deferred` — 预注册 box_selection_rule 字面量陈旧 + v3 模块 sha 未入回执:tzb-56 裁今晚不改字节,demo lane 记 OQ37 随最后一次文档重切入包 · ref: run_demo.py:40,214,223;引选框规则只引 trace/outcome/result
 - 2026-09-05T20:28+0800 [FACT/facts] <review-zh-v1> `review.tarball_202015` — 终包 202015(v24 默认)PASS 无阻断:sha 三方一致 1018 文件、删除 0、冻结面仅 REDACTION 追加;13 份清单摘要不符 0;v24 c83c0770 三方一致;七轮逐字段与 README 442 行相符;3 条非阻断=两脚本无执行位+两处行号指路失效 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-tarball-202015.md
 - 2026-09-05T20:28+0800 [FACT/facts] <m2c-exec> `oq37-written-pending-sync` — open-questions 第37条(选框规则名/预注册漏钉v3、halt布尔与-17.14mm非感知误差、拒绝文案中英不一且英文在冻结vendor、自检负例那行)已写 1e391d09,未同步;OQ24 close_report→command_report 已改正保留;等审稿人结论后由 tzb-56 叫同步并重切 · ref: tzb-deliverables/judge-package-v1/docs/open-questions.md
+- 2026-09-05T20:33+0800 [FACT/facts] <review-zh-v1> `review.tarball_202942` — 终包 202942 差量核 PASS:仅 4 文档变内容+2 权限位(字节未变,v24 清单仍 18/18)+3 个新增 recovery 文件(无人引用、file-manifest 未收录);两条非阻断=审计文档句子改断、OQ24 的 close_report 只改一处 · ref: /Users/gl/tzb-lanes/review-zh-v1/findings-tarball-202015.md
